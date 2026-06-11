@@ -263,6 +263,17 @@ Verificado en preview (desktop y móvil): iconos y barbell se renderizan correct
 
 **Pendiente detectado (no corregido, fuera del alcance de este cambio)**: en móvil, `.landing-nav` es `position: fixed` con 6 enlaces que no caben en pantallas estrechas y se solapan con el contenido de debajo (hero, títulos de sección). Es un problema preexistente, agravado al añadir el enlace "Opiniones". Convendría un menú hamburguesa en móvil.
 
+### 26. Dashboard utilizable en móvil (menú hamburguesa)
+**Problema**: en móvil, `.dash-sidebar` tenía `display: none`, así que en el área de cliente solo se veía el contenido de `.dash-main` (la sección "Hoy"), sin forma de navegar a Plan semanal, Nutrición, Check-in, Mi progreso, Notas, ni de cerrar sesión o volver al inicio.
+
+**Solución**:
+- Nueva `.dash-mobile-bar` (logo + botón `.dash-menu-btn` ☰), visible solo en `max-width: 768px`, fija arriba del `.dash-main`.
+- `.dash-sidebar` en móvil pasa a `position: fixed`, fuera de pantalla (`translateX(-100%)`), y se desliza dentro con la clase `.open`.
+- `.dash-overlay` oscurece el contenido al abrir el menú; clic fuera lo cierra.
+- Funciones JS `toggleDashMenu()` / `closeDashMenu()`; `showSection()` cierra el menú automáticamente al elegir una sección.
+
+Verificado en preview (375x812): el menú se abre con todas las secciones, "Volver al inicio" y "Cerrar sesión"; al elegir una sección se cierra y se muestra el contenido correctamente. Desktop sin cambios visuales.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

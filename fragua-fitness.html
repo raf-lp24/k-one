@@ -97,6 +97,49 @@
   }
   .nav-link:hover { color: var(--blanco); }
 
+  /* NAV MOBILE (hamburguesa) */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 101;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--blanco);
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.active span:nth-child(2) { opacity: 0; }
+  .nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    position: fixed;
+    inset: 0;
+    background: var(--negro);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+  }
+  .mobile-menu.active { opacity: 1; visibility: visible; }
+  .mobile-menu .nav-link { font-size: 18px; }
+  .mobile-menu .btn-primary { margin-top: 16px; }
+
   .btn-primary {
     background: var(--brasa);
     color: var(--blanco-puro);
@@ -1018,6 +1061,41 @@
     overflow-y: auto;
   }
 
+  .dash-mobile-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    background: var(--negro);
+    border-bottom: 1px solid var(--humo);
+    z-index: 50;
+  }
+
+  .dash-menu-btn {
+    background: none;
+    border: 1px solid var(--humo);
+    color: var(--blanco);
+    font-size: 18px;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dash-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 150;
+  }
+  .dash-overlay.open { display: block; }
+
   .dash-section { display: none; }
   .dash-section.active { display: block; }
 
@@ -1916,8 +1994,19 @@
     .form-sidebar { display: none; }
     .form-main { padding: 40px 24px; }
     .dash-layout { grid-template-columns: 1fr; }
-    .dash-sidebar { display: none; }
-    .dash-main { padding: 32px 24px; }
+    .dash-sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 80%;
+      max-width: 300px;
+      height: 100vh;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .dash-sidebar.open { transform: translateX(0); }
+    .dash-mobile-bar { display: flex; }
+    .dash-main { padding: 24px; }
     .week-day-row { flex-direction: column; gap: 16px; }
     .week-day-info { flex: none; }
     .week-day-content { align-self: stretch; }
@@ -1926,6 +2015,8 @@
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 0 24px 60px; }
     .manifesto, .how, .sports, .pricing, .philosophy { padding: 80px 24px; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
   }
 
   /* Scrollbar */
@@ -2447,7 +2538,19 @@
       <span class="nav-link" onclick="goTo('login')">Entrar</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 0,99€</button>
     </div>
+    <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
+    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
+    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
+    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
+    <span class="nav-link" onclick="closeMobileMenu(); goTo('login')">Entrar</span>
+    <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza por 0,99€</button>
+  </div>
 
   <section class="hero">
     <div class="hero-bg"></div>
@@ -3112,6 +3215,11 @@
 <!-- ==================== DASHBOARD ==================== -->
 <div class="screen" id="dashboard">
   <div class="dash-layout">
+    <div class="dash-mobile-bar">
+      <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
+      <button class="dash-menu-btn" onclick="toggleDashMenu()" aria-label="Abrir menú">☰</button>
+    </div>
+    <div class="dash-overlay" id="dashOverlay" onclick="closeDashMenu()"></div>
     <aside class="dash-sidebar">
       <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
       <div class="back-to-landing" onclick="goTo('landing')">← Volver al inicio</div>
@@ -3466,6 +3574,16 @@
 
   function scrollToSection(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function toggleMobileMenu() {
+    document.getElementById('navToggle').classList.toggle('active');
+    document.getElementById('mobileMenu').classList.toggle('active');
+  }
+
+  function closeMobileMenu() {
+    document.getElementById('navToggle').classList.remove('active');
+    document.getElementById('mobileMenu').classList.remove('active');
   }
 
   // ===== FORMULARIO =====
@@ -4418,6 +4536,18 @@
     document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`section-${id}`).classList.add('active');
     document.getElementById(`nav-${id}`)?.classList.add('active');
+    closeDashMenu();
+  }
+
+  // ===== MENÚ MÓVIL DEL DASHBOARD =====
+  function toggleDashMenu() {
+    document.querySelector('.dash-sidebar')?.classList.toggle('open');
+    document.getElementById('dashOverlay')?.classList.toggle('open');
+  }
+
+  function closeDashMenu() {
+    document.querySelector('.dash-sidebar')?.classList.remove('open');
+    document.getElementById('dashOverlay')?.classList.remove('open');
   }
 
   // ===== ENTRENAMIENTO COMPLETADO =====
