@@ -1449,6 +1449,16 @@
 
   .week-day-content span:last-child { border-bottom: none; }
 
+  .week-session-text { line-height: 1.8; }
+
+  .week-session-text strong {
+    color: var(--blanco-puro);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
   .week-day-rest-msg { font-style: italic; opacity: 0.7; align-self: center; font-size: 13px; color: var(--metal); }
 
   .week-today-badge {
@@ -4155,6 +4165,51 @@
     }, 4500);
   }
 
+  // ===== ESTRUCTURA COMPLETA DE UNA SESIÓN (calentamiento + bloque + vuelta a la calma) =====
+  // Se usa tanto para "Hoy" como para cada día de "Plan semanal", para que ambas vistas
+  // muestren siempre el mismo nivel de detalle y el mismo contenido.
+  const SESION_EXTRAS = {
+    'Cardio': { calentamiento: '5-8 min de movilidad de tobillos, cadera y rodillas + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
+    'Fuerza': { calentamiento: '8-10 min de movilidad articular + 1-2 series de aproximación con poco peso en el primer ejercicio', vueltaCalma: '5 min de estiramientos de los grupos musculares trabajados hoy' },
+    'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (skipping, talones al glúteo, zancada progresiva)', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
+    'Fondo': { calentamiento: '8-10 min trote suave + movilidad de cadera y tobillo', vueltaCalma: '5 min caminando + estiramientos de toda la cadena posterior' },
+    'Volumen': { calentamiento: '10 min trote muy suave + activación de glúteo y core', vueltaCalma: '5-8 min caminando + estiramientos de piernas y espalda baja' },
+    'Combinado': { calentamiento: '5 min de cardio suave + movilidad articular general', vueltaCalma: '5 min de estiramientos de cuerpo completo' },
+    'Hyrox': { calentamiento: '10 min carrera suave + movilidad dinámica de cadera y hombros', vueltaCalma: '5 min caminando + estiramientos completos' },
+    'Simulacro': { calentamiento: '10 min carrera suave + movilidad dinámica completa', vueltaCalma: '5-8 min caminando + estiramientos completos, hidrátate bien' },
+    'WOD': { calentamiento: '3 rondas suaves: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks, más movilidad específica del WOD', vueltaCalma: '5 min de respiración + estiramientos de los grupos más exigidos' },
+    'Empuje': { calentamiento: '8 min de activación de hombro y pecho + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
+    'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
+    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
+    'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
+    'Complemento': { calentamiento: '5-8 min de movilidad general y activación', vueltaCalma: '5 min de estiramientos generales + respiración' }
+  };
+  const SESION_EXTRAS_DEFAULT = { calentamiento: '8-10 min de movilidad general y activación progresiva', vueltaCalma: '5 min de estiramientos de los grupos trabajados hoy' };
+
+  // Construye el bloque "Calentamiento / Bloque principal / Vuelta a la calma" a partir de
+  // un día de `semana` (mismo dato para "Hoy" y para "Plan semanal" → mismo contenido).
+  function formatearSesion(day) {
+    if (!day || day.tipo === 'Descanso' || !day.detalle) return '';
+    const extras = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
+    const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const partes = day.detalle.split('·');
+    let musculos = '', ejerciciosTexto;
+    if (partes.length >= 2) {
+      musculos = partes[0].trim();
+      ejerciciosTexto = partes.slice(1).join('·');
+    } else {
+      ejerciciosTexto = day.detalle;
+    }
+    const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
+    const ejerciciosHTML = ejercicios.map(e => `· ${capitalizar(e)}`).join('<br>');
+
+    return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
+      `<strong>Bloque principal</strong>${musculos ? ` · ${musculos}` : ''}<br>` +
+      `${ejerciciosHTML}<br><br>` +
+      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
+  }
+
   function buildPlanFromData(u) {
     const soloDieta = (u.tipoPlan || '').includes('Solo nutrición');
     const deporte = u.deporte || 'Gimnasio / Fuerza';
@@ -4207,84 +4262,11 @@
     ];
     const mensaje_dia = mensajes[Math.floor(Math.random() * mensajes.length)];
 
-    // ENTRENAMIENTO HOY según deporte (se omite por completo en planes "solo nutrición")
+    // ENTRENAMIENTO HOY: se genera al final a partir del primer día de la semana
+    // (semana[0] = "Lunes"), para que "Hoy" y "Plan semanal" muestren siempre lo mismo.
     let entrenamiento_hoy = '';
     let semana = [];
     if (!soloDieta) {
-    if (esGimnasio || esCombinacion) {
-      if (esPrincipiante) {
-        entrenamiento_hoy = `<strong>Día 1 — Tren superior (evaluación de cargas)</strong><br><br>
-<strong>Calentamiento</strong> · 10 min en cinta o bici estática a ritmo suave<br><br>
-<strong>Bloque principal</strong><br>
-· Press de banca con barra · 3 series × 10 reps · Carga ligera, aprende el movimiento<br>
-· Remo con mancuerna · 3 × 10 por lado · Espalda recta en todo momento<br>
-· Press militar con mancuernas · 3 × 12 · Sin arquear la espalda<br>
-· Fondos en paralelas asistidos · 3 × 8 · O flexiones si no hay máquina<br><br>
-<strong>Core</strong><br>
-· Plancha frontal · 3 × 30 segundos<br>
-· Encogimientos lentos · 3 × 15<br><br>
-<strong>Vuelta a la calma</strong> · 5 min de estiramientos de pecho, hombros y bíceps`;
-      } else {
-        entrenamiento_hoy = `<strong>Día 1 — Tren superior (fuerza e hipertrofia)</strong><br><br>
-<strong>Calentamiento</strong> · 8 min activación + movilidad de hombros<br><br>
-<strong>Bloque de fuerza</strong><br>
-· Press de banca con barra · 4 × 6 · Al 75-80% de tu máximo<br>
-· Dominadas con peso · 4 × 6 · Rango completo de movimiento<br><br>
-<strong>Bloque de hipertrofia</strong><br>
-· Press inclinado con mancuernas · 3 × 10<br>
-· Remo en polea baja · 3 × 12<br>
-· Elevaciones laterales · 3 × 15 · Peso ligero, control total<br>
-· Curl de bíceps · 3 × 12 · Curl martillo alternado<br><br>
-<strong>Core</strong> · Plancha con rotación · 3 × 45 seg<br><br>
-<strong>Vuelta a la calma</strong> · 5 min estiramientos dirigidos`;
-      }
-    } else if (esRunner) {
-      if (esPrincipiante) {
-        entrenamiento_hoy = `<strong>Día 1 — Rodaje de iniciación</strong><br><br>
-<strong>Objetivo</strong> · Que el cuerpo recuerde lo que es moverse. Nada más.<br><br>
-<strong>Calentamiento</strong> · 5 min caminando a paso ligero<br><br>
-<strong>Bloque principal · 20 minutos</strong><br>
-· 2 min corriendo suave + 1 min caminando · Repetir 6-7 veces<br>
-· Ritmo: deberías poder mantener una conversación mientras corres<br>
-· Si en algún momento no puedes hablar, baja el ritmo<br><br>
-<strong>Vuelta a la calma</strong> · 5 min caminando + estiramientos de cuádriceps, gemelos e isquios · 2 min por músculo`;
-      } else {
-        entrenamiento_hoy = `<strong>Día 1 — Rodaje suave de activación</strong><br><br>
-<strong>Objetivo</strong> · Evaluar el estado de forma actual. Ritmo controlado.<br><br>
-<strong>Calentamiento</strong> · 10 min trote muy suave + drills de carrera<br><br>
-<strong>Bloque principal</strong><br>
-· 35-40 min a ritmo cómodo (zona 2 · conversación fluida posible)<br>
-· Cadencia objetivo: 170-180 pasos por minuto<br>
-· Si tienes pulsómetro: mantén entre 65-75% de tu FCmáx<br><br>
-<strong>Vuelta a la calma</strong> · 5 min trote muy suave + 10 min estiramientos completos de tren inferior`;
-      }
-    } else if (esHyrox) {
-      entrenamiento_hoy = `<strong>Día 1 — Evaluación base Hyrox</strong><br><br>
-<strong>Objetivo</strong> · Conocer tu punto de partida en carrera y fuerza funcional.<br><br>
-<strong>Calentamiento</strong> · 10 min carrera suave + movilidad de cadera y hombros<br><br>
-<strong>Test de running</strong><br>
-· 1 km a ritmo que puedas sostener · Anota el tiempo · Esta será tu referencia<br><br>
-<strong>Circuito funcional · 3 rondas</strong><br>
-· Ski Erg (o remo) · 250m<br>
-· Burpees sobre obstáculo · 10 reps<br>
-· Farmer carry · 20m con mancuernas cómodas<br>
-· Wall balls · 15 reps · Balón de 6-9kg<br><br>
-<strong>Vuelta a la calma</strong> · 5 min caminando + estiramientos completos`;
-    } else if (esCrossfit) {
-      entrenamiento_hoy = `<strong>Día 1 — WOD de evaluación</strong><br><br>
-<strong>Calentamiento</strong> · 3 rondas: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks<br><br>
-<strong>Skill</strong> · Sentadilla trasera con barra · Técnica y movilidad · 4 × 5 a peso ligero<br><br>
-<strong>WOD · AMRAP 12 minutos</strong><br>
-· 10 wall balls (6-9kg)<br>
-· 10 box jumps o step ups<br>
-· 200m carrera<br><br>
-<strong>Cooldown</strong> · 5 min de estiramientos + anotación de rondas completadas · Será tu referencia de partida`;
-    } else {
-      entrenamiento_hoy = `<strong>Día 1 — Sesión base</strong><br><br>
-<strong>Calentamiento</strong> · 10 min de movilidad general<br><br>
-<strong>Bloque principal</strong> · Adaptado a tu deporte y nivel · Trabajo técnico y de base<br><br>
-<strong>Vuelta a la calma</strong> · 5 min estiramientos`;
-    }
 
     // SEMANA según días disponibles y deporte
     const numDias = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
@@ -4429,7 +4411,6 @@
     }
 
     if (mapaLesion.length) {
-      entrenamiento_hoy = aplicarReemplazos(entrenamiento_hoy, mapaLesion);
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
     }
 
@@ -4471,7 +4452,6 @@
         if (s > 6) s = 6;
         return `${s}×${reps}`;
       });
-      entrenamiento_hoy = ajustarSeries(entrenamiento_hoy);
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: ajustarSeries(d.detalle) } : d);
       notasSalud.push(delta < 0
         ? 'Según tu último check-in, esta semana bajamos un poco el volumen para que puedas recuperar bien. Escucha al cuerpo, no la tabla.'
@@ -4489,12 +4469,18 @@
         // Consumir también el complemento de material ("con barra", "en polea baja"...)
         // para no dejar restos tipo "Press con mancuernas con barra"
         const regex = new RegExp(data.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '( (?:con|en) (?:barra|mancuernas?|máquina|polea(?: baja| alta)?|peso|banco))?', 'gi');
-        entrenamiento_hoy = entrenamiento_hoy.replace(regex, variante.nombre);
+        semana = semana.map(d => d.detalle ? { ...d, detalle: d.detalle.replace(regex, variante.nombre) } : d);
         cambiosTexto.push(`${data.nombre} → ${variante.nombre}`);
       });
       if (cambiosTexto.length) {
         notasSalud.push(`Según tu feedback, hemos cambiado: ${cambiosTexto.join(', ')}.`);
       }
+    }
+
+    // ENTRENAMIENTO HOY = el primer día de la semana (Lunes), con el mismo
+    // formato y nivel de detalle que se usa en "Plan semanal"
+    if (!soloDieta && semana.length > 0 && semana[0].tipo === 'Entrenamiento') {
+      entrenamiento_hoy = `<strong>${semana[0].dia} — ${semana[0].resumen}</strong><br><br>${formatearSesion(semana[0])}`;
     }
 
     if (!soloDieta && notasSalud.length) {
@@ -5076,25 +5062,17 @@
       const isRest = day.tipo === 'Descanso';
       const isToday = esActual && i === 0;
 
-      // Separar músculos y ejercicios del detalle
+      // Separar músculos del detalle (para la etiqueta lateral) y montar la sesión completa
       let musculos = '';
-      let ejerciciosHTML = '';
-
-      // Pone en mayúscula la primera letra (algunos ejercicios vienen en minúscula tras separar por comas)
-      const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+      let sesionHTML = '';
 
       if (!isRest && day.detalle) {
         // El detalle puede tener formato "Músculos · Ejercicios" o solo ejercicios
         const partes = day.detalle.split('·');
         if (partes.length >= 2) {
           musculos = partes[0].trim();
-          const ejercicios = partes.slice(1).join('·').split(',').map(e => e.trim()).filter(Boolean);
-          ejerciciosHTML = ejercicios.map(e => `<span>· ${capitalizar(e)}</span>`).join('');
-        } else {
-          // Solo ejercicios separados por coma
-          const ejercicios = day.detalle.split(',').map(e => e.trim()).filter(Boolean);
-          ejerciciosHTML = ejercicios.map(e => `<span>· ${capitalizar(e)}</span>`).join('');
         }
+        sesionHTML = formatearSesion(day);
       }
 
       const completadoHoy = isToday && (userData.entrenosCompletados || []).includes(getFechaHoyISO());
@@ -5114,7 +5092,7 @@
           <div class="week-day-content">
             ${isRest
               ? '<div class="week-day-rest-msg">Recupera. El descanso también es entrenamiento.</div>'
-              : ejerciciosHTML || `<span style="opacity:0.6">${day.detalle || ''}</span>`
+              : `<div class="week-session-text">${sesionHTML}</div>`
             }
           </div>
         </div>`;

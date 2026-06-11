@@ -312,6 +312,19 @@ Un usuario reportó en producción (móvil, k-one-six.vercel.app) que al intenta
 
 Verificado en preview: simulando un fallo de seeding (borrando `fragua_users` y los datos de la cuenta de test antes de pulsar "Entrar"), el login con `test@fragua.es`/`fragua123` sigue funcionando y lleva al dashboard; el flujo normal (seeding correcto) y el caso de contraseña incorrecta siguen funcionando igual que antes. Sin errores en consola.
 
+### 36. Fix: el entrenamiento de "Hoy" no coincidía con "Plan semanal" y venía menos detallado
+Un usuario detectó que el entrenamiento mostrado en la pestaña "Hoy" del área de cliente no era el mismo que el del lunes en "Plan semanal", y además venía con mucho menos detalle (solo bloques de ejercicios, sin calentamiento ni vuelta a la calma).
+
+**Causa**: `entrenamiento_hoy` se generaba con bloques de texto fijos por deporte/nivel (títulos "Día 1 — ..."), totalmente independientes de `semana[0]` (el "Lunes" real de "Plan semanal"), que además solo tenía músculos + lista de ejercicios sin calentamiento/vuelta a la calma.
+
+**Solución**: se creó una función compartida `formatearSesion(day)` y un mapa `SESION_EXTRAS` (con calentamiento y vuelta a la calma específicos según la `etiqueta` de la sesión: Cardio, Fuerza, Intensidad, Hyrox, WOD, Empuje, Piernas, etc., con un fallback `SESION_EXTRAS_DEFAULT`). Ahora:
+- Se eliminaron los bloques fijos de `entrenamiento_hoy` por deporte.
+- `entrenamiento_hoy` se genera al final, a partir de `semana[0]` ("Lunes"), con `formatearSesion()`, así que "Hoy" y "Plan semanal" muestran siempre el mismo contenido y nivel de detalle.
+- Las adaptaciones por lesión, ajuste de series por progreso y cambios de variante de ejercicio (feedback de la sesión anterior) ahora se aplican a `semana[].detalle` para todos los días (antes solo afectaban a `entrenamiento_hoy`), y de ahí se propagan automáticamente a "Hoy".
+- En "Plan semanal" (`renderWeekList`), cada día de entrenamiento ahora muestra calentamiento, bloque principal (con ejercicios) y vuelta a la calma con `formatearSesion()`, en lugar de solo una lista de ejercicios. Se añadió la clase CSS `.week-session-text` para el nuevo formato.
+
+Verificado en preview con la cuenta de test: regenerando el plan para Gimnasio, Running, Hyrox, CrossFit y Combinación, "Hoy" coincide exactamente con el lunes de "Plan semanal" y ambos incluyen calentamiento/bloque principal/vuelta a la calma. También se probó con lesión de rodilla (la nota "Tu plan, adaptado" se antepone correctamente a "Hoy") y con un plan "Solo nutrición" (no genera entrenamiento, como antes). Sin errores en consola.
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.
