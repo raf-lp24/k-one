@@ -4220,10 +4220,11 @@
     const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
 
     // En todos los días de entrenamiento (gimnasio, cardio, WOD, Hyrox, combinados...)
-    // separamos los ejercicios/tramos en bloque de fuerza (series cortas, ≤6 reps),
-    // hipertrofia (resto de series con reps), acondicionamiento (movimientos o tramos
-    // por distancia/tiempo, y cardio en general) y core, igual que mostraba antes
-    // el detalle de "Hoy".
+    // separamos los ejercicios/tramos en bloque de fuerza (levantamientos compuestos
+    // pesados), hipertrofia (ejercicios de aislamiento/accesorio), acondicionamiento
+    // (movimientos o tramos por distancia/tiempo, y cardio en general) y core, igual
+    // que mostraba antes el detalle de "Hoy".
+    const FUERZA_RE = /sentadilla|peso muerto|press (de )?banca|press militar|dominadas|remo (con )?barra|zancada|prensa|thruster/i;
     const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
     ejercicios.forEach(e => {
       const m = e.match(/×\s*(\d+)\s*(\D*)/);
@@ -4231,13 +4232,13 @@
       const unidad = m ? m[2].trim() : '';
       if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
       if (reps === null || /^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
-      // Nota orientativa según el rango de repeticiones, igual que mostraba antes "Hoy"
-      let nota = '';
-      if (reps <= 6) nota = ' · Al 75-80% de tu máximo';
-      else if (reps >= 15) nota = ' · Peso ligero, control total';
-      const texto = e + nota;
-      if (reps <= 6) fuerza.push(texto);
-      else hipertrofia.push(texto);
+      if (FUERZA_RE.test(e)) {
+        fuerza.push(e + ' · Al 75-80% de tu máximo');
+      } else {
+        // Nota orientativa para el trabajo accesorio de muchas repeticiones
+        const nota = reps >= 15 ? ' · Peso ligero, control total' : '';
+        hipertrofia.push(e + nota);
+      }
     });
     const bloque = (titulo, lista) => lista.length
       ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
