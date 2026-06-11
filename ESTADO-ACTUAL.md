@@ -429,6 +429,16 @@ El usuario aclaró la regla de precios que debe regir tanto el cuestionario inic
 
 Verificado en preview con datos controlados: `precioPlanActual` devuelve "Sigues en tu primer mes: 0,99€..." para ambos tipos de plan si `creado` es reciente, y "...14,99€/mes (o 119,99€/año)..." / "...4,99€/mes..." respectivamente si `creado` tiene más de 30 días. En el modal "Cambiar tu plan", el hint cambia correctamente al alternar entre "Plan completo" y "Solo nutrición" con una fecha de registro de hace 60 días. Cuenta de test restaurada a sus valores originales al finalizar.
 
+### 42. Contador de días restantes del plan en "Hoy"
+El usuario pidió añadir, en la página de inicio del dashboard ("Hoy"), un contador que muestre al cliente cuántos días le quedan de su plan/ciclo actual.
+
+- En `#section-hoy`, justo encima de "Entrenamiento de hoy", se sustituyó la fila que solo tenía el botón "Cambiar objetivo / deporte" por una fila con `display:flex; justify-content:space-between` que combina: a la izquierda, el texto `<span id="diasRestantesPlan">` (número, destacado en color "brasa") + `<span id="diasRestantesPlanLabel">` (texto descriptivo); a la derecha, el mismo botón "Cambiar objetivo / deporte".
+- Nueva función `actualizarDiasRestantesPlan()`, llamada desde `buildDashboard()`: calcula los días restantes del ciclo de `DIAS_PRUEBA` (30) días.
+  - Si el usuario aún no tiene `suscripcionActiva` (mes de prueba), cuenta desde `creado` y muestra la etiqueta "días restantes de tu mes de prueba (0,99€)".
+  - Si tiene `suscripcionActiva`, cuenta desde `fechaPago` (o `creado` si no hay `fechaPago`) en ciclos de 30 días, mostrando "días restantes de tu plan actual" (el plan anual aún no se gestiona de forma distinta porque no hay Stripe).
+
+Verificado en preview con la cuenta de test en dos escenarios simulados: suscripción activa con `fechaPago` de hace 10 días → muestra "20 días restantes de tu plan actual"; usuario en prueba con `creado` de hace 22 días → muestra "8 días restantes de tu mes de prueba (0,99€)". Tras las pruebas, la cuenta de test se restauró a `suscripcionActiva: true` con `creado` en el momento actual (sin `fechaPago`), mostrando correctamente "30 días restantes de tu plan actual" junto al plan original (Ganar músculo / Gimnasio). Sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

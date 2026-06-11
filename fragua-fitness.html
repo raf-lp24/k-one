@@ -3632,7 +3632,11 @@
           </div>
         </div>
 
-        <div style="text-align:right;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace">
+            <span id="diasRestantesPlan" style="color:var(--brasa);font-weight:700;font-size:14px">—</span>
+            <span id="diasRestantesPlanLabel"> días restantes de tu plan actual</span>
+          </div>
           <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
         </div>
 
@@ -4934,6 +4938,8 @@
     document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy;
     actualizarEstadoCompletado();
 
+    actualizarDiasRestantesPlan();
+
     // Notas / agenda
     renderNotas();
 
@@ -5394,6 +5400,30 @@
       return { precio: '4,99€/mes', detalle: 'El plan "Solo nutrición" cuesta 4,99€/mes a partir de tu próximo cobro.' };
     }
     return { precio: '14,99€/mes', detalle: 'El plan completo cuesta 14,99€/mes (o 119,99€/año con el plan anual) a partir de tu próximo cobro.' };
+  }
+
+  // ===== CONTADOR DE DÍAS RESTANTES DEL PLAN ACTUAL =====
+  // Mientras está en el mes de prueba, cuenta desde el registro (creado).
+  // Con la suscripción activa, cuenta desde el último pago (fechaPago), en ciclos de 30 días
+  // (el plan anual aún no se gestiona de forma distinta porque no hay Stripe).
+  function actualizarDiasRestantesPlan() {
+    const el = document.getElementById('diasRestantesPlan');
+    const label = document.getElementById('diasRestantesPlanLabel');
+    if (!el) return;
+    const user = getCurrentUser();
+    const u = user ? getUsers()[user.email] : null;
+    if (!u || !u.creado) {
+      el.textContent = '—';
+      if (label) label.textContent = ' días restantes de tu plan actual';
+      return;
+    }
+    const enPrueba = !u.suscripcionActiva;
+    const refFecha = enPrueba ? u.creado : (u.fechaPago || u.creado);
+    const periodo = DIAS_PRUEBA;
+    const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / (1000 * 60 * 60 * 24);
+    const restantes = Math.max(0, Math.ceil(periodo - (diasTranscurridos % periodo)));
+    el.textContent = restantes;
+    if (label) label.textContent = enPrueba ? ' días restantes de tu mes de prueba (0,99€)' : ' días restantes de tu plan actual';
   }
 
   function actualizarPrecioCambioPlan() {
