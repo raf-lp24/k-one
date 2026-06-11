@@ -410,6 +410,16 @@ A petición del usuario, el plan "Anual" pasa de 139,99€ a 119,99€. Se recal
 ### 31. Iconos de la barra de confianza (trust-bar) más visuales
 Los emojis 🔒/✕/🔐 de "Pago seguro · Cancela cuando quieras · Tus datos nunca se comparten" se sustituyeron por iconos SVG propios (estilo trazo, igual que los de la sección "Pilares"): escudo con check, círculo con X, candado. Nueva clase `.trust-icon` (22x22px, color `var(--brasa)`). También se subió `.trust-bar` de 12px a 13px y su color a `var(--metal-claro)` (consistente con el punto 29). Verificado en preview (escritorio y 375x812).
 
+### 40. Botón "Cambiar objetivo / deporte" en "Hoy": recalcula entrenamiento, nutrición y plan semanal
+El usuario pidió que un cliente pueda, cuando termine el mes o cuando quiera, cambiar su objetivo, deporte y demás preferencias (p. ej. pasar de "perder grasa"/gimnasio a "mejorar resistencia"/running) y que se recalcule TODO el plan: comidas, entrenamientos y plan semanal.
+
+- Nuevo botón "Cambiar objetivo / deporte" (`.btn-ghost`) bajo la fila de tarjetas Semana/Días entrenados/Objetivo/Deporte en `#section-hoy`.
+- Nuevo modal `#modalCambiarPlan` (variante ancha `.modal-box-wide`, `max-width:640px; max-height:85vh; overflow-y:auto`) con grupos de radio para: tipo de plan, objetivo, enfoque nutricional (con preselección automática vía `preseleccionarEnfoqueCambio`/`enfoquePorObjetivo`, igual que en el formulario), deporte, días de entreno, tiempo por sesión, nivel y lugar. IDs prefijados `cp-` para no chocar con los del formulario de registro.
+- `abrirModalCambiarPlan()`: preselecciona cada grupo con los valores actuales de `userData` (con valores por defecto "Plan completo"/"Equilibrado" si faltan, p. ej. en la cuenta de test).
+- `guardarCambioPlan()`: valida que todos los campos tengan selección, actualiza `userData` (tipoPlan, objetivo, enfoqueMacros, deporte, diasEntreno, tiempoSesion, nivel, lugar), reinicia `progreso` a semana 1 y `entrenosCompletados` a `[]` (nuevo plan desde cero), llama a `generatedPlan = buildPlanFromData(userData)` + `buildDashboard()`, persiste con `saveUserData()`, cierra el modal, navega a "Hoy" y muestra un toast de confirmación.
+
+Verificado en preview con la cuenta de test: cambiando de "Ganar músculo"/Gimnasio/3 días/60-90min a "Mejorar resistencia"/Running/4 días/45-60min/Al aire libre, "Hoy" pasa a mostrar "MEJORAR RESISTENCIA", "RUNNING", semana 1/0 días, y el entrenamiento de hoy cambia a "Rodaje suave" (cardio). "Plan semanal" (Semana 1, Lunes) muestra el mismo "Rodaje suave" con bloque de acondicionamiento. "Nutrición" muestra "Enfoque nutricional: Equilibrado" con macros recalculados. Sin errores en consola. Tras la prueba se restauró la cuenta de test a sus valores originales (Ganar músculo / Gimnasio / Fuerza).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

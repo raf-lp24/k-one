@@ -2434,6 +2434,11 @@
     max-width: 400px;
     position: relative;
   }
+  .modal-box-wide {
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
 
   .modal-close {
     position: absolute;
@@ -2691,6 +2696,91 @@
     <div class="price-amount" style="margin-bottom:4px">14,99€<span style="font-size:14px;color:var(--metal)">/mes</span></div>
     <button class="btn-primary" style="width:100%;padding:14px;margin-top:16px" onclick="confirmarPagoSuscripcion()">Continuar con K-One →</button>
     <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="logout()">Cerrar sesión</p>
+  </div>
+</div>
+
+<!-- MODAL CAMBIAR OBJETIVO / DEPORTE -->
+<div class="modal-overlay" id="modalCambiarPlan">
+  <div class="modal-box modal-box-wide">
+    <button class="modal-close" onclick="closeCambiarPlanModal()">✕</button>
+    <div class="modal-title">Cambiar tu plan</div>
+    <p class="modal-desc">¿Quieres cambiar de objetivo, deporte o cualquier otra preferencia? Actualiza lo que necesites y recalculamos al momento tu entrenamiento, tu nutrición y tu plan semanal. Tu progreso de esta semana se reiniciará para empezar el nuevo plan desde cero.</p>
+    <div class="form-grid full" style="gap:20px">
+      <div class="field">
+        <label>¿Qué tipo de plan quieres?</label>
+        <div class="radio-group" id="cp-tipoPlan">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan')">Plan completo: entrenamiento + nutrición</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan')">Solo nutrición, sin entrenamiento</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Cuál es tu objetivo principal?</label>
+        <div class="radio-group" id="cp-objetivo">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Perder grasa</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Ganar músculo</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Mejorar resistencia</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Preparar una competición</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Sentirme mejor en general</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-objetivo'); preseleccionarEnfoqueCambio(this.textContent.trim());">Ganar fuerza</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Qué enfoque nutricional prefieres?</label>
+        <div class="radio-group" id="cp-enfoqueMacros">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Equilibrado</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Alto en proteína</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Bajo en carbohidratos</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Flexible / sin restricciones</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Qué deporte quieres practicar?</label>
+        <div class="radio-group" id="cp-deporte">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Gimnasio / Fuerza</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Running</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Hyrox</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">CrossFit</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Combinación</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Cuántos días a la semana puedes entrenar?</label>
+        <div class="radio-group" id="cp-diasEntreno">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">2 días</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">3 días</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">4 días</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">5+ días</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Cuánto tiempo por sesión?</label>
+        <div class="radio-group" id="cp-tiempoSesion">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">30-45 min</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">45-60 min</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">60-90 min</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">Más de 90 min</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Cuál es tu nivel actual?</label>
+        <div class="radio-group" id="cp-nivel">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Principiante, empiezo desde cero</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Llevo algo de tiempo</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Avanzado</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Dónde entrenas?</label>
+        <div class="radio-group" id="cp-lugar">
+          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Gimnasio</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa con material</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa sin material</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Al aire libre</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Combinación</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;padding:14px;margin-top:24px" onclick="guardarCambioPlan()">Recalcular mi plan →</button>
   </div>
 </div>
 
@@ -3539,6 +3629,10 @@
             <div class="stat-card-value" id="statDeporte" style="font-size:18px;padding-top:8px">—</div>
             <div class="stat-card-sub">tu disciplina</div>
           </div>
+        </div>
+
+        <div style="text-align:right;margin-bottom:16px">
+          <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
         </div>
 
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
@@ -5273,6 +5367,84 @@
       responseText.textContent = respuesta;
       showToast('Check-in registrado. Tu plan de la semana que viene ya está actualizado.');
     }, 1200);
+  }
+
+  // ===== CAMBIAR OBJETIVO / DEPORTE: recalcula entrenamiento, nutrición y plan semanal =====
+  let enfoqueMacrosManualCambio = false;
+
+  function preseleccionarRadio(group, valor) {
+    const opts = document.querySelectorAll(`#${group} .radio-opt`);
+    opts.forEach(o => o.classList.remove('selected'));
+    const target = [...opts].find(o => o.textContent.trim() === (valor || '').trim());
+    if (target) target.classList.add('selected');
+  }
+
+  function abrirModalCambiarPlan() {
+    enfoqueMacrosManualCambio = false;
+    preseleccionarRadio('cp-tipoPlan', userData.tipoPlan || 'Plan completo: entrenamiento + nutrición');
+    preseleccionarRadio('cp-objetivo', userData.objetivo);
+    preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
+    preseleccionarRadio('cp-deporte', userData.deporte);
+    preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
+    preseleccionarRadio('cp-tiempoSesion', userData.tiempoSesion);
+    preseleccionarRadio('cp-nivel', userData.nivel);
+    preseleccionarRadio('cp-lugar', userData.lugar);
+    document.getElementById('modalCambiarPlan').classList.add('visible');
+  }
+
+  function closeCambiarPlanModal() {
+    document.getElementById('modalCambiarPlan').classList.remove('visible');
+  }
+
+  function marcarEnfoqueManualCambio() {
+    enfoqueMacrosManualCambio = true;
+  }
+
+  function preseleccionarEnfoqueCambio(objetivo) {
+    if (enfoqueMacrosManualCambio) return;
+    preseleccionarRadio('cp-enfoqueMacros', enfoquePorObjetivo[objetivo] || 'Equilibrado');
+  }
+
+  function guardarCambioPlan() {
+    const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
+    const nuevoTipoPlan = getRadio('cp-tipoPlan');
+    const nuevoObjetivo = getRadio('cp-objetivo');
+    const nuevoEnfoque = getRadio('cp-enfoqueMacros');
+    const nuevoDeporte = getRadio('cp-deporte');
+    const nuevosDias = getRadio('cp-diasEntreno');
+    const nuevoTiempo = getRadio('cp-tiempoSesion');
+    const nuevoNivel = getRadio('cp-nivel');
+    const nuevoLugar = getRadio('cp-lugar');
+
+    if (!nuevoTipoPlan || !nuevoObjetivo || !nuevoDeporte || !nuevosDias || !nuevoTiempo || !nuevoNivel || !nuevoLugar) {
+      showToast('Por favor, completa todas las opciones antes de recalcular tu plan.');
+      return;
+    }
+
+    userData.tipoPlan = nuevoTipoPlan;
+    userData.objetivo = nuevoObjetivo;
+    userData.enfoqueMacros = nuevoEnfoque || userData.enfoqueMacros;
+    userData.deporte = nuevoDeporte;
+    userData.diasEntreno = nuevosDias;
+    userData.tiempoSesion = nuevoTiempo;
+    userData.nivel = nuevoNivel;
+    userData.lugar = nuevoLugar;
+
+    // Nuevo objetivo/deporte: empezamos un plan desde cero
+    userData.progreso = { semana: 1, diasEntrenados: 0, ajuste: 0 };
+    userData.entrenosCompletados = [];
+
+    generatedPlan = buildPlanFromData(userData);
+    buildDashboard();
+
+    const user = getCurrentUser();
+    if (user && user.email !== 'demo@fragua.es') {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+
+    closeCambiarPlanModal();
+    showSection('hoy');
+    showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.');
   }
 
   // ===== SELECCIÓN DE OPCIÓN DE COMIDA =====
