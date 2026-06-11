@@ -289,6 +289,22 @@ Verificado en preview (375x812): con `.nav-links` oculto, la nav vuelve a ocupar
 
 Sin colisiones con el menú del dashboard (punto 26): nombres de clases (`.nav-toggle`/`.mobile-menu` vs `.dash-overlay`/`.dash-menu-btn`), funciones JS (`toggleMobileMenu`/`closeMobileMenu` vs `toggleDashMenu`/`closeDashMenu`) y z-index (`.nav-toggle`: 101, `.mobile-menu`: 99, `.dash-overlay`: 150) son todos independientes.
 
+### 28. "Entrar" como primera opción del menú móvil
+A petición del usuario, en `#mobileMenu` el enlace "Entrar" pasa a ser el primero de la lista (antes era el penúltimo, justo antes del botón "Empieza por 0,99€").
+
+### 29. Texto descriptivo más legible (toda la web, móvil y escritorio)
+El usuario reportó que los párrafos descriptivos de las tarjetas (p. ej. las descripciones de cada deporte en "Tu deporte, tu plan") apenas se veían: texto pequeño (12-13px), `font-weight: 300` y color `var(--metal)` (#8A8A8A), poco contraste sobre fondos oscuros.
+
+**Solución**:
+- Nueva variable `--metal-claro: #B5B2AD` (gris cálido más claro, mejor contraste manteniendo el aspecto "discreto").
+- Se actualizaron los párrafos descriptivos (no las etiquetas/labels en mayúsculas) a `var(--metal-claro)`, subiendo el tamaño 1-2px y el peso de 300 a 400 donde aplicaba:
+  - Landing: `.hero-sub`, `.manifesto-body`, `.pillar-desc`, `.step-body`, `.sport-desc` (12px→14px), `.price-desc`, `.philosophy-sub`, `.section-note`, `.form-block-desc`.
+  - Dashboard: `.dash-subtitle`, `.week-preview-note`, `.week-day-content`, `.subst-opt-desc`, `.meal-opt-ingredients`.
+
+Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, tu plan" y el subtítulo "Hoy comes" del dashboard se leen con claridad, sin afectar a las etiquetas pequeñas en mayúsculas (badges, fechas, "kcal", "gramos", etc., que mantienen `var(--metal)`).
+
+**Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
