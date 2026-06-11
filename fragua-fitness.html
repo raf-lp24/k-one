@@ -3320,13 +3320,23 @@
           <div class="field">
             <label>¿Cuál es tu objetivo principal? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="objetivo">
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Perder grasa</div>
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Ganar músculo</div>
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Mejorar resistencia</div>
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Preparar una competición</div>
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Sentirme mejor en general</div>
-              <div class="radio-opt" onclick="selectRadio(this,'objetivo')">Ganar fuerza</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Perder grasa</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Ganar músculo</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Mejorar resistencia</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Preparar una competición</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Sentirme mejor en general</div>
+              <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Ganar fuerza</div>
             </div>
+          </div>
+          <div class="field">
+            <label>¿Qué enfoque nutricional prefieres?</label>
+            <div class="radio-group" id="enfoqueMacros">
+              <div class="radio-opt" onclick="selectRadio(this,'enfoqueMacros'); marcarEnfoqueManual();">Equilibrado</div>
+              <div class="radio-opt" onclick="selectRadio(this,'enfoqueMacros'); marcarEnfoqueManual();">Alto en proteína</div>
+              <div class="radio-opt" onclick="selectRadio(this,'enfoqueMacros'); marcarEnfoqueManual();">Bajo en carbohidratos</div>
+              <div class="radio-opt" onclick="selectRadio(this,'enfoqueMacros'); marcarEnfoqueManual();">Flexible / sin restricciones</div>
+            </div>
+            <span class="field-hint" id="enfoqueMacrosHint">Te sugerimos un enfoque automáticamente al elegir tu objetivo, pero puedes cambiarlo cuando quieras.</span>
           </div>
           <div class="field">
             <label>¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
@@ -3581,6 +3591,7 @@
           <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
+          <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
           <div class="nutri-resumen-label">// Total de hoy, según tus elecciones</div>
           <div class="stats-row">
             <div class="stat-card">
@@ -3815,6 +3826,35 @@
     panel.style.display = 'block';
   }
 
+  // ===== PRESELECCIÓN INTELIGENTE DE ENFOQUE NUTRICIONAL (Bloque 5: objetivo) =====
+  let enfoqueMacrosManual = false;
+
+  const enfoquePorObjetivo = {
+    'Perder grasa': 'Alto en proteína',
+    'Ganar músculo': 'Alto en proteína',
+    'Ganar fuerza': 'Alto en proteína',
+    'Mejorar resistencia': 'Equilibrado',
+    'Preparar una competición': 'Equilibrado',
+    'Sentirme mejor en general': 'Equilibrado'
+  };
+
+  // El usuario puede sobreescribir la sugerencia; a partir de ahí dejamos de tocarla.
+  function marcarEnfoqueManual() {
+    enfoqueMacrosManual = true;
+    document.getElementById('enfoqueMacrosHint').textContent = 'Has elegido tu propio enfoque nutricional.';
+  }
+
+  function preseleccionarEnfoque(objetivo) {
+    if (enfoqueMacrosManual) return;
+    const sugerido = enfoquePorObjetivo[objetivo] || 'Equilibrado';
+    const opts = document.querySelectorAll('#enfoqueMacros .radio-opt');
+    opts.forEach(o => o.classList.remove('selected'));
+    const target = [...opts].find(o => o.textContent.trim() === sugerido);
+    if (target) target.classList.add('selected');
+    document.getElementById('enfoqueMacrosHint').textContent =
+      `Preseleccionado "${sugerido}" según tu objetivo. Puedes cambiarlo si prefieres otro enfoque.`;
+  }
+
   // ===== LÓGICA CONDICIONAL (Bloque 2: salud) =====
   // Muestra campos adicionales solo cuando la respuesta lo requiere, para no
   // saturar el formulario con preguntas que no aplican a todo el mundo.
@@ -3939,6 +3979,12 @@
       document.getElementById(id).style.display = 'none';
     });
 
+    // Reset de la preselección de enfoque nutricional
+    enfoqueMacrosManual = false;
+    document.querySelectorAll('#enfoqueMacros .radio-opt').forEach(o => o.classList.remove('selected'));
+    document.getElementById('enfoqueMacrosHint').textContent =
+      'Te sugerimos un enfoque automáticamente al elegir tu objetivo, pero puedes cambiarlo cuando quieras.';
+
     goTo('formulario');
     updateProgress();
     history.pushState({ screen: 'formulario', block: 0 }, '', '');
@@ -4020,6 +4066,7 @@
       cocina: getRadio('cocina'),
       tipoPlan: getRadio('tipoPlan'),
       objetivo: getRadio('objetivo'),
+      enfoqueMacros: getRadio('enfoqueMacros'),
       evento: document.getElementById('evento')?.value || '',
       plazo: getRadio('plazo'),
       antecedentes: document.getElementById('antecedentes')?.value || '',
@@ -4031,25 +4078,49 @@
     };
   }
 
+  // ===== TEXTOS PERSONALIZADOS DE LA PANTALLA DE CARGA =====
+  function buildLoadingTexts(userData) {
+    const soloDieta = (userData.tipoPlan || '').includes('Solo nutrición');
+    const texts = ['Analizando tu perfil...'];
+
+    if (userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
+      texts.push(`Cruzando tus datos con tu historial de ${userData.lesion.toLowerCase()} para diseñar ejercicios seguros...`);
+    } else if (!soloDieta) {
+      texts.push('Calculando tu plan de entrenamiento...');
+    } else {
+      texts.push('Diseñando tu plan de nutrición...');
+    }
+
+    if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
+      const alergeno = (userData.alergia === 'Otra' ? userData.alergiaOtra : userData.alergia) || userData.alergia;
+      texts.push(`Revisando que ningún plato contenga ${alergeno.toLowerCase()}...`);
+    } else {
+      texts.push(soloDieta ? 'Ajustando tus comidas a tu día a día...' : 'Diseñando tu nutrición...');
+    }
+
+    if (userData.objetivo && userData.objetivo !== 'No especificado') {
+      texts.push(`Ajustando tu plan para "${userData.objetivo}"...`);
+    } else {
+      texts.push('Ajustando según tus objetivos...');
+    }
+
+    if (userData.enfoqueMacros && userData.enfoqueMacros !== 'No especificado') {
+      texts.push(`Calculando tus macros con un enfoque ${userData.enfoqueMacros.toLowerCase()}...`);
+    } else {
+      texts.push('Calculando tus macros...');
+    }
+
+    texts.push(soloDieta ? 'Preparando tus primeras comidas...' : 'Preparando tu primera semana...');
+
+    return texts;
+  }
+
   // ===== GENERAR PLAN LOCAL (sin API externa) =====
   function generatePlan() {
     if (!validateBlock(currentBlock)) return;
     userData = collectFormData();
 
-    const soloDietaLoading = (document.querySelector('#tipoPlan .selected')?.textContent || '').includes('Solo nutrición');
-    const loadingTexts = soloDietaLoading ? [
-      'Analizando tu perfil...',
-      'Diseñando tu plan de nutrición...',
-      'Ajustando según tus objetivos...',
-      'Calculando tus macros...',
-      'Preparando tus primeras comidas...'
-    ] : [
-      'Analizando tu perfil...',
-      'Calculando tu plan de entrenamiento...',
-      'Diseñando tu nutrición...',
-      'Ajustando según tus objetivos...',
-      'Preparando tu primera semana...'
-    ];
+    const loadingTexts = buildLoadingTexts(userData);
 
     const overlay = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
@@ -4747,6 +4818,15 @@
     // Semana / Plan del mes (4 semanas)
     renderWeekTabs(progreso.semana);
     renderSemanaTab(progreso.semana);
+
+    // Enfoque nutricional elegido por el usuario
+    const enfoqueEl = document.getElementById('enfoqueNutricional');
+    if (userData.enfoqueMacros && userData.enfoqueMacros !== 'No especificado') {
+      enfoqueEl.textContent = `// Enfoque nutricional: ${userData.enfoqueMacros}`;
+      enfoqueEl.style.display = 'block';
+    } else {
+      enfoqueEl.style.display = 'none';
+    }
 
     // Nutrición con múltiples opciones
     const nutritionGrid = document.getElementById('nutritionGrid');
