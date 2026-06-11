@@ -327,6 +327,15 @@ Verificado en preview con la cuenta de test: regenerando el plan para Gimnasio, 
 
 **Extra**: en los días de gimnasio con split por grupo muscular (Empuje, Tracción, Piernas, Hombros, Complemento), `formatearSesion` ahora separa los ejercicios en "Bloque de fuerza" (series ≤6 reps), "Bloque de hipertrofia" (resto) y "Core" (plancha, russian twist, abdominales), igual que mostraba antes el detalle de "Hoy". Verificado con planes de Gimnasio de 3 y 5 días: por ejemplo, el jueves de piernas separa "Peso muerto 4×6" en fuerza y el resto de ejercicios en hipertrofia, y el viernes de hombros separa plancha/russian twist en "Core".
 
+### 37. Sincronizar "Hoy" con cuentas ya existentes + plegar los días de "Plan semanal"
+Tras el punto 36, las cuentas que ya tenían un plan guardado (generado con el código antiguo) seguían mostrando en "Hoy" el texto antiguo "Día 1 — ...", porque `entrenamiento_hoy` se carga tal cual desde `localStorage` y no se regeneraba. Además, en "Plan semanal" cada día mostraba todo el detalle siempre desplegado, ocupando toda la pantalla (a diferencia de "Nutrición", donde cada comida está plegada y se expande al pulsar).
+
+**Solución**:
+- Nueva función `regenerarEntrenamientoHoy(plan)`: recalcula `entrenamiento_hoy` a partir de `semana[0]` con `formatearSesion()` (conservando la nota "Tu plan, adaptado" si existía). Se llama desde `loadUserDashboard()` cada vez que se carga un plan guardado, así que cualquier cuenta existente queda sincronizada sin tener que regenerar todo el plan ni perder el progreso/checkins guardados.
+- En "Plan semanal" (`renderWeekList`), cada día de entrenamiento ahora se puede plegar/desplegar pulsando sobre la fila (`toggleWeekDay`), igual que los bloques de comida en "Nutrición". El día de "Hoy" empieza desplegado por defecto; el resto empiezan plegados, mostrando solo el resumen y la etiqueta, con una flechita (▾/▴) que indica el estado. Los días de descanso no son plegables (su mensaje es muy corto).
+
+Verificado en preview: con un plan "antiguo" simulado (entrenamiento_hoy desincronizado guardado en `localStorage`), al recargar el dashboard "Hoy" se regenera correctamente y coincide con el lunes de "Plan semanal". En "Plan semanal", el lunes (Hoy) aparece desplegado, el resto de días de entreno aparecen plegados y se despliegan/pliegan correctamente al pulsarlos, sin solaparse con la flechita de plegado. Sin errores en consola.
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.

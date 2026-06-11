@@ -1375,10 +1375,26 @@
     gap: 40px;
   }
 
+  .week-day-row:not(.rest) { cursor: pointer; }
   .week-day-row:hover { background: var(--grafito); }
   .week-day-row.today { border-left: 3px solid var(--brasa); }
   .week-day-row.rest { opacity: 0.5; }
   .week-day-row.rest:hover { opacity: 0.7; }
+
+  .week-day-toggle {
+    position: absolute;
+    top: 28px;
+    right: 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--metal);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .week-day-row.expanded .week-day-toggle {
+    transform: rotate(180deg);
+    color: var(--brasa);
+  }
 
   .week-day-info {
     flex: 0 0 220px;
@@ -1434,12 +1450,18 @@
 
   .week-day-content {
     flex: 1;
-    display: flex;
+    display: none;
     flex-direction: column;
     font-size: 14px;
     color: var(--metal-claro);
     line-height: 1.7;
     align-self: center;
+    padding-right: 28px;
+  }
+
+  .week-day-row.expanded .week-day-content,
+  .week-day-row.rest .week-day-content {
+    display: flex;
   }
 
   .week-day-content span {
@@ -5100,7 +5122,7 @@
       const completadoHoy = isToday && (userData.entrenosCompletados || []).includes(getFechaHoyISO());
 
       weekGrid.innerHTML += `
-        <div class="week-day-row ${isToday ? 'today' : ''} ${isRest ? 'rest' : ''}" ${isToday ? `id="dayCardHoy"` : ''}>
+        <div class="week-day-row ${isToday ? 'today expanded' : ''} ${isRest ? 'rest' : ''}" ${isToday ? `id="dayCardHoy"` : ''} ${!isRest ? `onclick="toggleWeekDay(this)"` : ''}>
           <div class="week-day-info">
             <div class="week-day-name">
               <span>${day.dia}</span>
@@ -5111,6 +5133,7 @@
             ${musculos ? `<div class="week-day-muscles">${musculos}</div>` : ''}
             ${!isRest ? `<div class="week-day-tag">${day.etiqueta}</div>` : ''}
           </div>
+          ${!isRest ? '<div class="week-day-toggle">▾</div>' : ''}
           <div class="week-day-content">
             ${isRest
               ? '<div class="week-day-rest-msg">Recupera. El descanso también es entrenamiento.</div>'
@@ -5293,6 +5316,11 @@
   // ===== DESPLEGAR / PLEGAR BLOQUE DE COMIDA =====
   function toggleMealBlock(mealIdx) {
     document.getElementById('mealBlock' + mealIdx)?.classList.toggle('expanded');
+  }
+
+  // ===== DESPLEGAR / PLEGAR DÍA DE LA SEMANA =====
+  function toggleWeekDay(el) {
+    el.classList.toggle('expanded');
   }
 
   // ===== SISTEMA DE SUSTITUCIÓN DE INGREDIENTES =====
@@ -6053,13 +6081,29 @@
     goTo('dashboard');
   }
 
+  // Recalcula entrenamiento_hoy a partir de semana[0] usando formatearSesion, conservando
+  // la nota "Tu plan, adaptado" si la tenía. Sirve para que cuentas con un plan guardado
+  // antes de unificar "Hoy" y "Plan semanal" se vean igual sin tener que regenerar todo el plan.
+  function regenerarEntrenamientoHoy(plan) {
+    if (!plan || !plan.semana || !plan.semana.length) return;
+    const lunes = plan.semana[0];
+    if (lunes.tipo !== 'Entrenamiento') return;
+    let notaHTML = '';
+    const match = (plan.entrenamiento_hoy || '').match(/^<div style="background:rgba\(232,73,15,0\.08\)[^>]*>[\s\S]*?<\/div>/);
+    if (match) notaHTML = match[0];
+    plan.entrenamiento_hoy = notaHTML + `<strong>${lunes.dia} — ${lunes.resumen}</strong><br><br>${formatearSesion(lunes)}`;
+  }
+
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
   function loadUserDashboard(email) {
     const saved = getUserData(email);
     if (saved) {
       userData = saved.userData || {};
       generatedPlan = saved.plan || null;
-      if (generatedPlan) buildDashboard();
+      if (generatedPlan) {
+        regenerarEntrenamientoHoy(generatedPlan);
+        buildDashboard();
+      }
     }
     const user = getCurrentUser();
     if (user) {
