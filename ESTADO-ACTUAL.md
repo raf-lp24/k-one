@@ -308,6 +308,9 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 ### 30. Capitalización de `.price-period` en la sección de precios
 El usuario detectó que las etiquetas bajo el precio empezaban en minúscula: "mes de prueba", "al mes · cancela cuando quieras" (x2), "al año · equivale a 11,67€/mes · ahorras 40€". Se corrigieron a "Mes de prueba", "Al mes · cancela cuando quieras" y "Al año · equivale a...". Verificado en preview (escritorio).
 
+### 31b. Precio anual rebajado de 139,99€ a 119€
+A petición del usuario, el plan "Anual" pasa de 139,99€ a 119€. Se recalculó el `.price-period`: "Al año · equivale a 9,92€/mes · ahorras 61€" (antes "11,67€/mes · ahorras 40€"). Verificado en preview (escritorio).
+
 ### 31. Iconos de la barra de confianza (trust-bar) más visuales
 Los emojis 🔒/✕/🔐 de "Pago seguro · Cancela cuando quieras · Tus datos nunca se comparten" se sustituyeron por iconos SVG propios (estilo trazo, igual que los de la sección "Pilares"): escudo con check, círculo con X, candado. Nueva clase `.trust-icon` (22x22px, color `var(--brasa)`). También se subió `.trust-bar` de 12px a 13px y su color a `var(--metal-claro)` (consistente con el punto 29). Verificado en preview (escritorio y 375x812).
 
