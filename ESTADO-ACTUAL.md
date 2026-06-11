@@ -308,6 +308,9 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 ### 30. Capitalización de `.price-period` en la sección de precios
 El usuario detectó que las etiquetas bajo el precio empezaban en minúscula: "mes de prueba", "al mes · cancela cuando quieras" (x2), "al año · equivale a 11,67€/mes · ahorras 40€". Se corrigieron a "Mes de prueba", "Al mes · cancela cuando quieras" y "Al año · equivale a...". Verificado en preview (escritorio).
 
+### 31d. Tipografía de `.price-period` más legible y "Equivale"/"Ahorras" capitalizados
+El usuario reportó que el texto bajo el precio (p. ej. "Al año · equivale a 10€/mes · ahorras 60€") se veía pequeño y con una tipografía monoespaciada poco visual, además de "equivale"/"ahorras" en minúscula tras el "·". Se cambió `.price-period` de `font-family: 'DM Mono', monospace; font-size: 12px; color: var(--metal)` a `font-family: 'Inter', sans-serif; font-size: 15px; color: var(--metal-claro); font-weight: 400` (igual que el resto del texto del sitio). Se capitalizó "Equivale"/"Ahorras" en el plan anual: "Al año · Equivale a 10€/mes · Ahorras 60€". Verificado en preview (escritorio).
+
 ### 31c. Botones "Empezar" alineados en la sección de precios
 Las 4 tarjetas de precios tienen descripciones de distinta longitud, por lo que los botones "Empezar" quedaban a alturas distintas (efecto "escalonado"). Se cambió `.price-card` a `display: flex; flex-direction: column;` y se añadió `.price-card .btn-primary { margin-top: auto; align-self: flex-start; }`, de forma que el botón siempre queda anclado al final de la tarjeta y alineado entre las 4 columnas. Verificado en preview (escritorio); en móvil cada tarjeta ocupa su propia fila, así que no aplica el alineado entre columnas.
 
