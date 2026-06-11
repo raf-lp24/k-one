@@ -285,6 +285,10 @@ Resuelve el pendiente detectado en el punto 25: en `max-width: 768px`, los 6 enl
 
 Verificado en preview (375x812): con `.nav-links` oculto, la nav vuelve a ocupar una sola fila (~85px) y el `hero-title` ("NO HAY ATAJOS. HAY PASOS.") ya no queda tapado (antes, con los 6 enlaces envueltos en 3 filas, la nav medía ~130px y tapaba también el título). El botón hamburguesa abre el menú a pantalla completa con los 6 enlaces, se transforma en "X", y se cierra correctamente al pulsar de nuevo o al elegir un enlace. Sin errores en consola.
 
+**Ajuste adicional**: con la nav ya en una sola fila (~85px), seguía quedando un solapamiento residual: el `.hero` usa `min-height: 100vh` y `justify-content: flex-end`, así que su contenido (empezando por `.hero-eyebrow`) ocupaba casi toda la altura de la pantalla y el `eyebrow` aparecía debajo del nav fijo, tapado por él. Se corrigió añadiendo `padding-top: 100px` a `.hero` en `max-width: 768px` (antes `padding: 0 24px 60px`, ahora `padding: 100px 24px 60px`), dejando espacio suficiente para el nav fijo. Verificado en preview (375x812): el eyebrow "// Entrenamiento · Nutrición · Mentalidad" ya no se solapa con el logo/hamburguesa.
+
+Sin colisiones con el menú del dashboard (punto 26): nombres de clases (`.nav-toggle`/`.mobile-menu` vs `.dash-overlay`/`.dash-menu-btn`), funciones JS (`toggleMobileMenu`/`closeMobileMenu` vs `toggleDashMenu`/`closeDashMenu`) y z-index (`.nav-toggle`: 101, `.mobile-menu`: 99, `.dash-overlay`: 150) son todos independientes.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
