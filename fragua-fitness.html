@@ -4225,24 +4225,28 @@
     }
     const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
 
-    // En los días de gimnasio (split por grupo muscular) separamos los ejercicios
-    // en bloque de fuerza (series cortas, ≤6 reps), hipertrofia (resto) y core,
+    // En los días de fuerza/gimnasio (split por grupo muscular o full body) separamos
+    // los ejercicios en bloque de fuerza (series cortas, ≤6 reps), hipertrofia (resto),
+    // acondicionamiento (movimientos por distancia/tiempo: m, km, seg) y core,
     // igual que mostraba antes el detalle de "Hoy".
-    const gruposMusculares = ['Empuje', 'Tracción', 'Piernas', 'Hombros', 'Complemento'];
+    const gruposMusculares = ['Empuje', 'Tracción', 'Piernas', 'Hombros', 'Complemento', 'Fuerza'];
     let bloquePrincipalHTML;
     if (gruposMusculares.includes(day.etiqueta)) {
-      const fuerza = [], hipertrofia = [], core = [];
+      const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
       ejercicios.forEach(e => {
-        const m = e.match(/×\s*(\d+)/);
+        const m = e.match(/×\s*(\d+)\s*(\D*)/);
         const reps = m ? parseInt(m[1], 10) : null;
+        const unidad = m ? m[2].trim() : '';
         if (/plancha|russian twist|abdomin/i.test(e)) core.push(e);
+        else if (/^(m|km|seg|s\b|min)/.test(unidad)) acondicionamiento.push(e);
         else if (reps !== null && reps <= 6) fuerza.push(e);
-        else hipertrofia.push(e);
+        else if (reps !== null) hipertrofia.push(e);
+        else acondicionamiento.push(e);
       });
       const bloque = (titulo, lista) => lista.length
         ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
         : '';
-      bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Core', core)]
+      bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
         .filter(Boolean).join('<br><br>');
     } else {
       bloquePrincipalHTML = `<strong>Bloque principal</strong>${musculos ? ` · ${musculos}` : ''}<br>` +

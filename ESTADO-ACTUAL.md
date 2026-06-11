@@ -336,6 +336,13 @@ Tras el punto 36, las cuentas que ya tenían un plan guardado (generado con el c
 
 Verificado en preview: con un plan "antiguo" simulado (entrenamiento_hoy desincronizado guardado en `localStorage`), al recargar el dashboard "Hoy" se regenera correctamente y coincide con el lunes de "Plan semanal". En "Plan semanal", el lunes (Hoy) aparece desplegado, el resto de días de entreno aparecen plegados y se despliegan/pliegan correctamente al pulsarlos, sin solaparse con la flechita de plegado. Sin errores en consola.
 
+### 38. Identificar también el tipo de ejercicio (fuerza/hipertrofia/core/acondicionamiento) en los días "Fuerza" de Combinación e Hyrox
+El punto 36 ya separaba en bloques "Bloque de fuerza / Bloque de hipertrofia / Core" los días de gimnasio con split por grupo muscular (Empuje, Tracción, Piernas, Hombros, Complemento), pero los días con etiqueta "Fuerza" (usados en los planes de Combinación y en el día de "Fuerza funcional" de Hyrox) seguían mostrando un único "Bloque principal" sin clasificar.
+
+**Solución**: se añadió "Fuerza" a la lista de etiquetas que `formatearSesion` clasifica, y se sumó una cuarta categoría, "Bloque de acondicionamiento", para movimientos funcionales medidos en distancia o tiempo (ej. "Sled push 4×20m", "Farmer carry 4×30m", "Rowing 4×250m" en Hyrox), que no encajan ni en fuerza ni en hipertrofia clásicas.
+
+Verificado en preview: en Combinación (3 y 5 días), los días "Fuerza" ahora muestran "Bloque de hipertrofia" (y "Core" cuando hay plancha); en Hyrox, el día "Fuerza funcional" separa "Sandbag lunges 3×12" en hipertrofia y "Sled push/Farmer carry/Rowing" en "Bloque de acondicionamiento". Sin errores en consola.
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.
