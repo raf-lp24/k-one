@@ -308,6 +308,9 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 ### 30. Capitalización de `.price-period` en la sección de precios
 El usuario detectó que las etiquetas bajo el precio empezaban en minúscula: "mes de prueba", "al mes · cancela cuando quieras" (x2), "al año · equivale a 11,67€/mes · ahorras 40€". Se corrigieron a "Mes de prueba", "Al mes · cancela cuando quieras" y "Al año · equivale a...". Verificado en preview (escritorio).
 
+### 31c. Botones "Empezar" alineados en la sección de precios
+Las 4 tarjetas de precios tienen descripciones de distinta longitud, por lo que los botones "Empezar" quedaban a alturas distintas (efecto "escalonado"). Se cambió `.price-card` a `display: flex; flex-direction: column;` y se añadió `.price-card .btn-primary { margin-top: auto; align-self: flex-start; }`, de forma que el botón siempre queda anclado al final de la tarjeta y alineado entre las 4 columnas. Verificado en preview (escritorio); en móvil cada tarjeta ocupa su propia fila, así que no aplica el alineado entre columnas.
+
 ### 31b. Precio anual rebajado de 139,99€ a 119,99€
 A petición del usuario, el plan "Anual" pasa de 139,99€ a 119,99€. Se recalculó el `.price-period`: "Al año · equivale a 10€/mes · ahorras 60€" (antes "11,67€/mes · ahorras 40€"). Verificado en preview (escritorio).
 
