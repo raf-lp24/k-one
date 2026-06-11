@@ -2692,8 +2692,8 @@
 <div class="modal-overlay" id="modalPaywall">
   <div class="modal-box">
     <div class="modal-title">Tu mes de prueba ha terminado</div>
-    <p class="modal-desc">Has disfrutado de K-One por 0,99€ durante tu primer mes. Para seguir con tu plan de entrenamiento y nutrición, tu seguimiento y el resto de funciones, continúa tu suscripción.</p>
-    <div class="price-amount" style="margin-bottom:4px">14,99€<span style="font-size:14px;color:var(--metal)">/mes</span></div>
+    <p class="modal-desc">Has disfrutado de K-One por 0,99€ durante tu primer mes. Para seguir con tu plan, tu seguimiento y el resto de funciones, continúa tu suscripción.</p>
+    <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">14,99€</span><span style="font-size:14px;color:var(--metal)">/mes</span></div>
     <button class="btn-primary" style="width:100%;padding:14px;margin-top:16px" onclick="confirmarPagoSuscripcion()">Continuar con K-One →</button>
     <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="logout()">Cerrar sesión</p>
   </div>
@@ -2709,9 +2709,10 @@
       <div class="field">
         <label>¿Qué tipo de plan quieres?</label>
         <div class="radio-group" id="cp-tipoPlan">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan')">Plan completo: entrenamiento + nutrición</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan')">Solo nutrición, sin entrenamiento</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarPrecioCambioPlan();">Plan completo: entrenamiento + nutrición</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarPrecioCambioPlan();">Solo nutrición, sin entrenamiento</div>
         </div>
+        <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
       <div class="field">
         <label>¿Cuál es tu objetivo principal?</label>
@@ -5379,6 +5380,30 @@
     if (target) target.classList.add('selected');
   }
 
+  // ===== REGLA DE PRECIOS =====
+  // Primer mes desde el registro (DIAS_PRUEBA): 0,99€ siempre, sea cual sea el plan.
+  // Pasado el primer mes: Plan completo 14,99€/mes (o 119,99€/año), Solo nutrición 4,99€/mes.
+  // Esta regla aplica tanto al paywall (fin de mes de prueba) como al cambio de plan desde "Hoy".
+  function precioPlanActual(tipoPlan, creadoISO) {
+    const esSoloNutricion = (tipoPlan || '').includes('Solo nutrición');
+    const dias = creadoISO ? (Date.now() - new Date(creadoISO).getTime()) / (1000 * 60 * 60 * 24) : Infinity;
+    if (dias <= DIAS_PRUEBA) {
+      return { precio: '0,99€', detalle: 'Sigues en tu primer mes: 0,99€, sea cual sea el plan que elijas.' };
+    }
+    if (esSoloNutricion) {
+      return { precio: '4,99€/mes', detalle: 'El plan "Solo nutrición" cuesta 4,99€/mes a partir de tu próximo cobro.' };
+    }
+    return { precio: '14,99€/mes', detalle: 'El plan completo cuesta 14,99€/mes (o 119,99€/año con el plan anual) a partir de tu próximo cobro.' };
+  }
+
+  function actualizarPrecioCambioPlan() {
+    const tipoPlan = document.querySelector('#cp-tipoPlan .selected')?.textContent?.trim() || '';
+    const user = getCurrentUser();
+    const creado = user ? getUsers()[user.email]?.creado : null;
+    const el = document.getElementById('cpPrecioInfo');
+    if (el) el.textContent = precioPlanActual(tipoPlan, creado).detalle;
+  }
+
   function abrirModalCambiarPlan() {
     enfoqueMacrosManualCambio = false;
     preseleccionarRadio('cp-tipoPlan', userData.tipoPlan || 'Plan completo: entrenamiento + nutrición');
@@ -5389,6 +5414,7 @@
     preseleccionarRadio('cp-tiempoSesion', userData.tiempoSesion);
     preseleccionarRadio('cp-nivel', userData.nivel);
     preseleccionarRadio('cp-lugar', userData.lugar);
+    actualizarPrecioCambioPlan();
     document.getElementById('modalCambiarPlan').classList.add('visible');
   }
 
@@ -6297,7 +6323,13 @@
   function comprobarPaywall(email) {
     const modal = document.getElementById('modalPaywall');
     if (!modal) return;
-    modal.classList.toggle('visible', !tieneAccesoActivo(email));
+    const activo = tieneAccesoActivo(email);
+    modal.classList.toggle('visible', !activo);
+    if (!activo) {
+      const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
+      const precioEl = document.getElementById('paywallPrecio');
+      if (precioEl) precioEl.textContent = tipoPlan.includes('Solo nutrición') ? '4,99€' : '14,99€';
+    }
   }
   function confirmarPagoSuscripcion() {
     const user = getCurrentUser();

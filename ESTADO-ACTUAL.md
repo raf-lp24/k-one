@@ -420,6 +420,15 @@ El usuario pidió que un cliente pueda, cuando termine el mes o cuando quiera, c
 
 Verificado en preview con la cuenta de test: cambiando de "Ganar músculo"/Gimnasio/3 días/60-90min a "Mejorar resistencia"/Running/4 días/45-60min/Al aire libre, "Hoy" pasa a mostrar "MEJORAR RESISTENCIA", "RUNNING", semana 1/0 días, y el entrenamiento de hoy cambia a "Rodaje suave" (cardio). "Plan semanal" (Semana 1, Lunes) muestra el mismo "Rodaje suave" con bloque de acondicionamiento. "Nutrición" muestra "Enfoque nutricional: Equilibrado" con macros recalculados. Sin errores en consola. Tras la prueba se restauró la cuenta de test a sus valores originales (Ganar músculo / Gimnasio / Fuerza).
 
+### 41. Regla de precios al cambiar de plan (Plan completo ↔ Solo nutrición)
+El usuario aclaró la regla de precios que debe regir tanto el cuestionario inicial como el cambio de plan (punto 40): durante el **primer mes desde el registro** (`DIAS_PRUEBA = 30`, ya existente), el coste es **0,99€ sea cual sea el plan elegido**; pasado ese primer mes, el "Plan completo" cuesta **14,99€/mes** (o 119,99€/año con el anual) y "Solo nutrición" cuesta **4,99€/mes**.
+
+- Nueva función `precioPlanActual(tipoPlan, creadoISO)`: aplica esa regla y devuelve un texto explicativo según el tipo de plan y los días transcurridos desde `creado`.
+- En el modal "Cambiar tu plan" (punto 40), bajo "¿Qué tipo de plan quieres?" se añadió un `field-hint` (`#cpPrecioInfo`) que muestra en vivo, vía `actualizarPrecioCambioPlan()`, el precio que corresponde según el plan seleccionado y la fecha de registro del usuario. Se actualiza al abrir el modal y al cambiar la selección de tipo de plan.
+- El paywall de fin de mes de prueba (`modalPaywall`) ahora muestra el precio correcto según `userData.tipoPlan`: 14,99€ para "Plan completo", 4,99€ para "Solo nutrición" (antes mostraba siempre 14,99€). `comprobarPaywall()` actualiza el `#paywallPrecio` dinámicamente.
+
+Verificado en preview con datos controlados: `precioPlanActual` devuelve "Sigues en tu primer mes: 0,99€..." para ambos tipos de plan si `creado` es reciente, y "...14,99€/mes (o 119,99€/año)..." / "...4,99€/mes..." respectivamente si `creado` tiene más de 30 días. En el modal "Cambiar tu plan", el hint cambia correctamente al alternar entre "Plan completo" y "Solo nutrición" con una fecha de registro de hace 60 días. Cuenta de test restaurada a sus valores originales al finalizar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
