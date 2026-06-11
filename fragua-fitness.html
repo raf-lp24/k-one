@@ -888,6 +888,21 @@
 
   .dash-sidebar .logo { margin-bottom: 40px; }
 
+  .back-to-landing {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--metal);
+    cursor: pointer;
+    margin: -16px 0 24px;
+    transition: color 0.2s;
+  }
+
+  .back-to-landing:hover { color: var(--brasa); }
+
   .dash-user {
     display: flex;
     align-items: center;
@@ -2948,6 +2963,7 @@
   <div class="dash-layout">
     <aside class="dash-sidebar">
       <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
+      <div class="back-to-landing" onclick="goTo('landing')">← Volver al inicio</div>
       <div class="dash-user">
         <div class="user-avatar" id="userAvatar">A</div>
         <div>
