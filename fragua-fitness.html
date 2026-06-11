@@ -3633,9 +3633,10 @@
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-          <div style="display:flex;align-items:baseline;gap:10px;background:var(--carbon);border-left:3px solid var(--brasa);padding:10px 20px">
-            <span id="diasRestantesPlan" style="color:var(--brasa);font-weight:700;font-size:32px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">—</span>
-            <span id="diasRestantesPlanLabel" style="font-size:13px;color:var(--blanco-puro);letter-spacing:0.5px;text-transform:uppercase"> días restantes de tu plan actual</span>
+          <div class="stat-card" style="flex:1;min-width:200px">
+            <div class="stat-card-label">Días restantes</div>
+            <div class="stat-card-value" id="diasRestantesPlan">—</div>
+            <div class="stat-card-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
           </div>
           <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
         </div>
@@ -5414,7 +5415,7 @@
     const u = user ? getUsers()[user.email] : null;
     if (!u || !u.creado) {
       el.textContent = '—';
-      if (label) label.textContent = ' días restantes de tu plan actual';
+      if (label) label.textContent = 'de tu plan actual';
       return;
     }
     const enPrueba = !u.suscripcionActiva;
@@ -5423,7 +5424,7 @@
     const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / (1000 * 60 * 60 * 24);
     const restantes = Math.max(0, Math.ceil(periodo - (diasTranscurridos % periodo)));
     el.textContent = restantes;
-    if (label) label.textContent = enPrueba ? ' días restantes de tu mes de prueba (0,99€)' : ' días restantes de tu plan actual';
+    if (label) label.textContent = enPrueba ? 'de tu mes de prueba (0,99€)' : 'de tu plan actual';
   }
 
   function actualizarPrecioCambioPlan() {

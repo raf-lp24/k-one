@@ -447,6 +447,14 @@ A petición del usuario, se mejoró la visibilidad de dos elementos del dashboar
 
 Verificado en preview con la cuenta de test: ambos elementos se ven correctamente más grandes y destacados, sin errores en consola.
 
+### 42.2 Contador de días restantes como tarjeta de estadística (`.stat-card`)
+El usuario pidió que las etiquetas del nuevo contador de días restantes (punto 42) siguieran el mismo estilo tipográfico que las tarjetas "Semana / Días entrenados / Objetivo / Deporte" (`.stat-card-label` en DM Mono mayúsculas gris, `.stat-card-value` en Bebas Neue naranja "brasa", `.stat-card-sub` en gris), tanto para lo nuevo como para lo existente. Tras revisar el resto de la web, las etiquetas/subtextos ya siguen mayoritariamente esa convención (DM Mono + mayúsculas + `var(--metal)`/`var(--brasa)`), por lo que el cambio se centró en el contador nuevo, que era el elemento que no la seguía.
+
+- El contador ahora reutiliza directamente las clases `.stat-card`/`.stat-card-label`/`.stat-card-value`/`.stat-card-sub`: etiqueta "Días restantes" arriba, número grande en el medio (`#diasRestantesPlan`), y subtexto "de tu plan actual" / "de tu mes de prueba (0,99€)" abajo (`#diasRestantesPlanLabel`).
+- `actualizarDiasRestantesPlan()` actualizado: el texto del subtítulo ya no repite "días restantes de...", solo "de tu plan actual" / "de tu mes de prueba (0,99€)" / "de tu mes de prueba (0,99€)".
+
+Verificado en preview con la cuenta de test: la tarjeta "DÍAS RESTANTES / 30 / de tu plan actual" se ve visualmente idéntica en estilo a las tarjetas de la fila de estadísticas. Sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
