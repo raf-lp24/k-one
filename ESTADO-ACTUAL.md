@@ -325,6 +325,8 @@ Un usuario detectó que el entrenamiento mostrado en la pestaña "Hoy" del área
 
 Verificado en preview con la cuenta de test: regenerando el plan para Gimnasio, Running, Hyrox, CrossFit y Combinación, "Hoy" coincide exactamente con el lunes de "Plan semanal" y ambos incluyen calentamiento/bloque principal/vuelta a la calma. También se probó con lesión de rodilla (la nota "Tu plan, adaptado" se antepone correctamente a "Hoy") y con un plan "Solo nutrición" (no genera entrenamiento, como antes). Sin errores en consola.
 
+**Extra**: en los días de gimnasio con split por grupo muscular (Empuje, Tracción, Piernas, Hombros, Complemento), `formatearSesion` ahora separa los ejercicios en "Bloque de fuerza" (series ≤6 reps), "Bloque de hipertrofia" (resto) y "Core" (plancha, russian twist, abdominales), igual que mostraba antes el detalle de "Hoy". Verificado con planes de Gimnasio de 3 y 5 días: por ejemplo, el jueves de piernas separa "Peso muerto 4×6" en fuerza y el resto de ejercicios en hipertrofia, y el viernes de hombros separa plancha/russian twist en "Core".
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.
