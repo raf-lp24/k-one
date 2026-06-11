@@ -4237,11 +4237,16 @@
         const m = e.match(/×\s*(\d+)\s*(\D*)/);
         const reps = m ? parseInt(m[1], 10) : null;
         const unidad = m ? m[2].trim() : '';
-        if (/plancha|russian twist|abdomin/i.test(e)) core.push(e);
-        else if (/^(m|km|seg|s\b|min)/.test(unidad)) acondicionamiento.push(e);
-        else if (reps !== null && reps <= 6) fuerza.push(e);
-        else if (reps !== null) hipertrofia.push(e);
-        else acondicionamiento.push(e);
+        if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
+        if (/^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
+        // Nota orientativa según el rango de repeticiones, igual que mostraba antes "Hoy"
+        let nota = '';
+        if (reps !== null && reps <= 6) nota = ' · Al 75-80% de tu máximo';
+        else if (reps !== null && reps >= 15) nota = ' · Peso ligero, control total';
+        const texto = e + nota;
+        if (reps !== null && reps <= 6) fuerza.push(texto);
+        else if (reps !== null) hipertrofia.push(texto);
+        else acondicionamiento.push(texto);
       });
       const bloque = (titulo, lista) => lista.length
         ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`

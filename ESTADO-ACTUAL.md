@@ -343,6 +343,13 @@ El punto 36 ya separaba en bloques "Bloque de fuerza / Bloque de hipertrofia / C
 
 Verificado en preview: en Combinación (3 y 5 días), los días "Fuerza" ahora muestran "Bloque de hipertrofia" (y "Core" cuando hay plancha); en Hyrox, el día "Fuerza funcional" separa "Sandbag lunges 3×12" en hipertrofia y "Sled push/Farmer carry/Rowing" en "Bloque de acondicionamiento". Sin errores en consola.
 
+### 39. Notas orientativas por ejercicio (intensidad/peso) en "Hoy" y "Plan semanal"
+El usuario adjuntó una captura del antiguo formato de "Hoy", que junto a cada ejercicio mostraba una nota orientativa sobre la intensidad o el peso a usar (ej. "Press de banca con barra · 4 × 6 · Al 75-80% de tu máximo", "Elevaciones laterales · 3 × 15 · Peso ligero, control total"). Pidió recuperar ese nivel de detalle por ejercicio, y que apareciera igual en ambos sitios ("Hoy" y "Plan semanal"), no solo en uno.
+
+**Solución**: dentro de la clasificación por ejercicio de `formatearSesion` (días con `gruposMusculares` incluyendo "Fuerza"), se añade una nota según el rango de repeticiones detectado: si son ≤6 reps (bloque de fuerza) se añade "· Al 75-80% de tu máximo"; si son ≥15 reps (bloque de hipertrofia, trabajo accesorio) se añade "· Peso ligero, control total". Los ejercicios con repeticiones intermedias (7-14) no llevan nota adicional. Como tanto "Hoy" como "Plan semanal" usan `formatearSesion` para renderizar la sesión (puntos 36-37), las notas aparecen automáticamente en ambos sitios sin duplicar lógica.
+
+Verificado en preview: en la cuenta de test (día Empuje), "Hoy" y el lunes de "Plan semanal" muestran "· Elevaciones laterales 3×15 · Peso ligero, control total" en "Bloque de hipertrofia". En un plan de 5 días, el jueves (Piernas) muestra "· Peso muerto 4×6 · Al 75-80% de tu máximo" en "Bloque de fuerza" y varias notas "Peso ligero, control total" en "Bloque de hipertrofia" (extensión cuádriceps, hip thrust, gemelos de pie); el viernes (Hombros) muestra las mismas notas en elevaciones laterales y face pull. Sin errores en consola.
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.
