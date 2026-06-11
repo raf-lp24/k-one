@@ -274,6 +274,17 @@ Verificado en preview (desktop y móvil): iconos y barbell se renderizan correct
 
 Verificado en preview (375x812): el menú se abre con todas las secciones, "Volver al inicio" y "Cerrar sesión"; al elegir una sección se cierra y se muestra el contenido correctamente. Desktop sin cambios visuales.
 
+### 27. Menú hamburguesa en la landing (móvil)
+Resuelve el pendiente detectado en el punto 25: en `max-width: 768px`, los 6 enlaces de `.nav-links` (Cómo funciona, Deportes, Opiniones, Precios, Entrar, "Empieza por 0,99€") no cabían en una fila, se envolvían en varias líneas y, al ser `.landing-nav` `position: fixed`, ese bloque tapaba el `hero-eyebrow` y el inicio del `hero-title`.
+
+**Solución**:
+- En la media query `max-width: 768px` se oculta `.nav-links` (`display: none`) y se muestra `.nav-toggle` (botón hamburguesa de 3 líneas, oculto por defecto en desktop).
+- Nuevo `.nav-toggle` (`#navToggle`) dentro de `.landing-nav`: al pulsarlo, las 3 líneas se transforman en una "X" (`.nav-toggle.active`).
+- Nuevo `#mobileMenu` (`.mobile-menu`), overlay a pantalla completa (`position: fixed; inset: 0`, fondo `--negro`, oculto con `opacity:0; visibility:hidden`) con los mismos 6 enlaces, centrados verticalmente.
+- Funciones JS `toggleMobileMenu()` / `closeMobileMenu()`: alternan la clase `.active` en `#navToggle` y `#mobileMenu`. Cada enlace del menú móvil llama a `closeMobileMenu()` antes de `scrollToSection(...)` / `goTo(...)`.
+
+Verificado en preview (375x812): con `.nav-links` oculto, la nav vuelve a ocupar una sola fila (~85px) y el `hero-title` ("NO HAY ATAJOS. HAY PASOS.") ya no queda tapado (antes, con los 6 enlaces envueltos en 3 filas, la nav medía ~130px y tapaba también el título). El botón hamburguesa abre el menú a pantalla completa con los 6 enlaces, se transforma en "X", y se cierra correctamente al pulsar de nuevo o al elegir un enlace. Sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
