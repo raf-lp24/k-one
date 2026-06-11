@@ -1124,17 +1124,17 @@
   .back-to-landing {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: var(--metal);
+    gap: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--blanco);
     cursor: pointer;
     margin: -16px 0 24px;
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.2s;
   }
 
-  .back-to-landing:hover { color: var(--brasa); }
+  .back-to-landing:hover { color: var(--brasa); transform: translateX(-2px); }
 
   .dash-user {
     display: flex;
@@ -3633,9 +3633,9 @@
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-          <div style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace">
-            <span id="diasRestantesPlan" style="color:var(--brasa);font-weight:700;font-size:14px">—</span>
-            <span id="diasRestantesPlanLabel"> días restantes de tu plan actual</span>
+          <div style="display:flex;align-items:baseline;gap:10px;background:var(--carbon);border-left:3px solid var(--brasa);padding:10px 20px">
+            <span id="diasRestantesPlan" style="color:var(--brasa);font-weight:700;font-size:32px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">—</span>
+            <span id="diasRestantesPlanLabel" style="font-size:13px;color:var(--metal-claro);letter-spacing:0.5px"> días restantes de tu plan actual</span>
           </div>
           <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
         </div>

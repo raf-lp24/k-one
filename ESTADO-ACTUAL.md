@@ -439,6 +439,14 @@ El usuario pidió añadir, en la página de inicio del dashboard ("Hoy"), un con
 
 Verificado en preview con la cuenta de test en dos escenarios simulados: suscripción activa con `fechaPago` de hace 10 días → muestra "20 días restantes de tu plan actual"; usuario en prueba con `creado` de hace 22 días → muestra "8 días restantes de tu mes de prueba (0,99€)". Tras las pruebas, la cuenta de test se restauró a `suscripcionActiva: true` con `creado` en el momento actual (sin `fechaPago`), mostrando correctamente "30 días restantes de tu plan actual" junto al plan original (Ganar músculo / Gimnasio). Sin errores en consola.
 
+### 42.1 Mejora visual de "Volver al inicio" y del contador de días restantes
+A petición del usuario, se mejoró la visibilidad de dos elementos del dashboard que quedaban demasiado discretos:
+
+- `.back-to-landing` ("← Volver al inicio"): pasa de `DM Mono` 11px gris a `Bebas Neue` 18px, color blanco con hover en "brasa" y un pequeño desplazamiento al pasar el ratón.
+- El contador de días restantes (`#diasRestantesPlan`/`#diasRestantesPlanLabel`, punto 42): ahora va dentro de una tarjeta (`background: var(--carbon)`, borde izquierdo de 3px en "brasa", padding), con el número en `Bebas Neue` 32px en color "brasa" y la etiqueta en `var(--metal-claro)`.
+
+Verificado en preview con la cuenta de test: ambos elementos se ven correctamente más grandes y destacados, sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
