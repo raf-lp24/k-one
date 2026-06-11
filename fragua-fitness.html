@@ -436,6 +436,21 @@
     border-top: 2px solid var(--brasa);
   }
 
+  .price-badge {
+    position: absolute;
+    top: 0;
+    right: 40px;
+    transform: translateY(-50%);
+    background: var(--brasa);
+    color: var(--blanco-puro);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+  }
+
   .price-tag {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -2435,27 +2450,27 @@
     </div>
     <div class="sports-grid">
       <div class="sport-card">
-        <span class="sport-icon">🏋️</span>
+        <span class="sport-icon" aria-hidden="true">🏋️</span>
         <div class="sport-name">Gimnasio</div>
         <p class="sport-desc">Hipertrofia, fuerza, definición. Rutinas con progresión de cargas semana a semana.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon">🏃</span>
+        <span class="sport-icon" aria-hidden="true">🏃</span>
         <div class="sport-name">Running</div>
         <p class="sport-desc">De 5km a maratón. Planes por fases con ritmos, distancias y zonas cardíacas.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon">⚡</span>
+        <span class="sport-icon" aria-hidden="true">⚡</span>
         <div class="sport-name">Hyrox</div>
         <p class="sport-desc">Preparación específica para las 8 estaciones. Fuerza funcional y resistencia combinadas.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon">🔥</span>
+        <span class="sport-icon" aria-hidden="true">🔥</span>
         <div class="sport-name">CrossFit</div>
         <p class="sport-desc">Alta intensidad, movimientos funcionales. Mejora tu acondicionamiento general.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon">🥗</span>
+        <span class="sport-icon" aria-hidden="true">🥗</span>
         <div class="sport-name">Solo nutrición</div>
         <p class="sport-desc">¿No quieres entrenar (de momento)? Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo.</p>
       </div>
@@ -2518,6 +2533,7 @@
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
       <div class="price-card featured">
+        <div class="price-badge">Más popular</div>
         <div class="price-tag">// Mensual</div>
         <div class="price-amount">14,99€</div>
         <div class="price-period">al mes · cancela cuando quieras</div>

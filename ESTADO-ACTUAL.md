@@ -237,6 +237,19 @@ Tras un análisis completo de la página desde la perspectiva de desarrollador w
 
 Verificado en preview: meta tags, favicon, sección de testimonios (3 tarjetas) y trust-bar se renderizan correctamente, sin errores en consola.
 
+### 22. Despliegue a producción (Vercel + GitHub)
+- Repositorio creado en GitHub: `raf-lp24/k-one` (rama `main`), conectado a Vercel (equipo `rafas-projects24`).
+- Proyecto Vercel `k-one` desplegado como sitio estático (preset "Other", sin build).
+- **URL pública**: `https://k-one-six.vercel.app` — `index.html` redirige a `fragua-fitness.html` (verificado con código 200 en ambas).
+- Flujo de actualización: cualquier `git push` a `main` en `raf-lp24/k-one` dispara un nuevo deploy automático en Vercel.
+- Repo local inicializado con `.gitignore` (excluye `desktop.ini`).
+
+### 23. Mejoras de accesibilidad y conversión (siguiente lote del análisis)
+- Los 5 emojis decorativos de `.sport-icon` (🏋️ 🏃 ⚡ 🔥 🥗) ahora llevan `aria-hidden="true"`, ya que su significado ya está en `.sport-name`.
+- Tarjeta de precio destacada (`.price-card.featured`, "Mensual 14,99€") ahora muestra un badge "MÁS POPULAR" (`.price-badge`, fondo `--brasa`, posicionado sobre el borde superior) para guiar la elección del usuario.
+
+Verificado en preview: badge visible y bien posicionado sobre la tarjeta "Mensual", sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
