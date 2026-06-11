@@ -596,14 +596,16 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 32px;
+    gap: 40px;
     margin-top: 56px;
     font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--metal);
+    font-size: 13px;
+    color: var(--metal-claro);
     letter-spacing: 0.5px;
   }
-  .trust-bar span { display: flex; align-items: center; gap: 8px; }
+  .trust-bar span { display: flex; align-items: center; gap: 10px; }
+  .trust-icon { width: 22px; height: 22px; color: var(--brasa); flex-shrink: 0; }
+  .trust-icon svg { width: 100%; height: 100%; }
 
   /* TESTIMONIALS */
   .testimonials {
@@ -2826,9 +2828,34 @@
       </div>
     </div>
     <div class="trust-bar">
-      <span>🔒 Pago seguro</span>
-      <span>✕ Cancela cuando quieras</span>
-      <span>🔐 Tus datos nunca se comparten</span>
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/>
+            <path d="M8.5 12 L11 14.5 L15.5 9.5"/>
+          </svg>
+        </span>
+        Pago seguro
+      </span>
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+          </svg>
+        </span>
+        Cancela cuando quieras
+      </span>
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="9" rx="2"/>
+            <path d="M8 11 V7 a4 4 0 0 1 8 0 v4"/>
+          </svg>
+        </span>
+        Tus datos nunca se comparten
+      </span>
     </div>
   </section>
 
