@@ -4216,47 +4216,34 @@
     const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
 
     const partes = day.detalle.split('·');
-    let musculos = '', ejerciciosTexto;
-    if (partes.length >= 2) {
-      musculos = partes[0].trim();
-      ejerciciosTexto = partes.slice(1).join('·');
-    } else {
-      ejerciciosTexto = day.detalle;
-    }
+    const ejerciciosTexto = partes.length >= 2 ? partes.slice(1).join('·') : day.detalle;
     const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
 
-    // En los días de fuerza/gimnasio (split por grupo muscular o full body) separamos
-    // los ejercicios en bloque de fuerza (series cortas, ≤6 reps), hipertrofia (resto),
-    // acondicionamiento (movimientos por distancia/tiempo: m, km, seg) y core,
-    // igual que mostraba antes el detalle de "Hoy".
-    const gruposMusculares = ['Empuje', 'Tracción', 'Piernas', 'Hombros', 'Complemento', 'Fuerza'];
-    let bloquePrincipalHTML;
-    if (gruposMusculares.includes(day.etiqueta)) {
-      const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
-      ejercicios.forEach(e => {
-        const m = e.match(/×\s*(\d+)\s*(\D*)/);
-        const reps = m ? parseInt(m[1], 10) : null;
-        const unidad = m ? m[2].trim() : '';
-        if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
-        if (/^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
-        // Nota orientativa según el rango de repeticiones, igual que mostraba antes "Hoy"
-        let nota = '';
-        if (reps !== null && reps <= 6) nota = ' · Al 75-80% de tu máximo';
-        else if (reps !== null && reps >= 15) nota = ' · Peso ligero, control total';
-        const texto = e + nota;
-        if (reps !== null && reps <= 6) fuerza.push(texto);
-        else if (reps !== null) hipertrofia.push(texto);
-        else acondicionamiento.push(texto);
-      });
-      const bloque = (titulo, lista) => lista.length
-        ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
-        : '';
-      bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
-        .filter(Boolean).join('<br><br>');
-    } else {
-      bloquePrincipalHTML = `<strong>Bloque principal</strong>${musculos ? ` · ${musculos}` : ''}<br>` +
-        ejercicios.map(e => `· ${capitalizar(e)}`).join('<br>');
-    }
+    // En todos los días de entrenamiento (gimnasio, cardio, WOD, Hyrox, combinados...)
+    // separamos los ejercicios/tramos en bloque de fuerza (series cortas, ≤6 reps),
+    // hipertrofia (resto de series con reps), acondicionamiento (movimientos o tramos
+    // por distancia/tiempo, y cardio en general) y core, igual que mostraba antes
+    // el detalle de "Hoy".
+    const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
+    ejercicios.forEach(e => {
+      const m = e.match(/×\s*(\d+)\s*(\D*)/);
+      const reps = m ? parseInt(m[1], 10) : null;
+      const unidad = m ? m[2].trim() : '';
+      if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
+      if (reps === null || /^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
+      // Nota orientativa según el rango de repeticiones, igual que mostraba antes "Hoy"
+      let nota = '';
+      if (reps <= 6) nota = ' · Al 75-80% de tu máximo';
+      else if (reps >= 15) nota = ' · Peso ligero, control total';
+      const texto = e + nota;
+      if (reps <= 6) fuerza.push(texto);
+      else hipertrofia.push(texto);
+    });
+    const bloque = (titulo, lista) => lista.length
+      ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
+      : '';
+    const bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
+      .filter(Boolean).join('<br><br>');
 
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
