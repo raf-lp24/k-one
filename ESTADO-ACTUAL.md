@@ -305,6 +305,13 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 
 **Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
 
+### 35. Fix: la cuenta de test podía dar "Email no encontrado" en algunos navegadores
+Un usuario reportó en producción (móvil, k-one-six.vercel.app) que al intentar entrar con la cuenta de testeo (`test@fragua.es` / `fragua123`) precargada en el formulario, salía el error "Email no encontrado". Causa: la cuenta de test se "siembra" en `localStorage` durante `window.onload` (`fragua_users`), pero si ese navegador bloquea o no persiste `localStorage` (modo privado, restricciones de cookies/storage, etc.), el guardado falla en silencio y `login()` no encuentra la cuenta.
+
+**Solución**: se extrajo la lógica de siembra a una función reutilizable `ensureTestAccount()`, que sigue ejecutándose en `window.onload` pero ahora también se invoca como respaldo dentro de `login()`: si el email/contraseña introducidos son los de la cuenta de test (`TEST_EMAIL`/`TEST_PASS`) y `users[email]` no existe, se vuelve a intentar `ensureTestAccount()` justo antes de validar, usando el objeto en memoria que devuelve aunque el guardado en `localStorage` vuelva a fallar. Así la cuenta de demo siempre permite entrar, incluso en navegadores que bloquean el almacenamiento local.
+
+Verificado en preview: simulando un fallo de seeding (borrando `fragua_users` y los datos de la cuenta de test antes de pulsar "Entrar"), el login con `test@fragua.es`/`fragua123` sigue funcionando y lleva al dashboard; el flujo normal (seeding correcto) y el caso de contraseña incorrecta siguen funcionando igual que antes. Sin errores en consola.
+
 ### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
 Continuación del rediseño UX, "Fase B":
 - **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.

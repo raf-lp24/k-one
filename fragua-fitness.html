@@ -5863,6 +5863,45 @@
     }
   }
 
+  // ===== CUENTA DE TEST PRE-CARGADA =====
+  const TEST_EMAIL = 'test@fragua.es';
+  const TEST_PASS = 'fragua123';
+
+  // Garantiza que la cuenta de test exista y tenga un plan, regenerando el
+  // hash en cada llamada para que siempre funcione con "fragua123". Devuelve
+  // el objeto de usuarios en memoria aunque el guardado en localStorage falle
+  // (p.ej. modo privado), para que el login pueda funcionar igualmente.
+  async function ensureTestAccount() {
+    const users = getUsers();
+    const testPassHash = await hashPassword(TEST_PASS);
+    if (!users[TEST_EMAIL] || users[TEST_EMAIL].passHash !== testPassHash) {
+      users[TEST_EMAIL] = {
+        nombre: 'Rafa Test',
+        email: TEST_EMAIL,
+        passHash: testPassHash,
+        creado: users[TEST_EMAIL]?.creado || new Date().toISOString(),
+        suscripcionActiva: true
+      };
+      saveUsers(users);
+    }
+    if (!getUserData(TEST_EMAIL)) {
+      const testUserData = {
+        edad: '30', sexo: 'Hombre', peso: '80', altura: '178',
+        complexion: 'Normal', enfermedad: 'No', lesion: 'No', alergia: 'No',
+        operacion: '', medicacion: '',
+        trabajo: 'Oficina', jornada: 'Sentado todo el día',
+        estres: 'Medio', sueno: '7-8 horas',
+        dieta: 'Como de todo', noComida: '', comidas: '3 veces', cocina: 'Casi siempre en casa',
+        objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
+        deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
+        nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio'
+      };
+      const testPlan = buildPlanFromData(testUserData);
+      saveUserData(TEST_EMAIL, { userData: testUserData, plan: testPlan, savedAt: new Date().toISOString() });
+    }
+    return users;
+  }
+
   // ===== LOGIN =====
   async function login() {
     let ok = true;
@@ -5885,7 +5924,13 @@
 
     if (!ok) return;
 
-    const users = getUsers();
+    let users = getUsers();
+    if (!users[email] && email === TEST_EMAIL && pass === TEST_PASS) {
+      // Si el seeding inicial falló (p.ej. localStorage bloqueado en este
+      // navegador), reintentamos aquí para que la cuenta de test no se quede
+      // sin poder entrar.
+      try { users = await ensureTestAccount(); } catch (e) { console.error('Error preparando la cuenta de test:', e); }
+    }
     if (!users[email]) {
       document.getElementById('err-login-email').classList.add('visible');
       document.getElementById('login-email').classList.add('error');
@@ -6416,40 +6461,7 @@
     // Si algo de lo de abajo falla (p.ej. al abrir el archivo con file://), nunca
     // debe dejar la pantalla en negro: igualmente navegamos a una pantalla válida.
     try {
-      // ===== CUENTA DE TEST PRE-CARGADA =====
-      // Se regenera el hash en cada carga para que siempre funcione con
-      // "fragua123", aunque localStorage tenga un hash de una versión anterior
-      // o de un entorno con un método de hash distinto (file:// vs servidor).
-      const testEmail = 'test@fragua.es';
-      const users = getUsers();
-      const testPassHash = await hashPassword('fragua123');
-      if (!users[testEmail] || users[testEmail].passHash !== testPassHash) {
-        users[testEmail] = {
-          nombre: 'Rafa Test',
-          email: testEmail,
-          passHash: testPassHash,
-          creado: users[testEmail]?.creado || new Date().toISOString(),
-          suscripcionActiva: true
-        };
-        saveUsers(users);
-      }
-      // Pre-cargar plan de test si no existe
-      if (!getUserData(testEmail)) {
-        const testUserData = {
-          edad: '30', sexo: 'Hombre', peso: '80', altura: '178',
-          complexion: 'Normal', enfermedad: 'No', lesion: 'No', alergia: 'No',
-          operacion: '', medicacion: '',
-          trabajo: 'Oficina', jornada: 'Sentado todo el día',
-          estres: 'Medio', sueno: '7-8 horas',
-          dieta: 'Como de todo', noComida: '', comidas: '3 veces', cocina: 'Casi siempre en casa',
-          objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
-          deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
-          nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio'
-        };
-        const testPlan = buildPlanFromData(testUserData);
-        saveUserData(testEmail, { userData: testUserData, plan: testPlan, savedAt: new Date().toISOString() });
-      }
-      // ===== FIN CUENTA DE TEST =====
+      await ensureTestAccount();
     } catch (e) {
       console.error('Error preparando la cuenta de test:', e);
     }
