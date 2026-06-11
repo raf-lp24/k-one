@@ -477,6 +477,14 @@ Otros usos de `var(--metal)`/`var(--metal-claro)` (navegación, hints de formula
 
 Verificado en preview: check-in semanal, bloques de comida en Nutrición, y secciones "El hierro no se forja solo" / "Tres pilares, un sistema" de la landing, todos con el texto descriptivo en blanco. Sin errores en consola. Cuenta de test restaurada al finalizar.
 
+### 42.5 Sección "Resultados reales": 20 opiniones + textos en blanco
+El usuario pidió ampliar la sección de testimonios de la landing (antes solo 3 tarjetas) a unas 20 opiniones que parecieran más reales, incluyendo estrellas de valoración, edad, plan contratado y resultado conseguido, además de arreglar el gris poco visible del subtítulo de la sección y del pie de cada tarjeta.
+
+- `.section-note` (subtítulo de cada sección, p. ej. "Personas que entrenan y comen mejor desde que usan K-One.") y `.testimonial-role` (línea bajo el nombre, p. ej. "34 años · Plan Gimnasio · -8 kg en 3 meses"): color `var(--metal-claro)`/`var(--metal)` → `var(--blanco)`. Como `.section-note` es una clase compartida, también mejora la legibilidad en "Tres pilares", "Cómo funciona", "Tu deporte, tu plan" y "Sin letra pequeña".
+- `testimonials-grid` ampliado de 3 a 20 tarjetas (`.testimonial-card`), cubriendo todos los tipos de plan (Gimnasio, Solo nutrición, Hyrox, Running, CrossFit, Casa/Calistenia, Combinación), distintas edades (22-55 años), valoraciones de 4 y 5 estrellas, y un resultado concreto por persona (pérdida de peso, ganancia muscular, tiempos de carrera, vuelta de lesiones, etc.). Cada `.testimonial-role` sigue el formato "{edad} años · {plan} · {resultado}".
+
+Verificado en preview: las 20 tarjetas se renderizan correctamente en el grid de 3 columnas, con estrellas, cita, avatar/nombre y la línea de edad/plan/resultado en blanco. Sin errores en consola. Cuenta de test restaurada al finalizar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
