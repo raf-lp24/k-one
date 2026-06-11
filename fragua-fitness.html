@@ -946,6 +946,108 @@
 
   .field select option { background: var(--carbon); }
 
+  /* SLIDERS (datos físicos) */
+  .field-slider-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .slider-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--brasa);
+    text-transform: none;
+  }
+
+  .field input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 24px;
+    background: transparent;
+    padding: 0;
+    border: none;
+  }
+
+  .field input[type="range"]:focus { border-color: transparent; }
+
+  .field input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: var(--humo);
+  }
+
+  .field input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--brasa);
+    margin-top: -8px;
+    cursor: pointer;
+    border: 3px solid var(--negro);
+  }
+
+  .field input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: var(--humo);
+  }
+
+  .field input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--brasa);
+    cursor: pointer;
+    border: 3px solid var(--negro);
+  }
+
+  /* PANEL DE FEEDBACK INMEDIATO (metabolismo basal estimado) */
+  .bmr-panel {
+    display: none;
+    margin: -8px 0 32px;
+    padding: 20px 24px;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-left: 3px solid var(--brasa);
+  }
+
+  .bmr-panel-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--brasa);
+    margin-bottom: 8px;
+  }
+
+  .bmr-panel-value {
+    font-size: 15px;
+    color: var(--blanco);
+    margin-bottom: 6px;
+  }
+
+  .bmr-panel-value strong {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--brasa);
+  }
+
+  .bmr-panel-note {
+    font-size: 12px;
+    color: var(--metal-claro);
+    line-height: 1.5;
+  }
+
+  /* CAMPOS CONDICIONALES (lógica if/then en bloque salud) */
+  .field-conditional {
+    margin-top: -8px;
+    padding-left: 16px;
+    border-left: 2px solid var(--humo);
+  }
+
   .radio-group, .checkbox-group {
     display: flex;
     flex-wrap: wrap;
@@ -2987,12 +3089,15 @@
         </div>
         <div class="form-grid">
           <div class="field">
-            <label>Edad</label>
-            <input type="number" id="edad" placeholder="28" min="14" max="80">
+            <div class="field-slider-row">
+              <label>Edad</label>
+              <span class="slider-value" id="edadVal">28</span>
+            </div>
+            <input type="range" id="edad" min="14" max="80" value="28" oninput="document.getElementById('edadVal').textContent=this.value; updateBmrPanel();">
           </div>
           <div class="field">
             <label>Sexo</label>
-            <select id="sexo">
+            <select id="sexo" onchange="updateBmrPanel()">
               <option value="">Selecciona</option>
               <option>Hombre</option>
               <option>Mujer</option>
@@ -3000,13 +3105,19 @@
             </select>
           </div>
           <div class="field">
-            <label>Peso actual (kg)</label>
-            <input type="number" id="peso" placeholder="75" min="30" max="250">
+            <div class="field-slider-row">
+              <label>Peso actual (kg)</label>
+              <span class="slider-value" id="pesoVal">75</span>
+            </div>
+            <input type="range" id="peso" min="40" max="180" value="75" oninput="document.getElementById('pesoVal').textContent=this.value; updateBmrPanel();">
             <span class="field-hint">Lo usamos para calcular tu metabolismo basal y ajustar las calorías de tu plan.</span>
           </div>
           <div class="field">
-            <label>Altura (cm)</label>
-            <input type="number" id="altura" placeholder="175" min="100" max="220">
+            <div class="field-slider-row">
+              <label>Altura (cm)</label>
+              <span class="slider-value" id="alturaVal">175</span>
+            </div>
+            <input type="range" id="altura" min="140" max="210" value="175" oninput="document.getElementById('alturaVal').textContent=this.value; updateBmrPanel();">
           </div>
         </div>
         <div class="field" style="margin-bottom:32px">
@@ -3018,6 +3129,11 @@
             <div class="radio-opt" onclick="selectRadio(this,'complexion')">Con algo de sobrepeso</div>
             <div class="radio-opt" onclick="selectRadio(this,'complexion')">Con sobrepeso</div>
           </div>
+        </div>
+        <div class="bmr-panel" id="bmrPanel">
+          <div class="bmr-panel-label">// Calculando con tus datos</div>
+          <div class="bmr-panel-value">Tu metabolismo basal estimado es de <strong id="bmrValue">—</strong> kcal/día</div>
+          <div class="bmr-panel-note">Es la energía que tu cuerpo necesita en reposo. Tu plan ajustará las calorías totales según tu actividad y tu objetivo.</div>
         </div>
         <div class="form-nav">
           <span class="form-nav-note">Campos obligatorios</span>
@@ -3036,33 +3152,45 @@
           <div class="field">
             <label>¿Tienes alguna enfermedad diagnosticada? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="enfermedad">
-              <div class="radio-opt" onclick="selectRadio(this,'enfermedad')">No</div>
-              <div class="radio-opt" onclick="selectRadio(this,'enfermedad')">Diabetes</div>
-              <div class="radio-opt" onclick="selectRadio(this,'enfermedad')">Hipertensión</div>
-              <div class="radio-opt" onclick="selectRadio(this,'enfermedad')">Problemas cardíacos</div>
-              <div class="radio-opt" onclick="selectRadio(this,'enfermedad')">Otra</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">No</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">Diabetes</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">Hipertensión</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">Problemas cardíacos</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">Otra</div>
             </div>
+          </div>
+          <div class="field field-conditional" id="enfermedadExtra" style="display:none">
+            <label>¿Cuál? <span class="optional">Opcional</span></label>
+            <input type="text" id="enfermedadOtra" placeholder="Cuéntanos qué enfermedad para adaptar el plan">
           </div>
           <div class="field">
             <label>¿Tienes alguna lesión activa ahora mismo? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="lesion">
-              <div class="radio-opt" onclick="selectRadio(this,'lesion')">No</div>
-              <div class="radio-opt" onclick="selectRadio(this,'lesion')">Rodilla</div>
-              <div class="radio-opt" onclick="selectRadio(this,'lesion')">Espalda</div>
-              <div class="radio-opt" onclick="selectRadio(this,'lesion')">Hombro</div>
-              <div class="radio-opt" onclick="selectRadio(this,'lesion')">Otra</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">No</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">Rodilla</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">Espalda</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">Hombro</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">Otra</div>
             </div>
             <span class="field-hint">Pedimos esto para evitar ejercicios que puedan agravar tu lesión y adaptar tu plan de forma segura.</span>
+          </div>
+          <div class="field field-conditional" id="lesionExtra" style="display:none">
+            <label>Cuéntanos más sobre esta lesión <span class="optional">Opcional</span></label>
+            <input type="text" id="lesionDetalle" placeholder="¿Desde cuándo? ¿Tienes diagnóstico médico?">
           </div>
           <div class="field">
             <label>¿Tienes alguna alergia alimentaria? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="alergia">
-              <div class="radio-opt" onclick="selectRadio(this,'alergia')">No</div>
-              <div class="radio-opt" onclick="selectRadio(this,'alergia')">Gluten</div>
-              <div class="radio-opt" onclick="selectRadio(this,'alergia')">Lactosa</div>
-              <div class="radio-opt" onclick="selectRadio(this,'alergia')">Frutos secos</div>
-              <div class="radio-opt" onclick="selectRadio(this,'alergia')">Otra</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">No</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">Gluten</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">Lactosa</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">Frutos secos</div>
+              <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">Otra</div>
             </div>
+          </div>
+          <div class="field field-conditional" id="alergiaExtra" style="display:none">
+            <label>¿Cuál? <span class="optional">Opcional</span></label>
+            <input type="text" id="alergiaOtra" placeholder="Cuéntanos a qué eres alérgico/a">
           </div>
           <div class="field">
             <label>¿Has sido operado de algo relevante? <span class="optional">Opcional</span></label>
@@ -3669,6 +3797,40 @@
     document.getElementById(group)?.classList.remove('error');
   }
 
+  // ===== FEEDBACK INMEDIATO: metabolismo basal estimado (Bloque 1) =====
+  // Fórmula de Mifflin-St Jeor. Se actualiza en vivo según edad/peso/altura/sexo.
+  function updateBmrPanel() {
+    const panel = document.getElementById('bmrPanel');
+    const sexo = document.getElementById('sexo').value;
+    if (!sexo) { panel.style.display = 'none'; return; }
+
+    const edad = parseFloat(document.getElementById('edad').value);
+    const peso = parseFloat(document.getElementById('peso').value);
+    const altura = parseFloat(document.getElementById('altura').value);
+
+    let bmr = 10 * peso + 6.25 * altura - 5 * edad;
+    bmr += sexo === 'Hombre' ? 5 : sexo === 'Mujer' ? -161 : -78;
+
+    document.getElementById('bmrValue').textContent = Math.round(bmr).toLocaleString('es-ES');
+    panel.style.display = 'block';
+  }
+
+  // ===== LÓGICA CONDICIONAL (Bloque 2: salud) =====
+  // Muestra campos adicionales solo cuando la respuesta lo requiere, para no
+  // saturar el formulario con preguntas que no aplican a todo el mundo.
+  function selectRadioConditional(el, group) {
+    selectRadio(el, group);
+    const selected = el.textContent.trim();
+    const wrapper = document.getElementById(group + 'Extra');
+    if (!wrapper) return;
+
+    let mostrar = false;
+    if (group === 'enfermedad' || group === 'alergia') mostrar = selected === 'Otra';
+    if (group === 'lesion') mostrar = selected !== 'No';
+
+    wrapper.style.display = mostrar ? 'flex' : 'none';
+  }
+
   // ===== VALIDACIÓN DE CAMPOS OBLIGATORIOS POR BLOQUE =====
   const requiredFieldsByBlock = {
     0: [
@@ -3765,6 +3927,18 @@
     currentBlock = 0;
     maxBlockReached = 0;
     document.querySelector('.form-block[data-block="0"]').classList.add('active');
+
+    // Reset de sliders, panel de feedback y campos condicionales
+    ['edad', 'peso', 'altura'].forEach(id => {
+      const input = document.getElementById(id);
+      input.value = input.defaultValue;
+      document.getElementById(id + 'Val').textContent = input.value;
+    });
+    document.getElementById('bmrPanel').style.display = 'none';
+    ['enfermedadExtra', 'lesionExtra', 'alergiaExtra'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+
     goTo('formulario');
     updateProgress();
     history.pushState({ screen: 'formulario', block: 0 }, '', '');
@@ -3829,8 +4003,11 @@
       altura: document.getElementById('altura')?.value || '',
       complexion: getRadio('complexion'),
       enfermedad: getRadio('enfermedad'),
+      enfermedadOtra: document.getElementById('enfermedadOtra')?.value || '',
       lesion: getRadio('lesion'),
+      lesionDetalle: document.getElementById('lesionDetalle')?.value || '',
       alergia: getRadio('alergia'),
+      alergiaOtra: document.getElementById('alergiaOtra')?.value || '',
       operacion: document.getElementById('operacion')?.value || '',
       medicacion: document.getElementById('medicacion')?.value || '',
       trabajo: document.getElementById('trabajo')?.value || '',

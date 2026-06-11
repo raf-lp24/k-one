@@ -305,6 +305,17 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 
 **Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
 
+### 33. Onboarding del formulario — Fase B (sliders visuales, feedback en vivo del metabolismo basal, lógica condicional en salud)
+Continuación del rediseño UX, "Fase B":
+- **Sliders visuales para datos físicos (Bloque 1 "Tu cuerpo")**: `edad`, `peso` y `altura` pasan de `<input type="number">` a `<input type="range">` con un valor en vivo junto a la etiqueta (`.slider-value`, en `var(--brasa)` y fuente Bebas Neue). Rangos: edad 14-80 (def. 28), peso 40-180 (def. 75), altura 140-210 (def. 175). Estilo de slider personalizado (`::-webkit-slider-thumb`/`::-moz-range-thumb`) con el círculo naranja de marca.
+- **Feedback inmediato — metabolismo basal estimado**: nuevo panel `.bmr-panel` (oculto hasta que se elige "Sexo") que muestra en vivo "Tu metabolismo basal estimado es de X kcal/día" usando la fórmula de Mifflin-St Jeor (`updateBmrPanel()`), recalculado con cada cambio de edad/peso/altura/sexo.
+- **Lógica condicional en Bloque 2 "Tu salud"**: nueva función `selectRadioConditional(el, group)`. Si se elige "Otra" en "¿Tienes alguna enfermedad diagnosticada?" o "¿Tienes alguna alergia alimentaria?", se despliega un campo de texto "¿Cuál?" (`enfermedadOtra`/`alergiaOtra`). Si en "¿Tienes alguna lesión activa ahora mismo?" se elige cualquier opción distinta de "No", se despliega "Cuéntanos más sobre esta lesión" (`lesionDetalle`). Estos campos se añadieron a `collectFormData()`. Estilo `.field-conditional` con borde izquierdo discreto para indicar que es una pregunta derivada.
+- `enterFormulario()` ahora resetea sliders, panel BMR y campos condicionales a su estado inicial al (re)entrar al formulario.
+
+Verificado en preview (escritorio y 375x812): los sliders se ven y actualizan correctamente, el panel de metabolismo basal aparece tras elegir sexo y calcula bien (28 años, 75kg, 175cm, hombre → 1709 kcal/día), y los campos condicionales de salud se muestran/ocultan según la respuesta.
+
+Pendiente (Fase C): pantalla de transición tipo "cruzando tus datos con tu historial..." y preselecciones inteligentes de macros según el objetivo elegido.
+
 ### 32. Onboarding del formulario — Fase A (sticky CTA, microcopy, "Paso X de 6" clicable, botón atrás)
 El usuario propuso un rediseño UX del formulario de registro (`#formulario`) con 10 ideas; se acordó implementar primero la "Fase A":
 - **Botón "Siguiente/Continuar" fijo en móvil**: en `max-width: 768px`, `.form-nav` pasa a `position: fixed; bottom: 0; left: 0; right: 0;` con fondo `var(--negro)` y borde superior. `.form-nav-note` ("Campos obligatorios") se oculta en móvil y `.btn-primary` usa `flex: 1` para ocupar el espacio. `.form-main` gana `padding-bottom: 110px` para que el contenido no quede tapado.
