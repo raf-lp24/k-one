@@ -305,6 +305,9 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 
 **Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
 
+### 30. Capitalización de `.price-period` en la sección de precios
+El usuario detectó que las etiquetas bajo el precio empezaban en minúscula: "mes de prueba", "al mes · cancela cuando quieras" (x2), "al año · equivale a 11,67€/mes · ahorras 40€". Se corrigieron a "Mes de prueba", "Al mes · cancela cuando quieras" y "Al año · equivale a...". Verificado en preview (escritorio).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
