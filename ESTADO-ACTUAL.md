@@ -305,6 +305,17 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 
 **Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
 
+### 32. Onboarding del formulario — Fase A (sticky CTA, microcopy, "Paso X de 6" clicable, botón atrás)
+El usuario propuso un rediseño UX del formulario de registro (`#formulario`) con 10 ideas; se acordó implementar primero la "Fase A":
+- **Botón "Siguiente/Continuar" fijo en móvil**: en `max-width: 768px`, `.form-nav` pasa a `position: fixed; bottom: 0; left: 0; right: 0;` con fondo `var(--negro)` y borde superior. `.form-nav-note` ("Campos obligatorios") se oculta en móvil y `.btn-primary` usa `flex: 1` para ocupar el espacio. `.form-main` gana `padding-bottom: 110px` para que el contenido no quede tapado.
+- **Microcopy gris bajo campos sensibles**: nueva clase `.field-hint` (12px, `var(--metal)`, cursiva). Añadida bajo "Peso actual (kg)" (Bloque 1), "¿Tienes alguna lesión activa...?" (Bloque 2) y bajo jornada laboral / nivel de estrés / horas de sueño (Bloque 3), explicando para qué se usa cada dato.
+- **Barra de progreso "Paso X de 6" + pasos clicables**: el `.progress-label` del sidebar (escritorio) ahora muestra "Paso X de 6" (antes "Progreso"). Como `.form-sidebar` está oculto en móvil, se añadió una nueva `.form-progress-mobile` (visible solo en `max-width: 768px`) al inicio de `.form-main` con su propio "Paso X de 6" + barra. Los `.form-step-item` del sidebar ahora son clicables (`onclick="goToBlock(i)"`) pero solo permiten saltar a bloques ya visitados (`maxBlockReached`), para corregir datos sin perder lo ya rellenado.
+- **Botón "atrás" del navegador/móvil retrocede un bloque**: nueva función `enterFormulario()` (sustituye las 3 llamadas a `goTo('formulario')`) que reinicia el formulario al bloque 0 y hace `history.pushState`. `nextBlock()`, `prevBlock()` y `goToBlock()` también hacen `pushState` con `{screen:'formulario', block:N}`. Un listener `popstate` global detecta estos estados y cambia de bloque sin recargar ni salir de la app.
+
+Verificado en preview (375x812 y escritorio): "Paso 1 de 6"/"Paso 2 de 6" se actualiza correctamente, el botón sticky se ve bien en móvil, el botón atrás del navegador retrocede de bloque 1 a bloque 0 sin salir del formulario, y el clic en "Tu salud" (paso ya visitado) navega correctamente mientras que saltar a "Tu entrenamiento" (no visitado) se bloquea.
+
+Pendiente (Fases B y C del rediseño, no implementadas aún): sliders/selectores visuales para datos físicos, lógica condicional if/then para lesiones, feedback inmediato (cálculo de metabolismo basal en vivo), pantalla de transición tipo "cruzando tus datos...", preselecciones inteligentes según objetivo.
+
 ### 30. Capitalización de `.price-period` en la sección de precios
 El usuario detectó que las etiquetas bajo el precio empezaban en minúscula: "mes de prueba", "al mes · cancela cuando quieras" (x2), "al año · equivale a 11,67€/mes · ahorras 40€". Se corrigieron a "Mes de prueba", "Al mes · cancela cuando quieras" y "Al año · equivale a...". Verificado en preview (escritorio).
 

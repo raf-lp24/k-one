@@ -812,6 +812,10 @@
     margin-top: 32px;
   }
 
+  .form-progress-mobile {
+    display: none;
+  }
+
   .progress-label {
     display: flex;
     justify-content: space-between;
@@ -897,6 +901,14 @@
     letter-spacing: 0;
     text-transform: none;
     margin-left: 6px;
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: var(--metal);
+    font-style: italic;
+    line-height: 1.5;
+    margin-top: -2px;
   }
 
   .field input,
@@ -2003,7 +2015,21 @@
     .pillars-grid { grid-template-columns: 1fr; }
     .form-layout { grid-template-columns: 1fr; }
     .form-sidebar { display: none; }
-    .form-main { padding: 40px 24px; }
+    .form-main { padding: 40px 24px 110px; }
+    .form-progress-mobile { display: block; margin-bottom: 40px; }
+    .form-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--negro);
+      padding: 14px 24px;
+      border-top: 1px solid var(--humo);
+      z-index: 50;
+      margin-top: 0;
+    }
+    .form-nav-note { display: none; }
+    .form-nav .btn-primary { flex: 1; text-align: center; }
     .dash-layout { grid-template-columns: 1fr; }
     .dash-sidebar {
       position: fixed;
@@ -2888,42 +2914,42 @@
     <aside class="form-sidebar">
       <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
       <nav class="form-steps-nav">
-        <div class="form-step-item active" data-block="0">
+        <div class="form-step-item active" data-block="0" onclick="goToBlock(0)">
           <div class="step-dot">1</div>
           <div>
             <div class="step-dot-label">Tu cuerpo</div>
             <div class="step-dot-sub">Datos físicos básicos</div>
           </div>
         </div>
-        <div class="form-step-item" data-block="1">
+        <div class="form-step-item" data-block="1" onclick="goToBlock(1)">
           <div class="step-dot">2</div>
           <div>
             <div class="step-dot-label">Tu salud</div>
             <div class="step-dot-sub">Lesiones y condiciones</div>
           </div>
         </div>
-        <div class="form-step-item" data-block="2">
+        <div class="form-step-item" data-block="2" onclick="goToBlock(2)">
           <div class="step-dot">3</div>
           <div>
             <div class="step-dot-label">Tu vida</div>
             <div class="step-dot-sub">Trabajo y rutinas</div>
           </div>
         </div>
-        <div class="form-step-item" data-block="3">
+        <div class="form-step-item" data-block="3" onclick="goToBlock(3)">
           <div class="step-dot">4</div>
           <div>
             <div class="step-dot-label">Tu alimentación</div>
             <div class="step-dot-sub">Gustos y restricciones</div>
           </div>
         </div>
-        <div class="form-step-item" data-block="4">
+        <div class="form-step-item" data-block="4" onclick="goToBlock(4)">
           <div class="step-dot">5</div>
           <div>
             <div class="step-dot-label">Tu objetivo</div>
             <div class="step-dot-sub">Qué quieres conseguir</div>
           </div>
         </div>
-        <div class="form-step-item" data-block="5">
+        <div class="form-step-item" data-block="5" onclick="goToBlock(5)">
           <div class="step-dot">6</div>
           <div>
             <div class="step-dot-label">Tu entrenamiento</div>
@@ -2933,7 +2959,7 @@
       </nav>
       <div class="form-progress">
         <div class="progress-label">
-          <span>Progreso</span>
+          <span id="progressStepLabel">Paso 1 de 6</span>
           <span id="progressPct">0%</span>
         </div>
         <div class="progress-bar">
@@ -2943,6 +2969,15 @@
     </aside>
 
     <main class="form-main">
+      <div class="form-progress-mobile">
+        <div class="progress-label">
+          <span id="progressStepLabelMobile">Paso 1 de 6</span>
+          <span id="progressPctMobile">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFillMobile" style="width:0%"></div>
+        </div>
+      </div>
       <!-- BLOQUE 1: CUERPO -->
       <div class="form-block active" data-block="0">
         <div class="form-block-header">
@@ -2967,6 +3002,7 @@
           <div class="field">
             <label>Peso actual (kg)</label>
             <input type="number" id="peso" placeholder="75" min="30" max="250">
+            <span class="field-hint">Lo usamos para calcular tu metabolismo basal y ajustar las calorías de tu plan.</span>
           </div>
           <div class="field">
             <label>Altura (cm)</label>
@@ -3016,6 +3052,7 @@
               <div class="radio-opt" onclick="selectRadio(this,'lesion')">Hombro</div>
               <div class="radio-opt" onclick="selectRadio(this,'lesion')">Otra</div>
             </div>
+            <span class="field-hint">Pedimos esto para evitar ejercicios que puedan agravar tu lesión y adaptar tu plan de forma segura.</span>
           </div>
           <div class="field">
             <label>¿Tienes alguna alergia alimentaria? <span class="optional">Obligatorio</span></label>
@@ -3062,6 +3099,7 @@
               <div class="radio-opt" onclick="selectRadio(this,'jornada')">De pie casi todo el día</div>
               <div class="radio-opt" onclick="selectRadio(this,'jornada')">Trabajo físico intenso</div>
             </div>
+            <span class="field-hint">Pedimos tu ritmo de vida para calcular el gasto calórico de tus días de descanso.</span>
           </div>
           <div class="field">
             <label>¿Cómo está tu nivel de estrés habitual? <span class="optional">Opcional</span></label>
@@ -3071,6 +3109,7 @@
               <div class="radio-opt" onclick="selectRadio(this,'estres')">Alto</div>
               <div class="radio-opt" onclick="selectRadio(this,'estres')">Muy alto</div>
             </div>
+            <span class="field-hint">El estrés influye en tu recuperación, así que ajustamos la intensidad del plan según este dato.</span>
           </div>
           <div class="field">
             <label>¿Cuántas horas duermes normalmente? <span class="optional">Opcional</span></label>
@@ -3080,6 +3119,7 @@
               <div class="radio-opt" onclick="selectRadio(this,'sueno')">7-8 horas</div>
               <div class="radio-opt" onclick="selectRadio(this,'sueno')">Más de 8h</div>
             </div>
+            <span class="field-hint">El descanso es clave para la recuperación muscular, lo tenemos en cuenta al planificar tu carga de entrenamiento.</span>
           </div>
         </div>
         <div class="form-nav">
@@ -3692,10 +3732,19 @@
     return true;
   }
 
+  let maxBlockReached = 0;
+
   function updateProgress() {
     const pct = Math.round((currentBlock / totalBlocks) * 100);
+    const stepLabel = `Paso ${currentBlock + 1} de ${totalBlocks}`;
+
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressStepLabel').textContent = stepLabel;
+
+    document.getElementById('progressFillMobile').style.width = pct + '%';
+    document.getElementById('progressPctMobile').textContent = pct + '%';
+    document.getElementById('progressStepLabelMobile').textContent = stepLabel;
 
     document.querySelectorAll('.form-step-item').forEach((item, i) => {
       item.classList.remove('active', 'done');
@@ -3709,6 +3758,28 @@
     return (document.querySelector('#tipoPlan .selected')?.textContent || '').includes('Solo nutrición');
   }
 
+  // Inicia (o reinicia) el formulario y deja un punto en el historial para que
+  // el botón "atrás" del navegador/móvil retroceda bloques en vez de salir.
+  function enterFormulario() {
+    document.querySelectorAll('.form-block').forEach(b => b.classList.remove('active'));
+    currentBlock = 0;
+    maxBlockReached = 0;
+    document.querySelector('.form-block[data-block="0"]').classList.add('active');
+    goTo('formulario');
+    updateProgress();
+    history.pushState({ screen: 'formulario', block: 0 }, '', '');
+  }
+
+  function goToBlock(target) {
+    if (target === currentBlock || target > maxBlockReached) return;
+    document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.remove('active');
+    currentBlock = target;
+    document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.add('active');
+    updateProgress();
+    window.scrollTo(0,0);
+    history.pushState({ screen: 'formulario', block: currentBlock }, '', '');
+  }
+
   function nextBlock() {
     if (!validateBlock(currentBlock)) return;
     if (currentBlock === 4 && esSoloDieta()) {
@@ -3718,9 +3789,11 @@
     if (currentBlock < totalBlocks - 1) {
       document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.remove('active');
       currentBlock++;
+      if (currentBlock > maxBlockReached) maxBlockReached = currentBlock;
       document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.add('active');
       updateProgress();
       window.scrollTo(0,0);
+      history.pushState({ screen: 'formulario', block: currentBlock }, '', '');
     }
   }
 
@@ -3731,8 +3804,21 @@
       document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.add('active');
       updateProgress();
       window.scrollTo(0,0);
+      history.pushState({ screen: 'formulario', block: currentBlock }, '', '');
     }
   }
+
+  // Botón "atrás" del navegador/móvil: si estamos en el formulario, retrocede
+  // un bloque en vez de salir de la página y perder los datos.
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.screen === 'formulario' && document.getElementById('formulario').classList.contains('active')) {
+      document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.remove('active');
+      currentBlock = e.state.block;
+      document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.add('active');
+      updateProgress();
+      window.scrollTo(0,0);
+    }
+  });
 
   function collectFormData() {
     const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || 'No especificado';
@@ -5516,7 +5602,7 @@
       loadUserDashboard(email);
       goTo('dashboard');
     } else {
-      goTo('formulario');
+      enterFormulario();
     }
   }
 
@@ -5566,7 +5652,7 @@
       loadUserDashboard(email);
       goTo('dashboard');
     } else {
-      goTo('formulario');
+      enterFormulario();
     }
   }
 
@@ -6118,7 +6204,7 @@
         loadUserDashboard(user.email);
         goTo('dashboard');
       } else {
-        goTo('formulario');
+        enterFormulario();
       }
     } else {
       goTo('landing');
