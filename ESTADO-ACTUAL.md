@@ -455,6 +455,14 @@ El usuario pidió que las etiquetas del nuevo contador de días restantes (punto
 
 Verificado en preview con la cuenta de test: la tarjeta "DÍAS RESTANTES / 30 / de tu plan actual" se ve visualmente idéntica en estilo a las tarjetas de la fila de estadísticas. Sin errores en consola.
 
+### 42.3 Texto de las stat-card en blanco
+El usuario consideró que el gris (`var(--metal)`) de las etiquetas (`.stat-card-label`: SEMANA, DÍAS ENTRENADOS, OBJETIVO, DEPORTE, DÍAS RESTANTES...) y subtextos (`.stat-card-sub`: de tu proceso, esta semana, tu meta, tu disciplina, kcal, gramos...) de las tarjetas de estadísticas se veía poco visible, y pidió pasarlos a blanco, ajustando el tamaño si era necesario.
+
+- `.stat-card-label`: color `var(--metal)` → `var(--blanco-puro)`, tamaño 10px → 11px (para compensar el mayor contraste).
+- `.stat-card-sub`: color `var(--metal)` → `var(--blanco-puro)`, tamaño 11px → 12px.
+
+Al ser clases compartidas, el cambio afecta a todas las stat-card del dashboard: la fila Semana/Días entrenados/Objetivo/Deporte y el contador de Días restantes en "Hoy", y la fila Calorías/Proteína/Carbohidratos/Grasas en "Nutrición". Verificado en preview en ambas secciones: las etiquetas y subtextos se ven en blanco y más legibles, manteniendo el número grande en naranja "brasa". Sin errores en consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
