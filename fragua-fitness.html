@@ -4202,11 +4202,33 @@
       ejerciciosTexto = day.detalle;
     }
     const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
-    const ejerciciosHTML = ejercicios.map(e => `· ${capitalizar(e)}`).join('<br>');
+
+    // En los días de gimnasio (split por grupo muscular) separamos los ejercicios
+    // en bloque de fuerza (series cortas, ≤6 reps), hipertrofia (resto) y core,
+    // igual que mostraba antes el detalle de "Hoy".
+    const gruposMusculares = ['Empuje', 'Tracción', 'Piernas', 'Hombros', 'Complemento'];
+    let bloquePrincipalHTML;
+    if (gruposMusculares.includes(day.etiqueta)) {
+      const fuerza = [], hipertrofia = [], core = [];
+      ejercicios.forEach(e => {
+        const m = e.match(/×\s*(\d+)/);
+        const reps = m ? parseInt(m[1], 10) : null;
+        if (/plancha|russian twist|abdomin/i.test(e)) core.push(e);
+        else if (reps !== null && reps <= 6) fuerza.push(e);
+        else hipertrofia.push(e);
+      });
+      const bloque = (titulo, lista) => lista.length
+        ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
+        : '';
+      bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Core', core)]
+        .filter(Boolean).join('<br><br>');
+    } else {
+      bloquePrincipalHTML = `<strong>Bloque principal</strong>${musculos ? ` · ${musculos}` : ''}<br>` +
+        ejercicios.map(e => `· ${capitalizar(e)}`).join('<br>');
+    }
 
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
-      `<strong>Bloque principal</strong>${musculos ? ` · ${musculos}` : ''}<br>` +
-      `${ejerciciosHTML}<br><br>` +
+      `${bloquePrincipalHTML}<br><br>` +
       `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
   }
 
