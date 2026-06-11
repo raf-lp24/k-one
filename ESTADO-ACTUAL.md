@@ -443,7 +443,7 @@ Verificado en preview con la cuenta de test en dos escenarios simulados: suscrip
 A petición del usuario, se mejoró la visibilidad de dos elementos del dashboard que quedaban demasiado discretos:
 
 - `.back-to-landing` ("← Volver al inicio"): pasa de `DM Mono` 11px gris a `Bebas Neue` 18px, color blanco con hover en "brasa" y un pequeño desplazamiento al pasar el ratón.
-- El contador de días restantes (`#diasRestantesPlan`/`#diasRestantesPlanLabel`, punto 42): ahora va dentro de una tarjeta (`background: var(--carbon)`, borde izquierdo de 3px en "brasa", padding), con el número en `Bebas Neue` 32px en color "brasa" y la etiqueta en `var(--metal-claro)`.
+- El contador de días restantes (`#diasRestantesPlan`/`#diasRestantesPlanLabel`, punto 42): ahora va dentro de una tarjeta (`background: var(--carbon)`, borde izquierdo de 3px en "brasa", padding), con el número en `Bebas Neue` 32px en color "brasa" y la etiqueta en `var(--blanco-puro)` y mayúsculas (`text-transform: uppercase`).
 
 Verificado en preview con la cuenta de test: ambos elementos se ven correctamente más grandes y destacados, sin errores en consola.
 
