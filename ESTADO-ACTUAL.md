@@ -463,6 +463,20 @@ El usuario consideró que el gris (`var(--metal)`) de las etiquetas (`.stat-card
 
 Al ser clases compartidas, el cambio afecta a todas las stat-card del dashboard: la fila Semana/Días entrenados/Objetivo/Deporte y el contador de Días restantes en "Hoy", y la fila Calorías/Proteína/Carbohidratos/Grasas en "Nutrición". Verificado en preview en ambas secciones: las etiquetas y subtextos se ven en blanco y más legibles, manteniendo el número grande en naranja "brasa". Sin errores en consola.
 
+### 42.4 Más textos grises a blanco (revisión general)
+El usuario aportó ejemplos adicionales de textos en gris que seguían viéndose poco visibles tras el cambio anterior: la descripción "por qué" de cada comida en Nutrición, el rango de semana y los botones de valoración del check-in semanal, las cifras de la sección "El hierro no se forja solo" de la landing, y las descripciones de "Tres pilares, un sistema" (Entrenamiento/Nutrición/Mentalidad).
+
+Cambios de color (de `var(--metal)`/`var(--metal-claro)` a `var(--blanco)`, sin tocar tamaños porque ya eran legibles):
+- `.meal-block-why` (texto "por qué" de cada comida, en cursiva, a la derecha de cada bloque de comida en Nutrición).
+- `.checkin-week` (rango de fechas "Semana del X al Y" en la cabecera de la tarjeta de check-in).
+- `.rating-btn` (texto de los botones de valoración 0-5/5+ y "Muy mal/Regular/Bien/Muy bien"; los estados hover/seleccionado ya eran blancos/naranjas y no cambian).
+- `.stat-label` (subtítulos de las cifras "30+ / 7 / 100%" en la sección "El hierro no se forja solo" de la landing).
+- `.pillar-desc` (descripciones de Entrenamiento/Nutrición/Mentalidad en "Tres pilares, un sistema").
+
+Otros usos de `var(--metal)`/`var(--metal-claro)` (navegación, hints de formulario, placeholders, estados hover, textos de apoyo en pantallas de login/registro) se dejaron sin cambios: son elementos de interfaz secundarios donde el contraste reducido es intencional, no contenido principal que el usuario deba leer.
+
+Verificado en preview: check-in semanal, bloques de comida en Nutrición, y secciones "El hierro no se forja solo" / "Tres pilares, un sistema" de la landing, todos con el texto descriptivo en blanco. Sin errores en consola. Cuenta de test restaurada al finalizar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
