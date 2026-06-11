@@ -250,6 +250,19 @@ Verificado en preview: meta tags, favicon, sección de testimonios (3 tarjetas) 
 
 Verificado en preview: badge visible y bien posicionado sobre la tarjeta "Mensual", sin errores en consola.
 
+### 24. Enlace "Volver al inicio" en el área de cliente
+- Nuevo `.back-to-landing` en `.dash-sidebar`, debajo del logo, en todas las secciones del dashboard. Llama a `goTo('landing')` (no cierra sesión).
+
+### 25. Elementos visuales en la landing (ilustraciones SVG propias)
+La landing era muy plana visualmente. Se han añadido gráficos SVG propios (sin imágenes externas/descargas) que siguen la paleta de marca (`--brasa`, `--metal`, `--humo`):
+- **Hero**: ilustración de barra con discos (`.hero-visual`) en la esquina superior derecha, semitransparente y rotada, oculta en móvil (`max-width: 768px`).
+- **Nueva sección "Tres pilares, un sistema"** (`#pillars`, entre el manifiesto y "Cómo funciona"): 3 tarjetas con icono SVG + título + descripción para Entrenamiento (mancuerna), Nutrición (plato) y Mentalidad (diana). En móvil pasa a 1 columna.
+- **"Cómo funciona"**: cada uno de los 4 pasos ahora tiene un icono SVG (perfil, documento/plan, calendario con check, cámara) encima del número de paso.
+
+Verificado en preview (desktop y móvil): iconos y barbell se renderizan correctamente, sin errores en consola.
+
+**Pendiente detectado (no corregido, fuera del alcance de este cambio)**: en móvil, `.landing-nav` es `position: fixed` con 6 enlaces que no caben en pantallas estrechas y se solapan con el contenido de debajo (hero, títulos de sección). Es un problema preexistente, agravado al añadir el enlace "Opiniones". Convendría un menú hamburguesa en móvil.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
