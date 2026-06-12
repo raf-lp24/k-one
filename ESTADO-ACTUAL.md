@@ -570,6 +570,21 @@ El usuario dio 3 sugerencias tras revisar la web: (1) mostrar visualmente cómo 
 
 Verificado en preview en escritorio (961px: mockup del teléfono de 290px de ancho dentro de la nueva sección, sin overflow propio; el único overflow horizontal detectado es el ya existente y esperado del carrusel de testimonios) y en móvil 375px (la sección colapsa a 1 columna con el mockup primero, el `.hybrid-callout` ocupa 327px sin desbordar, sin overflow horizontal adicional). Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing, sin datos de usuario).
 
+### 49. Reducción de texto en toda la landing (~30%)
+El usuario indicó que la página es muy larga (explicación del sistema, de la IA, deportes, testimonios, precios, CTA final) y que muchos usuarios no llegan al final, pidiendo reducir el texto entre un 25% y un 35%.
+
+- **Manifiesto** ("El hierro no se forja solo"): de 3 párrafos a 2, fusionando las ideas de acompañamiento semanal y de "entrenamiento, nutrición y mentalidad juntos" en el primero, y eliminando la redundancia del tercero.
+- **Pilar "Mentalidad"**: el texto ampliado en el punto 48 se recorta ligeramente (de ~320 a ~240 caracteres) manteniendo las 3 ideas clave (ajuste por check-in, hitos, mensaje diario) pero de forma más directa.
+- **"Tu semana, en el móvil"** (mockup): de 3 párrafos a 2, fusionando la descripción de ejercicios y comidas en uno solo.
+- **"Cómo funciona"**: los 4 textos de los pasos se acortan (~25-35% cada uno), eliminando repeticiones y palabras de relleno.
+- **"Cómo funciona la IA"**: las 3 descripciones se recortan significativamente (~30% cada una), manteniendo los conceptos clave (motor de reglas, criterios establecidos, límites/profesional sanitario).
+- **"Tu deporte, tu plan"**: el aviso de hibridación y el bloque "¿Solo buscas nutrición?" se acortan ligeramente (se elimina la pregunta retórica inicial en este último).
+- **Precios**: las descripciones de los planes Mensual, Trimestral, Anual y Solo nutrición se acortan, manteniendo el dato clave de cada uno.
+- **Testimonios**: de 20 a 10 tarjetas, conservando variedad de deportes (Gimnasio, Running, Hyrox, CrossFit, Solo nutrición, Combinación, Casa/Calistenia) y casos relevantes (alergias, lesiones, condición médica, edad).
+- **CTA final**: se fusionan las secciones `.philosophy` y `.lead-magnet` (antes dos secciones consecutivas con CTA) en una sola: la frase "Lo que se construye despacio no se rompe fácil" + botón "Empieza por 0,99€" + un formulario de email más discreto ("O déjanos tu email y te avisamos" / botón "Avísame") debajo. Se eliminó la sección `.lead-magnet` y su CSS específico (`.lead-magnet-title`, `.lead-magnet-sub`, etc.), conservando `.lead-magnet-form`/`.lead-magnet-note` reutilizados dentro de `.philosophy`.
+
+Verificado en preview en escritorio (10 testimonios en el carrusel, formulario de email dentro de la sección `.philosophy`, sección `.lead-magnet` ya no existe en el DOM) y en móvil 375px (formulario en columna, sin overflow horizontal adicional al ya existente del carrusel de testimonios). Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing, sin datos de usuario).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
