@@ -657,7 +657,8 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: var(--carbon);
+    background: rgba(20,20,20,0.85);
+    backdrop-filter: blur(3px);
     border: 1px solid var(--humo);
     color: var(--blanco);
     font-size: 22px;
@@ -2183,6 +2184,10 @@
 
   /* RESPONSIVE básico */
   @media (max-width: 768px) {
+    .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .section-title { font-size: 40px; }
+    .section-note { max-width: 100%; text-align: left; }
+    footer { flex-direction: column; align-items: flex-start; gap: 12px; text-align: left; }
     .manifesto { grid-template-columns: 1fr; gap: 40px; }
     .steps { grid-template-columns: 1fr 1fr; }
     .sports-grid { grid-template-columns: 1fr 1fr; }
@@ -2232,9 +2237,13 @@
     .stats-row { grid-template-columns: 1fr 1fr; }
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
-    .manifesto, .how, .sports, .pricing, .philosophy { padding: 80px 24px; }
+    .manifesto, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
     .nav-links { display: none; }
     .nav-toggle { display: flex; }
+  }
+
+  @media (max-width: 480px) {
+    .steps { grid-template-columns: 1fr; }
   }
 
   /* Scrollbar */

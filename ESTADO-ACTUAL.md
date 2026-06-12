@@ -496,6 +496,17 @@ Con 20 tarjetas, el grid de 3 columnas hacía la sección demasiado alta y "apre
 
 Verificado en preview en escritorio y móvil (375px): los botones avanzan/retroceden la fila de tarjetas un elemento cada vez con scroll suave, con difuminado en los bordes. Sin errores en consola. Cuenta de test restaurada al finalizar.
 
+### 42.7 Revisión general de errores de maquetación en móvil
+El usuario pidió revisar toda la web en móvil y escritorio buscando errores y comprobando que ambas vistas fueran coherentes. Recorriendo la landing completa en 375px se encontraron varios solapamientos de texto causados por reglas pensadas solo para escritorio:
+
+- `.section-header` usaba `display:flex; justify-content: space-between` con el título y el `.section-note` lado a lado; en móvil, los títulos largos (p. ej. "TRES PILARES, UN SISTEMA", "CÓMO FUNCIONA") ocupan varias líneas y el subtítulo de la derecha quedaba pisado encima del texto. Fix: en `@media (max-width: 768px)` ahora `.section-header` pasa a columna (`flex-direction: column`), `.section-note` ocupa el ancho completo y se alinea a la izquierda, y `.section-title` se reduce a 40px para que quepa en menos líneas.
+- `footer` (`display:flex; justify-content: space-between`) hacía que el logo "K-ONE" se partiera en dos líneas ("K-" / "ONE") y se solapara con el texto de copyright en móvil. Fix: en móvil el footer pasa a columna con los tres bloques apilados.
+- `.steps` (las 4 tarjetas de "Cómo funciona") forzaba 2 columnas incluso en móviles estrechos (375px), dejando columnas muy angostas con títulos partidos en 3 líneas. Fix: nueva regla `@media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }` para que cada paso ocupe el ancho completo.
+- Los botones del carrusel de opiniones (`.testimonials-nav`) en móvil quedaban como círculos opacos sobre el texto de la tarjeta. Se les dio fondo semitransparente con `backdrop-filter: blur(3px)` para que se note menos el recorte del texto debajo.
+- Se añadió `.testimonials` a la lista de secciones con padding reducido en móvil (`80px 24px`), igual que el resto de secciones de la landing.
+
+Verificado en preview recorriendo toda la landing en 375px (manifiesto, tres pilares, cómo funciona, tu deporte/tu plan, resultados reales, sin letra pequeña, CTA final y footer) y en escritorio (sin cambios visuales). También se revisó el dashboard completo (Hoy, Plan semanal, Nutrición, Check-in, Mi progreso, Notas y menú lateral móvil) con la cuenta de test: todo correcto, sin solapamientos ni errores de consola. Cuenta de test restaurada al finalizar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
