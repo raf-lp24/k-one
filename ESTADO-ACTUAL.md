@@ -550,6 +550,17 @@ Se revisó también el flujo del cuestionario y el dashboard: al elegir "Solo nu
 
 Verificado en preview en escritorio (4 tarjetas de deporte en una fila + bloque de nutrición separado debajo, con su propio borde y CTA) y en móvil 375px (4 tarjetas y el bloque de nutrición colapsan a 1 columna sin desbordar, ancho máximo 351px en viewport de 375px). Sin errores de consola. No requiere restaurar cuenta de test (no se modificaron datos de usuario).
 
+### 47. Nueva sección "Cómo funciona la IA" (transparencia y supervisión humana)
+El usuario pidió añadir validación/supervisión humana o, al menos, aclarar cómo funciona la IA y cómo se generan los planes, para ganar credibilidad. Se confirmó que K-One es un sistema basado en reglas (sin un profesional humano revisando cada plan individual), por lo que el texto debía ser honesto sobre esto y remitir a un profesional sanitario para casos médicos.
+
+- Nueva sección `<section class="pillars" id="transparencia">` entre "Cómo funciona" y "Tu deporte, tu plan", reutilizando los estilos ya existentes de `.pillars-grid`/`.pillar-card` (misma maquetación que "Tres pilares, un sistema").
+- Título "Cómo funciona la IA" / subtítulo "Transparencia sobre cómo se genera y se ajusta tu plan", con 3 tarjetas:
+  - **"No es una caja negra"**: explica que el plan lo genera un motor de reglas (progresión de cargas, volumen, macros), no una IA conversacional improvisando.
+  - **"Basado en criterios establecidos"**: la lógica sigue principios de entrenamiento/nutrición habituales (periodización, déficit/superávit calórico, macros) adaptados a los datos del usuario (edad, peso, objetivo, nivel, lesiones, alergias, disponibilidad).
+  - **"Sus límites"**: deja claro que K-One no sustituye a un médico ni a un dietista-nutricionista y remite a un profesional sanitario ante dudas o cambios importantes (refuerza el disclaimer ya existente en el footer).
+
+Verificado en preview en escritorio (3 tarjetas en una fila, debajo de "Cómo funciona" y encima de "Tu deporte, tu plan") y en móvil 375px (las 3 tarjetas se apilan en 1 columna sin desbordar). Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing, sin datos de usuario).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
