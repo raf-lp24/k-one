@@ -531,6 +531,14 @@ Tras una discusión sobre precios, se acordó: bajar el plan anual de 119,99€ 
 
 Verificado en preview en escritorio y móvil (375px): las 5 tarjetas de precios se muestran en una sola fila en escritorio (con el badge "Oferta del mes" en "Primer mes") y colapsan a 1 columna en móvil; en el modal "Cambiar tu plan", elegir "Solo nutrición" oculta las opciones "Trimestral" y "Anual" de periodicidad; `precioPlanActual` devuelve 35,99€/trimestre (≈12€/mes) para el plan completo trimestral; simulando fin del mes de prueba, el paywall muestra el selector de periodicidad y al confirmar el pago se guarda la periodicidad elegida y se actualiza el contador de días restantes. Sin errores de consola. Cuenta de test restaurada a su estado original.
 
+### 45. Mejora visual del mensaje de confianza del hero ("Pago seguro · Cancela cuando quieras · Sin permanencia")
+El usuario compartió una captura de la línea de confianza bajo los botones del hero y dijo que "no se ve bien" (texto pequeño, monoespaciado y en gris claro de baja legibilidad sobre el fondo oscuro).
+
+- `.hero-trust` ahora es un contenedor flex con 3 elementos en línea (uno por mensaje), cada uno con un icono SVG a juego con los ya usados en `.trust-bar` de la sección de precios (candado/check para "Pago seguro", círculo con aspa para "Cancela cuando quieras", candado abierto para "Sin permanencia"). Los iconos se colorean en `var(--brasa)` (naranja) y el texto pasa de `var(--metal-claro)` (gris, 12px) a `var(--blanco)` (casi blanco, 13px), con más espaciado (`gap`, `margin-top: 24px`).
+- En móvil los 3 elementos se apilan en columna gracias al `flex-wrap: wrap` ya existente, sin desbordar el ancho de pantalla.
+
+Verificado en preview en escritorio (3 elementos en fila, color de icono `rgb(232, 73, 15)` = `--brasa`, texto `rgb(240, 237, 232)` = `--blanco`) y en móvil 375px (los 3 elementos se apilan en columna sin desbordar). Sin errores de consola. No requiere restaurar cuenta de test (no se modificaron datos de usuario).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
