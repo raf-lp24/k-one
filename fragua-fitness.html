@@ -536,17 +536,17 @@
 
   .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 2px;
     margin-top: 64px;
-    max-width: 1160px;
+    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
   }
 
   .price-card {
     background: var(--carbon);
-    padding: 48px 40px;
+    padding: 40px 24px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -565,7 +565,7 @@
   .price-badge {
     position: absolute;
     top: 0;
-    right: 40px;
+    right: 24px;
     transform: translateY(-50%);
     background: var(--brasa);
     color: var(--blanco-puro);
@@ -3433,6 +3433,7 @@
     </div>
     <div class="pricing-cards">
       <div class="price-card">
+        <div class="price-badge">Oferta</div>
         <div class="price-tag">// Primer mes</div>
         <div class="price-amount">0,99€</div>
         <div class="price-period">Mes de prueba</div>
@@ -3449,8 +3450,8 @@
       </div>
       <div class="price-card">
         <div class="price-tag">// Trimestral</div>
-        <div class="price-amount">39,99€</div>
-        <div class="price-period">Cada 3 meses · Equivale a 13,33€/mes · Ahorras 5€</div>
+        <div class="price-amount">35,99€</div>
+        <div class="price-period">Cada 3 meses · Equivale a 12€/mes · Ahorras 9€</div>
         <p class="price-desc">Plan completo. Te comprometes con un trimestre de progreso real y aseguras tu precio.</p>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
@@ -3466,13 +3467,6 @@
         <div class="price-amount">6,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">¿No quieres entrenar de momento? Plan de alimentación 100% personalizado: adaptado a tus alergias, gustos y objetivo. Sin entrenamiento.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card">
-        <div class="price-tag">// Solo nutrición trimestral</div>
-        <div class="price-amount">18,99€</div>
-        <div class="price-period">Cada 3 meses · Equivale a 6,33€/mes · Ahorras 2€</div>
-        <p class="price-desc">Plan de alimentación 100% personalizado, asegurando tu precio durante un trimestre completo.</p>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
     </div>
@@ -5909,12 +5903,11 @@
   const PRECIOS = {
     'Plan completo: entrenamiento + nutrición': {
       mensual: { precio: '14,99€', periodo: 'mes', dias: 30, detalle: 'El plan completo cuesta 14,99€/mes a partir de tu próximo cobro.' },
-      trimestral: { precio: '39,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan completo trimestral cuesta 39,99€ cada 3 meses (≈13,33€/mes) a partir de tu próximo cobro.' },
+      trimestral: { precio: '35,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan completo trimestral cuesta 35,99€ cada 3 meses (≈12€/mes) a partir de tu próximo cobro.' },
       anual: { precio: '99,99€', periodo: 'año', dias: 365, detalle: 'El plan completo anual cuesta 99,99€/año (≈8,33€/mes) a partir de tu próximo cobro.' }
     },
     'Solo nutrición, sin entrenamiento': {
-      mensual: { precio: '6,99€', periodo: 'mes', dias: 30, detalle: 'El plan "Solo nutrición" cuesta 6,99€/mes a partir de tu próximo cobro.' },
-      trimestral: { precio: '18,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan "Solo nutrición" trimestral cuesta 18,99€ cada 3 meses (≈6,33€/mes) a partir de tu próximo cobro.' }
+      mensual: { precio: '6,99€', periodo: 'mes', dias: 30, detalle: 'El plan "Solo nutrición" cuesta 6,99€/mes a partir de tu próximo cobro.' }
     }
   };
 
@@ -5928,16 +5921,18 @@
     return texto.toLowerCase();
   }
 
-  // Oculta la opción "Anual" cuando el plan elegido es "Solo nutrición" (no tiene tarifa anual).
+  // Oculta "Trimestral" y "Anual" cuando el plan elegido es "Solo nutrición" (solo tiene tarifa mensual).
   function actualizarOpcionesPeriodicidad(tipoPlan, periodicidadGroupId) {
     const esSoloNutricion = (tipoPlan || '').includes('Solo nutrición');
-    const anualOpt = document.querySelector(`#${periodicidadGroupId} [data-valor="anual"]`);
-    if (!anualOpt) return;
-    anualOpt.style.display = esSoloNutricion ? 'none' : '';
-    if (esSoloNutricion && anualOpt.classList.contains('selected')) {
-      anualOpt.classList.remove('selected');
-      document.querySelector(`#${periodicidadGroupId} [data-valor="mensual"]`)?.classList.add('selected');
-    }
+    ['trimestral', 'anual'].forEach(valor => {
+      const opt = document.querySelector(`#${periodicidadGroupId} [data-valor="${valor}"]`);
+      if (!opt) return;
+      opt.style.display = esSoloNutricion ? 'none' : '';
+      if (esSoloNutricion && opt.classList.contains('selected')) {
+        opt.classList.remove('selected');
+        document.querySelector(`#${periodicidadGroupId} [data-valor="mensual"]`)?.classList.add('selected');
+      }
+    });
   }
 
   function precioPlanActual(tipoPlan, creadoISO, periodicidad) {
