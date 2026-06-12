@@ -657,6 +657,15 @@ El usuario compartió una captura desde su móvil mostrando el menú de escritor
 
 Verificado en preview en tres anchos: 375px (menú hamburguesa, precios en 1 columna, sin desbordamiento), 800-1024px (menú hamburguesa en vez del menú de escritorio desbordado, precios en 2 columnas, `scrollWidth === clientWidth` sin desbordamiento) y 1440px (menú de escritorio completo con "Entrar" primero, precios en 5 columnas). Orden de secciones confirmado por DOM: manifesto → pillars → app-preview → how → transparencia → sports → pricing → testimonials. Sin errores de consola. No requiere restaurar cuenta de test (solo contenido/estilos de la landing).
 
+### 57. Bloqueo del scroll horizontal de toda la página en móvil
+El usuario envió un vídeo grabado desde su móvil (sitio en producción, k-one-six.vercel.app) mostrando que tanto la landing como el dashboard se podían desplazar horizontalmente unos 15-20px, cortando el logo "K-ONE" y el texto del hero/título por el borde izquierdo, con una barra de scroll horizontal visible.
+
+- Las comprobaciones programáticas en el preview (375, 414, 800, 1024, 1440px) no detectaron ningún elemento que sobresaliera del viewport (`scrollWidth === clientWidth` en todos los casos), por lo que el origen exacto del pequeño desbordamiento en el dispositivo real no se pudo aislar con certeza.
+- Como red de seguridad, se añade `overflow-x: hidden` en `html, body` (y `width: 100%` en `body`): así, aunque algún elemento sobresalga ligeramente del viewport, la página ya no podrá desplazarse horizontalmente como conjunto. El carrusel de "Opiniones" (`.testimonials-track`) conserva su propio scroll horizontal interno (`overflow-x: auto`), que es intencional.
+
+Verificado en preview (375/414px): `overflowX` de `html`/`body` es `hidden`, `docScrollWidth === clientWidth`, y el carrusel de testimonios sigue teniendo `overflow-x: auto` con `scrollWidth > clientWidth` (sigue siendo desplazable). Sin errores de consola. No requiere restaurar cuenta de test (solo estilos globales).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
+- Para inspeccionar vídeos (p. ej. capturas de WhatsApp) sin ffmpeg/VLC instalados, se puede extraer un frame con PowerShell usando `System.Windows.Media.MediaPlayer` + `RenderTargetBitmap` dentro de un `DispatcherTimer`/`Dispatcher.Run()` (WPF, requiere hilo STA).
