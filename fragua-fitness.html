@@ -1754,38 +1754,64 @@
 
   .ejercicio-fila {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 8px 0;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
   }
   .ejercicio-fila:last-child { border-bottom: none; }
 
   .ejercicio-fila-texto { flex: 1; }
 
-  .ejercicio-fila-peso {
+  .ejercicio-fila-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .peso-stepper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--humo);
     flex-shrink: 0;
   }
 
-  .peso-input {
-    width: 64px;
+  .peso-btn {
+    width: 30px;
+    height: 32px;
     background: var(--acero);
-    border: 1px solid var(--humo);
-    color: var(--blanco);
-    padding: 7px 8px;
+    border: none;
+    color: var(--metal-claro);
+    font-size: 16px;
+    line-height: 1;
     font-family: 'Inter', sans-serif;
-    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .peso-btn:hover { background: var(--brasa); color: var(--blanco-puro); }
+  .peso-btn:active { background: var(--brasa-oscura); color: var(--blanco-puro); }
+
+  .peso-input {
+    width: 56px;
+    height: 32px;
+    background: var(--carbon);
+    border: none;
+    border-left: 1px solid var(--humo);
+    border-right: 1px solid var(--humo);
+    color: var(--blanco);
+    padding: 0 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
     outline: none;
-    transition: border-color 0.2s;
     -moz-appearance: textfield;
   }
-  .peso-input:focus { border-color: var(--brasa); }
-  .peso-input::placeholder { color: var(--metal); }
+  .peso-input::-webkit-outer-spin-button,
+  .peso-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .peso-input::placeholder { color: var(--metal); font-weight: 400; }
 
   .peso-unit {
     font-family: 'DM Mono', monospace;
@@ -1793,7 +1819,25 @@
     letter-spacing: 1px;
     color: var(--metal);
     text-transform: uppercase;
+    margin-left: 8px;
   }
+
+  /* MINI HISTORIAL (junto al stepper de cada ejercicio) */
+  .peso-mini-historial {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+  }
+  .peso-mini-historial:empty { display: none; }
+
+  .peso-bar-mini {
+    width: 5px;
+    min-height: 3px;
+    background: var(--humo);
+    border-radius: 1px 1px 0 0;
+  }
+  .peso-bar-mini:last-child { background: var(--brasa); }
 
   /* PROGRESIÓN DE PESOS (Mi progreso) */
   .peso-progreso-card {
@@ -4998,9 +5042,19 @@
     return entry ? entry.peso : null;
   }
 
+  // Genera las barras del mini-historial (versión pequeña de la de "Mi progreso")
+  // que acompaña al stepper de cada ejercicio.
+  function renderMiniHistorialHTML(historial) {
+    if (!historial || historial.length === 0) return '';
+    const max = Math.max(...historial.map(h => h.peso), 1);
+    return historial.slice(-6).map(h =>
+      `<div class="peso-bar-mini" style="height:${Math.max(15, Math.round((h.peso / max) * 100))}%" title="${h.fecha}: ${h.peso} kg"></div>`
+    ).join('');
+  }
+
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
-  // en una fila con el texto y un input de peso (kg) que recuerda el último valor
-  // guardado para ese ejercicio.
+  // en una fila con el texto, un stepper de peso (kg, con botones +/-) que recuerda
+  // el último valor guardado para ese ejercicio, y un mini-historial de registros previos.
   function renderEjercicioConPeso(texto, capitalizar) {
     const textoCap = capitalizar(texto);
     const match = textoCap.match(/^(.+?)(\s*\d+\s*[x×]\s*\S+)(.*)$/i);
@@ -5009,17 +5063,32 @@
     const nombre = match[1].trim();
     const resto = (match[2] + match[3]).trim();
     const key = normalizarEjercicio(nombre);
-    const guardado = getPesoEjercicio(key);
-    const valorAttr = guardado != null ? ` value="${guardado}"` : '';
+    const entry = userData.pesosEjercicios?.[key];
+    const valorAttr = entry?.peso != null ? ` value="${entry.peso}"` : '';
+    const miniHistorial = renderMiniHistorialHTML(entry?.historial);
 
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
-      <span class="ejercicio-fila-peso">
-        <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
-          data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onchange="guardarPesoEjercicio(this)">
-        <span class="peso-unit">kg</span>
-      </span>
+      <div class="ejercicio-fila-controls">
+        <div class="peso-stepper">
+          <button type="button" class="peso-btn" onclick="ajustarPeso(this,-2.5)" aria-label="Restar 2,5 kg">−</button>
+          <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
+            data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onchange="guardarPesoEjercicio(this)">
+          <button type="button" class="peso-btn" onclick="ajustarPeso(this,2.5)" aria-label="Sumar 2,5 kg">+</button>
+          <span class="peso-unit">kg</span>
+        </div>
+        <div class="peso-mini-historial" data-ejercicio="${key}">${miniHistorial}</div>
+      </div>
     </div>`;
+  }
+
+  // Botones +/- del stepper: ajustan el valor del input y guardan al instante
+  function ajustarPeso(btn, delta) {
+    const input = btn.parentElement.querySelector('.peso-input');
+    if (!input) return;
+    const actual = parseFloat(input.value) || 0;
+    input.value = Math.max(0, Math.round((actual + delta) * 10) / 10);
+    guardarPesoEjercicio(input);
   }
 
   function guardarPesoEjercicio(input) {
@@ -5043,8 +5112,12 @@
     }
 
     // Si el mismo ejercicio aparece en "Hoy" y en "Plan semanal", mantenerlos sincronizados
+    const historial = userData.pesosEjercicios[key]?.historial;
     document.querySelectorAll(`.peso-input[data-ejercicio="${key}"]`).forEach(el => {
       if (el !== input) el.value = input.value;
+    });
+    document.querySelectorAll(`.peso-mini-historial[data-ejercicio="${key}"]`).forEach(el => {
+      el.innerHTML = renderMiniHistorialHTML(historial);
     });
 
     const user = getCurrentUser();
