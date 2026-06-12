@@ -539,6 +539,17 @@ El usuario compartió una captura de la línea de confianza bajo los botones del
 
 Verificado en preview en escritorio (3 elementos en fila, color de icono `rgb(232, 73, 15)` = `--brasa`, texto `rgb(240, 237, 232)` = `--blanco`) y en móvil 375px (los 3 elementos se apilan en columna sin desbordar). Sin errores de consola. No requiere restaurar cuenta de test (no se modificaron datos de usuario).
 
+### 46. Separar "Solo nutrición" de las opciones de deporte en la sección "Tu deporte, tu plan"
+El usuario pidió corregir la categorización de la web: separar claramente las opciones de deporte de las de nutrición para evitar incoherencias en la interfaz. La sección `#sports` ("Tu deporte, tu plan") mostraba 5 tarjetas en una misma cuadrícula: 4 deportes reales (Gimnasio, Running, Hyrox, CrossFit) y, mezclada entre ellas, una tarjeta "Solo nutrición" — que no es un deporte, sino un tipo de plan sin entrenamiento, lo que resultaba incoherente bajo un título que habla de "deporte".
+
+- `.sports-grid` vuelve a `grid-template-columns: repeat(4, 1fr)` y ahora contiene únicamente las 4 tarjetas de deportes reales.
+- Se eliminó la tarjeta "Solo nutrición" de `.sports-grid` y se sustituyó por un bloque `.nutrition-callout` aparte, debajo de la cuadrícula de deportes: una franja con borde propio, icono 🥗, el título "¿Solo buscas nutrición?", la descripción del plan y un botón "Ver plan de nutrición →" que lleva al formulario. Visualmente queda claro que es una categoría distinta (plan de alimentación), no un deporte más.
+- Nuevo breakpoint en `@media (max-width: 480px)`: `.sports-grid` pasa a 1 columna y `.nutrition-callout` centra su contenido, igual que ya se hacía con `.steps`.
+
+Se revisó también el flujo del cuestionario y el dashboard: al elegir "Solo nutrición, sin entrenamiento" en "¿Qué tipo de plan quieres?", el bloque "Tu entrenamiento" (deporte, días, lugar, etc.) ya se salta automáticamente (`esSoloDieta()` en `nextBlock()`) y el dashboard abre directamente en "Nutrición" ocultando "Hoy", "Plan semanal" y "Check-in" — esa parte ya estaba correctamente separada y no requirió cambios.
+
+Verificado en preview en escritorio (4 tarjetas de deporte en una fila + bloque de nutrición separado debajo, con su propio borde y CTA) y en móvil 375px (4 tarjetas y el bloque de nutrición colapsan a 1 columna sin desbordar, ancho máximo 351px en viewport de 375px). Sin errores de consola. No requiere restaurar cuenta de test (no se modificaron datos de usuario).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

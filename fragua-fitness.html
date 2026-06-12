@@ -500,7 +500,7 @@
 
   .sports-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 2px;
     margin-top: 64px;
   }
@@ -528,6 +528,32 @@
   }
 
   .sport-desc {
+    font-size: 14px;
+    color: var(--metal-claro);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* NUTRICIÓN: bloque separado de las opciones de deporte */
+  .nutrition-callout {
+    margin-top: 24px;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .nutrition-callout-icon { font-size: 36px; flex-shrink: 0; }
+  .nutrition-callout-text { flex: 1; min-width: 240px; }
+  .nutrition-callout-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .nutrition-callout-desc {
     font-size: 14px;
     color: var(--metal-claro);
     line-height: 1.6;
@@ -2363,6 +2389,8 @@
 
   @media (max-width: 480px) {
     .steps { grid-template-columns: 1fr; }
+    .sports-grid { grid-template-columns: 1fr; }
+    .nutrition-callout { padding: 24px; text-align: center; justify-content: center; }
   }
 
   /* Scrollbar */
@@ -3220,11 +3248,14 @@
         <div class="sport-name">CrossFit</div>
         <p class="sport-desc">Alta intensidad, movimientos funcionales. Mejora tu acondicionamiento general.</p>
       </div>
-      <div class="sport-card">
-        <span class="sport-icon" aria-hidden="true">🥗</span>
-        <div class="sport-name">Solo nutrición</div>
-        <p class="sport-desc">¿No quieres entrenar (de momento)? Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo.</p>
+    </div>
+    <div class="nutrition-callout">
+      <span class="nutrition-callout-icon" aria-hidden="true">🥗</span>
+      <div class="nutrition-callout-text">
+        <div class="nutrition-callout-title">¿Solo buscas nutrición?</div>
+        <p class="nutrition-callout-desc">¿No quieres entrenar (de momento)? Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 6,99€/mes.</p>
       </div>
+      <button class="btn-ghost" onclick="goTo('bienvenida')">Ver plan de nutrición →</button>
     </div>
   </section>
 
