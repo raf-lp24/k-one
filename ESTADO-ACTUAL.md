@@ -485,16 +485,16 @@ El usuario pidió ampliar la sección de testimonios de la landing (antes solo 3
 
 Verificado en preview: las 20 tarjetas se renderizan correctamente en el grid de 3 columnas, con estrellas, cita, avatar/nombre y la línea de edad/plan/resultado en blanco. Sin errores en consola. Cuenta de test restaurada al finalizar.
 
-### 42.6 Sección "Resultados reales": carrusel horizontal automático
-Con 20 tarjetas, el grid de 3 columnas hacía la sección demasiado alta y "apretada". El usuario pidió un carrusel horizontal que se desplace solo hacia la derecha, para poder ver todas las opiniones sin que ocupen tanto espacio vertical.
+### 42.6 Sección "Resultados reales": carrusel horizontal con botones de navegación
+Con 20 tarjetas, el grid de 3 columnas hacía la sección demasiado alta y "apretada". Primero se probó un carrusel con desplazamiento automático continuo, pero el usuario prefirió un carrusel con botones de flecha a izquierda y derecha para que cada persona avance a su ritmo y pueda leer tranquilamente.
 
-- `.testimonials-grid` (grid de 3 columnas) sustituido por `.testimonials-carousel` (contenedor `overflow: hidden` con un degradado de máscara en los bordes izquierdo/derecho para que las tarjetas aparezcan/desaparezcan de forma suave) + `.testimonials-track` (fila flex sin saltos de línea, animada con `@keyframes testimonials-scroll` en bucle infinito de `translateX(-50%)` a `translateX(0)`, es decir, desplazamiento continuo hacia la derecha).
-- `.testimonial-card` ahora tiene ancho fijo (380px en escritorio, 280px en móvil vía la media query) y `flex-shrink: 0` para que las 20 tarjetas se coloquen en fila en lugar de en columnas.
-- En `window.onload`, el contenido de `.testimonials-track` se duplica por JS (`innerHTML += innerHTML`, 20 → 40 tarjetas) para que el bucle de la animación sea perfectamente cíclico y no se note el salto.
-- Al pasar el ratón por encima del carrusel (`.testimonials-track:hover`), la animación se pausa para poder leer una tarjeta tranquilamente.
-- Se quitó la regla de móvil que forzaba `.testimonials-grid` a una columna (ya no aplica con el nuevo layout en fila).
+- `.testimonials-grid` (grid de 3 columnas) sustituido por `.testimonials-carousel` (contenedor relativo) + `.testimonials-track` (fila flex con `overflow-x: auto`, `scroll-behavior: smooth`, sin barra de scroll visible, y un degradado de máscara en los bordes izquierdo/derecho).
+- `.testimonial-card` ahora tiene ancho fijo (380px en escritorio, 280px en móvil) y `flex-shrink: 0` para que las 20 tarjetas se coloquen en fila en lugar de en columnas.
+- Dos botones circulares `.testimonials-nav` (`‹` y `›`) superpuestos a izquierda/derecha del carrusel, con `onclick="scrollTestimonials(±1)"`; en hover se ponen en color "brasa". En móvil son más pequeños y se acercan al borde.
+- Nueva función `scrollTestimonials(direction)` (junto a `scrollToSection`): desplaza `.testimonials-track` un ancho de tarjeta (+gap) en la dirección indicada con `scrollBy({ behavior: 'smooth' })`.
+- Se quitó la regla de móvil que forzaba `.testimonials-grid` a una columna (ya no aplica con el nuevo layout en fila) y se añadieron los tamaños/posiciones de los botones para móvil.
 
-Verificado en preview en escritorio y móvil (375px): el carrusel se desplaza automáticamente hacia la derecha mostrando las 20 tarjetas en bucle, con difuminado en los bordes, y se pausa al pasar el ratón. Sin errores en consola. Cuenta de test restaurada al finalizar.
+Verificado en preview en escritorio y móvil (375px): los botones avanzan/retroceden la fila de tarjetas un elemento cada vez con scroll suave, con difuminado en los bordes. Sin errores en consola. Cuenta de test restaurada al finalizar.
 
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.

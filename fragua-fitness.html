@@ -623,26 +623,22 @@
 
   .testimonials-carousel {
     margin-top: 64px;
-    overflow: hidden;
     position: relative;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   }
 
   .testimonials-track {
     display: flex;
     gap: 2px;
-    width: max-content;
-    animation: testimonials-scroll 100s linear infinite;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
   }
 
-  .testimonials-track:hover {
-    animation-play-state: paused;
-  }
-
-  @keyframes testimonials-scroll {
-    from { transform: translateX(-50%); }
-    to { transform: translateX(0); }
+  .testimonials-track::-webkit-scrollbar {
+    display: none;
   }
 
   .testimonial-card {
@@ -653,6 +649,35 @@
     flex-shrink: 0;
     width: 380px;
   }
+
+  .testimonials-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    color: var(--blanco);
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background .2s, color .2s, border-color .2s;
+  }
+
+  .testimonials-nav:hover {
+    background: var(--brasa);
+    color: var(--blanco-puro);
+    border-color: var(--brasa);
+  }
+
+  .testimonials-nav--prev { left: -24px; }
+  .testimonials-nav--next { right: -24px; }
 
   .testimonial-stars {
     color: var(--brasa);
@@ -2163,6 +2188,9 @@
     .sports-grid { grid-template-columns: 1fr 1fr; }
     .pricing-cards { grid-template-columns: 1fr; }
     .testimonial-card { width: 280px; padding: 32px 24px; }
+    .testimonials-nav { width: 36px; height: 36px; font-size: 18px; }
+    .testimonials-nav--prev { left: -8px; }
+    .testimonials-nav--next { right: -8px; }
     .trust-bar { gap: 16px 28px; }
     .hero-visual { display: none; }
     .pillars-grid { grid-template-columns: 1fr; }
@@ -3033,6 +3061,8 @@
       <p class="section-note">Personas que entrenan y comen mejor desde que usan K-One.</p>
     </div>
     <div class="testimonials-carousel">
+    <button class="testimonials-nav testimonials-nav--prev" onclick="scrollTestimonials(-1)" aria-label="Ver opiniones anteriores">‹</button>
+    <button class="testimonials-nav testimonials-nav--next" onclick="scrollTestimonials(1)" aria-label="Ver más opiniones">›</button>
     <div class="testimonials-track">
       <div class="testimonial-card">
         <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
@@ -4129,6 +4159,14 @@
 
   function scrollToSection(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function scrollTestimonials(direction) {
+    const track = document.querySelector('.testimonials-track');
+    if (!track) return;
+    const card = track.querySelector('.testimonial-card');
+    const step = card ? card.offsetWidth + 2 : 380;
+    track.scrollBy({ left: direction * step, behavior: 'smooth' });
   }
 
   function toggleMobileMenu() {
@@ -6928,13 +6966,6 @@
   // ===== INIT =====
   window.onload = async () => {
     updateProgress();
-
-    // Duplica las tarjetas del carrusel de opiniones para que el scroll
-    // automático sea un bucle infinito sin saltos visibles.
-    const testimonialsTrack = document.querySelector('.testimonials-track');
-    if (testimonialsTrack) {
-      testimonialsTrack.innerHTML += testimonialsTrack.innerHTML;
-    }
     document.getElementById('login-pass')?.addEventListener('keydown', e => { if(e.key==='Enter') login(); });
     document.getElementById('reg-pass2')?.addEventListener('keydown', e => { if(e.key==='Enter') registrar(); });
 
