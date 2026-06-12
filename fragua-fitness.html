@@ -125,6 +125,7 @@
   .nav-toggle.active span:nth-child(2) { opacity: 0; }
   .nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+
   .mobile-menu {
     display: flex;
     flex-direction: column;
@@ -2584,6 +2585,13 @@
     text-transform: uppercase;
   }
 
+  /* NAV: pasa a hamburguesa antes de que los enlaces se queden sin sitio */
+  @media (max-width: 1024px) {
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .pricing-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
   /* RESPONSIVE básico */
   @media (max-width: 768px) {
     .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -2649,8 +2657,6 @@
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
     .manifesto, .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
-    .nav-links { display: none; }
-    .nav-toggle { display: flex; }
   }
 
   @media (max-width: 480px) {
@@ -3415,82 +3421,6 @@
     </div>
   </section>
 
-  <section class="pricing" id="pricing">
-    <div class="section-header">
-      <h2 class="section-title">Sin letra pequeña</h2>
-      <p class="section-note">Precios claros. Cancela cuando quieras. Sin sorpresas.</p>
-    </div>
-    <div class="pricing-cards">
-      <div class="price-card">
-        <div class="price-badge">Oferta del mes</div>
-        <div class="price-tag">// Empieza aquí</div>
-        <div class="price-amount">0,99€</div>
-        <div class="price-period">Mes de prueba</div>
-        <p class="price-desc">Acceso completo a todo. Sin compromiso. Para que lo pruebes sin riesgo.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card featured">
-        <div class="price-badge">Más popular</div>
-        <div class="price-tag">// Mensual</div>
-        <div class="price-amount">14,99€</div>
-        <div class="price-period">Al mes · Cancela cuando quieras</div>
-        <p class="price-desc">Entrenamiento, nutrición, check-in semanal y seguimiento de progreso.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card">
-        <div class="price-tag">// Trimestral</div>
-        <div class="price-amount">35,99€</div>
-        <div class="price-period">Cada 3 meses · Equivale a 12€/mes · Ahorras 9€</div>
-        <p class="price-desc">Plan completo. Un trimestre de progreso real, con tu precio asegurado.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card">
-        <div class="price-tag">// Anual</div>
-        <div class="price-amount">99,99€</div>
-        <div class="price-period">Al año · Equivale a 8,33€/mes · Ahorras 80€</div>
-        <p class="price-desc">Todo lo mismo, para quien se compromete con su proceso a largo plazo.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card">
-        <div class="price-tag">// Solo nutrición</div>
-        <div class="price-amount">6,99€</div>
-        <div class="price-period">Al mes · Cancela cuando quieras</div>
-        <p class="price-desc">Plan de alimentación 100% personalizado: adaptado a tus alergias, gustos y objetivo. Sin entrenamiento.</p>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-    </div>
-    <div class="trust-bar">
-      <span>
-        <span class="trust-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/>
-            <path d="M8.5 12 L11 14.5 L15.5 9.5"/>
-          </svg>
-        </span>
-        Pago seguro
-      </span>
-      <span>
-        <span class="trust-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-          </svg>
-        </span>
-        Cancela cuando quieras
-      </span>
-      <span>
-        <span class="trust-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="11" width="14" height="9" rx="2"/>
-            <path d="M8 11 V7 a4 4 0 0 1 8 0 v4"/>
-          </svg>
-        </span>
-        Tus datos nunca se comparten
-      </span>
-    </div>
-  </section>
-
   <section class="pillars" id="pillars">
     <div class="section-header">
       <h2 class="section-title">Tres pilares, un sistema</h2>
@@ -3724,6 +3654,82 @@
         <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 6,99€/mes.</p>
       </div>
       <button class="btn-ghost" onclick="goTo('bienvenida')">Ver plan de nutrición →</button>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="section-header">
+      <h2 class="section-title">Sin letra pequeña</h2>
+      <p class="section-note">Precios claros. Cancela cuando quieras. Sin sorpresas.</p>
+    </div>
+    <div class="pricing-cards">
+      <div class="price-card">
+        <div class="price-badge">Oferta del mes</div>
+        <div class="price-tag">// Empieza aquí</div>
+        <div class="price-amount">0,99€</div>
+        <div class="price-period">Mes de prueba</div>
+        <p class="price-desc">Acceso completo a todo. Sin compromiso. Para que lo pruebes sin riesgo.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Más popular</div>
+        <div class="price-tag">// Mensual</div>
+        <div class="price-amount">14,99€</div>
+        <div class="price-period">Al mes · Cancela cuando quieras</div>
+        <p class="price-desc">Entrenamiento, nutrición, check-in semanal y seguimiento de progreso.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tag">// Trimestral</div>
+        <div class="price-amount">35,99€</div>
+        <div class="price-period">Cada 3 meses · Equivale a 12€/mes · Ahorras 9€</div>
+        <p class="price-desc">Plan completo. Un trimestre de progreso real, con tu precio asegurado.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tag">// Anual</div>
+        <div class="price-amount">99,99€</div>
+        <div class="price-period">Al año · Equivale a 8,33€/mes · Ahorras 80€</div>
+        <p class="price-desc">Todo lo mismo, para quien se compromete con su proceso a largo plazo.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tag">// Solo nutrición</div>
+        <div class="price-amount">6,99€</div>
+        <div class="price-period">Al mes · Cancela cuando quieras</div>
+        <p class="price-desc">Plan de alimentación 100% personalizado: adaptado a tus alergias, gustos y objetivo. Sin entrenamiento.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+    </div>
+    <div class="trust-bar">
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/>
+            <path d="M8.5 12 L11 14.5 L15.5 9.5"/>
+          </svg>
+        </span>
+        Pago seguro
+      </span>
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+          </svg>
+        </span>
+        Cancela cuando quieras
+      </span>
+      <span>
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="9" rx="2"/>
+            <path d="M8 11 V7 a4 4 0 0 1 8 0 v4"/>
+          </svg>
+        </span>
+        Tus datos nunca se comparten
+      </span>
     </div>
   </section>
 
