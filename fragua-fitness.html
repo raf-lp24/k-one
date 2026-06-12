@@ -536,7 +536,7 @@
 
   .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2px;
     margin-top: 64px;
     max-width: 1160px;
@@ -2861,8 +2861,14 @@
 <div class="modal-overlay" id="modalPaywall">
   <div class="modal-box">
     <div class="modal-title">Tu mes de prueba ha terminado</div>
-    <p class="modal-desc">Has disfrutado de K-One por 0,99€ durante tu primer mes. Para seguir con tu plan, tu seguimiento y el resto de funciones, continúa tu suscripción.</p>
-    <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">14,99€</span><span style="font-size:14px;color:var(--metal)">/mes</span></div>
+    <p class="modal-desc">Has disfrutado de K-One por 0,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
+    <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
+      <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
+      <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Trimestral</div>
+      <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Anual</div>
+    </div>
+    <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">14,99€</span><span style="font-size:14px;color:var(--metal)" id="paywallPeriodo">/mes</span></div>
+    <p class="field-hint" id="paywallDetalle" style="margin-bottom:8px"></p>
     <button class="btn-primary" style="width:100%;padding:14px;margin-top:16px" onclick="confirmarPagoSuscripcion()">Continuar con K-One →</button>
     <p class="field-hint" style="text-align:center;margin-top:14px">Pago seguro · Cancela cuando quieras · Sin permanencia</p>
     <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="logout()">Cerrar sesión</p>
@@ -2879,8 +2885,16 @@
       <div class="field">
         <label>¿Qué tipo de plan quieres?</label>
         <div class="radio-group" id="cp-tipoPlan">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarPrecioCambioPlan();">Plan completo: entrenamiento + nutrición</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarPrecioCambioPlan();">Solo nutrición, sin entrenamiento</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Plan completo: entrenamiento + nutrición</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Solo nutrición, sin entrenamiento</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Con qué periodicidad quieres pagar?</label>
+        <div class="radio-group" id="cp-periodicidad">
+          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
+          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
+          <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Anual</div>
         </div>
         <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
@@ -3004,7 +3018,7 @@
         <em>atajos.</em><br>
         Hay pasos.
       </h1>
-      <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 4,99€/mes.</p>
+      <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 6,99€/mes.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
         <button class="btn-ghost" onclick="demoAccess()">Ver demo</button>
@@ -3434,17 +3448,31 @@
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
       <div class="price-card">
+        <div class="price-tag">// Trimestral</div>
+        <div class="price-amount">39,99€</div>
+        <div class="price-period">Cada 3 meses · Equivale a 13,33€/mes · Ahorras 5€</div>
+        <p class="price-desc">Plan completo. Te comprometes con un trimestre de progreso real y aseguras tu precio.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card">
         <div class="price-tag">// Anual</div>
-        <div class="price-amount">119,99€</div>
-        <div class="price-period">Al año · Equivale a 10€/mes · Ahorras 60€</div>
+        <div class="price-amount">99,99€</div>
+        <div class="price-period">Al año · Equivale a 8,33€/mes · Ahorras 80€</div>
         <p class="price-desc">Todo lo mismo. Eliges el anual si te quieres comprometer con tu proceso. Sin obligación.</p>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
       <div class="price-card">
         <div class="price-tag">// Solo nutrición</div>
-        <div class="price-amount">4,99€</div>
+        <div class="price-amount">6,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">¿No quieres entrenar de momento? Plan de alimentación 100% personalizado: adaptado a tus alergias, gustos y objetivo. Sin entrenamiento.</p>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tag">// Solo nutrición trimestral</div>
+        <div class="price-amount">18,99€</div>
+        <div class="price-period">Cada 3 meses · Equivale a 6,33€/mes · Ahorras 2€</div>
+        <p class="price-desc">Plan de alimentación 100% personalizado, asegurando tu precio durante un trimestre completo.</p>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
     </div>
@@ -5876,24 +5904,55 @@
 
   // ===== REGLA DE PRECIOS =====
   // Primer mes desde el registro (DIAS_PRUEBA): 0,99€ siempre, sea cual sea el plan.
-  // Pasado el primer mes: Plan completo 14,99€/mes (o 119,99€/año), Solo nutrición 4,99€/mes.
+  // Pasado el primer mes: precio según tipo de plan y periodicidad elegida (ver PRECIOS).
   // Esta regla aplica tanto al paywall (fin de mes de prueba) como al cambio de plan desde "Hoy".
-  function precioPlanActual(tipoPlan, creadoISO) {
+  const PRECIOS = {
+    'Plan completo: entrenamiento + nutrición': {
+      mensual: { precio: '14,99€', periodo: 'mes', dias: 30, detalle: 'El plan completo cuesta 14,99€/mes a partir de tu próximo cobro.' },
+      trimestral: { precio: '39,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan completo trimestral cuesta 39,99€ cada 3 meses (≈13,33€/mes) a partir de tu próximo cobro.' },
+      anual: { precio: '99,99€', periodo: 'año', dias: 365, detalle: 'El plan completo anual cuesta 99,99€/año (≈8,33€/mes) a partir de tu próximo cobro.' }
+    },
+    'Solo nutrición, sin entrenamiento': {
+      mensual: { precio: '6,99€', periodo: 'mes', dias: 30, detalle: 'El plan "Solo nutrición" cuesta 6,99€/mes a partir de tu próximo cobro.' },
+      trimestral: { precio: '18,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan "Solo nutrición" trimestral cuesta 18,99€ cada 3 meses (≈6,33€/mes) a partir de tu próximo cobro.' }
+    }
+  };
+
+  function preciosPlan(tipoPlan) {
+    return PRECIOS[tipoPlan] || PRECIOS['Plan completo: entrenamiento + nutrición'];
+  }
+
+  // Convierte el texto de un radio de periodicidad ("Mensual"/"Trimestral"/"Anual") en su clave.
+  function valorPeriodicidad(groupId) {
+    const texto = document.querySelector(`#${groupId} .selected`)?.textContent?.trim() || 'Mensual';
+    return texto.toLowerCase();
+  }
+
+  // Oculta la opción "Anual" cuando el plan elegido es "Solo nutrición" (no tiene tarifa anual).
+  function actualizarOpcionesPeriodicidad(tipoPlan, periodicidadGroupId) {
     const esSoloNutricion = (tipoPlan || '').includes('Solo nutrición');
+    const anualOpt = document.querySelector(`#${periodicidadGroupId} [data-valor="anual"]`);
+    if (!anualOpt) return;
+    anualOpt.style.display = esSoloNutricion ? 'none' : '';
+    if (esSoloNutricion && anualOpt.classList.contains('selected')) {
+      anualOpt.classList.remove('selected');
+      document.querySelector(`#${periodicidadGroupId} [data-valor="mensual"]`)?.classList.add('selected');
+    }
+  }
+
+  function precioPlanActual(tipoPlan, creadoISO, periodicidad) {
     const dias = creadoISO ? (Date.now() - new Date(creadoISO).getTime()) / (1000 * 60 * 60 * 24) : Infinity;
     if (dias <= DIAS_PRUEBA) {
       return { precio: '0,99€', detalle: 'Sigues en tu primer mes: 0,99€, sea cual sea el plan que elijas.' };
     }
-    if (esSoloNutricion) {
-      return { precio: '4,99€/mes', detalle: 'El plan "Solo nutrición" cuesta 4,99€/mes a partir de tu próximo cobro.' };
-    }
-    return { precio: '14,99€/mes', detalle: 'El plan completo cuesta 14,99€/mes (o 119,99€/año con el plan anual) a partir de tu próximo cobro.' };
+    const opcion = preciosPlan(tipoPlan)[periodicidad || 'mensual'] || preciosPlan(tipoPlan).mensual;
+    return { precio: `${opcion.precio}/${opcion.periodo}`, detalle: opcion.detalle };
   }
 
   // ===== CONTADOR DE DÍAS RESTANTES DEL PLAN ACTUAL =====
-  // Mientras está en el mes de prueba, cuenta desde el registro (creado).
-  // Con la suscripción activa, cuenta desde el último pago (fechaPago), en ciclos de 30 días
-  // (el plan anual aún no se gestiona de forma distinta porque no hay Stripe).
+  // Mientras está en el mes de prueba, cuenta desde el registro (creado), ciclo de DIAS_PRUEBA días.
+  // Con la suscripción activa, cuenta desde el último pago (fechaPago), en ciclos según la
+  // periodicidad elegida (mensual = 30, trimestral = 90, anual = 365).
   function actualizarDiasRestantesPlan() {
     const el = document.getElementById('diasRestantesPlan');
     const label = document.getElementById('diasRestantesPlanLabel');
@@ -5907,7 +5966,8 @@
     }
     const enPrueba = !u.suscripcionActiva;
     const refFecha = enPrueba ? u.creado : (u.fechaPago || u.creado);
-    const periodo = DIAS_PRUEBA;
+    const opcionPlan = preciosPlan(userData.tipoPlan);
+    const periodo = enPrueba ? DIAS_PRUEBA : (opcionPlan[userData.periodicidad || 'mensual'] || opcionPlan.mensual).dias;
     const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / (1000 * 60 * 60 * 24);
     const restantes = Math.max(0, Math.ceil(periodo - (diasTranscurridos % periodo)));
     el.textContent = restantes;
@@ -5916,15 +5976,19 @@
 
   function actualizarPrecioCambioPlan() {
     const tipoPlan = document.querySelector('#cp-tipoPlan .selected')?.textContent?.trim() || '';
+    const periodicidad = valorPeriodicidad('cp-periodicidad');
     const user = getCurrentUser();
     const creado = user ? getUsers()[user.email]?.creado : null;
     const el = document.getElementById('cpPrecioInfo');
-    if (el) el.textContent = precioPlanActual(tipoPlan, creado).detalle;
+    if (el) el.textContent = precioPlanActual(tipoPlan, creado, periodicidad).detalle;
   }
 
   function abrirModalCambiarPlan() {
     enfoqueMacrosManualCambio = false;
     preseleccionarRadio('cp-tipoPlan', userData.tipoPlan || 'Plan completo: entrenamiento + nutrición');
+    const periodicidadTexto = (userData.periodicidad || 'mensual');
+    preseleccionarRadio('cp-periodicidad', periodicidadTexto.charAt(0).toUpperCase() + periodicidadTexto.slice(1));
+    actualizarOpcionesPeriodicidad(userData.tipoPlan || 'Plan completo: entrenamiento + nutrición', 'cp-periodicidad');
     preseleccionarRadio('cp-objetivo', userData.objetivo);
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
@@ -5952,6 +6016,7 @@
   function guardarCambioPlan() {
     const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
     const nuevoTipoPlan = getRadio('cp-tipoPlan');
+    const nuevaPeriodicidad = valorPeriodicidad('cp-periodicidad');
     const nuevoObjetivo = getRadio('cp-objetivo');
     const nuevoEnfoque = getRadio('cp-enfoqueMacros');
     const nuevoDeporte = getRadio('cp-deporte');
@@ -5966,6 +6031,7 @@
     }
 
     userData.tipoPlan = nuevoTipoPlan;
+    userData.periodicidad = nuevaPeriodicidad;
     userData.objetivo = nuevoObjetivo;
     userData.enfoqueMacros = nuevoEnfoque || userData.enfoqueMacros;
     userData.deporte = nuevoDeporte;
@@ -6845,19 +6911,40 @@
     modal.classList.toggle('visible', !activo);
     if (!activo) {
       const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
-      const precioEl = document.getElementById('paywallPrecio');
-      if (precioEl) precioEl.textContent = tipoPlan.includes('Solo nutrición') ? '4,99€' : '14,99€';
+      const periodicidad = getUserData(email)?.userData?.periodicidad || 'mensual';
+      actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
+      preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
+      actualizarPrecioPaywall();
     }
+  }
+  function actualizarPrecioPaywall() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const tipoPlan = getUserData(user.email)?.userData?.tipoPlan || '';
+    const periodicidad = valorPeriodicidad('pw-periodicidad');
+    const opcion = preciosPlan(tipoPlan)[periodicidad] || preciosPlan(tipoPlan).mensual;
+    const precioEl = document.getElementById('paywallPrecio');
+    const periodoEl = document.getElementById('paywallPeriodo');
+    const detalleEl = document.getElementById('paywallDetalle');
+    if (precioEl) precioEl.textContent = opcion.precio;
+    if (periodoEl) periodoEl.textContent = '/' + opcion.periodo;
+    if (detalleEl) detalleEl.textContent = opcion.detalle;
   }
   function confirmarPagoSuscripcion() {
     const user = getCurrentUser();
     if (!user) return;
     const users = getUsers();
     if (!users[user.email]) return;
+    const periodicidad = valorPeriodicidad('pw-periodicidad');
     users[user.email].suscripcionActiva = true;
     users[user.email].fechaPago = new Date().toISOString();
     saveUsers(users);
+    userData.periodicidad = periodicidad;
+    if (user.email !== 'demo@fragua.es') {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
     document.getElementById('modalPaywall').classList.remove('visible');
+    actualizarDiasRestantesPlan();
     showToast('Pago confirmado. ¡Bienvenido/a de nuevo a K-One!');
   }
 
