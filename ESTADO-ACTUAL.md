@@ -665,6 +665,14 @@ El usuario envió un vídeo grabado desde su móvil (sitio en producción, k-one
 
 Verificado en preview (375/414px): `overflowX` de `html`/`body` es `hidden`, `docScrollWidth === clientWidth`, y el carrusel de testimonios sigue teniendo `overflow-x: auto` con `scrollWidth > clientWidth` (sigue siendo desplazable). Sin errores de consola. No requiere restaurar cuenta de test (solo estilos globales).
 
+### 58. Corregido el zoom automático de iOS que dejaba la web "desencuadrada" en el móvil
+El usuario envió varias capturas/vídeos desde su iPhone donde toda la web (landing y dashboard) aparecía ampliada y cortada por los bordes (logo y botón de menú cortados, texto saliéndose de pantalla), obligando a desplazarse lateralmente. La causa raíz identificada: **Safari en iOS hace zoom automático al tocar cualquier campo de texto cuya letra sea menor de 16px**, y como K-One es una SPA (una sola página que nunca se recarga), ese zoom se quedaba fijo para siempre tras tocar el email/contraseña del login, el cuestionario o el input de peso — dejando todo "desencuadrado".
+
+- **Viewport meta**: de `width=device-width, initial-scale=1.0` a `width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover`. `maximum-scale=1.0` impide el zoom automático al enfocar campos (desde iOS 10 el pellizco manual del usuario sigue funcionando, solo se bloquea el zoom automático).
+- **Campos a 16px en táctil**: dentro de `@media (max-width: 1024px)`, regla global `input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }` — ataca la causa de raíz: con 16px o más, iOS nunca dispara el zoom. Afecta a login/registro (email, contraseña), cuestionario (`.field input/select/textarea`, 14px), stepper de peso (`.peso-input`, 14px) y formulario de email del CTA final (`.lead-magnet-form input`, 14px). En escritorio (>1024px) se mantienen los tamaños originales.
+
+Verificado en preview a 375px: campos de login, `.peso-input` (el stepper sigue cabiendo, fila de 295px en viewport de 375px) y formulario de email a 16px, sin desbordamiento (`scrollWidth === clientWidth`); a 1440px los campos mantienen 14px. Sin errores de consola. Cuenta de test restaurada tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

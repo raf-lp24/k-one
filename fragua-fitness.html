@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>K-ONE — Un paso cada vez</title>
 <meta name="description" content="K-ONE genera tu plan de entrenamiento y nutrición personalizado con IA, y lo adapta cada semana según tu progreso. Gimnasio, running, Hyrox, CrossFit o solo nutrición. Empieza por 0,99€.">
 <meta property="og:type" content="website">
@@ -2593,6 +2593,11 @@
     .nav-links { display: none; }
     .nav-toggle { display: flex; }
     .pricing-cards { grid-template-columns: repeat(2, 1fr); }
+    /* iOS hace zoom automático (y permanente, al ser una SPA) al tocar
+       cualquier campo con letra menor de 16px — esto lo evita de raíz */
+    input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea { font-size: 16px !important; }
   }
 
   /* RESPONSIVE básico */
