@@ -594,6 +594,17 @@ El usuario compartió capturas de "← Volver a la web", "← Volver", "¿Olvida
 
 Verificado en preview en escritorio (961px) y móvil (375px) en las pantallas "bienvenida", "registro" y "login". Sin errores de consola. No requiere restaurar cuenta de test (solo estilos, sin datos de usuario).
 
+### 51. Registro de pesos por ejercicio, sincronizado entre "Hoy" y "Plan semanal", con progresión en "Mi progreso"
+El usuario pidió poder anotar el peso con el que entrena cada ejercicio directamente en el dashboard, que ese registro se vea también en el plan semanal, y que al repetir el mismo ejercicio más adelante se recuerde automáticamente el último peso usado, para facilitar ver la progresión.
+
+- **`formatearSesion(day)`** (usada tanto para "Entrenamiento de hoy" como para cada día de "Plan semanal"): los ejercicios del "Bloque de fuerza" y "Bloque de hipertrofia" (los que tienen series×reps con carga) ahora se renderizan como filas (`.ejercicio-fila`) con un input numérico de peso (`.peso-input`, en kg) al lado. Los bloques de "Acondicionamiento" y "Core" (distancia/tiempo/peso corporal) no cambian.
+- **`normalizarEjercicio(nombre)`**: genera una clave estable (minúsculas, sin acentos) a partir del nombre del ejercicio (p. ej. "Press banca" → "press banca"), usada para identificar el mismo ejercicio aunque aparezca en distintos días/semanas.
+- **`getPesoEjercicio(key)` / `guardarPesoEjercicio(input)`**: al cambiar un input de peso, se guarda en `userData.pesosEjercicios[key] = { nombre, peso, fecha, historial: [{fecha, peso}, ...] }` (una entrada por día, sin duplicados) y se persiste con `saveUserData`. Si el mismo ejercicio aparece en varias filas visibles (p. ej. "Hoy" y "Plan semanal" a la vez), todos los inputs con esa clave se sincronizan al instante. La próxima vez que aparezca ese ejercicio (otro día, otra semana), el input se precarga con el último peso guardado.
+- **Nueva sección "Progresión de pesos"** en "Mi progreso" (`#pesosProgresoList`, función `renderPesosProgreso`): una tarjeta por ejercicio registrado, con el peso actual, la diferencia respecto al primer registro ("+12.5 kg desde tu primer registro") y un mini-gráfico de barras (`.peso-bar`) con el historial de los últimos registros (la barra más reciente resaltada en `var(--brasa)`).
+- Nuevas clases CSS: `.ejercicios-peso-list`, `.ejercicio-fila`, `.ejercicio-fila-texto`, `.ejercicio-fila-peso`, `.peso-input`, `.peso-unit`, `.peso-progreso-card`, `.peso-progreso-nombre`, `.peso-progreso-actual`, `.peso-progreso-diff`, `.peso-progreso-bars`, `.peso-bar`.
+
+Verificado en preview con la cuenta de test: al introducir 60 kg en "Press banca" desde "Hoy", se guarda en `userData.pesosEjercicios`, el mismo input aparece precargado con 60 en "Plan semanal", y la tarjeta "Press banca · 60 kg" aparece en "Progresión de pesos" dentro de "Mi progreso". Probado también con un plan de CrossFit (bloques tipo WOD/AMRAP): el input de peso solo se añade al ejercicio con barra (p. ej. "Sentadilla trasera con barra"), no a ejercicios de acondicionamiento/core. Verificado en escritorio y móvil (375px, sin overflow). Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

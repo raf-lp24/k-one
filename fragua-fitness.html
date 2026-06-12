@@ -1745,6 +1745,105 @@
     text-transform: uppercase;
   }
 
+  /* REGISTRO DE PESOS POR EJERCICIO */
+  .ejercicios-peso-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+  }
+
+  .ejercicio-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .ejercicio-fila:last-child { border-bottom: none; }
+
+  .ejercicio-fila-texto { flex: 1; }
+
+  .ejercicio-fila-peso {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .peso-input {
+    width: 64px;
+    background: var(--acero);
+    border: 1px solid var(--humo);
+    color: var(--blanco);
+    padding: 7px 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .peso-input:focus { border-color: var(--brasa); }
+  .peso-input::placeholder { color: var(--metal); }
+
+  .peso-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--metal);
+    text-transform: uppercase;
+  }
+
+  /* PROGRESIÓN DE PESOS (Mi progreso) */
+  .peso-progreso-card {
+    background: var(--carbon);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+  }
+
+  .peso-progreso-nombre {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .peso-progreso-actual {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--brasa);
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  .peso-progreso-diff {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--metal);
+    margin-top: 4px;
+  }
+  .peso-progreso-diff.up { color: var(--brasa); }
+
+  .peso-progreso-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .peso-bar {
+    width: 10px;
+    min-height: 6px;
+    background: var(--humo);
+    border-radius: 2px 2px 0 0;
+  }
+  .peso-bar:last-child { background: var(--brasa); }
+
   .week-day-rest-msg { font-style: italic; opacity: 0.7; align-self: center; font-size: 13px; color: var(--metal); }
 
   .week-today-badge {
@@ -4424,6 +4523,11 @@
         </div>
 
         <div class="progress-section">
+          <div class="progress-title">Progresión de pesos</div>
+          <div id="pesosProgresoList"></div>
+        </div>
+
+        <div class="progress-section">
           <div class="progress-title">Hitos conseguidos</div>
           <div class="milestones" id="milestonesList"></div>
         </div>
@@ -4879,6 +4983,78 @@
 
   // Construye el bloque "Calentamiento / Bloque principal / Vuelta a la calma" a partir de
   // un día de `semana` (mismo dato para "Hoy" y para "Plan semanal" → mismo contenido).
+  // ===== REGISTRO DE PESOS POR EJERCICIO =====
+  // Normaliza un nombre de ejercicio (sin acentos, minúsculas) para usarlo
+  // como clave estable y poder recordar el último peso usado.
+  function normalizarEjercicio(nombre) {
+    return nombre
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .trim();
+  }
+
+  function getPesoEjercicio(key) {
+    const entry = userData.pesosEjercicios?.[key];
+    return entry ? entry.peso : null;
+  }
+
+  // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
+  // en una fila con el texto y un input de peso (kg) que recuerda el último valor
+  // guardado para ese ejercicio.
+  function renderEjercicioConPeso(texto, capitalizar) {
+    const textoCap = capitalizar(texto);
+    const match = textoCap.match(/^(.+?)(\s*\d+\s*[x×]\s*\S+)(.*)$/i);
+    if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${textoCap}</span></div>`;
+
+    const nombre = match[1].trim();
+    const resto = (match[2] + match[3]).trim();
+    const key = normalizarEjercicio(nombre);
+    const guardado = getPesoEjercicio(key);
+    const valorAttr = guardado != null ? ` value="${guardado}"` : '';
+
+    return `<div class="ejercicio-fila">
+      <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
+      <span class="ejercicio-fila-peso">
+        <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
+          data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onchange="guardarPesoEjercicio(this)">
+        <span class="peso-unit">kg</span>
+      </span>
+    </div>`;
+  }
+
+  function guardarPesoEjercicio(input) {
+    const key = input.dataset.ejercicio;
+    if (!key) return;
+    const nombre = input.dataset.nombre || key;
+    const valor = parseFloat(input.value);
+    if (!userData.pesosEjercicios) userData.pesosEjercicios = {};
+
+    if (isNaN(valor) || valor <= 0) {
+      delete userData.pesosEjercicios[key];
+    } else {
+      const hoy = getFechaHoyISO();
+      const entry = userData.pesosEjercicios[key] || { historial: [] };
+      entry.nombre = nombre;
+      entry.peso = valor;
+      entry.fecha = hoy;
+      entry.historial = (entry.historial || []).filter(h => h.fecha !== hoy);
+      entry.historial.push({ fecha: hoy, peso: valor });
+      userData.pesosEjercicios[key] = entry;
+    }
+
+    // Si el mismo ejercicio aparece en "Hoy" y en "Plan semanal", mantenerlos sincronizados
+    document.querySelectorAll(`.peso-input[data-ejercicio="${key}"]`).forEach(el => {
+      if (el !== input) el.value = input.value;
+    });
+
+    const user = getCurrentUser();
+    if (user && user.email !== 'demo@fragua.es') {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+
+    renderPesosProgreso();
+  }
+
   function formatearSesion(day) {
     if (!day || day.tipo === 'Descanso' || !day.detalle) return '';
     const extras = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
@@ -4912,7 +5088,12 @@
     const bloque = (titulo, lista) => lista.length
       ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
       : '';
-    const bloquePrincipalHTML = [bloque('Bloque de fuerza', fuerza), bloque('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
+    // Fuerza e hipertrofia llevan además un campo para registrar el peso usado,
+    // que recuerda el último valor guardado para ese ejercicio
+    const bloqueConPeso = (titulo, lista) => lista.length
+      ? `<strong>${titulo}</strong><div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`
+      : '';
+    const bloquePrincipalHTML = [bloqueConPeso('Bloque de fuerza', fuerza), bloqueConPeso('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
       .filter(Boolean).join('<br><br>');
 
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
@@ -5942,6 +6123,43 @@
   function renderProgresoSection() {
     renderFotosProgreso();
     renderHitos();
+    renderPesosProgreso();
+  }
+
+  // ===== PROGRESO: PESOS REGISTRADOS POR EJERCICIO =====
+  function renderPesosProgreso() {
+    const cont = document.getElementById('pesosProgresoList');
+    if (!cont) return;
+    const pesos = userData.pesosEjercicios || {};
+    const entries = Object.values(pesos).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+    if (entries.length === 0) {
+      cont.innerHTML = '<div class="notes-empty">Aún no has registrado ningún peso. Apunta el peso con el que entrenas en "Hoy" o en "Plan semanal" y aquí verás tu progresión.</div>';
+      return;
+    }
+
+    cont.innerHTML = entries.map(e => {
+      const hist = e.historial || [];
+      const max = Math.max(...hist.map(h => h.peso), 1);
+      const barras = hist.slice(-8).map(h =>
+        `<div class="peso-bar" style="height:${Math.max(8, Math.round((h.peso / max) * 100))}%" title="${h.fecha}: ${h.peso} kg"></div>`
+      ).join('');
+      const primero = hist[0]?.peso;
+      let diffHTML = '';
+      if (primero != null && hist.length > 1) {
+        const diff = Math.round((e.peso - primero) * 100) / 100;
+        diffHTML = `<div class="peso-progreso-diff ${diff >= 0 ? 'up' : ''}">${diff >= 0 ? '+' : ''}${diff} kg desde tu primer registro</div>`;
+      }
+      return `
+        <div class="peso-progreso-card">
+          <div class="peso-progreso-info">
+            <div class="peso-progreso-nombre">${e.nombre}</div>
+            <div class="peso-progreso-actual">${e.peso} kg</div>
+            ${diffHTML}
+          </div>
+          <div class="peso-progreso-bars">${barras}</div>
+        </div>`;
+    }).join('');
   }
 
   // ===== NOTAS / AGENDA =====
