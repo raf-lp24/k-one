@@ -409,6 +409,124 @@
     margin: 0 auto;
   }
 
+  /* APP PREVIEW (mockup de la interfaz) */
+  .app-preview {
+    padding: 120px 40px;
+    border-top: 1px solid var(--humo);
+  }
+
+  .app-preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .app-preview-visual {
+    display: flex;
+    justify-content: center;
+  }
+
+  .phone-frame {
+    width: 290px;
+    border: 8px solid var(--acero);
+    border-radius: 36px;
+    background: var(--negro);
+    padding: 16px 14px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  .phone-notch {
+    width: 80px;
+    height: 18px;
+    background: var(--acero);
+    border-radius: 0 0 12px 12px;
+    margin: 0 auto 12px;
+  }
+
+  .phone-screen {
+    background: var(--carbon);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mock-card {
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .mock-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--brasa);
+    margin-bottom: 10px;
+  }
+
+  .mock-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--blanco);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--humo);
+    font-weight: 300;
+  }
+  .mock-row:last-of-type { border-bottom: none; }
+
+  .mock-macros {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--humo);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--metal-claro);
+  }
+
+  .mock-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 70px;
+    margin-top: 4px;
+  }
+
+  .mock-bar {
+    flex: 1;
+    background: var(--humo);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+  }
+  .mock-bar--active { background: var(--brasa); }
+
+  .mock-bar span {
+    position: absolute;
+    bottom: -16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9px;
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .mock-chart-label {
+    margin-top: 22px;
+    font-size: 11px;
+    color: var(--metal-claro);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+  }
+
   /* HOW IT WORKS */
   .how {
     padding: 120px 40px;
@@ -554,6 +672,32 @@
     margin-bottom: 6px;
   }
   .nutrition-callout-desc {
+    font-size: 14px;
+    color: var(--metal-claro);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* HIBRIDACIÓN: aviso de que las disciplinas se pueden combinar */
+  .hybrid-callout {
+    margin-bottom: 24px;
+    background: var(--carbon);
+    border: 1px solid var(--brasa-oscura);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .hybrid-callout-icon { font-size: 36px; flex-shrink: 0; }
+  .hybrid-callout-text { flex: 1; min-width: 240px; }
+  .hybrid-callout-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .hybrid-callout-desc {
     font-size: 14px;
     color: var(--metal-claro);
     line-height: 1.6;
@@ -2334,6 +2478,8 @@
     .section-note { max-width: 100%; text-align: left; }
     footer { flex-direction: column; align-items: flex-start; gap: 12px; text-align: left; }
     .manifesto { grid-template-columns: 1fr; gap: 40px; }
+    .app-preview-grid { grid-template-columns: 1fr; gap: 40px; }
+    .app-preview-visual { order: -1; }
     .steps { grid-template-columns: 1fr 1fr; }
     .sports-grid { grid-template-columns: 1fr 1fr; }
     .pricing-cards { grid-template-columns: 1fr; }
@@ -2382,7 +2528,7 @@
     .stats-row { grid-template-columns: 1fr 1fr; }
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
-    .manifesto, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
+    .manifesto, .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
     .nav-links { display: none; }
     .nav-toggle { display: flex; }
   }
@@ -3157,7 +3303,54 @@
           </svg>
         </div>
         <div class="pillar-title">Mentalidad</div>
-        <p class="pillar-desc">Check-in semanal y mensajes que te ayudan a sostener el proceso, no solo a empezarlo.</p>
+        <p class="pillar-desc">Tu check-in semanal (días entrenados, energía, estado físico y mental) ajusta el volumen de la semana que viene: si vienes fuerte, el plan sube; si tocas fondo, baja para que recuperes. Cada hito desbloqueado refleja tu constancia real, y cada día recibes un mensaje pensado para los días en que cuesta empezar.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="app-preview" id="app-preview">
+    <div class="app-preview-grid">
+      <div class="app-preview-text">
+        <div class="manifesto-tag">// Así es por dentro</div>
+        <h2 class="manifesto-title">Tu semana, en el móvil.</h2>
+        <div class="manifesto-body">
+          <p>Cada día abres la app y ves exactamente qué toca: ejercicios, series, repeticiones y el peso ajustado a tu progresión de esta semana.</p>
+          <p>Tus comidas calculadas para tus macros y adaptadas a lo que de verdad te gusta comer.</p>
+          <p>Y la evolución de tus cargas, semana a semana, para que el esfuerzo se vea también en números.</p>
+        </div>
+      </div>
+      <div class="app-preview-visual">
+        <div class="phone-frame" aria-hidden="true">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-card">
+              <div class="mock-card-title">Hoy · Empuje</div>
+              <div class="mock-row"><span>Press banca</span><span>4×8 · 62.5 kg</span></div>
+              <div class="mock-row"><span>Press militar</span><span>3×10 · 32 kg</span></div>
+              <div class="mock-row"><span>Fondos lastrados</span><span>3×12 · 10 kg</span></div>
+              <div class="mock-row"><span>Elevaciones laterales</span><span>3×15 · 8 kg</span></div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-title">Comida · Almuerzo</div>
+              <div class="mock-row"><span>🍗 Pollo a la plancha</span><span>180 g</span></div>
+              <div class="mock-row"><span>🍚 Arroz integral</span><span>90 g</span></div>
+              <div class="mock-row"><span>🥑 Aguacate</span><span>1/2 ud</span></div>
+              <div class="mock-macros"><span>P 48g</span><span>C 62g</span><span>G 18g</span></div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-title">Progresión · Sentadilla</div>
+              <div class="mock-chart">
+                <div class="mock-bar" style="height:40%"><span>S1</span></div>
+                <div class="mock-bar" style="height:52%"><span>S2</span></div>
+                <div class="mock-bar" style="height:60%"><span>S3</span></div>
+                <div class="mock-bar" style="height:74%"><span>S4</span></div>
+                <div class="mock-bar" style="height:88%"><span>S5</span></div>
+                <div class="mock-bar mock-bar--active" style="height:100%"><span>S6</span></div>
+              </div>
+              <div class="mock-chart-label">60 kg → 92.5 kg en 6 semanas</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -3269,6 +3462,13 @@
     <div class="section-header">
       <h2 class="section-title">Tu deporte, tu plan</h2>
       <p class="section-note">Planes específicos para cada disciplina. No genéricos.</p>
+    </div>
+    <div class="hybrid-callout">
+      <span class="hybrid-callout-icon" aria-hidden="true">🔀</span>
+      <div class="hybrid-callout-text">
+        <div class="hybrid-callout-title">¿Entrenas para más de una cosa?</div>
+        <p class="hybrid-callout-desc">Si preparas una maratón o un Hyrox y no quieres perder lo que has ganado en el gimnasio, elige "Combinación": un único plan semanal que reparte fuerza y resistencia sin que se pisen entre sí.</p>
+      </div>
     </div>
     <div class="sports-grid">
       <div class="sport-card">
