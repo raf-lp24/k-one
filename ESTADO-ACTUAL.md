@@ -614,6 +614,40 @@ El usuario compartió una captura del input de peso en "Hoy" (un simple `<input 
 
 Verificado en preview con la cuenta de test: el stepper se ve correctamente en escritorio y móvil (375px), los botones +/- incrementan/decrementan el peso de "Press banca" en pasos de 2,5 kg y persisten el valor; con un historial de ejemplo (40→42,5→45→45→50 kg), el mini-historial muestra 5 barras crecientes con la última en naranja, sincronizado entre "Hoy" y "Plan semanal", y la tarjeta de "Press banca" en "Progresión de pesos" (Mi progreso) sigue mostrando el mismo historial con su gráfico de barras grande. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
 
+### 53. Botón de precio del hero más grande ("Oferta del mes") y reordenación del menú
+El usuario compartió capturas del badge de precio del hero ("PRIMER MES 0,99€") y de la barra de navegación, pidiendo que el badge fuera más grande y dijera "Oferta del mes", y que en el menú "Entrar" apareciera primero.
+
+- **`.hero-price`**: padding de `12px 22px` a `16px 28px`, borde de `1px solid rgba(232,73,15,0.35)` a `2px solid var(--brasa)` (más visible).
+- **`.hero-price-main`**: tamaño de fuente de `42px` a `56px`.
+- **`.hero-price-label`**: tamaño de fuente de `11px` a `12px`, color de `var(--metal)` a `var(--blanco)` con `font-weight: 600`, y el texto pasa de "Primer mes" a "Oferta del mes".
+- **Menú de escritorio (`.nav-links`)**: "Entrar" se mueve al primer lugar, antes de "Cómo funciona", "Deportes", "Opiniones" y "Precios". El menú móvil ya tenía "Entrar" primero, sin cambios.
+
+Verificado en preview en escritorio y móvil (375px): el badge de precio se ve notablemente más grande con el nuevo texto "Oferta del mes", y "Entrar" aparece como primer elemento del menú. Sin errores de consola. No requiere restaurar cuenta de test (solo contenido/estilos de la landing).
+
+### 54. Reordenación de secciones de la landing: precios más arriba, opiniones antes del CTA final
+El usuario indicó que los precios estaban demasiado abajo (los visitantes tienen que hacer mucho scroll para verlos) y que las opiniones deberían aparecer un poco antes del final de la web, ya que pocos usuarios llegan hasta el final. Se propuso mover la sección de precios justo después del manifiesto, lo que automáticamente deja "Opiniones" como la sección inmediatamente anterior al CTA final; el usuario aprobó la propuesta.
+
+- La sección `<section class="pricing" id="pricing">` (5 tarjetas de precio + barra de confianza) se traslada de su posición original (entre "Opiniones" y el CTA final "Lo que se construye despacio...") a justo después de `<section class="manifesto" id="manifesto">`, antes de "Tres pilares, un sistema".
+- Nuevo orden de secciones: hero → manifiesto → **precios** → tres pilares → tu semana en el móvil → cómo funciona → cómo funciona la IA → tu deporte, tu plan → **opiniones** → CTA final.
+- No se modificó el contenido de la sección de precios, solo su posición.
+
+Verificado en preview en escritorio: navegando a "Tres pilares" se ve la sección de precios justo antes; navegando a "Opiniones" se confirma que es la sección inmediatamente anterior al CTA final. Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing).
+
+### 55. Reducción del espaciado general del dashboard en móvil
+El usuario indicó que en móvil la pantalla "Hoy" del dashboard se sentía incómoda, con demasiado espacio entre elementos. Tras compartir una captura real desde el móvil y aclarar que el problema era el "espaciado general de toda la pantalla", se redujeron los márgenes y paddings de los bloques principales del dashboard dentro de `@media (max-width: 768px)`:
+
+- `.dash-main`: padding de `24px` a `20px`.
+- `.dash-header`: `margin-bottom` de `48px` (escritorio) a `28px`.
+- `.dash-title`: `font-size` de `48px` (escritorio) a `36px`.
+- `.motivation-card`: padding de `28px 32px` a `18px 20px`, `margin-bottom` de `40px` a `24px`.
+- `.motivation-text`: `font-size` de `18px` a `16px`.
+- `.stats-row`: `gap` de `2px` (escritorio) a `1px`, `margin-bottom` de `40px` a `24px`.
+- `.stat-card`: padding de `24px 28px` a `16px 18px`.
+- `.stat-card-value`: `font-size` de `36px` a `30px`.
+- `#todayPlan`, `#feedbackPanel`, `.checkin-card`, `.subst-box` (tarjetas con padding inline de `40px`): `padding: 20px !important` en móvil.
+
+Verificado en preview en móvil (375x812) con la cuenta de test: la pantalla "Hoy" se ve notablemente más compacta. Se revisaron también "Plan semanal", "Nutrición" y "Mi progreso", que usan los mismos estilos reducidos y se ven correctamente sin elementos rotos ni desbordamiento. Verificado en escritorio (1440px) que el cambio, al estar dentro de `@media (max-width: 768px)`, no afecta al espaciado de escritorio. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
