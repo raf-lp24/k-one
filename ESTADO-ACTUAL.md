@@ -585,6 +585,15 @@ El usuario indicó que la página es muy larga (explicación del sistema, de la 
 
 Verificado en preview en escritorio (10 testimonios en el carrusel, formulario de email dentro de la sección `.philosophy`, sección `.lead-magnet` ya no existe en el DOM) y en móvil 375px (formulario en columna, sin overflow horizontal adicional al ya existente del carrusel de testimonios). Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing, sin datos de usuario).
 
+### 50. Mejora visual de los enlaces secundarios en las pantallas de acceso (bienvenida, registro, login)
+El usuario compartió capturas de "← Volver a la web", "← Volver", "¿Olvidaste tu contraseña?" y "¿No tienes cuenta?" en las pantallas de autenticación, indicando que se veían planos/poco visuales y pidiendo un estilo más acorde con el resto de la web.
+
+- **Enlaces "Entra aquí" / "Créala aquí"** (`.auth-subtitle a`): pasan de naranja fino sin negrita a `font-weight: 600` y añaden una flecha ("Entra aquí →" / "Créala aquí →"), con transición a blanco al pasar el ratón.
+- **"¿Olvidaste tu contraseña?"** (`.auth-forgot`): de texto gris monoespaciado plano a un span en blanco (`var(--blanco)`) con subrayado punteado en `var(--metal)` que se vuelve naranja (`var(--brasa)`) al pasar el ratón.
+- **"← Volver" / "← Volver a la web"**: nueva clase `.auth-back` reutilizada en bienvenida, registro y login — texto en blanco, mayúsculas, espaciado tipo etiqueta (`DM Mono`, letter-spacing 2px, igual que otras etiquetas de la web), con la flecha (`.auth-back-arrow`) deslizándose hacia la izquierda al pasar el ratón.
+
+Verificado en preview en escritorio (961px) y móvil (375px) en las pantallas "bienvenida", "registro" y "login". Sin errores de consola. No requiere restaurar cuenta de test (solo estilos, sin datos de usuario).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

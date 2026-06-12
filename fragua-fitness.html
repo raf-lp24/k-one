@@ -2638,10 +2638,12 @@
 
   .auth-subtitle a {
     color: var(--brasa);
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
+    transition: color 0.2s;
   }
-  .auth-subtitle a:hover { text-decoration: underline; }
+  .auth-subtitle a:hover { color: var(--blanco); text-decoration: underline; }
 
   .auth-field {
     display: flex;
@@ -2721,15 +2723,44 @@
   }
 
   .auth-forgot {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .auth-forgot span {
     font-size: 12px;
-    color: var(--metal);
+    color: var(--blanco);
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+    padding-bottom: 3px;
+    border-bottom: 1px dotted var(--metal);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .auth-forgot span:hover { color: var(--brasa); border-color: var(--brasa); }
+
+  /* VOLVER (auth screens) */
+  .auth-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    font-size: 11px;
     font-family: 'DM Mono', monospace;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blanco);
+    cursor: pointer;
     transition: color 0.2s;
   }
-  .auth-forgot:hover { color: var(--brasa); }
+  .auth-back .auth-back-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  .auth-back:hover { color: var(--brasa); }
+  .auth-back:hover .auth-back-arrow { transform: translateX(-4px); }
 
   /* MODAL FORGOT */
   .modal-overlay {
@@ -2885,7 +2916,7 @@
       <div class="welcome-divider"><span>o</span></div>
       <button class="btn-ghost" onclick="goTo('login')">Ya tengo cuenta · Entrar</button>
     </div>
-    <p style="text-align:center;margin-top:32px;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="goTo('landing')">← Volver a la web</p>
+    <p class="auth-back" onclick="goTo('landing')"><span class="auth-back-arrow">←</span> Volver a la web</p>
   </div>
 </div>
 
@@ -2896,7 +2927,7 @@
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Crear cuenta</h2>
-    <p class="auth-subtitle">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí</a></p>
+    <p class="auth-subtitle">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
 
     <div class="auth-field">
       <label>Nombre</label>
@@ -2929,7 +2960,7 @@
     <div class="auth-error" id="err-terminos">Debes aceptar los términos para continuar</div>
 
     <button class="btn-primary auth-submit" onclick="registrar()">Crear mi cuenta →</button>
-    <p style="text-align:center;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="goTo('bienvenida')">← Volver</p>
+    <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
   </div>
 </div>
 
@@ -2940,7 +2971,7 @@
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Bienvenido/a</h2>
-    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('registro')">Créala aquí</a></p>
+    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('registro')">Créala aquí →</a></p>
 
     <!-- AVISO CUENTA DE TEST -->
     <div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:24px">
@@ -2964,8 +2995,8 @@
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
 
     <button class="btn-primary auth-submit" onclick="login()" style="margin-top:8px">Entrar →</button>
-    <p class="auth-forgot" onclick="document.getElementById('modalForgot').classList.add('visible')">¿Olvidaste tu contraseña?</p>
-    <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--humo);font-family:'DM Mono',monospace;cursor:pointer" onclick="goTo('bienvenida')">← Volver</p>
+    <p class="auth-forgot" onclick="document.getElementById('modalForgot').classList.add('visible')"><span>¿Olvidaste tu contraseña?</span></p>
+    <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
   </div>
 </div>
 
