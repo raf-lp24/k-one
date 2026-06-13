@@ -771,6 +771,18 @@ El usuario compartió un análisis "Puntos a mejorar" de la landing con 6 observ
 
 Verificado en preview (escritorio 1440px y móvil 375px): el botón "Ver demo →" se ve claramente secundario sin solapar con "Empieza ahora"; la reseña de Diego F. muestra 4 estrellas y el nuevo texto; las 4 píldoras de comida se muestran en 4 columnas en escritorio y 2 en móvil sin desbordamiento horizontal. Sin errores de consola. Solo cambios de landing (sin datos de usuario), no requiere restaurar cuenta de test.
 
+### 69. "Entrenamiento de hoy" y "Hoy" en el plan semanal ahora coinciden con el día real
+El usuario reportó: "Veo que no está sincronizado las semanas, con el día de entrenamiento que te marca. Hoy es sábado y te está marcando el entrenamiento del lunes." El diseño anterior fijaba deliberadamente "Entrenamiento de hoy" y el badge "Hoy" del plan semanal al primer día del array `semana` (Lunes), independientemente del día real.
+
+- Nueva función `getIndiceDiaHoy()`: convierte `new Date().getDay()` (0=domingo...6=sábado) al índice del array `semana` (0=Lunes...6=Domingo) con `(getDay() + 6) % 7`.
+- `buildPlanFromData()`: `entrenamiento_hoy` se genera ahora a partir de `semana[getIndiceDiaHoy()]` en lugar de `semana[0]`.
+- `buildDashboard()`: la etiqueta `dashWeekDay` pasa de `// Semana N · Día 1` a `// Semana N · <nombre del día real>` (p. ej. "// Semana 1 · Sábado").
+- `renderWeekList()`: el badge "Hoy"/fila resaltada del plan semanal (`isToday`) usa `i === getIndiceDiaHoy()` en lugar de `i === 0`.
+- `regenerarEntrenamientoHoy()` (se ejecuta al cargar el dashboard de una cuenta existente): recalcula `entrenamiento_hoy` a partir de `semana[getIndiceDiaHoy()]` en lugar de `semana[0]`, conservando la nota "Tu plan, adaptado" si existía.
+- Si el día de hoy es de descanso (`tipo: "Descanso"`), "Entrenamiento de hoy" muestra ahora el resumen del día (p. ej. "Sábado — Descanso activo") con un mensaje de recuperación, y se ocultan los botones "✓ Marcar como completado" y "¿Cómo va el entreno? →" (no aplican en un día sin sesión).
+
+Verificado en preview con la cuenta de test (hoy sábado): "Entrenamiento de hoy" muestra "Sábado — Descanso activo" con mensaje de recuperación y sin los botones de completado/feedback; en "Plan semanal", la fila de Sábado tiene el badge "Hoy" y está expandida, el resto de días no. Probado también con un plan de Gimnasio (Sábado = "Full body o cardio"): `entrenamiento_hoy` genera la sesión completa de fuerza correctamente. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

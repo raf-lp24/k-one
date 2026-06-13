@@ -5855,10 +5855,11 @@
       }
     }
 
-    // ENTRENAMIENTO HOY = el primer día de la semana (Lunes), con el mismo
-    // formato y nivel de detalle que se usa en "Plan semanal"
-    if (!soloDieta && semana.length > 0 && semana[0].tipo === 'Entrenamiento') {
-      entrenamiento_hoy = `<strong>${semana[0].dia} — ${semana[0].resumen}</strong><br><br>${formatearSesion(semana[0])}`;
+    // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
+    // con el mismo formato y nivel de detalle que se usa en "Plan semanal"
+    const diaHoy = semana[getIndiceDiaHoy()];
+    if (!soloDieta && semana.length > 0 && diaHoy.tipo === 'Entrenamiento') {
+      entrenamiento_hoy = `<strong>${diaHoy.dia} — ${diaHoy.resumen}</strong><br><br>${formatearSesion(diaHoy)}`;
     }
 
     if (!soloDieta && notasSalud.length) {
@@ -6159,9 +6160,10 @@
     document.getElementById('statObjetivo').textContent = userData.objetivo?.split(' ').slice(0,2).join(' ') || '—';
     document.getElementById('statDeporte').textContent = userData.deporte?.split(' ')[0] || '—';
 
-    // Progresión real (semana actual y días entrenados), no fijo en "Semana 1 · Día 1"
+    // Progresión real (semana actual y día de hoy), no fijo en "Semana 1 · Día 1"
     const progreso = generatedPlan.progreso || userData.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
-    document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · Día 1`;
+    const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || 'Lunes';
+    document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
     document.getElementById('statSemana').textContent = progreso.semana;
     document.getElementById('statDiasEntrenados').textContent = (userData.entrenosCompletados || []).length;
     const checkinSemanaLabel = document.getElementById('checkinSemanaLabel');
@@ -6173,7 +6175,20 @@
     document.getElementById('userGoal').textContent = userData.objetivo || 'Tu objetivo';
 
     // Entrenamiento hoy
-    document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy;
+    const diaHoyPlan = generatedPlan.semana?.[getIndiceDiaHoy()];
+    const esDescansoHoy = !generatedPlan.soloDieta && diaHoyPlan && diaHoyPlan.tipo === 'Descanso';
+    const btnCompletado = document.getElementById('btnCompletado');
+    const btnFeedback = document.getElementById('btnFeedback');
+    if (esDescansoHoy) {
+      document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy +
+        `<strong>${diaHoyPlan.dia} — ${diaHoyPlan.resumen}</strong><br><br>Hoy toca descanso. Aprovecha para recuperar: duerme bien, hidrátate y, si te apetece, dale un paseo suave.`;
+      if (btnCompletado) btnCompletado.style.display = 'none';
+      if (btnFeedback) btnFeedback.style.display = 'none';
+    } else {
+      document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy;
+      if (btnCompletado) btnCompletado.style.display = '';
+      if (btnFeedback) btnFeedback.style.display = '';
+    }
     actualizarEstadoCompletado();
 
     actualizarDiasRestantesPlan();
@@ -6311,6 +6326,12 @@
   function getFechaHoyISO() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // Índice (0-6) del día actual dentro del array "semana" (Lunes=0 ... Domingo=6).
+  // new Date().getDay() devuelve 0=Domingo...6=Sábado, por eso se desplaza +6 mod 7.
+  function getIndiceDiaHoy() {
+    return (new Date().getDay() + 6) % 7;
   }
 
   function actualizarEstadoCompletado() {
@@ -6493,7 +6514,7 @@
     weekGrid.innerHTML = '';
     semanaArr.forEach((day, i) => {
       const isRest = day.tipo === 'Descanso';
-      const isToday = esActual && i === 0;
+      const isToday = esActual && i === getIndiceDiaHoy();
 
       // Separar músculos del detalle (para la etiqueta lateral) y montar la sesión completa
       let musculos = '';
@@ -7896,17 +7917,21 @@
     goTo('dashboard');
   }
 
-  // Recalcula entrenamiento_hoy a partir de semana[0] usando formatearSesion, conservando
-  // la nota "Tu plan, adaptado" si la tenía. Sirve para que cuentas con un plan guardado
-  // antes de unificar "Hoy" y "Plan semanal" se vean igual sin tener que regenerar todo el plan.
+  // Recalcula entrenamiento_hoy a partir del día de la semana que toca hoy (según el
+  // calendario real), usando formatearSesion y conservando la nota "Tu plan, adaptado"
+  // si la tenía. Se llama al cargar el dashboard para que "Hoy" esté siempre al día,
+  // sin tener que regenerar todo el plan.
   function regenerarEntrenamientoHoy(plan) {
     if (!plan || !plan.semana || !plan.semana.length) return;
-    const lunes = plan.semana[0];
-    if (lunes.tipo !== 'Entrenamiento') return;
+    const diaHoy = plan.semana[getIndiceDiaHoy()];
     let notaHTML = '';
     const match = (plan.entrenamiento_hoy || '').match(/^<div style="background:rgba\(232,73,15,0\.08\)[^>]*>[\s\S]*?<\/div>/);
     if (match) notaHTML = match[0];
-    plan.entrenamiento_hoy = notaHTML + `<strong>${lunes.dia} — ${lunes.resumen}</strong><br><br>${formatearSesion(lunes)}`;
+    if (diaHoy.tipo !== 'Entrenamiento') {
+      plan.entrenamiento_hoy = notaHTML;
+      return;
+    }
+    plan.entrenamiento_hoy = notaHTML + `<strong>${diaHoy.dia} — ${diaHoy.resumen}</strong><br><br>${formatearSesion(diaHoy)}`;
   }
 
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
