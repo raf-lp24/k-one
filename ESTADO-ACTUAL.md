@@ -761,6 +761,16 @@ Verificado en preview con la cuenta de test: al pulsar "✓ Marcar como completa
 - **"Datos de peso incongruentes" (Press inclinado 52kg/Fondos 36kg con historial vs. Press plano/Sentadilla 2.5kg)**: la cuenta de test no tiene datos de pesos sembrados, así que esos valores son datos reales introducidos en una cuenta real al probar el nuevo selector de pesos. No es un bug de código; si se quiere, se puede limpiar/editar ese historial manualmente desde "Mi progreso".
 - **"Texto gris sobre oscuro"**: revisado `.stat-card-sub` (usado en "tu meta", "tu disciplina", "de tu proceso", etc.) — su color ya es `var(--blanco-puro)` (#FFFFFF) sobre `var(--carbon)` (#141414), ratio de contraste ~21:1 (máximo). Parece ya resuelto en el código actual; si en producción se sigue viendo gris claro, puede ser caché del navegador/CDN de una versión anterior.
 
+### 68. Ajustes de landing: jerarquía de CTAs, reseña más matizada y feature de nutrición destacada
+El usuario compartió un análisis "Puntos a mejorar" de la landing con 6 observaciones.
+
+- **Identidad de marca, tagline principal y sección "Cómo funciona la IA"**: revisados — ya están resueltos en el código actual (marca "K-ONE"/"K-One" consistente en toda la landing y el dashboard; el `<h1>` del hero ya es "No hay atajos. Hay pasos."; la sección "Cómo funciona la IA" ya usa tarjetas `.pillar-card` con icono SVG propio cada una). Probablemente el análisis se hizo sobre una versión cacheada anterior.
+- **CTA "Ver demo" como acción secundaria**: nueva clase `.btn-link` (sin fondo ni borde, subrayado en `var(--humo)`, texto en `var(--metal-claro)`) aplicada al botón "Ver demo →" del hero, dejando "Empieza ahora" (`.btn-primary`) como único CTA con peso visual fuerte.
+- **Reseña más matizada**: la reseña de Diego F. (calistenia) pasa de 5 a 4 estrellas y su texto ahora menciona que las primeras semanas le costó encontrar hueco y algún día no completó el entreno, antes de llegar a su primera dominada estricta — para no dar la sensación de que todas las experiencias son perfectas desde el día 1.
+- **Feature "elige entre 4 opciones por comida" destacada en landing**: el `.nutrition-callout` de la sección "Tu deporte, tu plan" ahora incluye `.nutrition-callout-demo`, un mockup estático con la fila `.meal-preview-row`/`.meal-preview-pill` (las mismas clases del dashboard, item 61) mostrando 4 opciones de ejemplo para una comida, bajo la etiqueta "// Cada comida, a tu manera — elige entre 4 opciones".
+
+Verificado en preview (escritorio 1440px y móvil 375px): el botón "Ver demo →" se ve claramente secundario sin solapar con "Empieza ahora"; la reseña de Diego F. muestra 4 estrellas y el nuevo texto; las 4 píldoras de comida se muestran en 4 columnas en escritorio y 2 en móvil sin desbordamiento horizontal. Sin errores de consola. Solo cambios de landing (sin datos de usuario), no requiere restaurar cuenta de test.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

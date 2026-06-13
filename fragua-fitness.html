@@ -178,6 +178,24 @@
   }
   .btn-ghost:hover { border-color: var(--metal); color: var(--blanco-puro); }
 
+  .btn-link {
+    background: transparent;
+    border: none;
+    color: var(--metal-claro);
+    padding: 12px 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--humo);
+    text-underline-offset: 4px;
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+  .btn-link:hover { color: var(--blanco-puro); text-decoration-color: var(--metal); }
+
   /* HERO */
   .hero {
     min-height: 100vh;
@@ -681,6 +699,21 @@
     color: var(--metal-claro);
     line-height: 1.6;
     font-weight: 300;
+  }
+
+  .nutrition-callout-demo {
+    flex-basis: 100%;
+    margin-top: 8px;
+    padding-top: 24px;
+    border-top: 1px solid var(--humo);
+  }
+  .nutrition-callout-demo-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--brasa);
+    margin-bottom: 12px;
   }
 
   /* HIBRIDACIÓN: aviso de que las disciplinas se pueden combinar */
@@ -3627,7 +3660,7 @@
       <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 6,99€/mes.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
-        <button class="btn-ghost" onclick="demoAccess()">Ver demo</button>
+        <button class="btn-link" onclick="demoAccess()">Ver demo →</button>
         <div class="hero-price">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>0,99€</div>
         </div>
@@ -3923,6 +3956,31 @@
         <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 6,99€/mes.</p>
       </div>
       <button class="btn-ghost" onclick="goTo('bienvenida')">Ver plan de nutrición →</button>
+      <div class="nutrition-callout-demo">
+        <div class="nutrition-callout-demo-label">// Cada comida, a tu manera — elige entre 4 opciones</div>
+        <div class="meal-preview-row">
+          <div class="meal-preview-pill selected">
+            <div class="meal-preview-num">Opción 1</div>
+            <div class="meal-preview-name">Bowl de pollo, arroz y verduras al vapor</div>
+            <div class="meal-preview-kcal">🔥 520 kcal</div>
+          </div>
+          <div class="meal-preview-pill">
+            <div class="meal-preview-num">Opción 2</div>
+            <div class="meal-preview-name">Salmón al horno con boniato y brócoli</div>
+            <div class="meal-preview-kcal">🔥 540 kcal</div>
+          </div>
+          <div class="meal-preview-pill">
+            <div class="meal-preview-num">Opción 3</div>
+            <div class="meal-preview-name">Tortilla de claras con avena y frutos rojos</div>
+            <div class="meal-preview-kcal">🔥 480 kcal</div>
+          </div>
+          <div class="meal-preview-pill">
+            <div class="meal-preview-num">Opción 4</div>
+            <div class="meal-preview-name">Tofu salteado con quinoa y verduras</div>
+            <div class="meal-preview-kcal">🔥 510 kcal</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -4067,8 +4125,8 @@
         </div>
       </div>
       <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Entreno en casa porque no tengo tiempo para ir al gimnasio. Después de cuatro meses con el plan de calistenia conseguí mi primera dominada estricta, algo que llevaba años intentando."</p>
+        <div class="testimonial-stars" aria-label="4 de 5 estrellas">★★★★☆</div>
+        <p class="testimonial-quote">"Entreno en casa porque no tengo tiempo para ir al gimnasio. Las primeras semanas me costó encontrar hueco y algún día no llegué a completar el entreno, pero el plan se ajustó sin dramas. Cuatro meses después conseguí mi primera dominada estricta, algo que llevaba años intentando."</p>
         <div class="testimonial-author">
           <div class="testimonial-avatar">D</div>
           <div>
