@@ -783,6 +783,24 @@ El usuario reportó: "Veo que no está sincronizado las semanas, con el día de 
 
 Verificado en preview con la cuenta de test (hoy sábado): "Entrenamiento de hoy" muestra "Sábado — Descanso activo" con mensaje de recuperación y sin los botones de completado/feedback; en "Plan semanal", la fila de Sábado tiene el badge "Hoy" y está expandida, el resto de días no. Probado también con un plan de Gimnasio (Sábado = "Full body o cardio"): `entrenamiento_hoy` genera la sesión completa de fuerza correctamente. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
 
+### 70. Semanas contadas desde el registro + link compartible sin demo ni cuenta de test visible
+El usuario pidió: (a) que las semanas de entrenamiento cuenten desde la fecha de registro del email, y (b) que al pasar el link entre clientes salte la pantalla de inicio, sin que aparezca ninguna cuenta demo.
+
+**Semanas desde el registro (antes solo avanzaban al hacer check-in):**
+- Nueva función `getSemanaActual()`: calcula el número de semana a partir de `creado` (fecha de alta del usuario en `getUsers()`), con `Math.max(1, Math.floor(díasDesdeRegistro / 7) + 1)`. Sin fecha de registro, conserva el valor guardado o 1.
+- `buildDashboard()`: fija `progreso.semana = getSemanaActual()` y garantiza que `userData.progreso` exista y lleve esa semana (antes, si `userData` no tenía `progreso` —p. ej. la cuenta de test—, los hitos caían a "semana 1").
+- El check-in ya no incrementa la semana con `+1`; toma `getSemanaActual()` y solo registra `diasEntrenados`/`ajuste` para adaptar el plan que viene. El resumen "Resumen de la semana N" usa `getSemanaActual()`.
+- Cambiar objetivo/deporte ya no reinicia la semana a 1; usa `getSemanaActual()` (solo se reinicia `ajuste`/`diasEntrenados`/`entrenosCompletados`).
+- Verificado: registro hace 0 d → Semana 1, 8 d → Semana 2, 22 d → Semana 4, 100 d → Semana 15. Las pestañas de "Plan semanal" marcan la semana actual ("Semana 4 · Actual" + futuras) y los hitos se desbloquean por calendario ("Primera semana completada" conseguido en Semana 4).
+
+**Link compartible sin demo / sin cuenta de test a la vista:**
+- Eliminado el botón "Ver demo →" del hero y la función `demoAccess()` (ya no hay acceso a un dashboard demo falso).
+- Eliminado del login el recuadro "// Cuenta de testeo" con las credenciales `test@fragua.es` / `fragua123` y los `value=""` precargados de email y contraseña (los campos salen vacíos).
+- La cuenta de test sigue existiendo de forma invisible (`ensureTestAccount()` en `window.onload`) para poder verificar, pero ya no se anuncia en ninguna pantalla.
+- Verificado con `localStorage` vacío (simulando un cliente nuevo que abre el link): la única pantalla visible es `landing`, no hay botón de demo, `demoAccess` es `undefined`, y los campos de login salen vacíos.
+
+Verificado en escritorio y móvil (375px) sin desbordamiento horizontal ni errores de consola. Cuenta de test restaurada a su estado original tras las pruebas.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

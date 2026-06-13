@@ -3421,24 +3421,15 @@
     <h2 class="auth-title">Bienvenido/a</h2>
     <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('registro')">Créala aquí →</a></p>
 
-    <!-- AVISO CUENTA DE TEST -->
-    <div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:24px">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--brasa);text-transform:uppercase;margin-bottom:6px">// Cuenta de testeo</div>
-      <div style="font-size:12px;color:var(--metal);line-height:1.6">
-        Email: <strong style="color:var(--blanco)">test@fragua.es</strong><br>
-        Contraseña: <strong style="color:var(--blanco)">fragua123</strong>
-      </div>
-    </div>
-
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off" value="test@fragua.es">
+      <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off">
     </div>
     <div class="auth-error" id="err-login-email">Email no encontrado</div>
 
     <div class="auth-field">
       <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="Tu contraseña" value="fragua123">
+      <input type="password" id="login-pass" placeholder="Tu contraseña">
     </div>
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
 
@@ -3660,7 +3651,6 @@
       <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 6,99€/mes.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
-        <button class="btn-link" onclick="demoAccess()">Ver demo →</button>
         <div class="hero-price">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>0,99€</div>
         </div>
@@ -6160,8 +6150,15 @@
     document.getElementById('statObjetivo').textContent = userData.objetivo?.split(' ').slice(0,2).join(' ') || '—';
     document.getElementById('statDeporte').textContent = userData.deporte?.split(' ')[0] || '—';
 
-    // Progresión real (semana actual y día de hoy), no fijo en "Semana 1 · Día 1"
+    // Progresión real (semana actual y día de hoy), no fijo en "Semana 1 · Día 1".
+    // La semana se cuenta desde la fecha de registro del email (no depende del check-in).
     const progreso = generatedPlan.progreso || userData.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
+    progreso.semana = getSemanaActual();
+    generatedPlan.progreso = progreso;
+    // Garantizar que userData.progreso exista y lleve la semana actual, para que los hitos
+    // y demás cálculos no caigan al valor por defecto (semana 1).
+    userData.progreso = userData.progreso || { diasEntrenados: 0, ajuste: 0 };
+    userData.progreso.semana = progreso.semana;
     const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || 'Lunes';
     document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
     document.getElementById('statSemana').textContent = progreso.semana;
@@ -6332,6 +6329,18 @@
   // new Date().getDay() devuelve 0=Domingo...6=Sábado, por eso se desplaza +6 mod 7.
   function getIndiceDiaHoy() {
     return (new Date().getDay() + 6) % 7;
+  }
+
+  // Número de semana del plan, contado desde la fecha de registro del usuario (creado).
+  // Semana 1 = primeros 7 días tras registrarse; avanza sola cada 7 días sin depender
+  // del check-in. Si no hay fecha de registro, se conserva el valor guardado (o 1).
+  function getSemanaActual() {
+    const user = getCurrentUser();
+    const u = user ? getUsers()[user.email] : null;
+    const creado = u && u.creado;
+    if (!creado) return (userData.progreso && userData.progreso.semana) || 1;
+    const dias = (Date.now() - new Date(creado).getTime()) / (1000 * 60 * 60 * 24);
+    return Math.max(1, Math.floor(dias / 7) + 1);
   }
 
   function actualizarEstadoCompletado() {
@@ -6850,8 +6859,10 @@
       }
 
       const progresoActual = userData.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
+      // La semana la marca el calendario (fecha de registro), no el check-in; este solo
+      // registra cómo ha ido la semana y ajusta el plan que viene (ajuste/díasEntrenados).
       userData.progreso = {
-        semana: progresoActual.semana + 1,
+        semana: getSemanaActual(),
         diasEntrenados: numDias,
         ajuste
       };
@@ -6893,7 +6904,7 @@
       } else {
         adjustEl.textContent = '➡️ Tu plan de la semana que viene se mantiene en el mismo nivel.';
       }
-      document.getElementById('checkinSummarySemana').textContent = `Resumen de la semana ${progresoActual.semana}`;
+      document.getElementById('checkinSummarySemana').textContent = `Resumen de la semana ${getSemanaActual()}`;
       document.getElementById('checkinForm').style.display = 'none';
       const summaryEl = document.getElementById('checkinSummary');
       summaryEl.classList.add('visible');
@@ -7080,8 +7091,9 @@
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
 
-    // Nuevo objetivo/deporte: empezamos un plan desde cero
-    userData.progreso = { semana: 1, diasEntrenados: 0, ajuste: 0 };
+    // Nuevo objetivo/deporte: reiniciamos el ajuste del plan, pero la semana se sigue
+    // contando desde la fecha de registro del email (no vuelve a empezar en 1).
+    userData.progreso = { semana: getSemanaActual(), diasEntrenados: 0, ajuste: 0 };
     userData.entrenosCompletados = [];
 
     generatedPlan = buildPlanFromData(userData);
@@ -7898,24 +7910,6 @@
     setTimeout(() => goTo('landing'), 800);
   }
 
-  // ===== DEMO ACCESS =====
-  function demoAccess() {
-    // Crea un usuario demo temporal
-    setCurrentUser({ nombre: 'Demo', email: 'demo@fragua.es' });
-    userData = {
-      edad: '28', sexo: 'Hombre', peso: '78', altura: '178',
-      complexion: 'Normal', enfermedad: 'No', lesion: 'No', alergia: 'No',
-      operacion: '', medicacion: '', trabajo: 'Oficina', jornada: 'Sentado todo el día',
-      estres: 'Medio', sueno: '7-8 horas', dieta: 'Como de todo', noComida: '',
-      comidas: '3 veces', cocina: 'Casi siempre en casa',
-      objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
-      deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
-      nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio'
-    };
-    generatedPlan = buildPlanFromData(userData);
-    buildDashboard();
-    goTo('dashboard');
-  }
 
   // Recalcula entrenamiento_hoy a partir del día de la semana que toca hoy (según el
   // calendario real), usando formatearSesion y conservando la nota "Tu plan, adaptado"
