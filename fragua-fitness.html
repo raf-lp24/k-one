@@ -8363,15 +8363,17 @@
       showToast('Aviso: este navegador bloquea el guardado local en archivos abiertos con file://. Los datos no se guardarán.', 6000);
     }
 
-    // Si algo de lo de abajo falla (p.ej. al abrir el archivo con file://), nunca
-    // debe dejar la pantalla en negro: igualmente navegamos a una pantalla válida.
-    try {
-      await ensureTestAccount();
-    } catch (e) {
-      console.error('Error preparando la cuenta de test:', e);
-    }
-
+    // La cuenta de test NO se siembra automáticamente: solo se crea al iniciar sesión
+    // con sus credenciales (ver login()). Así un cliente que abre el link nunca la tiene
+    // en su navegador ni se mete en ella al refrescar.
     const user = getCurrentUser();
+    if (user && user.email === TEST_EMAIL) {
+      // La cuenta de test no debe reanudarse sola al recargar (p.ej. estando en la
+      // landing): se cierra su sesión y se muestra la pantalla de inicio.
+      clearCurrentUser();
+      goTo('landing');
+      return;
+    }
     if (user) {
       const saved = getUserData(user.email);
       if (saved && saved.plan) {

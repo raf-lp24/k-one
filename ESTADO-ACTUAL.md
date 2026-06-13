@@ -809,6 +809,14 @@ El usuario pidió que los botones +/- del selector de peso sumen/resten de 1,5 e
 
 Verificado en preview con la cuenta de test: en el plan semanal, con un día expandido, pulsar "+" suma 1,5 kg (0 → 1,5 → 3) y "−" resta 1,5, y la fila permanece expandida en ambos casos. Sin errores de consola. Cuenta de test restaurada tras la prueba.
 
+### 72. La cuenta de test ya no se siembra sola ni se reanuda al refrescar en la landing
+El usuario reportó que estando en la página de inicio (landing) y pulsando refrescar, la app se metía directamente en la cuenta de testeo. Causa: `window.onload` sembraba la cuenta de test (`ensureTestAccount()`) en TODOS los navegadores y luego reanudaba cualquier sesión guardada (`fragua_current_user`), incluida la de test.
+
+- `window.onload`: eliminada la llamada automática a `ensureTestAccount()`. La cuenta de test ya no se crea en el navegador de cada visitante; solo se siembra bajo demanda al iniciar sesión con sus credenciales (el fallback ya existente en `login()`: si el email es `test@fragua.es` y la contraseña `fragua123`, se llama a `ensureTestAccount()`).
+- `window.onload`: nuevo guardado — si la sesión almacenada es la cuenta de test (`user.email === TEST_EMAIL`), no se reanuda; se hace `clearCurrentUser()` y se va a `landing`. Las cuentas reales sí siguen reanudando su sesión al refrescar (UX normal).
+
+Verificado en preview: (1) con sesión de test guardada, al recargar se muestra `landing` y la sesión queda limpia (`fragua_current_user` = null); (2) el login de test (`test@fragua.es` / `fragua123`) sigue funcionando desde cero y entra al dashboard (Semana 1); (3) una cuenta real de ejemplo con plan guardado sí reanuda en el dashboard al refrescar. Sin errores de consola. Estado de pruebas limpiado tras la verificación.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
