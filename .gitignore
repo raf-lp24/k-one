@@ -1,1 +1,6 @@
 desktop.ini
+
+# Archivos temporales/bloqueo de Microsoft Word
+~$*
+*.tmp
+~WRL*.tmp
