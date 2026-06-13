@@ -2583,6 +2583,14 @@
 
   .photo-slot-icon { font-size: 28px; opacity: 0.3; }
 
+  .photo-slot-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+
   .photo-slot-label {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -3466,6 +3474,7 @@
 <div class="modal-overlay" id="modalCambiarPlan">
   <div class="modal-box modal-box-wide">
     <button class="modal-close" onclick="closeCambiarPlanModal()">✕</button>
+    <div id="cpStep1">
     <div class="modal-title">Cambiar tu plan</div>
     <p class="modal-desc">¿Quieres cambiar de objetivo, deporte o cualquier otra preferencia? Actualiza lo que necesites y recalculamos al momento tu entrenamiento, tu nutrición y tu plan semanal. Tu progreso de esta semana se reiniciará para empezar el nuevo plan desde cero.</p>
     <div class="form-grid full" style="gap:20px">
@@ -3475,15 +3484,6 @@
           <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Plan completo: entrenamiento + nutrición</div>
           <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Solo nutrición, sin entrenamiento</div>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Con qué periodicidad quieres pagar?</label>
-        <div class="radio-group" id="cp-periodicidad">
-          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
-          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
-          <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Anual</div>
-        </div>
-        <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
       <div class="field">
         <label>¿Cuál es tu objetivo principal?</label>
@@ -3552,7 +3552,26 @@
         </div>
       </div>
     </div>
-    <button class="btn-primary" style="width:100%;padding:14px;margin-top:24px" onclick="guardarCambioPlan()">Recalcular mi plan →</button>
+    <button class="btn-primary" style="width:100%;padding:14px;margin-top:24px" onclick="irPasoPrecioCambioPlan()">Continuar →</button>
+    </div>
+
+    <div id="cpStep2" style="display:none">
+      <div class="modal-title">Confirma tu periodicidad de pago</div>
+      <p class="modal-desc">Esto es lo único que afecta a tu facturación. Tu entrenamiento, nutrición y plan semanal se recalcularán según las preferencias que has elegido en el paso anterior.</p>
+      <div class="field">
+        <label>¿Con qué periodicidad quieres pagar?</label>
+        <div class="radio-group" id="cp-periodicidad">
+          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
+          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
+          <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Anual</div>
+        </div>
+        <span class="field-hint" id="cpPrecioInfo"></span>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px">
+        <button class="btn-ghost" style="flex:1;padding:14px" onclick="volverPasoCambioPlan()">← Volver</button>
+        <button class="btn-primary" style="flex:2;padding:14px" onclick="guardarCambioPlan()">Confirmar y recalcular →</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -4846,6 +4865,7 @@
 
         <div class="progress-section">
           <div class="progress-title">Fotos mensuales</div>
+          <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan solo en este dispositivo, nadie más las ve, y te ayudan a ver tu evolución mes a mes.</p>
           <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
           <div class="photos-grid" id="photosGrid"></div>
         </div>
@@ -6239,11 +6259,16 @@
     const btn = document.getElementById('btnCompletado');
     const badge = document.getElementById('entrenoCompletadoBadge');
     if (!btn || !badge) return;
-    const completado = (userData.entrenosCompletados || []).includes(getFechaHoyISO());
+    const hoy = getFechaHoyISO();
+    const completado = (userData.entrenosCompletados || []).includes(hoy);
     if (completado) {
       btn.textContent = '✓ Completado';
       btn.classList.add('completado');
       badge.style.display = 'flex';
+      const hora = userData.horaCompletado?.[hoy];
+      badge.querySelector('span:last-child').textContent = hora
+        ? `Marcado como completado hoy a las ${hora}. Buen trabajo.`
+        : 'Entrenamiento de hoy completado. Buen trabajo.';
     } else {
       btn.textContent = '✓ Marcar como completado';
       btn.classList.remove('completado');
@@ -6297,10 +6322,13 @@
     if (idx === -1) {
       userData.entrenosCompletados.push(hoy);
       if (idxHist === -1) userData.historialEntrenos.push(hoy);
+      if (!userData.horaCompletado) userData.horaCompletado = {};
+      userData.horaCompletado[hoy] = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       showToast('Entrenamiento de hoy marcado como completado. ¡Buen trabajo!');
     } else {
       userData.entrenosCompletados.splice(idx, 1);
       if (idxHist !== -1) userData.historialEntrenos.splice(idxHist, 1);
+      if (userData.horaCompletado) delete userData.horaCompletado[hoy];
     }
     actualizarEstadoCompletado();
 
@@ -6466,6 +6494,7 @@
       return `
         <div class="photo-slot" onclick="seleccionarFoto(${idx})">
           <div class="photo-slot-icon">📷</div>
+          <div class="photo-slot-hint">+ Añadir foto</div>
           <div class="photo-slot-label">Mes ${idx + 1}</div>
         </div>`;
     }).join('');
@@ -6908,11 +6937,32 @@
     preseleccionarRadio('cp-nivel', userData.nivel);
     preseleccionarRadio('cp-lugar', userData.lugar);
     actualizarPrecioCambioPlan();
+    document.getElementById('cpStep1').style.display = '';
+    document.getElementById('cpStep2').style.display = 'none';
     document.getElementById('modalCambiarPlan').classList.add('visible');
   }
 
   function closeCambiarPlanModal() {
     document.getElementById('modalCambiarPlan').classList.remove('visible');
+  }
+
+  // Paso 1 (preferencias de plan) -> paso 2 (periodicidad de pago)
+  function irPasoPrecioCambioPlan() {
+    const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
+    const tipoPlan = getRadio('cp-tipoPlan');
+    if (!tipoPlan || !getRadio('cp-objetivo') || !getRadio('cp-deporte') || !getRadio('cp-diasEntreno') || !getRadio('cp-tiempoSesion') || !getRadio('cp-nivel') || !getRadio('cp-lugar')) {
+      showToast('Por favor, completa todas las opciones antes de continuar.');
+      return;
+    }
+    actualizarOpcionesPeriodicidad(tipoPlan, 'cp-periodicidad');
+    actualizarPrecioCambioPlan();
+    document.getElementById('cpStep1').style.display = 'none';
+    document.getElementById('cpStep2').style.display = '';
+  }
+
+  function volverPasoCambioPlan() {
+    document.getElementById('cpStep2').style.display = 'none';
+    document.getElementById('cpStep1').style.display = '';
   }
 
   function marcarEnfoqueManualCambio() {

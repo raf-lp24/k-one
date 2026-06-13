@@ -730,6 +730,37 @@ El usuario pidió dar contexto al usuario nuevo justo después de generar su pla
 
 Verificado en preview generando un plan nuevo desde el cuestionario: el modal aparece automáticamente con los 5 pasos, "Saltar" y "Siguiente"/"Empezar" funcionan correctamente y al finalizar se muestra la sección "Hoy"; en la cuenta de test (con `onboardingCompletado: true`) el tour no aparece. Verificado en escritorio y móvil (375px), sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
 
+### 65. Guía y acción en los slots vacíos de "Fotos mensuales"
+El usuario compartió una captura "ERRORES Y PROBLEMAS DETECTADOS" señalando que los 4 huecos de "Fotos mensuales" no daban ninguna indicación de cómo añadir una foto.
+
+- `renderFotosProgreso()`: cada slot vacío añade ahora un `.photo-slot-hint` ("+ Añadir foto", en `var(--brasa)`) entre el icono de cámara y la etiqueta "Mes N".
+- Nuevo párrafo `.field-hint` justo encima de `#photosGrid` explicando que se puede tocar cualquier hueco para subir una foto desde el dispositivo, que se guardan solo localmente y que sirven para ver la evolución mes a mes.
+- Nueva clase CSS `.photo-slot-hint` (DM Mono, 10px, mayúsculas, color `var(--brasa)`).
+
+Verificado en preview con la cuenta de test: los 4 huecos muestran "+ AÑADIR FOTO" en naranja bajo el icono de cámara, y el texto explicativo aparece sobre la rejilla. Sin errores de consola.
+
+### 66. Modal "Cambiar tu plan" dividido en dos pasos (preferencias vs. periodicidad de pago)
+La misma captura señalaba que la sección de precios (Mensual/Trimestral/Anual + "0,99€ primer mes") aparecía mezclada dentro del modal de "Cambiar objetivo/deporte", mezclando configuración funcional con decisión de compra.
+
+- `#modalCambiarPlan` se dividió en `#cpStep1` (todas las preferencias: tipo de plan, objetivo, enfoque nutricional, deporte, días, tiempo, nivel, lugar) y `#cpStep2` (nuevo paso "Confirma tu periodicidad de pago", con el campo `cp-periodicidad`/`#cpPrecioInfo` que antes estaba mezclado en el paso 1).
+- El botón final del paso 1 pasa de "Recalcular mi plan →" a "Continuar →" (`irPasoPrecioCambioPlan()`); el paso 2 añade "← Volver" (`volverPasoCambioPlan()`) y "Confirmar y recalcular →" (`guardarCambioPlan()`, sin cambios en su lógica de guardado).
+- Nuevas funciones: `irPasoPrecioCambioPlan()` valida que todos los campos del paso 1 estén rellenos (si no, muestra un toast), actualiza las opciones/precio de periodicidad y muestra el paso 2; `volverPasoCambioPlan()` vuelve al paso 1 sin perder lo seleccionado. `abrirModalCambiarPlan()` ahora resetea siempre a `#cpStep1` visible / `#cpStep2` oculto al abrir el modal.
+
+Verificado en preview con la cuenta de test: el modal abre mostrando solo las preferencias (sin precios); "Continuar →" pasa al paso de periodicidad de pago; "← Volver" regresa al paso 1 conservando la selección; "Confirmar y recalcular →" recalcula el plan y cierra el modal. Sin errores de consola.
+
+### 67. Feedback de hora al marcar un entrenamiento como completado
+La misma captura señalaba que el botón "✓ Completado" no indicaba si lo había marcado el usuario ni cuándo.
+
+- `toggleEntrenoCompletado()` guarda ahora `userData.horaCompletado[fecha]` (hora local `HH:MM`) al marcar un entrenamiento como completado, y la elimina si se desmarca.
+- `actualizarEstadoCompletado()`: cuando el entrenamiento de hoy está completado, el texto de `#entrenoCompletadoBadge` pasa de "Entrenamiento de hoy completado. Buen trabajo." a "Marcado como completado hoy a las HH:MM. Buen trabajo." si existe la hora guardada.
+
+Verificado en preview con la cuenta de test: al pulsar "✓ Marcar como completado" el botón cambia a "✓ Completado" y el badge muestra "Marcado como completado hoy a las HH:MM. Buen trabajo.". Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
+### Revisión de los otros 3 puntos de la captura "ERRORES Y PROBLEMAS DETECTADOS"
+- **"Scrollbar naranja huérfana"**: no se ha encontrado ningún elemento, estilo o scrollbar real en el código que coincida (la hoja de estilos solo define un scrollbar gris `var(--humo)`, global). Durante la verificación con las herramientas de preview se reprodujo una línea naranja similar, pero resultó ser un artefacto de renderizado del navegador de previsualización (apareció junto con un "tiling" completo de la página) y desapareció tras recargar; no parece un bug del código.
+- **"Datos de peso incongruentes" (Press inclinado 52kg/Fondos 36kg con historial vs. Press plano/Sentadilla 2.5kg)**: la cuenta de test no tiene datos de pesos sembrados, así que esos valores son datos reales introducidos en una cuenta real al probar el nuevo selector de pesos. No es un bug de código; si se quiere, se puede limpiar/editar ese historial manualmente desde "Mi progreso".
+- **"Texto gris sobre oscuro"**: revisado `.stat-card-sub` (usado en "tu meta", "tu disciplina", "de tu proceso", etc.) — su color ya es `var(--blanco-puro)` (#FFFFFF) sobre `var(--carbon)` (#141414), ratio de contraste ~21:1 (máximo). Parece ya resuelto en el código actual; si en producción se sigue viendo gris claro, puede ser caché del navegador/CDN de una versión anterior.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
