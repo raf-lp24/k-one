@@ -5474,11 +5474,11 @@
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
       <div class="ejercicio-fila-controls">
-        <div class="peso-stepper">
-          <button type="button" class="peso-btn" onclick="ajustarPeso(this,-2.5)" aria-label="Restar 2,5 kg">−</button>
+        <div class="peso-stepper" onclick="event.stopPropagation()">
+          <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
           <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
-            data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onchange="guardarPesoEjercicio(this)">
-          <button type="button" class="peso-btn" onclick="ajustarPeso(this,2.5)" aria-label="Sumar 2,5 kg">+</button>
+            data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
+          <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,1.5)" aria-label="Sumar 1,5 kg">+</button>
           <span class="peso-unit">kg</span>
         </div>
         <div class="peso-mini-historial" data-ejercicio="${key}">${miniHistorial}</div>

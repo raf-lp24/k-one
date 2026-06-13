@@ -801,6 +801,14 @@ El usuario pidió: (a) que las semanas de entrenamiento cuenten desde la fecha d
 
 Verificado en escritorio y móvil (375px) sin desbordamiento horizontal ni errores de consola. Cuenta de test restaurada a su estado original tras las pruebas.
 
+### 71. Pesos en pasos de 1,5 kg y el +/- ya no colapsa el día en el plan semanal
+El usuario pidió que los botones +/- del selector de peso sumen/resten de 1,5 en 1,5 (antes 2,5) y reportó que al pulsar "+" dentro del plan semanal la fila del día se cerraba ("se sale para atrás").
+
+- `formatearSesion()` (plantilla del `.peso-stepper`): el `delta` de los botones pasa de `±2.5` a `±1.5`, con sus `aria-label` actualizados ("Sumar/Restar 1,5 kg").
+- Causa del colapso: el clic en los botones/input se propagaba hasta el `onclick="toggleWeekDay(this)"` de `.week-day-row`, que cierra el día. Solución: `event.stopPropagation()` en `.peso-stepper` (contenedor), en cada `.peso-btn` y en el `.peso-input`, para que interactuar con el peso no plegue la tarjeta del día.
+
+Verificado en preview con la cuenta de test: en el plan semanal, con un día expandido, pulsar "+" suma 1,5 kg (0 → 1,5 → 3) y "−" resta 1,5, y la fila permanece expandida en ambos casos. Sin errores de consola. Cuenta de test restaurada tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
