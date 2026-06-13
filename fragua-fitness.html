@@ -1877,21 +1877,18 @@
   }
   .peso-progreso-diff.up { color: var(--brasa); }
 
-  .peso-progreso-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
+  .peso-line-chart {
+    width: 140px;
     height: 48px;
     flex-shrink: 0;
   }
 
-  .peso-bar {
-    width: 10px;
-    min-height: 6px;
-    background: var(--humo);
-    border-radius: 2px 2px 0 0;
+  .peso-line-chart-empty {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--metal);
+    max-width: 140px;
   }
-  .peso-bar:last-child { background: var(--brasa); }
 
   .week-day-rest-msg { font-style: italic; opacity: 0.7; align-self: center; font-size: 13px; color: var(--metal); }
 
@@ -1991,6 +1988,70 @@
     color: var(--brasa);
   }
 
+  .meal-block-count {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+    color: var(--metal);
+    text-transform: uppercase;
+  }
+
+  /* MINIATURAS DE LAS OPCIONES, SIEMPRE VISIBLES (sin expandir) */
+  .meal-preview-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .meal-preview-pill {
+    padding: 12px 14px;
+    background: var(--grafito);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meal-preview-pill:hover { background: var(--acero); }
+
+  .meal-preview-pill.selected {
+    border-color: var(--brasa);
+    background: rgba(232,73,15,0.06);
+  }
+
+  .meal-preview-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--metal);
+    text-transform: uppercase;
+  }
+
+  .meal-preview-pill.selected .meal-preview-num { color: var(--brasa); }
+
+  .meal-preview-name {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meal-preview-kcal {
+    font-size: 10px;
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 900px) {
+    .meal-preview-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
   .meal-options {
     display: none;
     grid-template-columns: repeat(4, 1fr);
@@ -2080,6 +2141,78 @@
     display: none;
   }
   .subst-modal.visible { display: flex; }
+
+  /* TOUR DE BIENVENIDA */
+  .onboarding-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+    padding: 24px;
+  }
+
+  .onboarding-modal.visible { display: flex; }
+
+  .onboarding-box {
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-top: 3px solid var(--brasa);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .onboarding-step-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--metal);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .onboarding-icon { font-size: 36px; margin-bottom: 12px; }
+
+  .onboarding-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .onboarding-text {
+    font-size: 14px;
+    color: var(--metal-claro);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .onboarding-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--humo);
+  }
+
+  .onboarding-dot.active { background: var(--brasa); }
+
+  .onboarding-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
 
   .subst-box {
     background: var(--carbon);
@@ -2310,6 +2443,96 @@
   }
 
   .ai-response.visible { display: block; }
+
+  /* RESUMEN/CIERRE DEL CHECK-IN */
+  .checkin-summary {
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    padding: 40px;
+    display: none;
+  }
+
+  .checkin-summary.visible { display: block; }
+
+  .checkin-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .checkin-summary-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    background: var(--brasa);
+    color: var(--blanco-puro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .checkin-summary-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+  }
+
+  .checkin-summary-sub {
+    font-size: 12px;
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .checkin-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin-bottom: 24px;
+    background: var(--humo);
+  }
+
+  .checkin-summary-stat {
+    background: var(--grafito);
+    padding: 16px 14px;
+    text-align: center;
+  }
+
+  .checkin-summary-stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--brasa);
+  }
+
+  .checkin-summary-stat-label {
+    font-size: 10px;
+    color: var(--metal);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .checkin-summary-adjust {
+    font-size: 13px;
+    padding: 14px 18px;
+    background: rgba(232,73,15,0.08);
+    border-left: 3px solid var(--brasa);
+    margin-bottom: 4px;
+  }
+
+  .checkin-summary-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    .checkin-summary-stats { grid-template-columns: repeat(2, 1fr); }
+    .checkin-summary { padding: 24px; }
+  }
 
   .ai-label {
     font-family: 'DM Mono', monospace;
@@ -2598,6 +2821,23 @@
     input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
     select,
     textarea { font-size: 16px !important; }
+
+    /* DASHBOARD: el sidebar fijo de 260px ocupa ~1/3 de una tablet,
+       pasa a menú lateral oculto (hamburguesa) igual que en móvil */
+    .dash-layout { grid-template-columns: 1fr; }
+    .dash-sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 80%;
+      max-width: 300px;
+      height: 100vh;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .dash-sidebar.open { transform: translateX(0); }
+    .dash-mobile-bar { display: flex; }
+    .dash-main { padding: 28px; }
   }
 
   /* RESPONSIVE básico */
@@ -2636,19 +2876,6 @@
     }
     .form-nav-note { display: none; }
     .form-nav .btn-primary { flex: 1; text-align: center; }
-    .dash-layout { grid-template-columns: 1fr; }
-    .dash-sidebar {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 80%;
-      max-width: 300px;
-      height: 100vh;
-      z-index: 200;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-    }
-    .dash-sidebar.open { transform: translateX(0); }
-    .dash-mobile-bar { display: flex; }
     .dash-main { padding: 20px; }
     .week-day-row { flex-direction: column; gap: 16px; }
     .week-day-info { flex: none; }
@@ -3063,6 +3290,21 @@
   <div class="loading-logo">K-<span>ONE</span></div>
   <div class="loading-bar"></div>
   <div class="loading-text" id="loadingText">Analizando tu perfil...</div>
+</div>
+
+<!-- TOUR DE BIENVENIDA (DÍA 1) -->
+<div class="onboarding-modal" id="onboardingModal">
+  <div class="onboarding-box">
+    <div class="onboarding-step-label" id="onboardingStepLabel">Paso 1 de 5</div>
+    <div class="onboarding-icon" id="onboardingIcon">⚡</div>
+    <h3 class="onboarding-title" id="onboardingTitle">Hoy</h3>
+    <p class="onboarding-text" id="onboardingText"></p>
+    <div class="onboarding-dots" id="onboardingDots"></div>
+    <div class="onboarding-actions">
+      <button class="btn-ghost" onclick="skipOnboarding()">Saltar tour</button>
+      <button class="btn-primary" id="onboardingNextBtn" onclick="nextOnboardingStep()">Siguiente →</button>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== BIENVENIDA ==================== -->
@@ -4385,6 +4627,11 @@
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
           <div class="stat-card" style="flex:1;min-width:200px">
+            <div class="stat-card-label">Racha</div>
+            <div class="stat-card-value" id="rachaDias" style="color:var(--brasa)">🔥 0</div>
+            <div class="stat-card-sub" id="rachaDiasLabel">días seguidos entrenando</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:200px">
             <div class="stat-card-label">Días restantes</div>
             <div class="stat-card-value" id="diasRestantesPlan">—</div>
             <div class="stat-card-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
@@ -4513,7 +4760,7 @@
           <p class="dash-subtitle">Cinco minutos. Cuéntanos tu semana y adaptamos el plan.</p>
         </div>
 
-        <div class="checkin-card">
+        <div class="checkin-card" id="checkinForm">
           <div class="checkin-header">
             <div class="checkin-title">Check-in semanal</div>
             <div class="checkin-week" id="checkinWeekRange">Semana del 9 al 15 de junio</div>
@@ -4568,9 +4815,24 @@
           </div>
         </div>
 
-        <div class="ai-response" id="checkinResponse">
-          <div class="ai-label">// K-One responde</div>
-          <div class="ai-text" id="checkinResponseText"></div>
+        <div class="checkin-summary" id="checkinSummary">
+          <div class="checkin-summary-header">
+            <div class="checkin-summary-icon">✓</div>
+            <div>
+              <div class="checkin-summary-title">Check-in completado</div>
+              <div class="checkin-summary-sub" id="checkinSummarySemana">Resumen de tu semana</div>
+            </div>
+          </div>
+          <div class="checkin-summary-stats" id="checkinSummaryStats"></div>
+          <div class="checkin-summary-adjust" id="checkinSummaryAdjust"></div>
+          <div class="ai-response visible" id="checkinResponse">
+            <div class="ai-label">// K-One responde</div>
+            <div class="ai-text" id="checkinResponseText"></div>
+          </div>
+          <div class="checkin-summary-actions">
+            <button class="btn-primary" onclick="showSection('semana')">Ver mi plan de la semana que viene →</button>
+            <button class="btn-ghost" onclick="resetCheckinForm()">Editar mis respuestas</button>
+          </div>
         </div>
       </div>
 
@@ -5023,7 +5285,59 @@
       }
 
       goTo('dashboard');
+      if (!userData.onboardingCompletado) startOnboarding();
     }, 4500);
+  }
+
+  // ===== TOUR DE BIENVENIDA (DÍA 1) =====
+  const ONBOARDING_STEPS = [
+    { section: 'hoy', icon: '⚡', title: 'Hoy', text: 'Aquí tienes tu entrenamiento de hoy explicado paso a paso. Cuando lo termines, márcalo como completado: eso es lo que empieza tu racha.' },
+    { section: 'semana', icon: '📅', title: 'Plan semanal', text: 'Consulta toda tu semana de un vistazo, y las próximas semanas de tu plan, que se irán ajustando según tu progreso.' },
+    { section: 'nutricion', icon: '🥗', title: 'Nutrición', text: 'Cada comida tiene 4 opciones para elegir la que más te apetezca. Toca cualquier ingrediente para sustituirlo si no te gusta o no lo tienes.' },
+    { section: 'checkin', icon: '✓', title: 'Check-in semanal', text: 'Cada semana cuéntanos cómo te fue (días entrenados, energía, sensaciones) y ajustamos tu plan de la semana siguiente automáticamente.' },
+    { section: 'progreso', icon: '📈', title: 'Mi progreso', text: 'Aquí verás tu evolución: pesos, fotos e hitos conseguidos. Cuanto más registres, más útil será.' }
+  ];
+  let onboardingStepIdx = 0;
+
+  function startOnboarding() {
+    onboardingStepIdx = 0;
+    document.getElementById('onboardingModal').classList.add('visible');
+    renderOnboardingStep();
+  }
+
+  function renderOnboardingStep() {
+    const step = ONBOARDING_STEPS[onboardingStepIdx];
+    showSection(step.section);
+    document.getElementById('onboardingIcon').textContent = step.icon;
+    document.getElementById('onboardingTitle').textContent = step.title;
+    document.getElementById('onboardingText').textContent = step.text;
+    document.getElementById('onboardingStepLabel').textContent = `Paso ${onboardingStepIdx + 1} de ${ONBOARDING_STEPS.length}`;
+    document.getElementById('onboardingNextBtn').textContent = onboardingStepIdx === ONBOARDING_STEPS.length - 1 ? 'Empezar →' : 'Siguiente →';
+    document.getElementById('onboardingDots').innerHTML = ONBOARDING_STEPS.map((_, i) =>
+      `<span class="onboarding-dot ${i === onboardingStepIdx ? 'active' : ''}"></span>`).join('');
+  }
+
+  function nextOnboardingStep() {
+    if (onboardingStepIdx < ONBOARDING_STEPS.length - 1) {
+      onboardingStepIdx++;
+      renderOnboardingStep();
+    } else {
+      finishOnboarding();
+    }
+  }
+
+  function skipOnboarding() {
+    finishOnboarding();
+  }
+
+  function finishOnboarding() {
+    document.getElementById('onboardingModal').classList.remove('visible');
+    showSection('hoy');
+    userData.onboardingCompletado = true;
+    const user = getCurrentUser();
+    if (user && user.email !== 'demo@fragua.es') {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
   }
 
   // ===== ESTRUCTURA COMPLETA DE UNA SESIÓN (calentamiento + bloque + vuelta a la calma) =====
@@ -5813,6 +6127,13 @@
       return (guardada !== undefined && guardada < meal.opciones.length) ? guardada : 0;
     });
     generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      const previewHTML = meal.opciones.map((opt, optIdx) => `
+        <div class="meal-preview-pill ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="event.stopPropagation(); selectMealOptionPreview(${mealIdx}, ${optIdx})">
+          <div class="meal-preview-num">Opción ${optIdx + 1}</div>
+          <div class="meal-preview-name">${opt.nombre}</div>
+          <div class="meal-preview-kcal">🔥 ${opt.kcal}</div>
+        </div>`).join('');
+
       const optionsHTML = meal.opciones.map((opt, optIdx) => {
         // Convertir ingredientes en tags clicables
         const ingredTags = opt.ingredientes.split(',').map((ing, ingredIdx) => {
@@ -5841,13 +6162,15 @@
           <div class="meal-block-header" onclick="toggleMealBlock(${mealIdx})">
             <div class="meal-block-left">
               <div class="meal-block-title">${meal.momento}</div>
-              <div class="meal-block-selected" id="mealSelected${mealIdx}">${meal.opciones[comidasSeleccionadas[mealIdx]].nombre}</div>
+              <div class="meal-block-selected" id="mealSelected${mealIdx}">Elegida: ${meal.opciones[comidasSeleccionadas[mealIdx]].nombre}</div>
             </div>
             <div class="meal-block-right">
               <div class="meal-block-why">${meal.porque}</div>
+              <div class="meal-block-count">${meal.opciones.length} opciones · toca para ver detalles</div>
               <div class="meal-block-toggle">▾</div>
             </div>
           </div>
+          <div class="meal-preview-row" id="mealPreview${mealIdx}">${previewHTML}</div>
           <div class="meal-options" id="mealOptions${mealIdx}">${optionsHTML}</div>
         </div>`;
     });
@@ -5934,17 +6257,50 @@
     // Actualizar contador de días entrenados esta semana
     const statDias = document.getElementById('statDiasEntrenados');
     if (statDias) statDias.textContent = (userData.entrenosCompletados || []).length;
+
+    actualizarRacha();
+  }
+
+  // ===== RACHA DE DÍAS SEGUIDOS ENTRENANDO =====
+  // Se basa en historialEntrenos, un registro persistente de todos los días completados
+  // (a diferencia de entrenosCompletados, que se reinicia cada semana tras el check-in).
+  function calcularRachaDias() {
+    const historial = new Set(userData.historialEntrenos || []);
+    if (historial.size === 0) return 0;
+    const cursor = new Date();
+    if (!historial.has(getFechaHoyISO())) cursor.setDate(cursor.getDate() - 1);
+    let racha = 0;
+    while (true) {
+      const iso = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+      if (!historial.has(iso)) break;
+      racha++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return racha;
+  }
+
+  function actualizarRacha() {
+    const el = document.getElementById('rachaDias');
+    const label = document.getElementById('rachaDiasLabel');
+    if (!el) return;
+    const racha = calcularRachaDias();
+    el.textContent = `🔥 ${racha}`;
+    if (label) label.textContent = racha === 1 ? 'día seguido entrenando' : 'días seguidos entrenando';
   }
 
   function toggleEntrenoCompletado() {
     const hoy = getFechaHoyISO();
     if (!userData.entrenosCompletados) userData.entrenosCompletados = [];
+    if (!userData.historialEntrenos) userData.historialEntrenos = [];
     const idx = userData.entrenosCompletados.indexOf(hoy);
+    const idxHist = userData.historialEntrenos.indexOf(hoy);
     if (idx === -1) {
       userData.entrenosCompletados.push(hoy);
+      if (idxHist === -1) userData.historialEntrenos.push(hoy);
       showToast('Entrenamiento de hoy marcado como completado. ¡Buen trabajo!');
     } else {
       userData.entrenosCompletados.splice(idx, 1);
+      if (idxHist !== -1) userData.historialEntrenos.splice(idxHist, 1);
     }
     actualizarEstadoCompletado();
 
@@ -6235,10 +6591,6 @@
 
     cont.innerHTML = entries.map(e => {
       const hist = e.historial || [];
-      const max = Math.max(...hist.map(h => h.peso), 1);
-      const barras = hist.slice(-8).map(h =>
-        `<div class="peso-bar" style="height:${Math.max(8, Math.round((h.peso / max) * 100))}%" title="${h.fecha}: ${h.peso} kg"></div>`
-      ).join('');
       const primero = hist[0]?.peso;
       let diffHTML = '';
       if (primero != null && hist.length > 1) {
@@ -6252,9 +6604,38 @@
             <div class="peso-progreso-actual">${e.peso} kg</div>
             ${diffHTML}
           </div>
-          <div class="peso-progreso-bars">${barras}</div>
+          ${pesosLineChartHTML(hist)}
         </div>`;
     }).join('');
+  }
+
+  // Mini-gráfico de línea con la evolución de las últimas semanas para un ejercicio
+  function pesosLineChartHTML(hist) {
+    const data = hist.slice(-6);
+    if (data.length < 2) {
+      return '<div class="peso-line-chart-empty">Sigue registrando pesos para ver tu evolución aquí</div>';
+    }
+    const w = 140, h = 48, pad = 5;
+    const pesos = data.map(d => d.peso);
+    const min = Math.min(...pesos), max = Math.max(...pesos);
+    const range = max - min || 1;
+    const stepX = (w - pad * 2) / (data.length - 1);
+    const points = data.map((d, i) => ({
+      x: pad + i * stepX,
+      y: pad + (h - pad * 2) * (1 - (d.peso - min) / range),
+      fecha: d.fecha,
+      peso: d.peso
+    }));
+    const linePoints = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const dots = points.map((p, i) => `
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i === points.length - 1 ? 3.5 : 2}" style="fill:${i === points.length - 1 ? 'var(--brasa)' : 'var(--metal)'}">
+        <title>${p.fecha}: ${p.peso} kg</title>
+      </circle>`).join('');
+    return `
+      <svg class="peso-line-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <polyline points="${linePoints}" fill="none" style="stroke:var(--brasa)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        ${dots}
+      </svg>`;
   }
 
   // ===== NOTAS / AGENDA =====
@@ -6388,7 +6769,37 @@
 
       responseText.textContent = respuesta;
       showToast('Check-in registrado. Tu plan de la semana que viene ya está actualizado.');
+
+      // ===== PANTALLA DE CIERRE: resumen de la semana =====
+      document.getElementById('checkinSummaryStats').innerHTML = `
+        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${dias}</div><div class="checkin-summary-stat-label">Días entrenados</div></div>
+        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${fisico}</div><div class="checkin-summary-stat-label">Físico</div></div>
+        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${energia}/5</div><div class="checkin-summary-stat-label">Energía</div></div>
+        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${mente}</div><div class="checkin-summary-stat-label">Cabeza</div></div>
+      `;
+      const adjustEl = document.getElementById('checkinSummaryAdjust');
+      if (ajuste < 0) {
+        adjustEl.textContent = '📉 Tu plan de la semana que viene baja un poco el volumen, para que puedas recuperar bien.';
+      } else if (ajuste > 0) {
+        adjustEl.textContent = '📈 Tu plan de la semana que viene sube ligeramente el reto: vienes con buen ritmo.';
+      } else {
+        adjustEl.textContent = '➡️ Tu plan de la semana que viene se mantiene en el mismo nivel.';
+      }
+      document.getElementById('checkinSummarySemana').textContent = `Resumen de la semana ${progresoActual.semana}`;
+      document.getElementById('checkinForm').style.display = 'none';
+      const summaryEl = document.getElementById('checkinSummary');
+      summaryEl.classList.add('visible');
+      summaryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 1200);
+  }
+
+  // Volver al formulario del check-in (por si el usuario quiere corregir respuestas)
+  function resetCheckinForm() {
+    document.getElementById('checkinSummary').classList.remove('visible');
+    document.getElementById('checkinForm').style.display = '';
+    document.getElementById('checkinResponse').classList.remove('visible');
+    document.querySelectorAll('.checkin-card .rating-btn.selected').forEach(b => b.classList.remove('selected'));
+    document.getElementById('checkinNota').value = '';
   }
 
   // ===== CAMBIAR OBJETIVO / DEPORTE: recalcula entrenamiento, nutrición y plan semanal =====
@@ -6563,8 +6974,24 @@
     block.querySelectorAll('.meal-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
     const nombre = el.querySelector('.meal-opt-name')?.textContent;
+    aplicarSeleccionComida(mealIdx, optIdx, nombre);
+  }
+
+  // Selección desde las miniaturas (sin expandir el bloque)
+  function selectMealOptionPreview(mealIdx, optIdx) {
+    const previewRow = document.getElementById('mealPreview' + mealIdx);
+    previewRow?.querySelectorAll('.meal-preview-pill').forEach((p, i) => p.classList.toggle('selected', i === optIdx));
+
+    const optionsBlock = document.getElementById('mealOptions' + mealIdx);
+    optionsBlock?.querySelectorAll('.meal-option').forEach((o, i) => o.classList.toggle('selected', i === optIdx));
+
+    const nombre = generatedPlan.nutricion[mealIdx]?.opciones[optIdx]?.nombre;
+    aplicarSeleccionComida(mealIdx, optIdx, nombre);
+  }
+
+  function aplicarSeleccionComida(mealIdx, optIdx, nombre) {
     const label = document.getElementById('mealSelected' + mealIdx);
-    if (label && nombre) label.textContent = nombre;
+    if (label && nombre) label.textContent = `Elegida: ${nombre}`;
 
     comidasSeleccionadas[mealIdx] = optIdx;
     userData.comidasSeleccionadas = comidasSeleccionadas;
@@ -7201,7 +7628,8 @@
         dieta: 'Como de todo', noComida: '', comidas: '3 veces', cocina: 'Casi siempre en casa',
         objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
         deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
-        nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio'
+        nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio',
+        onboardingCompletado: true
       };
       const testPlan = buildPlanFromData(testUserData);
       saveUserData(TEST_EMAIL, { userData: testUserData, plan: testPlan, savedAt: new Date().toISOString() });

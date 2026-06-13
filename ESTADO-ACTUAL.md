@@ -673,6 +673,63 @@ El usuario envió varias capturas/vídeos desde su iPhone donde toda la web (lan
 
 Verificado en preview a 375px: campos de login, `.peso-input` (el stepper sigue cabiendo, fila de 295px en viewport de 375px) y formulario de email a 16px, sin desbordamiento (`scrollWidth === clientWidth`); a 1440px los campos mantienen 14px. Sin errores de consola. Cuenta de test restaurada tras la prueba.
 
+### 59. Sidebar del dashboard oculto también en tablets (igual que en móvil)
+El usuario compartió una captura "QUÉ MEJORARÍA" señalando que en tablets el sidebar fijo del dashboard ocupaba aproximadamente un tercio del ancho de la pantalla.
+
+- El patrón "off-canvas" (sidebar oculto con `transform: translateX(-100%)`, botón hamburguesa `.dash-mobile-bar`, clase `.open` para mostrarlo) que ya existía solo en `@media (max-width: 768px)` se extendió a `@media (max-width: 1024px)`: `.dash-layout { grid-template-columns: 1fr; }`, `.dash-sidebar` pasa a `position: fixed`, `width: 80%` (máx. 300px), `z-index: 200` y `.dash-mobile-bar { display: flex; }`.
+- `.dash-main` pasa a `padding: 28px` en este rango (768px sigue sobrescribiéndolo a `20px` para móviles).
+
+Verificado en preview a 800px (tablet): el sidebar queda oculto, aparece el botón hamburguesa y se abre/cierra correctamente sobre el contenido; a 1440px el layout de escritorio no cambia. Sin errores de consola. No requiere restaurar cuenta de test (solo estilos).
+
+### 60. Gráfica de líneas real para "Progresión de pesos"
+El usuario pidió gráficas de progreso "reales" en lugar de las barras simples de la tarjeta de cada ejercicio en "Mi progreso".
+
+- Nueva función `pesosLineChartHTML(hist)`: genera un SVG (`viewBox="0 0 140 48"`) con un `<polyline>` y un `<circle>` por cada uno de los últimos 4-6 registros de peso, escalados según el mínimo/máximo del historial; el último punto se resalta en `var(--brasa)` (vía `style="fill:..."`/`style="stroke:..."` para que la variable CSS se resuelva en SVG), los anteriores en `var(--metal)`. Si hay menos de 2 registros, muestra un mensaje (`.peso-line-chart-empty`) en su lugar.
+- `renderPesosProgreso()` ahora llama a `pesosLineChartHTML(hist)` en vez de generar las antiguas `.peso-bar`/`.peso-progreso-bars` (eliminadas del CSS).
+- Nuevas clases CSS: `.peso-line-chart` (140x48px) y `.peso-line-chart-empty`.
+
+Verificado en preview con la cuenta de test (historial de ejemplo de 6 semanas en "Press banca"): la gráfica de líneas se renderiza correctamente con el último punto en naranja, sin errores de consola, en escritorio y móvil (375px). Cuenta de test restaurada a su estado original tras la prueba.
+
+### 61. Vista previa de las opciones de comida en "Nutrición" sin necesidad de expandir
+El usuario pidió poder ver de un vistazo las alternativas de cada comida sin tener que desplegar cada bloque.
+
+- Cada `.meal-block` añade ahora `.meal-block-count` ("X opciones · toca para ver detalles") y, antes de `.meal-options`, una nueva fila `.meal-preview-row` (`#mealPreview${mealIdx}`) con una píldora `.meal-preview-pill` por cada una de las 4 alternativas (nombre + kcal), en grid de 4 columnas (2 columnas por debajo de 900px).
+- Cada píldora es clicable (`selectMealOptionPreview(mealIdx, optIdx)`, con `event.stopPropagation()` para no abrir/cerrar el bloque) y selecciona esa opción directamente; la píldora seleccionada recibe la clase `.meal-preview-pill.selected`.
+- `selectMealOption(el, mealIdx, optIdx)` se refactorizó para delegar en una nueva función común `aplicarSeleccionComida(mealIdx, optIdx, nombre)`, que `selectMealOptionPreview` también usa, sincronizando tanto las píldoras de vista previa como las tarjetas `.meal-option` expandidas. El texto de la comida elegida pasa a "Elegida: ${nombre}".
+- Nuevas clases CSS: `.meal-block-count`, `.meal-preview-row`, `.meal-preview-pill`, `.meal-preview-pill.selected`, `.meal-preview-num`, `.meal-preview-name` (line-clamp 2 líneas), `.meal-preview-kcal`.
+
+Verificado en preview con la cuenta de test: las 4 píldoras de cada comida muestran nombre y kcal sin expandir el bloque; al pulsar una píldora se marca como seleccionada y se sincroniza con la tarjeta expandida correspondiente. Verificado en escritorio (4 columnas) y tablet/móvil (2 columnas), sin desbordamiento. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
+### 62. Pantalla de resumen al completar el check-in semanal
+El usuario pidió un feedback más claro justo después de enviar el check-in semanal, en vez de solo una respuesta de texto.
+
+- Nuevo bloque `#checkinSummary` (`.checkin-summary`, oculto por defecto, clase `.visible` para mostrarlo) que sustituye visualmente a `#checkinForm` (ahora con `id="checkinForm"`) tras enviar el check-in. Incluye: cabecera con icono ✓, título "Check-in completado" y `#checkinSummarySemana` ("Resumen de la semana N"); una rejilla `#checkinSummaryStats` de 4 estadísticas (días entrenados, físico, energía, cabeza); `#checkinSummaryAdjust` con un mensaje sobre el ajuste aplicado al plan; la respuesta de la IA (`#checkinResponse`, antes `.ai-response`) ahora anidada y siempre visible; y `.checkin-summary-actions` con dos botones ("Ver plan de la semana" → `showSection('semana')`, y "Hacer otro check-in" → `resetCheckinForm()`).
+- `submitCheckin()`: en el `setTimeout` existente, además de la lógica previa, ahora rellena `#checkinSummaryStats` y `#checkinSummaryAdjust` (según `ajuste` sea -1/0/+1), pone el texto de `#checkinSummarySemana`, oculta `#checkinForm` y muestra/hace scroll a `#checkinSummary`.
+- Nueva función `resetCheckinForm()`: oculta el resumen, vuelve a mostrar el formulario y limpia las valoraciones y el textarea para un nuevo check-in.
+- Nuevas clases CSS: `.checkin-summary`, `.checkin-summary.visible`, `.checkin-summary-header`, `.checkin-summary-icon`, `.checkin-summary-title`, `.checkin-summary-sub`, `.checkin-summary-stats` (grid 4 columnas, 2 por debajo de 600px), `.checkin-summary-stat`, `.checkin-summary-stat-value`, `.checkin-summary-stat-label`, `.checkin-summary-adjust`, `.checkin-summary-actions`.
+
+Verificado en preview con la cuenta de test: al enviar un check-in se oculta el formulario y aparece la pantalla de resumen con las 4 estadísticas, el mensaje de ajuste del plan y los dos botones de acción; "Hacer otro check-in" devuelve al formulario vacío. Verificado en escritorio y móvil (375px, estadísticas en 2 columnas), sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
+### 63. Racha de días entrenando ("🔥 X días seguidos")
+El usuario pidió un elemento de gamificación tipo "racha de días" junto a "Días restantes".
+
+- Nueva tarjeta de estadística antes de "Días restantes": `#rachaDias` ("🔥 0") con etiqueta `#rachaDiasLabel` ("días seguidos entrenando"), color `var(--brasa)`.
+- Nuevo array persistente `userData.historialEntrenos` (a diferencia de `entrenosCompletados`, que se vacía cada semana tras el check-in, este nunca se resetea), actualizado por `toggleEntrenoCompletado()` en paralelo al array semanal.
+- Nueva función `calcularRachaDias()`: cuenta los días consecutivos en `historialEntrenos` terminando hoy o ayer (para no romper la racha si todavía no se ha entrenado hoy). Nueva función `actualizarRacha()`: actualiza `#rachaDias`/`#rachaDiasLabel` (con singular/plural) y se llama desde `actualizarEstadoCompletado()`.
+
+Verificado en preview con la cuenta de test: al marcar entrenos completados en días consecutivos (simulando `historialEntrenos`), la racha se actualiza correctamente y el texto pluraliza bien ("1 día" / "X días"). Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
+### 64. Tour guiado del primer día (onboarding) tras generar el plan
+El usuario pidió dar contexto al usuario nuevo justo después de generar su plan, para que entienda dónde encontrar cada cosa.
+
+- Nuevo modal `#onboardingModal` (`.onboarding-modal`, `z-index: 400`, clase `.visible` para mostrarlo) con `.onboarding-box`: paso actual, icono, título, texto, puntos de progreso (`.onboarding-dots`/`.onboarding-dot`/`.onboarding-dot.active`) y acciones ("Saltar" → `skipOnboarding()`, "Siguiente"/"Empezar" → `nextOnboardingStep()`).
+- Nuevo array `ONBOARDING_STEPS` con 5 pasos (Hoy, Plan semanal, Nutrición, Check-in, Progreso), cada uno con icono/título/texto explicando esa sección del dashboard.
+- Nuevas funciones `startOnboarding()`, `renderOnboardingStep()`, `nextOnboardingStep()`, `skipOnboarding()` y `finishOnboarding()` (marca `userData.onboardingCompletado = true`, lo persiste con `saveUserData` si no es el usuario demo, y muestra la sección "Hoy").
+- En `generatePlan()`, justo después de `goTo('dashboard')`, se añade `if (!userData.onboardingCompletado) startOnboarding();` — el tour solo se dispara la primera vez, justo tras generar el plan (el verdadero "día 1").
+- `ensureTestAccount()` siembra `onboardingCompletado: true` en los datos de la cuenta de test, para que no aparezca el tour durante las pruebas habituales.
+
+Verificado en preview generando un plan nuevo desde el cuestionario: el modal aparece automáticamente con los 5 pasos, "Saltar" y "Siguiente"/"Empezar" funcionan correctamente y al finalizar se muestra la sección "Hoy"; en la cuenta de test (con `onboardingCompletado: true`) el tour no aparece. Verificado en escritorio y móvil (375px), sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
