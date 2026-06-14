@@ -15,12 +15,14 @@ function readRawBody(req) {
 
 // Actualiza (o crea) la fila de subscriptions a partir de una suscripción de Stripe.
 async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
+  const item = subscription.items.data[0];
+  const periodEnd = item?.current_period_end ?? subscription.current_period_end;
   const row = {
     stripe_customer_id: subscription.customer,
     stripe_subscription_id: subscription.id,
-    plan: subscription.items.data[0]?.price?.id || null,
+    plan: item?.price?.id || null,
     status: subscription.status,
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+    current_period_end: new Date(periodEnd * 1000).toISOString()
   };
 
   if (userId) {
@@ -58,7 +60,7 @@ module.exports = async (req, res) => {
     }
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
-      const subscription = event.data.object;
+      const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
       await upsertFromSubscription(supabaseAdmin, subscription, null);
       break;
     }
