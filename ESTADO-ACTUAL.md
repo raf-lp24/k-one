@@ -935,6 +935,37 @@ Antes el avatar del sidebar solo mostraba la inicial del nombre y no se podía c
 
 Verificado en preview: con foto se aplica `has-photo` + `background-image` y se oculta la inicial; sin foto vuelve a la inicial; el flujo real con un archivo de imagen sintético redimensiona a 256×256, produce JPEG y lo persiste. Sin errores de consola.
 
+### 82. Stripe en producción: configuración completada, probado end-to-end y arreglo del webhook (API "dahlia")
+Se completaron los pasos pendientes del punto 78 (creación de productos/precios en Stripe, variables de entorno en Vercel, webhook y Portal de Clientes) y se probó el flujo de pago real de principio a fin con la tarjeta de test `4242 4242 4242 4242`. Durante la prueba se detectó y corrigió un fallo del webhook causado por la versión nueva de la API de Stripe.
+
+**Productos y precios creados en Stripe (modo test).** En vez de 3 productos separados, se usan **2 productos** con varios precios cada uno:
+- **K-ONE — Plan completo** (`prod_UhhzHe1rdxhepx`), 4 precios recurrentes en EUR:
+  - Oferta del mes (primer mes): 0,99€/mes → `price_1TiIZJArPjnnOdT9v8qnqnCY` *(aún no la usa el código; reservada para la futura lógica de "primer mes a 0,99€ y luego precio normal", que requerirá un Subscription Schedule)*
+  - Mensual: 14,99€/mes → `price_1TiIa5ArPjnnOdT94UvnsP4P`
+  - Trimestral: 35,99€/3 meses → `price_1TiIa5ArPjnnOdT9KqyvbKu5`
+  - Anual: 99,99€/año → `price_1TiIa5ArPjnnOdT92XFvzouZ`
+- **Nutricion** (`prod_Uhi1fN9PETu0qE`), 1 precio:
+  - Mensual: 6,99€/mes → `price_1TiIbSArPjnnOdT9p8Obe6mn`
+
+**Variables de entorno configuradas en Vercel** (entornos Production + Preview; "Development" no es necesario porque no se usa `vercel dev` en local):
+- `STRIPE_PRICE_COMPLETO_MENSUAL`, `STRIPE_PRICE_COMPLETO_TRIMESTRAL`, `STRIPE_PRICE_COMPLETO_ANUAL`, `STRIPE_PRICE_NUTRICION_MENSUAL`, `STRIPE_PRICE_OFERTA_MES` (las 5 anteriores; el código usa las 4 primeras vía el mapeo de `api/_stripeHelpers.js`).
+- `STRIPE_SECRET_KEY` (clave secreta de Stripe, `sk_test_...` en modo test).
+- `SUPABASE_SERVICE_ROLE_KEY` (en proyectos nuevos de Supabase es la clave `sb_secret_...`, equivalente a la `service_role`; nunca va en el HTML).
+- `STRIPE_WEBHOOK_SECRET` (`whsec_...` del endpoint de webhook).
+
+**Webhook de Stripe.** Endpoint creado en Stripe → Developers → Webhooks apuntando a `https://k-one-six.vercel.app/api/stripe-webhook`, escuchando `checkout.session.completed`, `customer.subscription.updated` y `customer.subscription.deleted`. Su Signing secret se guardó como `STRIPE_WEBHOOK_SECRET` en Vercel.
+
+**Portal de Clientes** de Stripe activado (Settings → Billing → Customer portal) para que `api/create-portal-session.js` (botón "Gestionar suscripción") funcione.
+
+**Bug detectado y corregido — `current_period_end` en la API `2026-05-27.dahlia`.** En la prueba real, `checkout.session.completed` respondió 200 OK y creó bien la fila en `public.subscriptions` (`status: active`, `stripe_customer_id`, `stripe_subscription_id`), pero `customer.subscription.updated` devolvió **500**. Causa: en esta versión de la API de Stripe, el campo `current_period_end` **ya no está en la raíz del objeto suscripción**, sino dentro de `items.data[0].current_period_end`. El código antiguo hacía `new Date(subscription.current_period_end * 1000)` → como ese campo era `undefined`, generaba un `Invalid Date` y la función lanzaba error. `checkout.session.completed` no fallaba porque recupera la suscripción de otra forma.
+- Arreglo en `api/stripe-webhook.js` (`upsertFromSubscription`): ahora lee `const periodEnd = item?.current_period_end ?? subscription.current_period_end;` (con fallback a la raíz por compatibilidad) y, para `customer.subscription.updated`/`deleted`, recupera la suscripción completa con `stripe.subscriptions.retrieve(event.data.object.id)` antes de procesarla, igual que ya hacía `checkout.session.completed`.
+
+**Otro cambio incluido en el mismo commit:** el enlace "Cerrar sesión" del modal de fin de prueba (`#modalPaywall`) estaba en gris muy oscuro (`var(--humo)`, casi invisible sobre el fondo) → pasa a `var(--blanco)` para que se lea.
+
+**Verificación end-to-end (producción, modo test de Stripe):** registro de una cuenta real nueva → paywall (forzado con `document.getElementById('modalPaywall').classList.add('visible')` desde la consola) → Checkout de Stripe con el precio correcto → pago con `4242 4242 4242 4242` → vuelta a la app con "checkout=exito". Tras desplegar el arreglo del webhook, Stripe reintentó el evento `customer.subscription.updated` que había fallado y quedó como **"Entrega recuperada"** (200 OK). La tabla `public.subscriptions` quedó con `status: active` y `current_period_end` con fecha futura correcta. Flujo de Checkout + webhook + Portal verificado.
+
+**Pendiente para más adelante (no bloqueante):** conectar el precio "Oferta del mes" (0,99€, `STRIPE_PRICE_OFERTA_MES`) a la lógica de "primer mes a 0,99€ y luego el precio normal del plan elegido". Esto requiere implementar un **Stripe Subscription Schedule** (o equivalente) en el backend, que todavía no existe.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
