@@ -11,16 +11,18 @@
 -- ============================================================
 -- 1. TABLA: profiles
 -- Un perfil por usuario, vinculado 1:1 con auth.users.
--- Guarda el cuestionario, el plan generado y el progreso.
+-- "userdata" guarda TODO el objeto que hoy vive en
+-- localStorage (fragua_data_<email>): cuestionario, progreso,
+-- entrenos completados, pesos, fotos, hitos, notas, etc.
+-- "plan" guarda el plan de entrenamiento/nutrición generado.
 -- ============================================================
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   nombre text,
   email text,
-  cuestionario jsonb default '{}'::jsonb,
+  userdata jsonb default '{}'::jsonb,
   plan jsonb,
-  entrenos_completados jsonb default '[]'::jsonb,
-  ejercicios_no_gustan jsonb default '[]'::jsonb,
+  saved_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -108,7 +110,8 @@ create trigger subscriptions_set_updated_at
 -- 4. VISTA: admin_clientes
 -- Vista de solo lectura para que tú (con el panel de Supabase)
 -- veas de un vistazo todos tus clientes: plan contratado, estado
--- de la suscripción, objetivo, deporte y ejercicios que no le gustan.
+-- de la suscripción, objetivo, deporte, semana actual, entrenos
+-- completados y cambios de ejercicios preferidos.
 -- Esta vista NO es accesible para los usuarios normales (RLS de
 -- las tablas base la protege); consúltala desde el Table/SQL Editor.
 -- ============================================================
@@ -121,13 +124,19 @@ select
   coalesce(s.status, 'none') as estado_suscripcion,
   s.plan as plan_pago,
   s.current_period_end as renovacion,
-  p.cuestionario->>'objetivo' as objetivo,
-  p.cuestionario->>'deporte' as deporte,
-  p.cuestionario->>'tipoPlan' as tipo_plan,
-  p.cuestionario->>'lesion' as lesion,
-  p.cuestionario->>'alergia' as alergia,
-  p.ejercicios_no_gustan,
-  jsonb_array_length(coalesce(p.entrenos_completados, '[]'::jsonb)) as entrenos_completados_total
+  p.userdata->>'objetivo' as objetivo,
+  p.userdata->>'deporte' as deporte,
+  p.userdata->>'tipoPlan' as tipo_plan,
+  p.userdata->>'lesion' as lesion,
+  p.userdata->>'lesionDetalle' as lesion_detalle,
+  p.userdata->>'alergia' as alergia,
+  p.userdata->>'alergiaOtra' as alergia_otra,
+  p.userdata->>'medicacion' as medicacion,
+  (p.userdata->'progreso'->>'semana')::int as semana_actual,
+  jsonb_array_length(coalesce(p.userdata->'entrenosCompletados', '[]'::jsonb)) as entrenos_completados_total,
+  p.userdata->'variantPreferences' as cambios_ejercicios,
+  p.userdata->'hitos' as hitos,
+  p.saved_at
 from public.profiles p
 left join public.subscriptions s on s.user_id = p.id
 order by p.created_at desc;
@@ -136,6 +145,6 @@ order by p.created_at desc;
 -- 5. CUENTA DE TEST (opcional)
 -- La cuenta de demo (test@fragua.es / fragua123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales
--- (botón "Probar con cuenta demo" → registra el usuario vía
--- supabase.auth.signUp si no existe). No hace falta crearla aquí.
+-- (login() la registra vía supabase.auth.signUp si no existe).
+-- No hace falta crearla aquí.
 -- ============================================================

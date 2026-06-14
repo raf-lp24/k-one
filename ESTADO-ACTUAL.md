@@ -834,6 +834,24 @@ Verificado en preview (escritorio y móvil 375px): la pantalla abre desde footer
 
 **Pendiente del usuario:** rellenar los 7 placeholders con los datos reales del titular (nombre/razón social, NIF, dirección fiscal y email de contacto) antes de operar de cara al público.
 
+### 74. Fase 1 de la migración a Supabase: cuentas y datos reales en la nube
+Hasta ahora todo (usuarios, contraseñas, cuestionario, plan, progreso) vivía solo en el `localStorage` del navegador de cada cliente: no había forma de ver quién se registraba ni qué plan tenía. Se ha conectado la app a un proyecto real de Supabase (Postgres + Auth) manteniendo toda la interfaz y el comportamiento igual.
+
+- **SDK y conexión**: añadido `@supabase/supabase-js@2` por CDN y `const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)` con las credenciales del proyecto "K-one" (`sb_publishable_...`, segura para el navegador gracias a RLS).
+- **Esquema** (`supabase/schema.sql`, ejecutado por el usuario en el SQL Editor): tabla `profiles` (`id` = usuario de Auth, `nombre`, `email`, `userdata` jsonb, `plan` jsonb, `saved_at`) con RLS (cada usuario solo ve/edita su fila), trigger que crea automáticamente el perfil al registrarse, tabla `subscriptions` (preparada para Stripe, Fase 2) y vista `admin_clientes` (perfil + suscripción + objetivo/deporte/lesión/alergia/semana actual/entrenos completados/hitos) consultable desde el Table Editor de Supabase.
+- **Capa de datos reescrita** (`getCurrentUser`/`setCurrentUser`/`getUserData`/`saveUserData` mantienen la misma firma, ahora respaldadas por Supabase):
+  - `registrar()` y `login()` usan `supabase.auth.signUp` / `signInWithPassword`. `logout()` cierra sesión en Supabase.
+  - `saveUserData()` sigue cacheando en `localStorage` para acceso instantáneo y además sincroniza en segundo plano `userdata`/`plan`/`saved_at` en la tabla `profiles`.
+  - Nueva `syncProfileFromSupabase()` rellena las cachés locales tras login/registro/recarga de página.
+  - `userData._cuenta = {creado, suscripcionActiva, fechaPago}` sustituye al antiguo "almacén de usuarios" local (`getUsers`/`saveUsers`/`hashPassword`, eliminados) para el estado de la suscripción/mes de prueba.
+  - `ensureTestAccount()` ahora crea/inicia sesión con `test@fragua.es` en Supabase Auth y siembra su plan de ejemplo si no existe.
+- **Recuperación de contraseña real por email**: el modal "Recuperar acceso" ahora llama a `supabase.auth.resetPasswordForEmail()` (mensaje genérico, sin confirmar si el email existe); al volver desde el enlace del correo, `onAuthStateChange('PASSWORD_RECOVERY')` abre el modal en el paso de elegir nueva contraseña, que se guarda con `supabase.auth.updateUser()`.
+- **Configuración de Supabase** (hecha por el usuario): desactivado "Confirm email" en Authentication para que el registro siga siendo instantáneo, igual que antes.
+
+Verificado en preview (localhost:8080): login de la cuenta de test funciona y su perfil/plan se sincronizan en `profiles` (incluido `_cuenta.suscripcionActiva: true`); registro de un usuario nuevo crea su fila en `auth.users` y `profiles` automáticamente (vía trigger) y entra directo al cuestionario; al recargar la página se restaura la sesión desde Supabase y vuelve a la pantalla correcta. Sin errores de consola.
+
+**Nota**: durante la verificación se creó un usuario de prueba (`prueba_...@fragua.es`) en Supabase Auth; se puede borrar desde Authentication → Users si se quiere limpiar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

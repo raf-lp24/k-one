@@ -3423,6 +3423,7 @@
   }
   .logout-btn:hover { border-color: var(--metal); color: var(--blanco); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -3577,13 +3578,13 @@
     <div class="modal-title">Recuperar acceso</div>
 
     <div id="forgotStep1">
-      <p class="modal-desc">Como aún no tenemos servidor de email, busca tu cuenta por su email y elige una contraseña nueva directamente aquí.</p>
+      <p class="modal-desc">Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
       <div class="auth-field">
         <label>Email</label>
         <input type="email" id="forgot-email" placeholder="tu@email.com">
       </div>
-      <div class="auth-error" id="err-forgot-email">No encontramos ninguna cuenta con ese email</div>
-      <button class="btn-primary" style="width:100%;padding:14px" onclick="checkForgotEmail()">Continuar</button>
+      <div class="auth-error" id="err-forgot-email">Introduce un email válido</div>
+      <button class="btn-primary" style="width:100%;padding:14px" onclick="sendResetEmail()">Enviar enlace</button>
     </div>
 
     <div id="forgotStep2" style="display:none">
@@ -5182,6 +5183,14 @@
 </div>
 
 <script>
+  // ===== SUPABASE =====
+  const SUPABASE_URL = 'https://rfdrqbnzceudwclagjvp.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_gTQi9LggEVe_T0PzyMv8AA__hzbhQUX';
+  const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // id del usuario autenticado en Supabase; null si no hay sesión. Se usa para
+  // sincronizar getUserData/saveUserData con la tabla profiles.
+  let _supaUserId = null;
+
   // ===== STATE =====
   let currentBlock = 0;
   const totalBlocks = 6;
@@ -6581,8 +6590,7 @@
   // del check-in. Si no hay fecha de registro, se conserva el valor guardado (o 1).
   function getSemanaActual() {
     const user = getCurrentUser();
-    const u = user ? getUsers()[user.email] : null;
-    const creado = u && u.creado;
+    const creado = user && user.creado;
     if (!creado) return (userData.progreso && userData.progreso.semana) || 1;
     const dias = (Date.now() - new Date(creado).getTime()) / (1000 * 60 * 60 * 24);
     return Math.max(1, Math.floor(dias / 7) + 1);
@@ -7233,14 +7241,13 @@
     const label = document.getElementById('diasRestantesPlanLabel');
     if (!el) return;
     const user = getCurrentUser();
-    const u = user ? getUsers()[user.email] : null;
-    if (!u || !u.creado) {
+    if (!user || !user.creado) {
       el.textContent = '—';
       if (label) label.textContent = 'de tu plan actual';
       return;
     }
-    const enPrueba = !u.suscripcionActiva;
-    const refFecha = enPrueba ? u.creado : (u.fechaPago || u.creado);
+    const enPrueba = !user.suscripcionActiva;
+    const refFecha = enPrueba ? user.creado : (user.fechaPago || user.creado);
     const opcionPlan = preciosPlan(userData.tipoPlan);
     const periodo = enPrueba ? DIAS_PRUEBA : (opcionPlan[userData.periodicidad || 'mensual'] || opcionPlan.mensual).dias;
     const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / (1000 * 60 * 60 * 24);
@@ -7253,7 +7260,7 @@
     const tipoPlan = document.querySelector('#cp-tipoPlan .selected')?.textContent?.trim() || '';
     const periodicidad = valorPeriodicidad('cp-periodicidad');
     const user = getCurrentUser();
-    const creado = user ? getUsers()[user.email]?.creado : null;
+    const creado = user ? user.creado : null;
     const el = document.getElementById('cpPrecioInfo');
     if (el) el.textContent = precioPlanActual(tipoPlan, creado, periodicidad).detalle;
   }
@@ -7856,47 +7863,65 @@
   }
 
   // ===== AUTH: STORAGE =====
-  // Simula base de datos con localStorage
-  function getUsers() {
-    try { return JSON.parse(localStorage.getItem('fragua_users') || '{}'); } catch(e) { return {}; }
-  }
-  function saveUsers(u) {
-    try { localStorage.setItem('fragua_users', JSON.stringify(u)); } catch(e) {}
-  }
+  // getCurrentUser/setCurrentUser cachean en localStorage la sesión activa
+  // ({nombre, email, creado, suscripcionActiva, fechaPago}) para acceso síncrono
+  // desde el resto del código. La fuente de verdad es Supabase Auth
+  // (supa.auth.getSession()); esta caché se rellena en login/registro/restauración
+  // de sesión vía syncProfileFromSupabase().
   function getCurrentUser() {
     try { return JSON.parse(localStorage.getItem('fragua_current_user') || 'null'); } catch(e) { return null; }
   }
   function setCurrentUser(u) {
     try { localStorage.setItem('fragua_current_user', JSON.stringify(u)); } catch(e) {}
   }
-
-  // ===== AUTH: HASH DE CONTRASEÑA =====
-  // Nunca guardamos la contraseña en texto plano. SHA-256 vía Web Crypto cuando está
-  // disponible; si no (p.ej. al abrir el archivo con file://, donde SubtleCrypto no
-  // existe), usamos un hash alternativo para no bloquear la app ni guardar en claro.
-  async function hashPassword(pass) {
-    if (window.crypto?.subtle?.digest) {
-      const data = new TextEncoder().encode(pass);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-    let h1 = 0;
-    for (let i = 0; i < pass.length; i++) h1 = (Math.imul(31, h1) + pass.charCodeAt(i)) | 0;
-    let h2 = 0x811c9dc5;
-    for (let i = 0; i < pass.length; i++) {
-      h2 ^= pass.charCodeAt(i);
-      h2 = Math.imul(h2, 0x01000193);
-    }
-    return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
-  }
   function clearCurrentUser() {
     try { localStorage.removeItem('fragua_current_user'); } catch(e) {}
   }
+
+  // getUserData/saveUserData cachean en localStorage {userData, plan, savedAt} para
+  // acceso síncrono (lo usan muchos puntos del código sin tocarlos). saveUserData
+  // además sincroniza en segundo plano con la tabla "profiles" de Supabase si hay
+  // sesión activa, para que tú puedas ver a tus clientes desde el panel.
   function getUserData(email) {
     try { return JSON.parse(localStorage.getItem(`fragua_data_${email}`) || 'null'); } catch(e) { return null; }
   }
   function saveUserData(email, data) {
     try { localStorage.setItem(`fragua_data_${email}`, JSON.stringify(data)); } catch(e) {}
+    if (_supaUserId) {
+      supa.from('profiles').update({
+        userdata: data.userData,
+        plan: data.plan,
+        saved_at: data.savedAt
+      }).eq('id', _supaUserId).then(({ error }) => {
+        if (error) console.error('Error guardando en Supabase:', error);
+      });
+    }
+  }
+
+  // Trae el perfil desde Supabase y rellena las cachés locales (sesión + datos del
+  // plan) para que getCurrentUser()/getUserData() sigan funcionando igual que antes.
+  async function syncProfileFromSupabase(authUser) {
+    _supaUserId = authUser.id;
+    const { data: profile, error } = await supa.from('profiles')
+      .select('nombre, userdata, plan, saved_at')
+      .eq('id', authUser.id)
+      .single();
+    if (error) console.error('Error cargando perfil de Supabase:', error);
+    const cuenta = profile?.userdata?._cuenta || {};
+    setCurrentUser({
+      nombre: profile?.nombre || authUser.user_metadata?.nombre || '',
+      email: authUser.email,
+      creado: cuenta.creado || authUser.created_at,
+      suscripcionActiva: !!cuenta.suscripcionActiva,
+      fechaPago: cuenta.fechaPago || null
+    });
+    if (profile?.plan) {
+      saveUserData(authUser.email, {
+        userData: profile.userdata || {},
+        plan: profile.plan,
+        savedAt: profile.saved_at || new Date().toISOString()
+      });
+    }
   }
 
   // ===== TOAST =====
@@ -7951,21 +7976,20 @@
 
     if (!ok) return;
 
-    const users = getUsers();
-    if (users[email]) {
-      document.getElementById('err-email').textContent = 'Este email ya está registrado';
-      document.getElementById('err-email').classList.add('visible');
-      document.getElementById('reg-email').classList.add('error');
+    const { data, error } = await supa.auth.signUp({
+      email, password: pass, options: { data: { nombre } }
+    });
+
+    if (error) {
+      if (/registered|already|existe/i.test(error.message)) {
+        document.getElementById('err-email').textContent = 'Este email ya está registrado';
+        document.getElementById('err-email').classList.add('visible');
+        document.getElementById('reg-email').classList.add('error');
+      } else {
+        showToast('No se pudo crear la cuenta: ' + error.message, 5000);
+      }
       return;
     }
-
-    // Guardar usuario (la contraseña nunca se guarda en texto plano)
-    const passHash = await hashPassword(pass);
-    users[email] = { nombre, email, passHash, creado: new Date().toISOString(), suscripcionActiva: false };
-    saveUsers(users);
-    setCurrentUser({ nombre, email });
-
-    showToast('Cuenta creada. Bienvenido/a a K-One.');
 
     // Limpiar campos
     ['reg-nombre','reg-email','reg-pass','reg-pass2'].forEach(id => {
@@ -7973,38 +7997,50 @@
     });
     document.getElementById('reg-terminos').checked = false;
 
-    // Ir al formulario si no tiene datos, o al dashboard si ya los tiene
-    const existingData = getUserData(email);
-    if (existingData && existingData.plan) {
-      loadUserDashboard(email);
-      goTo('dashboard');
-    } else {
-      enterFormulario();
+    // Si el proyecto de Supabase exige confirmar el email, no hay sesión todavía:
+    // avisamos y mandamos a login para que entre tras confirmar.
+    if (!data.session) {
+      showToast('Cuenta creada. Revisa tu email para confirmarla y poder iniciar sesión.', 6000);
+      goTo('login');
+      return;
     }
+
+    await syncProfileFromSupabase(data.user);
+    showToast('Cuenta creada. Bienvenido/a a K-One.');
+
+    // Un usuario recién registrado nunca tiene datos previos: al cuestionario.
+    enterFormulario();
   }
 
   // ===== CUENTA DE TEST PRE-CARGADA =====
   const TEST_EMAIL = 'test@fragua.es';
   const TEST_PASS = 'fragua123';
 
-  // Garantiza que la cuenta de test exista y tenga un plan, regenerando el
-  // hash en cada llamada para que siempre funcione con "fragua123". Devuelve
-  // el objeto de usuarios en memoria aunque el guardado en localStorage falle
-  // (p.ej. modo privado), para que el login pueda funcionar igualmente.
+  // Garantiza que la cuenta de test exista en Supabase Auth (se crea la primera
+  // vez que alguien entra con sus credenciales) y tenga un plan de ejemplo.
+  // Deja la sesión iniciada como esa cuenta.
   async function ensureTestAccount() {
-    const users = getUsers();
-    const testPassHash = await hashPassword(TEST_PASS);
-    if (!users[TEST_EMAIL] || users[TEST_EMAIL].passHash !== testPassHash) {
-      users[TEST_EMAIL] = {
-        nombre: 'Rafa Test',
-        email: TEST_EMAIL,
-        passHash: testPassHash,
-        creado: users[TEST_EMAIL]?.creado || new Date().toISOString(),
-        suscripcionActiva: true
-      };
-      saveUsers(users);
+    let { data, error } = await supa.auth.signInWithPassword({ email: TEST_EMAIL, password: TEST_PASS });
+    if (error) {
+      const signUpRes = await supa.auth.signUp({
+        email: TEST_EMAIL, password: TEST_PASS, options: { data: { nombre: 'Rafa Test' } }
+      });
+      if (signUpRes.error) throw signUpRes.error;
+      data = signUpRes.data;
+      if (!data.session) {
+        const retry = await supa.auth.signInWithPassword({ email: TEST_EMAIL, password: TEST_PASS });
+        if (retry.error) throw retry.error;
+        data = retry.data;
+      }
     }
-    if (!getUserData(TEST_EMAIL)) {
+    await syncProfileFromSupabase(data.user);
+
+    // La cuenta de test siempre tiene acceso activo, sin mes de prueba.
+    const user = getCurrentUser();
+    user.suscripcionActiva = true;
+    setCurrentUser(user);
+
+    if (!getUserData(TEST_EMAIL)?.plan) {
       const testUserData = {
         edad: '30', sexo: 'Hombre', peso: '80', altura: '178',
         complexion: 'Normal', enfermedad: 'No', lesion: 'No', alergia: 'No',
@@ -8015,12 +8051,13 @@
         objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
         deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
         nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio',
-        onboardingCompletado: true
+        onboardingCompletado: true,
+        _cuenta: { suscripcionActiva: true }
       };
       const testPlan = buildPlanFromData(testUserData);
       saveUserData(TEST_EMAIL, { userData: testUserData, plan: testPlan, savedAt: new Date().toISOString() });
     }
-    return users;
+    return data;
   }
 
   // ===== LOGIN =====
@@ -8045,27 +8082,32 @@
 
     if (!ok) return;
 
-    let users = getUsers();
-    if (!users[email] && email === TEST_EMAIL && pass === TEST_PASS) {
-      // Si el seeding inicial falló (p.ej. localStorage bloqueado en este
-      // navegador), reintentamos aquí para que la cuenta de test no se quede
-      // sin poder entrar.
-      try { users = await ensureTestAccount(); } catch (e) { console.error('Error preparando la cuenta de test:', e); }
-    }
-    if (!users[email]) {
-      document.getElementById('err-login-email').classList.add('visible');
-      document.getElementById('login-email').classList.add('error');
-      return;
-    }
-    const passHash = await hashPassword(pass);
-    if (users[email].passHash !== passHash) {
-      document.getElementById('err-login-pass').classList.add('visible');
-      document.getElementById('login-pass').classList.add('error');
-      return;
+    if (email === TEST_EMAIL && pass === TEST_PASS) {
+      try {
+        await ensureTestAccount();
+      } catch (e) {
+        console.error('Error preparando la cuenta de test:', e);
+        document.getElementById('err-login-email').classList.add('visible');
+        document.getElementById('login-email').classList.add('error');
+        return;
+      }
+    } else {
+      const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        if (/invalid/i.test(error.message)) {
+          document.getElementById('err-login-pass').classList.add('visible');
+          document.getElementById('login-pass').classList.add('error');
+        } else {
+          document.getElementById('err-login-email').classList.add('visible');
+          document.getElementById('login-email').classList.add('error');
+        }
+        return;
+      }
+      await syncProfileFromSupabase(data.user);
     }
 
-    setCurrentUser({ nombre: users[email].nombre, email });
-    showToast(`Bienvenido/a de vuelta, ${users[email].nombre}.`);
+    const user = getCurrentUser();
+    showToast(`Bienvenido/a de vuelta, ${user.nombre}.`);
 
     document.getElementById('login-email').value = '';
     document.getElementById('login-pass').value = '';
@@ -8079,9 +8121,7 @@
     }
   }
 
-  // ===== RECUPERAR CONTRASEÑA (reseteo local, sin backend de email) =====
-  let forgotEmail = '';
-
+  // ===== RECUPERAR CONTRASEÑA (vía email con Supabase Auth) =====
   function closeForgotModal() {
     document.getElementById('modalForgot').classList.remove('visible');
     document.getElementById('forgotStep1').style.display = 'block';
@@ -8093,26 +8133,37 @@
     document.getElementById('forgot-email').value = '';
     document.getElementById('forgot-newpass').value = '';
     document.getElementById('forgot-newpass2').value = '';
-    forgotEmail = '';
   }
 
-  function checkForgotEmail() {
+  // Pide a Supabase que envíe un email con un enlace de recuperación. No revela
+  // si el email existe o no (mismo mensaje en ambos casos, evita enumeración).
+  async function sendResetEmail() {
     const email = document.getElementById('forgot-email').value.trim().toLowerCase();
     document.getElementById('err-forgot-email').classList.remove('visible');
     document.getElementById('forgot-email').classList.remove('error');
 
-    const users = getUsers();
-    if (!email || !users[email]) {
+    if (!email || !email.includes('@')) {
+      document.getElementById('err-forgot-email').textContent = 'Introduce un email válido';
       document.getElementById('err-forgot-email').classList.add('visible');
       document.getElementById('forgot-email').classList.add('error');
       return;
     }
 
-    forgotEmail = email;
+    await supa.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href.split('#')[0].split('?')[0]
+    });
+
     document.getElementById('forgotStep1').style.display = 'none';
-    document.getElementById('forgotStep2').style.display = 'block';
+    document.getElementById('forgotSuccess').textContent = 'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.';
+    document.getElementById('forgotSuccess').classList.add('visible');
+
+    setTimeout(() => {
+      closeForgotModal();
+    }, 4000);
   }
 
+  // Se llama tras volver del enlace del email (evento PASSWORD_RECOVERY de Supabase),
+  // cuando el modal ya está en su paso 2 mostrando los campos de nueva contraseña.
   async function resetPassword() {
     const newPass = document.getElementById('forgot-newpass').value;
     const newPass2 = document.getElementById('forgot-newpass2').value;
@@ -8134,22 +8185,26 @@
     }
     if (!ok) return;
 
-    const users = getUsers();
-    if (!users[forgotEmail]) return;
-
-    users[forgotEmail].passHash = await hashPassword(newPass);
-    saveUsers(users);
+    const { error } = await supa.auth.updateUser({ password: newPass });
+    if (error) {
+      showToast('No se pudo actualizar la contraseña. Vuelve a solicitar el enlace.');
+      return;
+    }
 
     document.getElementById('forgotStep2').style.display = 'none';
+    document.getElementById('forgotSuccess').textContent = 'Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.';
     document.getElementById('forgotSuccess').classList.add('visible');
 
     setTimeout(() => {
       closeForgotModal();
+      goTo('landing');
     }, 2500);
   }
 
   // ===== LOGOUT =====
-  function logout() {
+  async function logout() {
+    await supa.auth.signOut();
+    _supaUserId = null;
     clearCurrentUser();
     showToast('Sesión cerrada. Hasta pronto.');
     setTimeout(() => goTo('landing'), 800);
@@ -8197,11 +8252,11 @@
   // activa (pago confirmado), se bloquea el área personal con un paywall.
   const DIAS_PRUEBA = 30;
   function tieneAccesoActivo(email) {
-    const u = getUsers()[email];
-    if (!u) return false;
-    if (u.suscripcionActiva) return true;
-    if (!u.creado) return true; // cuentas antiguas sin fecha de alta: no se bloquean
-    const dias = (Date.now() - new Date(u.creado).getTime()) / (1000 * 60 * 60 * 24);
+    const user = getCurrentUser();
+    if (!user || user.email !== email) return true;
+    if (user.suscripcionActiva) return true;
+    if (!user.creado) return true; // cuentas antiguas sin fecha de alta: no se bloquean
+    const dias = (Date.now() - new Date(user.creado).getTime()) / (1000 * 60 * 60 * 24);
     return dias <= DIAS_PRUEBA;
   }
   function comprobarPaywall(email) {
@@ -8233,13 +8288,12 @@
   function confirmarPagoSuscripcion() {
     const user = getCurrentUser();
     if (!user) return;
-    const users = getUsers();
-    if (!users[user.email]) return;
     const periodicidad = valorPeriodicidad('pw-periodicidad');
-    users[user.email].suscripcionActiva = true;
-    users[user.email].fechaPago = new Date().toISOString();
-    saveUsers(users);
+    user.suscripcionActiva = true;
+    user.fechaPago = new Date().toISOString();
+    setCurrentUser(user);
     userData.periodicidad = periodicidad;
+    userData._cuenta = { creado: user.creado, suscripcionActiva: true, fechaPago: user.fechaPago };
     if (user.email !== 'demo@fragua.es') {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     }
@@ -8608,17 +8662,25 @@
       showToast('Aviso: este navegador bloquea el guardado local en archivos abiertos con file://. Los datos no se guardarán.', 6000);
     }
 
-    // La cuenta de test NO se siembra automáticamente: solo se crea al iniciar sesión
-    // con sus credenciales (ver login()). Así un cliente que abre el link nunca la tiene
-    // en su navegador ni se mete en ella al refrescar.
-    const user = getCurrentUser();
-    if (user && user.email === TEST_EMAIL) {
-      // La cuenta de test no debe reanudarse sola al recargar (p.ej. estando en la
-      // landing): se cierra su sesión y se muestra la pantalla de inicio.
+    // Si vuelve de un enlace de recuperación de contraseña, Supabase emite este
+    // evento: abrimos el modal directamente en el paso de elegir nueva contraseña.
+    supa.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        document.getElementById('modalForgot').classList.add('visible');
+        document.getElementById('forgotStep1').style.display = 'none';
+        document.getElementById('forgotStep2').style.display = 'block';
+      }
+    });
+
+    // Restaura la sesión activa de Supabase (si la hay) y sincroniza el perfil.
+    const { data: { session } } = await supa.auth.getSession();
+    if (session) {
+      await syncProfileFromSupabase(session.user);
+    } else {
       clearCurrentUser();
-      goTo('landing');
-      return;
     }
+
+    const user = getCurrentUser();
     if (user) {
       const saved = getUserData(user.email);
       if (saved && saved.plan) {
