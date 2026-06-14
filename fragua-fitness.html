@@ -8087,8 +8087,7 @@
         await ensureTestAccount();
       } catch (e) {
         console.error('Error preparando la cuenta de test:', e);
-        document.getElementById('err-login-email').classList.add('visible');
-        document.getElementById('login-email').classList.add('error');
+        showToast('No se pudo iniciar sesión con la cuenta de test: ' + e.message, 5000);
         return;
       }
     } else {
