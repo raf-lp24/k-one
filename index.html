@@ -287,18 +287,28 @@
   .hero-trust .trust-icon svg { width: 100%; height: 100%; }
 
   .hero-price {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 16px;
-    padding: 16px 28px;
+    padding: 24px 44px;
     background: rgba(232,73,15,0.08);
     border: 2px solid var(--brasa);
-    border-radius: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .hero-price:hover,
+  .hero-price:focus-visible {
+    background: rgba(232,73,15,0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(232,73,15,0.28);
+    outline: none;
   }
 
   .hero-price-main {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 56px;
+    font-size: clamp(64px, 11vw, 92px);
     line-height: 1;
     letter-spacing: 1px;
     color: var(--brasa);
@@ -308,12 +318,12 @@
   .hero-price-label {
     display: block;
     font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
+    font-size: 14px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
     color: var(--blanco);
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .hero-visual {
@@ -3824,7 +3834,7 @@
       <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 6,99€/mes.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
-        <div class="hero-price">
+        <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 0,99€. Crear cuenta nueva" onclick="goTo('registro')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('registro');}">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>0,99€</div>
         </div>
       </div>
