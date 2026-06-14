@@ -1570,16 +1570,42 @@
   }
 
   .user-avatar {
+    position: relative;
     width: 40px;
     height: 40px;
     background: var(--brasa);
+    background-size: cover;
+    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 18px;
     flex-shrink: 0;
+    cursor: pointer;
+    overflow: visible;
   }
+
+  .user-avatar.has-photo #userAvatarLetter { display: none; }
+
+  .avatar-cam {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: var(--grafito);
+    border: 1px solid var(--carbon, #0d0d0d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    line-height: 1;
+    opacity: .85;
+  }
+
+  .user-avatar:hover .avatar-cam { opacity: 1; }
 
   .user-name { font-size: 14px; font-weight: 600; }
   .user-goal { font-size: 11px; color: var(--metal); }
@@ -4854,7 +4880,11 @@
       <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
       <div class="back-to-landing" onclick="goTo('landing')">← Volver al inicio</div>
       <div class="dash-user">
-        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-avatar" id="userAvatar" onclick="document.getElementById('fotoPerfilInput').click()" title="Cambiar foto de perfil">
+          <span id="userAvatarLetter">A</span>
+          <span class="avatar-cam" aria-hidden="true">📷</span>
+        </div>
+        <input type="file" id="fotoPerfilInput" accept="image/*" style="display:none" onchange="subirFotoPerfil(event)">
         <div>
           <div class="user-name" id="userName">Tu perfil</div>
           <div class="user-goal" id="userGoal">Cargando...</div>
@@ -5608,7 +5638,7 @@
       // Actualizar nombre en dashboard
       if (user) {
         document.getElementById('userName').textContent = user.nombre;
-        document.getElementById('userAvatar').textContent = user.nombre.charAt(0).toUpperCase();
+        aplicarAvatarPerfil();
         document.getElementById('userGoal').textContent = userData.objetivo || 'Tu objetivo';
       }
 
@@ -6427,8 +6457,7 @@
     if (checkinSemanaLabel) checkinSemanaLabel.textContent = `// Semana ${progreso.semana}`;
 
     // User avatar
-    const name = userData.objetivo?.charAt(0) || 'U';
-    document.getElementById('userAvatar').textContent = name.toUpperCase();
+    aplicarAvatarPerfil();
     document.getElementById('userGoal').textContent = userData.objetivo || 'Tu objetivo';
 
     // Entrenamiento hoy
@@ -6567,6 +6596,58 @@
         document.getElementById('nav-hoy').classList.add('active');
       }
     }
+  }
+
+  // ===== FOTO DE PERFIL =====
+  // Pinta el avatar del sidebar: usa la foto de perfil guardada si existe,
+  // y si no, la inicial del nombre (o del objetivo como respaldo).
+  function aplicarAvatarPerfil() {
+    const av = document.getElementById('userAvatar');
+    if (!av) return;
+    const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+    const letra = (user?.nombre?.charAt(0) || userData?.objetivo?.charAt(0) || 'U').toUpperCase();
+    const letraEl = document.getElementById('userAvatarLetter');
+    if (letraEl) letraEl.textContent = letra;
+    const foto = userData?.fotoPerfil;
+    if (foto) {
+      av.style.backgroundImage = `url("${foto}")`;
+      av.classList.add('has-photo');
+    } else {
+      av.style.backgroundImage = '';
+      av.classList.remove('has-photo');
+    }
+  }
+
+  // Lee la imagen elegida, la recorta a un cuadrado de 256px (JPEG calidad 0,8)
+  // para no inflar localStorage/Supabase, la guarda en userData.fotoPerfil y la aplica.
+  function subirFotoPerfil(event) {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // permite volver a elegir la misma imagen
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('Selecciona un archivo de imagen.'); return; }
+    if (file.size > 12 * 1024 * 1024) { showToast('La imagen es demasiado grande (máx. 12 MB).'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const size = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        userData.fotoPerfil = canvas.toDataURL('image/jpeg', 0.8);
+        aplicarAvatarPerfil();
+        const user = getCurrentUser();
+        if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+        showToast('Foto de perfil actualizada.');
+      };
+      img.onerror = () => showToast('No se pudo procesar la imagen.');
+      img.src = e.target.result;
+    };
+    reader.onerror = () => showToast('No se pudo leer el archivo.');
+    reader.readAsDataURL(file);
   }
 
   // ===== DASHBOARD NAV =====
@@ -8263,7 +8344,7 @@
     const user = getCurrentUser();
     if (user) {
       document.getElementById('userName').textContent = user.nombre;
-      document.getElementById('userAvatar').textContent = user.nombre.charAt(0).toUpperCase();
+      aplicarAvatarPerfil();
     }
     comprobarPaywall(email);
   }

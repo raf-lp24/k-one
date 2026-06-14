@@ -925,6 +925,16 @@ Tras el punto 79, el usuario aclaró el comportamiento deseado: en un plan "Solo
 
 Verificado en preview (plan solo-dieta forzado, partiendo de la sección "Semana" activa): queda visible Hoy + Nutrición, ocultos Semana y Check-in, y la vista cae correctamente a "Hoy". Sin errores de consola.
 
+### 81. Foto de perfil del usuario
+Antes el avatar del sidebar solo mostraba la inicial del nombre y no se podía cambiar. Ahora cada usuario puede ponerse su foto.
+
+- `index.html` (markup): el avatar (`#userAvatar`) es clicable y abre un `<input type="file" accept="image/*">` oculto (`#fotoPerfilInput`); lleva un badge de cámara (`.avatar-cam`) y la inicial pasa a un `<span id="userAvatarLetter">`.
+- `subirFotoPerfil(event)`: valida que sea imagen (y < 12 MB), la recorta a un cuadrado centrado de **256×256** y la exporta a **JPEG calidad 0,8** vía canvas (≈4-6 KB en base64), la guarda en `userData.fotoPerfil` y persiste con `saveUserData` (→ localStorage + `profiles.userdata` jsonb de Supabase). No requiere cambios de esquema: viaja dentro del blob `userData` que ya se guarda/recarga.
+- `aplicarAvatarPerfil()`: pinta el avatar con la foto guardada (clase `has-photo`, `background-image`) o, si no hay, con la inicial del nombre/objetivo. Sustituye los 3 puntos donde antes se fijaba la inicial a mano (login, `buildDashboard`, `loadUserDashboard`).
+- CSS: `.user-avatar` con `background-size:cover`, cursor pointer, badge de cámara que se intensifica en hover; `.user-avatar.has-photo #userAvatarLetter{display:none}`.
+
+Verificado en preview: con foto se aplica `has-photo` + `background-image` y se oculta la inicial; sin foto vuelve a la inicial; el flujo real con un archivo de imagen sintético redimensiona a 256×256, produce JPEG y lo persiste. Sin errores de consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
