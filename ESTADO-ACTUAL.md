@@ -817,6 +817,23 @@ El usuario reportó que estando en la página de inicio (landing) y pulsando ref
 
 Verificado en preview: (1) con sesión de test guardada, al recargar se muestra `landing` y la sesión queda limpia (`fragua_current_user` = null); (2) el login de test (`test@fragua.es` / `fragua123`) sigue funcionando desde cero y entra al dashboard (Semana 1); (3) una cuenta real de ejemplo con plan guardado sí reanuda en el dashboard al refrescar. Sin errores de consola. Estado de pruebas limpiado tras la verificación.
 
+### 73. Página legal (Aviso legal + Privacidad RGPD + Términos + Cookies) y disclaimer médico
+A raíz del análisis de producto, se añade la capa legal obligatoria (se recogen datos de salud — categoría especial art. 9 RGPD — sin base legal documentada).
+
+- Nueva pantalla `#legal` (`goTo('legal')`) con:
+  - **Aviso de salud destacado** arriba (banner `.legal-disclaimer`): no es consejo médico, consultar antes de empezar, parar si hay dolor/mareo.
+  - **1. Aviso legal** (LSSI-CE): datos del titular con placeholders `[NOMBRE/RAZÓN SOCIAL]`, `[NIF/CIF]`, `[DIRECCIÓN FISCAL]`, `[EMAIL DE CONTACTO]` (7 en total, marcados con `.legal-placeholder`, pendientes de rellenar por el usuario).
+  - **2. Política de privacidad (RGPD/LOPDGDD)**: responsable, datos tratados (incluida categoría especial de salud), finalidad, base jurídica (ejecución de contrato + consentimiento explícito art. 9.2.a), conservación, destinatarios/encargados, derechos ARCO+RGPD y reclamación ante la AEPD, seguridad (con nota honesta de que en esta fase los datos viven en el localStorage del navegador).
+  - **3. Términos y condiciones**: objeto, registro, precios/prueba 0,99€, cancelación sin permanencia, exención de responsabilidad, modificaciones.
+  - **4. Cookies**: actualmente sin cookies de seguimiento, solo localStorage técnico.
+- Navegación: enlaces nuevos en el `footer` (Aviso legal / Privacidad / Términos) y `nav` interno con scroll a cada sección. Funciones `goToLegal(seccion)` (abre y salta) y `scrollToLegal(id)`.
+- La casilla de términos del registro ahora enlaza a las secciones reales (`goToLegal('terminos')` / `goToLegal('privacidad')`) y menciona explícitamente el consentimiento para tratar datos de salud.
+- CSS nuevo: `.footer-links`, bloque `.legal-*` (wrap, back, h1, disclaimer, nav, section, placeholder), usando `Bebas Neue` (display real del sitio) y las variables de color existentes.
+
+Verificado en preview (escritorio y móvil 375px): la pantalla abre desde footer y desde la casilla de registro, las 4 secciones existen y el scroll funciona, el disclaimer se muestra arriba, sin desbordamiento horizontal ni errores de consola.
+
+**Pendiente del usuario:** rellenar los 7 placeholders con los datos reales del titular (nombre/razón social, NIF, dirección fiscal y email de contacto) antes de operar de cara al público.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

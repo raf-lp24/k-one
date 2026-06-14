@@ -1031,6 +1031,128 @@
     font-family: 'DM Mono', monospace;
   }
 
+  .footer-links {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .footer-links a {
+    font-size: 12px;
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--blanco-puro); }
+
+  /* ===================== PÁGINA LEGAL ===================== */
+  .legal-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  .legal-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--metal-claro);
+    cursor: pointer;
+    margin-bottom: 32px;
+    background: none;
+    border: none;
+  }
+  .legal-back:hover { color: var(--blanco-puro); }
+  .legal-h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 6vw, 52px);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blanco-puro);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .legal-updated {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--metal);
+    margin-bottom: 32px;
+  }
+  .legal-disclaimer {
+    background: rgba(232,73,15,0.10);
+    border-left: 3px solid var(--brasa);
+    padding: 18px 22px;
+    margin-bottom: 40px;
+    border-radius: 2px;
+  }
+  .legal-disclaimer strong { color: var(--blanco-puro); }
+  .legal-disclaimer p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--blanco);
+    margin: 0;
+  }
+  .legal-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--humo);
+  }
+  .legal-nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--metal-claro);
+    border: 1px solid var(--acero);
+    padding: 8px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .legal-nav a:hover { border-color: var(--brasa); color: var(--blanco-puro); }
+  .legal-section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  .legal-section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--brasa);
+    margin-bottom: 4px;
+  }
+  .legal-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--blanco-puro);
+    margin: 24px 0 8px;
+  }
+  .legal-section p, .legal-section li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--metal-claro);
+  }
+  .legal-section p { margin-bottom: 14px; }
+  .legal-section ul { margin: 0 0 14px; padding-left: 20px; }
+  .legal-section li { margin-bottom: 6px; }
+  .legal-section strong { color: var(--blanco); }
+  .legal-section a { color: var(--brasa); text-decoration: underline; }
+  .legal-placeholder {
+    background: var(--grafito);
+    border: 1px dashed var(--humo);
+    color: var(--metal-claro);
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
   /* ===================== FORMULARIO ===================== */
   #formulario {
     display: none;
@@ -3403,7 +3525,7 @@
 
     <label class="auth-check">
       <input type="checkbox" id="reg-terminos">
-      <span class="auth-check-label">Acepto los <a>términos y condiciones</a> y la <a>política de privacidad</a>. Esta plataforma es orientación personalizada, no consejo médico.</span>
+      <span class="auth-check-label">Acepto los <a onclick="goToLegal('terminos')" style="cursor:pointer">términos y condiciones</a> y la <a onclick="goToLegal('privacidad')" style="cursor:pointer">política de privacidad</a>, incluido el tratamiento de mis datos de salud para personalizar el plan. Esta plataforma es orientación personalizada, no consejo médico.</span>
     </label>
     <div class="auth-error" id="err-terminos">Debes aceptar los términos para continuar</div>
 
@@ -4197,9 +4319,110 @@
 
   <footer>
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
-    <div class="footer-note">© 2026 K-One · Todos los derechos reservados</div>
-    <div class="footer-note">Esta plataforma es orientación personalizada, no consejo médico.</div>
+    <div class="footer-links">
+      <a onclick="goToLegal('aviso-legal')">Aviso legal</a>
+      <a onclick="goToLegal('privacidad')">Privacidad</a>
+      <a onclick="goToLegal('terminos')">Términos</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;text-align:right">
+      <div class="footer-note">© 2026 K-One · Todos los derechos reservados</div>
+      <div class="footer-note">Esta plataforma es orientación personalizada, no consejo médico.</div>
+    </div>
   </footer>
+</div>
+
+<!-- ==================== LEGAL ==================== -->
+<div class="screen" id="legal">
+  <div class="legal-wrap">
+    <button class="legal-back" onclick="goTo('landing')">← Volver al inicio</button>
+
+    <h1 class="legal-h1">Aviso legal y privacidad</h1>
+    <div class="legal-updated">Última actualización: 14 de junio de 2026</div>
+
+    <div class="legal-disclaimer">
+      <p><strong>Aviso de salud importante.</strong> K-One ofrece orientación deportiva y nutricional personalizada de carácter general, generada de forma automática a partir de los datos que tú facilitas. <strong>No constituye consejo médico, diagnóstico ni tratamiento</strong>, y no sustituye la valoración de un profesional sanitario. Antes de iniciar cualquier programa de ejercicio o cambio en tu alimentación —especialmente si tienes lesiones, enfermedades, alergias o tomas medicación— consulta con tu médico. Si notas dolor, mareo o malestar durante el entrenamiento, detente y busca atención médica.</p>
+    </div>
+
+    <nav class="legal-nav">
+      <a onclick="scrollToLegal('aviso-legal')">Aviso legal</a>
+      <a onclick="scrollToLegal('privacidad')">Política de privacidad (RGPD)</a>
+      <a onclick="scrollToLegal('terminos')">Términos y condiciones</a>
+      <a onclick="scrollToLegal('cookies')">Cookies</a>
+    </nav>
+
+    <section class="legal-section" id="aviso-legal">
+      <h2>1. Aviso legal</h2>
+      <p>En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los siguientes datos del titular de esta plataforma:</p>
+      <ul>
+        <li><strong>Titular:</strong> <span class="legal-placeholder">[NOMBRE / RAZÓN SOCIAL]</span></li>
+        <li><strong>NIF/CIF:</strong> <span class="legal-placeholder">[NIF / CIF]</span></li>
+        <li><strong>Domicilio:</strong> <span class="legal-placeholder">[DIRECCIÓN FISCAL]</span></li>
+        <li><strong>Email de contacto:</strong> <span class="legal-placeholder">[EMAIL DE CONTACTO]</span></li>
+        <li><strong>Sitio web:</strong> k-one-six.vercel.app</li>
+      </ul>
+      <p>El acceso y uso de esta web atribuye la condición de usuario y supone la aceptación de las condiciones aquí recogidas. Todos los contenidos (textos, diseño, logotipos, código y planes generados) son titularidad del responsable o se usan con autorización, y quedan protegidos por la normativa de propiedad intelectual e industrial. Queda prohibida su reproducción o distribución sin autorización.</p>
+    </section>
+
+    <section class="legal-section" id="privacidad">
+      <h2>2. Política de privacidad (RGPD)</h2>
+      <p>Esta política se rige por el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD).</p>
+
+      <h3>2.1. Responsable del tratamiento</h3>
+      <p><span class="legal-placeholder">[NOMBRE / RAZÓN SOCIAL]</span> — <span class="legal-placeholder">[EMAIL DE CONTACTO]</span>. Puedes dirigirte a esta dirección para cualquier cuestión relativa a tus datos.</p>
+
+      <h3>2.2. Qué datos tratamos</h3>
+      <ul>
+        <li><strong>Datos identificativos y de contacto:</strong> nombre y correo electrónico.</li>
+        <li><strong>Datos de perfil físico y de actividad:</strong> edad, sexo, peso, altura, complexión, objetivo, deporte, nivel, disponibilidad y hábitos (trabajo, sueño, estrés, alimentación).</li>
+        <li><strong>Categorías especiales de datos (datos de salud — art. 9 RGPD):</strong> enfermedades, lesiones, operaciones, alergias y medicación que declares para adaptar tu plan. Estos datos solo se tratan con tu <strong>consentimiento explícito</strong>.</li>
+        <li><strong>Datos de uso:</strong> entrenamientos marcados, check-ins, pesos registrados y progreso.</li>
+      </ul>
+
+      <h3>2.3. Finalidad</h3>
+      <p>Tratamos tus datos para crear y adaptar tu plan de entrenamiento y nutrición, gestionar tu cuenta y suscripción, y prestarte el servicio. Los datos de salud se usan exclusivamente para personalizar y excluir ejercicios o alimentos que no te convengan.</p>
+
+      <h3>2.4. Base jurídica</h3>
+      <ul>
+        <li><strong>Ejecución del contrato</strong> (art. 6.1.b RGPD) para la prestación del servicio y la gestión de tu cuenta.</li>
+        <li><strong>Consentimiento explícito</strong> (art. 9.2.a RGPD) para tratar tus datos de salud, que otorgas al aceptar esta política y rellenar el cuestionario. Puedes retirarlo en cualquier momento.</li>
+      </ul>
+
+      <h3>2.5. Conservación</h3>
+      <p>Conservamos tus datos mientras mantengas tu cuenta activa. Si te das de baja, se suprimen o anonimizan salvo obligación legal de conservarlos (p. ej. facturación).</p>
+
+      <h3>2.6. Destinatarios</h3>
+      <p>No vendemos ni cedemos tus datos a terceros con fines comerciales. Para prestar el servicio podemos apoyarnos en proveedores que actúan como <strong>encargados del tratamiento</strong> bajo contrato (alojamiento y base de datos, y pasarela de pago para gestionar los cobros). Estos proveedores solo tratan los datos según nuestras instrucciones.</p>
+
+      <h3>2.7. Tus derechos</h3>
+      <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a <span class="legal-placeholder">[EMAIL DE CONTACTO]</span>. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+
+      <h3>2.8. Seguridad</h3>
+      <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. <strong>Nota sobre la versión actual:</strong> en esta fase de pruebas, los datos se guardan en el almacenamiento local de tu propio navegador; no se transmiten a un servidor central. Cuando se active el almacenamiento en la nube se actualizará esta política.</p>
+    </section>
+
+    <section class="legal-section" id="terminos">
+      <h2>3. Términos y condiciones</h2>
+      <h3>3.1. Objeto</h3>
+      <p>K-One presta un servicio de generación automática de planes de entrenamiento y nutrición personalizados a partir de los datos del usuario, mediante un sistema basado en reglas (no es asesoramiento profesional individualizado).</p>
+      <h3>3.2. Registro</h3>
+      <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud.</p>
+      <h3>3.3. Precios, pago y prueba</h3>
+      <p>El primer mes tiene un precio promocional de 0,99€. Transcurrido el periodo de prueba se aplica la tarifa del plan elegido (mensual, trimestral o anual), según se detalla en la web. Los precios incluyen los impuestos aplicables.</p>
+      <h3>3.4. Cancelación</h3>
+      <p>Puedes cancelar tu suscripción en cualquier momento, sin permanencia. La cancelación detiene futuras renovaciones; el periodo ya abonado se mantiene activo hasta su vencimiento.</p>
+      <h3>3.5. Exención de responsabilidad</h3>
+      <p>El usuario realiza la actividad física bajo su propia responsabilidad. K-One no se responsabiliza de lesiones o problemas de salud derivados del uso del servicio. Consulta siempre a un profesional sanitario antes de empezar (ver aviso de salud arriba).</p>
+      <h3>3.6. Modificaciones</h3>
+      <p>Podemos modificar estos términos y el servicio. Los cambios relevantes se comunicarán a través de la web.</p>
+    </section>
+
+    <section class="legal-section" id="cookies">
+      <h2>4. Política de cookies</h2>
+      <p>Actualmente esta web <strong>no utiliza cookies de seguimiento ni publicitarias</strong>. Únicamente emplea el almacenamiento local del navegador (localStorage), técnicamente necesario para recordar tu sesión y guardar tu plan en tu dispositivo. Si en el futuro se incorporan cookies de analítica o de terceros, se solicitará tu consentimiento previo mediante un banner.</p>
+    </section>
+
+    <button class="legal-back" onclick="goTo('landing')" style="margin-top:8px">← Volver al inicio</button>
+  </div>
 </div>
 
 <!-- ==================== FORMULARIO ==================== -->
@@ -4975,6 +5198,19 @@
 
   function scrollToSection(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Abre la pantalla legal y, opcionalmente, salta a una de sus secciones
+  function goToLegal(seccion) {
+    goTo('legal');
+    if (seccion) {
+      requestAnimationFrame(() => {
+        document.getElementById(seccion)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      });
+    }
+  }
+  function scrollToLegal(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ===== LEAD MAGNET (landing) =====
