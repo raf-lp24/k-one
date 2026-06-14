@@ -567,6 +567,19 @@
     font-family: 'DM Mono', monospace;
   }
 
+  .mock-adapt {
+    margin-top: 10px;
+    padding: 9px 11px;
+    background: rgba(232,73,15,0.10);
+    border-left: 2px solid var(--brasa);
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--blanco);
+    font-weight: 400;
+  }
+  .mock-adapt strong { color: var(--brasa); font-weight: 600; }
+
   /* HOW IT WORKS */
   .how {
     padding: 120px 40px;
@@ -773,6 +786,12 @@
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  /* Variante de 3 tarjetas (sección "a partir del segundo mes" antes del footer) */
+  .pricing-cards--3 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1040px;
   }
 
   .price-card {
@@ -3947,6 +3966,7 @@
         <div class="manifesto-body">
           <p>Cada día abres la app y ves exactamente qué toca: ejercicios con el peso ajustado a tu progresión, y tus comidas calculadas para tus macros y lo que de verdad te gusta comer.</p>
           <p>Y la evolución de tus cargas, semana a semana, para que el esfuerzo se vea también en números.</p>
+          <p>Cada domingo haces tu check-in y el plan de la semana siguiente se ajusta solo: si vienes fatigado, baja el volumen; si vas sobrado, aprieta. No entrenas a ciegas.</p>
         </div>
       </div>
       <div class="app-preview-visual">
@@ -3978,6 +3998,12 @@
                 <div class="mock-bar mock-bar--active" style="height:100%"><span>S6</span></div>
               </div>
               <div class="mock-chart-label">60 kg → 92.5 kg en 6 semanas</div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-title">Check-in · Domingo</div>
+              <div class="mock-row"><span>Fatiga</span><span>Alta</span></div>
+              <div class="mock-row"><span>Energía</span><span>Baja</span></div>
+              <div class="mock-adapt">➔ <strong>Semana 2 adaptada:</strong> descarga de volumen automática para que te recuperes sin perder el ritmo.</div>
             </div>
           </div>
         </div>
@@ -4367,6 +4393,37 @@
       <button type="submit" class="btn-ghost">Avísame</button>
     </form>
     <p class="lead-magnet-note" id="leadMagnetNote"></p>
+  </section>
+
+  <section class="pricing" id="tarifas">
+    <div class="section-header">
+      <h2 class="section-title">¿Y a partir del segundo mes?</h2>
+      <p class="section-note">Tu primer mes son 0,99€. Al terminar, eliges tu plan. Sin letra pequeña, cancela cuando quieras.</p>
+    </div>
+    <div class="pricing-cards pricing-cards--3">
+      <div class="price-card">
+        <div class="price-tag">// Mensual</div>
+        <div class="price-amount">14,99€</div>
+        <div class="price-period">Al mes · Cancela cuando quieras</div>
+        <p class="price-desc">Entrenamiento, nutrición, check-in semanal y seguimiento de progreso.</p>
+        <button class="btn-primary" onclick="goTo('registro')">Empezar por 0,99€</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tag">// Trimestral</div>
+        <div class="price-amount">35,99€</div>
+        <div class="price-period">Cada 3 meses · Equivale a 12€/mes · Ahorras 9€</div>
+        <p class="price-desc">Plan completo. Un trimestre de progreso real, con tu precio asegurado.</p>
+        <button class="btn-primary" onclick="goTo('registro')">Empezar por 0,99€</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Mejor precio</div>
+        <div class="price-tag">// Anual</div>
+        <div class="price-amount">99,99€</div>
+        <div class="price-period">Al año · Equivale a 8,33€/mes · Ahorras 80€</div>
+        <p class="price-desc">Todo lo mismo, para quien se compromete con su proceso a largo plazo.</p>
+        <button class="btn-primary" onclick="goTo('registro')">Empezar por 0,99€</button>
+      </div>
+    </div>
   </section>
 
   <footer>
