@@ -7343,11 +7343,22 @@
       if (label) label.textContent = 'de tu plan actual';
       return;
     }
+    const DIA_MS = 1000 * 60 * 60 * 24;
     const enPrueba = !user.suscripcionActiva;
+    const finReal = user.fechaPago ? new Date(user.fechaPago).getTime() : NaN;
+    // Con suscripción activa, fechaPago es la próxima renovación de Stripe
+    // (current_period_end, una fecha futura): se cuentan los días que faltan hasta ella.
+    if (!enPrueba && !isNaN(finReal) && finReal > Date.now()) {
+      el.textContent = Math.max(0, Math.ceil((finReal - Date.now()) / DIA_MS));
+      if (label) label.textContent = 'de tu plan actual';
+      return;
+    }
+    // Caso prueba (cuenta desde el registro) o datos heredados (fechaPago pasada):
+    // ciclo fijo según periodicidad / mes de prueba.
     const refFecha = enPrueba ? user.creado : (user.fechaPago || user.creado);
     const opcionPlan = preciosPlan(userData.tipoPlan);
     const periodo = enPrueba ? DIAS_PRUEBA : (opcionPlan[userData.periodicidad || 'mensual'] || opcionPlan.mensual).dias;
-    const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / (1000 * 60 * 60 * 24);
+    const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / DIA_MS;
     const restantes = Math.max(0, Math.ceil(periodo - (diasTranscurridos % periodo)));
     el.textContent = restantes;
     if (label) label.textContent = enPrueba ? 'de tu mes de prueba (0,99€)' : 'de tu plan actual';

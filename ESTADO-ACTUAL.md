@@ -966,6 +966,14 @@ Se completaron los pasos pendientes del punto 78 (creación de productos/precios
 
 **Pendiente para más adelante (no bloqueante):** conectar el precio "Oferta del mes" (0,99€, `STRIPE_PRICE_OFERTA_MES`) a la lógica de "primer mes a 0,99€ y luego el precio normal del plan elegido". Esto requiere implementar un **Stripe Subscription Schedule** (o equivalente) en el backend, que todavía no existe.
 
+### 83. Arreglo del contador "Días restantes" con suscripción de Stripe activa (mostraba 32 en vez de los días reales hasta la renovación)
+Tras pagar de verdad (punto 82), el dashboard "Hoy" mostraba "32 días restantes de tu plan actual" para una suscripción trimestral recién contratada, un valor sin sentido.
+
+- **Causa:** `syncProfileFromSupabase()` rellena `user.fechaPago` con `sub.current_period_end` de Stripe, que es la fecha de **próxima renovación** (futura, ~3 meses para el trimestral). Pero `actualizarDiasRestantesPlan()` estaba escrita asumiendo que `fechaPago` era la fecha del **último pago** (pasada) y calculaba `ceil(periodo - (diasTranscurridos % periodo))`. Con una fecha futura, `diasTranscurridos` es negativo y el módulo en JS conserva el signo, dando `ceil(30 - (-1.9)) = 32`.
+- **Arreglo (`actualizarDiasRestantesPlan`):** si hay suscripción activa y `fechaPago` es una fecha **futura**, se cuentan directamente los días que faltan hasta ella (`ceil((fechaPago - now) / día)`), que es justo lo que representa `current_period_end`. Se conserva la lógica cíclica anterior para el mes de prueba (cuenta desde `creado`) y para datos heredados donde `fechaPago` sea pasada (cuenta de test con pago simulado).
+
+Verificado en preview reproduciendo el cálculo: con una `fechaPago` a 92 días en el futuro, la lógica vieja daba 32 (el bug observado) y la nueva da 92 (correcto). La función carga sin errores de sintaxis (`typeof actualizarDiasRestantesPlan === 'function'`).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
