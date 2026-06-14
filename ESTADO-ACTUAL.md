@@ -918,6 +918,13 @@ El usuario reportó que en una cuenta real ("ree") no aparecían ni la sección 
 
 Verificado en preview reproduciendo el caso (forzando `tipoPlan: 'Solo nutrición, sin entrenamiento'`): con solo-nutrición se ocultan Hoy/Semana/Check-in, se abre en Nutrición y aparece el nuevo botón; al cambiar a plan completo desde ese botón, reaparecen las pestañas de entrenamiento y el botón se oculta. Sin errores de consola. Cuenta de test restaurada tras la prueba.
 
+### 80. "Solo nutrición": se recupera la pestaña "Hoy" (solo se oculta el entrenamiento semanal)
+Tras el punto 79, el usuario aclaró el comportamiento deseado: en un plan "Solo nutrición" **sí** quiere ver la pestaña **"Hoy"** (resumen/motivación: mensaje del día, objetivo, racha, días restantes y el botón de cambiar plan), y lo único que no debe aparecer es **"Planning" / plan semanal** (el entrenamiento), porque no hay entrenamiento. El punto 79 ocultaba "Hoy" de más.
+
+- `buildDashboard()` (`index.html`): para `generatedPlan.soloDieta` ahora solo se ocultan `nav-semana` (Planning) y `nav-checkin`; `nav-hoy` y `nav-nutricion` quedan visibles. Si al recalcular el plan la sección activa era una de entrenamiento que se acaba de ocultar (`section-semana`/`section-checkin`), se redirige a "Hoy" en lugar de a Nutrición.
+
+Verificado en preview (plan solo-dieta forzado, partiendo de la sección "Semana" activa): queda visible Hoy + Nutrición, ocultos Semana y Check-in, y la vista cae correctamente a "Hoy". Sin errores de consola.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
