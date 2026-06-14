@@ -4880,6 +4880,9 @@
           <span class="dash-nav-icon">📝</span> Notas
         </div>
       </nav>
+      <button class="logout-btn" onclick="gestionarSuscripcion()">
+        <span>⬡</span> Gestionar suscripción
+      </button>
       <button class="logout-btn" onclick="logout()">
         <span>⬡</span> Cerrar sesión
       </button>
@@ -7908,12 +7911,18 @@
       .single();
     if (error) console.error('Error cargando perfil de Supabase:', error);
     const cuenta = profile?.userdata?._cuenta || {};
+    // La suscripción real (Stripe) se guarda en "subscriptions" vía webhook.
+    const { data: sub } = await supa.from('subscriptions')
+      .select('status, current_period_end')
+      .eq('user_id', authUser.id)
+      .maybeSingle();
+    const suscripcionStripeActiva = !!sub && ['active', 'trialing'].includes(sub.status);
     setCurrentUser({
       nombre: profile?.nombre || authUser.user_metadata?.nombre || '',
       email: authUser.email,
       creado: cuenta.creado || authUser.created_at,
-      suscripcionActiva: !!cuenta.suscripcionActiva,
-      fechaPago: cuenta.fechaPago || null
+      suscripcionActiva: !!cuenta.suscripcionActiva || suscripcionStripeActiva,
+      fechaPago: sub?.current_period_end || cuenta.fechaPago || null
     });
     if (profile?.plan) {
       saveUserData(authUser.email, {
@@ -8284,19 +8293,54 @@
     if (periodoEl) periodoEl.textContent = '/' + opcion.periodo;
     if (detalleEl) detalleEl.textContent = opcion.detalle;
   }
-  function confirmarPagoSuscripcion() {
+  // Redirige a Stripe Checkout para iniciar la suscripción de pago.
+  // La activación real (modalPaywall se oculta, suscripcionActiva pasa a true)
+  // ocurre al volver de Stripe, vía api/stripe-webhook.js + syncProfileFromSupabase().
+  async function confirmarPagoSuscripcion() {
     const user = getCurrentUser();
     if (!user) return;
     const periodicidad = valorPeriodicidad('pw-periodicidad');
-    user.suscripcionActiva = true;
-    user.fechaPago = new Date().toISOString();
-    setCurrentUser(user);
-    userData.periodicidad = periodicidad;
-    userData._cuenta = { creado: user.creado, suscripcionActiva: true, fechaPago: user.fechaPago };
-    saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
-    document.getElementById('modalPaywall').classList.remove('visible');
-    actualizarDiasRestantesPlan();
-    showToast('Pago confirmado. ¡Bienvenido/a de nuevo a K-One!');
+    const tipoPlan = getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '';
+    const boton = document.querySelector('#modalPaywall .btn-primary');
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) {
+      showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000);
+      return;
+    }
+    if (boton) { boton.disabled = true; boton.textContent = 'Redirigiendo a pago seguro...'; }
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ tipoPlan, periodicidad })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      window.location.href = data.url;
+    } catch (e) {
+      showToast('No se pudo iniciar el pago: ' + e.message, 5000);
+      if (boton) { boton.disabled = false; boton.textContent = 'Continuar con K-One →'; }
+    }
+  }
+
+  // Abre el Portal de Clientes de Stripe (cambiar método de pago, plan o cancelar).
+  async function gestionarSuscripcion() {
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) {
+      showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000);
+      return;
+    }
+    try {
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo abrir la gestión de la suscripción');
+      window.location.href = data.url;
+    } catch (e) {
+      showToast(e.message, 5000);
+    }
   }
 
   // ===== GUARDAR DATOS TRAS GENERAR PLAN =====
@@ -8675,6 +8719,18 @@
       await syncProfileFromSupabase(session.user);
     } else {
       clearCurrentUser();
+    }
+
+    // Vuelta desde Stripe Checkout (ver api/create-checkout-session.js).
+    const checkoutParam = new URLSearchParams(window.location.search).get('checkout');
+    if (checkoutParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+      if (checkoutParam === 'exito') {
+        if (session) await syncProfileFromSupabase(session.user);
+        showToast('¡Pago confirmado! Activando tu suscripción...', 4000);
+      } else if (checkoutParam === 'cancelado') {
+        showToast('Pago cancelado. Puedes intentarlo de nuevo cuando quieras.', 4000);
+      }
     }
 
     const user = getCurrentUser();

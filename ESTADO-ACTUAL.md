@@ -872,6 +872,42 @@ Verificado en preview (`http://localhost:8080/`): la home carga como `index.html
 
 **Nota**: la antigua cuenta `test@fragua.es` sigue existiendo en Supabase Auth; se puede borrar desde Authentication → Users si se quiere limpiar.
 
+### 77. Vuelve la caja de credenciales de test en el login (solo para testeo)
+A petición del usuario, se restaura la caja "// Cuenta de testeo" en la pantalla de login (eliminada en el punto 76), ahora con las credenciales nuevas (`test@k-one.es` / `kone123`), para facilitar las pruebas mientras se sigue desarrollando.
+
+### 78. Fase 2 de Stripe: cobros reales para la suscripción
+Se conecta el paywall de fin de mes de prueba a Stripe (modo suscripción), siguiendo el reparto de tareas: el código vive en el repo, las claves y productos de Stripe se configuran en Vercel/Stripe (no en el HTML).
+
+- **`package.json`** (nuevo, raíz): dependencias `stripe` y `@supabase/supabase-js` para las funciones serverless de Vercel (`api/`).
+- **`api/_stripeHelpers.js`**: utilidades comunes — cliente de Stripe, cliente de Supabase con `service_role` (solo en el servidor), validación del usuario a partir del token de sesión de Supabase, y el mapeo de `(tipoPlan, periodicidad)` → Price ID de Stripe vía variables de entorno.
+- **`api/create-checkout-session.js`**: valida la sesión del usuario, crea (o reutiliza) su `customer` de Stripe, y crea una Checkout Session de suscripción para el plan/periodicidad elegidos; devuelve la URL de pago.
+- **`api/stripe-webhook.js`**: verifica la firma de Stripe y, en `checkout.session.completed` / `customer.subscription.updated` / `customer.subscription.deleted`, hace `upsert` en `public.subscriptions` (estado, `current_period_end`, ids de Stripe) con la `service_role key`.
+- **`api/create-portal-session.js`**: abre el Portal de Clientes de Stripe (cambiar método de pago, cambiar plan o cancelar) para el `customer` del usuario.
+- **Frontend** (`index.html`):
+  - `confirmarPagoSuscripcion()` (modal de fin de prueba) ya no simula el pago: ahora pide una Checkout Session a `/api/create-checkout-session` (con el token de Supabase) y redirige a Stripe.
+  - `syncProfileFromSupabase()` ahora también lee `public.subscriptions` (RLS: cada usuario ve solo la suya); si `status` es `active` o `trialing`, `suscripcionActiva = true` (se combina con el flag local `_cuenta.suscripcionActiva` que sigue usando la cuenta de test).
+  - Al volver de Stripe (`/?checkout=exito` o `/?checkout=cancelado`), se limpia la URL, se vuelve a sincronizar el perfil y se muestra un aviso.
+  - Nuevo botón "Gestionar suscripción" en el menú lateral del dashboard → `gestionarSuscripcion()` → `/api/create-portal-session`.
+- `.gitignore`: añadido `node_modules/`.
+
+**Pendiente del usuario, imprescindible para que funcione en producción** (nada de esto se prueba en el preview local, que es solo HTML estático — requiere despliegue en Vercel):
+1. En el [Dashboard de Stripe](https://dashboard.stripe.com) (modo *test* para probar primero): crear un producto "K-ONE" con 4 precios recurrentes:
+   - Plan completo mensual → 14,99€/mes
+   - Plan completo trimestral → 35,99€/3 meses
+   - Plan completo anual → 99,99€/año
+   - Solo nutrición mensual → 6,99€/mes
+   - Pasarme los 4 **Price ID** (`price_...`).
+2. Copiar la **clave secreta** de Stripe (`sk_test_...` en modo test).
+3. En Supabase → Project Settings → API: copiar la **`service_role` key** (secreta, nunca va en el HTML).
+4. En Vercel → Settings → Environment Variables, añadir:
+   - `STRIPE_SECRET_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `STRIPE_PRICE_COMPLETO_MENSUAL`, `STRIPE_PRICE_COMPLETO_TRIMESTRAL`, `STRIPE_PRICE_COMPLETO_ANUAL`, `STRIPE_PRICE_NUTRICION_MENSUAL`
+5. Desplegar (push a `main` ya dispara el deploy). Una vez desplegado, en Stripe → Developers → Webhooks: crear un endpoint a `https://k-one-six.vercel.app/api/stripe-webhook` para los eventos `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, y copiar su **Signing secret** (`whsec_...`) a Vercel como `STRIPE_WEBHOOK_SECRET` (y volver a desplegar para que la función lo recoja).
+6. Activar el **Portal de Clientes** de Stripe (Settings → Billing → Customer portal) para que `api/create-portal-session.js` funcione.
+
+**No probado end-to-end todavía** (requiere los pasos anteriores + despliegue): el flujo de Checkout, el webhook y el Portal de Clientes. Una vez configurado, probar con la tarjeta de test `4242 4242 4242 4242` desde una cuenta real (no la de test, que ya tiene `suscripcionActiva` forzado).
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
