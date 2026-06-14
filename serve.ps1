@@ -27,7 +27,7 @@ while ($listener.IsListening) {
   $response = $context.Response
 
   $path = $request.Url.AbsolutePath
-  if ($path -eq "/") { $path = "/fragua-fitness.html" }
+  if ($path -eq "/") { $path = "/index.html" }
 
   $filePath = Join-Path $Root ($path.TrimStart("/"))
 

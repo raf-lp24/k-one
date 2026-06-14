@@ -852,6 +852,26 @@ Verificado en preview (localhost:8080): login de la cuenta de test funciona y su
 
 **Nota**: durante la verificación se creó un usuario de prueba (`prueba_...@fragua.es`) en Supabase Auth; se puede borrar desde Authentication → Users si se quiere limpiar.
 
+### 75. Mensaje de error correcto si falla el login de la cuenta de test
+Revisión de la capa de autenticación: si `ensureTestAccount()` fallaba por cualquier motivo (p. ej. error de red), `login()` mostraba el mensaje "Email no encontrado" bajo el campo de email, que era engañoso (el problema no era que el email no existiera).
+
+- `login()`: en el `catch` de la rama de la cuenta de test, ahora se muestra `showToast('No se pudo iniciar sesión con la cuenta de test: ' + e.message, 5000)` en lugar de marcar el campo de email como erróneo.
+
+Verificado en preview: login de la cuenta de test sigue entrando correctamente al dashboard tras recargar, sin errores nuevos en consola.
+
+### 76. Eliminado "Fragua" de toda la app: ahora todo es K-ONE
+El usuario pidió que el nombre "Fragua" no aparezca en ningún sitio (interfaz, URL, código interno), solo "K-ONE".
+
+- **URL de producción**: `fragua-fitness.html` pasa a ser `index.html` (la home del sitio, `https://k-one-six.vercel.app/`). El antiguo `fragua-fitness.html` ahora es una página de redirección a `/` para no romper enlaces antiguos compartidos. `serve.ps1` (servidor de preview local) actualizado para servir `index.html` en la raíz.
+- **Caja visible de credenciales de test** en la pantalla de login (con `test@fragua.es` / `fragua123` a la vista de cualquier visitante) — eliminada por completo.
+- **Claves de `localStorage`** renombradas con prefijo `k1_`: `fragua_current_user` → `k1_current_user`, `fragua_data_<email>` → `k1_data_<email>`, `fragua_leads` → `k1_leads`, `fragua_storage_test` → `k1_storage_test` (diagnóstico de `window.onload`).
+- **Cuenta de test**: nuevas credenciales `test@k-one.es` / `kone123` (antes `test@fragua.es` / `fragua123`), creada en Supabase Auth desde la propia app (flujo normal de `ensureTestAccount()`/`signUp`, sin usar claves privadas). `supabase/schema.sql` actualizado con las nuevas credenciales en sus comentarios.
+- **Código muerto eliminado**: ~10 comprobaciones `user.email !== 'demo@fragua.es'` (una cuenta `demo@fragua.es` que nunca existió) que envolvían las llamadas a `saveUserData()`; simplificadas a `if (user) {` o eliminadas donde `user` ya era no-nulo.
+
+Verificado en preview (`http://localhost:8080/`): la home carga como `index.html`, login con `test@k-one.es` / `kone123` crea la cuenta en Supabase y entra al dashboard, la sesión persiste al recargar, las claves de `localStorage` son `k1_current_user` y `k1_data_test@k-one.es` (sin ninguna clave `fragua_*`), y la pantalla de login ya no muestra la caja de credenciales de test. Sin errores de consola.
+
+**Nota**: la antigua cuenta `test@fragua.es` sigue existiendo en Supabase Auth; se puede borrar desde Authentication → Users si se quiere limpiar.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.

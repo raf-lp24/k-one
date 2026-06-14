@@ -12,7 +12,7 @@
 -- 1. TABLA: profiles
 -- Un perfil por usuario, vinculado 1:1 con auth.users.
 -- "userdata" guarda TODO el objeto que hoy vive en
--- localStorage (fragua_data_<email>): cuestionario, progreso,
+-- localStorage (k1_data_<email>): cuestionario, progreso,
 -- entrenos completados, pesos, fotos, hitos, notas, etc.
 -- "plan" guarda el plan de entrenamiento/nutrición generado.
 -- ============================================================
@@ -143,7 +143,7 @@ order by p.created_at desc;
 
 -- ============================================================
 -- 5. CUENTA DE TEST (opcional)
--- La cuenta de demo (test@fragua.es / fragua123) se crea desde la
+-- La cuenta de demo (test@k-one.es / kone123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales
 -- (login() la registra vía supabase.auth.signUp si no existe).
 -- No hace falta crearla aquí.
