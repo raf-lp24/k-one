@@ -908,6 +908,16 @@ Se conecta el paywall de fin de mes de prueba a Stripe (modo suscripción), sigu
 
 **No probado end-to-end todavía** (requiere los pasos anteriores + despliegue): el flujo de Checkout, el webhook y el Portal de Clientes. Una vez configurado, probar con la tarjeta de test `4242 4242 4242 4242` desde una cuenta real (no la de test, que ya tiene `suscripcionActiva` forzado).
 
+### 79. Los clientes "Solo nutrición" ya pueden cambiar de plan (antes quedaban atrapados)
+El usuario reportó que en una cuenta real ("ree") no aparecían ni la sección "Hoy" ni el plan semanal. Diagnóstico: **no es un fallo** que falte el entrenamiento — esa cuenta se registró con el plan "Solo nutrición, sin entrenamiento", y el dashboard oculta a propósito las pestañas Hoy / Plan semanal / Check-in para esos planes (abre directo en Nutrición).
+
+**El fallo real encontrado**: el único botón para cambiar de plan ("Cambiar objetivo / deporte") vivía dentro de la sección "Hoy", que está oculta para los planes solo-nutrición. Resultado: un cliente de solo-nutrición no tenía forma de volver al plan completo (con entrenamiento) ni de cambiar nada — quedaba atrapado.
+
+- `index.html`: nuevo botón "Cambiar plan / añadir entrenamiento" (`#nutriCambiarPlan`) en la cabecera de la sección Nutrición, que llama a `abrirModalCambiarPlan()`.
+- `buildDashboard()`: el botón solo se muestra cuando el plan es solo-nutrición (`generatedPlan.soloDieta`); en planes completos queda oculto (esos ya tienen el botón en "Hoy").
+
+Verificado en preview reproduciendo el caso (forzando `tipoPlan: 'Solo nutrición, sin entrenamiento'`): con solo-nutrición se ocultan Hoy/Semana/Check-in, se abre en Nutrición y aparece el nuevo botón; al cambiar a plan completo desde ese botón, reaparecen las pestañas de entrenamiento y el botón se oculta. Sin errores de consola. Cuenta de test restaurada tras la prueba.
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
