@@ -17,11 +17,22 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { tipoPlan, periodicidad } = req.body || {};
-  const priceId = getPriceId(tipoPlan, periodicidad);
-  if (!priceId) {
-    res.status(400).json({ error: 'Plan o periodicidad no válidos' });
-    return;
+  const { tipoPlan, periodicidad, oferta } = req.body || {};
+  // Modo "oferta": primer mes a 0,99€ (STRIPE_PRICE_OFERTA_MES). El plan definitivo
+  // (mensual/trimestral/anual/nutrición) se elige al terminar el mes, en el paywall.
+  // Modo normal (paywall de fin de mes): se cobra directamente el plan elegido.
+  const ofertaPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
+  const usarOferta = !!oferta && !!ofertaPriceId;
+
+  let priceId;
+  if (usarOferta) {
+    priceId = ofertaPriceId;
+  } else {
+    priceId = getPriceId(tipoPlan, periodicidad);
+    if (!priceId) {
+      res.status(400).json({ error: 'Plan o periodicidad no válidos' });
+      return;
+    }
   }
 
   // Reutiliza el cliente de Stripe si ya existe uno para este usuario.
@@ -52,7 +63,12 @@ module.exports = async (req, res) => {
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${origin}/?checkout=exito`,
     cancel_url: `${origin}/?checkout=cancelado`,
-    metadata: { supabase_user_id: user.id, tipoPlan, periodicidad }
+    metadata: {
+      supabase_user_id: user.id,
+      tipoPlan: tipoPlan || '',
+      periodicidad: periodicidad || '',
+      oferta: usarOferta ? 'si' : 'no'
+    }
   });
 
   res.status(200).json({ url: session.url });

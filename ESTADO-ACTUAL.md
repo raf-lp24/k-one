@@ -974,6 +974,24 @@ Tras pagar de verdad (punto 82), el dashboard "Hoy" mostraba "32 días restantes
 
 Verificado en preview reproduciendo el cálculo: con una `fechaPago` a 92 días en el futuro, la lógica vieja daba 32 (el bug observado) y la nueva da 92 (correcto). La función carga sin errores de sintaxis (`typeof actualizarDiasRestantesPlan === 'function'`).
 
+### 84. Oferta real de "primer mes por 0,99€": cobro al registrarse y elección de plan al mes
+Hasta ahora el "0,99€" era solo marketing (el registro daba 30 días gratis y al día 30 el paywall cobraba el precio normal). Se conecta de verdad: **el usuario paga 0,99€ con tarjeta al terminar el cuestionario, y cuando ese primer mes acaba elige plan (mensual/trimestral/anual/solo nutrición) y paga el precio normal.** Decidido con el usuario: el pago de 0,99€ es **obligatorio al registrarse** (sustituye al acceso gratis de 30 días).
+
+**Backend:**
+- `api/create-checkout-session.js`: nuevo flag `oferta` en el body. En modo oferta, la Checkout Session usa `STRIPE_PRICE_OFERTA_MES` (0,99€) como line item y NO requiere plan elegido (se elige al mes); en `metadata` se marca `oferta: 'si'`. En modo normal sigue usando `getPriceId(tipoPlan, periodicidad)`.
+- `api/stripe-webhook.js`: en `checkout.session.completed`, si `metadata.oferta === 'si'`, hace `stripe.subscriptions.update(sub, { cancel_at_period_end: true })` para que el 0,99€ **no se renueve**: se cobra una vez, da acceso ~1 mes y luego se cancela solo, momento en que reaparece el paywall (ahora en modo "elige tu plan"). No se usan Subscription Schedules (más simple y robusto).
+
+**Frontend (`index.html`):**
+- **Paywall `#modalPaywall` con dos modos** (mismo modal, distinto contenido):
+  - *Primer mes* (usuario que nunca ha pagado, `!user.tieneSub`): título "Tu plan está listo", caja `#paywallOfertaBox` con "0,99€ · primer mes", sin selector de plan; botón "Empezar por 0,99€ →".
+  - *Elige tu plan* (terminó el mes de 0,99€, `user.tieneSub`): título "Tu primer mes ha terminado", selector de periodicidad `#paywallPlanChooser` + precio normal; botón "Continuar con K-One →".
+- Nueva función `pagarDesdePaywall()` que despacha a `confirmarPagoSuscripcion(oferta)` según el modo. `confirmarPagoSuscripcion(oferta)` envía `oferta` al backend (en modo oferta no manda plan).
+- Nuevo campo `user.tieneSub` (en `syncProfileFromSupabase`: `!!sub || !!cuenta.suscripcionActiva`) para distinguir los dos modos.
+- `tieneAccesoActivo()`: **se elimina el acceso gratis de 30 días**; ahora el acceso requiere `suscripcionActiva` (el 0,99€ del primer mes o el plan normal). La cuenta de test sigue con acceso porque tiene `_cuenta.suscripcionActiva = true` forzado.
+- `generatePlan()`: al terminar el cuestionario, si no hay acceso activo muestra el paywall (0,99€) en vez de entrar gratis. Al volver de Stripe con `?checkout=exito`, arranca el tour de onboarding si no se había hecho.
+
+Verificado en preview: ambos modos del paywall se renderizan con el texto/botón correctos (`primerMes` → "Tu plan está listo" / "Empezar por 0,99€ →" / oferta visible y selector oculto; `elegirPlan` → "Tu primer mes ha terminado" / "Continuar con K-One →" / selector visible). Captura del modo primer mes confirmada. Sin errores de consola. Todas las funciones cargan (`pagarDesdePaywall`, `confirmarPagoSuscripcion`, etc.). **Pendiente:** desplegar y probar end-to-end en Stripe test (cobro de 0,99€, no renovación, y reaparición del paywall en modo "elige plan").
+
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
 - Claude in Chrome (extensión) no está conectada en esta sesión — no se pudo usar automatización de navegador.
