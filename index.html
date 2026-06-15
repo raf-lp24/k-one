@@ -6088,7 +6088,7 @@
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Tren superior · Empuje", detalle:"Pecho, hombros, tríceps · Press banca 4×8, press militar 3×10, fondos 3×10, elevaciones laterales 3×15, press inclinado mancuernas 3×12", etiqueta:"Empuje"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Tren inferior completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, peso muerto rumano 4×10, prensa 3×12, extensiones 3×15, femoral tumbado 3×12, elevación gemelos 4×15", etiqueta:"Piernas"},
+          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Tren inferior completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, peso muerto rumano 4×10, prensa 3×12, extensión de cuádriceps 3×15, femoral tumbado 3×12, elevación de gemelos 4×15", etiqueta:"Piernas"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Tren superior · Tracción", detalle:"Espalda, bíceps, core · Dominadas o jalón 4×8, remo barra 4×10, remo mancuerna 3×12, curl bíceps 3×12, curl martillo 3×12, plancha 3×45s", etiqueta:"Tracción"},
           {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
@@ -6096,10 +6096,10 @@
         ];
       } else {
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps", detalle:"Pectoral, tríceps, hombro anterior · Press banca 4×8, press inclinado mancuernas 3×10, fondos 3×10, aperturas 3×12, extensión tríceps polea 4×12, press francés 3×12", etiqueta:"Empuje"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps", detalle:"Pectoral, tríceps, hombro anterior · Press banca 4×8, press inclinado mancuernas 3×10, fondos 3×10, aperturas 3×12, extensión de tríceps en polea 4×12, press francés 3×12", etiqueta:"Empuje"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps", detalle:"Dorsal, trapecio, bíceps, romboides · Dominadas 4×8, remo barra 4×10, jalón polea 3×12, remo polea baja 3×12, curl bíceps 4×10, curl martillo 3×12", etiqueta:"Tracción"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, peso muerto 4×6, prensa 3×12, extensión cuádriceps 3×15, femoral tumbado 3×12, hip thrust 3×15, gemelos de pie 4×15", etiqueta:"Piernas"},
+          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, peso muerto 4×6, prensa 3×12, extensión de cuádriceps 3×15, femoral tumbado 3×12, hip thrust 3×15, elevación de gemelos 4×15", etiqueta:"Piernas"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core", detalle:"Deltoides, trapecios, core · Press militar 4×8, elevaciones laterales 4×15, elevaciones frontales 3×12, face pull 3×15, encogimientos 3×12, plancha 3×60s, russian twist 3×20", etiqueta:"Hombros"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso", resumen: numDias >= 5 ? "Full body o cardio" : "Descanso", detalle: numDias >= 5 ? "Cuerpo completo · Sentadilla 3×10, press 3×10, remo 3×10, peso muerto 3×8, 20 min cardio suave al acabar" : "", etiqueta: numDias >= 5 ? "Complemento" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -8575,7 +8575,7 @@
   const variantesDB = {
     // PECHO
     'press banca': {
-      nombre: 'Press de banca',
+      nombre: 'Press banca',
       variantes: [
         { nombre: 'Press con mancuernas', desc: 'Mismo movimiento pero con mancuernas. Más rango de movimiento y menos estrés en las muñecas.', nivel: 'Similar' },
         { nombre: 'Flexiones en el suelo', desc: 'Sin máquina ni barra. Efectivo para principiantes o si hay molestia de hombro.', nivel: 'Más fácil' },
@@ -8589,6 +8589,14 @@
         { nombre: 'Press plano con mancuernas', desc: 'Traslada el trabajo al pecho medio. Menos estrés en el hombro anterior.', nivel: 'Similar' },
         { nombre: 'Aperturas inclinadas', desc: 'Aísla el pecho superior. Menos carga pero más rango.', nivel: 'Más fácil' },
         { nombre: 'Flexiones con pies elevados', desc: 'Simula el ángulo inclinado sin necesidad de banco.', nivel: 'Similar' }
+      ]
+    },
+    'aperturas': {
+      nombre: 'Aperturas con mancuernas',
+      variantes: [
+        { nombre: 'Aperturas en polea (cruce de poleas)', desc: 'Tensión constante en todo el recorrido. Más controlado que con mancuernas.', nivel: 'Similar' },
+        { nombre: 'Press inclinado con mancuernas', desc: 'Movimiento multiarticular con más carga total para el pecho.', nivel: 'Más exigente' },
+        { nombre: 'Flexiones con manos muy separadas', desc: 'Sin material. Trabaja el pecho con un patrón similar de apertura.', nivel: 'Más fácil' }
       ]
     },
     // ESPALDA
@@ -8628,6 +8636,22 @@
         { nombre: 'Face pull', desc: 'Trabaja el hombro posterior y los rotadores. Muy importante para salud articular.', nivel: 'Diferente' }
       ]
     },
+    'elevaciones frontales': {
+      nombre: 'Elevaciones frontales',
+      variantes: [
+        { nombre: 'Elevaciones frontales con disco', desc: 'Mismo movimiento con un disco en lugar de mancuernas. Igual de efectivo.', nivel: 'Similar' },
+        { nombre: 'Press militar', desc: 'Movimiento multiarticular que también implica al deltoides anterior, con más carga.', nivel: 'Más exigente' },
+        { nombre: 'Elevaciones laterales', desc: 'Cambia el foco al deltoides medio. Útil si el anterior ya está fatigado.', nivel: 'Diferente' }
+      ]
+    },
+    'face pull': {
+      nombre: 'Face pull',
+      variantes: [
+        { nombre: 'Remo al cuello en polea (cara)', desc: 'Mismo patrón con cuerda o barra. Trabaja deltoides posterior y rotadores externos.', nivel: 'Similar' },
+        { nombre: 'Pájaros con mancuernas (elevación posterior)', desc: 'Sin polea, inclinado hacia delante. Mismo grupo muscular.', nivel: 'Similar' },
+        { nombre: 'Remo en polea baja', desc: 'Trabaja la espalda media en general, menos foco en el hombro posterior.', nivel: 'Diferente' }
+      ]
+    },
     // PIERNAS
     'sentadilla': {
       nombre: 'Sentadilla',
@@ -8636,6 +8660,23 @@
         { nombre: 'Prensa de piernas', desc: 'Sin carga en la columna. Permite trabajar con más peso de forma segura.', nivel: 'Diferente' },
         { nombre: 'Sentadilla búlgara', desc: 'Un pie elevado. Trabaja unilateralmente y detecta desequilibrios.', nivel: 'Similar' },
         { nombre: 'Sentadilla hack', desc: 'En máquina. Cuádriceps más aislado, menos estrés en espalda baja.', nivel: 'Similar' }
+      ]
+    },
+    'zancadas': {
+      nombre: 'Zancadas',
+      variantes: [
+        { nombre: 'Zancadas estáticas (sin caminar)', desc: 'Mismo movimiento sin desplazamiento. Más fácil de controlar el equilibrio.', nivel: 'Más fácil' },
+        { nombre: 'Step-ups al cajón', desc: 'Sube a un cajón o banco con cada pierna. Mismo trabajo unilateral, menos impacto.', nivel: 'Similar' },
+        { nombre: 'Sentadilla búlgara', desc: 'Un pie elevado detrás. Mismo patrón unilateral con más apoyo.', nivel: 'Similar' },
+        { nombre: 'Prensa de piernas (bilateral)', desc: 'Sin componente de equilibrio. Permite cargar más peso de forma segura.', nivel: 'Diferente' }
+      ]
+    },
+    'extensión de cuádriceps': {
+      nombre: 'Extensión de cuádriceps',
+      variantes: [
+        { nombre: 'Sentadilla goblet', desc: 'Trabajo multiarticular de cuádriceps con mancuerna. Más exigente que el aislamiento.', nivel: 'Más exigente' },
+        { nombre: 'Prensa de piernas', desc: 'Cuádriceps con más carga total, sin aislamiento ni máquina específica.', nivel: 'Similar' },
+        { nombre: 'Step-ups con mancuernas', desc: 'Trabajo unilateral y funcional de cuádriceps y glúteo.', nivel: 'Diferente' }
       ]
     },
     'peso muerto': {
@@ -8647,12 +8688,44 @@
         { nombre: 'Peso muerto con mancuernas', desc: 'Menos peso total, más fácil de controlar la técnica.', nivel: 'Más fácil' }
       ]
     },
+    'femoral tumbado': {
+      nombre: 'Curl femoral tumbado',
+      variantes: [
+        { nombre: 'Curl femoral sentado', desc: 'Mismo músculo (isquiosurales), otro ángulo. Igual de efectivo en máquina.', nivel: 'Similar' },
+        { nombre: 'Peso muerto rumano', desc: 'Trabajo multiarticular de isquiosurales y glúteo con más carga.', nivel: 'Más exigente' },
+        { nombre: 'Puente de glúteo a una pierna', desc: 'Sin máquina. Isquiosurales y glúteo trabajando en isometría/concéntrico.', nivel: 'Más fácil' }
+      ]
+    },
+    'puente de glúteo': {
+      nombre: 'Puente de glúteo',
+      variantes: [
+        { nombre: 'Hip thrust con barra', desc: 'Mismo movimiento con más carga. Más exigente para el glúteo.', nivel: 'Más exigente' },
+        { nombre: 'Patada de glúteo en polea', desc: 'Aísla el glúteo de forma unilateral con tensión constante.', nivel: 'Similar' },
+        { nombre: 'Sentadilla goblet', desc: 'Trabajo de glúteo y cuádriceps combinado, con mancuerna.', nivel: 'Diferente' }
+      ]
+    },
+    'hip thrust': {
+      nombre: 'Hip thrust',
+      variantes: [
+        { nombre: 'Puente de glúteo (sin barra)', desc: 'Misma mecánica sin carga añadida. Ideal para aprender el patrón.', nivel: 'Más fácil' },
+        { nombre: 'Peso muerto rumano', desc: 'También enfocado en glúteo e isquiosurales, con más implicación lumbar.', nivel: 'Más exigente' },
+        { nombre: 'Patada de glúteo en polea', desc: 'Aislamiento unilateral de glúteo con tensión constante.', nivel: 'Similar' }
+      ]
+    },
     'prensa': {
       nombre: 'Prensa de piernas',
       variantes: [
         { nombre: 'Sentadilla con barra', desc: 'Patrón de movimiento similar pero más funcional. Requiere más estabilidad.', nivel: 'Más exigente' },
         { nombre: 'Sentadilla goblet', desc: 'Con mancuerna al pecho. Menos carga pero movimiento completo.', nivel: 'Más fácil' },
         { nombre: 'Step up con mancuernas', desc: 'Subida al cajón. Unilateral y funcional.', nivel: 'Diferente' }
+      ]
+    },
+    'gemelos': {
+      nombre: 'Elevación de gemelos',
+      variantes: [
+        { nombre: 'Elevación de gemelos sentado', desc: 'Cambia el énfasis hacia el sóleo. Igual de efectivo, otra máquina.', nivel: 'Similar' },
+        { nombre: 'Elevación de gemelos en prensa', desc: 'Mismo movimiento aprovechando la prensa de piernas, sin máquina específica.', nivel: 'Similar' },
+        { nombre: 'Saltos a la comba (suave)', desc: 'Trabajo dinámico de pantorrilla. Añade un componente cardiovascular ligero.', nivel: 'Diferente' }
       ]
     },
     // CORE
@@ -8673,6 +8746,14 @@
         { nombre: 'Leg raises tumbado', desc: 'Eleva las piernas rectas tumbado. Trabaja la parte baja del abdomen.', nivel: 'Similar' }
       ]
     },
+    'russian twist': {
+      nombre: 'Russian twist',
+      variantes: [
+        { nombre: 'Plancha lateral', desc: 'Trabaja los oblicuos de forma isométrica, sin rotación ni carga lumbar.', nivel: 'Más fácil' },
+        { nombre: 'Rueda de abdominales (oblicuos)', desc: 'Mismo grupo muscular con un giro controlado, sin necesidad de peso.', nivel: 'Similar' },
+        { nombre: 'Leñador en polea', desc: 'Rotación de tronco con carga y resistencia constante. Más exigente.', nivel: 'Más exigente' }
+      ]
+    },
     // BÍCEPS / TRÍCEPS
     'curl': {
       nombre: 'Curl de bíceps',
@@ -8690,6 +8771,14 @@
         { nombre: 'Press francés', desc: 'Con barra EZ o mancuernas. Trabaja el tríceps largo con estiramiento.', nivel: 'Similar' }
       ]
     },
+    'extensión de tríceps': {
+      nombre: 'Extensión de tríceps en polea',
+      variantes: [
+        { nombre: 'Press francés', desc: 'Con barra EZ o mancuernas. Más estiramiento del tríceps largo.', nivel: 'Similar' },
+        { nombre: 'Fondos en banco', desc: 'Multiarticular: tríceps, pecho y hombro juntos, con más carga.', nivel: 'Más exigente' },
+        { nombre: 'Patada de tríceps con mancuerna', desc: 'Aislamiento del tríceps sin polea, un brazo a la vez.', nivel: 'Similar' }
+      ]
+    },
     // RUNNING
     'rodaje': {
       nombre: 'Rodaje continuo',
@@ -8705,6 +8794,95 @@
         { nombre: 'Fartlek suave', desc: 'Aceleraciones libres sin estructura. Menos intensidad que las series clásicas.', nivel: 'Más fácil' },
         { nombre: 'Cuestas cortas', desc: '10-15 segundos subiendo una cuesta. Fuerza y velocidad sin tanto impacto.', nivel: 'Similar' },
         { nombre: 'Rodaje progresivo', desc: 'Empieza suave y termina a buen ritmo. Sin pausas entre series.', nivel: 'Diferente' }
+      ]
+    },
+    // FUNCIONAL / HYROX / CROSSFIT
+    'wall balls': {
+      nombre: 'Wall balls',
+      variantes: [
+        { nombre: 'Sentadilla goblet + press militar (sin lanzar)', desc: 'Mismo patrón sentadilla + empuje, sin balón medicinal ni pared.', nivel: 'Similar' },
+        { nombre: 'Thrusters con mancuernas', desc: 'Mismo patrón combinado, con mancuernas en vez de balón.', nivel: 'Similar' },
+        { nombre: 'Sentadilla con salto', desc: 'Quita el componente de lanzamiento, mantiene la explosividad de piernas.', nivel: 'Más fácil' }
+      ]
+    },
+    'box jumps': {
+      nombre: 'Box jumps',
+      variantes: [
+        { nombre: 'Step-ups al cajón (sin salto)', desc: 'Mismo patrón sin impacto en la recepción.', nivel: 'Más fácil' },
+        { nombre: 'Sentadilla con salto', desc: 'Mismo patrón explosivo sin necesidad de cajón.', nivel: 'Similar' },
+        { nombre: 'Saltos a la comba', desc: 'Pliometría de menor impacto para el mismo estímulo.', nivel: 'Diferente' }
+      ]
+    },
+    'burpees': {
+      nombre: 'Burpees',
+      variantes: [
+        { nombre: 'Burpee sin salto final', desc: 'Quita el impacto de aterrizaje, mantiene el resto del movimiento.', nivel: 'Más fácil' },
+        { nombre: 'Flexión + sentadilla (sin saltos)', desc: 'Mismo patrón dividido en dos movimientos, sin impacto.', nivel: 'Más fácil' },
+        { nombre: 'Mountain climbers', desc: 'Cardio y core sin impacto en muñecas ni rodillas.', nivel: 'Diferente' }
+      ]
+    },
+    'kettlebell swings': {
+      nombre: 'Kettlebell swings',
+      variantes: [
+        { nombre: 'Peso muerto rumano con mancuerna', desc: 'Mismo patrón de bisagra de cadera, sin componente balístico.', nivel: 'Similar' },
+        { nombre: 'Hip thrust', desc: 'Trabaja el glúteo del swing sin el impulso dinámico.', nivel: 'Más fácil' },
+        { nombre: 'Swing con mancuerna', desc: 'Mismo movimiento con el material que tengas disponible.', nivel: 'Similar' }
+      ]
+    },
+    'thrusters': {
+      nombre: 'Thrusters',
+      variantes: [
+        { nombre: 'Sentadilla goblet + press militar (sin enlazar)', desc: 'Separa el movimiento en dos partes, más fácil de controlar.', nivel: 'Más fácil' },
+        { nombre: 'Wall balls', desc: 'Mismo patrón combinado sentadilla + empuje, con balón.', nivel: 'Similar' },
+        { nombre: 'Press militar', desc: 'Solo la parte de tren superior, sin sentadilla.', nivel: 'Diferente' }
+      ]
+    },
+    'sled push': {
+      nombre: 'Sled push',
+      variantes: [
+        { nombre: 'Zancadas con peso', desc: 'Trabajo unilateral de pierna con carga, patrón de empuje similar.', nivel: 'Similar' },
+        { nombre: 'Prensa de piernas', desc: 'Mismo grupo muscular sin componente de desplazamiento.', nivel: 'Diferente' },
+        { nombre: 'Marcha con resistencia (banda o cuesta)', desc: 'Empuje de piernas contra resistencia, sin necesidad de trineo.', nivel: 'Similar' }
+      ]
+    },
+    'farmer carry': {
+      nombre: 'Farmer carry',
+      variantes: [
+        { nombre: 'Paseo del granjero con mancuernas', desc: 'Mismo ejercicio con el material que tengas disponible.', nivel: 'Similar' },
+        { nombre: 'Plancha con tracción (renegade row)', desc: 'Core y agarre, sin necesidad de caminar con peso.', nivel: 'Diferente' },
+        { nombre: 'Encogimientos con mancuernas (trapecio)', desc: 'Aísla el trabajo de trapecio y agarre que exige el carry.', nivel: 'Diferente' }
+      ]
+    },
+    'sandbag lunges': {
+      nombre: 'Zancadas con sandbag',
+      variantes: [
+        { nombre: 'Zancadas con mancuernas', desc: 'Mismo patrón unilateral con el material que tengas disponible.', nivel: 'Similar' },
+        { nombre: 'Sentadilla búlgara con peso', desc: 'Trabajo unilateral similar, con apoyo para el equilibrio.', nivel: 'Similar' },
+        { nombre: 'Step-ups con peso', desc: 'Patrón unilateral funcional con carga, sin desplazamiento.', nivel: 'Diferente' }
+      ]
+    },
+    'rowing': {
+      nombre: 'Remo en máquina (rowing)',
+      variantes: [
+        { nombre: 'Ski erg', desc: 'Cardio de tren superior, mismo concepto de máquina de cable.', nivel: 'Similar' },
+        { nombre: 'Carrera continua', desc: 'Mismo trabajo cardiovascular, centrado en piernas.', nivel: 'Diferente' },
+        { nombre: 'Bici estática', desc: 'Cardio sin impacto, alternativa si no hay máquina de remo.', nivel: 'Diferente' }
+      ]
+    },
+    'ski erg': {
+      nombre: 'Ski erg',
+      variantes: [
+        { nombre: 'Remo en máquina (rowing)', desc: 'Cardio de tren superior con una máquina más habitual en gimnasios.', nivel: 'Similar' },
+        { nombre: 'Cuerda de batalla', desc: 'Tren superior cardiovascular sin necesidad de máquina específica.', nivel: 'Similar' },
+        { nombre: 'Carrera continua', desc: 'Cardio general si no tienes acceso a ski erg ni remo.', nivel: 'Diferente' }
+      ]
+    },
+    'abdominales': {
+      nombre: 'Abdominales',
+      variantes: [
+        { nombre: 'Encogimientos abdominales', desc: 'Mismo grupo muscular con un patrón de movimiento clásico.', nivel: 'Similar' },
+        { nombre: 'Plancha', desc: 'Trabajo de core isométrico, sin repeticiones.', nivel: 'Diferente' },
+        { nombre: 'Russian twist', desc: 'Añade trabajo de oblicuos al core.', nivel: 'Diferente' }
       ]
     }
   };
@@ -8730,7 +8908,7 @@
       } else if (deporte.includes('Running')) {
         ejerciciosEncontrados.push('rodaje', 'series');
       } else if (deporte.includes('Hyrox') || deporte.includes('CrossFit')) {
-        ejerciciosEncontrados.push('sentadilla', 'peso muerto', 'plancha', 'fondos');
+        ejerciciosEncontrados.push('sentadilla', 'peso muerto', 'wall balls', 'burpees');
       } else {
         ejerciciosEncontrados.push('sentadilla', 'press banca', 'plancha');
       }
