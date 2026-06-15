@@ -5871,17 +5871,25 @@
     const valor = parseFloat(input.value);
     if (!userData.pesosEjercicios) userData.pesosEjercicios = {};
 
+    const hoy = getFechaHoyISO();
+    const previo = userData.pesosEjercicios[key];
+    // Último peso registrado en una sesión anterior (no la de hoy), para recordárselo al usuario
+    const pesoAnterior = previo && previo.fecha !== hoy ? previo.peso : null;
+
     if (isNaN(valor) || valor <= 0) {
       delete userData.pesosEjercicios[key];
     } else {
-      const hoy = getFechaHoyISO();
-      const entry = userData.pesosEjercicios[key] || { historial: [] };
+      const entry = previo || { historial: [] };
       entry.nombre = nombre;
       entry.peso = valor;
       entry.fecha = hoy;
       entry.historial = (entry.historial || []).filter(h => h.fecha !== hoy);
       entry.historial.push({ fecha: hoy, peso: valor });
       userData.pesosEjercicios[key] = entry;
+
+      if (pesoAnterior != null && pesoAnterior !== valor) {
+        showToast(`Último peso en ${nombre}: ${pesoAnterior} kg · Ahora: ${valor} kg`);
+      }
     }
 
     // Si el mismo ejercicio aparece en "Hoy" y en "Plan semanal", mantenerlos sincronizados
