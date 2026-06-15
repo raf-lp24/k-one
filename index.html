@@ -7633,7 +7633,7 @@
     [/leche de avena/, {kcal:45, prot:1, carbs:7, grasa:1.5}],
     [/leche de almendra/, {kcal:13, prot:0.4, carbs:0.3, grasa:1.1}],
     [/leche de soja/, {kcal:33, prot:3.3, carbs:1.8, grasa:1.8}],
-    [/leche de coco/, {kcal:50, prot:1, carbs:3, grasa:4}],
+    [/leche (de )?coco/, {kcal:50, prot:1, carbs:3, grasa:4}],
     [/leche sin lactosa|leche desnatada/, {kcal:35, prot:3.4, carbs:5, grasa:0.1}],
     [/leche/, {kcal:64, prot:3.2, carbs:4.8, grasa:3.6}],
     [/yogur de soja/, {kcal:55, prot:3.5, carbs:3, grasa:2.5}],
@@ -7664,22 +7664,38 @@
     [/lentejas/, {kcal:116, prot:9, carbs:20, grasa:0.4}],
     [/legumbres/, {kcal:120, prot:9, carbs:20, grasa:1}],
     [/arroz/, {kcal:130, prot:2.7, carbs:28, grasa:0.3}],
-    [/pasta/, {kcal:124, prot:5, carbs:25, grasa:1}],
+    [/pasta|fideos/, {kcal:124, prot:5, carbs:25, grasa:1}],
     [/cuscús|cuscus/, {kcal:112, prot:3.8, carbs:23, grasa:0.2}],
     [/batata/, {kcal:90, prot:2, carbs:21, grasa:0.1}],
     [/patata/, {kcal:87, prot:2, carbs:20, grasa:0.1}],
     [/pan integral|tostada|pan centeno|rebanada|centeno|pan/, {kcal:250, prot:9, carbs:43, grasa:2.5}],
     [/aguacate/, {kcal:160, prot:2, carbs:8.5, grasa:14.7}],
-    [/crema de cacahuete|cacahuete/, {kcal:588, prot:25, carbs:20, grasa:50}],
+    [/crema de cacahuete|cacahuete|tahini/, {kcal:588, prot:25, carbs:20, grasa:50}],
     [/nueces|almendra|frutos secos|semillas/, {kcal:620, prot:18, carbs:18, grasa:55}],
-    [/aceite/, {kcal:884, prot:0, carbs:0, grasa:100}],
+    [/aceite|aove/, {kcal:884, prot:0, carbs:0, grasa:100}],
     [/hummus/, {kcal:166, prot:8, carbs:14, grasa:10}],
     [/palmitos/, {kcal:26, prot:2.6, carbs:4, grasa:0.6}],
     [/plátano|platano/, {kcal:89, prot:1.1, carbs:23, grasa:0.3}],
     [/miel/, {kcal:304, prot:0.3, carbs:82, grasa:0}],
     [/cacao puro|cacao/, {kcal:228, prot:20, carbs:58, grasa:14}],
     [/proteína|scoop/, {kcal:380, prot:75, carbs:8, grasa:5}],
-    [/brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|espárrago|esparrago|tomate|pepino|lechuga|rúcula|rucula|verdura/, {kcal:30, prot:2.2, carbs:5, grasa:0.3}],
+    [/brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|espárrago|esparrago|tomate|pepino|lechuga|rúcula|rucula|berenjena|alcachofa|puerro|apio|verdura/, {kcal:30, prot:2.2, carbs:5, grasa:0.3}],
+    [/manzana|\bpera\b|naranja|mandarina|kiwi|melocotón|melocoton|mango|fresas?|arándanos|arandanos|frambuesas?|frutos rojos|fruta(?! seca)/, {kcal:52, prot:0.6, carbs:12, grasa:0.2}],
+    [/champiñones|champinones|setas/, {kcal:22, prot:3.1, carbs:3.3, grasa:0.3}],
+    [/jamón serrano|jamon serrano/, {kcal:241, prot:30, carbs:0, grasa:13}],
+    [/jamón|jamon/, {kcal:110, prot:18, carbs:1, grasa:3}],
+    [/gambas|langostinos|camarones/, {kcal:85, prot:20, carbs:0.2, grasa:1}],
+    [/edamame/, {kcal:122, prot:11, carbs:10, grasa:5}],
+    [/cebolla/, {kcal:40, prot:1.1, carbs:9.3, grasa:0.1}],
+    [/chorizo/, {kcal:455, prot:24, carbs:2, grasa:38}],
+    [/aceitunas|olivas/, {kcal:115, prot:1, carbs:6, grasa:11}],
+    [/tortitas? de ma[ií]z/, {kcal:380, prot:8, carbs:75, grasa:3}],
+    [/maíz|maiz/, {kcal:86, prot:3.3, carbs:19, grasa:1.2}],
+    [/dátiles|datiles/, {kcal:282, prot:2.5, carbs:75, grasa:0.4}],
+    [/sirope/, {kcal:310, prot:0.1, carbs:76, grasa:0}],
+    [/harina.*sarraceno|trigo sarraceno/, {kcal:335, prot:13, carbs:70, grasa:3}],
+    [/salsa de soja|salsa soja|tamari/, {kcal:60, prot:6, carbs:6, grasa:0.6}],
+    [/gazpacho|crema (de )?(calabaza|zanahoria|verduras)/, {kcal:35, prot:1.5, carbs:5, grasa:1.5}],
   ];
 
   // Pesos orientativos (en gramos/ml) de unidades de ración no expresadas en g/ml
@@ -7692,6 +7708,17 @@
     lata:80, latas:80, filete:150, filetes:150,
     diente:3, dientes:3, puñado:30, puñados:30, hoja:5, hojas:5,
     unidad:100, unidades:100, ración:100, raciones:100, porción:100, porciones:100, scoop:30,
+  };
+
+  // Pesos de condimentos/aromáticos cuando aparecen solos, sin cantidad indicada (ej. "AOVE", "ajo")
+  const PESO_CONDIMENTO = {
+    aove:5, aceite:5,
+    ajo:3, jengibre:5, limón:15, limon:15,
+    perejil:2, cilantro:2, orégano:1, oregano:1, canela:1,
+    pimentón:1, pimenton:1, curry:2, azafrán:0.1, azafran:0.1,
+    laurel:0.5, vinagre:10, sésamo:5, sesamo:5,
+    'ralladura de limón':2, 'ralladura de limon':2,
+    'salsa tamari':10, 'salsa de soja':10, 'salsa soja':10, tamari:10,
   };
 
   // Convierte la cantidad indicada en un texto de ingrediente a gramos/ml aproximados
@@ -7719,6 +7746,8 @@
       const val = parseFloat(m[1].replace(',', '.'));
       return val * (PESO_UNIDAD[m[2]] || 100);
     }
+    // Condimento/aromático sin cantidad indicada (ej. "AOVE", "ajo", "limón")
+    if (PESO_CONDIMENTO[t] !== undefined) return PESO_CONDIMENTO[t];
     // Sin cantidad indicada -> ración estándar
     return 100;
   }
