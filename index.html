@@ -5977,6 +5977,19 @@
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
 
+    // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
+    // (dos personas idénticas en el cuestionario reciben orden de comidas y selección
+    // de ejercicios distintos), pero reproducible para el mismo usuario.
+    const semilla = (function () {
+      const fuente = ((typeof user !== 'undefined' && user && user.email) ? user.email : '')
+        || (u.email || '') || (u.nombre || '')
+        || ((u.objetivo || '') + (u.deporte || '') + (u.diasEntreno || ''));
+      let h = 0;
+      for (let i = 0; i < fuente.length; i++) h = (Math.imul(h, 31) + fuente.charCodeAt(i)) | 0;
+      return Math.abs(h);
+    })();
+    const rotar = (arr, off) => (arr && arr.length) ? arr.slice(off % arr.length).concat(arr.slice(0, off % arr.length)) : arr;
+
     // BIENVENIDA personalizada
     let bienvenida = '';
     if (soloDieta) {
@@ -6222,6 +6235,31 @@
       }
     }
 
+    // VARIEDAD DE EJERCICIOS por usuario: intercambia algunos accesorios por equivalentes
+    // (mismo músculo, distinto material) según la semilla, para que dos perfiles iguales
+    // no reciban una tabla idéntica. Se conservan las palabras clave que usan el panel de
+    // variantes y las adaptaciones por lesión, y el formato N×M intacto.
+    if (!soloDieta && semana.length) {
+      const poolsEjercicio = [
+        [/press inclinado mancuernas/gi, ['press inclinado mancuernas', 'press inclinado en multipower', 'press inclinado en máquina']],
+        [/cruces en polea/gi, ['cruces en polea', 'aperturas en polea', 'cruces de polea desde arriba']],
+        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott']],
+        [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea']],
+        [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
+        [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza']],
+        [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco']],
+      ];
+      semana = semana.map(d => {
+        if (!d.detalle) return d;
+        let detalle = d.detalle;
+        poolsEjercicio.forEach(([regex, opciones], i) => {
+          const elegido = opciones[(semilla + i) % opciones.length];
+          detalle = detalle.replace(regex, elegido);
+        });
+        return { ...d, detalle };
+      });
+    }
+
     // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
     // con el mismo formato y nivel de detalle que se usa en "Plan semanal"
     const diaHoy = semana[getIndiceDiaHoy()];
@@ -6253,7 +6291,8 @@
             op("Tostadas de centeno con aguacate y huevo", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos revueltos, tomate cherry", "380 kcal", "22g prot", "32g carbs", "18g grasa", "Fácil · 10 min"),
             op("Yogur griego con nueces y arándanos", "200g yogur griego 0%, 20g nueces, 80g arándanos, canela", "320 kcal", "20g prot", "22g carbs", "14g grasa", "Sin cocción · 2 min"),
             op("Porridge de avena con semillas", "60g avena, leche de avena, 1 plátano pequeño, semillas de chía, canela", "350 kcal", "12g prot", "58g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Smoothie proteico verde", "1 plátano, espinacas, leche avena, 1 scoop proteína vegetal, jengibre, limón", "310 kcal", "24g prot", "38g carbs", "6g grasa", "Fácil · 3 min")
+            op("Smoothie proteico verde", "1 plátano, espinacas, leche avena, 1 scoop proteína vegetal, jengibre, limón", "310 kcal", "24g prot", "38g carbs", "6g grasa", "Fácil · 3 min"),
+            op("Tofu revuelto con espinacas y tosta", "150g tofu, espinacas, cúrcuma, tomate, 1 tosta de pan integral", "300 kcal", "22g prot", "24g carbs", "12g grasa", "Fácil · 10 min")
           ] : [
             op("Tortilla de claras con verduras", "4 claras + 1 huevo, pimiento, cebolla, tomate, 1 tostada centeno", "320 kcal", "28g prot", "22g carbs", "10g grasa", "Fácil · 10 min"),
             op("Yogur griego con pavo y fruta", "200g yogur griego 0%, 50g pavo en lonchas, 1 naranja", "310 kcal", "30g prot", "24g carbs", "6g grasa", "Sin cocción · 3 min"),
@@ -6280,7 +6319,8 @@
             op("Bowl de legumbres con arroz integral", "150g garbanzos cocidos, 70g arroz integral, espinacas, tomate, AOVE", "480 kcal", "22g prot", "72g carbs", "12g grasa", "Medio · 20 min"),
             op("Tofu a la plancha con quinoa y brócoli", "180g tofu firme, 80g quinoa cocida, 200g brócoli al vapor, limón", "420 kcal", "30g prot", "38g carbs", "14g grasa", "Medio · 25 min"),
             op("Lentejas con verduras de temporada", "200g lentejas cocidas, zanahoria, apio, puerro, tomate, AOVE", "390 kcal", "20g prot", "58g carbs", "8g grasa", "Fácil · 30 min"),
-            op("Ensalada de quinoa con aguacate y edamame", "100g quinoa, 100g edamame, 1/2 aguacate, pepino, tomate, limón, AOVE", "440 kcal", "20g prot", "48g carbs", "18g grasa", "Prep anterior · 10 min")
+            op("Ensalada de quinoa con aguacate y edamame", "100g quinoa, 100g edamame, 1/2 aguacate, pepino, tomate, limón, AOVE", "440 kcal", "20g prot", "48g carbs", "18g grasa", "Prep anterior · 10 min"),
+            op("Salteado de seitán con verduras y quinoa", "150g seitán, 60g quinoa cocida, brócoli, pimiento, salsa de soja", "400 kcal", "34g prot", "40g carbs", "8g grasa", "Medio · 20 min")
           ] : [
             op("Pechuga de pollo con ensalada y arroz", "180g pollo a la plancha, ensalada grande, 70g arroz integral cocido", "490 kcal", "42g prot", "44g carbs", "10g grasa", "Fácil · 20 min"),
             op("Merluza al horno con patata y verduras", "200g merluza, 120g patata cocida, judías verdes, tomate cherry", "420 kcal", "38g prot", "38g carbs", "8g grasa", "Fácil · 25 min"),
@@ -6307,7 +6347,8 @@
             op("Crema de calabaza + huevos revueltos", "300ml crema calabaza, 3 huevos revueltos, AOVE, semillas", "380 kcal", "22g prot", "24g carbs", "20g grasa", "Fácil · 15 min"),
             op("Ensalada de tofu con aguacate", "150g tofu, 1/2 aguacate, rúcula, tomate, pepino, limón, AOVE", "340 kcal", "18g prot", "12g carbs", "24g grasa", "Sin cocción · 10 min"),
             op("Sopa de miso con edamame", "300ml caldo miso, 100g edamame, alga wakame, tofu sedoso, sésamo", "280 kcal", "20g prot", "18g carbs", "12g grasa", "Fácil · 10 min"),
-            op("Wok de verduras con tempeh", "150g tempeh, brócoli, zanahoria, pimiento, salsa tamari, sésamo", "310 kcal", "24g prot", "16g carbs", "14g grasa", "Fácil · 15 min")
+            op("Wok de verduras con tempeh", "150g tempeh, brócoli, zanahoria, pimiento, salsa tamari, sésamo", "310 kcal", "24g prot", "16g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Tortilla de claras con champiñones y queso fresco", "4 claras + 1 huevo, 150g champiñones, 40g queso fresco, espinacas", "280 kcal", "30g prot", "8g carbs", "12g grasa", "Fácil · 12 min")
           ] : [
             op("Dorada al horno con verduras", "200g dorada, calabacín, pimiento, tomate cherry, AOVE, limón", "320 kcal", "36g prot", "8g carbs", "14g grasa", "Fácil · 25 min"),
             op("Pavo salteado con espinacas", "180g pechuga pavo, 200g espinacas frescas, ajo, AOVE", "290 kcal", "38g prot", "4g carbs", "12g grasa", "Fácil · 15 min"),
@@ -6326,7 +6367,8 @@
             op("Porridge de avena con proteína vegetal y plátano", "80g avena, leche avena, 1 scoop proteína vegetal, 1 plátano, crema cacahuete", "560 kcal", "32g prot", "72g carbs", "14g grasa", "Fácil · 8 min"),
             op("Tostadas de centeno con crema de cacahuete y plátano", "3 rebanadas centeno, 2 cucharadas crema cacahuete, 1 plátano, miel", "520 kcal", "18g prot", "78g carbs", "16g grasa", "Sin cocción · 3 min"),
             op("Bol de quinoa con frutas y frutos secos", "100g quinoa cocida, mango, kiwi, 30g nueces, yogur coco", "490 kcal", "16g prot", "68g carbs", "18g grasa", "Prep anterior · 5 min"),
-            op("Pancakes de avena veganos", "80g avena, 1 plátano, leche avena, levadura, arándanos, sirope agave", "480 kcal", "14g prot", "80g carbs", "10g grasa", "Medio · 15 min")
+            op("Pancakes de avena veganos", "80g avena, 1 plátano, leche avena, levadura, arándanos, sirope agave", "480 kcal", "14g prot", "80g carbs", "10g grasa", "Medio · 15 min"),
+            op("Tostadas con hummus, huevo y aguacate", "3 rebanadas centeno, 60g hummus, 2 huevos, 1/2 aguacate", "560 kcal", "24g prot", "52g carbs", "28g grasa", "Fácil · 8 min")
           ] : [
             op("Avena con huevos y plátano", "80g avena, leche entera, 2 huevos revueltos aparte, 1 plátano, miel", "580 kcal", "30g prot", "74g carbs", "14g grasa", "Fácil · 10 min"),
             op("Tostadas con salmón ahumado y aguacate", "3 rebanadas centeno, 100g salmón ahumado, 1/2 aguacate, queso fresco", "560 kcal", "34g prot", "44g carbs", "22g grasa", "Sin cocción · 5 min"),
@@ -6353,7 +6395,8 @@
             op("Arroz con tempeh y verduras al wok", "200g tempeh, 120g arroz integral, pimiento, brócoli, salsa tamari, sésamo", "620 kcal", "36g prot", "72g carbs", "18g grasa", "Medio · 25 min"),
             op("Pasta con legumbres y tomate", "120g pasta integral, 150g lentejas, tomate frito casero, albahaca, AOVE", "580 kcal", "28g prot", "88g carbs", "12g grasa", "Fácil · 20 min"),
             op("Bol de Buddha con garbanzos al horno", "180g garbanzos especiados, 100g quinoa, aguacate, zanahoria, tahini", "640 kcal", "26g prot", "76g carbs", "22g grasa", "Medio · 30 min"),
-            op("Lasaña de lentejas y berenjena", "200g lentejas, 1 berenjena, tomate frito, bechamel vegetal, queso rallado", "580 kcal", "28g prot", "68g carbs", "18g grasa", "Exigente · 45 min")
+            op("Lasaña de lentejas y berenjena", "200g lentejas, 1 berenjena, tomate frito, bechamel vegetal, queso rallado", "580 kcal", "28g prot", "68g carbs", "18g grasa", "Exigente · 45 min"),
+            op("Bowl de tofu con arroz y edamame", "200g tofu firme, 120g arroz integral, 100g edamame, salsa teriyaki, sésamo", "620 kcal", "38g prot", "74g carbs", "18g grasa", "Medio · 25 min")
           ] : [
             op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja", "620 kcal", "48g prot", "68g carbs", "10g grasa", "Medio · 25 min"),
             op("Pasta integral con atún y tomate", "120g pasta integral, 2 latas atún, tomate frito casero, aceitunas, albahaca", "580 kcal", "40g prot", "72g carbs", "12g grasa", "Fácil · 15 min"),
@@ -6380,7 +6423,8 @@
             op("Tofu a la plancha con patata y espinacas", "200g tofu firme, 150g patata cocida, espinacas salteadas, ajo, AOVE", "480 kcal", "28g prot", "44g carbs", "18g grasa", "Medio · 20 min"),
             op("Curry de garbanzos con arroz", "200g garbanzos, 80g arroz basmati, leche coco light, curry, cilantro", "520 kcal", "22g prot", "72g carbs", "14g grasa", "Fácil · 25 min"),
             op("Tortilla de verduras con queso", "4 huevos, pimiento, cebolla, champiñones, 40g queso, pan centeno", "460 kcal", "30g prot", "28g carbs", "26g grasa", "Fácil · 15 min"),
-            op("Revuelto de edamame con patata y espinacas", "150g edamame, 150g patata cocida, espinacas, ajo, AOVE, pimentón", "430 kcal", "24g prot", "46g carbs", "14g grasa", "Fácil · 15 min")
+            op("Revuelto de edamame con patata y espinacas", "150g edamame, 150g patata cocida, espinacas, ajo, AOVE, pimentón", "430 kcal", "24g prot", "46g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Revuelto de tofu y patata con queso", "200g tofu, 150g patata cocida, 40g queso, espinacas, AOVE", "480 kcal", "30g prot", "42g carbs", "20g grasa", "Fácil · 15 min")
           ] : [
             op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral, 200g brócoli al vapor, limón, AOVE", "580 kcal", "46g prot", "42g carbs", "22g grasa", "Fácil · 20 min"),
             op("Ternera con patata y ensalada", "180g solomillo ternera, 150g patata cocida, ensalada verde, AOVE", "540 kcal", "40g prot", "38g carbs", "20g grasa", "Medio · 25 min"),
@@ -6400,7 +6444,8 @@
             op("Avena con fruta y semillas", "70g avena, leche vegetal, 1 kiwi, 1 naranja, semillas de lino", "420 kcal", "14g prot", "68g carbs", "10g grasa", "Fácil · 5 min"),
             op("Tostadas con tomate y aguacate", "2 rebanadas centeno, tomate rallado, 1/2 aguacate, AOVE, orégano", "380 kcal", "10g prot", "44g carbs", "18g grasa", "Sin cocción · 5 min"),
             op("Yogur vegetal con muesli y fruta", "200g yogur coco o soja, 40g muesli sin azúcar, 1 manzana, canela", "360 kcal", "10g prot", "58g carbs", "10g grasa", "Sin cocción · 2 min"),
-            op("Crepes de trigo sarraceno con fruta", "80g harina trigo sarraceno, leche avena, 1 huevo vegano, fresas, sirope", "350 kcal", "10g prot", "62g carbs", "8g grasa", "Medio · 15 min")
+            op("Crepes de trigo sarraceno con fruta", "80g harina trigo sarraceno, leche avena, 1 huevo vegano, fresas, sirope", "350 kcal", "10g prot", "62g carbs", "8g grasa", "Medio · 15 min"),
+            op("Yogur griego con avena, fruta y nueces", "200g yogur griego, 40g avena, 1 fruta de temporada, 15g nueces, miel", "420 kcal", "20g prot", "52g carbs", "14g grasa", "Sin cocción · 3 min")
           ] : [
             op("Tostadas con huevo y tomate", "2 rebanadas centeno, 2 huevos revueltos, tomate, AOVE, orégano", "400 kcal", "20g prot", "40g carbs", "16g grasa", "Fácil · 8 min"),
             op("Avena con yogur griego y fruta", "60g avena, 150g yogur griego, 1 plátano, 10g miel, canela", "440 kcal", "18g prot", "70g carbs", "8g grasa", "Sin cocción · 3 min"),
@@ -6427,7 +6472,8 @@
             op("Lentejas estofadas con verduras", "200g lentejas, patata, zanahoria, puerro, tomate, AOVE, pimentón", "460 kcal", "22g prot", "68g carbs", "10g grasa", "Fácil · 35 min"),
             op("Pasta con tofu y salsa de tomate", "100g pasta, 150g tofu, tomate frito casero, albahaca, AOVE", "480 kcal", "24g prot", "62g carbs", "14g grasa", "Fácil · 20 min"),
             op("Paella de verduras", "100g arroz, pimiento, judía verde, alcachofa, tomate, azafrán, AOVE", "420 kcal", "12g prot", "72g carbs", "10g grasa", "Medio · 35 min"),
-            op("Pisto con huevos y pan", "calabacín, pimiento, tomate, cebolla salteados, 2 huevos, 1 rebanada centeno", "390 kcal", "16g prot", "42g carbs", "16g grasa", "Fácil · 20 min")
+            op("Pisto con huevos y pan", "calabacín, pimiento, tomate, cebolla salteados, 2 huevos, 1 rebanada centeno", "390 kcal", "16g prot", "42g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Garbanzos guisados con arroz y verduras", "180g garbanzos, 70g arroz, calabacín, zanahoria, tomate, AOVE", "470 kcal", "20g prot", "68g carbs", "12g grasa", "Fácil · 30 min")
           ] : [
             op("Pollo al horno con arroz y ensalada", "180g pollo, 80g arroz, ensalada verde, tomate, AOVE", "480 kcal", "40g prot", "46g carbs", "12g grasa", "Fácil · 25 min"),
             op("Lentejas con chorizo y verduras", "180g lentejas, 40g chorizo, zanahoria, patata, pimiento", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
@@ -6454,7 +6500,8 @@
             op("Crema de verduras con huevo pochado", "300ml crema calabaza o zanahoria, 2 huevos pochados, crostones centeno", "360 kcal", "18g prot", "38g carbs", "14g grasa", "Fácil · 15 min"),
             op("Ensalada completa con garbanzos", "Lechuga, tomate, pepino, 120g garbanzos, maíz, AOVE, vinagre", "320 kcal", "14g prot", "42g carbs", "10g grasa", "Sin cocción · 8 min"),
             op("Tortilla de verduras ligera", "3 huevos, cebolla, pimiento, champiñones, AOVE", "300 kcal", "20g prot", "8g carbs", "20g grasa", "Fácil · 12 min"),
-            op("Gazpacho con huevo duro y pan", "300ml gazpacho casero, 2 huevos duros, 1 rebanada pan", "280 kcal", "14g prot", "24g carbs", "14g grasa", "Sin cocción · 5 min")
+            op("Gazpacho con huevo duro y pan", "300ml gazpacho casero, 2 huevos duros, 1 rebanada pan", "280 kcal", "14g prot", "24g carbs", "14g grasa", "Sin cocción · 5 min"),
+            op("Crema de calabaza con huevo y semillas", "300ml crema de calabaza, 2 huevos pochados, semillas, 1 tosta de pan", "350 kcal", "18g prot", "30g carbs", "16g grasa", "Fácil · 15 min")
           ] : [
             op("Pescado a la plancha con verduras", "200g pescado blanco, judías verdes, zanahoria, limón, AOVE", "300 kcal", "34g prot", "8g carbs", "14g grasa", "Fácil · 15 min"),
             op("Sopa de pollo con fideos", "150g pollo, fideos finos, zanahoria, apio, caldo, perejil", "320 kcal", "28g prot", "26g carbs", "8g grasa", "Fácil · 20 min"),
@@ -6514,6 +6561,12 @@
         });
       });
     }
+
+    // VARIEDAD DE COMIDAS por usuario: rota el orden de las opciones de cada toma según la
+    // semilla, de modo que la opción "recomendada" (la primera) y el orden cambian entre
+    // clientes con el mismo perfil. Es estable para el mismo usuario, así que las opciones
+    // que guarde siguen apuntando al mismo plato.
+    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + 1) }));
 
     return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [] };
   }
