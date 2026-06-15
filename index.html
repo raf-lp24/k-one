@@ -1064,7 +1064,7 @@
 
   .footer-note {
     font-size: 12px;
-    color: var(--humo);
+    color: var(--metal);
     font-family: 'DM Mono', monospace;
   }
 
@@ -1358,7 +1358,7 @@
 
   .field .optional {
     font-size: 10px;
-    color: var(--humo);
+    color: var(--metal);
     letter-spacing: 0;
     text-transform: none;
     margin-left: 6px;
@@ -2537,7 +2537,7 @@
     font-family: 'DM Mono', monospace;
     font-size: 9px;
     letter-spacing: 2px;
-    color: var(--humo);
+    color: var(--metal);
     margin-bottom: 10px;
     text-transform: uppercase;
   }
@@ -2584,7 +2584,26 @@
     font-style: italic;
     margin-top: 8px;
     line-height: 1.4;
-    opacity: 0.7;
+  }
+
+  .subst-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--metal-claro);
+    background: rgba(181,178,173,0.07);
+    border: 1px solid rgba(181,178,173,0.15);
+    padding: 4px 9px;
+    margin-bottom: 10px;
+    cursor: default;
+  }
+  .subst-hint svg {
+    width: 11px; height: 11px;
+    stroke: var(--brasa);
+    flex-shrink: 0;
   }
 
   /* CHECKIN */
@@ -3257,7 +3276,7 @@
   .welcome-divider span {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--humo);
+    color: var(--metal);
     letter-spacing: 2px;
     text-transform: uppercase;
   }
@@ -6680,7 +6699,7 @@
           <div class="meal-opt-num">Opción ${optIdx + 1}</div>
           <div class="meal-opt-name">${opt.nombre}</div>
           <div class="meal-opt-ingredients" style="margin-bottom:8px">${ingredTags}</div>
-          <div style="font-size:10px;color:var(--humo);font-family:'DM Mono',monospace;margin-bottom:8px;font-style:italic">Toca un ingrediente para sustituirlo</div>
+          <div class="subst-hint"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Toca un ingrediente para cambiarlo</div>
           <div class="meal-opt-prep">⏱ ${opt.prep}</div>
           <div class="meal-opt-macros">
             <span class="macro-pill">🔥 ${opt.kcal}</span>
