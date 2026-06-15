@@ -7641,7 +7641,7 @@
     [/yogur de almendra/, {kcal:25, prot:1, carbs:2, grasa:1.5}],
     [/yogur griego/, {kcal:97, prot:9, carbs:4, grasa:5}],
     [/yogur|kéfir|kefir/, {kcal:60, prot:3.5, carbs:4.5, grasa:3}],
-    [/queso cottage|requesón|queso fresco/, {kcal:100, prot:11, carbs:3.5, grasa:4.5}],
+    [/queso cottage|requesón|queso fresco|queso batido|queso de burgos/, {kcal:100, prot:11, carbs:3.5, grasa:4.5}],
     [/queso tierno|queso/, {kcal:300, prot:20, carbs:1, grasa:24}],
     [/clara/, {kcal:52, prot:11, carbs:0.7, grasa:0.2}],
     [/aquafaba/, {kcal:20, prot:0.8, carbs:4, grasa:0}],
@@ -7663,10 +7663,12 @@
     [/garbanzos/, {kcal:164, prot:8.9, carbs:27, grasa:2.6}],
     [/lentejas/, {kcal:116, prot:9, carbs:20, grasa:0.4}],
     [/legumbres/, {kcal:120, prot:9, carbs:20, grasa:1}],
+    [/tort(it|)as? de arroz|tortas de arroz/, {kcal:387, prot:8, carbs:81, grasa:3}],
+    [/crema de arroz|harina de arroz/, {kcal:360, prot:7, carbs:80, grasa:1}],
     [/arroz/, {kcal:130, prot:2.7, carbs:28, grasa:0.3}],
     [/pasta|fideos/, {kcal:124, prot:5, carbs:25, grasa:1}],
     [/cuscús|cuscus/, {kcal:112, prot:3.8, carbs:23, grasa:0.2}],
-    [/batata/, {kcal:90, prot:2, carbs:21, grasa:0.1}],
+    [/batata|boniato/, {kcal:90, prot:2, carbs:21, grasa:0.1}],
     [/patata/, {kcal:87, prot:2, carbs:20, grasa:0.1}],
     [/pan integral|tostada|pan centeno|rebanada|centeno|pan/, {kcal:250, prot:9, carbs:43, grasa:2.5}],
     [/aguacate/, {kcal:160, prot:2, carbs:8.5, grasa:14.7}],
@@ -7678,18 +7680,22 @@
     [/plátano|platano/, {kcal:89, prot:1.1, carbs:23, grasa:0.3}],
     [/miel/, {kcal:304, prot:0.3, carbs:82, grasa:0}],
     [/cacao puro|cacao/, {kcal:228, prot:20, carbs:58, grasa:14}],
-    [/proteína|scoop/, {kcal:380, prot:75, carbs:8, grasa:5}],
+    [/proteína|proteina|whey|\biso\b|scoop|esenciales|bcaa/, {kcal:380, prot:75, carbs:8, grasa:5}],
     [/brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|espárrago|esparrago|tomate|pepino|lechuga|rúcula|rucula|berenjena|alcachofa|puerro|apio|verdura/, {kcal:30, prot:2.2, carbs:5, grasa:0.3}],
     [/manzana|\bpera\b|naranja|mandarina|kiwi|melocotón|melocoton|mango|fresas?|arándanos|arandanos|frambuesas?|frutos rojos|fruta(?! seca)/, {kcal:52, prot:0.6, carbs:12, grasa:0.2}],
     [/champiñones|champinones|setas/, {kcal:22, prot:3.1, carbs:3.3, grasa:0.3}],
     [/jamón serrano|jamon serrano/, {kcal:241, prot:30, carbs:0, grasa:13}],
+    [/lomo embuchado|embuchado|cecina|lacón|lacon/, {kcal:245, prot:42, carbs:1, grasa:8}],
     [/jamón|jamon/, {kcal:110, prot:18, carbs:1, grasa:3}],
+    [/guacamole/, {kcal:160, prot:2, carbs:8, grasa:14}],
+    [/crackers|wasa|wassa|pan crujiente|biscote/, {kcal:380, prot:11, carbs:70, grasa:4}],
+    [/fajita|tortilla de trigo|wrap|tortilla de ma[ií]z/, {kcal:300, prot:8, carbs:50, grasa:7}],
     [/gambas|langostinos|camarones/, {kcal:85, prot:20, carbs:0.2, grasa:1}],
     [/edamame/, {kcal:122, prot:11, carbs:10, grasa:5}],
     [/cebolla/, {kcal:40, prot:1.1, carbs:9.3, grasa:0.1}],
     [/chorizo/, {kcal:455, prot:24, carbs:2, grasa:38}],
     [/aceitunas|olivas/, {kcal:115, prot:1, carbs:6, grasa:11}],
-    [/tortitas? de ma[ií]z/, {kcal:380, prot:8, carbs:75, grasa:3}],
+    [/tort(it)?as? (de )?ma[ií]z/, {kcal:380, prot:8, carbs:75, grasa:3}],
     [/maíz|maiz/, {kcal:86, prot:3.3, carbs:19, grasa:1.2}],
     [/dátiles|datiles/, {kcal:282, prot:2.5, carbs:75, grasa:0.4}],
     [/sirope/, {kcal:310, prot:0.1, carbs:76, grasa:0}],
@@ -7703,6 +7709,9 @@
     huevo:50, huevos:50, clara:33, claras:33,
     plátano:120, platano:120,
     tostada:25, tostadas:25, rebanada:30, rebanadas:30, loncha:25, lonchas:25, lonja:25, lonjas:25,
+    tortita:9, tortitas:9, torta:9, tortas:9,
+    wasa:11, wassa:11, biscote:11, biscotes:11, cracker:11, crackers:11,
+    fajita:40, fajitas:40, wrap:40, wraps:40,
     cucharada:15, cucharadas:15, cucharadita:5, cucharaditas:5,
     taza:240, tazas:240, vaso:200, vasos:200,
     lata:80, latas:80, filete:150, filetes:150,
@@ -7733,8 +7742,8 @@
       const frac = parseInt(m[1]) / parseInt(m[2]);
       return frac * (PESO_UNIDAD[m[3]] || 100);
     }
-    // Número + g/ml/kg/l
-    m = t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b/);
+    // Número + g/gr/grs/ml/kg/l (acepta la notación "220gr" habitual en planes)
+    m = t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|grs?|g|l|ml)\b/);
     if (m) {
       let val = parseFloat(m[1].replace(',', '.'));
       if (m[2] === 'kg' || m[2] === 'l') val *= 1000;
@@ -7774,7 +7783,7 @@
     // Separa número + unidad de peso (ej. "200g") de número + unidad de ración
     // (ej. "1 tostada", "2 rebanadas", "3 tallos") para no arrastrar la unidad
     // de ración dentro de "tipo" ni generar nombres como "1 tostada quinoa".
-    const qm = ingLower.match(/^(\d+(?:[.,]\d+)?)(g|ml|kg|l)?(?:\s+(tostadas?|rebanadas?|lonchas?|lonjas?|rodajas?|tallos?|cucharadas?|cucharaditas?|tazas?|vasos?|filetes?|latas?|unidades?|dientes?|puñados?|hojas?|raciones?|porciones?))?\s+(.+)$/);
+    const qm = ingLower.match(/^(\d+(?:[.,]\d+)?)(grs?|g|ml|kg|l)?(?:\s+(tostadas?|rebanadas?|lonchas?|lonjas?|rodajas?|tallos?|cucharadas?|cucharaditas?|tazas?|vasos?|filetes?|latas?|unidades?|dientes?|puñados?|hojas?|raciones?|porciones?))?\s+(.+)$/);
     let cantidad = '';
     let cantidadUnidad = '';
     let unidadPalabra = '';
@@ -7968,7 +7977,7 @@
     }
 
     // FIAMBRE / EMBUTIDO (jamón, chorizo, pavo en lonchas...)
-    if (/jamón|jamon|chorizo|fiambre|embutido|salchichón|salchichon|salami|mortadela|pavo en lonchas/.test(tipo)) {
+    if (/jamón|jamon|chorizo|fiambre|embutido|embuchado|cecina|lacón|lacon|salchichón|salchichon|salami|mortadela|pavo en lonchas/.test(tipo)) {
       const s = {
         alergia:     [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Fiambre más simple, menor riesgo de aditivos alergénicos que otros embutidos.',t:'Más simple'},{n:'2 huevos',d:'Proteína sin embutido ni aditivos.',t:'Sin embutido'},{n:`${cantidad||'50g'} pollo cocido`,d:'Proteína magra sin aditivos de embutido.',t:'Sin embutido'}],
         intolerancia:[{n:`${cantidad||'50g'} pavo fresco cocido`,d:'Sin las histaminas de los curados/fermentados.',t:'Bajo histaminas'},{n:`${cantidad||'50g'} pollo fresco`,d:'Carne fresca, sin curar.',t:'Fresco'},{n:'2 huevos',d:'Proteína de fácil digestión.',t:'Digestivo'}],
@@ -8019,8 +8028,8 @@
     }
 
     // ─── GENÉRICO INTELIGENTE ─────────────────────────────────────────────
-    const esHidrato = /patata|pasta|pan|tostada|centeno|cuscús|cuscus|quinoa|mijo|plátano|platano|fruta/.test(tipo);
-    const esGrasa   = /aceite|aove|nuez|nueces|almendra|cacahuete|mantequilla|semilla|tahini|aceitunas|olivas/.test(tipo);
+    const esHidrato = /patata|boniato|batata|pasta|fideos|pan|tostada|centeno|espelta|cuscús|cuscus|quinoa|mijo|arroz|tortitas? de|tortas de|crackers|wasa|wassa|biscote|fajita|wrap|avena|cereales|muesli|plátano|platano|fruta/.test(tipo);
+    const esGrasa   = /aceite|aove|nuez|nueces|almendra|cacahuete|mantequilla|semilla|tahini|aceitunas|olivas|guacamole/.test(tipo);
 
     // Para alergia/intolerancia, si el ingrediente no encaja en ninguna categoría
     // anterior no arriesgamos una sugerencia genérica: lo indicamos directamente.
@@ -8698,7 +8707,40 @@
         { nombre: 'Flexiones con manos muy separadas', desc: 'Sin material. Trabaja el pecho con un patrón similar de apertura.', nivel: 'Más fácil' }
       ]
     },
+    'press declinado': {
+      nombre: 'Press declinado',
+      variantes: [
+        { nombre: 'Press plano con mancuernas', desc: 'Si no tienes banco declinado, el plano cubre el pecho medio-bajo de forma similar.', nivel: 'Similar' },
+        { nombre: 'Fondos en paralelas con torso inclinado', desc: 'Inclinando el tronco hacia delante enfatizas el pecho inferior, igual que el declinado.', nivel: 'Similar' },
+        { nombre: 'Cruces de polea desde arriba', desc: 'Aíslan el pecho inferior con tensión constante. Menos carga articular.', nivel: 'Más fácil' }
+      ]
+    },
+    'cruces': {
+      nombre: 'Cruces en polea',
+      variantes: [
+        { nombre: 'Aperturas con mancuernas', desc: 'Mismo gesto de apertura sin necesidad de poleas.', nivel: 'Similar' },
+        { nombre: 'Pec-deck (contractora)', desc: 'Movimiento guiado, fácil de controlar y de sentir el pecho.', nivel: 'Más fácil' },
+        { nombre: 'Press inclinado con mancuernas', desc: 'Pasa a un multiarticular con más carga total.', nivel: 'Más exigente' }
+      ]
+    },
+    'pullover': {
+      nombre: 'Pullover con mancuerna',
+      variantes: [
+        { nombre: 'Pullover en polea alta', desc: 'Tensión constante sobre el dorsal en todo el recorrido.', nivel: 'Similar' },
+        { nombre: 'Jalón con brazos rectos en polea', desc: 'Aísla el dorsal de forma muy parecida, de pie y controlado.', nivel: 'Similar' },
+        { nombre: 'Jalón al pecho', desc: 'Multiarticular para el dorsal con más carga.', nivel: 'Más exigente' }
+      ]
+    },
     // ESPALDA
+    'jalón': {
+      nombre: 'Jalón al pecho',
+      variantes: [
+        { nombre: 'Dominadas asistidas', desc: 'Mismo patrón vertical. Progresa hacia la dominada libre.', nivel: 'Más exigente' },
+        { nombre: 'Jalón con agarre cerrado o neutro', desc: 'Cambia el agarre para enfatizar dorsal bajo y bíceps.', nivel: 'Similar' },
+        { nombre: 'Remo en polea baja', desc: 'Tracción horizontal si molesta el hombro en el patrón vertical.', nivel: 'Diferente' },
+        { nombre: 'Pullover con mancuerna', desc: 'Aísla el dorsal desde otro ángulo, sin agarre que fatigue el antebrazo.', nivel: 'Más fácil' }
+      ]
+    },
     'dominadas': {
       nombre: 'Dominadas',
       variantes: [
@@ -8751,6 +8793,22 @@
         { nombre: 'Remo en polea baja', desc: 'Trabaja la espalda media en general, menos foco en el hombro posterior.', nivel: 'Diferente' }
       ]
     },
+    'pájaros': {
+      nombre: 'Pájaros (deltoides posterior)',
+      variantes: [
+        { nombre: 'Face pull en polea', desc: 'Mismo grupo (hombro posterior) con tensión constante y más control.', nivel: 'Similar' },
+        { nombre: 'Aperturas inversas en máquina (pec-deck invertido)', desc: 'Guiado, fácil de aislar el deltoides posterior sin perder la postura.', nivel: 'Más fácil' },
+        { nombre: 'Remo al mentón abierto', desc: 'Implica más el deltoides medio y posterior con algo más de carga.', nivel: 'Más exigente' }
+      ]
+    },
+    'remo al mentón': {
+      nombre: 'Remo al mentón',
+      variantes: [
+        { nombre: 'Elevaciones laterales', desc: 'Aíslan el deltoides medio sin el componente de tracción que puede molestar al hombro.', nivel: 'Más fácil' },
+        { nombre: 'Remo al mentón con cuerda en polea', desc: 'Trayectoria más libre y amable para la muñeca y el hombro.', nivel: 'Similar' },
+        { nombre: 'Press militar', desc: 'Multiarticular de hombro con más carga total.', nivel: 'Más exigente' }
+      ]
+    },
     // PIERNAS
     'sentadilla': {
       nombre: 'Sentadilla',
@@ -8768,6 +8826,14 @@
         { nombre: 'Step-ups al cajón', desc: 'Sube a un cajón o banco con cada pierna. Mismo trabajo unilateral, menos impacto.', nivel: 'Similar' },
         { nombre: 'Sentadilla búlgara', desc: 'Un pie elevado detrás. Mismo patrón unilateral con más apoyo.', nivel: 'Similar' },
         { nombre: 'Prensa de piernas (bilateral)', desc: 'Sin componente de equilibrio. Permite cargar más peso de forma segura.', nivel: 'Diferente' }
+      ]
+    },
+    'hack': {
+      nombre: 'Sentadilla hack',
+      variantes: [
+        { nombre: 'Prensa de piernas', desc: 'Mismo trabajo de cuádriceps con carga guiada, sin estrés en la espalda baja.', nivel: 'Similar' },
+        { nombre: 'Sentadilla goblet', desc: 'Versión libre con mancuerna al pecho, fácil de aprender.', nivel: 'Más fácil' },
+        { nombre: 'Sentadilla con barra', desc: 'Multiarticular libre con mayor demanda de core y estabilidad.', nivel: 'Más exigente' }
       ]
     },
     'extensión de cuádriceps': {
