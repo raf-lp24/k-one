@@ -7826,8 +7826,8 @@
       return s[r] || s.noMegusta;
     }
 
-    // SALMÓN
-    if (/salmón|salmon/.test(tipo)) {
+    // SALMÓN / PESCADO AZUL Y CONSERVAS
+    if (/salmón|salmon|atún|atun|caballa|sardinas/.test(tipo)) {
       const s = {
         noMegusta:   [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin sabor a pescado. Proteína equivalente.',t:'Sin pescado'},{n:`${cantidad||'200g'} dorada o lubina`,d:'Pescado blanco muy suave. Casi no sabe a pescado.',t:'Más suave'},{n:`${cantidad||'200g'} lomo de cerdo`,d:'Carne sin rastro de mar.',t:'Carne'}],
         alergia:     [{n:`${cantidad||'200g'} pollo`,d:'Sin alérgenos de pescado.',t:'Sin pescado'},{n:`${cantidad||'200g'} ternera magra`,d:'Carne sin alérgenos de pescado.',t:'Sin pescado'},{n:`${cantidad||'200g'} tofu`,d:'Vegetal, sin alérgenos.',t:'Vegetal'}],
@@ -7925,6 +7925,76 @@
       return s[r] || s.default;
     }
 
+    // MARISCO (gambas, langostinos, camarones...)
+    if (/gambas|langostinos|camarones|marisco/.test(tipo)) {
+      const s = {
+        alergia:     [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin alérgenos de crustáceos/marisco.',t:'Sin marisco'},{n:`${cantidad||'180g'} tofu firme`,d:'Proteína vegetal, sin alérgenos de marisco.',t:'Vegetal'},{n:`${cantidad||'2'} huevos`,d:'Proteína sin marisco.',t:'Sin marisco'}],
+        intolerancia:[{n:`${cantidad||'200g'} pollo fresco`,d:'Sin histaminas del marisco.',t:'Bajo histaminas'},{n:`${cantidad||'200g'} merluza fresca`,d:'Pescado blanco fresco, fácil digestión.',t:'Fresco'},{n:`${cantidad||'2'} huevos`,d:'Proteína de fácil digestión.',t:'Digestivo'}],
+        noMegusta:   [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin sabor a mar.',t:'Sin marisco'},{n:`${cantidad||'200g'} merluza o dorada`,d:'Pescado blanco suave.',t:'Pescado'},{n:`${cantidad||'180g'} tofu a la plancha`,d:'Textura firme, sin sabor a marisco.',t:'Vegetal'}],
+        noTengo:     [{n:'2 latas de atún',d:'Proteína marina sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'2'} huevos`,d:'Siempre en casa.',t:'Siempre disponible'},{n:`${cantidad||'200g'} pollo`,d:'Si no hay marisco.',t:'Fácil'}],
+        vegano:      [{n:`${cantidad||'180g'} tofu firme marinado`,d:'Con ajo y limón, textura firme similar.',t:'Vegetal'},{n:'Setas ostra salteadas',d:'Textura jugosa que recuerda al marisco.',t:'Vegetal'},{n:`${cantidad||'180g'} corazones de alcachofa`,d:'Sabor de mar suave en versión vegetal.',t:'Vegetal'}],
+        presupuesto: [{n:'2 latas de sardinas',d:'Proteína y omega-3 al mínimo coste.',t:'Muy económico'},{n:`${cantidad||'2'} huevos`,d:'La proteína más barata.',t:'Muy económico'},{n:`${cantidad||'200g'} muslo de pollo`,d:'Mucho más barato que el marisco.',t:'Económico'}],
+        default:     [{n:`${cantidad||'200g'} merluza o dorada`,d:'Pescado blanco, proteína similar.',t:'Pescado'},{n:`${cantidad||'200g'} pechuga de pollo`,d:'Proteína magra sin marisco.',t:'Carne'},{n:'2 latas de atún',d:'Proteína marina rápida.',t:'Rápido'}],
+      };
+      return s[r] || s.default;
+    }
+
+    // LEGUMBRES (garbanzos, lentejas, edamame, alubias, fabes...)
+    if (/garbanzos|lentejas|edamame|alubias|fabes/.test(tipo)) {
+      const s = {
+        alergia:     [{n:`${cantidad||'150g'} pollo`,d:'Proteína animal sin legumbres.',t:'Sin legumbre'},{n:`${cantidad||'100g'} quinoa`,d:'Hidrato con proteína, sin legumbres.',t:'Sin legumbre'},{n:`${cantidad||'150g'} arroz integral`,d:'Hidrato sin legumbres.',t:'Sin legumbre'}],
+        intolerancia:[{n:`${cantidad||'100g'} quinoa`,d:'Sin los fermentables (FODMAP) de las legumbres.',t:'Bajo FODMAP'},{n:`${cantidad||'150g'} arroz integral`,d:'Hidrato fácil de digerir.',t:'Bajo FODMAP'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal con menos FODMAP que las legumbres.',t:'Bajo FODMAP'}],
+        noMegusta:   [{n:`${cantidad||'100g'} quinoa`,d:'Proteína vegetal con textura diferente.',t:'Diferente'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal sin sabor a legumbre.',t:'Vegetal'},{n:`${cantidad||'150g'} pollo o pavo`,d:'Si prefieres proteína animal.',t:'Animal'}],
+        noTengo:     [{n:`${cantidad||'150g'} garbanzos en lata`,d:'Lista al instante, solo escurrir.',t:'Sin cocinar'},{n:'2 latas de atún',d:'Proteína inmediata.',t:'Rápido'},{n:`${cantidad||'2'} huevos`,d:'Siempre en casa.',t:'Siempre disponible'}],
+        vegano:      [{n:`${cantidad||'150g'} otra legumbre (lentejas, garbanzos o alubias)`,d:'Rota entre legumbres para variar.',t:'Vegetal'},{n:`${cantidad||'150g'} tofu o tempeh`,d:'Proteína vegetal concentrada.',t:'Vegetal'},{n:`${cantidad||'100g'} quinoa`,d:'Proteína completa vegetal.',t:'Vegetal'}],
+        presupuesto: [{n:`${cantidad||'150g'} lentejas`,d:'La legumbre más barata y rápida de cocinar.',t:'Muy económico'},{n:`${cantidad||'150g'} garbanzos secos cocidos en casa`,d:'Mucho más barato que en lata.',t:'Económico'},{n:`${cantidad||'2'} huevos`,d:'Proteína barata si rotas con legumbre.',t:'Económico'}],
+        default:     [{n:`${cantidad||'150g'} otra legumbre (lentejas, garbanzos, alubias o edamame)`,d:'Mismo perfil nutricional, varía el sabor.',t:'Similar'},{n:`${cantidad||'100g'} quinoa`,d:'Proteína vegetal completa, sin legumbre.',t:'Diferente'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal concentrada.',t:'Vegetal'}],
+      };
+      return s[r] || s.default;
+    }
+
+    // QUESOS (queso tierno, fresco, rallado, requesón, cottage...)
+    if (/queso|requesón|requeson/.test(tipo)) {
+      const s = {
+        alergia:     [{n:`${cantidad||'30g'} levadura nutricional`,d:'Aporta sabor "a queso" sin lácteos. Apta para alergia a la leche.',t:'Sin lácteo'},{n:`${cantidad||'30g'} queso vegano`,d:'Sin proteínas de leche.',t:'Sin lácteo'},{n:`${cantidad||'30g'} aguacate`,d:'Cremosidad sin lácteos.',t:'Sin lácteo'}],
+        intolerancia:[{n:`${cantidad||'30g'} queso curado`,d:'Los curados apenas tienen lactosa, suelen tolerarse mejor.',t:'Bajo lactosa'},{n:`${cantidad||'30g'} queso sin lactosa`,d:'Mismo sabor, sin lactosa.',t:'Sin lactosa'},{n:`${cantidad||'30g'} queso de cabra`,d:'Más fácil de digerir que el de vaca.',t:'Más digestivo'}],
+        noMegusta:   [{n:`${cantidad||'30g'} hummus`,d:'Cremoso, sin sabor a queso.',t:'Diferente'},{n:`${cantidad||'30g'} aguacate`,d:'Cremoso y suave.',t:'Diferente'},{n:`${cantidad||'50g'} pechuga de pavo`,d:'Proteína sin lácteos.',t:'Animal'}],
+        noTengo:     [{n:`${cantidad||'30g'} yogur griego espeso`,d:'Cremosidad similar.',t:'Similar'},{n:'1 huevo duro',d:'Proteína de despensa.',t:'Despensa'},{n:`${cantidad||'30g'} jamón o pavo`,d:'Si tienes fiambre a mano.',t:'Alternativa'}],
+        vegano:      [{n:`${cantidad||'30g'} queso vegano`,d:'A base de anacardos o coco.',t:'Vegetal'},{n:`${cantidad||'30g'} levadura nutricional`,d:'Sabor umami "a queso" sin lácteos.',t:'Vegetal'},{n:`${cantidad||'30g'} hummus`,d:'Cremoso y proteico.',t:'Vegetal'}],
+        presupuesto: [{n:`${cantidad||'30g'} queso de marca blanca`,d:'Mismo aporte, mucho más barato.',t:'Económico'},{n:'2 huevos',d:'Proteína más barata.',t:'Muy económico'},{n:`${cantidad||'30g'} requesón`,d:'Más barato que quesos curados.',t:'Económico'}],
+        default:     [{n:`${cantidad||'30g'} requesón o queso cottage`,d:'Menos grasa, más proteína.',t:'Más proteína'},{n:`${cantidad||'30g'} queso de cabra`,d:'Sabor diferente, fácil digestión.',t:'Diferente'},{n:`${cantidad||'30g'} hummus`,d:'Opción vegetal cremosa.',t:'Vegetal'}],
+      };
+      return s[r] || s.default;
+    }
+
+    // FIAMBRE / EMBUTIDO (jamón, chorizo, pavo en lonchas...)
+    if (/jamón|jamon|chorizo|fiambre|embutido|salchichón|salchichon|salami|mortadela|pavo en lonchas/.test(tipo)) {
+      const s = {
+        alergia:     [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Fiambre más simple, menor riesgo de aditivos alergénicos que otros embutidos.',t:'Más simple'},{n:'2 huevos',d:'Proteína sin embutido ni aditivos.',t:'Sin embutido'},{n:`${cantidad||'50g'} pollo cocido`,d:'Proteína magra sin aditivos de embutido.',t:'Sin embutido'}],
+        intolerancia:[{n:`${cantidad||'50g'} pavo fresco cocido`,d:'Sin las histaminas de los curados/fermentados.',t:'Bajo histaminas'},{n:`${cantidad||'50g'} pollo fresco`,d:'Carne fresca, sin curar.',t:'Fresco'},{n:'2 huevos',d:'Proteína de fácil digestión.',t:'Digestivo'}],
+        noMegusta:   [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Sabor más suave.',t:'Más suave'},{n:'2 huevos',d:'Proteína sin curar.',t:'Diferente'},{n:`${cantidad||'50g'} salmón ahumado`,d:'Otro tipo de "fiambre" con más omega-3.',t:'Pescado'}],
+        noTengo:     [{n:'2 huevos',d:'Siempre en casa.',t:'Siempre disponible'},{n:'2 latas de atún',d:'Proteína inmediata sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'50g'} queso`,d:'Si tienes queso a mano.',t:'Alternativa'}],
+        vegano:      [{n:`${cantidad||'50g'} tofu ahumado en lonchas`,d:'El ahumado imita el sabor del fiambre.',t:'Vegetal'},{n:`${cantidad||'50g'} seitán en lonchas`,d:'Textura similar al fiambre.',t:'Vegetal'},{n:'4 cucharadas hummus',d:'Proteína vegetal cremosa.',t:'Vegetal'}],
+        presupuesto: [{n:'2 huevos',d:'La proteína más barata.',t:'Muy económico'},{n:`${cantidad||'50g'} pavo en lonchas de marca blanca`,d:'Igual de bueno y más barato.',t:'Económico'},{n:'2 latas de sardinas',d:'Proteína y omega-3 económicos.',t:'Económico'}],
+        default:     [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Más magro que el resto de embutidos.',t:'Más magro'},{n:'2 huevos',d:'Proteína sin curar ni procesar.',t:'Sin procesar'},{n:`${cantidad||'50g'} salmón ahumado`,d:'Más omega-3, menos sal.',t:'Diferente'}],
+      };
+      return s[r] || s.default;
+    }
+
+    // FRUTA FRESCA (manzana, pera, naranja, kiwi, plátano, frutos rojos, dátiles...)
+    if (/manzana|\bpera\b|naranja|mandarina|kiwi|melocotón|melocoton|mango|fresas?|arándanos|arandanos|frambuesas?|frutos rojos|plátano|platano|dátiles|datiles/.test(tipo)) {
+      const s = {
+        alergia:     [{n:'1 pieza de pera',d:'Fruta de bajo potencial alergénico, a diferencia del kiwi o las frutas con hueso (frecuentes en alergia oral al polen).',t:'Hipoalergénico'},{n:'1 plátano',d:'Muy bien tolerado, raramente alergénico.',t:'Hipoalergénico'},{n:'150g manzana asada',d:'Cocinada reduce el riesgo de alergia oral (síndrome polen-frutas).',t:'Cocinada'}],
+        intolerancia:[{n:'1 plátano maduro',d:'Baja en FODMAP cuando está bien maduro.',t:'Bajo FODMAP'},{n:'1 naranja',d:'Cítrico bien tolerado en raciones moderadas.',t:'Bajo FODMAP'},{n:'150g fresas',d:'Fruta baja en FODMAP.',t:'Bajo FODMAP'}],
+        noMegusta:   [{n:'1 pieza de fruta de temporada (manzana, pera, naranja...)',d:'Cambia por la fruta que más te guste, el aporte es similar.',t:'A tu gusto'},{n:'150g yogur griego con canela',d:'Si no apetece fruta, opción dulce con más proteína.',t:'Alternativa'},{n:'1 puñado de frutos secos',d:'Snack dulce-salado sin fruta.',t:'Diferente'}],
+        noTengo:     [{n:'1 pieza de la fruta que tengas en casa',d:'Cualquier fruta fresca cumple la misma función.',t:'Lo que tengas'},{n:'1 puñado de fruta desecada (orejones, ciruelas)',d:'Dura mucho en la despensa.',t:'Despensa'},{n:'150g yogur natural',d:'Si no tienes fruta a mano.',t:'Alternativa'}],
+        vegano:      [{n:'1 pieza de fruta de temporada',d:'Cualquier fruta fresca es vegana.',t:'Vegetal'},{n:'1 puñado de fruta desecada',d:'Concentrado energético vegano.',t:'Vegetal'},{n:'150g compota sin azúcar',d:'Misma fruta, otra textura.',t:'Vegetal'}],
+        presupuesto: [{n:'1 manzana o plátano',d:'Las frutas más económicas y de todo el año.',t:'Muy económico'},{n:'1 pieza de fruta de temporada',d:'Siempre más barata fuera de temporada de otras.',t:'Económico'},{n:'1 puñado de fruta congelada',d:'Más barata que la fresca fuera de temporada.',t:'Económico'}],
+        default:     [{n:'1 pieza de fruta de temporada (manzana, pera, naranja, kiwi...)',d:'Cualquier fruta fresca aporta un perfil similar de vitaminas y fibra.',t:'Similar'},{n:'150g yogur griego 0% con fruta',d:'Añade proteína al snack.',t:'Más proteína'},{n:'1 puñado de frutos secos',d:'Cambia dulce por graso-saciante.',t:'Diferente'}],
+      };
+      return s[r] || s.default;
+    }
+
     if (/aguacate/.test(tipo)) {
       const s = {
         alergia:     [{n:'2 cucharadas aceite de oliva virgen extra',d:'Grasa saludable sin alérgenos del aguacate (síndrome látex-frutas).',t:'Sin aguacate'},{n:'30g nueces',d:'Grasas saludables alternativas, sin aguacate.',t:'Frutos secos'},{n:'4 cucharadas hummus',d:'Grasas vegetales sin aguacate.',t:'Sin aguacate'}],
@@ -7937,7 +8007,7 @@
       return s[r] || s.default;
     }
 
-    if (/verdura|brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín/.test(tipo)) {
+    if (/verdura|brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|tomate|pepino|lechuga|rúcula|rucula|pimiento|cebolla|champiñones|champinones|setas|espárrago|esparrago|berenjena|puerro|apio|alcachofa|maíz|maiz/.test(tipo)) {
       const s = {
         alergia:     [{n:`${cantidad||'200g'} calabacín`,d:'Vegetal de bajo potencial alergénico.',t:'Hipoalergénico'},{n:`${cantidad||'200g'} zanahoria`,d:'Muy poco alergénico, fácil de tolerar.',t:'Hipoalergénico'},{n:`${cantidad||'200g'} judías verdes`,d:'Alternativa con bajo riesgo de alergia.',t:'Hipoalergénico'}],
         intolerancia:[{n:`${cantidad||'200g'} zanahoria`,d:'Vegetal bajo en FODMAP, fácil de digerir.',t:'Bajo FODMAP'},{n:`${cantidad||'200g'} calabacín`,d:'Bajo en FODMAP, suave para el intestino.',t:'Bajo FODMAP'},{n:`${cantidad||'200g'} espinaca`,d:'Verdura de hoja baja en FODMAP.',t:'Bajo FODMAP'}],
@@ -7950,7 +8020,7 @@
 
     // ─── GENÉRICO INTELIGENTE ─────────────────────────────────────────────
     const esHidrato = /patata|pasta|pan|tostada|centeno|cuscús|cuscus|quinoa|mijo|plátano|platano|fruta/.test(tipo);
-    const esGrasa   = /aceite|nuez|nueces|almendra|cacahuete|mantequilla/.test(tipo);
+    const esGrasa   = /aceite|aove|nuez|nueces|almendra|cacahuete|mantequilla|semilla|tahini|aceitunas|olivas/.test(tipo);
 
     // Para alergia/intolerancia, si el ingrediente no encaja en ninguna categoría
     // anterior no arriesgamos una sugerencia genérica: lo indicamos directamente.
