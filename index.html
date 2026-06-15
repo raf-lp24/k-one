@@ -6030,7 +6030,7 @@
       // Mezcla real de fuerza + cardio, no una copia de running ni de gimnasio puro
       if (numDias <= 3) {
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Cuerpo completo", detalle:"Fuerza general · Sentadilla 4×8, press de banca 3×10, remo con mancuerna 3×10 por lado, plancha 3×40s", etiqueta:"Fuerza"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Cuerpo completo", detalle:"Fuerza general · Sentadilla 4×8, press banca 3×10, remo con mancuerna 3×10 por lado, plancha 3×40s", etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Rodaje suave", detalle:"Cardio aeróbico · 30 min a ritmo conversacional, zona 2, cadencia 170-180 pasos/min", etiqueta:"Cardio"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
@@ -6040,7 +6040,7 @@
         ];
       } else {
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior", detalle:"Empuje y tracción · Press de banca 4×8, remo con barra 4×10, press militar 3×10, dominadas o jalón 3×8", etiqueta:"Fuerza"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior", detalle:"Empuje y tracción · Press banca 4×8, remo con barra 4×10, press militar 3×10, dominadas o jalón 3×8", etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Rodaje suave", detalle:"Cardio aeróbico · 30-35 min a ritmo conversacional, zona 2, cadencia 170-180 pasos/min", etiqueta:"Cardio"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior", detalle:"Piernas y core · Sentadilla 4×8, peso muerto rumano 3×10, prensa 3×12, plancha 3×45s", etiqueta:"Fuerza"},
@@ -6073,7 +6073,7 @@
         ];
       } else {
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon", detalle:"Strength · Press de banca 5×5 · AMRAP 12 min: 10 wall balls, 10 box jumps, 200m carrera", etiqueta:"WOD"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon", detalle:"Strength · Press banca 5×5 · AMRAP 12 min: 10 wall balls, 10 box jumps, 200m carrera", etiqueta:"WOD"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"WOD For Time", detalle:"For Time · 21-15-9: thrusters (20/15kg), burpees sobre cajón, abdominales", etiqueta:"WOD"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Hero WOD", detalle:"For Time (tope 30 min) · 5 rondas: 400m carrera, 15 peso muerto, 15 dominadas o remo en barra. Escala las rondas si hace falta", etiqueta:"WOD"},
@@ -8574,7 +8574,7 @@
   // Base de datos de variantes por ejercicio
   const variantesDB = {
     // PECHO
-    'press de banca': {
+    'press banca': {
       nombre: 'Press de banca',
       variantes: [
         { nombre: 'Press con mancuernas', desc: 'Mismo movimiento pero con mancuernas. Más rango de movimiento y menos estrés en las muñecas.', nivel: 'Similar' },
@@ -8726,13 +8726,13 @@
     if (ejerciciosEncontrados.length === 0) {
       const deporte = userData.deporte || '';
       if (deporte.includes('Gimnasio') || deporte.includes('Fuerza')) {
-        ejerciciosEncontrados.push('press de banca', 'remo', 'sentadilla', 'plancha');
+        ejerciciosEncontrados.push('press banca', 'remo', 'sentadilla', 'plancha');
       } else if (deporte.includes('Running')) {
         ejerciciosEncontrados.push('rodaje', 'series');
       } else if (deporte.includes('Hyrox') || deporte.includes('CrossFit')) {
         ejerciciosEncontrados.push('sentadilla', 'peso muerto', 'plancha', 'fondos');
       } else {
-        ejerciciosEncontrados.push('sentadilla', 'press de banca', 'plancha');
+        ejerciciosEncontrados.push('sentadilla', 'press banca', 'plancha');
       }
     }
 
