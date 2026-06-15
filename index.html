@@ -5873,8 +5873,8 @@
 
     const hoy = getFechaHoyISO();
     const previo = userData.pesosEjercicios[key];
-    // Último peso registrado en una sesión anterior (no la de hoy), para recordárselo al usuario
-    const pesoAnterior = previo && previo.fecha !== hoy ? previo.peso : null;
+    // Último peso guardado antes de este cambio, para recordárselo al usuario
+    const pesoAnterior = previo ? previo.peso : null;
 
     if (isNaN(valor) || valor <= 0) {
       delete userData.pesosEjercicios[key];
