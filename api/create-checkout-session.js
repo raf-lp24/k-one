@@ -61,6 +61,7 @@ module.exports = async (req, res) => {
     customer: customerId,
     client_reference_id: user.id,
     line_items: [{ price: priceId, quantity: 1 }],
+    payment_method_types: ['card'], // solo tarjeta (incluye Apple Pay / Google Pay); sin Klarna, PayPal ni SEPA
     success_url: `${origin}/?checkout=exito`,
     cancel_url: `${origin}/?checkout=cancelado`,
     metadata: {
