@@ -3156,6 +3156,18 @@
     letter-spacing: 2px;
     color: var(--metal);
     text-transform: uppercase;
+    transition: opacity 0.25s ease;
+  }
+  .loading-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--humo);
+    text-transform: uppercase;
+    margin-top: 8px;
+    min-height: 14px;
+    text-align: center;
+    transition: opacity 0.25s ease;
   }
 
   /* NAV: pasa a hamburguesa antes de que los enlaces se queden sin sitio */
@@ -3846,6 +3858,7 @@
   <div class="loading-logo">K-<span>ONE</span></div>
   <div class="loading-bar"></div>
   <div class="loading-text" id="loadingText">Analizando tu perfil...</div>
+  <div class="loading-sub" id="loadingSubText"></div>
 </div>
 
 <!-- TOUR DE BIENVENIDA (DÍA 1) -->
@@ -4051,7 +4064,7 @@
     <button class="modal-close" onclick="closeCambiarPlanModal()">✕</button>
     <div id="cpStep1">
     <div class="modal-title">Cambiar tu plan</div>
-    <p class="modal-desc">¿Quieres cambiar de objetivo, deporte o cualquier otra preferencia? Actualiza lo que necesites y recalculamos al momento tu entrenamiento, tu nutrición y tu plan semanal. Tu progreso de esta semana se reiniciará para empezar el nuevo plan desde cero.</p>
+    <p class="modal-desc">¿Quieres cambiar de objetivo, deporte o cualquier otra preferencia? Actualiza lo que necesites y recalculamos al momento tu entrenamiento, tu nutrición y tu plan semanal. Los entrenamientos ya completados esta semana se conservan en tu racha.</p>
     <div class="form-grid full" style="gap:20px">
       <div class="field">
         <label>¿Qué tipo de plan quieres?</label>
@@ -6003,38 +6016,41 @@
   // ===== TEXTOS PERSONALIZADOS DE LA PANTALLA DE CARGA =====
   function buildLoadingTexts(userData) {
     const soloDieta = (userData.tipoPlan || '').includes('Solo nutrición');
-    const texts = ['Analizando tu perfil...'];
+    const steps = [];
+
+    steps.push({ main: 'Analizando tu perfil...', sub: 'Procesando los datos del cuestionario' });
+    steps.push({ main: 'Calculando gasto calórico basal (TMB)...', sub: 'Fórmula Mifflin-St Jeor · TDEE ajustado por actividad' });
 
     if (userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
-      texts.push(`Cruzando tus datos con tu historial de ${userData.lesion.toLowerCase()} para diseñar ejercicios seguros...`);
+      steps.push({ main: `Adaptando ejercicios a tu historial de ${userData.lesion.toLowerCase()}...`, sub: 'Excluyendo movimientos de riesgo · Activando alternativas seguras' });
     } else if (!soloDieta) {
-      texts.push('Calculando tu plan de entrenamiento...');
-    } else {
-      texts.push('Diseñando tu plan de nutrición...');
+      steps.push({ main: 'Estructurando bloques de empuje y tirón...', sub: 'Distribución Push · Pull · Piernas · Core' });
     }
 
     if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
       const alergeno = (userData.alergia === 'Otra' ? userData.alergiaOtra : userData.alergia) || userData.alergia;
-      texts.push(`Revisando que ningún plato contenga ${alergeno.toLowerCase()}...`);
+      steps.push({ main: `Filtrando alérgenos: ${alergeno.toLowerCase()}...`, sub: 'Revisando cada ingrediente en la base de datos nutricional' });
     } else {
-      texts.push(soloDieta ? 'Ajustando tus comidas a tu día a día...' : 'Diseñando tu nutrición...');
+      steps.push({ main: 'Calculando distribución de macronutrientes...', sub: 'Proteínas · Carbohidratos · Grasas ajustados al objetivo' });
     }
 
     if (userData.objetivo && userData.objetivo !== 'No especificado') {
-      texts.push(`Ajustando tu plan para "${userData.objetivo}"...`);
-    } else {
-      texts.push('Ajustando según tus objetivos...');
+      steps.push({ main: `Ajustando protocolo para "${userData.objetivo}"...`, sub: 'Seleccionando metodología de entrenamiento óptima' });
     }
 
     if (userData.enfoqueMacros && userData.enfoqueMacros !== 'No especificado') {
-      texts.push(`Calculando tus macros con un enfoque ${userData.enfoqueMacros.toLowerCase()}...`);
-    } else {
-      texts.push('Calculando tus macros...');
+      steps.push({ main: `Aplicando enfoque ${userData.enfoqueMacros.toLowerCase()}...`, sub: 'Calibrando calorías y frecuencia de comidas' });
     }
 
-    texts.push(soloDieta ? 'Preparando tus primeras comidas...' : 'Preparando tu primera semana...');
+    if (!soloDieta) {
+      steps.push({ main: 'Equilibrando carga y recuperación semanal...', sub: 'Volumen · Intensidad · Descanso activo' });
+    }
 
-    return texts;
+    steps.push({ main: 'Seleccionando recetas y opciones de comida...', sub: 'Cruzando preferencias con la base de datos de recetas' });
+    steps.push({ main: 'Validando coherencia del plan completo...', sub: 'Control de calidad · Revisión final' });
+    steps.push({ main: 'Tu plan personalizado está listo.', sub: '' });
+
+    return steps;
   }
 
   // ===== GENERAR PLAN LOCAL (sin API externa) =====
@@ -6042,17 +6058,29 @@
     if (!validateBlock(currentBlock)) return;
     userData = collectFormData();
 
-    const loadingTexts = buildLoadingTexts(userData);
+    const loadingSteps = buildLoadingTexts(userData);
 
     const overlay = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
+    const loadingSubText = document.getElementById('loadingSubText');
     overlay.classList.add('visible');
 
     let i = 0;
+    function mostrarStep(step) {
+      loadingText.style.opacity = '0';
+      if (loadingSubText) loadingSubText.style.opacity = '0';
+      setTimeout(() => {
+        loadingText.textContent = step.main;
+        if (loadingSubText) loadingSubText.textContent = step.sub || '';
+        loadingText.style.opacity = '1';
+        if (loadingSubText) loadingSubText.style.opacity = step.sub ? '1' : '0';
+      }, 250);
+    }
+    mostrarStep(loadingSteps[0]);
     const interval = setInterval(() => {
-      loadingText.textContent = loadingTexts[i % loadingTexts.length];
       i++;
-    }, 900);
+      mostrarStep(loadingSteps[i % loadingSteps.length]);
+    }, 550);
 
     // Simulamos procesamiento y generamos plan inteligente basado en los datos
     setTimeout(() => {
@@ -6321,6 +6349,86 @@
       `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
   }
 
+  // ===== MENSAJES DEL DÍA (60 frases, rotación diaria determinista) =====
+  const MENSAJES_DIA = [
+    "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
+    "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
+    "No hace falta que sea perfecto. Hace falta que sea constante.",
+    "Nadie recuerda el primer día. Todos recuerdan cuando no pararon.",
+    "El proceso es la recompensa. Los resultados son solo la prueba.",
+    "La disciplina es elegir lo que quieres más sobre lo que quieres ahora.",
+    "Un día malo de entrenamiento sigue siendo mejor que un día sin entrenar.",
+    "No se trata de motivación. Se trata de construir un hábito.",
+    "La mentalidad cambia cuando los hábitos cambian. Empieza por los hábitos.",
+    "El cansancio de hoy es la fuerza de mañana.",
+    "El progreso no se ve en el espejo. Se nota en cómo piensas.",
+    "Cada repetición que no te apetecía hacer vale el doble.",
+    "El cuerpo logra lo que la mente cree posible.",
+    "Pequeños pasos, todos los días. Eso es lo que construye algo grande.",
+    "Los resultados tardan. Pero siempre llegan si no paras.",
+    "No seas perfecto. Sé consistente.",
+    "La racha es una cadena. No rompas la cadena.",
+    "El que entrena cuando no quiere es el que gana cuando importa.",
+    "Constancia mata al talento cuando el talento no es constante.",
+    "Hoy puede que no notes nada. La semana que viene, sí.",
+    "Tu mente se rinde antes que tu cuerpo. Entrena las dos.",
+    "La incomodidad de hoy es el estándar de mañana.",
+    "El esfuerzo que nadie ve es el que crea los resultados que todo el mundo notará.",
+    "Lo que resistes, persiste. Lo que entrenas, crece.",
+    "No esperes sentirte listo. Empieza y el estado mental llegará.",
+    "Lo que pones en el plato importa tanto como lo que pones en la barra.",
+    "Come para rendir, no para castigarte ni para consolarte.",
+    "La recuperación empieza en la cocina. El rendimiento también.",
+    "No hay plan de entrenamiento que compense una mala alimentación sostenida.",
+    "Proteína, descanso, consistencia. El triángulo que nadie quiere aceptar.",
+    "Un mes de consistencia cambia cómo te ves. Un año, cómo eres.",
+    "Los mejores resultados no se comparten. Se viven.",
+    "No compitas con nadie. Compite con quien eras la semana pasada.",
+    "El atleta que eres en dos años depende del entrenamiento de hoy.",
+    "La inversión más rentable que existe es la que haces en tu cuerpo.",
+    "Cuando quieras parar, recuerda por qué empezaste.",
+    "El límite no es físico. Casi nunca lo es.",
+    "Que no sea cómodo no significa que sea imposible.",
+    "Cada vez que te cuesta más es porque estás progresando.",
+    "La diferencia entre quien lo logra y quien no, es seguir cuando duele.",
+    "Entrena como si nadie te viera. Porque los resultados no mienten.",
+    "La energía que pones en las excusas es la que podrías poner en el entrenamiento.",
+    "No eres el único que tiene mal día. Eres el único que entrena igual.",
+    "Habla menos de lo que vas a hacer. Haz más de lo que ibas a contar.",
+    "El esfuerzo silencioso siempre llega más lejos que el ruido.",
+    "Semana a semana. Ese es el único plazo que importa.",
+    "Los hábitos no se construyen en un día. Pero se destruyen en uno solo.",
+    "Esta semana suma. La anterior ya no se puede cambiar.",
+    "Cada semana es una oportunidad de hacerlo mejor que la anterior.",
+    "No se trata de ser el mejor. Se trata de no rendirse.",
+    "Descansar no es rendirse. Es parte del protocolo.",
+    "El músculo no crece en el gimnasio. Crece mientras duermes.",
+    "Los días de descanso también cuentan. Protégelos.",
+    "Hidratación, sueño, nutrición. El trío que determina tus resultados.",
+    "Recuperar bien es entrenar mejor.",
+    "No necesitas motivación. Ya la tienes. Se llama tu objetivo.",
+    "Cada vez que dices 'mañana' pagas con los resultados del mañana.",
+    "El camino es el mismo para todos. La diferencia es quién no para.",
+    "Este no es un plan de 30 días. Es un cambio de quién eres.",
+    "K-One no te da un plan. Te da una herramienta. El trabajo es tuyo."
+  ];
+
+  function getMensajeDia() {
+    const inicio = new Date(new Date().getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((Date.now() - inicio) / 86400000);
+    const racha = calcularRachaDias ? calcularRachaDias() : 0;
+    // Cada 3 días, los usuarios con racha alta ven un mensaje personalizado con su número
+    if (racha >= 14 && dayOfYear % 3 === 0) {
+      const streakMsgs = [
+        `${racha} días seguidos. Eso ya es un hábito. Sigue.`,
+        `${racha} días sin parar. La mayoría ya lo habría dejado.`,
+        `${racha} días de racha. No es motivación. Es identidad.`
+      ];
+      return streakMsgs[dayOfYear % streakMsgs.length];
+    }
+    return MENSAJES_DIA[dayOfYear % MENSAJES_DIA.length];
+  }
+
   function buildPlanFromData(u) {
     const soloDieta = (u.tipoPlan || '').includes('Solo nutrición');
     const deporte = u.deporte || 'Gimnasio / Fuerza';
@@ -6387,15 +6495,8 @@
       bienvenida += `${dias} de entrenamiento a la semana, ajustados a tu tiempo y nivel. Sin atajos, sin promesas vacías.`;
     }
 
-    // MENSAJE DEL DÍA
-    const mensajes = [
-      "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
-      "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
-      "No hace falta que sea perfecto. Hace falta que sea constante.",
-      "Nadie recuerda el primer día. Todos recuerdan cuando no pararon.",
-      "El proceso es la recompensa. Los resultados son solo la prueba."
-    ];
-    const mensaje_dia = mensajes[Math.floor(Math.random() * mensajes.length)];
+    // MENSAJE DEL DÍA — rotación determinista diaria (60 frases + especiales por racha)
+    const mensaje_dia = getMensajeDia();
 
     // ENTRENAMIENTO HOY: se genera al final a partir del primer día de la semana
     // (semana[0] = "Lunes"), para que "Hoy" y "Plan semanal" muestren siempre lo mismo.
@@ -8957,8 +9058,10 @@
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
 
-    userData.progreso = { semana: getSemanaActual(), diasEntrenados: 0, ajuste: 0 };
-    userData.entrenosCompletados = [];
+    // Transición suave: conservar los días ya entrenados esta semana para no perder la racha
+    const _diasEntrenados = userData.progreso ? (userData.progreso.diasEntrenados || 0) : 0;
+    userData.progreso = { semana: getSemanaActual(), diasEntrenados: _diasEntrenados, ajuste: 0 };
+    userData.entrenosCompletados = []; // se resetea porque los ejercicios han cambiado
 
     generatedPlan = buildPlanFromData(userData);
     buildDashboard();
