@@ -4056,8 +4056,8 @@
       <div class="field">
         <label>¿Qué tipo de plan quieres?</label>
         <div class="radio-group" id="cp-tipoPlan">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Plan completo: entrenamiento + nutrición</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan();">Solo nutrición, sin entrenamiento</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan(); toggleCpEntrenamiento(false);">Plan completo: entrenamiento + nutrición</div>
+          <div class="radio-opt" onclick="selectRadio(this,'cp-tipoPlan'); actualizarOpcionesPeriodicidad(this.textContent.trim(),'cp-periodicidad'); actualizarPrecioCambioPlan(); toggleCpEntrenamiento(true);">Solo nutrición, sin entrenamiento</div>
         </div>
       </div>
       <div class="field">
@@ -4080,48 +4080,50 @@
           <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Flexible / sin restricciones</div>
         </div>
       </div>
-      <div class="field">
-        <label>¿Qué deporte quieres practicar?</label>
-        <div class="radio-group" id="cp-deporte">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Gimnasio / Fuerza</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Running</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Hyrox</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">CrossFit</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Combinación</div>
+      <div id="cp-entrenamientoSection">
+        <div class="field">
+          <label>¿Qué deporte quieres practicar?</label>
+          <div class="radio-group" id="cp-deporte">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Gimnasio / Fuerza</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Running</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Hyrox</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">CrossFit</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Combinación</div>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Cuántos días a la semana puedes entrenar?</label>
-        <div class="radio-group" id="cp-diasEntreno">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">2 días</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">3 días</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">4 días</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">5+ días</div>
+        <div class="field">
+          <label>¿Cuántos días a la semana puedes entrenar?</label>
+          <div class="radio-group" id="cp-diasEntreno">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">2 días</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">3 días</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">4 días</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-diasEntreno')">5+ días</div>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Cuánto tiempo por sesión?</label>
-        <div class="radio-group" id="cp-tiempoSesion">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">30-45 min</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">45-60 min</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">60-90 min</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">Más de 90 min</div>
+        <div class="field">
+          <label>¿Cuánto tiempo por sesión?</label>
+          <div class="radio-group" id="cp-tiempoSesion">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">30-45 min</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">45-60 min</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">60-90 min</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">Más de 90 min</div>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Cuál es tu nivel actual?</label>
-        <div class="radio-group" id="cp-nivel">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Principiante, empiezo desde cero</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Llevo algo de tiempo</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Avanzado</div>
+        <div class="field">
+          <label>¿Cuál es tu nivel actual?</label>
+          <div class="radio-group" id="cp-nivel">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Principiante, empiezo desde cero</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Llevo algo de tiempo</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Avanzado</div>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Dónde entrenas?</label>
-        <div class="radio-group" id="cp-lugar">
-          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Gimnasio</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa con material</div>
-          <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa sin material</div>
+        <div class="field">
+          <label>¿Dónde entrenas?</label>
+          <div class="radio-group" id="cp-lugar">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Gimnasio</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa con material</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa sin material</div>
+          </div>
         </div>
       </div>
     </div>
@@ -5293,6 +5295,9 @@
       </nav>
       <button class="logout-btn" onclick="gestionarSuscripcion()">
         <span>⬡</span> Gestionar suscripción
+      </button>
+      <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px">
+        <span>⬡</span> Cancelar suscripción
       </button>
       <button class="logout-btn" onclick="logout()">
         <span>⬡</span> Cerrar sesión
@@ -7528,6 +7533,7 @@
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) return;
+    actualizarBtnCancelar();
 
     // Header
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
@@ -8683,12 +8689,20 @@
     document.body.style.overflow = '';
   }
 
+  function toggleCpEntrenamiento(ocultar) {
+    const sec = document.getElementById('cp-entrenamientoSection');
+    if (sec) sec.style.display = ocultar ? 'none' : '';
+  }
+
   function abrirModalCambiarPlan() {
     enfoqueMacrosManualCambio = false;
-    preseleccionarRadio('cp-tipoPlan', userData.tipoPlan || 'Plan completo: entrenamiento + nutrición');
+    const tipoPlanActual = userData.tipoPlan || 'Plan completo: entrenamiento + nutrición';
+    const esSoloNutri = tipoPlanActual.includes('Solo');
+    preseleccionarRadio('cp-tipoPlan', tipoPlanActual);
+    toggleCpEntrenamiento(esSoloNutri);
     const periodicidadTexto = (userData.periodicidad || 'mensual');
     preseleccionarRadio('cp-periodicidad', periodicidadTexto.charAt(0).toUpperCase() + periodicidadTexto.slice(1));
-    actualizarOpcionesPeriodicidad(userData.tipoPlan || 'Plan completo: entrenamiento + nutrición', 'cp-periodicidad');
+    actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
     preseleccionarRadio('cp-objetivo', userData.objetivo);
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
@@ -8711,7 +8725,10 @@
   function irPasoPrecioCambioPlan() {
     const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
     const tipoPlan = getRadio('cp-tipoPlan');
-    if (!tipoPlan || !getRadio('cp-objetivo') || !getRadio('cp-deporte') || !getRadio('cp-diasEntreno') || !getRadio('cp-tiempoSesion') || !getRadio('cp-nivel') || !getRadio('cp-lugar')) {
+    const esSoloNutri = tipoPlan.includes('Solo');
+    const camposBase = !tipoPlan || !getRadio('cp-objetivo');
+    const camposEntreno = !esSoloNutri && (!getRadio('cp-deporte') || !getRadio('cp-diasEntreno') || !getRadio('cp-tiempoSesion') || !getRadio('cp-nivel') || !getRadio('cp-lugar'));
+    if (camposBase || camposEntreno) {
       showToast('Por favor, completa todas las opciones antes de continuar.');
       return;
     }
@@ -8747,7 +8764,10 @@
     const nuevoNivel = getRadio('cp-nivel');
     const nuevoLugar = getRadio('cp-lugar');
 
-    if (!nuevoTipoPlan || !nuevoObjetivo || !nuevoDeporte || !nuevosDias || !nuevoTiempo || !nuevoNivel || !nuevoLugar) {
+    const esSoloNutriNuevo = nuevoTipoPlan.includes('Solo');
+    const falloBase = !nuevoTipoPlan || !nuevoObjetivo;
+    const falloEntreno = !esSoloNutriNuevo && (!nuevoDeporte || !nuevosDias || !nuevoTiempo || !nuevoNivel || !nuevoLugar);
+    if (falloBase || falloEntreno) {
       showToast('Por favor, completa todas las opciones antes de recalcular tu plan.');
       return;
     }
@@ -9818,6 +9838,21 @@
       return;
     }
     modal.classList.remove('visible');
+    // Verificar si hubo renovación para mostrar encuesta de nuevo
+    const user = getCurrentUser();
+    if (user && user.suscripcionActiva && user.tieneSub && user.fechaPago) {
+      const periodoActual = user.fechaPago;
+      if (!userData.testimonioUltimoPeriodo) {
+        userData.testimonioUltimoPeriodo = periodoActual;
+        saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      } else if (userData.testimonioUltimoPeriodo !== periodoActual && userData.testimonioCompletado) {
+        userData.testimonioCompletado = false;
+        mostrarEncuestaOpinion(() => {
+          userData.testimonioUltimoPeriodo = periodoActual;
+          saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+        });
+      }
+    }
   }
   function _mostrarPaywallInner(modal, user) {
     modal.classList.add('visible');
@@ -9900,6 +9935,47 @@
     } catch (e) {
       showToast('No se pudo iniciar el pago: ' + e.message, 5000);
       if (boton) { boton.disabled = false; boton.textContent = textoBoton || 'Continuar con K-One →'; }
+    }
+  }
+
+  // Muestra u oculta el botón de cancelar según el estado de la suscripción
+  function actualizarBtnCancelar() {
+    const user = getCurrentUser();
+    const btn = document.getElementById('btnCancelarSub');
+    if (!btn) return;
+    btn.style.display = (user && user.suscripcionActiva && user.tieneSub) ? '' : 'none';
+  }
+
+  async function cancelarSuscripcion() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const fechaFin = user.fechaPago
+      ? new Date(user.fechaPago).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'el final de tu período actual';
+    const confirmar = window.confirm(
+      `¿Seguro que quieres cancelar tu suscripción?\n\nTu acceso seguirá activo hasta el ${fechaFin}. Después no se renovará y podrás volver cuando quieras.`
+    );
+    if (!confirmar) return;
+
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
+
+    const btn = document.getElementById('btnCancelarSub');
+    const textoOriginal = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Cancelando...'; }
+
+    try {
+      const res = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al cancelar');
+      if (btn) { btn.style.display = 'none'; }
+      showToast(`Suscripción cancelada. Tu acceso sigue activo hasta el ${fechaFin}.`, 6000);
+    } catch (e) {
+      showToast('No se pudo cancelar: ' + e.message, 5000);
+      if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
     }
   }
 
