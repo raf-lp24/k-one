@@ -6356,6 +6356,7 @@
     const enfermedad = u.enfermedad || 'No';
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
+    const notasSalud = [];
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
     // (dos personas idénticas en el cuestionario reciben orden de comidas y selección
@@ -7057,7 +7058,6 @@
     // ===== ADAPTACIONES POR SALUD, PROGRESIÓN Y FEEDBACK =====
     // Lesiones, alergias, medicación y los cambios pedidos en el feedback de la sesión
     // anterior modifican de verdad el entreno de hoy y la semana — no son solo texto.
-    const notasSalud = [];
     const sinGluten = (u.dieta && u.dieta.includes('gluten')) || alergiaSalud.includes('Gluten');
     const sinLactosa = (u.dieta && u.dieta.includes('lactosa')) || alergiaSalud.includes('Lactosa');
     const sinFrutosSecos = alergiaSalud.includes('Frutos secos');
@@ -7206,6 +7206,9 @@
 
     // NUTRICIÓN con 4 opciones por comida
     const esVegetariano = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
+    if (esVegetariano) {
+      notasSalud.push('En dietas vegetarianas y veganas hay nutrientes difíciles de cubrir solo con comida: vitamina B12 (suplementación esencial, no negociable), creatina monohidrato (mejora el rendimiento muscular un 10-15% sin carne), omega-3 de algas (DHA+EPA), vitamina D3 y hierro en forma de bisglicinato. El hierro vegetal (no hemo) se absorbe mucho mejor tomándolo con un alimento rico en vitamina C. Consulta tus niveles con un profesional antes de suplementar.');
+    }
 
     // ── TDEE PERSONALIZADO (Mifflin-St Jeor) ─────────────────────────────────
     const pesoKg  = parseFloat(u.peso)   || 70;
@@ -7220,7 +7223,7 @@
 
     // Factor de actividad según deporte, nivel e intensidad semanal
     const factorAct = soloDieta ? 1.375
-      : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 4) ? 1.9
+      : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 4) ? 1.725
       : ((esHyrox || esCrossfit || esRunner) && numDias >= 4)   ? 1.725
       : (numDias >= 4)  ? 1.725
       : (numDias >= 2)  ? 1.55
@@ -7238,9 +7241,15 @@
       kcalObj = tdee; // equilibrio = TDEE real calculado, no valor fijo
     }
 
-    // Objetivo de proteína (g/día): más alto en déficit para preservar músculo
+    // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso
+    const lbm = esMujer
+      ? (0.252 * pesoKg + 0.473 * altCm - 48.3)
+      : (0.407 * pesoKg + 0.267 * altCm - 19.2);
+    const lbmProtMax = Math.round(lbm * 2.4);
+
+    // Objetivo de proteína (g/día): más alto en déficit para preservar músculo; cap por masa magra en déficit
     const protObj = Math.round(
-      perdidaGrasa ? Math.max(pesoKg * 2.2, 100) :
+      perdidaGrasa ? Math.min(Math.max(pesoKg * 2.2, 100), lbmProtMax) :
       ganarMusculo ? pesoKg * 2.0 :
       pesoKg * 1.6
     );
@@ -7250,11 +7259,22 @@
     const escalaRacion = Math.min(2.5, Math.max(0.65, kcalObj / baseKcalPlan));
     // ─────────────────────────────────────────────────────────────────────────
 
-    // op() construye cada opción escalando kcal/macros al perfil del usuario
+    // Ajusta gramos y ml en el texto de ingredientes al perfil calórico del usuario
+    const scaleIngredientes = (texto, factor) => {
+      if (Math.abs(factor - 1) < 0.05) return texto;
+      return texto.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
+        const raw = parseFloat(num.replace(',', '.')) * factor;
+        const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
+        return `${Math.max(5, rounded)}${unit}`;
+      });
+    };
+
+    // op() construye cada opción escalando kcal/macros e ingredientes al perfil del usuario
     const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
       const sc = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion); };
       return {
-        nombre, ingredientes,
+        nombre,
+        ingredientes: scaleIngredientes(ingredientes, escalaRacion),
         kcal:  `${sc(kcal)} kcal`,
         prot:  `${sc(prot)}g prot`,
         carbs: `${sc(carbs)}g carbs`,
@@ -7288,9 +7308,9 @@
           momento: "Media mañana", hora: "10:30",
           porque: "Snack pequeño para estabilizar la glucosa y llegar sin hambre a la comida",
           opciones: [
-            op("Manzana con almendras", "1 manzana mediana, 20g almendras crudas", "185 kcal", "4g prot", "24g carbs", "9g grasa", "Sin cocción · 1 min"),
-            op("Infusión + barrita de proteína casera", "Dátiles, avena y proteína en polvo. Prepara el domingo para toda la semana.", "200 kcal", "12g prot", "22g carbs", "6g grasa", "Prep dominical"),
-            op("Pepino y zanahoria con hummus", "150g pepino + zanahoria crudos, 40g hummus", "130 kcal", "5g prot", "14g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Skyr con fruta y canela", "150g skyr natural, 1 pieza de fruta de temporada, canela al gusto", "190 kcal", "18g prot", "22g carbs", "2g grasa", "Sin cocción · 2 min"),
+            op("Infusión + barrita de proteína casera", "Dátiles, 30g avena y 1 scoop proteína en polvo. Prepara el domingo para toda la semana.", "200 kcal", "18g prot", "22g carbs", "5g grasa", "Prep dominical"),
+            op("Queso batido con pepino y semillas", "150g queso batido 0%, pepino en rodajas, orégano, 10g pipas de calabaza", "145 kcal", "18g prot", "6g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Kéfir con frutos rojos", "200ml kéfir natural, 80g frutos rojos, 5g semillas de lino", "160 kcal", "8g prot", "20g carbs", "4g grasa", "Sin cocción · 1 min"),
             op("Tortas de arroz con queso batido", "4 tortas de arroz, 150g queso batido 0%, canela", "195 kcal", "18g prot", "28g carbs", "2g grasa", "Sin cocción · 2 min")
           ]
@@ -7314,7 +7334,7 @@
         },
         {
           momento: "Merienda", hora: "17:30",
-          porque: "Si entrenas hoy, necesitas energía. Si no, elige la opción más ligera",
+          porque: "Post-entreno ideal si entrenas por la tarde — tómalo en los 30-60 min tras acabar. Si no entrenas hoy, elige la opción más ligera o saltatela",
           opciones: [
             op("Plátano + yogur griego", "1 plátano maduro, 150g yogur griego 0%", "230 kcal", "12g prot", "38g carbs", "2g grasa", "Sin cocción · 1 min"),
             op("Fruta de temporada + frutos secos", "1 pera o melocotón, 15g nueces o almendras", "190 kcal", "4g prot", "26g carbs", "9g grasa", "Sin cocción · 1 min"),
@@ -7390,7 +7410,7 @@
         },
         {
           momento: "Merienda", hora: "17:30",
-          porque: "Pre o post entreno: el momento más importante del día para recargar músculo",
+          porque: "Pre o post entreno: el momento más importante del día para recargar músculo. Tómalo en los 30-60 min antes o después de la sesión para maximizar la síntesis proteica",
           opciones: [
             op("Plátano + batido de proteína", "1 plátano grande, 1 scoop proteína en agua o leche", "320 kcal", "28g prot", "42g carbs", "4g grasa", "Fácil · 2 min"),
             op("Arroz con leche proteico", "50g arroz, 200ml leche entera, canela, 1 scoop proteína vainilla", "430 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 20 min"),
@@ -7443,7 +7463,7 @@
           opciones: [
             op("Fruta + frutos secos", "1 manzana o pera, 15g almendras o nueces", "185 kcal", "4g prot", "24g carbs", "9g grasa", "Sin cocción · 1 min"),
             op("Café con leche + galletas de avena", "200ml leche, 3 galletas avena caseras", "220 kcal", "8g prot", "30g carbs", "8g grasa", "Sin cocción · 1 min"),
-            op("Fruta de temporada sola", "1 naranja + 1 kiwi, o cualquier fruta que tengas", "100 kcal", "2g prot", "22g carbs", "0g grasa", "Sin cocción · 1 min"),
+            op("Yogur natural con fruta y canela", "150g yogur natural entero, 1 naranja o kiwi, canela al gusto", "160 kcal", "7g prot", "20g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Palitos de apio con mantequilla de almendra", "3 tallos apio, 2 cucharadas mantequilla almendra", "160 kcal", "5g prot", "8g carbs", "12g grasa", "Sin cocción · 1 min"),
             op("Tortas de arroz con queso batido y miel", "4 tortas de arroz, 150g queso batido, 1 cucharada miel, canela", "230 kcal", "18g prot", "34g carbs", "2g grasa", "Sin cocción · 2 min")
           ]
@@ -7459,7 +7479,9 @@
             op("Garbanzos guisados con arroz y verduras", "180g garbanzos, 70g arroz, calabacín, zanahoria, tomate, AOVE", "470 kcal", "20g prot", "68g carbs", "12g grasa", "Fácil · 30 min")
           ] : [
             op("Pollo al horno con arroz y ensalada", "180g pollo, 80g arroz, ensalada verde, tomate, AOVE", "480 kcal", "40g prot", "46g carbs", "12g grasa", "Fácil · 25 min"),
-            op("Lentejas con chorizo y verduras", "180g lentejas, 40g chorizo, zanahoria, patata, pimiento", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
+            (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos'))
+              ? op("Lentejas estofadas con verduras", "180g lentejas, zanahoria, patata, pimiento, cebolla, pimentón ahumado, AOVE", "460 kcal", "28g prot", "62g carbs", "8g grasa", "Fácil · 35 min")
+              : op("Lentejas con chorizo y verduras", "180g lentejas, 40g chorizo, zanahoria, patata, pimiento", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
             op("Merluza al horno con patatas y pisto", "200g merluza, 120g patata cocida, calabacín, tomate, pimiento, AOVE", "400 kcal", "36g prot", "42g carbs", "8g grasa", "Fácil · 25 min"),
             op("Fabes con verduras y pimentón ahumado", "120g fabes cocidas, zanahoria, cebolla, laurel, pimentón ahumado, 20g jamón serrano, AOVE", "420 kcal", "24g prot", "54g carbs", "10g grasa", "Fácil · 40 min"),
             op("Garbanzos con atún y huevo", "150g garbanzos cocidos, 1 lata de atún, 1 huevo duro, ensalada variada, AOVE", "430 kcal", "34g prot", "40g carbs", "12g grasa", "Sin cocción · 8 min")
@@ -7467,7 +7489,7 @@
         },
         {
           momento: "Merienda", hora: "17:30",
-          porque: "Snack de tarde para sostener la energía sin pasarse de calorías",
+          porque: "Snack de tarde. Si entrenas hoy, tómalo como post-entreno en los 30-60 min tras la sesión y elige una opción con proteína",
           opciones: [
             op("Yogur con fruta y nueces", "150g yogur natural, 1 melocotón o kiwi, 10g nueces", "220 kcal", "8g prot", "28g carbs", "9g grasa", "Sin cocción · 2 min"),
             op("Pan con tomate y jamón o queso", "1 rebanada pan centeno, tomate rallado, 2 lonchas jamón o queso", "230 kcal", "12g prot", "24g carbs", "10g grasa", "Sin cocción · 3 min"),
