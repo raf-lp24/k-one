@@ -8943,6 +8943,8 @@
     await supa.auth.signOut();
     _supaUserId = null;
     clearCurrentUser();
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('visible'));
+    document.body.style.overflow = '';
     showToast('Sesión cerrada. Hasta pronto.');
     setTimeout(() => goTo('landing'), 800);
   }
