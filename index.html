@@ -3448,6 +3448,114 @@
     max-height: 85vh;
     overflow-y: auto;
   }
+  .modal-box-recetario {
+    max-width: 860px;
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 36px 32px;
+  }
+  .recetario-section { margin-bottom: 36px; }
+  .recetario-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(181,178,173,0.12);
+  }
+  .recetario-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--brasa);
+    text-transform: uppercase;
+  }
+  .recetario-section-hora {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--metal);
+  }
+  .recetario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .receta-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(181,178,173,0.1);
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+  .receta-card:hover { border-color: rgba(232,73,15,0.3); }
+  .receta-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--metal);
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .receta-nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blanco);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .receta-ingredientes {
+    font-size: 11px;
+    color: var(--metal-claro);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+  .receta-ingredientes ul {
+    margin: 0;
+    padding-left: 14px;
+  }
+  .receta-ingredientes ul li { margin-bottom: 1px; }
+  .receta-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .receta-prep {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--metal);
+  }
+  .receta-macros {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .receta-macro-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    background: rgba(232,73,15,0.08);
+    border: 1px solid rgba(232,73,15,0.2);
+    color: var(--metal-claro);
+    padding: 2px 6px;
+  }
+  .btn-recetario {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    padding: 9px 18px;
+    background: rgba(232,73,15,0.08);
+    border: 1px solid rgba(232,73,15,0.3);
+    color: var(--brasa);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-recetario:hover { background: rgba(232,73,15,0.16); border-color: var(--brasa); }
+  .btn-recetario svg { width: 14px; height: 14px; flex-shrink: 0; }
 
   .modal-close {
     position: absolute;
@@ -3710,6 +3818,19 @@
     <div class="modal-success" id="forgotSuccess">
       Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.
     </div>
+  </div>
+</div>
+
+<!-- MODAL RECETARIO COMPLETO -->
+<div class="modal-overlay" id="modalRecetario" onclick="if(event.target===this)cerrarRecetario()">
+  <div class="modal-box modal-box-recetario">
+    <button class="modal-close" onclick="cerrarRecetario()">✕</button>
+    <div style="margin-bottom:24px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">// Recetario</div>
+      <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
+      <div style="font-size:12px;color:var(--metal)">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
+    </div>
+    <div id="recetarioContenido"></div>
   </div>
 </div>
 
@@ -5138,6 +5259,10 @@
           <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
             <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
           </div>
+          <button class="btn-recetario" onclick="abrirRecetario()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
+            Ver recetario completo
+          </button>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
@@ -7545,6 +7670,46 @@
     const creado = user ? user.creado : null;
     const el = document.getElementById('cpPrecioInfo');
     if (el) el.textContent = precioPlanActual(tipoPlan, creado, periodicidad).detalle;
+  }
+
+  function abrirRecetario() {
+    if (!generatedPlan || !generatedPlan.nutricion) return;
+    const contenido = document.getElementById('recetarioContenido');
+    contenido.innerHTML = generatedPlan.nutricion.map(meal => {
+      const cards = meal.opciones.map((opt, i) => {
+        const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
+        return `
+          <div class="receta-card">
+            <div class="receta-num">Opción ${i + 1}</div>
+            <div class="receta-nombre">${opt.nombre}</div>
+            <div class="receta-ingredientes"><ul>${items}</ul></div>
+            <div class="receta-footer">
+              <div class="receta-prep">⏱ ${opt.prep}</div>
+              <div class="receta-macros">
+                <span class="receta-macro-pill">🔥 ${opt.kcal}</span>
+                <span class="receta-macro-pill">💪 ${opt.prot}</span>
+                <span class="receta-macro-pill">⚡ ${opt.carbs}</span>
+                <span class="receta-macro-pill">🫒 ${opt.grasa}</span>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="recetario-section">
+          <div class="recetario-section-header">
+            <div class="recetario-section-title">${meal.momento}</div>
+            <div class="recetario-section-hora">${meal.hora} · ${meal.porque}</div>
+          </div>
+          <div class="recetario-grid">${cards}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('modalRecetario').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarRecetario() {
+    document.getElementById('modalRecetario').classList.remove('visible');
+    document.body.style.overflow = '';
   }
 
   function abrirModalCambiarPlan() {
