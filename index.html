@@ -2179,61 +2179,6 @@
   }
   .peso-bar-mini:last-child { background: var(--brasa); }
 
-  /* PROGRESIÓN DE PESOS (Mi progreso) */
-  #pesosProgresoList {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-  }
-  @media (max-width: 540px) {
-    #pesosProgresoList { grid-template-columns: 1fr; }
-  }
-
-  .peso-progreso-card {
-    background: var(--carbon);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .peso-progreso-nombre {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--humo);
-  }
-
-  .peso-progreso-actual {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    color: var(--brasa);
-    line-height: 1;
-    margin-top: 2px;
-  }
-
-  .peso-progreso-diff {
-    font-size: 10px;
-    font-family: 'DM Mono', monospace;
-    color: var(--metal);
-    margin-top: 2px;
-  }
-  .peso-progreso-diff.up { color: var(--brasa); }
-
-  .peso-line-chart {
-    width: 90px;
-    height: 36px;
-    flex-shrink: 0;
-  }
-
-  .peso-line-chart-empty {
-    font-size: 10px;
-    font-family: 'DM Mono', monospace;
-    color: var(--metal);
-    max-width: 90px;
-    line-height: 1.4;
-  }
-
   .week-day-rest-msg { font-style: italic; opacity: 0.7; align-self: center; font-size: 13px; color: var(--metal); }
 
   .week-today-badge {
@@ -5659,11 +5604,6 @@
         </div>
 
         <div class="progress-section">
-          <div class="progress-title">Progresión de pesos</div>
-          <div id="pesosProgresoList"></div>
-        </div>
-
-        <div class="progress-section">
           <div class="progress-title">Hitos conseguidos</div>
           <div class="milestones" id="milestonesList"></div>
         </div>
@@ -6338,7 +6278,6 @@
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     }
 
-    renderPesosProgreso();
   }
 
   function formatearSesion(day) {
@@ -8327,68 +8266,6 @@
   function renderProgresoSection() {
     renderFotosProgreso();
     renderHitos();
-    renderPesosProgreso();
-  }
-
-  // ===== PROGRESO: PESOS REGISTRADOS POR EJERCICIO =====
-  function renderPesosProgreso() {
-    const cont = document.getElementById('pesosProgresoList');
-    if (!cont) return;
-    const pesos = userData.pesosEjercicios || {};
-    const entries = Object.values(pesos).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
-
-    if (entries.length === 0) {
-      cont.innerHTML = '<div class="notes-empty">Aún no has registrado ningún peso. Apunta el peso con el que entrenas en "Hoy" o en "Plan semanal" y aquí verás tu progresión.</div>';
-      return;
-    }
-
-    cont.innerHTML = entries.map(e => {
-      const hist = e.historial || [];
-      const primero = hist[0]?.peso;
-      let diffHTML = '';
-      if (primero != null && hist.length > 1) {
-        const diff = Math.round((e.peso - primero) * 100) / 100;
-        diffHTML = `<div class="peso-progreso-diff ${diff >= 0 ? 'up' : ''}">${diff >= 0 ? '+' : ''}${diff} kg desde tu primer registro</div>`;
-      }
-      return `
-        <div class="peso-progreso-card">
-          <div class="peso-progreso-info">
-            <div class="peso-progreso-nombre">${e.nombre}</div>
-            <div class="peso-progreso-actual">${e.peso} kg</div>
-            ${diffHTML}
-          </div>
-          ${pesosLineChartHTML(hist)}
-        </div>`;
-    }).join('');
-  }
-
-  // Mini-gráfico de línea con la evolución de las últimas semanas para un ejercicio
-  function pesosLineChartHTML(hist) {
-    const data = hist.slice(-6);
-    if (data.length < 2) {
-      return '<div class="peso-line-chart-empty">Sigue registrando pesos para ver tu evolución aquí</div>';
-    }
-    const w = 140, h = 48, pad = 5;
-    const pesos = data.map(d => d.peso);
-    const min = Math.min(...pesos), max = Math.max(...pesos);
-    const range = max - min || 1;
-    const stepX = (w - pad * 2) / (data.length - 1);
-    const points = data.map((d, i) => ({
-      x: pad + i * stepX,
-      y: pad + (h - pad * 2) * (1 - (d.peso - min) / range),
-      fecha: d.fecha,
-      peso: d.peso
-    }));
-    const linePoints = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const dots = points.map((p, i) => `
-      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i === points.length - 1 ? 3.5 : 2}" style="fill:${i === points.length - 1 ? 'var(--brasa)' : 'var(--metal)'}">
-        <title>${p.fecha}: ${p.peso} kg</title>
-      </circle>`).join('');
-    return `
-      <svg class="peso-line-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-        <polyline points="${linePoints}" fill="none" style="stroke:var(--brasa)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-        ${dots}
-      </svg>`;
   }
 
   // ===== NOTAS / AGENDA =====
