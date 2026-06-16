@@ -17,11 +17,13 @@ function readRawBody(req) {
 async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
   const item = subscription.items.data[0];
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const row = {
     stripe_customer_id: subscription.customer,
     stripe_subscription_id: subscription.id,
     plan: item?.price?.id || null,
     status: subscription.status,
+    current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
     current_period_end: new Date(periodEnd * 1000).toISOString()
   };
 
