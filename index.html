@@ -8772,6 +8772,33 @@
       return;
     }
 
+    const planCambia = nuevoTipoPlan !== userData.tipoPlan;
+    const periodCambia = nuevaPeriodicidad !== userData.periodicidad;
+    const user = getCurrentUser();
+
+    // Si cambia el tipo de plan o la periodicidad, hay que actualizar Stripe PRIMERO.
+    // Sin esto, cualquiera podría pagar el plan barato y activarse el completo gratis.
+    if ((planCambia || periodCambia) && user && user.tieneSub) {
+      const btnConfirmar = document.querySelector('#cpStep2 .btn-primary');
+      const textoBtn = btnConfirmar ? btnConfirmar.textContent : '';
+      if (btnConfirmar) { btnConfirmar.disabled = true; btnConfirmar.textContent = 'Actualizando...'; }
+      try {
+        const { data: { session } } = await supa.auth.getSession();
+        if (!session) throw new Error('Sesión caducada. Vuelve a entrar.');
+        const res = await fetch('/api/update-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ tipoPlan: nuevoTipoPlan, periodicidad: nuevaPeriodicidad })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'No se pudo actualizar la suscripción');
+      } catch (e) {
+        showToast('Error al actualizar el plan de pago: ' + e.message, 6000);
+        if (btnConfirmar) { btnConfirmar.disabled = false; btnConfirmar.textContent = textoBtn; }
+        return;
+      }
+    }
+
     userData.tipoPlan = nuevoTipoPlan;
     userData.periodicidad = nuevaPeriodicidad;
     userData.objetivo = nuevoObjetivo;
@@ -8782,22 +8809,20 @@
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
 
-    // Nuevo objetivo/deporte: reiniciamos el ajuste del plan, pero la semana se sigue
-    // contando desde la fecha de registro del email (no vuelve a empezar en 1).
     userData.progreso = { semana: getSemanaActual(), diasEntrenados: 0, ajuste: 0 };
     userData.entrenosCompletados = [];
 
     generatedPlan = buildPlanFromData(userData);
     buildDashboard();
 
-    const user = getCurrentUser();
     if (user) {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     }
 
     closeCambiarPlanModal();
     showSection('hoy');
-    showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.');
+    const msgPago = (planCambia || periodCambia) ? ' La diferencia se ha aplicado a tu próxima factura.' : '';
+    showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.' + msgPago);
   }
 
   // ===== SELECCIÓN DE OPCIÓN DE COMIDA =====
