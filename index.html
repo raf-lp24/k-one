@@ -8752,7 +8752,7 @@
     preseleccionarRadio('cp-enfoqueMacros', enfoquePorObjetivo[objetivo] || 'Equilibrado');
   }
 
-  function guardarCambioPlan() {
+  async function guardarCambioPlan() {
     const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
     const nuevoTipoPlan = getRadio('cp-tipoPlan');
     const nuevaPeriodicidad = valorPeriodicidad('cp-periodicidad');
@@ -8821,7 +8821,13 @@
 
     closeCambiarPlanModal();
     showSection('hoy');
-    const msgPago = (planCambia || periodCambia) ? ' La diferencia se ha aplicado a tu próxima factura.' : '';
+    let msgPago = '';
+    if (planCambia || periodCambia) {
+      const esUpgrade = nuevoTipoPlan.includes('completo') && (userData.tipoPlan || '').includes('Solo');
+      msgPago = esUpgrade
+        ? ' El cargo prorrateado se ha procesado en tu tarjeta.'
+        : ' Los ajustes se aplicarán en tu próxima factura.';
+    }
     showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.' + msgPago);
   }
 

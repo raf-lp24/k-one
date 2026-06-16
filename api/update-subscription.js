@@ -37,6 +37,12 @@ module.exports = async (req, res) => {
   }
 
   const subscription = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+
+  if (!['active', 'trialing'].includes(subscription.status)) {
+    res.status(400).json({ error: 'La suscripción no está activa' });
+    return;
+  }
+
   const itemId = subscription.items.data[0]?.id;
   if (!itemId) {
     res.status(500).json({ error: 'No se encontró el ítem de la suscripción' });
@@ -50,10 +56,16 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+  const updateParams = {
     items: [{ id: itemId, price: newPriceId }],
     proration_behavior: 'create_prorations'
-  });
+  };
+  // Si la suscripción estaba programada para cancelarse, mantener esa cancelación
+  // al cambiar el precio. Sin esto, el update borraría cancel_at_period_end=true.
+  if (subscription.cancel_at_period_end) {
+    updateParams.cancel_at_period_end = true;
+  }
+  const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, updateParams);
 
   res.status(200).json({
     ok: true,

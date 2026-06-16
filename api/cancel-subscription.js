@@ -28,11 +28,29 @@ module.exports = async (req, res) => {
     return;
   }
 
+  const subscription = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+
+  if (!['active', 'trialing'].includes(subscription.status)) {
+    res.status(400).json({ error: 'La suscripción no está activa' });
+    return;
+  }
+
+  if (subscription.cancel_at_period_end) {
+    res.status(200).json({
+      ok: true,
+      alreadyCancelled: true,
+      cancelAt: subscription.cancel_at,
+      currentPeriodEnd: subscription.current_period_end
+    });
+    return;
+  }
+
   const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
     cancel_at_period_end: true
   });
 
   res.status(200).json({
+    ok: true,
     cancelAt: updated.cancel_at,
     currentPeriodEnd: updated.current_period_end
   });
