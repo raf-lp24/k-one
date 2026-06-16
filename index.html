@@ -7601,7 +7601,8 @@
     // y demás cálculos no caigan al valor por defecto (semana 1).
     userData.progreso = userData.progreso || { diasEntrenados: 0, ajuste: 0 };
     userData.progreso.semana = progreso.semana;
-    const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || 'Lunes';
+    const _diasNombres = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || _diasNombres[getIndiceDiaHoy()];
     document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
     document.getElementById('statSemana').textContent = progreso.semana;
     document.getElementById('statDiasEntrenados').textContent = (userData.entrenosCompletados || []).length;
