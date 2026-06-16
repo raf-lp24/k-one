@@ -1,8 +1,8 @@
 const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
 
-// Cambia el precio de la suscripción activa con prorrateo inmediato.
-// Si es una subida de plan (ej: nutrición → completo), Stripe cobra la diferencia
-// al momento. Si es una bajada, abona la diferencia en el próximo ciclo.
+// Cambia el precio de la suscripción activa con prorrateo.
+// La diferencia (subida o bajada) se refleja PRORRATEADA en la próxima factura
+// (proration_behavior: 'create_prorations' no genera un cobro inmediato).
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -27,16 +27,26 @@ module.exports = async (req, res) => {
 
   const { data: sub } = await supabaseAdmin
     .from('subscriptions')
-    .select('stripe_subscription_id')
+    .select('stripe_subscription_id, stripe_customer_id')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!sub?.stripe_subscription_id) {
+  // Resiliencia: si el webhook no llegó a guardar el id de la suscripción
+  // (p. ej. falló un upsert), búscala en Stripe por el id de cliente para no
+  // dejar al usuario bloqueado sin poder cambiar de plan.
+  let subscriptionId = sub?.stripe_subscription_id;
+  if (!subscriptionId && sub?.stripe_customer_id) {
+    const lista = await stripe.subscriptions.list({ customer: sub.stripe_customer_id, status: 'all', limit: 10 });
+    const activa = lista.data.find(s => ['active', 'trialing'].includes(s.status));
+    subscriptionId = activa?.id || null;
+  }
+
+  if (!subscriptionId) {
     res.status(404).json({ error: 'No tienes una suscripción activa para actualizar' });
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   if (!['active', 'trialing'].includes(subscription.status)) {
     res.status(400).json({ error: 'La suscripción no está activa' });
@@ -49,8 +59,20 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Si ya tiene ese precio, no hacemos nada
   const currentPriceId = subscription.items.data[0]?.price?.id;
+
+  // Durante el primer mes de oferta (0,99€) el precio en Stripe es el de la oferta.
+  // NO se toca la facturación: el cliente sigue pagando 0,99€ ese mes elija el plan
+  // que elija. El plan definitivo (mensual/trimestral/anual/nutrición) y su precio
+  // se eligen y se cobran al renovar, en el paywall. Aquí solo dejamos que el
+  // frontend recalcule el plan (entrenamiento/nutrición) sin cobrar nada.
+  const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
+  if (offerPriceId && currentPriceId === offerPriceId) {
+    res.status(200).json({ ok: true, enOferta: true, noChange: true });
+    return;
+  }
+
+  // Si ya tiene ese precio, no hacemos nada
   if (currentPriceId === newPriceId) {
     res.status(200).json({ ok: true, noChange: true });
     return;
@@ -65,7 +87,7 @@ module.exports = async (req, res) => {
   if (subscription.cancel_at_period_end) {
     updateParams.cancel_at_period_end = true;
   }
-  const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, updateParams);
+  const updated = await stripe.subscriptions.update(subscriptionId, updateParams);
 
   res.status(200).json({
     ok: true,

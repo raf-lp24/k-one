@@ -9128,6 +9128,7 @@
     const periodCambia = nuevaPeriodicidad !== userData.periodicidad;
     const planAnterior = userData.tipoPlan;
     const user = getCurrentUser();
+    let enOferta = false; // true si el cliente sigue en el primer mes a 0,99€
 
     // Si cambia el tipo de plan o la periodicidad, hay que actualizar Stripe PRIMERO.
     // Sin esto, cualquiera podría pagar el plan barato y activarse el completo gratis.
@@ -9151,6 +9152,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'No se pudo actualizar la suscripción');
         stripeOk = true;
+        enOferta = !!data.enOferta; // sigue en el primer mes a 0,99€: no se cambia la facturación
       } catch (e) {
         const msg = e.name === 'AbortError' ? 'La petición tardó demasiado. Inténtalo de nuevo.' : e.message;
         showToast('Error al actualizar el plan de pago: ' + msg, 6000);
@@ -9185,11 +9187,13 @@
     closeCambiarPlanModal();
     showSection('hoy');
     let msgPago = '';
-    if (planCambia || periodCambia) {
-      const esUpgrade = nuevoTipoPlan.includes('completo') && (planAnterior || '').includes('Solo');
-      msgPago = esUpgrade
-        ? ' El cargo prorrateado se ha procesado en tu tarjeta.'
-        : ' Los ajustes se aplicarán en tu próxima factura.';
+    if (enOferta) {
+      // Sigue en el primer mes a 0,99€: no se cambia la facturación, solo el plan.
+      msgPago = ' Sigues en tu primer mes a 0,99€; elegirás (y pagarás) tu plan definitivo al renovar.';
+    } else if (planCambia || periodCambia) {
+      // proration_behavior 'create_prorations' NO cobra al instante: la diferencia
+      // (a favor o en contra) se prorratea y aparece en la próxima factura.
+      msgPago = ' El ajuste de precio se prorratea y se reflejará en tu próxima factura.';
     }
     showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.' + msgPago);
   }

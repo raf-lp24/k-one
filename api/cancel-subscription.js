@@ -19,16 +19,25 @@ module.exports = async (req, res) => {
 
   const { data: sub } = await supabaseAdmin
     .from('subscriptions')
-    .select('stripe_subscription_id, current_period_end')
+    .select('stripe_subscription_id, stripe_customer_id, current_period_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!sub?.stripe_subscription_id) {
+  // Resiliencia: si el webhook no guardó el id de la suscripción, búscala en
+  // Stripe por el id de cliente para no impedir la cancelación.
+  let subscriptionId = sub?.stripe_subscription_id;
+  if (!subscriptionId && sub?.stripe_customer_id) {
+    const lista = await stripe.subscriptions.list({ customer: sub.stripe_customer_id, status: 'all', limit: 10 });
+    const activa = lista.data.find(s => ['active', 'trialing'].includes(s.status));
+    subscriptionId = activa?.id || null;
+  }
+
+  if (!subscriptionId) {
     res.status(404).json({ error: 'No tienes una suscripción activa' });
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   if (!['active', 'trialing'].includes(subscription.status)) {
     res.status(400).json({ error: 'La suscripción no está activa' });
@@ -45,7 +54,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+  const updated = await stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: true
   });
 
