@@ -6547,6 +6547,10 @@
     const nivel = u.nivel || 'Principiante, empiezo desde cero';
     const objetivo = u.objetivo || 'Sentirme mejor en general';
     const dias = u.diasEntreno || '3 días';
+    // Nº de días de entrenamiento a la semana — a nivel de función para que tanto el
+    // bloque de entrenamiento como el cálculo de TDEE (más abajo, fuera del if !soloDieta)
+    // puedan usarlo. Antes vivía dentro del if y rompía el plan completo en el TDEE.
+    const numDias = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
     const esPrincipiante = nivel.includes('Principiante');
     const esIntermedio   = nivel.includes('Llevo');
     const esAvanzado     = nivel.includes('Avanzado');
@@ -6616,9 +6620,7 @@
     let semana = [];
     if (!soloDieta) {
 
-    // SEMANA según días disponibles y deporte
-    const numDias = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
-
+    // SEMANA según días disponibles y deporte (numDias se declara arriba, a nivel de función)
     if (esRunner) {
       // ── RUNNING ── diferenciado por nivel y tiempo de sesión
       const durBase  = sesionCorta ? '20-25 min' : esAvanzado ? '50-60 min' : '35-45 min';
@@ -9177,8 +9179,15 @@
     userData.progreso = { semana: getSemanaActual(), diasEntrenados: _diasEntrenados, ajuste: 0 };
     userData.entrenosCompletados = []; // se resetea porque los ejercicios han cambiado
 
-    generatedPlan = buildPlanFromData(userData);
-    buildDashboard();
+    // Si el recálculo del plan fallara, avisar y no dejar el modal congelado en silencio.
+    try {
+      generatedPlan = buildPlanFromData(userData);
+      buildDashboard();
+    } catch (e) {
+      console.error('Error recalculando el plan:', e);
+      showToast('No se pudo recalcular tu plan. Inténtalo de nuevo o escríbenos si persiste.', 6000);
+      return;
+    }
 
     if (user) {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
