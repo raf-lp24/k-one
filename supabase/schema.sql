@@ -90,6 +90,7 @@ create table if not exists public.subscriptions (
   status text not null default 'none', -- active | trialing | past_due | canceled | none
   current_period_start timestamptz,
   current_period_end timestamptz,
+  cancel_at_period_end boolean not null default false, -- true: oferta 0,99€ o cancelación; no renovará
   updated_at timestamptz not null default now()
 );
 

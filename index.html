@@ -4123,6 +4123,9 @@
 <!-- MODAL FIN DE PRUEBA / PAYWALL -->
 <div class="modal-overlay" id="modalPaywall">
   <div class="modal-box">
+    <!-- Solo visible en renovación VOLUNTARIA (el cliente aún tiene acceso). El paywall
+         obligatorio de fin de período no muestra esta X. -->
+    <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()">✕</button>
     <div class="modal-title" id="paywallTitulo">Tu mes de prueba ha terminado</div>
     <p class="modal-desc" id="paywallDesc">Has disfrutado de K-One por 0,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
     <!-- Modo "primer mes": oferta de 0,99€ (sin elegir plan todavía) -->
@@ -5443,6 +5446,22 @@
           <div class="motivation-label">// Mensaje del día</div>
           <div class="motivation-text" id="motivationText">
             "El primer día no requiere ganas. Requiere decisión. Ya la tomaste."
+          </div>
+        </div>
+
+        <!-- Aviso suave de renovación: 2 días antes, 1 día antes y el último día.
+             Solo para quien NO se le renueva solo (oferta 0,99€ o suscripción cancelada). -->
+        <div id="avisoRenovacion" style="display:none;background:#1a1a1a;border:1px solid var(--brasa);border-radius:10px;padding:18px 20px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:22px;line-height:1.2">✨</span>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em" id="avisoRenovacionTitulo">Tu plan continúa cuando quieras</div>
+              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6" id="avisoRenovacionDesc">Si quieres, puedes elegir ya tu plan y no esperar al último día. Sin prisa: tu acceso sigue activo hasta entonces.</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="abrirRenovacionVoluntaria()">Elegir mi plan ahora →</button>
+                <button style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -7846,6 +7865,7 @@
     actualizarEstadoCompletado();
 
     actualizarDiasRestantesPlan();
+    actualizarAvisoRenovacion();
 
     // Notas / agenda
     renderNotas();
@@ -9874,7 +9894,7 @@
     const esBeta = !!profile?.is_beta;
     // La suscripción real (Stripe) se guarda en "subscriptions" vía webhook.
     const { data: sub } = await supa.from('subscriptions')
-      .select('status, current_period_start, current_period_end')
+      .select('status, current_period_start, current_period_end, cancel_at_period_end')
       .eq('user_id', authUser.id)
       .maybeSingle();
     const suscripcionStripeActiva = !!sub && ['active', 'trialing'].includes(sub.status);
@@ -9886,6 +9906,8 @@
       fechaPago: sub?.current_period_end || cuenta.fechaPago || null,
       // Inicio del período actual de Stripe — para que semanas y días restantes arranquen desde el pago.
       inicioPeriodo: sub?.current_period_start || null,
+      // ¿Se cancelará al final del período? (oferta 0,99€ o cancelación). Para avisar antes de que expire.
+      cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 0,99€.
       tieneSub: !!sub || !!cuenta.suscripcionActiva || esBeta,
       isBeta: esBeta
@@ -10238,6 +10260,7 @@
   function comprobarPaywall(email) {
     const modal = document.getElementById('modalPaywall');
     if (!modal) return;
+    _paywallVoluntario = false; // el paywall obligatorio nunca es cerrable
     const activo = tieneAccesoActivo(email);
     if (!activo) {
       const user = getCurrentUser();
@@ -10266,10 +10289,78 @@
       }
     }
   }
+  // ===== AVISO SUAVE DE RENOVACIÓN (2 días antes / 1 día antes / último día) =====
+  // Solo para quien NO se le renueva solo: oferta de 0,99€ o suscripción ya cancelada.
+  // Es una recomendación, nunca un bloqueo: el acceso sigue activo hasta que expire.
+  let _paywallVoluntario = false;
+
+  function _diasHastaFinPeriodo() {
+    const user = getCurrentUser();
+    if (!user || !user.fechaPago) return null;
+    const fin = new Date(user.fechaPago).getTime();
+    if (isNaN(fin)) return null;
+    return Math.ceil((fin - Date.now()) / (1000 * 60 * 60 * 24));
+  }
+
+  function actualizarAvisoRenovacion() {
+    const box = document.getElementById('avisoRenovacion');
+    if (!box) return;
+    const user = getCurrentUser();
+    const dias = _diasHastaFinPeriodo();
+    // Condiciones: tiene acceso ahora, NO se le renueva solo, y quedan 2 días o menos.
+    const noRenueva = user && user.cancelaAlFinal && !user.isBeta;
+    if (!user || !noRenueva || dias === null || dias > 2 || dias < 0) {
+      box.style.display = 'none';
+      return;
+    }
+    // No insistir: si ya lo cerró hoy, no volver a mostrarlo hasta mañana.
+    try {
+      const clave = 'kone_aviso_renov_' + (user.email || '') + '_' + new Date().toDateString();
+      if (localStorage.getItem(clave)) { box.style.display = 'none'; return; }
+    } catch (e) {}
+    const titulo = document.getElementById('avisoRenovacionTitulo');
+    const desc = document.getElementById('avisoRenovacionDesc');
+    if (dias <= 0) {
+      if (titulo) titulo.textContent = 'Hoy es el último día de tu período';
+      if (desc) desc.textContent = 'Si quieres seguir sin interrupción, elige tu plan ahora. Es tu decisión: sin permanencia y cancela cuando quieras.';
+    } else {
+      if (titulo) titulo.textContent = dias === 1 ? 'Mañana termina tu período actual' : `Quedan ${dias} días de tu período actual`;
+      if (desc) desc.textContent = 'Si quieres, puedes elegir ya tu plan y no esperar al último día. Sin prisa: tu acceso sigue activo hasta entonces.';
+    }
+    box.style.display = 'block';
+  }
+
+  function cerrarAvisoRenovacion() {
+    const user = getCurrentUser();
+    try {
+      const clave = 'kone_aviso_renov_' + ((user && user.email) || '') + '_' + new Date().toDateString();
+      localStorage.setItem(clave, '1');
+    } catch (e) {}
+    const box = document.getElementById('avisoRenovacion');
+    if (box) box.style.display = 'none';
+  }
+
+  function abrirRenovacionVoluntaria() {
+    _paywallVoluntario = true;
+    const modal = document.getElementById('modalPaywall');
+    if (modal) _mostrarPaywallInner(modal, getCurrentUser());
+  }
+
+  function cerrarPaywallVoluntario() {
+    _paywallVoluntario = false;
+    const modal = document.getElementById('modalPaywall');
+    if (modal) modal.classList.remove('visible');
+    const btnCerrar = document.getElementById('paywallCerrarVoluntario');
+    if (btnCerrar) btnCerrar.style.display = 'none';
+  }
+
   function _mostrarPaywallInner(modal, user) {
     modal.classList.add('visible');
     if (!user) { user = getCurrentUser(); }
     const primerMes = !(user && user.tieneSub);
+    // Botón de cerrar: solo en renovación voluntaria (el cliente aún tiene acceso).
+    const btnCerrar = document.getElementById('paywallCerrarVoluntario');
+    if (btnCerrar) btnCerrar.style.display = _paywallVoluntario ? '' : 'none';
     document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
     document.getElementById('paywallPlanChooser').style.display = primerMes ? 'none' : 'block';
     const titulo = document.getElementById('paywallTitulo');
@@ -10280,8 +10371,10 @@
       if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 0,99€. Sin permanencia, cancela cuando quieras.';
       if (btn) btn.textContent = 'Empezar por 0,99€ →';
     } else {
-      if (titulo) titulo.textContent = 'Tu primer mes ha terminado';
-      if (desc) desc.textContent = 'Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.';
+      if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
+      if (desc) desc.textContent = _paywallVoluntario
+        ? 'Puedes dejar elegido tu plan desde ya. Tu acceso actual sigue intacto hasta que termine el período; solo te adelantas para no esperar al último día.'
+        : 'Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.';
       if (btn) btn.textContent = 'Continuar con K-One →';
       const email = user?.email || '';
       const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';

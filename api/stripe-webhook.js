@@ -24,29 +24,43 @@ async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
     plan: item?.price?.id || null,
     status: subscription.status,
     current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-    current_period_end: new Date(periodEnd * 1000).toISOString()
+    current_period_end: new Date(periodEnd * 1000).toISOString(),
+    // ¿Se cancelará al final del período? (oferta de 0,99€ o cancelación del cliente).
+    // Lo usa el frontend para avisar de la renovación antes de que expire.
+    cancel_at_period_end: !!subscription.cancel_at_period_end
   };
 
-  let err;
-  if (userId) {
-    ({ error: err } = await supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...row }, { onConflict: 'user_id' }));
-  } else {
-    ({ error: err } = await supabaseAdmin.from('subscriptions').update(row).eq('stripe_customer_id', subscription.customer));
+  async function escribir(r) {
+    if (userId) {
+      return supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...r }, { onConflict: 'user_id' });
+    }
+    return supabaseAdmin.from('subscriptions').update(r).eq('stripe_customer_id', subscription.customer);
   }
 
-  // Fallback: si current_period_start no existe todavía en la tabla, reintenta sin ella
-  // para que el status se actualice igualmente.
-  if (err && err.message && err.message.includes('current_period_start')) {
-    const rowSinStart = { ...row };
-    delete rowSinStart.current_period_start;
-    if (userId) {
-      ({ error: err } = await supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...rowSinStart }, { onConflict: 'user_id' }));
-    } else {
-      ({ error: err } = await supabaseAdmin.from('subscriptions').update(rowSinStart).eq('stripe_customer_id', subscription.customer));
-    }
+  let { error: err } = await escribir(row);
+
+  // Fallback: si alguna columna opcional (current_period_start / cancel_at_period_end)
+  // todavía no existe en la tabla, reintenta sin ellas para que el status se guarde igual.
+  if (err && err.message && /current_period_start|cancel_at_period_end/.test(err.message)) {
+    const rowMin = { ...row };
+    delete rowMin.current_period_start;
+    delete rowMin.cancel_at_period_end;
+    ({ error: err } = await escribir(rowMin));
   }
 
   if (err) throw new Error(`Supabase upsert error: ${err.message}`);
+}
+
+// Sincroniza el estado del cliente eligiendo SIEMPRE su mejor suscripción actual.
+// Evita que, si un cliente renueva antes de tiempo (queda una suscripción vieja
+// marcada para cancelar), el evento de cancelación de la vieja le quite el acceso.
+async function syncCustomerFromStripe(stripe, supabaseAdmin, customerId, fallbackSub) {
+  const list = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 });
+  const subs = list.data;
+  const activaSinCancelar = subs.find(s => ['active', 'trialing'].includes(s.status) && !s.cancel_at_period_end);
+  const activa = subs.find(s => ['active', 'trialing'].includes(s.status));
+  const elegida = activaSinCancelar || activa || fallbackSub || subs[0];
+  if (elegida) await upsertFromSubscription(supabaseAdmin, elegida, null);
 }
 
 module.exports = async (req, res) => {
@@ -83,7 +97,9 @@ module.exports = async (req, res) => {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
       const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
-      await upsertFromSubscription(supabaseAdmin, subscription, null);
+      // No degradar a ciegas por el id del evento: reflejar la mejor suscripción
+      // vigente del cliente (gestiona renovaciones anticipadas y solapamientos).
+      await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
       break;
     }
     default:
