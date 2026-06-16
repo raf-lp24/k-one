@@ -3455,15 +3455,21 @@
     overflow-y: auto;
     padding: 36px 32px;
   }
-  .recetario-section { margin-bottom: 36px; }
+  .recetario-section { margin-bottom: 4px; }
   .recetario-section-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(181,178,173,0.12);
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(181,178,173,0.1);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
   }
+  .recetario-section-header:hover { background: rgba(255,255,255,0.06); }
+  .recetario-section-left { display: flex; align-items: baseline; gap: 10px; }
   .recetario-section-title {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -3476,11 +3482,20 @@
     font-size: 10px;
     color: var(--metal);
   }
+  .recetario-section-arrow {
+    font-size: 12px;
+    color: var(--metal);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .recetario-section.open .recetario-section-arrow { transform: rotate(180deg); }
   .recetario-grid {
-    display: grid;
+    display: none;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
+    padding: 14px 0 6px;
   }
+  .recetario-section.open .recetario-grid { display: grid; }
   .receta-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(181,178,173,0.1);
@@ -7842,16 +7857,23 @@
           </div>`;
       }).join('');
       return `
-        <div class="recetario-section">
-          <div class="recetario-section-header">
-            <div class="recetario-section-title">${meal.momento}</div>
-            <div class="recetario-section-hora">${meal.hora} · ${meal.porque}</div>
+        <div class="recetario-section" id="recSec${mealIdx}">
+          <div class="recetario-section-header" onclick="toggleRecetarioSec(${mealIdx})">
+            <div class="recetario-section-left">
+              <div class="recetario-section-title">${meal.momento}</div>
+              <div class="recetario-section-hora">${meal.hora} · ${meal.opciones.length} opciones</div>
+            </div>
+            <div class="recetario-section-arrow">▾</div>
           </div>
           <div class="recetario-grid">${cards}</div>
         </div>`;
     }).join('');
     document.getElementById('modalRecetario').classList.add('visible');
     document.body.style.overflow = 'hidden';
+  }
+
+  function toggleRecetarioSec(idx) {
+    document.getElementById('recSec' + idx).classList.toggle('open');
   }
 
   function cerrarRecetario() {
