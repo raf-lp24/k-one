@@ -2180,49 +2180,58 @@
   .peso-bar-mini:last-child { background: var(--brasa); }
 
   /* PROGRESIÓN DE PESOS (Mi progreso) */
+  #pesosProgresoList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+  @media (max-width: 540px) {
+    #pesosProgresoList { grid-template-columns: 1fr; }
+  }
+
   .peso-progreso-card {
     background: var(--carbon);
-    padding: 20px 24px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 2px;
-    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .peso-progreso-nombre {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
+    color: var(--humo);
   }
 
   .peso-progreso-actual {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 22px;
     color: var(--brasa);
     line-height: 1;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .peso-progreso-diff {
-    font-size: 11px;
+    font-size: 10px;
     font-family: 'DM Mono', monospace;
     color: var(--metal);
-    margin-top: 4px;
+    margin-top: 2px;
   }
   .peso-progreso-diff.up { color: var(--brasa); }
 
   .peso-line-chart {
-    width: 140px;
-    height: 48px;
+    width: 90px;
+    height: 36px;
     flex-shrink: 0;
   }
 
   .peso-line-chart-empty {
-    font-size: 11px;
+    font-size: 10px;
     font-family: 'DM Mono', monospace;
     color: var(--metal);
-    max-width: 140px;
+    max-width: 90px;
+    line-height: 1.4;
   }
 
   .week-day-rest-msg { font-style: italic; opacity: 0.7; align-self: center; font-size: 13px; color: var(--metal); }
