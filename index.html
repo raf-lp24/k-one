@@ -5321,6 +5321,26 @@
           </div>
         </div>
 
+        <!-- Banner mensual: recálculo de plan por cambio de peso -->
+        <div id="bannerRecalculo" style="display:none;background:#1a1a1a;border:1px solid var(--brasa);border-radius:10px;padding:18px 20px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:22px;line-height:1.2">⚖️</span>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">Ha pasado un mes — ¿actualizamos tu plan?</div>
+              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6" id="bannerRecalculoDesc">Tu peso actual afecta a las calorías y proteína del plan. Actualízalo para que el siguiente ciclo sea exacto.</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:8px;background:#111;border:1px solid #333;border-radius:8px;padding:8px 14px">
+                  <span style="font-size:13px;color:#aaa">Peso actual</span>
+                  <input type="number" id="inputPesoRecalculo" placeholder="—" min="30" max="300" step="0.1" style="width:64px;background:transparent;border:none;color:var(--blanco);font-size:16px;font-weight:700;text-align:center;outline:none">
+                  <span style="font-size:13px;color:#aaa">kg</span>
+                </div>
+                <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="confirmarRecalculoPeso()">Actualizar plan →</button>
+                <button style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerRecalculo()">Ahora no</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="stats-row">
           <div class="stat-card">
             <div class="stat-card-label">Semana</div>
@@ -7734,6 +7754,89 @@
         document.getElementById('nav-hoy').classList.add('active');
       }
     }
+
+    checkBannerRecalculo();
+  }
+
+  // ===== BANNER MENSUAL: RECÁLCULO POR PESO =====
+  function checkBannerRecalculo() {
+    const banner = document.getElementById('bannerRecalculo');
+    if (!banner || !userData) return;
+
+    const user = getCurrentUser();
+    const DIA_MS = 86400000;
+    const now = Date.now();
+
+    // Referencia: fecha del último recálculo manual; si nunca ha habido, fecha de registro
+    const refRecalculo = userData.ultimoRecalculo
+      ? new Date(userData.ultimoRecalculo).getTime()
+      : (user?.creado ? new Date(user.creado).getTime() : now);
+
+    const diasDesdeRecalculo = (now - refRecalculo) / DIA_MS;
+
+    // Días hasta el fin del período de Stripe (current_period_end) — puede ser null en trial
+    const finPeriodo = user?.fechaPago ? new Date(user.fechaPago).getTime() : null;
+    const diasHastaRenovacion = finPeriodo ? (finPeriodo - now) / DIA_MS : null;
+
+    // Snooze 5 días si el cliente pulsó "Ahora no"
+    const snoozeTs = userData.recalculoSnooze ? new Date(userData.recalculoSnooze).getTime() : null;
+    const enSnooze = snoozeTs && (now - snoozeTs) < 5 * DIA_MS;
+
+    // Mostrar si: ≥25 días desde el último recálculo Y (han pasado ≥30 días
+    // O la renovación está a ≤7 días) Y no está en snooze
+    const mostrar = !enSnooze
+      && diasDesdeRecalculo >= 25
+      && (diasDesdeRecalculo >= 30 || (diasHastaRenovacion !== null && diasHastaRenovacion >= 0 && diasHastaRenovacion <= 7));
+
+    banner.style.display = mostrar ? '' : 'none';
+    if (!mostrar) return;
+
+    // Mensaje contextual según si la renovación está cerca o simplemente pasó un mes
+    const desc = document.getElementById('bannerRecalculoDesc');
+    if (desc) {
+      if (diasHastaRenovacion !== null && diasHastaRenovacion <= 7 && diasHastaRenovacion >= 0) {
+        const d = Math.ceil(diasHastaRenovacion);
+        const cuandoStr = d <= 1 ? 'mañana' : `en ${d} día${d === 1 ? '' : 's'}`;
+        desc.textContent = `Tu plan se renueva ${cuandoStr}. Actualiza tu peso ahora para que el siguiente ciclo tenga las calorías y proteína exactas.`;
+      } else {
+        desc.textContent = `Han pasado más de 30 días. Tu peso actual afecta a las calorías y proteína del plan — actualízalo para seguir progresando.`;
+      }
+    }
+
+    // Pre-rellenar con el peso que ya tiene el perfil
+    const input = document.getElementById('inputPesoRecalculo');
+    if (input && userData.peso && !input.value) input.value = userData.peso;
+  }
+
+  function confirmarRecalculoPeso() {
+    const input = document.getElementById('inputPesoRecalculo');
+    const nuevoPeso = parseFloat(input?.value);
+    if (!nuevoPeso || nuevoPeso < 30 || nuevoPeso > 300) {
+      showToast('Introduce tu peso actual en kg para continuar.');
+      return;
+    }
+
+    const pesoPrevio = userData.peso;
+    userData.peso = nuevoPeso;
+    userData.ultimoRecalculo = new Date().toISOString();
+    delete userData.recalculoSnooze;
+
+    generatedPlan = buildPlanFromData(userData);
+    buildDashboard();
+
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+
+    const diff = nuevoPeso - (pesoPrevio || nuevoPeso);
+    const difMsg = diff !== 0 ? ` (${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg desde tu registro)` : '';
+    showToast(`Plan recalculado con tu peso actual: ${nuevoPeso} kg${difMsg}.`);
+  }
+
+  function cerrarBannerRecalculo() {
+    userData.recalculoSnooze = new Date().toISOString();
+    document.getElementById('bannerRecalculo').style.display = 'none';
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
 
   // ===== FOTO DE PERFIL =====
