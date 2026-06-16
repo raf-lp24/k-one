@@ -11244,10 +11244,7 @@
     const checkoutParam = new URLSearchParams(window.location.search).get('checkout');
     if (checkoutParam) {
       window.history.replaceState({}, '', window.location.pathname);
-      if (checkoutParam === 'exito') {
-        if (session) await syncProfileFromSupabase(session.user);
-        showToast('¡Pago confirmado! Activando tu suscripción...', 4000);
-      } else if (checkoutParam === 'cancelado') {
+      if (checkoutParam === 'cancelado') {
         showToast('Pago cancelado. Puedes intentarlo de nuevo cuando quieras.', 4000);
       }
     }
@@ -11258,15 +11255,34 @@
       if (saved && saved.plan) {
         loadUserDashboard(user.email);
         goTo('dashboard');
-        // Tras volver de Stripe con el primer mes pagado, arranca el tour si no se hizo.
-        if (checkoutParam === 'exito' && tieneAccesoActivo(user.email) && !userData.onboardingCompletado) {
-          startOnboarding();
-        }
       } else {
         enterFormulario();
       }
     } else {
       goTo('landing');
+    }
+
+    // Vuelta desde Stripe con pago completado: el webhook puede tardar 1-5s en actualizar
+    // subscriptions en Supabase. Reintentamos syncProfile cada 2s hasta confirmar acceso.
+    if (checkoutParam === 'exito' && session) {
+      showToast('¡Pago confirmado! Verificando tu suscripción...', 3000);
+      let intentos = 0;
+      const verificarSuscripcion = async () => {
+        await syncProfileFromSupabase(session.user);
+        const u = getCurrentUser();
+        if (u && tieneAccesoActivo(u.email)) {
+          const modal = document.getElementById('modalPaywall');
+          if (modal) modal.classList.remove('visible');
+          showToast('¡Suscripción activada! Bienvenido a K-One.', 4000);
+          if (!userData.onboardingCompletado) startOnboarding();
+        } else if (intentos < 9) {
+          intentos++;
+          setTimeout(verificarSuscripcion, 2000);
+        } else {
+          showToast('El pago se está procesando. Si en unos minutos no se activa, escríbenos.', 8000);
+        }
+      };
+      setTimeout(verificarSuscripcion, 1500);
     }
   };
 </script>
