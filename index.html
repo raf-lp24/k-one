@@ -8804,6 +8804,7 @@
 
     const planCambia = nuevoTipoPlan !== userData.tipoPlan;
     const periodCambia = nuevaPeriodicidad !== userData.periodicidad;
+    const planAnterior = userData.tipoPlan;
     const user = getCurrentUser();
 
     // Si cambia el tipo de plan o la periodicidad, hay que actualizar Stripe PRIMERO.
@@ -8812,21 +8813,29 @@
       const btnConfirmar = document.querySelector('#cpStep2 .btn-primary');
       const textoBtn = btnConfirmar ? btnConfirmar.textContent : '';
       if (btnConfirmar) { btnConfirmar.disabled = true; btnConfirmar.textContent = 'Actualizando...'; }
+      let stripeOk = false;
       try {
         const { data: { session } } = await supa.auth.getSession();
         if (!session) throw new Error('Sesión caducada. Vuelve a entrar.');
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 30000);
         const res = await fetch('/api/update-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-          body: JSON.stringify({ tipoPlan: nuevoTipoPlan, periodicidad: nuevaPeriodicidad })
+          body: JSON.stringify({ tipoPlan: nuevoTipoPlan, periodicidad: nuevaPeriodicidad }),
+          signal: ctrl.signal
         });
+        clearTimeout(tid);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'No se pudo actualizar la suscripción');
+        stripeOk = true;
       } catch (e) {
-        showToast('Error al actualizar el plan de pago: ' + e.message, 6000);
+        const msg = e.name === 'AbortError' ? 'La petición tardó demasiado. Inténtalo de nuevo.' : e.message;
+        showToast('Error al actualizar el plan de pago: ' + msg, 6000);
+      } finally {
         if (btnConfirmar) { btnConfirmar.disabled = false; btnConfirmar.textContent = textoBtn; }
-        return;
       }
+      if (!stripeOk) return;
     }
 
     userData.tipoPlan = nuevoTipoPlan;
@@ -8853,7 +8862,7 @@
     showSection('hoy');
     let msgPago = '';
     if (planCambia || periodCambia) {
-      const esUpgrade = nuevoTipoPlan.includes('completo') && (userData.tipoPlan || '').includes('Solo');
+      const esUpgrade = nuevoTipoPlan.includes('completo') && (planAnterior || '').includes('Solo');
       msgPago = esUpgrade
         ? ' El cargo prorrateado se ha procesado en tu tarjeta.'
         : ' Los ajustes se aplicarán en tu próxima factura.';
