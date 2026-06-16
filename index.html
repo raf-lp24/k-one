@@ -4182,6 +4182,14 @@
         </div>
       </div>
       <div class="field">
+        <label>¿Cuál es tu peso actual?</label>
+        <div style="display:flex;align-items:center;gap:10px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 14px;max-width:200px">
+          <input type="number" id="cp-peso" placeholder="—" min="30" max="300" step="0.1" style="flex:1;background:transparent;border:none;color:var(--blanco);font-size:18px;font-weight:700;text-align:center;outline:none">
+          <span style="font-size:14px;color:#aaa">kg</span>
+        </div>
+        <span class="field-hint">Recalculamos tus calorías y proteína con tu peso de hoy. No es lo mismo el plan a 75 kg que a 80 kg.</span>
+      </div>
+      <div class="field">
         <label>¿Qué enfoque nutricional prefieres?</label>
         <div class="radio-group" id="cp-enfoqueMacros">
           <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Equilibrado</div>
@@ -7796,7 +7804,10 @@
     // semilla, de modo que la opción "recomendada" (la primera) y el orden cambian entre
     // clientes con el mismo perfil. Es estable para el mismo usuario, así que las opciones
     // que guarde siguen apuntando al mismo plato.
-    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + 1) }));
+    // Se muestran SIEMPRE 5 opciones por toma (lo que promete la web). Algunas tomas tienen
+    // más platos definidos en el código: la rotación elige qué 5 ve cada usuario (más variedad
+    // entre clientes), pero cada uno ve exactamente 5.
+    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + 1).slice(0, 5) }));
 
     return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], kcalObj, protObj, tdee };
   }
@@ -9078,6 +9089,8 @@
     preseleccionarRadio('cp-periodicidad', periodicidadTexto.charAt(0).toUpperCase() + periodicidadTexto.slice(1));
     actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
     preseleccionarRadio('cp-objetivo', userData.objetivo);
+    const inputPesoCp = document.getElementById('cp-peso');
+    if (inputPesoCp) inputPesoCp.value = userData.peso || '';
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
@@ -9182,6 +9195,14 @@
         if (btnConfirmar) { btnConfirmar.disabled = false; btnConfirmar.textContent = textoBtn; }
       }
       if (!stripeOk) return;
+    }
+
+    // Peso actual: si lo ha indicado, actualizarlo para que el recálculo de
+    // calorías y proteína parta de su peso de hoy (TMB/TDEE dependen del peso).
+    const _pesoNuevo = parseFloat((document.getElementById('cp-peso') || {}).value);
+    if (!isNaN(_pesoNuevo) && _pesoNuevo >= 30 && _pesoNuevo <= 300) {
+      userData.peso = _pesoNuevo;
+      userData.ultimoRecalculo = new Date().toISOString();
     }
 
     userData.tipoPlan = nuevoTipoPlan;
