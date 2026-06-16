@@ -6284,24 +6284,75 @@
       }
     } else {
       // Gimnasio / Fuerza
-      if (numDias <= 3) {
+      // El plan se bifurca en 3 ramas: principiante (Full Body), intermedio 3 días (PPL),
+      // intermedio 4-5 días (Upper/Lower/Bro mejorado). Dentro de cada rama se diferencia
+      // por objetivo: finisher metabólico para perder grasa, más volumen para ganar músculo.
+      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : '';
+      const finisher4 = perdidaGrasa ? ', 15 min interválico al finalizar: 1 min fuerte / 1 min suave × 7 rondas' : '';
+      const sVol  = ganarMusculo ? '4' : '3'; // series para principiante
+      const volP  = ganarMusculo ? '5' : '4'; // series compuesto principal (intermedio)
+      const volA  = ganarMusculo ? '4' : '3'; // series accesorios (intermedio)
+
+      if (esPrincipiante) {
+        // PRINCIPIANTE → Full Body A/B alternado. Alta frecuencia, bajo volumen por grupo.
+        // Cada sesión entrena los 4 patrones clave: bisagra, sentadilla, empuje, tracción.
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Tren superior · Empuje", detalle:"Pecho, hombros, tríceps · Press banca 4×8, press inclinado mancuernas 3×10, press militar 3×10, fondos 3×10, cruces en polea 3×15, elevaciones laterales 3×15, extensión de tríceps en polea 3×12", etiqueta:"Empuje"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Patrones básicos",
+           detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
+           etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Tren inferior completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, prensa 3×12, hack 3×12, peso muerto rumano 4×10, zancadas 3×12 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, elevación de gemelos 4×15", etiqueta:"Piernas"},
+          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Full Body B · Variantes",
+           detalle:`Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}`,
+           etiqueta:"Fuerza"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Tren superior · Tracción", detalle:"Espalda, bíceps, core · Dominadas o jalón 4×8, remo barra 4×10, remo mancuerna 3×12, pullover 3×12, curl bíceps 3×12, curl martillo 3×12, plancha 3×45s", etiqueta:"Tracción"},
+          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Full Body A · Sube el peso",
+           detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
+           etiqueta:"Fuerza"},
+          {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 4 ? "Full Body B · Variantes" : "Descanso activo",
+           detalle: numDias >= 4 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
+           etiqueta: numDias >= 4 ? "Fuerza" : "Descanso"},
+          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+        ];
+      } else if (numDias <= 3) {
+        // INTERMEDIO/AVANZADO 3 días → Push / Pull / Legs (orden correcto de recovery)
+        semana = [
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
+           detalle:`Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8, elevaciones laterales 4×15, fondos 3×10, extensión de tríceps en polea 3×12${finisher3}`,
+           etiqueta:"Empuje"},
+          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
+           detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10, curl martillo 3×10${finisher3}`,
+           etiqueta:"Tracción"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
+           detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
+           etiqueta:"Piernas"},
           {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else {
+        // INTERMEDIO/AVANZADO 4-5 días → Bro split mejorado con volumen diferenciado por objetivo
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps", detalle:"Pectoral, tríceps, hombro anterior · Press banca 4×8, press inclinado mancuernas 3×10, press declinado 3×10, fondos 3×10, cruces en polea 3×15, aperturas 3×12, extensión de tríceps en polea 4×12, press francés 3×12", etiqueta:"Empuje"},
-          {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps", detalle:"Dorsal, trapecio, bíceps, romboides · Dominadas 4×8, remo barra 4×10, jalón polea 3×12, remo polea baja 3×12, pullover 3×12, curl bíceps 4×10, curl martillo 3×12", etiqueta:"Tracción"},
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps",
+           detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, fondos 3×10, extensión de tríceps en polea 3×12, press francés 3×10${finisher4}`,
+           etiqueta:"Empuje"},
+          {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
+           detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10, curl martillo 3×10${finisher4}`,
+           etiqueta:"Tracción"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas completo", detalle:"Cuádriceps, isquios, glúteos, gemelos · Sentadilla 4×8, prensa 3×12, hack 3×12, peso muerto 4×6, extensión de cuádriceps 3×15, femoral tumbado 3×12, hip thrust 3×15, elevación de gemelos 4×15", etiqueta:"Piernas"},
-          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core", detalle:"Deltoides, trapecios, core · Press militar 4×8, elevaciones laterales 4×15, elevaciones frontales 3×12, pájaros 3×15, remo al mentón 3×12, face pull 3×15, encogimientos 3×12, plancha 3×60s", etiqueta:"Hombros"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso", resumen: numDias >= 5 ? "Full body o cardio" : "Descanso", detalle: numDias >= 5 ? "Cuerpo completo · Sentadilla 3×10, press 3×10, remo 3×10, peso muerto 3×8, 20 min cardio suave al acabar" : "", etiqueta: numDias >= 5 ? "Complemento" : "Descanso"},
+          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas y glúteos",
+           detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volA}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, elevación de gemelos 4×15${finisher4}`,
+           etiqueta:"Piernas"},
+          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core",
+           detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6, elevaciones laterales 4×15, pájaros 3×15, face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
+           etiqueta:"Hombros"},
+          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios y core") : "Descanso",
+           detalle: numDias >= 5 ? (perdidaGrasa
+             ? "Acondicionamiento · 5 rondas: 10 sentadillas goblet, 10 flexiones, 15 hip thrusts, 12 remo mancuerna por lado, 30s plancha. Descanso 90s entre rondas"
+             : `Accesorios y movilidad · Sentadilla búlgara 3×12 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, cruce de polea 3×15, encogimientos de hombro 3×12, plancha lateral 3×30s por lado`) : "",
+           etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       }
