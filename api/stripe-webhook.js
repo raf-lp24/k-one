@@ -27,11 +27,26 @@ async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
     current_period_end: new Date(periodEnd * 1000).toISOString()
   };
 
+  let err;
   if (userId) {
-    await supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...row }, { onConflict: 'user_id' });
+    ({ error: err } = await supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...row }, { onConflict: 'user_id' }));
   } else {
-    await supabaseAdmin.from('subscriptions').update(row).eq('stripe_customer_id', subscription.customer);
+    ({ error: err } = await supabaseAdmin.from('subscriptions').update(row).eq('stripe_customer_id', subscription.customer));
   }
+
+  // Fallback: si current_period_start no existe todavía en la tabla, reintenta sin ella
+  // para que el status se actualice igualmente.
+  if (err && err.message && err.message.includes('current_period_start')) {
+    const rowSinStart = { ...row };
+    delete rowSinStart.current_period_start;
+    if (userId) {
+      ({ error: err } = await supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...rowSinStart }, { onConflict: 'user_id' }));
+    } else {
+      ({ error: err } = await supabaseAdmin.from('subscriptions').update(rowSinStart).eq('stripe_customer_id', subscription.customer));
+    }
+  }
+
+  if (err) throw new Error(`Supabase upsert error: ${err.message}`);
 }
 
 module.exports = async (req, res) => {

@@ -88,6 +88,7 @@ create table if not exists public.subscriptions (
   stripe_subscription_id text,
   plan text,
   status text not null default 'none', -- active | trialing | past_due | canceled | none
+  current_period_start timestamptz,
   current_period_end timestamptz,
   updated_at timestamptz not null default now()
 );
