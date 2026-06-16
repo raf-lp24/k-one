@@ -2986,6 +2986,37 @@
   }
   .photo-slot-remove:hover { background: var(--brasa); }
 
+  .fotos-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .fotos-nav-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    color: var(--brasa);
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .fotos-nav-btn:hover:not(:disabled) { background: var(--grafito); }
+  .fotos-nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .fotos-nav-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--metal);
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+  }
+
   .milestones { display: flex; flex-direction: column; gap: 2px; }
 
   .milestone {
@@ -5614,6 +5645,7 @@
           <div class="progress-title">Fotos mensuales</div>
           <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan solo en este dispositivo, nadie más las ve, y te ayudan a ver tu evolución mes a mes.</p>
           <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
+          <div class="fotos-nav" id="fotosNav"></div>
           <div class="photos-grid" id="photosGrid"></div>
         </div>
 
@@ -8067,31 +8099,67 @@
 
   // ===== PROGRESO: FOTOS MENSUALES =====
   let fotoSlotActivo = null;
+  let fotoPagina = 0;
+
+  function normalizarFotos() {
+    if (Array.isArray(userData.fotosProgreso)) {
+      const obj = {};
+      userData.fotosProgreso.forEach((f, i) => { if (f) obj[i + 1] = f; });
+      userData.fotosProgreso = obj;
+    }
+    if (!userData.fotosProgreso || typeof userData.fotosProgreso !== 'object') {
+      userData.fotosProgreso = {};
+    }
+  }
 
   function renderFotosProgreso() {
     const grid = document.getElementById('photosGrid');
+    const nav = document.getElementById('fotosNav');
     if (!grid) return;
-    const fotos = userData.fotosProgreso || ['', '', '', ''];
-    grid.innerHTML = fotos.map((src, idx) => {
+
+    normalizarFotos();
+    const fotosObj = userData.fotosProgreso;
+
+    const keys = Object.keys(fotosObj).map(Number).filter(n => fotosObj[n]);
+    const maxMes = keys.length > 0 ? Math.max(...keys) : 0;
+    const totalSlots = maxMes + 1;
+    const totalPages = Math.max(1, Math.ceil(totalSlots / 4));
+
+    if (fotoPagina >= totalPages) fotoPagina = totalPages - 1;
+    if (fotoPagina < 0) fotoPagina = 0;
+
+    const startMes = fotoPagina * 4 + 1;
+    const slots = [startMes, startMes + 1, startMes + 2, startMes + 3];
+
+    grid.innerHTML = slots.map(mes => {
+      const src = fotosObj[mes];
       if (src) {
-        return `
-          <div class="photo-slot filled" onclick="seleccionarFoto(${idx})">
-            <img src="${src}" alt="Foto de progreso, mes ${idx + 1}">
-            <button class="photo-slot-remove" onclick="eliminarFoto(event, ${idx})" aria-label="Eliminar foto del mes ${idx + 1}">✕</button>
-            <div class="photo-slot-label">Mes ${idx + 1}</div>
-          </div>`;
-      }
-      return `
-        <div class="photo-slot" onclick="seleccionarFoto(${idx})">
-          <div class="photo-slot-icon">📷</div>
-          <div class="photo-slot-hint">+ Añadir foto</div>
-          <div class="photo-slot-label">Mes ${idx + 1}</div>
+        return `<div class="photo-slot filled" onclick="seleccionarFoto(${mes})">
+          <img src="${src}" alt="Mes ${mes}" loading="lazy">
+          <button class="photo-slot-remove" onclick="eliminarFoto(event,${mes})" aria-label="Eliminar foto mes ${mes}">✕</button>
+          <div class="photo-slot-label">Mes ${mes}</div>
         </div>`;
+      }
+      return `<div class="photo-slot" onclick="seleccionarFoto(${mes})">
+        <div class="photo-slot-icon">📷</div>
+        <div class="photo-slot-hint">+ Añadir foto</div>
+        <div class="photo-slot-label">Mes ${mes}</div>
+      </div>`;
     }).join('');
+
+    if (nav) {
+      const prevOk = fotoPagina > 0;
+      const nextOk = fotoPagina < totalPages - 1;
+      nav.innerHTML = `
+        <button class="fotos-nav-btn" onclick="fotoPagina--;renderFotosProgreso()" ${prevOk ? '' : 'disabled'}>← Anterior</button>
+        <span class="fotos-nav-label">Meses ${startMes}–${startMes + 3}</span>
+        <button class="fotos-nav-btn" onclick="fotoPagina++;renderFotosProgreso()" ${nextOk ? '' : 'disabled'}>Siguiente →</button>
+      `;
+    }
   }
 
-  function seleccionarFoto(idx) {
-    fotoSlotActivo = idx;
+  function seleccionarFoto(mes) {
+    fotoSlotActivo = mes;
     document.getElementById('fotoInput').click();
   }
 
@@ -8102,7 +8170,7 @@
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 800;
+        const maxDim = 600;
         let { width, height } = img;
         if (width > maxDim || height > maxDim) {
           if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
@@ -8112,8 +8180,9 @@
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        if (!userData.fotosProgreso) userData.fotosProgreso = ['', '', '', ''];
-        userData.fotosProgreso[fotoSlotActivo] = canvas.toDataURL('image/jpeg', 0.75);
+        normalizarFotos();
+        userData.fotosProgreso[fotoSlotActivo] = canvas.toDataURL('image/jpeg', 0.6);
+        fotoPagina = Math.floor((fotoSlotActivo - 1) / 4);
         renderFotosProgreso();
         guardarProgresoUsuario();
       };
@@ -8123,10 +8192,10 @@
     event.target.value = '';
   }
 
-  function eliminarFoto(event, idx) {
+  function eliminarFoto(event, mes) {
     event.stopPropagation();
-    if (!userData.fotosProgreso) return;
-    userData.fotosProgreso[idx] = '';
+    normalizarFotos();
+    delete userData.fotosProgreso[mes];
     renderFotosProgreso();
     guardarProgresoUsuario();
   }
@@ -8141,13 +8210,69 @@
   // ===== PROGRESO: HITOS CONSEGUIDOS =====
   function calcularHitos() {
     if (!userData.hitos) userData.hitos = {};
-    const progreso = userData.progreso || { semana: 1 };
+    const semanas = (userData.progreso && userData.progreso.semana) || 1;
     const totalEntrenos = (userData.entrenosCompletados || []).length;
+    const racha = calcularRachaDias();
+    const fotosObj = (() => {
+      if (!userData.fotosProgreso) return {};
+      if (Array.isArray(userData.fotosProgreso)) {
+        const o = {}; userData.fotosProgreso.forEach((f, i) => { if (f) o[i + 1] = f; }); return o;
+      }
+      return userData.fotosProgreso;
+    })();
+    const tieneFoto = Object.values(fotosObj).some(f => !!f);
+
     const defs = [
-      { key: 'semana1', icon: '🔥', name: 'Primera semana completada', cumple: () => progreso.semana >= 2 },
-      { key: 'mes1', icon: '💪', name: 'Primer mes completado', cumple: () => progreso.semana >= 5 },
-      { key: 'objetivo1', icon: '🏃', name: 'Primer objetivo conseguido', cumple: () => totalEntrenos >= 12 },
+      { key: 'primer_entreno', icon: '⚡', name: 'La primera piedra',
+        desc: 'Tu primer entreno completado. El único que importa ahora mismo. Todo lo demás viene después.',
+        cumple: () => totalEntrenos >= 1 },
+      { key: 'tres_entrenos', icon: '🔥', name: 'Ya no es un capricho',
+        desc: '3 entrenamientos. La mayoría de la gente que se apunta nunca llega aquí. Tú sí.',
+        cumple: () => totalEntrenos >= 3 },
+      { key: 'semana1', icon: '📅', name: 'Primera semana completada',
+        desc: 'Una semana entera sin rendirte. Hay gente que no aguanta ni esto. La racha empieza aquí.',
+        cumple: () => semanas >= 2 },
+      { key: 'primer_foto', icon: '📸', name: 'La foto que no miente',
+        desc: 'Primera foto de progreso guardada. El espejo engaña; la foto no. Dentro de meses se lo agradecerás.',
+        cumple: () => tieneFoto },
+      { key: 'diez_entrenos', icon: '💥', name: 'Doble dígito',
+        desc: '10 sesiones. Tu cuerpo ya empieza a notar algo diferente. Tus tendones también, y eso es bueno.',
+        cumple: () => totalEntrenos >= 10 },
+      { key: 'racha5', icon: '⛓️', name: 'Sin romper la cadena',
+        desc: '5 días seguidos entrenando. El hábito ya tiene raíces. No lo rompes tú ahora.',
+        cumple: () => racha >= 5 },
+      { key: 'mes1', icon: '💪', name: 'Primer mes completado',
+        desc: 'Un mes entero. Eso dice más de ti que cualquier kilo en la barra. El 80% lo deja antes de llegar aquí.',
+        cumple: () => semanas >= 5 },
+      { key: 'veinte_entrenos', icon: '🎯', name: '20 sesiones',
+        desc: '20 veces que pudiste no ir y fuiste igual. 20 veces que ganaste la batalla mental.',
+        cumple: () => totalEntrenos >= 20 },
+      { key: 'mes2', icon: '🏗️', name: 'Dos meses en pie',
+        desc: 'El cuerpo que quieres se construye por debajo antes de verse por fuera. Ya está pasando. Sigue.',
+        cumple: () => semanas >= 9 },
+      { key: 'racha14', icon: '🔗', name: 'Dos semanas sin parar',
+        desc: '14 días seguidos. Eso no lo para una mala semana en el trabajo ni una excusa de domingo.',
+        cumple: () => racha >= 14 },
+      { key: 'mes3', icon: '🏃', name: 'Tres meses',
+        desc: 'Si guardaste foto del mes 1, ábrela ahora. Ahí está la respuesta a si vale la pena.',
+        cumple: () => semanas >= 13 },
+      { key: 'cincuenta', icon: '🔩', name: 'Medio centenar',
+        desc: '50 entrenamientos. Esto ya no es motivación. Es identidad. Eres la persona que entrena.',
+        cumple: () => totalEntrenos >= 50 },
+      { key: 'mes6', icon: '🏆', name: 'Seis meses',
+        desc: 'Medio año sin dejarlo. Eres la minoría absoluta. El físico que ves ahora no tiene nada que ver con el del día 1.',
+        cumple: () => semanas >= 27 },
+      { key: 'cien', icon: '💯', name: 'Triple dígito',
+        desc: '100 entrenamientos. Hay gente apuntada al gym desde hace años que no llega ni a la mitad.',
+        cumple: () => totalEntrenos >= 100 },
+      { key: 'un_anio', icon: '🥇', name: 'Un año',
+        desc: '52 semanas. Un año entero sin dejarlo. Ya no es un reto ni un objetivo. Es tu vida. Punto.',
+        cumple: () => semanas >= 53 },
+      { key: 'doscientos', icon: '⚙️', name: '200 sesiones',
+        desc: '200 veces que elegiste el largo plazo sobre el sofá. Eso tiene un nombre: disciplina de hierro.',
+        cumple: () => totalEntrenos >= 200 },
     ];
+
     let changed = false;
     defs.forEach(d => {
       if (!userData.hitos[d.key] && d.cumple()) {
@@ -8165,25 +8290,25 @@
     let proximoAsignado = false;
     list.innerHTML = defs.map(d => {
       const fechaISO = userData.hitos[d.key];
-      let badge, fechaTexto, claseDone = '';
+      let badge, subtexto, claseDone = '';
       if (fechaISO) {
         const f = new Date(fechaISO);
-        fechaTexto = `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`;
+        subtexto = `Conseguido el ${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`;
         badge = 'CONSEGUIDO';
         claseDone = 'done';
       } else {
-        fechaTexto = 'Pendiente';
+        subtexto = d.desc;
         if (!proximoAsignado) { badge = 'PRÓXIMO'; proximoAsignado = true; }
-        else badge = 'BLOQUEADO';
+        else badge = '';
       }
       return `
         <div class="milestone ${claseDone}">
           <div class="milestone-icon">${d.icon}</div>
           <div class="milestone-text">
             <div class="milestone-name">${d.name}</div>
-            <div class="milestone-date">${fechaTexto}</div>
+            <div class="milestone-date">${subtexto}</div>
           </div>
-          <div class="milestone-badge ${claseDone}">${badge}</div>
+          ${badge ? `<div class="milestone-badge ${claseDone}">${badge}</div>` : ''}
         </div>`;
     }).join('');
 
