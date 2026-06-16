@@ -3547,6 +3547,61 @@
     overflow-y: auto;
     padding: 36px 32px;
   }
+  /* ENCUESTA DE OPINIÓN */
+  .encuesta-stars {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0 16px;
+  }
+  .encuesta-star {
+    font-size: 32px;
+    cursor: pointer;
+    color: var(--humo);
+    transition: color 0.15s;
+    line-height: 1;
+    user-select: none;
+  }
+  .encuesta-star.activa { color: var(--brasa); }
+  .encuesta-textarea {
+    width: 100%;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    color: var(--blanco);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 14px;
+    resize: none;
+    min-height: 90px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  .encuesta-textarea:focus { outline: none; border-color: var(--metal); }
+  .encuesta-check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 24px;
+    cursor: pointer;
+    line-height: 1.5;
+  }
+  .encuesta-check-label input { margin-top: 2px; flex-shrink: 0; accent-color: var(--brasa); }
+  .encuesta-skip {
+    background: none;
+    border: none;
+    color: var(--metal);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 12px;
+    display: block;
+    text-align: center;
+    width: 100%;
+  }
+
   .recetario-section { margin-bottom: 4px; }
   .recetario-section-header {
     display: flex;
@@ -4093,6 +4148,28 @@
   </div>
 </div>
 
+<!-- ENCUESTA DE OPINIÓN -->
+<div class="modal-overlay" id="modalEncuesta">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title" style="font-size:20px">Antes de irte, cuéntanos</div>
+    <p class="modal-desc" style="margin-bottom:4px">Tu opinión nos ayuda a mejorar K-One y puede aparecer en la web para animar a otros.</p>
+    <div class="encuesta-stars" id="encuestaStars">
+      <span class="encuesta-star" onclick="seleccionarEstrella(1)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrella(2)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrella(3)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrella(4)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrella(5)">★</span>
+    </div>
+    <textarea class="encuesta-textarea" id="encuestaTexto" placeholder="¿Qué es lo que más te ha aportado? (opcional)"></textarea>
+    <label class="encuesta-check-label">
+      <input type="checkbox" id="encuestaAutorizar" checked>
+      Autorizo que mi opinión aparezca en la web con mi nombre, edad y plan contratado
+    </label>
+    <button class="btn-primary" style="width:100%" onclick="enviarEncuesta()">Enviar opinión →</button>
+    <button class="encuesta-skip" onclick="cerrarEncuesta()">Ahora no</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -4623,122 +4700,15 @@
 
   <section class="testimonials" id="testimonials">
     <div class="section-header">
-      <h2 class="section-title">Resultados reales</h2>
-      <p class="section-note">Personas que entrenan y comen mejor desde que usan K-One.</p>
+      <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+      <p class="section-note">Opiniones reales de personas que usan K-One.</p>
     </div>
     <div class="testimonials-carousel">
     <button class="testimonials-nav testimonials-nav--prev" onclick="scrollTestimonials(-1)" aria-label="Ver opiniones anteriores">‹</button>
     <button class="testimonials-nav testimonials-nav--next" onclick="scrollTestimonials(1)" aria-label="Ver más opiniones">›</button>
-    <div class="testimonials-track">
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Llevo 3 meses con el plan de gimnasio y es la primera vez que sigo una rutina más de un mes seguido. Cada semana se ajusta a cómo me ha ido de verdad, no es genérico."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">M</div>
-          <div>
-            <div class="testimonial-name">Marta G.</div>
-            <div class="testimonial-role">34 años · Plan Gimnasio · -8 kg en 3 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Tengo intolerancia a la lactosa y es la primera app que de verdad adapta el plan de comidas a eso, no solo lo avisa. El check-in semanal hace que no lo abandone."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">J</div>
-          <div>
-            <div class="testimonial-name">Javier R.</div>
-            <div class="testimonial-role">41 años · Plan Solo nutrición · -5 kg y mejor digestión en 2 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Empecé el mes de prueba por el precio y me quedé por el seguimiento. Estoy preparando mi primer Hyrox y el plan se nota hecho a medida, no copiado de internet."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">L</div>
-          <div>
-            <div class="testimonial-name">Lucía M.</div>
-            <div class="testimonial-role">27 años · Plan Hyrox · Primer Hyrox completado en 1h12</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="4 de 5 estrellas">★★★★☆</div>
-        <p class="testimonial-quote">"Empecé corriendo 5K sin aliento y en seis semanas ya hago 10K sin pararme. El plan va subiendo poco a poco, no de golpe, y eso se nota en las piernas."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">C</div>
-          <div>
-            <div class="testimonial-name">Carlos P.</div>
-            <div class="testimonial-role">38 años · Plan Running · De 5K a 10K en 6 semanas</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Hago CrossFit tres veces por semana y el plan respeta los días que tengo libres. He subido 15 kg en sentadilla desde que empecé y nunca me había sentido tan fuerte."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">S</div>
-          <div>
-            <div class="testimonial-name">Sara V.</div>
-            <div class="testimonial-role">29 años · Plan CrossFit · +15 kg en sentadilla en 2 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="4 de 5 estrellas">★★★★☆</div>
-        <p class="testimonial-quote">"Entreno en casa porque no tengo tiempo para ir al gimnasio. Las primeras semanas me costó encontrar hueco y algún día no llegué a completar el entreno, pero el plan se ajustó sin dramas. Cuatro meses después conseguí mi primera dominada estricta, algo que llevaba años intentando."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">D</div>
-          <div>
-            <div class="testimonial-name">Diego F.</div>
-            <div class="testimonial-role">45 años · Plan Casa / Calistenia · Primera dominada estricta tras 4 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Combino gimnasio y running y al principio no sabía cómo organizarlo. K-One me hizo un plan que mete las dos cosas sin que se pisen entre sí. He bajado 6 kg y corro mejor que nunca."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">A</div>
-          <div>
-            <div class="testimonial-name">Andrea L.</div>
-            <div class="testimonial-role">31 años · Plan Combinación · -6 kg en 3 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"A mi edad pensaba que ya no podía cambiar nada. Llevo cinco meses, he bajado 10 kg y lo mejor es que el plan ha ido cambiando según mis check-ins, nunca me he aburrido."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">C</div>
-          <div>
-            <div class="testimonial-name">Carmen R.</div>
-            <div class="testimonial-role">47 años · Plan Gimnasio · -10 kg en 5 meses</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="4 de 5 estrellas">★★★★☆</div>
-        <p class="testimonial-quote">"Mi médico me recomendó cuidar la dieta por la tensión. Apunté mis condiciones médicas en el cuestionario y el plan las tuvo en cuenta desde el principio. En la última revisión, mi médico vio mejoras claras."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">M</div>
-          <div>
-            <div class="testimonial-name">Manuel A.</div>
-            <div class="testimonial-role">55 años · Plan Solo nutrición · Tensión arterial controlada</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="testimonial-quote">"Volví a correr después de una lesión de rodilla con bastante miedo. El plan empezó muy progresivo y fue subiendo según cómo respondía en cada check-in. Hoy corro sin dolor por primera vez en un año."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">H</div>
-          <div>
-            <div class="testimonial-name">Hugo B.</div>
-            <div class="testimonial-role">30 años · Plan Running · Vuelta a correr sin dolor</div>
-          </div>
-        </div>
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="testimonial-card" style="display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:13px;font-family:'DM Mono',monospace;letter-spacing:1px">
+        Cargando opiniones...
       </div>
     </div>
     </div>
@@ -9837,32 +9807,43 @@
     const modal = document.getElementById('modalPaywall');
     if (!modal) return;
     const activo = tieneAccesoActivo(email);
-    modal.classList.toggle('visible', !activo);
     if (!activo) {
       const user = getCurrentUser();
-      // Modo "primer mes" (nunca ha pagado) vs "elige tu plan" (terminó el mes de 0,99€).
-      const primerMes = !(user && user.tieneSub);
-      document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
-      document.getElementById('paywallPlanChooser').style.display = primerMes ? 'none' : 'block';
-      const titulo = document.getElementById('paywallTitulo');
-      const desc = document.getElementById('paywallDesc');
-      const btn = document.getElementById('paywallBtn');
-      if (primerMes) {
-        if (titulo) titulo.textContent = 'Tu plan está listo';
-        if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 0,99€. Sin permanencia, cancela cuando quieras.';
-        if (btn) btn.textContent = 'Empezar por 0,99€ →';
-      } else {
-        if (titulo) titulo.textContent = 'Tu primer mes ha terminado';
-        if (desc) desc.textContent = 'Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.';
-        if (btn) btn.textContent = 'Continuar con K-One →';
-        const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
-        const periodicidad = getUserData(email)?.userData?.periodicidad || 'mensual';
-        const esSoloNutri = tipoPlan.includes('Solo');
-        preseleccionarRadio('pw-tipoPlan', esSoloNutri ? 'Solo nutrición' : 'Entrenamiento + nutrición');
-        actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
-        preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
-        actualizarPrecioPaywall();
+      // Si tenía suscripción real (no solo trial) y no ha hecho la encuesta, mostrársela primero
+      if (user && user.tieneSub && !userData.testimonioCompletado) {
+        mostrarEncuestaOpinion(() => _mostrarPaywallInner(modal, user));
+        return;
       }
+      _mostrarPaywallInner(modal, user);
+      return;
+    }
+    modal.classList.remove('visible');
+  }
+  function _mostrarPaywallInner(modal, user) {
+    modal.classList.add('visible');
+    if (!user) { user = getCurrentUser(); }
+    const primerMes = !(user && user.tieneSub);
+    document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
+    document.getElementById('paywallPlanChooser').style.display = primerMes ? 'none' : 'block';
+    const titulo = document.getElementById('paywallTitulo');
+    const desc = document.getElementById('paywallDesc');
+    const btn = document.getElementById('paywallBtn');
+    if (primerMes) {
+      if (titulo) titulo.textContent = 'Tu plan está listo';
+      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 0,99€. Sin permanencia, cancela cuando quieras.';
+      if (btn) btn.textContent = 'Empezar por 0,99€ →';
+    } else {
+      if (titulo) titulo.textContent = 'Tu primer mes ha terminado';
+      if (desc) desc.textContent = 'Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.';
+      if (btn) btn.textContent = 'Continuar con K-One →';
+      const email = user?.email || '';
+      const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
+      const periodicidad = getUserData(email)?.userData?.periodicidad || 'mensual';
+      const esSoloNutri = tipoPlan.includes('Solo');
+      preseleccionarRadio('pw-tipoPlan', esSoloNutri ? 'Solo nutrición' : 'Entrenamiento + nutrición');
+      actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
+      preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
+      actualizarPrecioPaywall();
     }
   }
   // Despacha el pago del paywall según el modo: primer mes (0,99€) o plan elegido.
@@ -9939,6 +9920,118 @@
       window.location.href = data.url;
     } catch (e) {
       showToast(e.message, 5000);
+    }
+  }
+
+  // ===== ENCUESTA DE OPINIÓN =====
+  let _encuestaEstrellas = 0;
+  let _onEncuestaCerrada = null;
+
+  function mostrarEncuestaOpinion(onClose) {
+    _encuestaEstrellas = 0;
+    _onEncuestaCerrada = onClose || null;
+    const txt = document.getElementById('encuestaTexto');
+    const auth = document.getElementById('encuestaAutorizar');
+    if (txt) txt.value = '';
+    if (auth) auth.checked = true;
+    document.querySelectorAll('.encuesta-star').forEach(s => s.classList.remove('activa'));
+    document.getElementById('modalEncuesta').classList.add('visible');
+  }
+
+  function seleccionarEstrella(n) {
+    _encuestaEstrellas = n;
+    document.querySelectorAll('.encuesta-star').forEach((s, i) => {
+      s.classList.toggle('activa', i < n);
+    });
+  }
+
+  async function enviarEncuesta() {
+    const texto = (document.getElementById('encuestaTexto')?.value || '').trim();
+    const autorizar = document.getElementById('encuestaAutorizar')?.checked ?? true;
+    document.getElementById('modalEncuesta').classList.remove('visible');
+
+    const user = getCurrentUser();
+    userData.testimonioCompletado = true;
+    if (_encuestaEstrellas > 0 || texto) {
+      userData.testimonio = {
+        estrellas: _encuestaEstrellas,
+        texto,
+        autorizado: autorizar,
+        fecha: new Date().toISOString()
+      };
+    }
+    if (user) {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+
+    if (autorizar && _encuestaEstrellas > 0 && user) {
+      const edad = userData.edad ? parseInt(userData.edad) : null;
+      const deporte = userData.deporte || '';
+      const tipoPlan = userData.tipoPlan || '';
+      const planTexto = tipoPlan.includes('Solo') ? 'Solo nutrición' : (deporte || 'Plan K-One');
+      const inicial = user.nombre ? user.nombre.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase() : '?';
+      const nombrePublico = user.nombre ? (() => {
+        const parts = user.nombre.trim().split(' ');
+        return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
+      })() : 'Cliente';
+      await supa.from('testimonios').insert({
+        nombre: nombrePublico,
+        inicial,
+        edad,
+        plan: planTexto,
+        estrellas: _encuestaEstrellas,
+        texto: texto || null
+      });
+    }
+
+    if (_onEncuestaCerrada) _onEncuestaCerrada();
+    _onEncuestaCerrada = null;
+  }
+
+  function cerrarEncuesta() {
+    document.getElementById('modalEncuesta').classList.remove('visible');
+    userData.testimonioCompletado = true;
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    if (_onEncuestaCerrada) _onEncuestaCerrada();
+    _onEncuestaCerrada = null;
+  }
+
+  // ===== TESTIMONIALES: CARGA DINÁMICA DESDE SUPABASE =====
+  async function cargarTestimoniosLanding() {
+    const track = document.getElementById('testimonialsTrack');
+    if (!track) return;
+    try {
+      const { data, error } = await supa
+        .from('testimonios')
+        .select('nombre, inicial, edad, plan, estrellas, texto')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error || !data || data.length === 0) {
+        track.innerHTML = '';
+        return;
+      }
+      track.innerHTML = data.map(t => {
+        const estrellas = '★'.repeat(Math.max(1, Math.min(5, t.estrellas || 5))) +
+                          '☆'.repeat(5 - Math.max(1, Math.min(5, t.estrellas || 5)));
+        const quoteHTML = t.texto
+          ? `<p class="testimonial-quote">"${t.texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}"</p>`
+          : '';
+        const roleText = [t.edad ? `${t.edad} años` : '', t.plan].filter(Boolean).join(' · ');
+        return `<div class="testimonial-card">
+          <div class="testimonial-stars">${estrellas}</div>
+          ${quoteHTML}
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">${(t.inicial || t.nombre?.[0] || '?').toUpperCase()}</div>
+            <div>
+              <div class="testimonial-name">${t.nombre || 'Cliente'}</div>
+              <div class="testimonial-role">${roleText}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      track.innerHTML = '';
     }
   }
 
@@ -10522,6 +10615,7 @@
 
   // ===== INIT =====
   window.onload = async () => {
+    cargarTestimoniosLanding();
     updateProgress();
     document.getElementById('login-pass')?.addEventListener('keydown', e => { if(e.key==='Enter') login(); });
     document.getElementById('reg-pass2')?.addEventListener('keydown', e => { if(e.key==='Enter') registrar(); });
