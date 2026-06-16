@@ -5297,7 +5297,7 @@
         <div class="dash-header">
           <div class="dash-greeting">// Tu alimentación</div>
           <h1 class="dash-title">Hoy comes</h1>
-          <p class="dash-subtitle">Tienes 5 tomas al día con 5 opciones cada una. Toca cualquiera y elige lo que más te apetezca hoy. Si tienes dudas de cómo preparar algún plato, pulsa <strong>Ver recetario completo</strong> para ver los pasos de cada receta.</p>
+          <p class="dash-subtitle" id="nutricionSubtitle">Tienes 5 tomas al día con 5 opciones cada una. Toca cualquiera y elige lo que más te apetezca hoy. Si tienes dudas de cómo preparar algún plato, pulsa <strong>Ver recetario completo</strong> para ver los pasos de cada receta.</p>
           <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
           <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
             <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
@@ -6880,9 +6880,61 @@
     // NUTRICIÓN con 4 opciones por comida
     const esVegetariano = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
 
-    // Función para construir opciones de comida
-    const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) =>
-      ({ nombre, ingredientes, kcal, prot, carbs, grasa, prep });
+    // ── TDEE PERSONALIZADO (Mifflin-St Jeor) ─────────────────────────────────
+    const pesoKg  = parseFloat(u.peso)   || 70;
+    const altCm   = parseFloat(u.altura)  || 170;
+    const edadAnn = parseFloat(u.edad)    || 30;
+    const esMujer = (u.sexo || '').toLowerCase().includes('mujer') ||
+                    (u.sexo || '').toLowerCase() === 'f';
+
+    const bmr = esMujer
+      ? (10 * pesoKg + 6.25 * altCm - 5 * edadAnn - 161)
+      : (10 * pesoKg + 6.25 * altCm - 5 * edadAnn + 5);
+
+    // Factor de actividad según deporte, nivel e intensidad semanal
+    const factorAct = soloDieta ? 1.375
+      : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 4) ? 1.9
+      : ((esHyrox || esCrossfit || esRunner) && numDias >= 4)   ? 1.725
+      : (numDias >= 4)  ? 1.725
+      : (numDias >= 2)  ? 1.55
+      : 1.375;
+
+    const tdee = Math.round(bmr * factorAct);
+
+    // Objetivo calórico según meta
+    let kcalObj;
+    if (perdidaGrasa) {
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - 450);
+    } else if (ganarMusculo) {
+      kcalObj = tdee + 350;
+    } else {
+      kcalObj = tdee; // equilibrio = TDEE real calculado, no valor fijo
+    }
+
+    // Objetivo de proteína (g/día): más alto en déficit para preservar músculo
+    const protObj = Math.round(
+      perdidaGrasa ? Math.max(pesoKg * 2.2, 100) :
+      ganarMusculo ? pesoKg * 2.0 :
+      pesoKg * 1.6
+    );
+
+    // Factor de escala: ajusta kcal/macros del plan base al objetivo personal
+    const baseKcalPlan = perdidaGrasa ? 1480 : ganarMusculo ? 2570 : 1550;
+    const escalaRacion = Math.min(2.5, Math.max(0.65, kcalObj / baseKcalPlan));
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // op() construye cada opción escalando kcal/macros al perfil del usuario
+    const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
+      const sc = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion); };
+      return {
+        nombre, ingredientes,
+        kcal:  `${sc(kcal)} kcal`,
+        prot:  `${sc(prot)}g prot`,
+        carbs: `${sc(carbs)}g carbs`,
+        grasa: `${sc(grasa)}g grasa`,
+        prep,
+      };
+    };
 
     let nutricion = [];
 
@@ -7172,7 +7224,7 @@
     // que guarde siguen apuntando al mismo plato.
     nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + 1) }));
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [] };
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], kcalObj, protObj, tdee };
   }
 
   // Pone en mayúscula la primera palabra alfabética de un ingrediente,
@@ -7313,6 +7365,12 @@
         </div>`;
     });
     actualizarResumenNutricional();
+
+    // Subtítulo con objetivo calórico personalizado
+    const nutriSubEl = document.getElementById('nutricionSubtitle');
+    if (nutriSubEl && generatedPlan.kcalObj) {
+      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes 5 tomas con 5 opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <strong>Ver recetario completo</strong>.`;
+    }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
     const nutricionNotas = document.getElementById('nutricionNotas');
@@ -8454,6 +8512,15 @@
     set('resumenProt', prot + 'g');
     set('resumenCarbs', carbs + 'g');
     set('resumenGrasa', grasa + 'g');
+    // Mostrar objetivo personalizado en el subtexto de los stat cards
+    if (generatedPlan?.kcalObj) {
+      const sub = (id, txt) => {
+        const el = document.getElementById(id)?.closest('.stat-card')?.querySelector('.stat-card-sub');
+        if (el) el.textContent = txt;
+      };
+      sub('resumenKcal', `kcal · obj. ${generatedPlan.kcalObj}`);
+      sub('resumenProt', `g · obj. ${generatedPlan.protObj}g`);
+    }
   }
 
   // ===== DESPLEGAR / PLEGAR BLOQUE DE COMIDA =====
