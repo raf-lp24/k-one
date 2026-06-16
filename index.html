@@ -3539,6 +3539,23 @@
     color: var(--metal-claro);
     padding: 2px 6px;
   }
+  .receta-pasos {
+    font-size: 11.5px;
+    color: var(--blanco);
+    line-height: 1.75;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(232,73,15,0.05);
+    border-left: 2px solid var(--brasa);
+  }
+  .receta-pasos-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--brasa);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
   .btn-recetario {
     display: inline-flex;
     align-items: center;
@@ -7672,17 +7689,147 @@
     if (el) el.textContent = precioPlanActual(tipoPlan, creado, periodicidad).detalle;
   }
 
+  const RECETA_PASOS = {
+    // DESAYUNOS
+    "Tostadas de centeno con aguacate y huevo": "Aplasta el aguacate con un tenedor, sal y unas gotas de limón. Revuelve los huevos 2 min a fuego suave en sartén antiadherente. Tuesta el pan, unta el aguacate y corona con el huevo revuelto y tomate cherry partido.",
+    "Yogur griego con nueces y arándanos": "Vierte el yogur en un bol. Añade los arándanos, las nueces troceadas y una pizca de canela. Sin cocción — listo en 2 min.",
+    "Porridge de avena con proteína y semillas": "Cuece la avena en leche de avena a fuego medio 5 min removiendo. Retira del fuego, deja templar 2 min y mezcla el scoop de proteína hasta disolver. Añade semillas de chía y canela por encima.",
+    "Smoothie proteico verde": "Mete todos los ingredientes en la batidora con un par de cubitos de hielo. Bate 30 segundos. Sirve inmediatamente para que no oxide.",
+    "Tofu revuelto con espinacas y tosta": "Desmorona el tofu con las manos en sartén con unas gotas de AOVE, cúrcuma y sal. Sofríe 3 min, añade espinacas y tomate cherry y cocina 2 min más hasta que evapore el agua. Sirve sobre la tosta.",
+    "Tortilla de claras con verduras": "Sofríe pimiento, cebolla y tomate en AOVE 5 min a fuego medio. Bate las claras con el huevo, sal y pimienta. Vierte sobre las verduras y cuaja a fuego medio 3-4 min. Dobla y sirve con la tostada.",
+    "Tostada con huevo, jamón cocido y tomate": "Revuelve los huevos en sartén antiadherente 2 min a fuego suave con una pizca de sal. Tuesta el pan. Monta: pan, jamón cocido, huevo revuelto y tomate cherry partido. Listo.",
+    "Avena con proteína y fresas": "Cuece la avena en agua o leche desnatada 5 min removiendo. Retira, deja templar 2 min y mezcla el scoop de proteína. Añade las fresas troceadas por encima.",
+    "Requesón con fruta y canela": "Vierte el requesón en un bol. Trocea la fruta encima. Esparce las nueces trituradas y espolvorea canela generosamente. Sin cocción.",
+    "Claras revueltas con pavo y tosta": "Bate las claras con el huevo y una pizca de sal. Revuelve en sartén antiadherente a fuego suave 2-3 min. Tuesta el pan y monta con el pavo debajo y el revuelto encima.",
+    "Porridge de avena con proteína vegetal y plátano": "Cuece la avena en leche de avena 5-8 min removiendo. Retira, templa y mezcla el scoop de proteína. Sirve con el plátano en rodajas y la cucharada de crema de cacahuete por encima.",
+    "Tostadas de centeno con crema de cacahuete y cottage": "Tuesta el pan. Unta la crema de cacahuete sobre las tostadas. Sirve el cottage en un bol aparte o por encima. Añade el plátano en rodajas.",
+    "Bol de quinoa con proteína vegetal y frutas": "Cuece la quinoa y deja enfriar. Disuelve el scoop de proteína en un poco de leche vegetal y mezcla con la quinoa. Sirve con mango, kiwi y nueces troceadas.",
+    "Pancakes de avena con proteína vegetal": "Tritura la avena hasta harina. Mezcla con el plátano machacado, el scoop de proteína y leche de avena hasta obtener una masa espesa. Cocina en sartén antiadherente a fuego medio 2-3 min por lado. Sirve con arándanos.",
+    "Tostadas con hummus, huevo y aguacate": "Tuesta el pan. Unta el hummus. Fríe o revuelve los huevos en sartén. Añade el aguacate en láminas finas. Monta todo sobre las tostas.",
+    "Avena con huevos y plátano": "Cuece la avena en leche entera 8 min removiendo. Aparte, revuelve los 2 huevos en sartén antiadherente 2 min. Sirve la avena en bol con el plátano en rodajas, los huevos al lado y un chorrito de miel.",
+    "Tostadas con salmón ahumado y aguacate": "Tuesta el pan. Aplasta el aguacate con limón y sal. Monta: tosta, aguacate, salmón ahumado en lonchas y queso fresco por encima.",
+    "Batido casero para ganar masa": "Pon todos los ingredientes en la batidora: avena, leche entera, huevo, plátano, cacao puro y scoop de proteína. Bate hasta homogéneo. Toma frío o con hielo.",
+    "Gachas de avena con queso y huevo": "Cuece la avena en leche semidesnatada 8 min removiendo. Sirve en bol con miel. Aparte, revuelve los 2 huevos con el queso tierno en sartén antiadherente 2 min y ponlos encima de las gachas.",
+    "Tortita de avena con claras y fruta": "Mezcla la harina de avena con las claras y los 2 huevos hasta obtener masa homogénea. Cocina en sartén antiadherente a fuego medio-bajo 2-3 min por lado. Sirve con la fruta elegida troceada.",
+    "Avena con fruta y semillas": "Cuece la avena en leche vegetal 5 min. Sirve en bol con el kiwi y la naranja troceados. Espolvorea las semillas de lino por encima.",
+    "Tostadas con tomate, aguacate y queso fresco": "Ralla el tomate directamente sobre el pan tostado. Aplasta el aguacate con limón y extiéndelo. Añade el queso fresco en dados y un chorrito de AOVE.",
+    "Yogur de soja con muesli, fruta y semillas de cáñamo": "Vierte el yogur de soja en un bol. Añade el muesli, la manzana troceada y las semillas de cáñamo. Sin cocción.",
+    "Crepes de trigo sarraceno con fruta": "Hidrata las semillas de lino en agua 5 min. Mezcla la harina con leche de avena y las semillas hasta obtener masa fluida. Cocina en sartén antiadherente 2 min por lado. Sirve con fresas y sirope.",
+    "Yogur griego con avena, fruta y nueces": "Vierte el yogur en un bol. Añade la avena (en crudo o remojada 10 min antes), la fruta de temporada troceada, las nueces y la miel.",
+    "Tostadas con huevo y tomate": "Revuelve los huevos en sartén con AOVE 2 min. Tuesta el pan. Monta con el tomate en rodajas, el huevo revuelto y orégano.",
+    "Avena con yogur griego y fruta": "Mezcla la avena con el yogur griego en un bol. Añade el plátano en rodajas, la miel y la canela. Puedes prepararlo la noche anterior en la nevera (overnight oats).",
+    "Tortilla de 2 huevos con pan y fruta": "Bate los 2 huevos con sal. Cuaja en sartén con unas gotas de AOVE 2-3 min. Sirve con la rebanada de centeno y la naranja troceada aparte.",
+    "Muesli con leche y frutos secos": "Vierte el muesli en un bol, añade la leche y deja reposar 2 min. Añade las nueces troceadas y el kiwi.",
+    "Pan con jamón serrano y tomate": "Ralla el tomate sobre las tostas. Añade un chorrito de AOVE y las lonchas de jamón serrano.",
+    // MEDIAS MAÑANAS
+    "Manzana con almendras": "Lava la manzana y córtala en gajos. Sirve junto a las almendras crudas. Sin preparación.",
+    "Infusión + barrita de proteína casera": "Mezcla los dátiles troceados con avena y el scoop de proteína hasta obtener masa compacta. Forma 5 barritas y guárdalas en la nevera. El domingo haces el lote y tienes para toda la semana.",
+    "Pepino y zanahoria con hummus": "Pela y corta en bastones el pepino y la zanahoria. Sirve con el hummus en un cuenco para mojar.",
+    "Kéfir con frutos rojos": "Mezcla el kéfir con los frutos rojos y las semillas de lino en un vaso o bol. Sin cocción.",
+    "Tortas de arroz con queso batido": "Extiende el queso batido sobre las tortas de arroz con una cuchara. Espolvorea canela al gusto.",
+    "Yogur griego + granola y frutos rojos": "Vierte el yogur en un bol. Añade la granola por encima y los frutos rojos. Sin cocción.",
+    "Batido de proteína con leche y fruta": "Mezcla el scoop con la leche en una coctelera o batidora. Sirve con la fruta troceada aparte o dentro del batido.",
+    "Pan de centeno con pavo y queso": "Tuesta el pan si lo prefieres. Monta con lonchas de pavo, el queso y rodajas de tomate.",
+    "Arroz con leche proteico con vainilla": "Cuece el arroz en la leche a fuego bajo 20 min removiendo frecuentemente para que no se pegue. Retira del fuego, deja templar 5 min y mezcla el scoop de proteína de vainilla hasta disolver. Añade canela y ralladura de limón.",
+    "Crema de arroz con proteína y crema de cacahuete": "Disuelve la crema de arroz en agua caliente según instrucciones del envase. Añade la proteína en polvo y mezcla bien hasta homogéneo. Sirve con la crema de cacahuete por encima.",
+    "Fruta + frutos secos": "Lava y trocea la fruta. Sirve junto a los frutos secos elegidos. Sin preparación.",
+    "Café con leche + galletas de avena": "Prepara el café con leche caliente. Toma con las galletas de avena.",
+    "Fruta de temporada sola": "Lava y trocea la fruta de temporada que tengas en casa.",
+    "Palitos de apio con mantequilla de almendra": "Lava el apio y córtalo en bastones. Sirve con la mantequilla de almendra en un cuenco para mojar.",
+    "Tortas de arroz con queso batido y miel": "Extiende el queso batido sobre las tortas. Añade un chorrito de miel y espolvorea canela.",
+    // COMIDAS
+    "Bol de tofu con garbanzos y arroz integral": "Cuece el arroz integral 25-30 min en agua salada. Marca el tofu a la plancha con AOVE y pimentón 3-4 min por cada lado hasta dorar. Monta el bol: arroz, garbanzos, espinacas crudas y tomate. Coloca el tofu encima y aliña con limón.",
+    "Tofu a la plancha con quinoa y brócoli": "Cuece la quinoa en agua salada 15 min. Cuece el brócoli al vapor 8 min. Marca el tofu en sartén 3-4 min por lado. Monta el plato y aliña todo con limón.",
+    "Lentejas con verduras de temporada": "Sofríe zanahoria, apio, puerro y tomate troceados en AOVE 5 min. Añade las lentejas y caldo (o agua). Cuece 20-25 min a fuego suave. Rectifica sal y añade un chorrito de AOVE al servir.",
+    "Ensalada de quinoa con edamame y aguacate": "Cuece la quinoa y deja enfriar completamente. Mezcla en un bol con edamame cocido, pepino en dados y tomate cherry. Añade el aguacate y aliña con limón y pimentón. Puede prepararse la noche anterior sin el aguacate.",
+    "Salteado de seitán con verduras y quinoa": "Cuece la quinoa 15 min. Corta el seitán en tiras y sofríe con brócoli y pimiento a fuego fuerte 5 min. Añade la salsa de soja. Sirve sobre la quinoa.",
+    "Pechuga de pollo con ensalada y arroz": "Cuece el arroz integral. Plancha el pollo sazonado 4-5 min por cada lado a fuego medio-fuerte. Prepara la ensalada y aliña con AOVE y limón. Sirve todo junto.",
+    "Merluza al horno con patata y verduras": "Precalienta el horno a 180°C. Coloca las patatas en rodajas en bandeja con AOVE y sal, hornea 20 min. Coloca la merluza y las verduras encima, rocía con limón y hornea 15 min más.",
+    "Solomillo de ternera con verduras salteadas": "Marca el solomillo a fuego muy fuerte 2 min por lado (al punto). Retira y deja reposar. En la misma sartén, saltea pimiento, calabacín y cebolla 5 min. Sirve con el pan de centeno.",
+    "Ensalada de pollo con garbanzos": "Desmecha el pollo cocido o a la plancha con un tenedor. Mezcla en un bol con garbanzos, lechuga, pepino y tomate. Aliña con AOVE y limón.",
+    "Pollo con boniato y ensalada": "Precalienta el horno a 200°C. Corta el boniato en dados con AOVE y sal. Hornea junto al pollo 25 min. Prepara la ensalada variada y sirve todo junto.",
+    "Arroz con tempeh y verduras al wok": "Cuece el arroz integral. Corta el tempeh en dados y dóralo en sartén con aceite 4 min. Añade pimiento y brócoli, saltea 5 min a fuego fuerte. Incorpora tamari y sésamo. Sirve sobre el arroz.",
+    "Pasta con legumbres y tomate": "Cuece la pasta al dente. Sofríe ajo y tomate frito casero 5 min. Mezcla con las lentejas cocidas y la pasta. Añade albahaca fresca y un chorrito de AOVE.",
+    "Bol de Buddha con garbanzos al horno": "Precalienta el horno a 200°C. Sazona los garbanzos con pimentón, comino y AOVE. Hornea 20 min hasta crujientes. Cuece la quinoa. Monta el bol con quinoa, garbanzos, zanahoria rallada y aguacate. Aliña con tahini diluido en zumo de limón.",
+    "Lasaña de lentejas y berenjena": "Sofríe cebolla y tomate para la salsa de tomate 10 min. Añade las lentejas y cuece 10 min. Corta y asa la berenjena en sartén 5 min por lado. Monta capas en fuente: lentejas, berenjena, bechamel vegetal y queso rallado. Gratina 15 min a 200°C.",
+    "Bowl de tofu con arroz y edamame": "Cuece el arroz integral. Marca el tofu en sartén con AOVE 3-4 min por cada lado hasta dorar. Glasea con salsa teriyaki el último minuto. Sirve sobre arroz con edamame y sésamo.",
+    "Arroz con pollo y verduras al wok": "Cuece el arroz. Trocea el pollo y saltea a fuego fuerte con ajo 5 min hasta dorar. Añade pimiento, brócoli y zanahoria, saltea 5 min. Incorpora la salsa de soja. Sirve sobre el arroz.",
+    "Pasta integral con atún y tomate": "Cuece la pasta al dente. Sofríe ajo laminado y tomate frito 5 min. Escurre el atún y mézclalo con el tomate. Añade la pasta, aceitunas y albahaca fresca.",
+    "Salmón con patata asada y ensalada": "Precalienta el horno a 200°C. Hornea la patata en dados con AOVE y sal 25 min. Añade el salmón a la bandeja los últimos 12 min con limón. Prepara la ensalada verde y sirve.",
+    "Hamburguesa de ternera con arroz y aguacate": "Sazona la ternera picada con sal y pimienta y forma la hamburguesa. Plancha 3 min por lado a fuego fuerte. Cuece el arroz. Sirve con el aguacate en láminas, tomate y lechuga.",
+    "Ternera con pasta y verduras": "Sofríe la ternera picada con cebolla y pimiento troceados 5 min hasta dorar. Añade tomate frito y cuece 5 min más. Mezcla con la pasta integral cocida al dente.",
+    "Lentejas estofadas con verduras": "Sofríe cebolla, zanahoria y puerro en AOVE 5 min. Añade la patata en dados, las lentejas, pimentón y agua o caldo. Cuece 30-35 min a fuego suave. Rectifica sal.",
+    "Pasta con tofu y salsa de tomate": "Sofríe ajo y tomate frito casero 5 min. Desmenuza el tofu en la sartén y cuece 5 min más. Mezcla con la pasta cocida al dente, albahaca y un chorrito de AOVE.",
+    "Paella de verduras con garbanzos": "Sofríe pimiento, judía verde y alcachofa en paella con AOVE 5 min. Añade el tomate triturado y sofríe 2 min. Añade el arroz, los garbanzos, azafrán y caldo caliente (doble que de arroz). Cuece 18 min sin remover.",
+    "Pisto con huevos y pan": "Sofríe calabacín, pimiento, tomate y cebolla en AOVE 15 min a fuego medio-bajo hasta que se deshagan. Haz huecos en el pisto y casca los huevos dentro. Tapa y cuaja 3 min. Sirve con el pan de centeno.",
+    "Garbanzos guisados con arroz y verduras": "Sofríe calabacín y zanahoria en AOVE 5 min. Añade los garbanzos, tomate triturado y el arroz. Cubre con el doble de agua y cuece 20 min a fuego medio.",
+    "Pollo al horno con arroz y ensalada": "Precalienta el horno a 200°C. Sazona el pollo con sal, ajo y pimentón. Hornea 25 min. Cuece el arroz. Prepara la ensalada verde con tomate y aliña. Sirve todo junto.",
+    "Lentejas con chorizo y verduras": "Sofríe el chorizo en dados 2 min para que suelte la grasa. Añade zanahoria, patata en dados y pimiento. Incorpora las lentejas y cubre con agua. Cuece 30 min a fuego medio.",
+    "Merluza al horno con patatas y pisto": "Prepara el pisto (calabacín, pimiento, tomate) en sartén 15 min. Aparte, hornea la merluza sobre las patatas a 180°C 20 min. Sirve la merluza sobre el pisto.",
+    "Fabes con verduras y pimentón ahumado": "Sofríe cebolla, zanahoria y laurel en AOVE 5 min. Añade las fabes cocidas, el jamón serrano picado y el pimentón ahumado. Cuece 20 min a fuego suave removiendo para que espese.",
+    "Garbanzos con atún y huevo": "Escurre y aclara los garbanzos bajo el grifo. Mezcla en un bol con el atún escurrido, el huevo duro en cuartos y la ensalada variada. Aliña con AOVE y limón. Sin cocción extra.",
+    // MERIENDAS
+    "Plátano + yogur griego": "Corta el plátano en rodajas sobre el yogur. Listo.",
+    "Fruta de temporada + frutos secos": "Lava y trocea la fruta elegida. Sirve junto a los frutos secos.",
+    "Batido verde proteico": "Bate el plátano, espinacas, leche vegetal, scoop de proteína y jengibre en batidora. Sirve frío.",
+    "Queso cottage con pepino y aceitunas": "Sirve el cottage en un bol. Añade el pepino en rodajas, las aceitunas y espolvorea orégano.",
+    "Queso batido con frutos secos": "Vierte el queso batido en un bol. Añade las almendras y espolvorea canela.",
+    "Plátano + batido de proteína": "Mezcla el scoop con agua o leche en una botella agitando bien. Toma con el plátano.",
+    "Arroz con leche proteico": "Cuece el arroz en la leche entera a fuego bajo 20 min removiendo. Retira, deja templar 5 min y mezcla el scoop de proteína hasta disolver. Añade canela.",
+    "Pan de centeno con mantequilla de almendra y batido": "Tuesta el pan y unta la mantequilla de almendra. Mezcla el scoop en leche desnatada agitando bien. Añade un chorrito de miel a la tosta. Toma junto al batido.",
+    "Tostas de centeno con atún y aguacate": "Tuesta el pan. Escurre el atún. Aplasta el aguacate con unas gotas de limón. Monta: aguacate, atún y tomate cherry partido por encima.",
+    "Yogur proteico con tortas de arroz y frutos secos": "Sirve los yogures de proteína en un bol con los frutos secos. Toma las tortas de arroz aparte para mojar o comer a la vez.",
+    "Yogur con fruta y nueces": "Vierte el yogur en un bol. Trocea la fruta por encima y añade las nueces.",
+    "Pan con tomate y jamón o queso": "Ralla el tomate directamente sobre el pan. Añade el jamón o el queso.",
+    "Fruta variada": "Pela y trocea la fruta que tengas en casa. Sin preparación.",
+    "Tostada de centeno con queso y tomate": "Tuesta el pan. Coloca las lonchas de queso y el tomate en rodajas. Espolvorea orégano.",
+    "Tortas de arroz con queso fresco y tomate": "Coloca rodajas de tomate sobre las tortas de arroz. Añade el queso fresco desmenuzado y orégano.",
+    // CENAS
+    "Crema de calabaza + huevos revueltos": "Calienta la crema de calabaza. En sartén antiadherente sin aceite, revuelve los huevos y las claras a fuego muy suave 2-3 min para que queden cremosos. Sirve la crema en bol con el revuelto encima y las semillas de calabaza esparcidas.",
+    "Ensalada de tofu con aguacate": "Corta el tofu en dados y el aguacate en láminas. Mezcla con rúcula, tomate cherry y pepino. Aliña con limón y vinagre balsámico. Sin cocción.",
+    "Sopa de miso con edamame": "Calienta agua sin que hierva (70-80°C). Disuelve la pasta de miso removiendo — nunca la hiervas o pierde probióticos. Añade edamame cocido, alga wakame hidratada y dados de tofu sedoso. Espolvorea sésamo.",
+    "Wok de verduras con tempeh": "Corta el tempeh en dados y dóralo en sartén con aceite 3-4 min. Añade brócoli, zanahoria y pimiento, saltea a fuego fuerte 5 min para que queden al dente. Añade tamari y sésamo tostado al servir.",
+    "Tortilla de claras con champiñones y queso fresco": "Saltea los champiñones laminados con ajo en AOVE 3 min. Bate las claras con el huevo y sal. Vierte sobre los champiñones. Cuando empiece a cuajar añade el queso fresco y las espinacas. Cuaja 2-3 min tapando.",
+    "Dorada al horno con verduras": "Precalienta el horno a 180°C. Coloca el calabacín, pimiento y tomate cherry en bandeja. Pon la dorada limpia encima, rocía con AOVE y limón, sal y pimienta. Hornea 20-25 min.",
+    "Pavo salteado con espinacas": "Trocea la pechuga de pavo en tiras y salteala en AOVE con ajo laminado 5 min a fuego medio-fuerte. Añade las espinacas frescas y saltea 2 min más hasta que reduzcan. Rectifica sal.",
+    "Revuelto de claras y huevo con setas y jamón": "Saltea los champiñones laminados en una sartén antiadherente con 5 ml de AOVE 3 min. Añade el jamón serrano picado 1 min. Incorpora los huevos batidos y revuelve a fuego suave hasta cuajar. Añade perejil picado.",
+    "Gambas a la plancha con ensalada": "Plancha las gambas peladas en sartén muy caliente con una pizca de sal y ajo en polvo, 2 min por lado. Prepara la ensalada con lechuga, tomate y pepino. Aliña con AOVE y limón.",
+    "Lubina al horno con verduras": "Precalienta el horno a 180°C. Coloca las verduras en rodajas en bandeja. Pon la lubina encima, rocía con AOVE y limón. Hornea 20-25 min hasta que la piel dore.",
+    "Tofu a la plancha con patata y espinacas": "Cuece la patata en dados 15 min en agua con sal. Marca el tofu en sartén con AOVE y sal 3-4 min por lado. Saltea las espinacas con ajo 2 min. Sirve todo junto.",
+    "Curry de garbanzos y tofu con arroz": "Sofríe ajo y curry en polvo en sartén 1 min. Añade los garbanzos, el tofu en dados y la leche de coco light. Cuece a fuego medio 15 min removiendo. Sirve sobre arroz basmati con cilantro fresco.",
+    "Tortilla de verduras con queso": "Sofríe pimiento, cebolla y champiñones en AOVE 5 min. Bate los huevos con sal. Vierte sobre las verduras en sartén y cuaja 3 min a fuego medio. Añade el queso rallado, dobla la tortilla y sirve con pan de centeno.",
+    "Revuelto de edamame con patata y espinacas": "Cuece la patata en dados 15 min. Saltea el edamame con ajo y pimentón en AOVE 3 min. Añade las espinacas y la patata cocida. Saltea 2 min más. Rectifica sal.",
+    "Revuelto de tofu y patata con queso": "Cuece la patata en dados 15 min. Desmenuza el tofu en sartén con AOVE 3 min. Añade la patata, el queso rallado y las espinacas. Revuelve a fuego medio hasta que el queso funda.",
+    "Salmón a la plancha con arroz y brócoli": "Cuece el arroz integral. Cuece el brócoli al vapor 8 min. Plancha el salmón con sal 3-4 min por lado a fuego medio-fuerte dejando que dore. Aliña con limón y AOVE.",
+    "Ternera con patata y ensalada": "Cuece la patata en dados 15 min. Plancha el solomillo 2 min por lado a fuego muy fuerte. Deja reposar 2 min antes de cortar. Prepara la ensalada y sirve todo junto.",
+    "Tortilla francesa con queso y jamón + pan": "Bate los huevos con sal. En sartén con un poco de AOVE, añade el jamón cocido picado y vierte los huevos. Cuando empiece a cuajar añade el queso, dobla y sirve con las rebanadas de centeno.",
+    "Bacalao al pil-pil con patata y pimiento": "Sofríe la patata en rodajas y el pimiento con AOVE y ajo a fuego suave 15 min. Añade el bacalao con la piel arriba y cuece 8 min. Mueve la cazuela en círculos para que la gelatina del bacalao ligue la salsa.",
+    "Salmón con boniato y espárragos": "Precalienta el horno a 200°C. Asa el boniato en dados con AOVE y sal 20 min. Añade el salmón y los espárragos a la bandeja los últimos 12 min. Rocía con limón al servir.",
+    "Crema de verduras con huevo pochado": "Calienta la crema. Para los huevos pochados: calienta agua con sal y un chorrito de vinagre. Rompe el huevo en un cuenco pequeño y viértelo suavemente en el agua. Cuece 3 min. Sirve la crema con el huevo encima y los crostones.",
+    "Ensalada completa con garbanzos": "Mezcla lechuga troceada, tomate, pepino, garbanzos escurridos y maíz en un bol. Aliña con AOVE y vinagre al gusto. Sin cocción.",
+    "Tortilla de verduras ligera": "Sofríe cebolla, pimiento y champiñones laminados en AOVE 5 min. Bate los huevos con sal. Vierte sobre las verduras y cuaja a fuego medio-bajo 4 min.",
+    "Gazpacho con huevo duro y pan": "Sirve el gazpacho bien frío en bol. Añade los huevos duros en cuartos y el pan tostado o en dados. Sin cocción adicional.",
+    "Crema de calabaza con huevo y semillas": "Calienta la crema de calabaza. Escalfa los huevos en agua con vinagre 3 min. Sirve la crema en bol, coloca los huevos pochados encima, espolvorea semillas y añade la tosta de pan al lado.",
+    "Pescado a la plancha con verduras": "Plancha el pescado blanco con sal y limón 3-4 min por lado. Cuece las judías verdes y la zanahoria al vapor 10 min o en sartén con agua 8 min. Aliña con un chorrito de AOVE.",
+    "Sopa de pollo con fideos": "Cuece el pollo en caldo con zanahoria, apio y perejil 20 min. Saca el pollo, desmecha con un tenedor y vuelve a añadir al caldo. Incorpora los fideos y cuece 5 min más.",
+    "Revuelto de huevos con verduras": "Sofríe los espárragos, tomate y cebolleta troceados en AOVE 3 min. Añade los huevos batidos y revuelve a fuego suave 2 min. Sirve con el pan de centeno al lado.",
+    "Pechuga de pavo al horno con verduras al vapor": "Precalienta el horno a 200°C. Sazona el pavo con sal, ajo y hierbas. Hornea 20 min. Cuece brócoli, judías verdes y zanahoria al vapor 10 min. Aliña las verduras con AOVE y limón.",
+    "Berenjenas rellenas de carne picada": "Parte las berenjenas, vacíalas y sofríe la pulpa con cebolla y tomate 5 min. Añade la carne picada y cocina 8 min removiendo. Rellena las berenjenas con la mezcla, cubre con queso rallado y gratina 10 min a 200°C."
+  };
+
   function abrirRecetario() {
     if (!generatedPlan || !generatedPlan.nutricion) return;
     const contenido = document.getElementById('recetarioContenido');
     contenido.innerHTML = generatedPlan.nutricion.map(meal => {
       const cards = meal.opciones.map((opt, i) => {
         const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
+        const pasos = RECETA_PASOS[opt.nombre] || '';
         return `
           <div class="receta-card">
             <div class="receta-num">Opción ${i + 1}</div>
             <div class="receta-nombre">${opt.nombre}</div>
             <div class="receta-ingredientes"><ul>${items}</ul></div>
+            ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : ''}
             <div class="receta-footer">
               <div class="receta-prep">⏱ ${opt.prep}</div>
               <div class="receta-macros">
