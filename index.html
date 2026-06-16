@@ -3878,6 +3878,12 @@
     </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
     <div id="paywallPlanChooser">
+      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
+      <div class="radio-group" id="pw-tipoPlan" style="margin-bottom:16px">
+        <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Entrenamiento + nutrición</div>
+        <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Solo nutrición</div>
+      </div>
+      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px" id="pw-periodicidadLabel">FACTURACIÓN</p>
       <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
         <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
         <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Trimestral</div>
@@ -9013,6 +9019,8 @@
         if (btn) btn.textContent = 'Continuar con K-One →';
         const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
         const periodicidad = getUserData(email)?.userData?.periodicidad || 'mensual';
+        const esSoloNutri = tipoPlan.includes('Solo');
+        preseleccionarRadio('pw-tipoPlan', esSoloNutri ? 'Solo nutrición' : 'Entrenamiento + nutrición');
         actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
         preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
         actualizarPrecioPaywall();
@@ -9024,12 +9032,18 @@
     const user = getCurrentUser();
     const primerMes = !(user && user.tieneSub);
     if (primerMes) confirmarPagoSuscripcion(true);
-    else confirmarPagoSuscripcion(false);
+    else confirmarPagoSuscripcion(false, tipoPlanDesdePaywall());
   }
+  function tipoPlanDesdePaywall() {
+    const v = document.querySelector('#pw-tipoPlan .selected')?.dataset?.valor || 'completo';
+    return v === 'nutricion' ? 'Solo nutrición, sin entrenamiento' : 'Plan completo: entrenamiento + nutrición';
+  }
+
   function actualizarPrecioPaywall() {
-    const user = getCurrentUser();
-    if (!user) return;
-    const tipoPlan = getUserData(user.email)?.userData?.tipoPlan || '';
+    const tipoPlan = tipoPlanDesdePaywall();
+    actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
+    const label = document.getElementById('pw-periodicidadLabel');
+    if (label) label.style.display = tipoPlan.includes('Solo') ? 'none' : '';
     const periodicidad = valorPeriodicidad('pw-periodicidad');
     const opcion = preciosPlan(tipoPlan)[periodicidad] || preciosPlan(tipoPlan).mensual;
     const precioEl = document.getElementById('paywallPrecio');
@@ -9042,13 +9056,11 @@
   // Redirige a Stripe Checkout para iniciar la suscripción de pago.
   // La activación real (modalPaywall se oculta, suscripcionActiva pasa a true)
   // ocurre al volver de Stripe, vía api/stripe-webhook.js + syncProfileFromSupabase().
-  async function confirmarPagoSuscripcion(oferta) {
+  async function confirmarPagoSuscripcion(oferta, tipoPlanOverride) {
     const user = getCurrentUser();
     if (!user) return;
-    // En modo oferta (primer mes 0,99€) no se elige plan todavía; el plan se elige
-    // al terminar el mes. En modo normal se usa la periodicidad seleccionada.
     const periodicidad = oferta ? '' : valorPeriodicidad('pw-periodicidad');
-    const tipoPlan = oferta ? '' : (getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '');
+    const tipoPlan = oferta ? '' : (tipoPlanOverride || getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '');
     const boton = document.getElementById('paywallBtn');
     const textoBoton = boton ? boton.textContent : '';
     const { data: { session } } = await supa.auth.getSession();
