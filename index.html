@@ -6233,11 +6233,19 @@
       const durLarga = esAvanzado  ? '80-100 min' : '55-70 min';
 
       // Fuerza de corredor: trabajo específico para prevenir lesiones y mejorar economía
+      const lugarR  = u.lugar || 'Gimnasio';
+      const rSinMat = lugarR.includes('sin material') || lugarR.includes('aire libre');
       const fuerzaCorredor = esPrincipiante
-        ? 'Fuerza específica corredor · Sentadilla goblet 3×12, zancadas 3×10 por pierna, puente de glúteo 3×15, gemelos en escalón 3×15, plancha frontal 3×30s'
+        ? rSinMat
+          ? 'Fuerza corredor en casa · Sentadilla aérea 3×15, zancadas 3×10 por pierna, puente de glúteo 3×20, mountain climbers 3×20, plancha 3×30s'
+          : 'Fuerza específica corredor · Sentadilla goblet 3×12, zancadas 3×10 por pierna, puente de glúteo 3×15, gemelos en escalón 3×15, plancha frontal 3×30s'
         : esAvanzado
-          ? 'Fuerza potencia corredor · Peso muerto rumano 4×8, sentadilla búlgara 4×10 por pierna, hip thrust 4×12, saltos al cajón 3×8, gemelos con carga 4×15, plancha con rotación 3×12'
-          : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10 por pierna, hip thrust 3×12, gemelos en escalón 3×15, plancha 3×40s';
+          ? rSinMat
+            ? 'Fuerza potencia corredor en casa · Sentadilla búlgara en silla 4×10 por pierna, hip thrust en suelo 4×15, nordic curl asistido 3×8, saltos verticales 3×8, plancha con rotación 3×12'
+            : 'Fuerza potencia corredor · Peso muerto rumano 4×8, sentadilla búlgara 4×10 por pierna, hip thrust 4×12, saltos al cajón 3×8, gemelos con carga 4×15, plancha con rotación 3×12'
+          : rSinMat
+            ? 'Fuerza corredor en casa · Sentadilla aérea 3×15, zancadas con mochila 3×10 por pierna, hip thrust en suelo 3×15, gemelos en escalón 3×15, plancha 3×40s'
+            : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10 por pierna, hip thrust 3×12, gemelos en escalón 3×15, plancha 3×40s';
 
       if (esPrincipiante) {
         // Principiante: protocolo run/walk progresivo — nunca continuo desde el día 1
@@ -6311,60 +6319,123 @@
       }
 
     } else if (esCombinacion) {
-      // ── COMBINACIÓN fuerza + cardio ── diferenciada por nivel y objetivo
+      // ── COMBINACIÓN fuerza + cardio ── diferenciada por nivel, objetivo y lugar
+      const lugarComb   = u.lugar || 'Gimnasio';
+      const combSinMat  = lugarComb.includes('sin material');
+      const combAireLib = lugarComb.includes('aire libre');
+      const combConMat  = !combSinMat; // gimnasio, con material o aire libre con material
+
       const volFuerza = ganarMusculo ? '4' : '3';
       const finComb   = perdidaGrasa ? ', circuito al final: 3 rondas de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones sin descanso' : '';
 
+      // Textos de fuerza que varían según equipamiento
+      const fzSuperiorComb = combSinMat
+        ? `Empuje y tracción sin material · Flexiones ${volFuerza}×12, flexiones con pies elevados ${volFuerza}×10, dominadas australianas en mesa ${volFuerza}×10, dips en sillas 3×10, plancha lateral 3×30s por lado`
+        : combAireLib
+          ? `Empuje y tracción al aire libre · Flexiones ${volFuerza}×12, fondos en banco de parque ${volFuerza}×10, dominadas en barra de parque ${volFuerza}×8, press mancuernas 3×10, face pull con banda 3×15`
+          : `Empuje y tracción · Press banca ${volFuerza}×8, remo barra ${volFuerza}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, extensión tríceps 3×12`;
+
+      const fzInferiorComb = combSinMat
+        ? `Piernas y glúteos sin material · Sentadilla búlgara en silla ${volFuerza}×10 por pierna, hip thrust en suelo ${volFuerza}×15, zancadas ${volFuerza}×10 por pierna, nordic curl asistido 3×8, elevación gemelos 3×20, plancha 3×45s`
+        : `Piernas y glúteos · Sentadilla ${volFuerza}×8, hip thrust ${volFuerza}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, elevación gemelos 3×15, plancha 3×45s`;
+
+      const fzFullBodyComb = combSinMat
+        ? `Fuerza sin material · Sentadilla aérea ${volFuerza}×12, flexiones ${volFuerza}×10, hip thrust en suelo ${volFuerza}×15, dominadas australianas ${volFuerza}×10, plancha 3×40s`
+        : `Fuerza general · Sentadilla ${volFuerza}×8, press banca o mancuernas ${volFuerza}×8, remo mancuerna ${volFuerza}×10 por lado, hip thrust 3×12, peso muerto rumano 3×10, plancha 3×45s`;
+
+      const cardioBase = combAireLib
+        ? `Cardio al aire libre · ${sesionCorta ? '25 min' : '35-40 min'} carrera o marcha rápida a ritmo conversacional, zona 2`
+        : `Cardio aeróbico · ${sesionCorta ? '25 min' : '35-40 min'} a ritmo conversacional, zona 2${combSinMat ? ' (carrera o marcha rápida)' : ', cadencia 170-180 pasos/min'}`;
+
       if (esPrincipiante) {
+        const lunDetalle = combSinMat
+          ? `Fuerza base sin material · Sentadilla aérea 3×10, flexiones 3×8 (rodillas si necesitas), puente de glúteo 3×15, plancha 3×30s, mountain climbers 3×15${finComb}`
+          : `Fuerza base · Sentadilla goblet 3×10, press con mancuernas 3×10, remo mancuerna 3×10 por lado, hip thrust con mancuerna 3×12, plancha 3×30s${finComb}`;
+        const sabDetalle = numDias >= 4 ? (combSinMat
+          ? `Combinado · 25-30 min carrera o marcha rápida zona 2, sentadilla aérea 3×12, flexiones 3×10, hip thrust en suelo 3×15, plancha 3×30s`
+          : `Combinado · 30 min bici/elíptica zona 2, sentadilla goblet 3×12, press mancuernas 3×10, remo mancuerna 3×10 por lado, plancha 3×30s`) : "";
+
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body · Fuerza base",
-           detalle:`Fuerza general · Sentadilla goblet 3×10, press con mancuernas 3×10, remo mancuerna 3×10 por lado, hip thrust con mancuerna 3×12, plancha 3×30s${finComb}`,
-           etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+           detalle: lunDetalle, etiqueta:"Fuerza"},
+          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? "Cardio suave · Rodaje" : "Recuperación activa",
+           detalle: numDias >= 5 ? `Cardio suave · 20 min a ritmo muy cómodo zona 1-2, marcha rápida o carrera sin esfuerzo. Movilidad 10 min al acabar` : "",
+           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Cardio suave · Run/walk" : "Movilidad",
-           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas, o 25 min de bici/elíptica a zona 2 si prefieres bajo impacto` : "",
+           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${combSinMat ? '' : ', o 25 min de bici/elíptica a zona 2 si prefieres bajo impacto'}` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Circuito combinado básico" : "Descanso activo",
-           detalle: numDias >= 3 ? `Fuerza + cardio · 4 rondas: 10 sentadillas, 8 flexiones (rodillas si es necesario), 12 zancadas por pierna, 200m carrera suave entre rondas. Descansa 90s entre rondas` : "",
+           detalle: numDias >= 3 ? `Fuerza + cardio · 4 rondas: 10 sentadillas, 8 flexiones (rodillas si necesitas), 12 zancadas por pierna, 200m carrera suave entre rondas. Descansa 90s entre rondas` : "",
            etiqueta: numDias >= 3 ? "Combinado" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Full Body · Cardio activo" : "Descanso activo",
-           detalle: numDias >= 4 ? `Combinado · 30 min bici/elíptica zona 2, sentadilla goblet 3×12, press mancuernas 3×10, remo mancuerna 3×10 por lado, plancha 3×30s` : "",
+           detalle: sabDetalle,
            etiqueta: numDias >= 4 ? "Combinado" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else if (numDias <= 3) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Cuerpo completo",
-           detalle:`Fuerza general · Sentadilla ${volFuerza}×8, press banca ${volFuerza}×8, remo barra ${volFuerza}×10, hip thrust 3×12, peso muerto rumano 3×10, plancha 3×45s${finComb}`,
+           detalle: `${fzFullBodyComb}${finComb}`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Zona 2 · Rodaje suave" : "Movilidad",
-           detalle: numDias >= 2 ? `Cardio aeróbico · ${sesionCorta ? '25 min' : '35-40 min'} a ritmo conversacional, zona 2, cadencia 170-180 pasos/min` : "",
+           detalle: numDias >= 2 ? cardioBase : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Circuito combinado" : "Descanso activo",
-           detalle: numDias >= 3 ? `Fuerza + cardio · 4 rondas: 12 sentadillas, 10 flexiones, 12 zancadas por pierna, 400m carrera o 3 min bici fuerte entre rondas. Descansa 2 min entre rondas` : "",
+           detalle: numDias >= 3 ? `Fuerza + cardio · 4 rondas: 12 sentadillas, 10 flexiones, 12 zancadas por pierna, 400m carrera o 3 min de carrera fuerte entre rondas. Descansa 2 min entre rondas` : "",
            etiqueta: numDias >= 3 ? "Combinado" : "Descanso"},
           {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
-      } else {
+      } else if (esAvanzado) {
+        // Avanzado 4-5 días: división push/pull/legs + cardio de calidad + sesión metabólica
+        const cardioCalidad = sesionCorta
+          ? `Series · 5×400m con 90s recuperación a ritmo umbral. Cronometra cada repetición y anótala`
+          : `Series avanzado · 6×800m con 2 min recuperación a ritmo umbral, o 25 min tempo run al 85-90% FCmáx. Cronometra y anota cada repetición`;
+        const metabAvz = perdidaGrasa
+          ? `Metabólico HIIT · 6 rondas: 12 sentadillas con salto, 10 flexiones explosivas, 15 hip thrusts, 12 remo${combSinMat ? ' invertido en mesa' : ' mancuerna'} por lado, 200m sprint. Descanso 60s entre rondas`
+          : `Potencia combinada · 5 rondas: 10 saltos verticales, 8 fondos en sillas, 12 dominadas australianas o${combSinMat ? '' : ' jalón'}, 400m carrera. Descanso 90s entre rondas`;
+
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior",
-           detalle:`Empuje y tracción · Press banca ${volFuerza}×8, remo barra ${volFuerza}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, extensión tríceps 3×12${finComb}`,
+           detalle:`${fzSuperiorComb}${finComb}`,
            etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Rodaje suave",
-           detalle:`Cardio aeróbico · ${sesionCorta ? '25-30 min' : '35-40 min'} a ritmo conversacional, zona 2, cadencia 170-180 pasos/min`,
+          {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 + strides",
+           detalle:`Cardio de calidad · ${sesionCorta ? '25-30 min' : '40-45 min'} zona 2 a ritmo conversacional + 4-6 strides de 60m al final (aceleración controlada, no sprint máximo)`,
            etiqueta:"Cardio"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
-           detalle:`Piernas y glúteos · Sentadilla ${volFuerza}×8, hip thrust ${volFuerza}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, elevación gemelos 3×15, plancha 3×45s${finComb}`,
+           detalle:`${fzInferiorComb}${finComb}`,
+           etiqueta:"Fuerza"},
+          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Series · Calidad cardiovascular",
+           detalle: cardioCalidad,
+           etiqueta:"Intensidad"},
+          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico HIIT" : "Potencia combinada") : "Descanso",
+           detalle: numDias >= 5 ? metabAvz : "",
+           etiqueta: numDias >= 5 ? "Combinado" : "Descanso"},
+          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+        ];
+      } else {
+        // Intermedio 4-5 días
+        semana = [
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior",
+           detalle:`${fzSuperiorComb}${finComb}`,
+           etiqueta:"Fuerza"},
+          {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Rodaje suave",
+           detalle:`Cardio aeróbico · ${sesionCorta ? '25-30 min' : '35-40 min'} a ritmo conversacional, zona 2${combSinMat ? ' (carrera o marcha rápida)' : ', cadencia 170-180 pasos/min'}`,
+           etiqueta:"Cardio"},
+          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
+           detalle:`${fzInferiorComb}${finComb}`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Series o tempo run",
            detalle:`Calidad cardiovascular · ${sesionCorta ? '5×400m con 90s rec' : '6×400m con 90s rec o 20 min a ritmo umbral'}. Cronometra cada repetición y anótala`,
@@ -6372,24 +6443,38 @@
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Circuito combinado") : "Descanso",
            detalle: numDias >= 5 ? (perdidaGrasa
-             ? "Metabólico · 5 rondas: 10 sentadillas con salto, 10 flexiones, 15 hip thrusts, 12 remo mancuerna por lado, 200m carrera. Descanso 90s entre rondas"
-             : "Fuerza + cardio · 4 rondas: 12 sentadillas con salto, 10 fondos, 15 dominadas australianas, 400m carrera. Descanso 2 min entre rondas") : "",
+             ? `Metabólico · 5 rondas: 10 sentadillas con salto, 10 flexiones, 15 hip thrusts, 12 remo${combSinMat ? ' invertido en mesa' : ' mancuerna'} por lado, 200m carrera. Descanso 90s entre rondas`
+             : `Fuerza + cardio · 4 rondas: 12 sentadillas con salto, 10 fondos en sillas, 15 dominadas australianas, 400m carrera. Descanso 2 min entre rondas`) : "",
            etiqueta: numDias >= 5 ? "Combinado" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       }
 
     } else if (esHyrox) {
-      // ── HYROX ── diferenciado por nivel. Principiante aprende estaciones antes de combinarlas
+      // ── HYROX ── diferenciado por nivel y lugar
+      const lugarHy  = u.lugar || 'Gimnasio';
+      const hySinMat = lugarHy.includes('sin material') || lugarHy.includes('aire libre');
+
+      if (hySinMat) {
+        notasSalud.push('Hyrox requiere equipamiento especializado (ski erg, sled, remo ergómetro, wall balls). Tus sesiones de fuerza funcional se han adaptado con sustitutos caseros, pero para entrenar la competición real necesitarás acceso a un box o gimnasio con ese material.');
+      }
+
       if (esPrincipiante) {
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Cardio base + técnica ski erg y remo",
-           detalle:`Capacidad aeróbica y técnica · 20-25 min carrera continua zona 2, ski erg técnica 3×200m (foco en tirón desde cadera, no solo brazos), remo 3×250m a ritmo cómodo`,
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Cardio base + técnica aeróbica",
+           detalle: hySinMat
+             ? `Capacidad aeróbica · 20-25 min carrera continua zona 2, sprints progresivos 3×30s con 1 min recuperación (simula ski erg), saltos de cuerda o jumping jacks 3×1 min`
+             : `Capacidad aeróbica y técnica · 20-25 min carrera continua zona 2, ski erg técnica 3×200m (foco en tirón desde cadera), remo 3×250m a ritmo cómodo`,
            etiqueta:"Hyrox"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? "Rodaje suave + movilidad" : "Recuperación activa",
+           detalle: numDias >= 5 ? `Complementario · 20-25 min zona 2 a ritmo muy cómodo + 10 min de movilidad de cadera y tobillo` : "",
+           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 2 ? "Fuerza funcional · Técnica sled y farmer" : "Movilidad",
-           detalle: numDias >= 2 ? `Movimientos Hyrox · Sled push (sin peso o muy ligero) 4×15m técnica, farmer carry 4×20m, sandbag squat 3×10 (carga ligera), zancadas con mancuerna 3×10 por pierna. Prioriza la técnica sobre la carga` : "",
+           resumen: numDias >= 2 ? "Fuerza funcional · Estaciones Hyrox" : "Movilidad",
+           detalle: numDias >= 2 ? (hySinMat
+             ? `Sustitutos Hyrox en casa · Burpees explosivos 4×10 (simula sled push), farmer carry con botellas de 5-6L 4×20m, sentadilla con mochila cargada 3×10, zancadas 3×10 por pierna. Prioriza la técnica`
+             : `Movimientos Hyrox · Sled push (sin peso o muy ligero) 4×15m técnica, farmer carry 4×20m, sandbag squat 3×10 (carga ligera), zancadas con mancuerna 3×10 por pierna. Prioriza la técnica`) : "",
            etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
           {dia:"Jueves", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Rodaje de fondo suave" : "Movilidad",
@@ -6397,20 +6482,29 @@
            etiqueta: numDias >= 4 ? "Cardio" : "Descanso"},
           {dia:"Viernes", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Sábado", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Mini-simulacro · 2 estaciones" : "Descanso activo",
-           detalle: numDias >= 3 ? `Introducción a la competición · 3 rondas: 500m carrera + wall balls 10 reps (pelota ligera 4-6 kg) + burpees sobre línea 5 reps. Descansa 3 min entre rondas. Anota el tiempo total` : "",
+           resumen: numDias >= 3 ? "Mini-simulacro · Estaciones" : "Descanso activo",
+           detalle: numDias >= 3 ? (hySinMat
+             ? `Simulacro adaptado · 3 rondas: 500m carrera + 10 burpees explosivos (sled) + 10 sentadillas con salto (wall ball) + 5 zancadas por pierna. Descanso 3 min entre rondas. Anota el tiempo total`
+             : `Introducción a la competición · 3 rondas: 500m carrera + wall balls 10 reps (4-6 kg) + burpees sobre línea 5 reps. Descansa 3 min entre rondas. Anota el tiempo total`) : "",
            etiqueta: numDias >= 3 ? "Simulacro" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else if (esAvanzado) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Running + bloque de estaciones",
-           detalle:`Resistencia específica · 4-5km carrera, ski erg 4×250m (ritmo competición), wall balls 4×20 (9/6kg), burpees sobre obstáculo 4×10. Descanso mínimo entre estaciones`,
+           detalle: hySinMat
+             ? `Resistencia específica · 4-5km carrera, sprints 4×30s explosivos (simula ski erg), thrusters con mochila cargada 4×15 (wall balls), burpees sobre línea 4×10. Sin descanso entre estaciones`
+             : `Resistencia específica · 4-5km carrera, ski erg 4×250m (ritmo competición), wall balls 4×20 (9/6kg), burpees sobre obstáculo 4×10. Descanso mínimo entre estaciones`,
            etiqueta:"Hyrox"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? "Running de calidad" : "Recuperación activa",
+           detalle: numDias >= 5 ? `Calidad running · 5×1km a ritmo objetivo de competición con 2 min recuperación. Trabaja técnica de carrera bajo fatiga` : "",
+           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Fuerza funcional pesada" : "Movilidad",
-           detalle: numDias >= 2 ? `Potencia y resistencia · Sled push 5×20m (carga competición +20%), farmer carry 4×40m (carga pesada), sandbag lunges 4×12, rowing 4×500m a ritmo fuerte, hip thrust 4×10 carga máxima` : "",
+           detalle: numDias >= 2 ? (hySinMat
+             ? `Potencia funcional en casa · Burpees explosivos 5×15 (sled), farmer carry botellas 5L 4×40m, zancadas con mochila cargada 4×12, sentadilla sumo con salto 4×10, hip thrust en suelo 4×12 carga máx`
+             : `Potencia y resistencia · Sled push 5×20m (carga competición +20%), farmer carry 4×40m (carga pesada), sandbag lunges 4×12, rowing 4×500m a ritmo fuerte, hip thrust 4×10 carga máxima`) : "",
            etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
           {dia:"Jueves", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Running de fondo + strides" : "Movilidad",
@@ -6419,7 +6513,9 @@
           {dia:"Viernes", tipo:"Descanso", resumen:"Movilidad y activación", detalle:"", etiqueta:"Descanso"},
           {dia:"Sábado", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Simulacro completo Hyrox" : "Descanso activo",
-           detalle: numDias >= 3 ? `Específico competición · 1km carrera + 8 estaciones (ski erg 1000m, sled push, sled pull, burpees sobre obstáculo, rowing 1000m, farmer carry, sandbag lunges, wall balls) × 1 ronda completa. Cronometra el tiempo total y cada estación` : "",
+           detalle: numDias >= 3 ? (hySinMat
+             ? `Simulacro funcional · 1km carrera + 8 estaciones adaptadas: sprints 2×30s (ski erg), 4×30m carrera empujando (sled push), burpees sobre línea 4×10, saltos de cuerda 200 (rowing), farmer carry 4×25m botellas, zancadas 200m, thrusters mochila 4×15 (wall balls). Cronometra el total`
+             : `Específico competición · 1km carrera + 8 estaciones (ski erg 1000m, sled push, sled pull, burpees sobre obstáculo, rowing 1000m, farmer carry, sandbag lunges, wall balls) × 1 ronda completa. Cronometra el tiempo total y cada estación`) : "",
            etiqueta: numDias >= 3 ? "Simulacro" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -6427,12 +6523,19 @@
         // Intermedio Hyrox
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Running + 3 estaciones",
-           detalle:`Resistencia + fuerza funcional · 3km carrera, ski erg 4×250m, wall balls 4×15 (6/4kg), burpees sobre obstáculo 4×10. Descansa 2 min entre estaciones`,
+           detalle: hySinMat
+             ? `Resistencia + fuerza funcional · 3km carrera, sprints progresivos 4×30s (ski erg), thrusters mochila 4×12 (wall balls), burpees sobre línea 4×10. Descansa 2 min entre estaciones`
+             : `Resistencia + fuerza funcional · 3km carrera, ski erg 4×250m, wall balls 4×15 (6/4kg), burpees sobre obstáculo 4×10. Descansa 2 min entre estaciones`,
            etiqueta:"Hyrox"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? "Running complementario" : "Recuperación activa",
+           detalle: numDias >= 5 ? `Base cardiovascular · 4-6km zona 2 suave + 4 strides de 60m al final. Trabaja la postura y cadencia de carrera` : "",
+           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Fuerza funcional Hyrox" : "Movilidad",
-           detalle: numDias >= 2 ? `Cuerpo completo · Sled push 4×20m, farmer carry 4×30m, sandbag lunges 3×12, rowing 4×250m, hip thrust 3×12. Anota cargas y tiempos para progresar cada semana` : "",
+           detalle: numDias >= 2 ? (hySinMat
+             ? `Cuerpo completo funcional · Burpees explosivos 4×12 (sled), farmer carry botellas 4×30m, zancadas con mochila 3×12, saltos de cuerda 4×1 min (rowing), hip thrust en suelo 3×15. Anota tiempos para progresar`
+             : `Cuerpo completo · Sled push 4×20m, farmer carry 4×30m, sandbag lunges 3×12, rowing 4×250m, hip thrust 3×12. Anota cargas y tiempos para progresar cada semana`) : "",
            etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
           {dia:"Jueves", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Running de fondo" : "Movilidad",
@@ -6441,14 +6544,23 @@
           {dia:"Viernes", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Sábado", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Simulacro progresivo" : "Descanso activo",
-           detalle: numDias >= 3 ? `Específico competición · 1km carrera + 4-6 estaciones × 1 ronda. Aumentar estaciones cada semana. Cronometra el total. En las últimas semanas antes del race, hacer la ronda completa` : "",
+           detalle: numDias >= 3 ? (hySinMat
+             ? `Simulacro adaptado · 1km carrera + 4-6 estaciones: sprint 30s (ski erg), burpees 15 (sled push), zancadas 20m (sandbag lunges), thrusters mochila 12 (wall balls). Añade una estación cada semana. Cronometra el total`
+             : `Específico competición · 1km carrera + 4-6 estaciones × 1 ronda. Aumentar estaciones cada semana. Cronometra el total. En las últimas semanas antes del race, hacer la ronda completa`) : "",
            etiqueta: numDias >= 3 ? "Simulacro" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       }
 
     } else if (esCrossfit) {
-      // ── CROSSFIT ── diferenciado por nivel. Principiante = fundamentos sin barra pesada
+      // ── CROSSFIT ── diferenciado por nivel y lugar
+      const lugarCF  = u.lugar || 'Gimnasio';
+      const cfSinMat = lugarCF.includes('sin material') || lugarCF.includes('aire libre');
+
+      if (cfSinMat) {
+        notasSalud.push('CrossFit en su versión Rx requiere equipamiento de box (barra olímpica, cajones, remo ergómetro, anillas). Las sesiones se han adaptado con sustitutos sin barra o con mancuernas, pero para progresar al nivel competición necesitarás acceso a un box CrossFit.');
+      }
+
       if (esPrincipiante) {
         // Fundamentos: técnica y bodyweight. Sin barra olímpica, sin pesos pesados.
         semana = [
@@ -6474,18 +6586,24 @@
       } else if (numDias <= 3) {
         if (esAvanzado) {
           semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza olímpica + Metcon",
-             detalle:`Strength · Sentadilla trasera 5×3 al 80-85% + Power clean técnica 4×3. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 5 pull-ups. Anota rondas`,
+            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
+             detalle: cfSinMat
+               ? `Strength sin barra · Sentadilla búlgara en silla 5×6 por pierna + saltos verticales 4×5. AMRAP 12 min: 10 thrusters con mancuernas (2×15kg), 10 box jumps o saltos, 5 pull-ups o ring rows. Anota rondas`
+               : `Strength · Sentadilla trasera 5×3 al 80-85% + Power clean técnica 4×3. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 5 pull-ups. Anota rondas`,
              etiqueta:"WOD"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 2 ? "WOD For Time · Rx" : "Movilidad",
-             detalle: numDias >= 2 ? `For Time · 21-15-9: peso muerto (100/70kg), burpees sobre cajón, pull-ups. Cronometra. Si superas 20 min, escala el peso. Anota el tiempo y el scaling usado` : "",
+             resumen: numDias >= 2 ? "WOD For Time" : "Movilidad",
+             detalle: numDias >= 2 ? (cfSinMat
+               ? `For Time · 21-15-9: peso muerto KB (2×24/16kg o escala), burpees sobre línea, pull-ups o flexiones con pies elevados. Cronometra. Anota el tiempo y el scaling usado`
+               : `For Time · 21-15-9: peso muerto (100/70kg), burpees sobre cajón, pull-ups. Cronometra. Si superas 20 min, escala el peso. Anota el tiempo y el scaling usado`) : "",
              etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 3 ? "EMOM + Gimnástica avanzada" : "Descanso activo",
-             detalle: numDias >= 3 ? `EMOM 20 min: min impar: 3 muscle-ups o 6 dips + 6 pull-ups · min par: 12 kettlebell swings (32/24kg). Cierre: 4×máx toes-to-bar` : "",
+             detalle: numDias >= 3 ? (cfSinMat
+               ? `EMOM 20 min: min impar: 6 dips en sillas + 6 pull-ups o flexiones explosivas · min par: 15 KB swings (24/16kg) o sentadillas con salto. Cierre: toes-to-bar 4×10 o elevaciones de piernas 4×15`
+               : `EMOM 20 min: min impar: 3 muscle-ups o 6 dips + 6 pull-ups · min par: 12 kettlebell swings (32/24kg). Cierre: 4×máx toes-to-bar`) : "",
              etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
             {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -6493,17 +6611,23 @@
         } else {
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle:`Strength · Sentadilla trasera con barra 5×5 al 70-75%. AMRAP 10 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 10 abdominales. Anota rondas y escala si necesitas`,
+             detalle: cfSinMat
+               ? `Strength sin barra · Sentadilla aérea 5×12 + saltos al sitio 3×8. AMRAP 10 min: 10 thrusters con mancuernas (2×10kg o escala), 10 step-ups o saltos, 10 abdominales. Anota rondas`
+               : `Strength · Sentadilla trasera con barra 5×5 al 70-75%. AMRAP 10 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 10 abdominales. Anota rondas y escala si necesitas`,
              etiqueta:"WOD"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 2 ? "WOD For Time" : "Movilidad",
-             detalle: numDias >= 2 ? `For Time · 21-15-9: peso muerto (60/40kg o escala), burpees, dominadas o remo en barra baja. Cronometra y anota el peso y scaling usado` : "",
+             detalle: numDias >= 2 ? (cfSinMat
+               ? `For Time · 21-15-9: peso muerto KB (2×16/12kg o escala), burpees, dominadas o ring rows en mesa. Cronometra y anota el peso y scaling usado`
+               : `For Time · 21-15-9: peso muerto (60/40kg o escala), burpees, dominadas o remo en barra baja. Cronometra y anota el peso y scaling usado`) : "",
              etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 3 ? "EMOM + Gimnástica" : "Descanso activo",
-             detalle: numDias >= 3 ? `EMOM 16 min alterno: min impar: 12 kettlebell swings (16/12kg) · min par: 30s plancha + 10 sentadillas aéreas. Cierre: progresión de pull-ups 4×máx (band si necesitas)` : "",
+             detalle: numDias >= 3 ? (cfSinMat
+               ? `EMOM 16 min alterno: min impar: 12 sentadillas con salto · min par: 30s plancha + 10 flexiones. Cierre: dominadas australianas o remo invertido en mesa 4×máx`
+               : `EMOM 16 min alterno: min impar: 12 kettlebell swings (16/12kg) · min par: 30s plancha + 10 sentadillas aéreas. Cierre: progresión de pull-ups 4×máx (band si necesitas)`) : "",
              etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
             {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -6513,43 +6637,63 @@
         // 4-5 días CrossFit
         if (esAvanzado) {
           semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Oly lifting + Metcon",
-             detalle:`Strength · Snatch técnica 4×3 al 75% + sentadilla frontal 4×4. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 200m carrera`,
+            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
+             detalle: cfSinMat
+               ? `Strength sin barra · Sentadilla búlgara 4×6 por pierna + saltos verticales 4×5. AMRAP 12 min: 10 thrusters con mancuernas (2×15kg), 10 saltos, 200m carrera`
+               : `Strength · Snatch técnica 4×3 al 75% + sentadilla frontal 4×4. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 200m carrera`,
              etiqueta:"WOD"},
-            {dia:"Martes", tipo:"Entrenamiento", resumen:"WOD For Time · Rx pesado",
-             detalle:`For Time · 21-15-9: thrusters (43/30kg), burpees sobre cajón, pull-ups. Cronometra. Si excedes 18 min, escala el peso la próxima vez`,
+            {dia:"Martes", tipo:"Entrenamiento", resumen:"WOD For Time",
+             detalle: cfSinMat
+               ? `For Time · 21-15-9: thrusters con mancuernas (2×15/10kg), burpees sobre línea, pull-ups o flexiones explosivas. Cronometra. Si excedes 18 min, reduce el peso la próxima vez`
+               : `For Time · 21-15-9: thrusters (43/30kg), burpees sobre cajón, pull-ups. Cronometra. Si excedes 18 min, escala el peso la próxima vez`,
              etiqueta:"WOD"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Hero WOD",
-             detalle:`For Time (cap 30 min) · 5 rondas: 400m carrera, 15 peso muerto (100/70kg), 15 pull-ups. Escala rondas a 3 si es tu primera vez con este WOD. Anota tiempo y scaling`,
+             detalle: cfSinMat
+               ? `For Time (cap 30 min) · 5 rondas: 400m carrera, 15 peso muerto KB (2×24/16kg), 15 pull-ups o dominadas australianas. Escala a 3 rondas si es la primera vez. Anota tiempo y scaling`
+               : `For Time (cap 30 min) · 5 rondas: 400m carrera, 15 peso muerto (100/70kg), 15 pull-ups. Escala rondas a 3 si es tu primera vez con este WOD. Anota tiempo y scaling`,
              etiqueta:"WOD"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"EMOM + Gymnastic skills",
-             detalle:`EMOM 20 min: min1: 3-5 muscle-ups · min2: 30s plancha · min3: 10 pistol squats o sentadillas con salto · min4: descanso. Cierre: toes-to-bar 4×10`,
+             detalle: cfSinMat
+               ? `EMOM 20 min: min1: 6 dips en sillas + 6 pull-ups · min2: 30s plancha · min3: 10 pistol squats asistidos o sentadillas con salto · min4: descanso. Cierre: toes-to-bar 4×10 o elevaciones de piernas 4×15`
+               : `EMOM 20 min: min1: 3-5 muscle-ups · min2: 30s plancha · min3: 10 pistol squats o sentadillas con salto · min4: descanso. Cierre: toes-to-bar 4×10`,
              etiqueta:"WOD"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? "WOD sábado · Largo" : "Descanso",
-             detalle: numDias >= 5 ? `AMRAP 20 min: 400m carrera, 15 KB swings (32/24kg), 10 pull-ups, 15 wall balls. Ritmo sostenible. Anota rondas` : "",
+             detalle: numDias >= 5 ? (cfSinMat
+               ? `AMRAP 20 min: 400m carrera, 15 KB swings (24/16kg) o sentadillas con salto, 10 pull-ups o flexiones con pies elevados, 15 thrusters mancuernas. Ritmo sostenible. Anota rondas`
+               : `AMRAP 20 min: 400m carrera, 15 KB swings (32/24kg), 10 pull-ups, 15 wall balls. Ritmo sostenible. Anota rondas`) : "",
              etiqueta: numDias >= 5 ? "WOD" : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         } else {
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle:`Strength · Sentadilla trasera 5×5 al 70-75%. AMRAP 12 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 200m carrera. Anota rondas`,
+             detalle: cfSinMat
+               ? `Strength sin barra · Sentadilla aérea 5×12 + saltos 3×8. AMRAP 12 min: 10 thrusters con mancuernas (2×10kg), 10 step-ups o saltos, 200m carrera. Anota rondas`
+               : `Strength · Sentadilla trasera 5×5 al 70-75%. AMRAP 12 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 200m carrera. Anota rondas`,
              etiqueta:"WOD"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"WOD For Time",
-             detalle:`For Time · 21-15-9: thrusters (20/15kg o escala), burpees sobre cajón, abdominales. Cronometra y anota`,
+             detalle: cfSinMat
+               ? `For Time · 21-15-9: thrusters con mancuernas (2×8/6kg o escala), burpees sobre línea, abdominales. Cronometra y anota`
+               : `For Time · 21-15-9: thrusters (20/15kg o escala), burpees sobre cajón, abdominales. Cronometra y anota`,
              etiqueta:"WOD"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"WOD largo + fuerza",
-             detalle:`For Time (cap 25 min) · 3-4 rondas: 400m carrera, 12 peso muerto (60/40kg o escala), 12 dominadas o ring rows. Escala las rondas o el peso si es necesario`,
+             detalle: cfSinMat
+               ? `For Time (cap 25 min) · 3-4 rondas: 400m carrera, 12 peso muerto KB (2×16/12kg o escala), 12 dominadas australianas o flexiones. Escala rondas o peso si es necesario`
+               : `For Time (cap 25 min) · 3-4 rondas: 400m carrera, 12 peso muerto (60/40kg o escala), 12 dominadas o ring rows. Escala las rondas o el peso si es necesario`,
              etiqueta:"WOD"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"EMOM + Gimnástica",
-             detalle:`EMOM 20 min: min1: 12 KB swings (16/12kg) · min2: 30s plancha · min3: 10 sentadillas con salto · min4: descanso. Cierre: pull-ups progresión 4×máx`,
+             detalle: cfSinMat
+               ? `EMOM 20 min: min1: 12 sentadillas con salto · min2: 30s plancha · min3: 10 flexiones · min4: descanso. Cierre: dominadas australianas o ring rows 4×máx`
+               : `EMOM 20 min: min1: 12 KB swings (16/12kg) · min2: 30s plancha · min3: 10 sentadillas con salto · min4: descanso. Cierre: pull-ups progresión 4×máx`,
              etiqueta:"WOD"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? "WOD del sábado" : "Descanso",
-             detalle: numDias >= 5 ? `AMRAP 15 min: 5 burpees, 10 KB swings, 15 sentadillas aéreas, 200m carrera. Ritmo sostenible. Anota rondas` : "",
+             detalle: numDias >= 5 ? (cfSinMat
+               ? `AMRAP 15 min: 5 burpees, 10 sentadillas con salto, 15 sentadillas aéreas, 200m carrera. Ritmo sostenible. Anota rondas`
+               : `AMRAP 15 min: 5 burpees, 10 KB swings, 15 sentadillas aéreas, 200m carrera. Ritmo sostenible. Anota rondas`) : "",
              etiqueta: numDias >= 5 ? "WOD" : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
