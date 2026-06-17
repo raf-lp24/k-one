@@ -794,6 +794,9 @@
     margin-bottom: 20px;
     display: block;
   }
+  .sport-icon svg { width: 40px; height: 40px; stroke: var(--brasa); display: block; }
+  .nutrition-callout-icon svg, .hybrid-callout-icon svg { width: 34px; height: 34px; stroke: var(--brasa); }
+  .dash-nav-icon svg { width: 18px; height: 18px; stroke: currentColor; vertical-align: middle; }
 
   .sport-name {
     font-family: 'Bebas Neue', sans-serif;
@@ -4341,7 +4344,7 @@
         <em>atajos.</em><br>
         Hay pasos.
       </h1>
-      <p class="hero-sub">Tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a cómo evoluciones. Para quien empieza y para quien quiere más. ¿Solo buscas nutrición? También hay plan para ti, desde 6,99€/mes.</p>
+      <p class="hero-sub">Tu plan de entrenamiento y nutrición, personalizado y adaptado cada semana a cómo evolucionas. Para quien empieza y para quien quiere más.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
         <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 0,99€. Crear cuenta nueva" onclick="goTo('registro')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('registro');}">
@@ -4412,7 +4415,7 @@
       <p class="section-note">Planes específicos para cada disciplina. No genéricos.</p>
     </div>
     <div class="hybrid-callout">
-      <span class="hybrid-callout-icon" aria-hidden="true">🔀</span>
+      <span class="hybrid-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 H7 L17 17 H21"/><path d="M3 17 H7 L17 7 H21"/><path d="M18 4 L21 7 L18 10"/><path d="M18 14 L21 17 L18 20"/></svg></span>
       <div class="hybrid-callout-text">
         <div class="hybrid-callout-title">¿Entrenas para más de una cosa?</div>
         <p class="hybrid-callout-desc">Si preparas una maratón o un Hyrox sin perder lo ganado en el gimnasio, elige "Combinación": un plan semanal que reparte fuerza y resistencia sin que se pisen.</p>
@@ -4420,28 +4423,28 @@
     </div>
     <div class="sports-grid">
       <div class="sport-card">
-        <span class="sport-icon" aria-hidden="true">🏋️</span>
+        <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="14" y1="24" x2="34" y2="24"/><rect x="8" y="17" width="6" height="14" rx="1.5"/><rect x="34" y="17" width="6" height="14" rx="1.5"/><rect x="3" y="20" width="5" height="8" rx="1.5"/><rect x="40" y="20" width="5" height="8" rx="1.5"/></svg></span>
         <div class="sport-name">Gimnasio</div>
         <p class="sport-desc">Hipertrofia, fuerza, definición. Rutinas con progresión de cargas semana a semana.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon" aria-hidden="true">🏃</span>
+        <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="29" cy="9" r="4"/><path d="M27 15 L20 21 L26 26 L24 38"/><path d="M26 26 L33 30 L36 26"/><path d="M20 21 L13 24"/><path d="M26 26 L19 33"/></svg></span>
         <div class="sport-name">Running</div>
         <p class="sport-desc">De 5km a maratón. Planes por fases con ritmos, distancias y zonas cardíacas.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon" aria-hidden="true">⚡</span>
+        <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M26 4 L10 27 H23 L20 44 L38 20 H25 Z"/></svg></span>
         <div class="sport-name">Hyrox</div>
         <p class="sport-desc">Preparación específica para las 8 estaciones. Fuerza funcional y resistencia combinadas.</p>
       </div>
       <div class="sport-card">
-        <span class="sport-icon" aria-hidden="true">🔥</span>
+        <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 C26 14 34 16 34 26 a10 10 0 0 1 -20 0 C14 20 18 18 19 14 C22 18 24 18 24 5 Z"/></svg></span>
         <div class="sport-name">CrossFit</div>
         <p class="sport-desc">Alta intensidad, movimientos funcionales. Mejora tu acondicionamiento general.</p>
       </div>
     </div>
     <div class="nutrition-callout">
-      <span class="nutrition-callout-icon" aria-hidden="true">🥗</span>
+      <span class="nutrition-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/><line x1="7" y1="14" x2="8" y2="16"/><line x1="12" y1="14.5" x2="12" y2="17"/><line x1="17" y1="14" x2="16" y2="16"/></svg></span>
       <div class="nutrition-callout-text">
         <div class="nutrition-callout-title">¿Solo buscas nutrición?</div>
         <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 6,99€/mes.</p>
@@ -5415,22 +5418,22 @@
       </div>
       <nav class="dash-nav">
         <div class="dash-nav-item active" onclick="showSection('hoy')" id="nav-hoy">
-          <span class="dash-nav-icon">⚡</span> Hoy
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L4 14 H11 L10 22 L19 9 H12 Z"/></svg></span> Hoy
         </div>
         <div class="dash-nav-item" onclick="showSection('semana')" id="nav-semana">
-          <span class="dash-nav-icon">📅</span> Plan semanal
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="16" y1="3" x2="16" y2="6"/></svg></span> Plan semanal
         </div>
         <div class="dash-nav-item" onclick="showSection('nutricion')" id="nav-nutricion">
-          <span class="dash-nav-icon">🥗</span> Nutrición
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg></span> Nutrición
         </div>
         <div class="dash-nav-item" onclick="showSection('checkin')" id="nav-checkin">
-          <span class="dash-nav-icon">✓</span> Check-in semanal
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg></span> Check-in semanal
         </div>
         <div class="dash-nav-item" onclick="showSection('progreso')" id="nav-progreso">
-          <span class="dash-nav-icon">📈</span> Mi progreso
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 15 L11 10 L14 13 L19 6"/></svg></span> Mi progreso
         </div>
         <div class="dash-nav-item" onclick="showSection('notas')" id="nav-notas">
-          <span class="dash-nav-icon">📝</span> Notas
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 H15 L19 7 V21 H5 Z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span> Notas
         </div>
       </nav>
       <button class="logout-btn" onclick="gestionarSuscripcion()">
@@ -10674,32 +10677,16 @@
         .order('created_at', { ascending: false })
         .limit(20);
       if (error || !data || data.length === 0) {
-        // Testimonios iniciales mientras no hay datos reales en la tabla de Supabase
-        const fallback = [
-          { nombre: 'Carlos M.', inicial: 'CM', edad: 28, plan: 'Gimnasio · Ganar músculo', estrellas: 5, texto: 'Llevo 3 semanas y ya noto la diferencia en la organización. El check-in semanal me mantiene motivado y el plan cambia cada semana según cómo me encuentro.' },
-          { nombre: 'Laura G.', inicial: 'LG', edad: 34, plan: 'Solo nutrición', estrellas: 5, texto: 'Nunca había encontrado un plan de alimentación tan detallado y ajustado a mis alergias. Cinco opciones por comida es un lujo que no esperaba a este precio.' },
-          { nombre: 'Iván S.', inicial: 'IS', edad: 31, plan: 'Running · Pérdida de grasa', estrellas: 4, texto: 'El plan de entrenamiento combinado con la nutrición tiene mucho más sentido que lo que hacía antes por separado. Buen producto con buena lógica detrás.' },
-          { nombre: 'Marta R.', inicial: 'MR', edad: 26, plan: 'Hyrox · Resistencia', estrellas: 5, texto: 'Llevo meses preparando Hyrox y K-One es el primer servicio que me da un plan específico para este deporte. Los otros me mandaban rutinas de gimnasio genéricas.' },
-          { nombre: 'Pablo T.', inicial: 'PT', edad: 41, plan: 'Gimnasio / Fuerza', estrellas: 5, texto: 'Me gusta que no promete milagros. La progresión de carga semana a semana es exactamente lo que buscaba. Y el precio frente a un entrenador personal es imbatible.' },
-          { nombre: 'Ana B.', inicial: 'AB', edad: 29, plan: 'CrossFit · Equilibrio', estrellas: 4, texto: 'Los WODs que genera son muy acertados y el seguimiento de macros me ayuda mucho. La nutrición para CrossFit es muy específica, no genérica.' }
-        ];
-        track.innerHTML = fallback.map(t => {
-          const estrellas = '★'.repeat(t.estrellas) + '☆'.repeat(5 - t.estrellas);
-          const roleText = [t.edad ? `${t.edad} años` : '', t.plan].filter(Boolean).join(' · ');
-          return `<div class="testimonial-card">
-            <div class="testimonial-stars">${estrellas}</div>
-            <p class="testimonial-quote">"${t.texto}"</p>
-            <div class="testimonial-author">
-              <div class="testimonial-avatar">${t.inicial}</div>
-              <div>
-                <div class="testimonial-name">${t.nombre}</div>
-                <div class="testimonial-role">${roleText}</div>
-              </div>
-            </div>
-          </div>`;
-        }).join('');
+        // Sin opiniones reales todavía: NO inventamos testimonios (sería publicidad
+        // engañosa). Ocultamos la sección entera; reaparece sola cuando haya reseñas
+        // reales en la tabla "testimonios" de Supabase.
+        const seccion = document.getElementById('testimonials');
+        if (seccion) seccion.style.display = 'none';
         return;
       }
+      // Hay opiniones reales: aseguramos que la sección esté visible.
+      const seccion = document.getElementById('testimonials');
+      if (seccion) seccion.style.display = '';
       track.innerHTML = data.map(t => {
         const estrellas = '★'.repeat(Math.max(1, Math.min(5, t.estrellas || 5))) +
                           '☆'.repeat(5 - Math.max(1, Math.min(5, t.estrellas || 5)));
@@ -10720,7 +10707,8 @@
         </div>`;
       }).join('');
     } catch (e) {
-      track.innerHTML = '';
+      const seccion = document.getElementById('testimonials');
+      if (seccion) seccion.style.display = 'none';
     }
   }
 
