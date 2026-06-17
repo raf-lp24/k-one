@@ -267,6 +267,20 @@
   .btn-primary:hover { background: var(--brasa-oscura); transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
 
+  .jarvis-filtro {
+    background: #1a1a1a; color: var(--metal); border: 1px solid #2a2a2a;
+    padding: 5px 11px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    font-family: 'DM Mono', monospace; letter-spacing: .3px; transition: all .15s;
+  }
+  .jarvis-filtro:hover { border-color: var(--brasa); color: var(--blanco); }
+  .jarvis-filtro-active { border-color: var(--brasa) !important; color: var(--blanco) !important; background: #1e0c06 !important; }
+  #adminBuscador:focus { border-color: var(--brasa); }
+  #modalJarvisCliente { display: none; }
+  #modalJarvisCliente.visible { display: flex; }
+  .jc-row { background:#161616; border:1px solid #222; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .jc-label { font-size:10px; color:var(--metal); text-transform:uppercase; letter-spacing:.5px; font-family:'DM Mono',monospace; margin-bottom:3px; }
+  .jc-val { font-size:13px; color:var(--blanco); font-weight:500; }
+
   .btn-ghost {
     background: transparent;
     color: var(--blanco);
@@ -4158,43 +4172,84 @@
   </div>
 </div>
 
-<!-- PANEL DE ADMIN ("cerebro") -->
+<!-- PANEL DE ADMIN — JARVIS -->
 <div id="modalAdmin" style="display:none;position:fixed;inset:0;z-index:10000;background:#0b0b0b;overflow-y:auto;padding:28px 20px">
-  <div style="max-width:1200px;margin:0 auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+  <div style="max-width:1300px;margin:0 auto">
+
+    <!-- Cabecera -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap">
       <div>
         <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--brasa);letter-spacing:1px">// PANEL DE ADMIN</div>
-        <div style="font-size:24px;font-weight:700;color:var(--blanco)">Jarvis</div>
+        <div style="font-size:26px;font-weight:700;color:var(--blanco);letter-spacing:-0.5px">Jarvis</div>
+        <div id="adminTimestamp" style="font-size:11px;color:var(--metal);margin-top:2px"></div>
       </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn-ghost" style="padding:9px 16px;font-size:13px" onclick="abrirPanelAdmin()">↻ Actualizar</button>
-        <button class="btn-ghost" style="padding:9px 16px;font-size:13px" onclick="cerrarPanelAdmin()">✕ Cerrar</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn-ghost" style="padding:8px 14px;font-size:12px" onclick="exportarAdminCSV()">↓ Exportar CSV</button>
+        <button class="btn-ghost" style="padding:8px 14px;font-size:12px" onclick="abrirPanelAdmin()">↻ Actualizar</button>
+        <button class="btn-ghost" style="padding:8px 14px;font-size:12px" onclick="cerrarPanelAdmin()">✕ Cerrar</button>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--metal);margin-bottom:22px">Datos en tiempo real de Supabase + Stripe. Solo tú ves esto.</p>
+    <p style="font-size:12px;color:var(--metal);margin-bottom:24px">Datos en tiempo real · Supabase + Stripe · Solo tú ves esto.</p>
 
-    <!-- Sección: Negocio -->
+    <!-- // Negocio -->
     <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">// Negocio</div>
-    <div id="adminMetricsBiz" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px"></div>
+    <div id="adminMetricsBiz" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px"></div>
 
-    <!-- Sección: Embudo y engagement -->
+    <!-- // Esta semana (tendencia) -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">// Esta semana</div>
+    <div id="adminMetricsTrend" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px"></div>
+
+    <!-- // Embudo & Engagement -->
     <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">// Embudo &amp; Engagement</div>
-    <div id="adminMetricsEng" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px"></div>
+    <div id="adminMetricsEng" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px"></div>
 
-    <!-- Sección: Alertas operativas -->
+    <!-- // Alertas operativas -->
     <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">// Alertas operativas</div>
     <div id="adminMetricsAlt" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px"></div>
 
-    <!-- Sección: Distribución del producto -->
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:14px;text-transform:uppercase">// Distribución del producto</div>
-    <div id="adminDist" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:28px"></div>
+    <!-- // Distribución + Retención -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:14px;text-transform:uppercase">// Distribución &amp; Retención</div>
+    <div id="adminDist" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:30px"></div>
 
-    <!-- Tabla de clientes -->
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">// Clientes (<span id="adminTotalClientes">0</span>)</div>
+    <!-- // Clientes — barra de búsqueda/filtros -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:10px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);letter-spacing:1px;text-transform:uppercase">
+        // Clientes · <span id="adminTotalFiltro">0</span> de <span id="adminTotalClientes">0</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="adminBuscador" type="text" placeholder="Buscar nombre o email…" oninput="buscarAdmin(this.value)"
+          style="background:#111;border:1px solid #333;border-radius:8px;padding:7px 12px;font-size:12px;color:var(--blanco);width:210px;outline:none">
+        <div style="display:flex;gap:4px" id="adminFiltrosBtns">
+          <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
+          <button class="jarvis-filtro" onclick="filtrarAdminTipo('alertas')">🔴 Alertas</button>
+          <button class="jarvis-filtro" onclick="filtrarAdminTipo('activos')">Activos</button>
+          <button class="jarvis-filtro" onclick="filtrarAdminTipo('sinpago')">Sin pago</button>
+          <button class="jarvis-filtro" onclick="filtrarAdminTipo('nuevos')">Nuevos</button>
+        </div>
+      </div>
+    </div>
     <div style="overflow-x:auto;border:1px solid #2a2a2a;border-radius:10px">
-      <table id="adminTabla" style="width:100%;border-collapse:collapse;font-size:13px;color:var(--blanco);min-width:1000px"></table>
+      <table id="adminTabla" style="width:100%;border-collapse:collapse;font-size:13px;color:var(--blanco);min-width:1050px"></table>
     </div>
     <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE DE CLIENTE (Jarvis) -->
+<div id="modalJarvisCliente" style="position:fixed;inset:0;z-index:10100;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)cerrarDetalleCliente()">
+  <div style="background:#111;border:1px solid #2a2a2a;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:4px">// DETALLE DE CLIENTE</div>
+        <div id="jcNombre" style="font-size:20px;font-weight:700;color:var(--blanco)"></div>
+        <div id="jcEmail" style="font-size:12px;color:var(--metal);margin-top:2px"></div>
+      </div>
+      <button onclick="cerrarDetalleCliente()" style="background:none;border:none;color:var(--metal);font-size:20px;cursor:pointer;padding:4px">✕</button>
+    </div>
+    <div id="jcBody" style="display:grid;gap:10px"></div>
+    <div style="margin-top:20px;text-align:right">
+      <a id="jcMailto" href="#" style="display:inline-block;background:var(--brasa);color:#fff;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none">✉ Enviar email</a>
+    </div>
   </div>
 </div>
 
@@ -10584,33 +10639,37 @@
     actualizarBtnAdmin();
   }
 
-  // ===== PANEL DE ADMIN ("cerebro") =====
-  // Correos con acceso de admin (la seguridad real la aplica el backend; esto solo
-  // decide si se muestra el botón). Debe coincidir con ADMIN_EMAILS del servidor.
+  // ===== JARVIS — PANEL DE ADMIN =====
   const ADMIN_EMAILS_UI = ['azuqueca1@hotmail.com'];
 
   function esAdmin() {
     const user = getCurrentUser();
     return !!user && ADMIN_EMAILS_UI.includes((user.email || '').toLowerCase());
   }
-
   function actualizarBtnAdmin() {
     const btn = document.getElementById('btnPanelAdmin');
     if (btn) btn.style.display = esAdmin() ? '' : 'none';
   }
-
   function cerrarPanelAdmin() {
     const m = document.getElementById('modalAdmin');
     if (m) m.style.display = 'none';
   }
 
-  const _fmtFecha = (iso) => iso ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  // Estado del panel
+  let _adminDatos = null;
+  let _adminFiltro = { texto: '', tipo: 'todos' };
+  let _adminSort   = { col: 'alta', dir: -1 };
+
+  const _fmtFecha = (iso) => iso
+    ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+  const _esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const _estadoLegible = (c) => {
-    if (c.enOferta) return '<span style="color:#f0a500">Oferta 0,99€</span>';
+    if (c.enOferta)    return '<span style="color:#f0a500">Oferta 0,99€</span>';
     if (c.estado === 'past_due') return '<span style="color:#e74c3c">Pago fallido</span>';
     if (c.cancelaAlFinal) return '<span style="color:#e67e22">Cancela al final</span>';
-    if (['active', 'trialing'].includes(c.estado)) return '<span style="color:#27ae60">Activo</span>';
-    if (['canceled', 'unpaid'].includes(c.estado)) return '<span style="color:var(--metal)">Cancelado</span>';
+    if (['active','trialing'].includes(c.estado)) return '<span style="color:#27ae60">Activo</span>';
+    if (['canceled','unpaid'].includes(c.estado)) return '<span style="color:var(--metal)">Cancelado</span>';
     return '<span style="color:var(--metal)">Sin pago</span>';
   };
 
@@ -10618,11 +10677,9 @@
     const m = document.getElementById('modalAdmin');
     if (m) m.style.display = 'block';
     const estado = document.getElementById('adminEstado');
-    const tabla = document.getElementById('adminTabla');
-    const metrics = document.getElementById('adminMetrics');
     if (estado) estado.textContent = 'Cargando datos...';
-    if (tabla) tabla.innerHTML = '';
-    if (metrics) metrics.innerHTML = '';
+    ['adminMetricsBiz','adminMetricsTrend','adminMetricsEng','adminMetricsAlt','adminDist','adminTabla']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) throw new Error('Sesión caducada. Vuelve a entrar.');
@@ -10632,8 +10689,16 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudieron cargar los datos');
+      _adminDatos = data;
+      _adminFiltro = { texto: '', tipo: 'todos' };
+      _adminSort   = { col: 'alta', dir: -1 };
+      const buscador = document.getElementById('adminBuscador');
+      if (buscador) buscador.value = '';
+      _activarFiltroBtn('todos');
       renderPanelAdmin(data);
       if (estado) estado.textContent = data.clientes.length ? '' : 'Aún no hay clientes registrados.';
+      const ts = document.getElementById('adminTimestamp');
+      if (ts) ts.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     } catch (e) {
       if (estado) estado.textContent = 'Error: ' + e.message;
     }
@@ -10641,7 +10706,6 @@
 
   function renderPanelAdmin(data) {
     const mt = data.metrics || {};
-    const esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     const renderCards = (id, cards) => {
       const el = document.getElementById(id);
@@ -10657,9 +10721,18 @@
     // — Negocio —
     renderCards('adminMetricsBiz', [
       { label: 'Ingresos est./mes (MRR)', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2) : '0') + '€', color: 'var(--brasa)' },
-      { label: 'Activos de pago', valor: mt.activosPago || 0, color: '#27ae60', sub: `${mt.tasaConversion || 0}% de conversión` },
+      { label: 'Activos de pago', valor: mt.activosPago || 0, color: '#27ae60', sub: `${mt.tasaConversion || 0}% conversión` },
       { label: 'En oferta 0,99€', valor: mt.enOferta || 0, color: '#f0a500' },
       { label: 'Total registrados', valor: mt.registrados || 0, color: 'var(--blanco)' },
+    ]);
+
+    // — Esta semana vs anterior —
+    const trendColor = (n, p) => n > p ? '#27ae60' : n < p ? '#e74c3c' : 'var(--metal)';
+    const trendArrow = (n, p) => n > p ? ' ↑' : n < p ? ' ↓' : '';
+    const nReg = mt.nuevosEstaSemana || 0, pReg = mt.nuevosSemanaPasada || 0;
+    renderCards('adminMetricsTrend', [
+      { label: 'Nuevos registros', valor: nReg + trendArrow(nReg, pReg), color: trendColor(nReg, pReg), sub: `${pReg} semana anterior` },
+      { label: 'Nuevos pagos', valor: mt.nuevosPagosEstaSemana || 0, color: (mt.nuevosPagosEstaSemana || 0) > 0 ? '#27ae60' : 'var(--metal)' },
     ]);
 
     // — Embudo & Engagement —
@@ -10680,76 +10753,277 @@
       { label: 'Cancelados total', valor: mt.cancelados || 0, color: 'var(--metal)' },
     ]);
 
-    // — Distribuciones —
+    // — Distribuciones + Retención —
     const distEl = document.getElementById('adminDist');
     if (distEl) {
-      const renderDist = (titulo, items, total) => {
+      const totalClientes = data.clientes.length;
+      const renderDist = (titulo, items, tot) => {
         if (!items || items.length === 0) return '';
         const barras = items.map(it => {
-          const pct = total > 0 ? Math.round((it.count / total) * 100) : 0;
-          return `<div style="margin-bottom:8px">
+          const pct = tot > 0 ? Math.round((it.count / tot) * 100) : 0;
+          return `<div style="margin-bottom:9px">
             <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-              <span style="color:var(--blanco)">${esc(it.label)}</span>
-              <span style="color:var(--metal)">${it.count} (${pct}%)</span>
+              <span>${_esc(it.label)}</span>
+              <span style="color:var(--metal)">${it.count} · ${pct}%</span>
             </div>
-            <div style="background:#222;border-radius:4px;height:6px;overflow:hidden">
-              <div style="background:var(--brasa);height:100%;width:${pct}%;border-radius:4px;transition:width .3s"></div>
+            <div style="background:#222;border-radius:4px;height:5px;overflow:hidden">
+              <div style="background:var(--brasa);height:100%;width:${pct}%;border-radius:4px"></div>
             </div>
           </div>`;
         }).join('');
         return `<div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:16px">
           <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">${titulo}</div>
-          ${barras}
-        </div>`;
+          ${barras}</div>`;
       };
-      const totalClientes = data.clientes.length;
+
+      // Retención (clientes activos por semana del plan)
+      const ret = data.retencion || {};
+      const totalRet = (ret['1']||0)+(ret['2']||0)+(ret['3']||0)+(ret['4+']||0);
+      const retItems = [
+        { label: 'Semana 1', count: ret['1']||0 },
+        { label: 'Semana 2', count: ret['2']||0 },
+        { label: 'Semana 3', count: ret['3']||0 },
+        { label: 'Semana 4+', count: ret['4+']||0 },
+      ];
+      const retBarras = retItems.map(it => {
+        const pct = totalRet > 0 ? Math.round((it.count / totalRet) * 100) : 0;
+        const col = it.label === 'Semana 4+' ? '#27ae60' : 'var(--brasa)';
+        return `<div style="margin-bottom:9px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+            <span>${it.label}</span><span style="color:var(--metal)">${it.count} · ${pct}%</span>
+          </div>
+          <div style="background:#222;border-radius:4px;height:5px;overflow:hidden">
+            <div style="background:${col};height:100%;width:${pct}%;border-radius:4px"></div>
+          </div>
+        </div>`;
+      }).join('');
+      const retCard = `<div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:16px">
+        <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Retención por semana</div>
+        <div style="font-size:11px;color:var(--metal);margin-bottom:12px">Los activos en semana 4+ rara vez cancelan</div>
+        ${retBarras}</div>`;
+
       distEl.innerHTML =
         renderDist('Deporte', data.distDeporte, totalClientes) +
         renderDist('Objetivo', data.distObjetivo, totalClientes) +
-        renderDist('Tipo de plan', data.distPlan, totalClientes);
+        renderDist('Tipo de plan', data.distPlan, totalClientes) +
+        retCard;
     }
 
-    // — Tabla de clientes —
-    const total = document.getElementById('adminTotalClientes');
-    if (total) total.textContent = data.clientes.length;
+    // — Totales en cabecera de tabla —
+    const totalEl = document.getElementById('adminTotalClientes');
+    if (totalEl) totalEl.textContent = data.clientes.length;
 
-    const th = (t, tip) => `<th title="${tip||''}" style="text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap;cursor:default">${t}</th>`;
-    const td = (c) => `<td style="padding:10px 12px;border-bottom:1px solid #1c1c1c;white-space:nowrap">${c}</td>`;
+    renderTablaAdmin();
+  }
+
+  // Renderiza solo la tabla (filtros + orden sin volver a la API)
+  function renderTablaAdmin() {
+    if (!_adminDatos) return;
+    const { clientes } = _adminDatos;
+
+    // Filtro por tipo
+    let lista = clientes.filter(c => {
+      switch (_adminFiltro.tipo) {
+        case 'alertas': return c.alerta === 'red' || c.alerta === 'orange';
+        case 'activos': return ['active','trialing'].includes(c.estado);
+        case 'sinpago': return !['active','trialing','past_due'].includes(c.estado);
+        case 'nuevos':  return c.esNuevo;
+        default: return true;
+      }
+    });
+
+    // Filtro por texto
+    if (_adminFiltro.texto) {
+      const q = _adminFiltro.texto.toLowerCase();
+      lista = lista.filter(c =>
+        (c.nombre || '').toLowerCase().includes(q) ||
+        (c.email  || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Orden
+    lista = [...lista].sort((a, b) => {
+      let va = a[_adminSort.col], vb = b[_adminSort.col];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va == null) va = '';
+      if (vb == null) vb = '';
+      return va < vb ? -_adminSort.dir : va > vb ? _adminSort.dir : 0;
+    });
+
+    const filtroEl = document.getElementById('adminTotalFiltro');
+    if (filtroEl) filtroEl.textContent = lista.length;
+
     const tabla = document.getElementById('adminTabla');
     if (!tabla) return;
 
+    const sortIcon = (col) => _adminSort.col === col
+      ? (_adminSort.dir === 1 ? ' ↑' : ' ↓') : '';
+
+    const thS = (t, col) => {
+      const base = 'text-align:left;padding:10px 12px;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap;cursor:pointer;user-select:none';
+      const act  = _adminSort.col === col ? ';color:var(--brasa)' : '';
+      return `<th style="${base}${act}" onclick="ordenarAdminCol('${col}')">${t}${sortIcon(col)}</th>`;
+    };
+    const thN = (t) => `<th style="text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap">${t}</th>`;
+    const td  = (c) => `<td style="padding:10px 12px;border-bottom:1px solid #1c1c1c;white-space:nowrap">${c}</td>`;
+
     const alertaDot = (c) => {
-      const colores = { red: '#e74c3c', orange: '#e67e22', yellow: '#f0a500', green: '#27ae60', none: '#333' };
-      const col = colores[c.alerta] || '#333';
-      return `<span title="${esc(c.alertaRazon)}" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${col};margin-right:6px;vertical-align:middle;flex-shrink:0"></span>`;
+      const cols = { red:'#e74c3c', orange:'#e67e22', yellow:'#f0a500', green:'#27ae60', none:'#2a2a2a' };
+      return `<span title="${_esc(c.alertaRazon)}" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cols[c.alerta]||'#2a2a2a'};cursor:help"></span>`;
     };
 
-    const cols = ['', 'Cliente', 'Email', 'Alta', 'Estado', 'Plan', 'Objetivo', 'Deporte', 'Entrenos', 'Semana', 'Renueva', 'Lesión'];
-    const cabecera = `<thead><tr>${cols.map((c, i) => th(c, i===0 ? 'Alerta de salud del cliente' : '')).join('')}</tr></thead>`;
+    const cabecera = `<thead><tr>
+      ${thN('')}
+      ${thS('Cliente','nombre')}
+      ${thN('Email')}
+      ${thS('Alta','alta')}
+      ${thN('Estado')}
+      ${thN('Plan')}
+      ${thN('Objetivo')}
+      ${thN('Deporte')}
+      ${thS('Entrenos','entrenosTotal')}
+      ${thS('Semana','semanaActual')}
+      ${thS('Renueva','renovacion')}
+      ${thN('Lesión')}
+      ${thN('')}
+    </tr></thead>`;
 
-    const filas = data.clientes.map(c => {
-      const rowBg = c.alerta === 'red' ? 'background:rgba(231,76,60,.05)' : c.alerta === 'orange' ? 'background:rgba(230,126,34,.04)' : '';
-      return `<tr style="${rowBg}">
-        ${td(alertaDot(c))}
-        ${td('<strong>' + esc(c.nombre) + '</strong>')}
-        ${td('<span style="color:var(--metal);font-size:12px">' + esc(c.email) + '</span>')}
-        ${td('<span style="color:var(--metal)">' + _fmtFecha(c.alta) + '</span>')}
-        ${td(_estadoLegible(c))}
-        ${td('<span style="color:var(--metal)">' + esc(c.tipoPlan) + '</span>')}
-        ${td(esc(c.objetivo))}
-        ${td(esc(c.deporte))}
-        ${td(c.entrenosTotal > 0
-          ? '<span style="color:#27ae60;font-weight:600">' + c.entrenosTotal + '</span>'
-          : '<span style="color:var(--metal)">0</span>')}
-        ${td('<span style="color:var(--metal)">Sem. ' + (c.semanaActual || 1) + '</span>')}
-        ${td(_fmtFecha(c.renovacion))}
-        ${td(c.lesion
-          ? '<span style="color:#e67e22;font-size:11px">Con lesión</span>'
-          : '<span style="color:var(--metal)">—</span>')}
-      </tr>`;
-    }).join('');
+    const filas = lista.length === 0
+      ? `<tr><td colspan="13" style="text-align:center;padding:30px;color:var(--metal);font-size:13px">No hay clientes que coincidan con el filtro.</td></tr>`
+      : lista.map((c, idx) => {
+          const rowBg = c.alerta==='red' ? 'background:rgba(231,76,60,.05)' : c.alerta==='orange' ? 'background:rgba(230,126,34,.04)' : '';
+          const badgeNuevo = c.esNuevo ? '<span style="background:#1a0d06;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:1px 5px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace">NUEVO</span>' : '';
+          const realIdx = clientes.indexOf(c);
+          return `<tr style="${rowBg};cursor:pointer" onclick="verDetalleCliente(${realIdx})">
+            ${td(alertaDot(c))}
+            ${td('<strong>' + _esc(c.nombre) + '</strong>' + badgeNuevo)}
+            ${td('<span style="color:var(--metal);font-size:12px">' + _esc(c.email) + '</span>')}
+            ${td('<span style="color:var(--metal)">' + _fmtFecha(c.alta) + '</span>')}
+            ${td(_estadoLegible(c))}
+            ${td('<span style="color:var(--metal)">' + _esc(c.tipoPlan) + '</span>')}
+            ${td(_esc(c.objetivo))}
+            ${td(_esc(c.deporte))}
+            ${td(c.entrenosTotal > 0
+              ? '<span style="color:#27ae60;font-weight:600">' + c.entrenosTotal + '</span>'
+              : '<span style="color:var(--metal)">0</span>')}
+            ${td('<span style="color:var(--metal)">Sem. ' + (c.semanaActual || 1) + '</span>')}
+            ${td(_fmtFecha(c.renovacion))}
+            ${td(c.lesion
+              ? '<span style="color:#e67e22;font-size:11px">Con lesión</span>'
+              : '<span style="color:var(--metal)">—</span>')}
+            ${td('<a href="mailto:' + _esc(c.email) + '" onclick="event.stopPropagation()" title="Enviar email" style="color:var(--metal);text-decoration:none;font-size:14px">✉</a>')}
+          </tr>`;
+        }).join('');
 
     tabla.innerHTML = cabecera + '<tbody>' + filas + '</tbody>';
+  }
+
+  function buscarAdmin(v) {
+    _adminFiltro.texto = v || '';
+    renderTablaAdmin();
+  }
+
+  function filtrarAdminTipo(tipo) {
+    _adminFiltro.tipo = tipo;
+    _activarFiltroBtn(tipo);
+    renderTablaAdmin();
+  }
+
+  function _activarFiltroBtn(tipo) {
+    document.querySelectorAll('.jarvis-filtro').forEach(b => {
+      b.classList.toggle('jarvis-filtro-active', b.textContent.trim().toLowerCase().includes(
+        tipo === 'todos' ? 'todos' :
+        tipo === 'alertas' ? 'alertas' :
+        tipo === 'activos' ? 'activos' :
+        tipo === 'sinpago' ? 'sin pago' : 'nuevos'
+      ));
+    });
+  }
+
+  function ordenarAdminCol(col) {
+    if (_adminSort.col === col) _adminSort.dir *= -1;
+    else { _adminSort.col = col; _adminSort.dir = 1; }
+    renderTablaAdmin();
+  }
+
+  // Exportar CSV con los datos filtrados/ordenados actuales
+  function exportarAdminCSV() {
+    if (!_adminDatos) return;
+    const cols = ['Nombre','Email','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Lesión','Alerta'];
+    const fila = (c) => [
+      c.nombre, c.email,
+      c.alta ? new Date(c.alta).toLocaleDateString('es-ES') : '',
+      c.enOferta ? 'Oferta 0,99€' : c.estado,
+      c.tipoPlan, c.objetivo, c.deporte,
+      c.entrenosTotal, c.semanaActual,
+      c.renovacion ? new Date(c.renovacion).toLocaleDateString('es-ES') : '',
+      c.lesion ? 'Sí' : 'No',
+      c.alertaRazon || ''
+    ].map(v => '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"').join(',');
+
+    const csv = [cols.join(','), ..._adminDatos.clientes.map(fila)].join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'jarvis-clientes-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  // Modal de detalle de cliente
+  function verDetalleCliente(idx) {
+    if (!_adminDatos) return;
+    const c = _adminDatos.clientes[idx];
+    if (!c) return;
+    document.getElementById('jcNombre').textContent = c.nombre || '—';
+    document.getElementById('jcEmail').textContent  = c.email  || '—';
+    const mailto = document.getElementById('jcMailto');
+    if (mailto) mailto.href = 'mailto:' + (c.email || '');
+
+    const row = (label, val, color) => `
+      <div class="jc-row">
+        <div><div class="jc-label">${label}</div><div class="jc-val" style="${color?'color:'+color:''}">${val || '—'}</div></div>
+      </div>`;
+
+    const estadoColor = c.enOferta ? '#f0a500' : c.estado==='past_due' ? '#e74c3c' :
+      ['active','trialing'].includes(c.estado) ? '#27ae60' : 'var(--metal)';
+    const estadoTexto = c.enOferta ? 'Oferta 0,99€' : c.cancelaAlFinal ? 'Cancela al final' :
+      c.estado === 'past_due' ? 'Pago fallido' :
+      c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
+      c.estado === 'canceled' ? 'Cancelado' : c.estado || 'Sin pago';
+
+    document.getElementById('jcBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${row('Estado', estadoTexto, estadoColor)}
+        ${row('Plan', c.tipoPlan)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${row('Alta', _fmtFecha(c.alta))}
+        ${row('Renueva', _fmtFecha(c.renovacion))}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${row('Objetivo', c.objetivo)}
+        ${row('Deporte', c.deporte)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        ${row('Semana', c.semanaActual || 1)}
+        ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? '#27ae60' : null)}
+        ${row('Peso actual', c.peso ? c.peso + ' kg' : '—')}
+      </div>
+      ${c.lesion ? row('Lesión', c.lesionDetalle || 'Sí', '#e67e22') : ''}
+      ${c.alergia && c.alergia !== 'No' ? row('Alergia', c.alergiaOtra || c.alergia) : ''}
+      ${c.medicacion && c.medicacion !== 'No' ? row('Medicación', c.medicacion) : ''}
+      ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
+        c.alerta==='red' ? '#e74c3c' : c.alerta==='orange' ? '#e67e22' : '#f0a500') : ''}
+      ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#27ae60' : 'var(--metal)')}
+    `;
+    const modal = document.getElementById('modalJarvisCliente');
+    if (modal) modal.classList.add('visible');
+  }
+
+  function cerrarDetalleCliente() {
+    const modal = document.getElementById('modalJarvisCliente');
+    if (modal) modal.classList.remove('visible');
   }
 
   async function cancelarSuscripcion() {

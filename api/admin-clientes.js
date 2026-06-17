@@ -64,32 +64,26 @@ module.exports = async (req, res) => {
 
   const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
   const mrrMap = getMrrMap();
+
   const ahora = new Date();
+  const hace7d = new Date(ahora.getTime() - 7 * 86400000);
+  const hace14d = new Date(ahora.getTime() - 14 * 86400000);
   const en7d = new Date(ahora.getTime() + 7 * 86400000);
 
   let mrr = 0;
-  let sumaDiasPago = 0;
-  let contadorDiasPago = 0;
-  let sumEntrenosActivos = 0;
-  let contEntrenosActivos = 0;
+  let sumaDiasPago = 0, contadorDiasPago = 0;
+  let sumEntrenosActivos = 0, contEntrenosActivos = 0;
 
   const m = {
-    registrados: 0,
-    onboardingCompletado: 0,
-    activosPago: 0,
-    enOferta: 0,
-    cancelanAlFinal: 0,
-    pagoFallido: 0,
-    sinSuscripcion: 0,
-    cancelados: 0,
-    renovacionProximos7d: 0,
-    sinOnboarding14d: 0,
-    ceroEntrenosActivos: 0,
-    tasaConversion: 0,
-    tiempoMedioPago: null,
-    mediaEntrenos: 0,
-    mrrEstimado: 0,
+    registrados: 0, onboardingCompletado: 0,
+    activosPago: 0, enOferta: 0, cancelanAlFinal: 0,
+    pagoFallido: 0, sinSuscripcion: 0, cancelados: 0,
+    renovacionProximos7d: 0, sinOnboarding14d: 0, ceroEntrenosActivos: 0,
+    tasaConversion: 0, tiempoMedioPago: null, mediaEntrenos: 0, mrrEstimado: 0,
+    nuevosEstaSemana: 0, nuevosSemanaPasada: 0, nuevosPagosEstaSemana: 0,
   };
+
+  const retencion = { '1': 0, '2': 0, '3': 0, '4+': 0 };
 
   const clientes = (perfiles || []).map(p => {
     const ud = p.userdata || {};
@@ -99,6 +93,10 @@ module.exports = async (req, res) => {
     const enOferta = activo && offerPriceId && s?.plan === offerPriceId;
     const cancela = activo && !!s?.cancel_at_period_end;
     const diasDesdeAlta = diasEntre(p.created_at, ahora);
+    const altaDate = new Date(p.created_at);
+    const esNuevo = altaDate >= hace7d;
+    const esSemanaPasada = !esNuevo && altaDate >= hace14d;
+
     const entrenosTotal = Array.isArray(ud.historialEntrenos)
       ? ud.historialEntrenos.length
       : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
@@ -107,30 +105,34 @@ module.exports = async (req, res) => {
     const renovaProximo = activo && renovacion && new Date(renovacion) <= en7d && new Date(renovacion) >= ahora;
     const sinOnboarding14d = !ud.onboardingCompletado && diasDesdeAlta >= 14;
 
-    // Alerta: rojo > amarillo > verde > gris
-    let alerta = 'none';
-    let alertaRazon = '';
-    if (status === 'past_due') { alerta = 'red'; alertaRazon = 'Pago fallido'; }
-    else if (sinOnboarding14d) { alerta = 'red'; alertaRazon = '+14 días sin onboarding'; }
+    // Alerta
+    let alerta = 'none', alertaRazon = '';
+    if (status === 'past_due')       { alerta = 'red';    alertaRazon = 'Pago fallido'; }
+    else if (sinOnboarding14d)       { alerta = 'red';    alertaRazon = '+14 días sin onboarding'; }
     else if (activo && entrenosTotal === 0) { alerta = 'orange'; alertaRazon = 'Activo, 0 entrenos'; }
-    else if (cancela) { alerta = 'orange'; alertaRazon = 'Cancela al vencer'; }
+    else if (cancela)                { alerta = 'orange'; alertaRazon = 'Cancela al vencer'; }
     else if (renovaProximo && !cancela) { alerta = 'yellow'; alertaRazon = 'Renueva en 7 días'; }
-    else if (activo && entrenosTotal > 0) { alerta = 'green'; alertaRazon = 'Activo y entrenando'; }
+    else if (activo && entrenosTotal > 0)  { alerta = 'green';  alertaRazon = 'Activo y entrenando'; }
 
-    // Tiempo desde registro hasta primera suscripción
+    // Tiempo hasta pago
     if (activo && s?.current_period_start && p.created_at) {
       const dias = diasEntre(p.created_at, s.current_period_start);
-      if (dias !== null && dias >= 0 && dias <= 365) {
-        sumaDiasPago += dias;
-        contadorDiasPago++;
-      }
+      if (dias !== null && dias >= 0 && dias <= 365) { sumaDiasPago += dias; contadorDiasPago++; }
     }
 
-    // Promedio de entrenos en activos
-    if (activo) {
-      sumEntrenosActivos += entrenosTotal;
-      contEntrenosActivos++;
+    // Nuevos pagos esta semana
+    if (activo && s?.current_period_start && new Date(s.current_period_start) >= hace7d) {
+      m.nuevosPagosEstaSemana++;
     }
+
+    // Retención por semana (solo activos, excluye oferta)
+    if (activo && !enOferta) {
+      const sem = semanaActual >= 4 ? '4+' : String(semanaActual);
+      retencion[sem]++;
+    }
+
+    // Promedio entrenos activos
+    if (activo) { sumEntrenosActivos += entrenosTotal; contEntrenosActivos++; }
 
     // Métricas globales
     m.registrados++;
@@ -145,21 +147,29 @@ module.exports = async (req, res) => {
     if (sinOnboarding14d) m.sinOnboarding14d++;
     if (activo && entrenosTotal === 0) m.ceroEntrenosActivos++;
     if (activo && !enOferta && mrrMap[s.plan]) mrr += mrrMap[s.plan];
+    if (esNuevo) m.nuevosEstaSemana++;
+    if (esSemanaPasada) m.nuevosSemanaPasada++;
 
     return {
-      nombre: p.nombre || '—',
-      email: p.email || '—',
-      alta: p.created_at,
+      nombre:       p.nombre || '—',
+      email:        p.email  || '—',
+      alta:         p.created_at,
       diasDesdeAlta,
-      estado: status,
-      enOferta: !!enOferta,
+      esNuevo,
+      estado:       status,
+      enOferta:     !!enOferta,
       cancelaAlFinal: cancela,
       renovacion,
-      objetivo: ud.objetivo || '—',
-      deporte: ud.deporte || '—',
-      tipoPlan: ud.tipoPlan || '—',
-      lesion: ud.lesion === 'Sí' || ud.lesion === 'si' || ud.lesion === true,
-      onboarding: !!ud.onboardingCompletado,
+      objetivo:     ud.objetivo    || '—',
+      deporte:      ud.deporte     || '—',
+      tipoPlan:     ud.tipoPlan    || '—',
+      lesion:       ud.lesion === 'Sí' || ud.lesion === 'si' || ud.lesion === true,
+      lesionDetalle: ud.lesionDetalle || null,
+      alergia:      ud.alergia    || null,
+      alergiaOtra:  ud.alergiaOtra || null,
+      medicacion:   ud.medicacion  || null,
+      peso:         ud.peso || ud.pesoActual || null,
+      onboarding:   !!ud.onboardingCompletado,
       entrenosTotal,
       semanaActual,
       alerta,
@@ -167,14 +177,14 @@ module.exports = async (req, res) => {
     };
   });
 
-  m.mrrEstimado = Math.round(mrr * 100) / 100;
-  m.tasaConversion = m.registrados > 0 ? Math.round((m.activosPago / m.registrados) * 100) : 0;
-  m.tiempoMedioPago = contadorDiasPago > 0 ? Math.round(sumaDiasPago / contadorDiasPago) : null;
-  m.mediaEntrenos = contEntrenosActivos > 0 ? Math.round((sumEntrenosActivos / contEntrenosActivos) * 10) / 10 : 0;
+  m.mrrEstimado      = Math.round(mrr * 100) / 100;
+  m.tasaConversion   = m.registrados > 0 ? Math.round((m.activosPago / m.registrados) * 100) : 0;
+  m.tiempoMedioPago  = contadorDiasPago > 0 ? Math.round(sumaDiasPago / contadorDiasPago) : null;
+  m.mediaEntrenos    = contEntrenosActivos > 0 ? Math.round((sumEntrenosActivos / contEntrenosActivos) * 10) / 10 : 0;
 
-  const distDeporte = distribucion(clientes.filter(c => c.deporte !== '—'), 'deporte');
+  const distDeporte  = distribucion(clientes.filter(c => c.deporte  !== '—'), 'deporte');
   const distObjetivo = distribucion(clientes.filter(c => c.objetivo !== '—'), 'objetivo');
-  const distPlan = distribucion(clientes.filter(c => c.tipoPlan !== '—'), 'tipoPlan');
+  const distPlan     = distribucion(clientes.filter(c => c.tipoPlan !== '—'), 'tipoPlan');
 
-  res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan });
+  res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion });
 };
