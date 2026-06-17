@@ -1590,6 +1590,69 @@
     margin-top: -2px;
   }
 
+  /* ── Widget de peso interactivo (cambiar plan) ── */
+  .cp-peso-widget {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #0e0e0e;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 10px 14px;
+    max-width: 280px;
+    transition: border-color .2s;
+  }
+  .cp-peso-widget:focus-within { border-color: var(--brasa); }
+  .cp-peso-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid #2e2e2e;
+    background: #1a1a1a;
+    color: var(--blanco);
+    font-size: 22px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s, color .15s, transform .1s;
+    flex-shrink: 0;
+    line-height: 1;
+    user-select: none;
+  }
+  .cp-peso-btn:hover { border-color: var(--brasa); color: var(--brasa); background: rgba(232,73,15,.1); }
+  .cp-peso-btn:active { transform: scale(.88); }
+  .cp-peso-num {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+  }
+  .cp-peso-num input[type="number"] {
+    background: transparent;
+    border: none;
+    color: var(--blanco);
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    width: 90px;
+    -moz-appearance: textfield;
+  }
+  .cp-peso-num input[type="number"]::-webkit-inner-spin-button,
+  .cp-peso-num input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .cp-peso-num span { font-size: 15px; color: #888; }
+  .cp-peso-slider {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    margin-top: 10px;
+    accent-color: var(--brasa);
+    cursor: pointer;
+    height: 4px;
+  }
+
   .field input,
   .field select,
   .field textarea {
@@ -4348,11 +4411,15 @@
       </div>
       <div class="field">
         <label>¿Cuál es tu peso actual?</label>
-        <div style="display:flex;align-items:center;gap:10px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 14px;max-width:200px">
-          <input type="number" id="cp-peso" placeholder="—" min="30" max="300" step="0.1" style="flex:1;background:transparent;border:none;color:var(--blanco);font-size:18px;font-weight:700;text-align:center;outline:none">
-          <span style="font-size:14px;color:#aaa">kg</span>
+        <div class="cp-peso-widget">
+          <button class="cp-peso-btn" type="button" onclick="ajustarPeso(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">−</button>
+          <div class="cp-peso-num">
+            <input type="number" id="cp-peso" placeholder="70" min="30" max="300" step="0.5" oninput="sincronizarPesoSlider()">
+            <span>kg</span>
+          </div>
+          <button class="cp-peso-btn" type="button" onclick="ajustarPeso(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">+</button>
         </div>
-        <span class="field-hint">Recalculamos tus calorías y proteína con tu peso de hoy. No es lo mismo el plan a 75 kg que a 80 kg.</span>
+        <input type="range" id="cp-pesoSlider" min="30" max="200" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()">
       </div>
       <div class="field">
         <label>¿Qué enfoque nutricional prefieres?</label>
@@ -9355,6 +9422,33 @@
     if (sec) sec.style.display = ocultar ? 'none' : '';
   }
 
+  let _pesoRepInterval = null;
+  function ajustarPeso(delta) {
+    const inp = document.getElementById('cp-peso');
+    const val = parseFloat(inp.value) || 70;
+    const nuevo = Math.min(300, Math.max(30, Math.round((val + delta) * 2) / 2));
+    inp.value = nuevo % 1 === 0 ? nuevo : nuevo.toFixed(1);
+    sincronizarPesoSlider();
+  }
+  function iniciarRepeticion(delta) {
+    pararRepeticion();
+    _pesoRepInterval = setInterval(() => ajustarPeso(delta), 120);
+  }
+  function pararRepeticion() {
+    clearInterval(_pesoRepInterval);
+    _pesoRepInterval = null;
+  }
+  function sincronizarPesoSlider() {
+    const inp = document.getElementById('cp-peso');
+    const sl  = document.getElementById('cp-pesoSlider');
+    if (sl && inp.value) sl.value = parseFloat(inp.value);
+  }
+  function sincronizarPesoInput() {
+    const sl  = document.getElementById('cp-pesoSlider');
+    const inp = document.getElementById('cp-peso');
+    if (sl && inp) inp.value = sl.value;
+  }
+
   function abrirModalCambiarPlan() {
     enfoqueMacrosManualCambio = false;
     const tipoPlanActual = userData.tipoPlan || 'Plan completo: entrenamiento + nutrición';
@@ -9366,7 +9460,7 @@
     actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
     preseleccionarRadio('cp-objetivo', userData.objetivo);
     const inputPesoCp = document.getElementById('cp-peso');
-    if (inputPesoCp) inputPesoCp.value = userData.peso || '';
+    if (inputPesoCp) { inputPesoCp.value = userData.peso || ''; sincronizarPesoSlider(); }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
