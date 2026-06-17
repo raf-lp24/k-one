@@ -4133,6 +4133,7 @@
     <h2 class="auth-title">Crear cuenta</h2>
     <p class="auth-subtitle">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
 
+    <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
       <label>Nombre</label>
       <div class="auth-field-wrap">
@@ -4180,7 +4181,8 @@
     </label>
     <div class="auth-error" id="err-terminos">Debes aceptar los términos para continuar</div>
 
-    <button class="btn-primary auth-submit" onclick="registrar()">Crear mi cuenta →</button>
+    <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
+    </form>
     <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
   </div>
 </div>
@@ -4203,6 +4205,7 @@
       </div>
     </div>
 
+    <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
     <div class="auth-field">
       <label>Email</label>
       <div class="auth-field-wrap">
@@ -4219,7 +4222,8 @@
     </div>
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
 
-    <button class="btn-primary auth-submit" onclick="login()" style="margin-top:8px">Entrar →</button>
+    <button type="submit" class="btn-primary auth-submit" style="margin-top:8px">Entrar →</button>
+    </form>
     <p class="auth-forgot" onclick="document.getElementById('modalForgot').classList.add('visible')"><span>¿Olvidaste tu contraseña?</span></p>
     <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
   </div>
