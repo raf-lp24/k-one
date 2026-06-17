@@ -1756,6 +1756,29 @@
     color: var(--blanco-puro);
   }
 
+  .radio-opt[data-hint]::after {
+    content: attr(data-hint);
+    display: block;
+    font-size: 11px;
+    color: var(--ceniza);
+    font-weight: 400;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .radio-opt.selected[data-hint]::after { color: rgba(255,255,255,0.55); }
+
+  #rutinaPreviewWrap { display:none; animation: fadeInDown .25s ease; }
+  .rutina-preview {
+    background: rgba(232,73,15,0.07);
+    border: 1px solid rgba(232,73,15,0.28);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .rutina-preview-label { font-size: 11px; font-weight: 700; color: var(--brasa); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .rutina-preview-split { font-size: 15px; font-weight: 700; color: var(--blanco-puro); margin-bottom: 6px; }
+  .rutina-preview-desc { font-size: 12px; color: var(--ceniza); line-height: 1.55; }
+  .rutina-preview-nota { font-size: 11px; color: var(--brasa); margin-top: 8px; font-style: italic; display: none; }
+
   .radio-opt input, .check-opt input { display: none; }
 
   .form-nav {
@@ -5510,9 +5533,17 @@
           <div class="field">
             <label>¿Cuál es tu nivel actual? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="nivel">
-              <div class="radio-opt" onclick="selectRadio(this,'nivel')">Principiante, empiezo desde cero</div>
-              <div class="radio-opt" onclick="selectRadio(this,'nivel')">Llevo algo de tiempo</div>
-              <div class="radio-opt" onclick="selectRadio(this,'nivel')">Avanzado</div>
+              <div class="radio-opt" onclick="selectRadio(this,'nivel')" data-hint="Menos de 3 meses con rutina estructurada, o nunca he entrenado con método">Principiante, empiezo desde cero</div>
+              <div class="radio-opt" onclick="selectRadio(this,'nivel')" data-hint="3+ meses yendo con regularidad (aunque te notes novato/a — elige esta si ya llevas meses en el gym)">Llevo algo de tiempo</div>
+              <div class="radio-opt" onclick="selectRadio(this,'nivel')" data-hint="1-2+ años dominando los básicos: sentadilla, peso muerto, press...">Avanzado</div>
+            </div>
+          </div>
+          <div id="rutinaPreviewWrap">
+            <div class="rutina-preview">
+              <div class="rutina-preview-label">Tu rutina estimada</div>
+              <div class="rutina-preview-split" id="rpSplit">—</div>
+              <div class="rutina-preview-desc" id="rpDesc"></div>
+              <div class="rutina-preview-nota" id="rpNota"></div>
             </div>
           </div>
           <div class="field">
@@ -6022,6 +6053,61 @@
     document.getElementById(group)?.classList.remove('error');
     if (group === 'deporte') updateLugarOptions(el.textContent.trim(), 'lugar');
     if (group === 'cp-deporte') updateLugarOptions(el.textContent.trim(), 'cp-lugar');
+    if (['deporte','diasEntreno','nivel','lugar'].includes(group)) actualizarRutinaPreview();
+  }
+
+  function actualizarRutinaPreview() {
+    const getR = id => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
+    const deporte = getR('deporte');
+    const dias    = getR('diasEntreno');
+    const nivel   = getR('nivel');
+    const lugar   = getR('lugar');
+    const wrap    = document.getElementById('rutinaPreviewWrap');
+    if (!wrap) return;
+    if (!deporte || !dias || !nivel) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+
+    const numDias       = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
+    const esPrincipiante = nivel.includes('Principiante');
+    const sinMat         = lugar.includes('sin material');
+    const esGym          = deporte.includes('Gimnasio') || deporte.includes('Fuerza') || deporte.includes('Combinación') || deporte.includes('casa');
+
+    let split = '', desc = '', nota = '';
+
+    if (deporte.includes('Running')) {
+      split = 'Plan de Running';
+      desc  = 'Sesiones de rodaje por zonas de frecuencia cardíaca (base aeróbica, tempo, intervalos), adaptadas a tu nivel y tiempo disponible.';
+    } else if (deporte.includes('Hyrox')) {
+      split = 'Plan Hyrox';
+      desc  = 'Combina trabajo de fuerza funcional y resistencia específica (ski erg, sled, remo, farmer carry...) estructurado por semanas progresivas.';
+    } else if (deporte.includes('CrossFit')) {
+      split = 'Plan CrossFit';
+      desc  = 'WODs diarios con ciclos de fuerza (squat, press, deadlift), habilidades gimnásticas y acondicionamiento metabólico (AMRAP, EMOM, For Time).';
+    } else if (numDias <= 2) {
+      split = 'Full Body × ' + numDias;
+      desc  = 'Con ' + numDias + ' día' + (numDias > 1 ? 's' : '') + ' a la semana, entrenas el cuerpo completo en cada sesión — es la forma más eficiente de estimular todos los músculos con tan poco tiempo.';
+    } else if (esPrincipiante && numDias === 3) {
+      split = 'Full Body × 3';
+      desc  = '3 días de cuerpo completo es la distribución óptima para principiantes: alta frecuencia por músculo, volumen controlado y tiempo suficiente para recuperar y fijar la técnica antes de la siguiente sesión.';
+    } else if (esPrincipiante && numDias >= 4) {
+      split = sinMat ? 'Upper / Lower (bodyweight)' : 'Upper / Lower';
+      desc  = 'Con ' + numDias + ' días disponibles, el Upper/Lower es el salto ideal desde el Full Body: entrenas tren superior y tren inferior en días alternos, dando 2 estímulos semanales a cada músculo con volumen moderado y énfasis en la técnica.';
+      nota  = 'Si llevas ya 3-4 meses yendo al gym con regularidad aunque te notes novato/a, cambia el nivel a "Llevo algo de tiempo" — te generará un plan más retador.';
+    } else if (numDias === 3) {
+      split = 'Push / Pull / Legs';
+      desc  = 'Lunes Empuje (pecho, hombros, tríceps) · Miércoles Tracción (espalda, bíceps) · Viernes Piernas y glúteos. Alta eficiencia para 3 días de entrenamiento.';
+    } else if (numDias === 4) {
+      split = 'Split clásico · 4 días';
+      desc  = 'Pecho+Tríceps / Espalda+Bíceps / Piernas+Glúteos / Hombros+Core. Cada grupo muscular tiene su sesión dedicada con 48-72 h de recuperación antes del siguiente estímulo.';
+    } else {
+      split = 'Split clásico · 5 días';
+      desc  = 'Plan de 5 días con sesiones especializadas por grupo muscular y una sesión extra de accesorios o circuito metabólico para maximizar el volumen semanal.';
+    }
+
+    document.getElementById('rpSplit').textContent = split;
+    document.getElementById('rpDesc').textContent  = desc;
+    const notaEl = document.getElementById('rpNota');
+    if (notaEl) { notaEl.textContent = nota; notaEl.style.display = nota ? 'block' : 'none'; }
   }
 
   function updateLugarOptions(deporte, grupoId) {
@@ -7275,7 +7361,8 @@
 
       if (sinMaterial) {
         // ── EN CASA SIN MATERIAL → Bodyweight puro adaptado por nivel ──
-        if (esPrincipiante || numDias <= 2) {
+        // ≤2 días (cualquier nivel) o principiante con 3 días → Full Body bodyweight
+        if (numDias <= 2 || (esPrincipiante && numDias === 3)) {
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Sin material",
              detalle:`Sin material · Sentadilla ${sVol}×15, flexiones ${sVol}×10 (rodillas ok si necesitas), puente de glúteo ${sVol}×20, plancha ${sVol}×30s, mountain climbers ${sVol}×20${finisher3}`,
@@ -7341,8 +7428,8 @@
 
       } else {
         // ── GIMNASIO / EN CASA CON MATERIAL → pesos libres + máquinas ──
-        // 2 días: Full Body × 2 siempre (no PPL sin día de piernas)
-        if (esPrincipiante || numDias <= 2) {
+        // ≤2 días (cualquier nivel) o principiante con 3 días → Full Body, máxima frecuencia
+        if (numDias <= 2 || (esPrincipiante && numDias === 3)) {
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Patrones básicos",
              detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
@@ -7363,8 +7450,32 @@
              etiqueta: numDias >= 4 ? "Fuerza" : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
+        } else if (esPrincipiante && numDias >= 4) {
+          // Principiante + 4-5 días → Upper/Lower: 2× frecuencia, volumen moderado, foco en técnica
+          semana = [
+            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Upper A · Empuje + tirón",
+             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press mancuernas en hombro (agarre neutro) 3×12, remo mancuerna a un brazo 3×10/lado, fondos en banco (tríceps) 3×15, curl bíceps alterno 3×12, plancha 3×30s${finisher3}`,
+             etiqueta:"Empuje+Tracción"},
+            {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
+             detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
+             etiqueta:"Piernas"},
+            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Variante",
+             detalle:`Pecho, espalda, hombros, brazos · Press inclinado mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales mancuernas 3×15, remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15, curl martillo 3×12, plancha lateral 3×30s/lado${finisher3}`,
+             etiqueta:"Empuje+Tracción"},
+            {dia:"Viernes", tipo:"Entrenamiento", resumen:"Lower B · Isquios + glúteos",
+             detalle:`Piernas y glúteos · Prensa de piernas 3×12, peso muerto sumo con mancuernas 3×12, hip thrust a una pierna 3×10/pierna, femoral tumbado en máquina 3×12, step-ups controlados 3×10/pierna, gemelos en prensa o máquina 3×20${finisher3}`,
+             etiqueta:"Piernas"},
+            {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+             resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico · Full Body ligero" : "Core + accesorios") : "Descanso activo",
+             detalle: numDias >= 5 ? (perdidaGrasa
+               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo mancuerna/lado, 30s plancha. Descanso 90s entre rondas${finisher3}`
+               : `Core y complementos · Peso muerto con mancuernas 3×10, jalón en polea 3×10, press en máquina 3×10, plancha 3×40s, elevación de piernas en barra o banco 3×15, plancha lateral 3×30s/lado`) : "",
+             etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
+            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+          ];
         } else if (numDias === 3) {
-          // 3 días → Push / Pull / Legs (orden correcto de recovery)
+          // Intermedio/Avanzado + 3 días → Push / Pull / Legs (orden correcto de recovery)
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
              detalle: sesionCorta
@@ -7387,7 +7498,7 @@
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         } else {
-          // 4-5 días → Bro split diferenciado por objetivo
+          // Intermedio/Avanzado + 4-5 días → Split clásico diferenciado por objetivo
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps",
              detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, fondos 3×10, extensión de tríceps en polea 3×12, press francés 3×10${finisher4}`,
