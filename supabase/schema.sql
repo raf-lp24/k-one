@@ -158,12 +158,34 @@ create table if not exists public.webhook_events (
   processed_at timestamptz not null default now()
 );
 
--- Sin RLS ni políticas de usuario: solo el service role puede escribir aquí.
--- (No necesita ALTER TABLE ENABLE ROW LEVEL SECURITY porque el service role
---  bypasea RLS por defecto en Supabase.)
+-- RLS activado: ningún usuario con anon/authenticated key puede leer ni
+-- escribir aquí. El service role bypasea RLS y es el único que escribe.
+alter table public.webhook_events enable row level security;
+-- (No se crean políticas de usuario: la tabla queda cerrada a todos excepto
+--  al service role, que ignora RLS por diseño de Supabase.)
 
 -- ============================================================
--- 6. CUENTA DE TEST (opcional)
+-- 6. FUNCIÓN HELPER: is_admin()
+-- Devuelve true si el usuario autenticado tiene app_metadata.is_admin = true.
+-- app_metadata solo puede ser modificado por el service role (no por el usuario),
+-- lo que la hace más segura que user_metadata.
+-- Uso: WHERE public.is_admin() en políticas RLS de tablas analíticas.
+-- ============================================================
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean,
+    false
+  );
+$$;
+
+-- ============================================================
+-- 7. CUENTA DE TEST (opcional)
 -- La cuenta de demo (test@k-one.es / kone123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales
 -- (login() la registra vía supabase.auth.signUp si no existe).
