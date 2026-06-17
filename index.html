@@ -6480,14 +6480,37 @@
     const steps = [];
 
     steps.push({ main: 'Analizando tu perfil...', sub: 'Procesando los datos del cuestionario' });
-    steps.push({ main: 'Calculando gasto calórico basal (TMB)...', sub: 'Fórmula Mifflin-St Jeor · TDEE ajustado por actividad' });
 
+    // Cálculo metabólico
+    const sexo = userData.sexo || '';
+    const edad = userData.edad ? `${userData.edad} años` : '';
+    const pesoStr = userData.peso ? `${userData.peso} kg` : '';
+    const alturaStr = userData.altura ? `${userData.altura} cm` : '';
+    const datosPersonales = [sexo, edad, pesoStr, alturaStr].filter(Boolean).join(' · ');
+    steps.push({ main: 'Calculando gasto calórico basal (TMB)...', sub: datosPersonales || 'Fórmula Mifflin-St Jeor · TDEE ajustado por actividad' });
+
+    // Lesión o estructura de entreno
     if (userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
       steps.push({ main: `Adaptando ejercicios a tu historial de ${userData.lesion.toLowerCase()}...`, sub: 'Excluyendo movimientos de riesgo · Activando alternativas seguras' });
-    } else if (!soloDieta) {
-      steps.push({ main: 'Estructurando bloques de empuje y tirón...', sub: 'Distribución Push · Pull · Piernas · Core' });
+    } else if (!soloDieta && userData.deporte) {
+      const deporteStr = userData.deporte.toLowerCase().replace(',', '');
+      steps.push({ main: `Configurando plan de ${deporteStr}...`, sub: `${userData.diasEntreno || ''} días de entrenamiento · ${userData.lugar || 'Configuración'} · Nivel ${(userData.nivel || 'medio').split(',')[0].toLowerCase()}` });
     }
 
+    // Objetivo
+    if (userData.objetivo && userData.objetivo !== 'No especificado') {
+      const metodologias = {
+        'Perder grasa': 'Déficit calórico controlado · Preservación muscular',
+        'Ganar músculo': 'Superávit mínimo · Alta síntesis proteica',
+        'Rendimiento': 'Periodización · Carga progresiva por ciclos',
+        'Mantenimiento': 'Isocalórico · Equilibrio macro estable',
+        'Salud general': 'Variedad de estímulos · Bienestar a largo plazo'
+      };
+      const metodo = metodologias[userData.objetivo] || 'Seleccionando metodología óptima';
+      steps.push({ main: `Ajustando protocolo para "${userData.objetivo}"...`, sub: metodo });
+    }
+
+    // Alérgenos o macros
     if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
       const alergeno = (userData.alergia === 'Otra' ? userData.alergiaOtra : userData.alergia) || userData.alergia;
       steps.push({ main: `Filtrando alérgenos: ${alergeno.toLowerCase()}...`, sub: 'Revisando cada ingrediente en la base de datos nutricional' });
@@ -6495,20 +6518,25 @@
       steps.push({ main: 'Calculando distribución de macronutrientes...', sub: 'Proteínas · Carbohidratos · Grasas ajustados al objetivo' });
     }
 
-    if (userData.objetivo && userData.objetivo !== 'No especificado') {
-      steps.push({ main: `Ajustando protocolo para "${userData.objetivo}"...`, sub: 'Seleccionando metodología de entrenamiento óptima' });
+    // Medicación
+    if (userData.medicacion && userData.medicacion !== 'No' && userData.medicacion !== 'No especificado') {
+      steps.push({ main: 'Revisando interacciones con medicación...', sub: 'Ajustando intensidad y selección de ejercicios' });
     }
 
+    // Enfoque macros
     if (userData.enfoqueMacros && userData.enfoqueMacros !== 'No especificado') {
       steps.push({ main: `Aplicando enfoque ${userData.enfoqueMacros.toLowerCase()}...`, sub: 'Calibrando calorías y frecuencia de comidas' });
     }
 
+    // Estructura semanal
     if (!soloDieta) {
-      steps.push({ main: 'Equilibrando carga y recuperación semanal...', sub: 'Volumen · Intensidad · Descanso activo' });
+      const numDias = parseInt(userData.diasEntreno) || 3;
+      const diasLibres = 7 - numDias;
+      steps.push({ main: 'Equilibrando carga y recuperación semanal...', sub: `${numDias} días de entreno · ${diasLibres} de recuperación · Progresión lineal` });
     }
 
-    steps.push({ main: 'Seleccionando recetas y opciones de comida...', sub: 'Cruzando preferencias con la base de datos de recetas' });
-    steps.push({ main: 'Validando coherencia del plan completo...', sub: 'Control de calidad · Revisión final' });
+    steps.push({ main: 'Seleccionando recetas y opciones de comida...', sub: '5 tomas · 4 opciones por comida · Cruzando con tus preferencias' });
+    steps.push({ main: 'Validando coherencia del plan completo...', sub: 'Comprobación final · Listo para empezar' });
     steps.push({ main: 'Tu plan personalizado está listo.', sub: '' });
 
     return steps;
@@ -9596,7 +9624,11 @@
     // Transición suave: conservar los días ya entrenados esta semana para no perder la racha
     const _diasEntrenados = userData.progreso ? (userData.progreso.diasEntrenados || 0) : 0;
     userData.progreso = { semana: getSemanaActual(), diasEntrenados: _diasEntrenados, ajuste: 0 };
-    userData.entrenosCompletados = []; // se resetea porque los ejercicios han cambiado
+    // Solo resetear el historial si cambiaron los parámetros de entrenamiento.
+    // Si el usuario solo actualizó su peso u objetivo nutricional, sus entrenos de esta semana se conservan.
+    const _entrenoHaCambiado = nuevoDeporte !== userData.deporte ||
+      nuevosDias !== userData.diasEntreno || nuevoNivel !== userData.nivel || nuevoLugar !== userData.lugar;
+    if (_entrenoHaCambiado) userData.entrenosCompletados = [];
 
     // Si el recálculo del plan fallara, avisar y no dejar el modal congelado en silencio.
     try {
@@ -10352,6 +10384,8 @@
         });
       }
     }
+    // Verificar admin silenciosamente tras cada login/restauración de sesión.
+    verificarAdminSilencioso();
   }
 
   // ===== TOAST =====
@@ -10748,7 +10782,7 @@
   function tieneAccesoActivo(email) {
     const user = getCurrentUser();
     if (!user || user.email !== email) return true;
-    if (ADMIN_EMAILS_UI.includes((user.email || '').toLowerCase())) return true; // admin: sin paywall
+    if (_adminVerificado) return true; // admin: sin paywall
     if (user.isBeta) return true;            // beta tester: acceso completo sin pago
     if (user.suscripcionActiva) return true; // primer mes (0,99€) o plan normal en vigor
     if (!user.creado) return true; // cuentas antiguas sin fecha de alta: no se bloquean
@@ -10988,15 +11022,29 @@
   }
 
   // ===== JARVIS — PANEL DE ADMIN =====
-  const ADMIN_EMAILS_UI = ['azuqueca1@hotmail.com'];
+  // El estado de admin lo confirma el backend (api/is-admin) — nunca el frontend.
+  let _adminVerificado = false;
 
-  function esAdmin() {
-    const user = getCurrentUser();
-    return !!user && ADMIN_EMAILS_UI.includes((user.email || '').toLowerCase());
-  }
+  function esAdmin() { return _adminVerificado; }
+
   function actualizarBtnAdmin() {
     const btn = document.getElementById('btnPanelAdmin');
-    if (btn) btn.style.display = esAdmin() ? '' : 'none';
+    if (btn) btn.style.display = _adminVerificado ? '' : 'none';
+  }
+
+  async function verificarAdminSilencioso() {
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      const res = await fetch('/api/is-admin', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isAdmin) { _adminVerificado = true; actualizarBtnAdmin(); }
+      }
+    } catch {}
   }
   function cerrarPanelAdmin() {
     const m = document.getElementById('modalAdmin');
