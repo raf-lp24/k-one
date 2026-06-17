@@ -8265,6 +8265,21 @@
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) return;
+
+    // Backfill de objetivos nutricionales: los planes generados antes de incorporar
+    // kcalObj/protObj/tdee no los tienen guardados, así que el KPI "Kcal objetivo",
+    // el subtítulo personalizado y el resumen del perfil salían vacíos. Se recalculan
+    // desde el perfil del usuario sin tocar el resto del plan (que puede estar
+    // personalizado con sustituciones de ingredientes).
+    if (generatedPlan.kcalObj === undefined && userData && userData.peso && userData.altura && userData.edad) {
+      try {
+        const _obj = buildPlanFromData(userData);
+        generatedPlan.kcalObj = _obj.kcalObj;
+        generatedPlan.protObj = _obj.protObj;
+        generatedPlan.tdee = _obj.tdee;
+      } catch (e) { /* perfil incompleto: se deja sin objetivos, los KPIs muestran — */ }
+    }
+
     actualizarBtnCancelar();
 
     // Header
