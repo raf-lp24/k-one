@@ -3441,6 +3441,10 @@
     .week-day-content { align-self: stretch; }
     .nutrition-day { grid-template-columns: 1fr 1fr; }
     .stats-row { grid-template-columns: 1fr 1fr; gap: 1px; margin-bottom: 24px; }
+    .stats-row-3kpi { grid-template-columns: 1fr 1fr 1fr !important; }
+    .stats-row-3kpi .stat-card-value { font-size: 22px !important; }
+    .stats-row-3kpi .stat-card-label { font-size: 9px; }
+    .stats-row-3kpi .stat-card { padding: 14px 12px; }
     .dash-header { margin-bottom: 28px; }
     .dash-title { font-size: 36px; }
     .motivation-card { padding: 18px 20px; margin-bottom: 24px; }
@@ -5784,7 +5788,7 @@
           </div>
         </div>
 
-        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:2px">
+        <div class="stats-row stats-row-3kpi" style="grid-template-columns:repeat(3,1fr);margin-bottom:2px">
           <div class="stat-card">
             <div class="stat-card-label">Peso actual</div>
             <div class="stat-card-value" id="statPesoActual" style="font-size:28px">—</div>
