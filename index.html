@@ -4158,6 +4158,29 @@
   </div>
 </div>
 
+<!-- PANEL DE ADMIN ("cerebro") -->
+<div id="modalAdmin" style="display:none;position:fixed;inset:0;z-index:10000;background:#0b0b0b;overflow-y:auto;padding:28px 20px">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--brasa);letter-spacing:1px">// PANEL DE ADMIN</div>
+        <div style="font-size:24px;font-weight:700;color:var(--blanco)">El cerebro de K-One</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-ghost" style="padding:9px 16px;font-size:13px" onclick="abrirPanelAdmin()">↻ Actualizar</button>
+        <button class="btn-ghost" style="padding:9px 16px;font-size:13px" onclick="cerrarPanelAdmin()">✕ Cerrar</button>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--metal);margin-bottom:22px">Datos en tiempo real de Supabase + Stripe. Solo tú ves esto.</p>
+    <div id="adminMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--metal);letter-spacing:1px;margin-bottom:10px">// CLIENTES (<span id="adminTotalClientes">0</span>)</div>
+    <div style="overflow-x:auto;border:1px solid #2a2a2a;border-radius:10px">
+      <table id="adminTabla" style="width:100%;border-collapse:collapse;font-size:13px;color:var(--blanco);min-width:780px"></table>
+    </div>
+    <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
+  </div>
+</div>
+
 <!-- MODAL CAMBIAR OBJETIVO / DEPORTE -->
 <div class="modal-overlay" id="modalCambiarPlan">
   <div class="modal-box modal-box-wide">
@@ -5436,6 +5459,9 @@
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 H15 L19 7 V21 H5 Z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span> Notas
         </div>
       </nav>
+      <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa)">
+        <span>⬡</span> Panel de admin
+      </button>
       <button class="logout-btn" onclick="gestionarSuscripcion()">
         <span>⬡</span> Gestionar suscripción
       </button>
@@ -10537,6 +10563,104 @@
     const btn = document.getElementById('btnCancelarSub');
     if (!btn) return;
     btn.style.display = (user && user.suscripcionActiva && user.tieneSub && !user.isBeta) ? '' : 'none';
+    actualizarBtnAdmin();
+  }
+
+  // ===== PANEL DE ADMIN ("cerebro") =====
+  // Correos con acceso de admin (la seguridad real la aplica el backend; esto solo
+  // decide si se muestra el botón). Debe coincidir con ADMIN_EMAILS del servidor.
+  const ADMIN_EMAILS_UI = ['azuqueca1@hotmail.com'];
+
+  function esAdmin() {
+    const user = getCurrentUser();
+    return !!user && ADMIN_EMAILS_UI.includes((user.email || '').toLowerCase());
+  }
+
+  function actualizarBtnAdmin() {
+    const btn = document.getElementById('btnPanelAdmin');
+    if (btn) btn.style.display = esAdmin() ? '' : 'none';
+  }
+
+  function cerrarPanelAdmin() {
+    const m = document.getElementById('modalAdmin');
+    if (m) m.style.display = 'none';
+  }
+
+  const _fmtFecha = (iso) => iso ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  const _estadoLegible = (c) => {
+    if (c.enOferta) return '<span style="color:#f0a500">Oferta 0,99€</span>';
+    if (c.estado === 'past_due') return '<span style="color:#e74c3c">Pago fallido</span>';
+    if (c.cancelaAlFinal) return '<span style="color:#e67e22">Cancela al final</span>';
+    if (['active', 'trialing'].includes(c.estado)) return '<span style="color:#27ae60">Activo</span>';
+    if (['canceled', 'unpaid'].includes(c.estado)) return '<span style="color:var(--metal)">Cancelado</span>';
+    return '<span style="color:var(--metal)">Sin pago</span>';
+  };
+
+  async function abrirPanelAdmin() {
+    const m = document.getElementById('modalAdmin');
+    if (m) m.style.display = 'block';
+    const estado = document.getElementById('adminEstado');
+    const tabla = document.getElementById('adminTabla');
+    const metrics = document.getElementById('adminMetrics');
+    if (estado) estado.textContent = 'Cargando datos...';
+    if (tabla) tabla.innerHTML = '';
+    if (metrics) metrics.innerHTML = '';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) throw new Error('Sesión caducada. Vuelve a entrar.');
+      const res = await fetch('/api/admin-clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudieron cargar los datos');
+      renderPanelAdmin(data);
+      if (estado) estado.textContent = data.clientes.length ? '' : 'Aún no hay clientes registrados.';
+    } catch (e) {
+      if (estado) estado.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  function renderPanelAdmin(data) {
+    const mt = data.metrics || {};
+    const cards = [
+      { label: 'Registrados', valor: mt.registrados || 0, color: 'var(--blanco)' },
+      { label: 'Activos de pago', valor: mt.activosPago || 0, color: '#27ae60' },
+      { label: 'En oferta 0,99€', valor: mt.enOferta || 0, color: '#f0a500' },
+      { label: 'Cancelan al final', valor: mt.cancelanAlFinal || 0, color: '#e67e22' },
+      { label: 'Pago fallido', valor: mt.pagoFallido || 0, color: '#e74c3c' },
+      { label: 'Sin suscripción', valor: mt.sinSuscripcion || 0, color: 'var(--metal)' },
+      { label: 'Completó onboarding', valor: mt.onboardingCompletado || 0, color: 'var(--blanco)' },
+      { label: 'Ingresos est./mes', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2) : '0') + '€', color: 'var(--brasa)' }
+    ];
+    const metrics = document.getElementById('adminMetrics');
+    if (metrics) metrics.innerHTML = cards.map(c => `
+      <div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:14px 16px">
+        <div style="font-size:11px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${c.label}</div>
+        <div style="font-size:24px;font-weight:700;color:${c.color}">${c.valor}</div>
+      </div>`).join('');
+
+    const total = document.getElementById('adminTotalClientes');
+    if (total) total.textContent = data.clientes.length;
+
+    const esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const th = (t) => `<th style="text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap">${t}</th>`;
+    const td = (c) => `<td style="padding:10px 12px;border-bottom:1px solid #1c1c1c;white-space:nowrap">${c}</td>`;
+    const tabla = document.getElementById('adminTabla');
+    if (!tabla) return;
+    const cabecera = `<thead><tr>${['Cliente', 'Email', 'Alta', 'Estado', 'Plan', 'Objetivo', 'Deporte', 'Renueva', 'Onboarding'].map(th).join('')}</tr></thead>`;
+    const filas = data.clientes.map(c => `<tr>
+      ${td('<strong>' + esc(c.nombre) + '</strong>')}
+      ${td('<span style="color:var(--metal)">' + esc(c.email) + '</span>')}
+      ${td(_fmtFecha(c.alta))}
+      ${td(_estadoLegible(c))}
+      ${td(esc(c.tipoPlan))}
+      ${td(esc(c.objetivo))}
+      ${td(esc(c.deporte))}
+      ${td(_fmtFecha(c.renovacion))}
+      ${td(c.onboarding ? '✓' : '<span style="color:var(--metal)">—</span>')}
+    </tr>`).join('');
+    tabla.innerHTML = cabecera + '<tbody>' + filas + '</tbody>';
   }
 
   async function cancelarSuscripcion() {
