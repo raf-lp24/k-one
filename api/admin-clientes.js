@@ -1,12 +1,5 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 
-// Panel de administración ("cerebro"): devuelve métricas agregadas y la lista de
-// clientes. SOLO accesible para los correos de la allowlist de admin.
-//
-// Seguridad: se valida el JWT de Supabase del que llama y se comprueba que su email
-// está en ADMIN_EMAILS (variable de entorno, separada por comas) o, por defecto, en
-// la lista de abajo. La consulta usa la service-role key (solo backend), así que se
-// salta RLS y puede leer todos los clientes — por eso el control de acceso es crítico.
 const ADMIN_FALLBACK = ['azuqueca1@hotmail.com'];
 
 function getAdmins() {
@@ -15,7 +8,6 @@ function getAdmins() {
   return fromEnv.length ? fromEnv : ADMIN_FALLBACK.map(e => e.toLowerCase());
 }
 
-// Mapa precio de Stripe -> ingreso mensual equivalente (MRR), para estimar ingresos.
 function getMrrMap() {
   const m = {};
   const add = (id, eur) => { if (id) m[id] = eur; };
@@ -27,6 +19,22 @@ function getMrrMap() {
   return m;
 }
 
+function diasEntre(fechaA, fechaB) {
+  if (!fechaA || !fechaB) return null;
+  return Math.round((new Date(fechaB) - new Date(fechaA)) / 86400000);
+}
+
+function distribucion(arr, campo) {
+  const mapa = {};
+  arr.forEach(item => {
+    const val = item[campo] || 'Desconocido';
+    mapa[val] = (mapa[val] || 0) + 1;
+  });
+  return Object.entries(mapa)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, count]) => ({ label, count }));
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST' && req.method !== 'GET') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -35,17 +43,11 @@ module.exports = async (req, res) => {
 
   const supabaseAdmin = getSupabaseAdmin();
   const user = await getAuthUser(req, supabaseAdmin);
-  if (!user) {
-    res.status(401).json({ error: 'No autenticado' });
-    return;
-  }
-  const email = (user.email || '').toLowerCase();
-  if (!getAdmins().includes(email)) {
-    res.status(403).json({ error: 'No autorizado' });
-    return;
-  }
+  if (!user) { res.status(401).json({ error: 'No autenticado' }); return; }
 
-  // Perfiles + suscripciones (service-role: lee todo).
+  const email = (user.email || '').toLowerCase();
+  if (!getAdmins().includes(email)) { res.status(403).json({ error: 'No autorizado' }); return; }
+
   const { data: perfiles, error: e1 } = await supabaseAdmin
     .from('profiles')
     .select('id, nombre, email, created_at, userdata')
@@ -54,7 +56,7 @@ module.exports = async (req, res) => {
 
   const { data: subs, error: e2 } = await supabaseAdmin
     .from('subscriptions')
-    .select('user_id, status, plan, current_period_end, cancel_at_period_end');
+    .select('user_id, status, plan, current_period_end, current_period_start, cancel_at_period_end, stripe_customer_id');
   if (e2) { res.status(500).json({ error: e2.message }); return; }
 
   const subByUser = {};
@@ -62,9 +64,32 @@ module.exports = async (req, res) => {
 
   const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
   const mrrMap = getMrrMap();
+  const ahora = new Date();
+  const en7d = new Date(ahora.getTime() + 7 * 86400000);
 
   let mrr = 0;
-  const m = { registrados: 0, onboardingCompletado: 0, activosPago: 0, enOferta: 0, cancelanAlFinal: 0, pagoFallido: 0, sinSuscripcion: 0, cancelados: 0 };
+  let sumaDiasPago = 0;
+  let contadorDiasPago = 0;
+  let sumEntrenosActivos = 0;
+  let contEntrenosActivos = 0;
+
+  const m = {
+    registrados: 0,
+    onboardingCompletado: 0,
+    activosPago: 0,
+    enOferta: 0,
+    cancelanAlFinal: 0,
+    pagoFallido: 0,
+    sinSuscripcion: 0,
+    cancelados: 0,
+    renovacionProximos7d: 0,
+    sinOnboarding14d: 0,
+    ceroEntrenosActivos: 0,
+    tasaConversion: 0,
+    tiempoMedioPago: null,
+    mediaEntrenos: 0,
+    mrrEstimado: 0,
+  };
 
   const clientes = (perfiles || []).map(p => {
     const ud = p.userdata || {};
@@ -73,7 +98,41 @@ module.exports = async (req, res) => {
     const activo = ['active', 'trialing'].includes(status);
     const enOferta = activo && offerPriceId && s?.plan === offerPriceId;
     const cancela = activo && !!s?.cancel_at_period_end;
+    const diasDesdeAlta = diasEntre(p.created_at, ahora);
+    const entrenosTotal = Array.isArray(ud.historialEntrenos)
+      ? ud.historialEntrenos.length
+      : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
+    const semanaActual = ud.progreso?.semana || 1;
+    const renovacion = s?.current_period_end || null;
+    const renovaProximo = activo && renovacion && new Date(renovacion) <= en7d && new Date(renovacion) >= ahora;
+    const sinOnboarding14d = !ud.onboardingCompletado && diasDesdeAlta >= 14;
 
+    // Alerta: rojo > amarillo > verde > gris
+    let alerta = 'none';
+    let alertaRazon = '';
+    if (status === 'past_due') { alerta = 'red'; alertaRazon = 'Pago fallido'; }
+    else if (sinOnboarding14d) { alerta = 'red'; alertaRazon = '+14 días sin onboarding'; }
+    else if (activo && entrenosTotal === 0) { alerta = 'orange'; alertaRazon = 'Activo, 0 entrenos'; }
+    else if (cancela) { alerta = 'orange'; alertaRazon = 'Cancela al vencer'; }
+    else if (renovaProximo && !cancela) { alerta = 'yellow'; alertaRazon = 'Renueva en 7 días'; }
+    else if (activo && entrenosTotal > 0) { alerta = 'green'; alertaRazon = 'Activo y entrenando'; }
+
+    // Tiempo desde registro hasta primera suscripción
+    if (activo && s?.current_period_start && p.created_at) {
+      const dias = diasEntre(p.created_at, s.current_period_start);
+      if (dias !== null && dias >= 0 && dias <= 365) {
+        sumaDiasPago += dias;
+        contadorDiasPago++;
+      }
+    }
+
+    // Promedio de entrenos en activos
+    if (activo) {
+      sumEntrenosActivos += entrenosTotal;
+      contEntrenosActivos++;
+    }
+
+    // Métricas globales
     m.registrados++;
     if (ud.onboardingCompletado) m.onboardingCompletado++;
     if (!s || status === 'none') m.sinSuscripcion++;
@@ -82,24 +141,40 @@ module.exports = async (req, res) => {
     if (cancela) m.cancelanAlFinal++;
     if (status === 'past_due') m.pagoFallido++;
     if (status === 'canceled' || status === 'unpaid') m.cancelados++;
+    if (renovaProximo) m.renovacionProximos7d++;
+    if (sinOnboarding14d) m.sinOnboarding14d++;
+    if (activo && entrenosTotal === 0) m.ceroEntrenosActivos++;
     if (activo && !enOferta && mrrMap[s.plan]) mrr += mrrMap[s.plan];
 
     return {
       nombre: p.nombre || '—',
       email: p.email || '—',
       alta: p.created_at,
+      diasDesdeAlta,
       estado: status,
-      enOferta,
+      enOferta: !!enOferta,
       cancelaAlFinal: cancela,
-      renovacion: s?.current_period_end || null,
+      renovacion,
       objetivo: ud.objetivo || '—',
       deporte: ud.deporte || '—',
       tipoPlan: ud.tipoPlan || '—',
-      onboarding: !!ud.onboardingCompletado
+      lesion: ud.lesion === 'Sí' || ud.lesion === 'si' || ud.lesion === true,
+      onboarding: !!ud.onboardingCompletado,
+      entrenosTotal,
+      semanaActual,
+      alerta,
+      alertaRazon,
     };
   });
 
   m.mrrEstimado = Math.round(mrr * 100) / 100;
+  m.tasaConversion = m.registrados > 0 ? Math.round((m.activosPago / m.registrados) * 100) : 0;
+  m.tiempoMedioPago = contadorDiasPago > 0 ? Math.round(sumaDiasPago / contadorDiasPago) : null;
+  m.mediaEntrenos = contEntrenosActivos > 0 ? Math.round((sumEntrenosActivos / contEntrenosActivos) * 10) / 10 : 0;
 
-  res.status(200).json({ metrics: m, clientes });
+  const distDeporte = distribucion(clientes.filter(c => c.deporte !== '—'), 'deporte');
+  const distObjetivo = distribucion(clientes.filter(c => c.objetivo !== '—'), 'objetivo');
+  const distPlan = distribucion(clientes.filter(c => c.tipoPlan !== '—'), 'tipoPlan');
+
+  res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan });
 };
