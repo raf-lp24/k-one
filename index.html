@@ -4132,7 +4132,7 @@
     <div class="auth-field">
       <label>Nombre</label>
       <div class="auth-field-wrap">
-        <input type="text" id="reg-nombre" placeholder="Tu nombre" autocomplete="off"
+        <input type="text" id="reg-nombre" placeholder="Tu nombre" autocomplete="name"
           oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
         <span class="auth-field-check" id="check-nombre">✓</span>
       </div>
@@ -4142,7 +4142,7 @@
     <div class="auth-field">
       <label>Email</label>
       <div class="auth-field-wrap">
-        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="off"
+        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email"
           oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
         <span class="auth-field-check" id="check-email">✓</span>
       </div>
@@ -4152,7 +4152,7 @@
     <div class="auth-field">
       <label>Contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"
           oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
         <span class="auth-field-check" id="check-pass">✓</span>
       </div>
@@ -4163,7 +4163,7 @@
     <div class="auth-field">
       <label>Confirmar contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass2" placeholder="Repite la contraseña"
+        <input type="password" id="reg-pass2" placeholder="Repite la contraseña" autocomplete="new-password"
           oninput="validarCampoReg('pass2')" onblur="validarCampoReg('pass2')">
         <span class="auth-field-check" id="check-pass2">✓</span>
       </div>
@@ -4202,7 +4202,7 @@
     <div class="auth-field">
       <label>Email</label>
       <div class="auth-field-wrap">
-        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off"
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email"
           oninput="validarCampoLogin('email')" onblur="validarCampoLogin('email')">
         <span class="auth-field-check" id="check-login-email">✓</span>
       </div>
@@ -4211,7 +4211,7 @@
 
     <div class="auth-field">
       <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="Tu contraseña">
+      <input type="password" id="login-pass" placeholder="Tu contraseña" autocomplete="current-password">
     </div>
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
 
