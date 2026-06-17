@@ -4692,7 +4692,11 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo cambiar de objetivo o de deporte más adelante?</summary>
-        <p class="faq-a">Sí. Desde tu dashboard puedes actualizar tu perfil cuando quieras y el plan se regenera con los nuevos datos.</p>
+        <p class="faq-a">Sí. Desde tu dashboard, en "Cambiar objetivo / deporte", puedes actualizar tu perfil cuando quieras —incluido tu peso actual— y el plan se regenera al momento con los nuevos datos: entrenamiento, calorías y proteína se recalculan según tu peso y tu objetivo.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Si cambio de plan a mitad de mes, ¿cómo se cobra?</summary>
+        <p class="faq-a">De forma proporcional y sin sorpresas. <strong>Durante tu primer mes a 0,99€</strong> puedes cambiar de plan las veces que quieras sin coste: sigues pagando 0,99€ y eliges tu plan definitivo al renovar.<br><br><strong>Si ya tienes un plan de pago</strong> y cambias a mitad de ciclo (por ejemplo, de "Solo nutrición" a "Completo"), no se te cobra nada en ese momento: Stripe te abona los días que no has usado del plan anterior y te cobra la parte proporcional del nuevo, y la diferencia se refleja en tu <strong>próxima factura</strong>. Tu fecha de renovación no cambia.<br><br><em>Ejemplo:</em> pagas 6,99€ de nutrición el 15/06 y el 29/06 subes a Completo. En tu factura del 15/07 verás el plan Completo (14,99€) más un pequeño ajuste prorrateado por esos días de transición. Bajar de plan funciona igual, pero a tu favor (se te descuenta).</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
@@ -9913,7 +9917,10 @@
     if (error) console.error('Error cargando perfil de Supabase:', error);
     const cuenta = profile?.userdata?._cuenta || {};
     const esBeta = !!profile?.is_beta;
-    // La suscripción real (Stripe) se guarda en "subscriptions" vía webhook.
+    const esTest = authUser.email === TEST_EMAIL; // cuenta de demo, acceso siempre
+    // El acceso de pago se decide SOLO con la tabla "subscriptions", que únicamente
+    // escribe el webhook (service-role). No se confía en flags de "profiles"
+    // (userdata._cuenta), que el propio usuario podría editar vía RLS.
     const { data: sub } = await supa.from('subscriptions')
       .select('status, current_period_start, current_period_end, cancel_at_period_end')
       .eq('user_id', authUser.id)
@@ -9923,14 +9930,14 @@
       nombre: profile?.nombre || authUser.user_metadata?.nombre || '',
       email: authUser.email,
       creado: cuenta.creado || authUser.created_at,
-      suscripcionActiva: !!cuenta.suscripcionActiva || suscripcionStripeActiva || esBeta,
+      suscripcionActiva: suscripcionStripeActiva || esBeta || esTest,
       fechaPago: sub?.current_period_end || cuenta.fechaPago || null,
       // Inicio del período actual de Stripe — para que semanas y días restantes arranquen desde el pago.
       inicioPeriodo: sub?.current_period_start || null,
       // ¿Se cancelará al final del período? (oferta 0,99€ o cancelación). Para avisar antes de que expire.
       cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 0,99€.
-      tieneSub: !!sub || !!cuenta.suscripcionActiva || esBeta,
+      tieneSub: !!sub || esBeta || esTest,
       isBeta: esBeta
     });
     if (profile?.plan) {
