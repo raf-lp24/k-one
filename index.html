@@ -10328,6 +10328,7 @@
   function tieneAccesoActivo(email) {
     const user = getCurrentUser();
     if (!user || user.email !== email) return true;
+    if (ADMIN_EMAILS_UI.includes((user.email || '').toLowerCase())) return true; // admin: sin paywall
     if (user.isBeta) return true;            // beta tester: acceso completo sin pago
     if (user.suscripcionActiva) return true; // primer mes (0,99€) o plan normal en vigor
     if (!user.creado) return true; // cuentas antiguas sin fecha de alta: no se bloquean
