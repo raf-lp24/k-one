@@ -1652,6 +1652,10 @@
     cursor: pointer;
     height: 4px;
   }
+  @media (max-width: 500px) {
+    .cp-peso-widget { max-width: 100%; }
+    .cp-peso-slider { max-width: 100%; }
+  }
 
   .field input,
   .field select,
@@ -9441,7 +9445,7 @@
   function sincronizarPesoSlider() {
     const inp = document.getElementById('cp-peso');
     const sl  = document.getElementById('cp-pesoSlider');
-    if (sl && inp.value) sl.value = parseFloat(inp.value);
+    if (sl) sl.value = inp?.value ? parseFloat(inp.value) : 70;
   }
   function sincronizarPesoInput() {
     const sl  = document.getElementById('cp-pesoSlider');
@@ -9460,7 +9464,11 @@
     actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
     preseleccionarRadio('cp-objetivo', userData.objetivo);
     const inputPesoCp = document.getElementById('cp-peso');
-    if (inputPesoCp) { inputPesoCp.value = userData.peso || ''; sincronizarPesoSlider(); }
+    if (inputPesoCp) {
+      inputPesoCp.value = userData.peso || '';
+      const sl = document.getElementById('cp-pesoSlider');
+      if (sl) sl.value = userData.peso ? parseFloat(userData.peso) : 70;
+    }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
