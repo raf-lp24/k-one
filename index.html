@@ -5334,9 +5334,10 @@
           </div>
         </div>
         <div class="bmr-panel" id="bmrPanel">
-          <div class="bmr-panel-label">// Calculando con tus datos</div>
-          <div class="bmr-panel-value">Tu metabolismo basal estimado es de <strong id="bmrValue">—</strong> kcal/día</div>
-          <div class="bmr-panel-note">Es la energía que tu cuerpo necesita en reposo. Tu plan ajustará las calorías totales según tu actividad y tu objetivo.</div>
+          <div class="bmr-panel-label">// Calculando con tus datos en tiempo real</div>
+          <div class="bmr-panel-value">Metabolismo basal: <strong id="bmrValue">—</strong> kcal/día</div>
+          <div class="bmr-panel-value" style="margin-top:6px">IMC: <strong id="imcValue">—</strong> <span id="imcCategoria" style="font-size:13px;font-weight:400"></span></div>
+          <div class="bmr-panel-note">Tu plan ajustará las calorías totales según tu nivel de actividad y tu objetivo.</div>
         </div>
         <div class="form-nav">
           <span class="form-nav-note">Campos obligatorios</span>
@@ -5783,7 +5784,24 @@
           </div>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:2px">
+          <div class="stat-card">
+            <div class="stat-card-label">Peso actual</div>
+            <div class="stat-card-value" id="statPesoActual" style="font-size:28px">—</div>
+            <div class="stat-card-sub">kg registrados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Adherencia</div>
+            <div class="stat-card-value" id="statAdherencia" style="font-size:28px">—</div>
+            <div class="stat-card-sub" id="statAdherenciaSub">días esta semana</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Kcal objetivo</div>
+            <div class="stat-card-value" id="statKcal" style="font-size:28px">—</div>
+            <div class="stat-card-sub">kcal/día estimadas</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;margin-top:2px">
           <div class="stat-card" style="flex:1;min-width:200px">
             <div class="stat-card-label">Racha</div>
             <div class="stat-card-value" id="rachaDias" style="color:var(--brasa)">🔥 0</div>
@@ -5795,6 +5813,12 @@
             <div class="stat-card-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
           </div>
           <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
+        </div>
+
+        <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
+        <div id="trazabilidadPanel" style="display:none;background:rgba(232,73,15,0.06);border:1px solid rgba(232,73,15,0.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:8px">// POR QUÉ ESTE PLAN</div>
+          <ul id="trazabilidadList" style="margin:0;padding-left:16px;color:var(--ceniza);font-size:13px;line-height:1.9"></ul>
         </div>
 
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
@@ -6219,6 +6243,21 @@
     bmr += sexo === 'Hombre' ? 5 : sexo === 'Mujer' ? -161 : -78;
 
     document.getElementById('bmrValue').textContent = Math.round(bmr).toLocaleString('es-ES');
+
+    // IMC en tiempo real
+    if (peso > 0 && altura > 0) {
+      const altM = altura / 100;
+      const imc = peso / (altM * altM);
+      document.getElementById('imcValue').textContent = imc.toFixed(1);
+      const imcCat = document.getElementById('imcCategoria');
+      if (imcCat) {
+        if (imc < 18.5)      { imcCat.textContent = '— Bajo peso';  imcCat.style.color = '#f0a500'; }
+        else if (imc < 25)   { imcCat.textContent = '— Normal';     imcCat.style.color = '#27ae60'; }
+        else if (imc < 30)   { imcCat.textContent = '— Sobrepeso';  imcCat.style.color = '#f0a500'; }
+        else                 { imcCat.textContent = '— Obesidad';   imcCat.style.color = '#e84a0f'; }
+      }
+    }
+
     panel.style.display = 'block';
   }
 
@@ -8226,6 +8265,61 @@
     document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
     document.getElementById('statSemana').textContent = progreso.semana;
     document.getElementById('statDiasEntrenados').textContent = (userData.entrenosCompletados || []).length;
+
+    // ── KPIs adicionales ──────────────────────────────────────────────────────
+    // Peso actual
+    const statPesoEl = document.getElementById('statPesoActual');
+    if (statPesoEl) statPesoEl.textContent = userData.peso ? `${userData.peso} kg` : '—';
+
+    // Adherencia: días completados esta semana vs días planificados
+    const statAdherenciaEl = document.getElementById('statAdherencia');
+    const statAdherenciaSubEl = document.getElementById('statAdherenciaSub');
+    if (statAdherenciaEl) {
+      const diasHechos = (userData.entrenosCompletados || []).length;
+      const diasPlan = parseInt(userData.diasEntreno) || 3;
+      const pct = Math.round((diasHechos / diasPlan) * 100);
+      statAdherenciaEl.textContent = `${diasHechos}/${diasPlan}`;
+      if (statAdherenciaSubEl) statAdherenciaSubEl.textContent = `días (${pct}% adherencia)`;
+    }
+
+    // Kcal objetivo
+    const statKcalEl = document.getElementById('statKcal');
+    if (statKcalEl) statKcalEl.textContent = generatedPlan.kcalObj ? `${generatedPlan.kcalObj}` : '—';
+
+    // ── Panel de trazabilidad IA ──────────────────────────────────────────────
+    (function() {
+      const panel = document.getElementById('trazabilidadPanel');
+      const lista = document.getElementById('trazabilidadList');
+      if (!panel || !lista) return;
+      const razones = [];
+      const p = userData.progreso || {};
+      const semana = progreso.semana;
+
+      if (semana <= 1) {
+        razones.push(`Plan inicial personalizado basado en tu cuestionario de ${userData.deporte || 'entrenamiento'}`);
+        razones.push(`Nivel ${(userData.nivel || '').split(',')[0].toLowerCase() || 'adaptado'} · ${userData.diasEntreno || '3'} días/semana · ${userData.lugar || 'tu zona'}`);
+        razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu metabolismo`);
+      } else {
+        const diasSemAnt = p.diasEntrenados || 0;
+        razones.push(`Semana ${semana} de tu proceso — llevas ${(userData.historialEntrenos || []).length} entrenos completados`);
+        if (diasSemAnt > 0) razones.push(`La semana pasada completaste ${diasSemAnt} días de entrenamiento`);
+        if (p.ajuste > 0)  razones.push('Subimos ligeramente la intensidad: tu energía y físico reportados fueron buenos');
+        if (p.ajuste < 0)  razones.push('Bajamos el volumen para que puedas recuperar bien esta semana');
+        if (p.ajuste === 0 && diasSemAnt > 0) razones.push('Mantenemos el nivel: buen equilibrio entre esfuerzo y recuperación');
+        if (p.ultimaNota) razones.push(`Tu nota del check-in: "${p.ultimaNota.slice(0,80)}${p.ultimaNota.length > 80 ? '…' : ''}"`);
+      }
+
+      if (userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
+        razones.push(`Ejercicios adaptados a tu historial de ${userData.lesion.toLowerCase()}`);
+      }
+      if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
+        razones.push(`Nutrición filtrada por tu ${userData.alergia === 'Otra' ? 'alergia personalizada' : userData.alergia.toLowerCase()}`);
+      }
+
+      lista.innerHTML = razones.map(r => `<li>${r}</li>`).join('');
+      panel.style.display = razones.length ? '' : 'none';
+    })();
+
     const checkinSemanaLabel = document.getElementById('checkinSemanaLabel');
     if (checkinSemanaLabel) checkinSemanaLabel.textContent = `// Semana ${progreso.semana}`;
 
