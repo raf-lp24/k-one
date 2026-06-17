@@ -1,96 +1,88 @@
-const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
+const {
+  getStripe, getSupabaseAdmin, getPriceId, getAuthUser,
+  getActiveSubscriptionId, assertSubscriptionOwnership
+} = require('./_stripeHelpers');
 
 // Cambia el precio de la suscripción activa con prorrateo.
-// La diferencia (subida o bajada) se refleja PRORRATEADA en la próxima factura
-// (proration_behavior: 'create_prorations' no genera un cobro inmediato).
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Método no permitido' });
-    return;
+    return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const stripe = getStripe();
-  const supabaseAdmin = getSupabaseAdmin();
+  // A-4: try/catch global
+  try {
+    // A-2: validar body
+    if (typeof req.body !== 'object' || req.body === null) {
+      return res.status(400).json({ error: 'Body JSON requerido' });
+    }
 
-  const user = await getAuthUser(req, supabaseAdmin);
-  if (!user) {
-    res.status(401).json({ error: 'No autenticado' });
-    return;
+    const stripe       = getStripe();
+    const supabaseAdmin = getSupabaseAdmin();
+
+    const user = await getAuthUser(req, supabaseAdmin);
+    if (!user) return res.status(401).json({ error: 'No autenticado' });
+
+    const { tipoPlan, periodicidad } = req.body;
+    if (!tipoPlan || !periodicidad) {
+      return res.status(400).json({ error: 'tipoPlan y periodicidad son obligatorios' });
+    }
+    const newPriceId = getPriceId(tipoPlan, periodicidad);
+    if (!newPriceId) {
+      return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
+    }
+
+    const { data: sub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_subscription_id, stripe_customer_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    // M-6: helper compartido (antes duplicado en cancel y reactivate)
+    const subscriptionId = await getActiveSubscriptionId(stripe, sub);
+    if (!subscriptionId) {
+      return res.status(404).json({ error: 'No tienes una suscripción activa para actualizar' });
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    // C-1: verificar que la suscripción pertenece al cliente del usuario autenticado
+    assertSubscriptionOwnership(subscription, sub.stripe_customer_id);
+
+    if (!['active', 'trialing'].includes(subscription.status)) {
+      return res.status(400).json({ error: 'La suscripción no está activa' });
+    }
+
+    const itemId = subscription.items.data[0]?.id;
+    if (!itemId) {
+      return res.status(500).json({ error: 'No se encontró el ítem de la suscripción' });
+    }
+
+    const currentPriceId = subscription.items.data[0]?.price?.id;
+
+    // Durante el mes de oferta (0,99€) no se toca la facturación.
+    const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
+    if (offerPriceId && currentPriceId === offerPriceId) {
+      return res.status(200).json({ ok: true, enOferta: true, noChange: true });
+    }
+
+    if (currentPriceId === newPriceId) {
+      return res.status(200).json({ ok: true, noChange: true });
+    }
+
+    const updateParams = {
+      items: [{ id: itemId, price: newPriceId }],
+      proration_behavior: 'create_prorations'
+    };
+    if (subscription.cancel_at_period_end) {
+      updateParams.cancel_at_period_end = true;
+    }
+    const updated = await stripe.subscriptions.update(subscriptionId, updateParams);
+
+    return res.status(200).json({ ok: true, currentPeriodEnd: updated.current_period_end });
+
+  } catch (err) {
+    console.error('[update-subscription] error:', err);
+    const status = err.statusCode || 500;
+    return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
   }
-
-  const { tipoPlan, periodicidad } = req.body || {};
-  const newPriceId = getPriceId(tipoPlan, periodicidad);
-  if (!newPriceId) {
-    res.status(400).json({ error: 'Plan o periodicidad no válidos' });
-    return;
-  }
-
-  const { data: sub } = await supabaseAdmin
-    .from('subscriptions')
-    .select('stripe_subscription_id, stripe_customer_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  // Resiliencia: si el webhook no llegó a guardar el id de la suscripción
-  // (p. ej. falló un upsert), búscala en Stripe por el id de cliente para no
-  // dejar al usuario bloqueado sin poder cambiar de plan.
-  let subscriptionId = sub?.stripe_subscription_id;
-  if (!subscriptionId && sub?.stripe_customer_id) {
-    const lista = await stripe.subscriptions.list({ customer: sub.stripe_customer_id, status: 'all', limit: 10 });
-    const activa = lista.data.find(s => ['active', 'trialing'].includes(s.status));
-    subscriptionId = activa?.id || null;
-  }
-
-  if (!subscriptionId) {
-    res.status(404).json({ error: 'No tienes una suscripción activa para actualizar' });
-    return;
-  }
-
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-  if (!['active', 'trialing'].includes(subscription.status)) {
-    res.status(400).json({ error: 'La suscripción no está activa' });
-    return;
-  }
-
-  const itemId = subscription.items.data[0]?.id;
-  if (!itemId) {
-    res.status(500).json({ error: 'No se encontró el ítem de la suscripción' });
-    return;
-  }
-
-  const currentPriceId = subscription.items.data[0]?.price?.id;
-
-  // Durante el primer mes de oferta (0,99€) el precio en Stripe es el de la oferta.
-  // NO se toca la facturación: el cliente sigue pagando 0,99€ ese mes elija el plan
-  // que elija. El plan definitivo (mensual/trimestral/anual/nutrición) y su precio
-  // se eligen y se cobran al renovar, en el paywall. Aquí solo dejamos que el
-  // frontend recalcule el plan (entrenamiento/nutrición) sin cobrar nada.
-  const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
-  if (offerPriceId && currentPriceId === offerPriceId) {
-    res.status(200).json({ ok: true, enOferta: true, noChange: true });
-    return;
-  }
-
-  // Si ya tiene ese precio, no hacemos nada
-  if (currentPriceId === newPriceId) {
-    res.status(200).json({ ok: true, noChange: true });
-    return;
-  }
-
-  const updateParams = {
-    items: [{ id: itemId, price: newPriceId }],
-    proration_behavior: 'create_prorations'
-  };
-  // Si la suscripción estaba programada para cancelarse, mantener esa cancelación
-  // al cambiar el precio. Sin esto, el update borraría cancel_at_period_end=true.
-  if (subscription.cancel_at_period_end) {
-    updateParams.cancel_at_period_end = true;
-  }
-  const updated = await stripe.subscriptions.update(subscriptionId, updateParams);
-
-  res.status(200).json({
-    ok: true,
-    currentPeriodEnd: updated.current_period_end
-  });
 };

@@ -4,36 +4,39 @@ const { getStripe, getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers')
 // gestione/cambie/cancele su suscripción y método de pago.
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Método no permitido' });
-    return;
+    return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const stripe = getStripe();
-  const supabaseAdmin = getSupabaseAdmin();
+  // A-4: try/catch global
+  try {
+    const stripe       = getStripe();
+    const supabaseAdmin = getSupabaseAdmin();
 
-  const user = await getAuthUser(req, supabaseAdmin);
-  if (!user) {
-    res.status(401).json({ error: 'No autenticado' });
-    return;
+    const user = await getAuthUser(req, supabaseAdmin);
+    if (!user) return res.status(401).json({ error: 'No autenticado' });
+
+    const { data: sub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!sub?.stripe_customer_id) {
+      return res.status(404).json({ error: 'No tienes una suscripción asociada todavía' });
+    }
+
+    // M-4: origen desde variable de entorno para evitar header Host manipulado
+    const origin = process.env.APP_URL || `https://${req.headers.host}`;
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer:   sub.stripe_customer_id,
+      return_url: `${origin}/`
+    });
+
+    return res.status(200).json({ url: session.url });
+
+  } catch (err) {
+    console.error('[create-portal-session] error:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
-
-  const { data: sub } = await supabaseAdmin
-    .from('subscriptions')
-    .select('stripe_customer_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (!sub?.stripe_customer_id) {
-    res.status(404).json({ error: 'No tienes una suscripción asociada todavía' });
-    return;
-  }
-
-  const origin = `https://${req.headers.host}`;
-
-  const session = await stripe.billingPortal.sessions.create({
-    customer: sub.stripe_customer_id,
-    return_url: `${origin}/`
-  });
-
-  res.status(200).json({ url: session.url });
 };

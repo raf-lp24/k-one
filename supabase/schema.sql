@@ -144,7 +144,26 @@ left join public.subscriptions s on s.user_id = p.id
 order by p.created_at desc;
 
 -- ============================================================
--- 5. CUENTA DE TEST (opcional)
+-- 5. TABLA: webhook_events
+-- Garantiza idempotencia en el webhook de Stripe: Stripe envía cada
+-- evento "al menos una vez", por lo que puede llegar duplicado.
+-- Al inicio del handler se intenta insertar el event_id; si ya existe
+-- (código de error 23505 = unique_violation) el handler devuelve 200
+-- inmediatamente sin procesar el evento de nuevo.
+-- Solo escribe el backend con service_role; sin acceso para usuarios.
+-- ============================================================
+create table if not exists public.webhook_events (
+  event_id     text        primary key,
+  type         text        not null,
+  processed_at timestamptz not null default now()
+);
+
+-- Sin RLS ni políticas de usuario: solo el service role puede escribir aquí.
+-- (No necesita ALTER TABLE ENABLE ROW LEVEL SECURITY porque el service role
+--  bypasea RLS por defecto en Supabase.)
+
+-- ============================================================
+-- 6. CUENTA DE TEST (opcional)
 -- La cuenta de demo (test@k-one.es / kone123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales
 -- (login() la registra vía supabase.auth.signUp si no existe).

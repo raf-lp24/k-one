@@ -1,33 +1,31 @@
 const { getStripe, getSupabaseAdmin } = require('./_stripeHelpers');
 
-// Vercel necesita el cuerpo de la petición sin parsear para verificar
-// la firma de Stripe.
+// Vercel necesita el cuerpo de la petición sin parsear para verificar la firma de Stripe.
 module.exports.config = { api: { bodyParser: false } };
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('end',  () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
 }
 
-// Actualiza (o crea) la fila de subscriptions a partir de una suscripción de Stripe.
+// Actualiza (o crea) la fila de subscriptions a partir de un objeto suscripción de Stripe.
 async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
-  const item = subscription.items.data[0];
-  const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const item      = subscription.items.data[0];
+  const periodEnd = item?.current_period_end   ?? subscription.current_period_end;
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
+
   const row = {
-    stripe_customer_id: subscription.customer,
+    stripe_customer_id:     subscription.customer,
     stripe_subscription_id: subscription.id,
-    plan: item?.price?.id || null,
-    status: subscription.status,
-    current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
-    current_period_end: new Date(periodEnd * 1000).toISOString(),
-    // ¿Se cancelará al final del período? (oferta de 0,99€ o cancelación del cliente).
-    // Lo usa el frontend para avisar de la renovación antes de que expire.
-    cancel_at_period_end: !!subscription.cancel_at_period_end
+    plan:                   item?.price?.id || null,
+    status:                 subscription.status,
+    current_period_start:   periodStart ? new Date(periodStart * 1000).toISOString() : null,
+    current_period_end:     new Date(periodEnd * 1000).toISOString(),
+    cancel_at_period_end:   !!subscription.cancel_at_period_end
   };
 
   async function escribir(r) {
@@ -39,9 +37,9 @@ async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
 
   let { error: err } = await escribir(row);
 
-  // Fallback: si alguna columna opcional (current_period_start / cancel_at_period_end)
-  // todavía no existe en la tabla, reintenta sin ellas para que el status se guarde igual.
+  // M-3: loggear el error ANTES del fallback para que aparezca en los logs de Vercel
   if (err && err.message && /current_period_start|cancel_at_period_end/.test(err.message)) {
+    console.warn('[stripe-webhook] columna faltante en subscriptions, reintentando sin ella:', err.message);
     const rowMin = { ...row };
     delete rowMin.current_period_start;
     delete rowMin.cancel_at_period_end;
@@ -51,60 +49,81 @@ async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
   if (err) throw new Error(`Supabase upsert error: ${err.message}`);
 }
 
-// Sincroniza el estado del cliente eligiendo SIEMPRE su mejor suscripción actual.
-// Evita que, si un cliente renueva antes de tiempo (queda una suscripción vieja
-// marcada para cancelar), el evento de cancelación de la vieja le quite el acceso.
+// Sincroniza el estado del cliente eligiendo SIEMPRE su mejor suscripción activa.
+// Evita que un evento de cancelación de una suscripción vieja quite el acceso si ya
+// tiene una nueva activa (p. ej. renovación anticipada o cambio de plan).
 async function syncCustomerFromStripe(stripe, supabaseAdmin, customerId, fallbackSub) {
   const list = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 });
   const subs = list.data;
   const activaSinCancelar = subs.find(s => ['active', 'trialing'].includes(s.status) && !s.cancel_at_period_end);
-  const activa = subs.find(s => ['active', 'trialing'].includes(s.status));
-  const elegida = activaSinCancelar || activa || fallbackSub || subs[0];
+  const activa   = subs.find(s => ['active', 'trialing'].includes(s.status));
+  const elegida  = activaSinCancelar || activa || fallbackSub || subs[0];
   if (elegida) await upsertFromSubscription(supabaseAdmin, elegida, null);
 }
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    res.status(405).end('Método no permitido');
-    return;
+    return res.status(405).end('Método no permitido');
   }
 
-  const stripe = getStripe();
-  const supabaseAdmin = getSupabaseAdmin();
-
-  const rawBody = await readRawBody(req);
-  let event;
+  // A-4: try/catch global
   try {
-    event = stripe.webhooks.constructEvent(rawBody, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    res.status(400).send(`Firma inválida: ${err.message}`);
-    return;
-  }
+    const stripe       = getStripe();
+    const supabaseAdmin = getSupabaseAdmin();
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object;
-      const userId = session.client_reference_id || session.metadata?.supabase_user_id;
-      // En la oferta de primer mes (0,99€) la suscripción NO debe renovarse: se cobra
-      // una vez y, al terminar el mes, el cliente elige plan en el paywall y paga el normal.
-      if (session.metadata?.oferta === 'si') {
-        await stripe.subscriptions.update(session.subscription, { cancel_at_period_end: true });
+    const rawBody = await readRawBody(req);
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        req.headers['stripe-signature'],
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      return res.status(400).send(`Firma inválida: ${err.message}`);
+    }
+
+    // C-3: idempotencia — si este event.id ya fue procesado devolvemos 200 inmediatamente.
+    // Requiere la tabla webhook_events en Supabase (ver supabase/schema.sql).
+    const { error: dupErr } = await supabaseAdmin
+      .from('webhook_events')
+      .insert({ event_id: event.id, type: event.type });
+
+    if (dupErr?.code === '23505') {
+      // Duplicado conocido: Stripe reenvió el evento, ya fue procesado
+      return res.status(200).json({ received: true, duplicate: true });
+    }
+    if (dupErr) {
+      // La tabla puede no existir aún — loggeamos pero NO bloqueamos el procesamiento
+      console.warn('[stripe-webhook] webhook_events insert error (no bloqueante):', dupErr.message);
+    }
+
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
+        // En la oferta de primer mes (0,99€) la suscripción no debe renovarse automáticamente.
+        if (session.metadata?.oferta === 'si') {
+          await stripe.subscriptions.update(session.subscription, { cancel_at_period_end: true });
+        }
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+        await upsertFromSubscription(supabaseAdmin, subscription, userId);
+        break;
       }
-      const subscription = await stripe.subscriptions.retrieve(session.subscription);
-      await upsertFromSubscription(supabaseAdmin, subscription, userId);
-      break;
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
+        await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
+        break;
+      }
+      default:
+        break;
     }
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted': {
-      const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
-      // No degradar a ciegas por el id del evento: reflejar la mejor suscripción
-      // vigente del cliente (gestiona renovaciones anticipadas y solapamientos).
-      await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
-      break;
-    }
-    default:
-      break;
-  }
 
-  res.status(200).json({ received: true });
+    return res.status(200).json({ received: true });
+
+  } catch (err) {
+    console.error('[stripe-webhook] error no controlado:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
 };
