@@ -4147,7 +4147,7 @@
     <div class="auth-field">
       <label>Email</label>
       <div class="auth-field-wrap">
-        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email"
+        <input type="email" id="reg-email" name="username" placeholder="tu@email.com" autocomplete="username"
           oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
         <span class="auth-field-check" id="check-email">✓</span>
       </div>
@@ -4157,7 +4157,7 @@
     <div class="auth-field">
       <label>Contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"
+        <input type="password" id="reg-pass" name="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"
           oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
         <span class="auth-field-check" id="check-pass">✓</span>
       </div>
@@ -4168,7 +4168,7 @@
     <div class="auth-field">
       <label>Confirmar contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass2" placeholder="Repite la contraseña" autocomplete="new-password"
+        <input type="password" id="reg-pass2" name="confirm-password" placeholder="Repite la contraseña" autocomplete="new-password"
           oninput="validarCampoReg('pass2')" onblur="validarCampoReg('pass2')">
         <span class="auth-field-check" id="check-pass2">✓</span>
       </div>
@@ -4209,7 +4209,7 @@
     <div class="auth-field">
       <label>Email</label>
       <div class="auth-field-wrap">
-        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email"
+        <input type="email" id="login-email" name="username" placeholder="tu@email.com" autocomplete="username"
           oninput="validarCampoLogin('email')" onblur="validarCampoLogin('email')">
         <span class="auth-field-check" id="check-login-email">✓</span>
       </div>
@@ -4218,7 +4218,7 @@
 
     <div class="auth-field">
       <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="Tu contraseña" autocomplete="current-password">
+      <input type="password" id="login-pass" name="password" placeholder="Tu contraseña" autocomplete="current-password">
     </div>
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
 
@@ -10434,13 +10434,24 @@
   // plan) para que getCurrentUser()/getUserData() sigan funcionando igual que antes.
   async function syncProfileFromSupabase(authUser) {
     _supaUserId = authUser.id;
+    // Solo columnas que existen seguro. NO incluir aquí columnas opcionales:
+    // si una columna no existe en la BD, PostgREST devuelve error y profile queda
+    // null, lo que borraría la restauración del perfil (y reaparecería el
+    // cuestionario en un dispositivo nuevo). is_beta se consulta aparte, a prueba de fallos.
     const { data: profile, error } = await supa.from('profiles')
-      .select('nombre, userdata, plan, saved_at, is_beta')
+      .select('nombre, userdata, plan, saved_at')
       .eq('id', authUser.id)
       .single();
     if (error) console.error('Error cargando perfil de Supabase:', error);
     const cuenta = profile?.userdata?._cuenta || {};
-    const esBeta = !!profile?.is_beta;
+    // is_beta es opcional: si la columna no existe todavía en la BD, esta consulta
+    // falla de forma aislada (betaRow = null) sin afectar a la carga del perfil.
+    let esBeta = false;
+    try {
+      const { data: betaRow } = await supa.from('profiles')
+        .select('is_beta').eq('id', authUser.id).maybeSingle();
+      esBeta = !!betaRow?.is_beta;
+    } catch (e) { esBeta = false; }
     const esTest = authUser.email === TEST_EMAIL; // cuenta de demo, acceso siempre
     // El acceso de pago se decide SOLO con la tabla "subscriptions", que únicamente
     // escribe el webhook (service-role). No se confía en flags de "profiles"

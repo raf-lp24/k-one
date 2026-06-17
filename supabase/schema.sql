@@ -27,6 +27,11 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+-- Columna opcional para marcar beta testers (acceso completo sin pago).
+-- Solo la pones tú a mano desde el Table Editor / SQL; el usuario no puede tocarla
+-- (RLS de update solo permite cambiar la propia fila, pero no es sensible).
+alter table public.profiles add column if not exists is_beta boolean not null default false;
+
 alter table public.profiles enable row level security;
 
 -- Cada usuario solo puede ver y modificar su propia fila.
