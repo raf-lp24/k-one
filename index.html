@@ -5461,6 +5461,19 @@
           </div>
         </div>
 
+        <!-- Aviso de pago fallido (past_due): el cobro de la renovación no pasó y Stripe
+             reintenta. El acceso sigue activo durante la gracia; pedimos actualizar tarjeta. -->
+        <div id="avisoPagoPendiente" style="display:none;background:#2a1410;border:1px solid #c0392b;border-radius:10px;padding:18px 20px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:22px;line-height:1.2">⚠️</span>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">No hemos podido cobrar tu renovación</div>
+              <div style="font-size:13px;color:#e0b4ad;margin-bottom:14px;line-height:1.6">Tu acceso sigue activo, pero hay un problema con tu método de pago. Actualiza tu tarjeta para no perder tu plan; volveremos a intentar el cobro automáticamente.</div>
+              <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="gestionarSuscripcion()">Actualizar método de pago →</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Aviso suave de renovación: 2 días antes, 1 día antes y el último día.
              Solo para quien NO se le renueva solo (oferta 0,99€ o suscripción cancelada). -->
         <div id="avisoRenovacion" style="display:none;background:#1a1a1a;border:1px solid var(--brasa);border-radius:10px;padding:18px 20px;margin-bottom:20px">
@@ -5470,7 +5483,7 @@
               <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em" id="avisoRenovacionTitulo">Tu plan continúa cuando quieras</div>
               <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6" id="avisoRenovacionDesc">Si quieres, puedes elegir ya tu plan y no esperar al último día. Sin prisa: tu acceso sigue activo hasta entonces.</div>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="abrirRenovacionVoluntaria()">Elegir mi plan ahora →</button>
+                <button class="btn-primary" id="avisoRenovacionBtn" style="padding:9px 20px;font-size:13px" onclick="continuarRenovacion()">Continuar con mi plan →</button>
                 <button style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
               </div>
             </div>
@@ -9925,7 +9938,11 @@
       .select('status, current_period_start, current_period_end, cancel_at_period_end')
       .eq('user_id', authUser.id)
       .maybeSingle();
-    const suscripcionStripeActiva = !!sub && ['active', 'trialing'].includes(sub.status);
+    // 'past_due' = el cobro de la renovación falló y Stripe está reintentando (dunning).
+    // Damos un período de gracia: mantenemos el acceso mientras reintenta y avisamos
+    // al cliente para que actualice su tarjeta. Si Stripe agota los reintentos, la
+    // suscripción pasa a canceled/unpaid y entonces sí se corta el acceso.
+    const suscripcionStripeActiva = !!sub && ['active', 'trialing', 'past_due'].includes(sub.status);
     setCurrentUser({
       nombre: profile?.nombre || authUser.user_metadata?.nombre || '',
       email: authUser.email,
@@ -9934,6 +9951,8 @@
       fechaPago: sub?.current_period_end || cuenta.fechaPago || null,
       // Inicio del período actual de Stripe — para que semanas y días restantes arranquen desde el pago.
       inicioPeriodo: sub?.current_period_start || null,
+      // Pago de la renovación pendiente/fallido: mostrar aviso para actualizar la tarjeta.
+      pagoPendiente: !!(sub && sub.status === 'past_due'),
       // ¿Se cancelará al final del período? (oferta 0,99€ o cancelación). Para avisar antes de que expire.
       cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 0,99€.
@@ -10334,6 +10353,9 @@
     const box = document.getElementById('avisoRenovacion');
     if (!box) return;
     const user = getCurrentUser();
+    // Aviso de pago fallido (past_due): prioritario sobre el aviso de renovación.
+    const boxPago = document.getElementById('avisoPagoPendiente');
+    if (boxPago) boxPago.style.display = (user && user.pagoPendiente && !user.isBeta) ? 'block' : 'none';
     const dias = _diasHastaFinPeriodo();
     // Condiciones: tiene acceso ahora, NO se le renueva solo, y quedan 2 días o menos.
     const noRenueva = user && user.cancelaAlFinal && !user.isBeta;
@@ -10372,6 +10394,41 @@
     _paywallVoluntario = true;
     const modal = document.getElementById('modalPaywall');
     if (modal) _mostrarPaywallInner(modal, getCurrentUser());
+  }
+
+  // Botón del aviso de renovación: intenta reactivar sin cargo (plan de pago real que
+  // estaba cancelado); si toca elegir y pagar (oferta o suscripción ya expirada),
+  // abre el paywall voluntario. Así evitamos el doble cobro al renovar anticipadamente.
+  async function continuarRenovacion() {
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000); return; }
+    const btn = document.getElementById('avisoRenovacionBtn');
+    const txt = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Un momento...'; }
+    try {
+      const res = await fetch('/api/reactivate-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo procesar');
+      if (data.reactivated || data.noChange) {
+        await syncProfileFromSupabase(session.user);
+        cerrarAvisoRenovacion();
+        buildDashboard();
+        showToast(data.reactivated
+          ? 'Tu plan continúa activo. No se ha hecho ningún cargo nuevo: seguirás con tu plan actual.'
+          : 'Tu plan ya está activo, no hay que hacer nada.', 6000);
+        return;
+      }
+      // needsCheckout (oferta o suscripción expirada): elegir plan y pagar.
+      abrirRenovacionVoluntaria();
+    } catch (e) {
+      // Ante cualquier fallo, dejar la vía de elegir plan y pagar.
+      abrirRenovacionVoluntaria();
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = txt; }
+    }
   }
 
   function cerrarPaywallVoluntario() {
