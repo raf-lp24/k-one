@@ -3975,6 +3975,9 @@
   }
   .btn-recetario:hover { background: rgba(232,73,15,0.16); border-color: var(--brasa); }
   .btn-recetario svg { width: 14px; height: 14px; flex-shrink: 0; }
+  /* Enlace inline naranja para llamar la atención sobre el recetario dentro del texto */
+  .link-recetario { color: var(--brasa); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .link-recetario:hover { opacity: 0.82; }
 
   .modal-close {
     position: absolute;
@@ -5907,7 +5910,7 @@
         <div class="dash-header">
           <div class="dash-greeting">// Tu alimentación</div>
           <h1 class="dash-title">Hoy comes</h1>
-          <p class="dash-subtitle" id="nutricionSubtitle">Tienes 5 tomas al día con 5 opciones cada una. Toca cualquiera y elige lo que más te apetezca hoy. Si tienes dudas de cómo preparar algún plato, pulsa <strong>Ver recetario completo</strong> para ver los pasos de cada receta.</p>
+          <p class="dash-subtitle" id="nutricionSubtitle">Tienes 5 tomas al día con 5 opciones cada una. Toca cualquiera y elige lo que más te apetezca hoy. Si tienes dudas de cómo preparar algún plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span> para ver los pasos de cada receta.</p>
           <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
           <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
             <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
@@ -8247,6 +8250,18 @@
     return partes.join(' ');
   }
 
+  // Extrae el nombre del alimento sin la cantidad: "220g judías verdes" → "judías verdes".
+  // Se usa para reescribir el título de la opción cuando se sustituye un ingrediente.
+  function nombreBaseAlimento(s) {
+    return (s || '')
+      .toLowerCase()
+      .replace(/\d+([.,]\d+)?\s*(g|gr|gramos|ml|cl|l|kg|ud|uds|unidad|unidades|cucharada|cucharadas|cda|loncha|lonchas|puñado|puñados|taza|tazas|rebanada|rebanadas|filete|filetes)\b/g, '')
+      .replace(/\d+([.,]\d+)?/g, '')
+      .replace(/\s*\+\s*/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) return;
@@ -8434,7 +8449,7 @@
     // Subtítulo con objetivo calórico personalizado
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl && generatedPlan.kcalObj) {
-      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes 5 tomas con 5 opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <strong>Ver recetario completo</strong>.`;
+      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes 5 tomas con 5 opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -9509,12 +9524,17 @@
       const cards = meal.opciones.map((opt, i) => {
         const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
         const pasos = RECETA_PASOS[opt.nombre] || '';
+        // Si la opción se ha personalizado (ingrediente sustituido) y ya no
+        // tenemos pasos exactos para el nuevo nombre, lo indicamos con honestidad.
+        const notaPersonalizada = (!pasos && opt.personalizada)
+          ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos" style="color:var(--ceniza)">Has personalizado esta receta sustituyendo un ingrediente. Prepárala igual que la original, cambiando el ingrediente sustituido por el nuevo (mismo método de cocción y tiempos).</div>`
+          : '';
         return `
           <div class="receta-card">
             <div class="receta-num">Opción ${i + 1}</div>
             <div class="receta-nombre">${opt.nombre}</div>
             <div class="receta-ingredientes"><ul>${items}</ul></div>
-            ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : ''}
+            ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : notaPersonalizada}
             <div class="receta-footer">
               <div class="receta-prep">⏱ ${opt.prep}</div>
               <div class="receta-macros">
@@ -10368,6 +10388,31 @@
       currentSubst.tag.textContent = capitalizarIngrediente(currentSubst.selectedSub.n);
       currentSubst.tag.classList.add('substituted');
       currentSubst.tag.title = `Sustituido por: ${currentSubst.selectedSub.n}`;
+
+      // Reescribir el título de la opción para que refleje el ingrediente sustituido
+      // ("Revuelto ... con setas y jamón" → "... con judías verdes y jamón").
+      // Solo si el alimento original aparece realmente en el nombre.
+      const origFood = nombreBaseAlimento(currentSubst.ingredient);
+      const subFood  = nombreBaseAlimento(currentSubst.selectedSub.n);
+      if (origFood && subFood) {
+        const re = new RegExp(origFood.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        if (re.test(opt.nombre)) {
+          opt.nombre = opt.nombre.replace(re, subFood);
+          opt.personalizada = true; // marca que la receta se ha adaptado
+          // Actualizar el nombre en la tarjeta abierta
+          const cardEl = currentSubst.tag.closest('.meal-option');
+          const nameEl = cardEl?.querySelector('.meal-opt-name');
+          if (nameEl) nameEl.textContent = opt.nombre;
+          // Actualizar la píldora de preview de esta opción
+          const previewName = document.querySelectorAll(`#mealPreview${mealIdx} .meal-preview-name`)[optIdx];
+          if (previewName) previewName.textContent = opt.nombre;
+          // Si es la opción elegida, actualizar la etiqueta "Elegida: ..."
+          if (comidasSeleccionadas[mealIdx] === optIdx) {
+            const selEl = document.getElementById(`mealSelected${mealIdx}`);
+            if (selEl) selEl.textContent = `Elegida: ${opt.nombre}`;
+          }
+        }
+      }
 
       // Recalcular el resumen "Total de hoy" y persistir
       actualizarResumenNutricional();
