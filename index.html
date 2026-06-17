@@ -3547,9 +3547,9 @@
     width: 100%;
   }
 
-  .auth-field input:focus { border-color: var(--brasa); }
-
+  .auth-field input:focus { border-color: var(--brasa); outline: none; }
   .auth-field input.error { border-color: #e8150f; }
+  .auth-field input.valid { border-color: #27ae60; }
 
   .auth-error {
     font-size: 11px;
@@ -3558,8 +3558,31 @@
     margin-top: -14px;
     margin-bottom: 8px;
     display: none;
+    animation: fadeInDown .15s ease;
   }
   .auth-error.visible { display: block; }
+  @keyframes fadeInDown { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+  .auth-pass-strength {
+    display: none; height: 3px; border-radius: 2px; margin-top: -14px; margin-bottom: 8px;
+    background: #222; overflow: hidden;
+  }
+  .auth-pass-strength.visible { display: block; }
+  .auth-pass-strength-bar { height: 100%; border-radius: 2px; transition: width .2s, background .2s; }
+
+  .auth-field-wrap { position: relative; }
+  .auth-field-check {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    color: #27ae60; font-size: 14px; display: none; pointer-events: none;
+  }
+  .auth-field-check.visible { display: block; }
+
+  .kone-save-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: #27ae60; font-family: 'DM Mono', monospace;
+    opacity: 0; transition: opacity .3s;
+  }
+  .kone-save-badge.visible { opacity: 1; }
 
   .auth-check {
     display: flex;
@@ -4018,25 +4041,42 @@
 
     <div class="auth-field">
       <label>Nombre</label>
-      <input type="text" id="reg-nombre" placeholder="Tu nombre" autocomplete="off">
+      <div class="auth-field-wrap">
+        <input type="text" id="reg-nombre" placeholder="Tu nombre" autocomplete="off"
+          oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
+        <span class="auth-field-check" id="check-nombre">✓</span>
+      </div>
     </div>
     <div class="auth-error" id="err-nombre">Introduce tu nombre</div>
 
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="off">
+      <div class="auth-field-wrap">
+        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="off"
+          oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
+        <span class="auth-field-check" id="check-email">✓</span>
+      </div>
     </div>
     <div class="auth-error" id="err-email">Introduce un email válido</div>
 
     <div class="auth-field">
       <label>Contraseña</label>
-      <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
+      <div class="auth-field-wrap">
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"
+          oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
+        <span class="auth-field-check" id="check-pass">✓</span>
+      </div>
     </div>
+    <div class="auth-pass-strength" id="pass-strength-bar"><div class="auth-pass-strength-bar" id="pass-strength-fill"></div></div>
     <div class="auth-error" id="err-pass">La contraseña debe tener al menos 6 caracteres</div>
 
     <div class="auth-field">
       <label>Confirmar contraseña</label>
-      <input type="password" id="reg-pass2" placeholder="Repite la contraseña">
+      <div class="auth-field-wrap">
+        <input type="password" id="reg-pass2" placeholder="Repite la contraseña"
+          oninput="validarCampoReg('pass2')" onblur="validarCampoReg('pass2')">
+        <span class="auth-field-check" id="check-pass2">✓</span>
+      </div>
     </div>
     <div class="auth-error" id="err-pass2">Las contraseñas no coinciden</div>
 
@@ -4071,7 +4111,11 @@
 
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off">
+      <div class="auth-field-wrap">
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off"
+          oninput="validarCampoLogin('email')" onblur="validarCampoLogin('email')">
+        <span class="auth-field-check" id="check-login-email">✓</span>
+      </div>
     </div>
     <div class="auth-error" id="err-login-email">Email no encontrado</div>
 
@@ -5550,7 +5594,10 @@
       <!-- HOY -->
       <div class="dash-section active" id="section-hoy">
         <div class="dash-header">
-          <div class="dash-greeting" id="dashWeekDay">// Semana 1 · Día 1</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div class="dash-greeting" id="dashWeekDay">// Semana 1 · Día 1</div>
+            <span class="kone-save-badge" id="koneCloudBadge">☁ Guardado en la nube</span>
+          </div>
           <h1 class="dash-title" id="dashTitle">Bienvenido/a</h1>
           <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
         </div>
@@ -10001,23 +10048,39 @@
   }
 
   // getUserData/saveUserData cachean en localStorage {userData, plan, savedAt} para
-  // acceso síncrono (lo usan muchos puntos del código sin tocarlos). saveUserData
-  // además sincroniza en segundo plano con la tabla "profiles" de Supabase si hay
-  // sesión activa, para que tú puedas ver a tus clientes desde el panel.
+  // acceso síncrono. saveUserData también sincroniza con Supabase con retry.
   function getUserData(email) {
     try { return JSON.parse(localStorage.getItem(`k1_data_${email}`) || 'null'); } catch(e) { return null; }
   }
+
+  let _saveTimer = null;
+  function _mostrarGuardado() {
+    const badge = document.getElementById('koneCloudBadge');
+    if (!badge) return;
+    badge.classList.add('visible');
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => badge.classList.remove('visible'), 3000);
+  }
+
   function saveUserData(email, data) {
     try { localStorage.setItem(`k1_data_${email}`, JSON.stringify(data)); } catch(e) {}
-    if (_supaUserId) {
-      supa.from('profiles').update({
-        userdata: data.userData,
-        plan: data.plan,
-        saved_at: data.savedAt
-      }).eq('id', _supaUserId).then(({ error }) => {
-        if (error) console.error('Error guardando en Supabase:', error);
+    if (!_supaUserId) return;
+    const payload = { userdata: data.userData, plan: data.plan, saved_at: data.savedAt };
+    supa.from('profiles').update(payload).eq('id', _supaUserId)
+      .then(({ error }) => {
+        if (error) {
+          // Retry una vez tras 2 segundos
+          setTimeout(() => {
+            supa.from('profiles').update(payload).eq('id', _supaUserId)
+              .then(({ error: e2 }) => {
+                if (e2) console.error('Error guardando en Supabase (retry):', e2);
+                else _mostrarGuardado();
+              });
+          }, 2000);
+        } else {
+          _mostrarGuardado();
+        }
       });
-    }
   }
 
   // Trae el perfil desde Supabase y rellena las cachés locales (sesión + datos del
@@ -10060,12 +10123,21 @@
       tieneSub: !!sub || esBeta || esTest,
       isBeta: esBeta
     });
-    if (profile?.plan) {
-      saveUserData(authUser.email, {
-        userData: profile.userdata || {},
-        plan: profile.plan,
-        savedAt: profile.saved_at || new Date().toISOString()
-      });
+    // Restaurar datos del perfil desde Supabase a localStorage.
+    // Se hace aunque plan sea null: el usuario puede haber completado el cuestionario
+    // sin haber generado el plan todavía (cambio de dispositivo o limpieza de caché).
+    if (profile?.userdata || profile?.plan) {
+      const localData = getUserData(authUser.email);
+      // Si los datos locales son más recientes que los de Supabase, no sobreescribir.
+      const supaTs = profile?.saved_at ? new Date(profile.saved_at).getTime() : 0;
+      const localTs = localData?.savedAt  ? new Date(localData.savedAt).getTime()  : 0;
+      if (supaTs >= localTs) {
+        saveUserData(authUser.email, {
+          userData: profile.userdata || {},
+          plan: profile.plan || null,
+          savedAt: profile.saved_at || new Date().toISOString()
+        });
+      }
     }
   }
 
@@ -10075,6 +10147,69 @@
     t.textContent = msg;
     t.classList.add('visible');
     setTimeout(() => t.classList.remove('visible'), duration);
+  }
+
+  // ===== VALIDACIÓN EN TIEMPO REAL =====
+  function _setFieldState(id, estado) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    // err-nombre / err-login-email: conservamos el prefijo login- para diferenciar
+    const errId  = id.startsWith('login-') ? 'err-' + id : 'err-' + id.replace('reg-', '');
+    const checkId = 'check-' + id.replace('reg-', '');
+    const errEl   = document.getElementById(errId);
+    const checkEl = document.getElementById(checkId);
+    input.classList.toggle('error', estado === 'error');
+    input.classList.toggle('valid', estado === 'valid');
+    if (estado === 'none') { input.classList.remove('error', 'valid'); }
+    if (errEl)   errEl.classList.toggle('visible',  estado === 'error');
+    if (checkEl) checkEl.classList.toggle('visible', estado === 'valid');
+  }
+
+  function validarCampoReg(campo) {
+    const val = (document.getElementById('reg-' + campo) || {}).value || '';
+    switch (campo) {
+      case 'nombre':
+        _setFieldState('reg-nombre', val.trim().length >= 2 ? 'valid' : val.trim() ? 'error' : 'none');
+        break;
+      case 'email': {
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
+        _setFieldState('reg-email', val.trim() ? (ok ? 'valid' : 'error') : 'none');
+        break;
+      }
+      case 'pass': {
+        const bar = document.getElementById('pass-strength-bar');
+        const fill = document.getElementById('pass-strength-fill');
+        if (bar && fill) {
+          if (val.length === 0) { bar.classList.remove('visible'); }
+          else {
+            bar.classList.add('visible');
+            const fuerza = val.length < 6 ? 1 : val.length < 10 ? 2 : /[A-Z]/.test(val) && /[0-9]/.test(val) ? 3 : 2;
+            const pct = fuerza === 1 ? '33%' : fuerza === 2 ? '66%' : '100%';
+            const col = fuerza === 1 ? '#e74c3c' : fuerza === 2 ? '#f0a500' : '#27ae60';
+            fill.style.width = pct; fill.style.background = col;
+          }
+        }
+        _setFieldState('reg-pass', val.length === 0 ? 'none' : val.length >= 6 ? 'valid' : 'error');
+        const v2 = (document.getElementById('reg-pass2') || {}).value || '';
+        if (v2) validarCampoReg('pass2');
+        break;
+      }
+      case 'pass2': {
+        const pass1 = (document.getElementById('reg-pass') || {}).value || '';
+        _setFieldState('reg-pass2', val.length === 0 ? 'none' : val === pass1 ? 'valid' : 'error');
+        break;
+      }
+    }
+  }
+
+  function validarCampoLogin(campo) {
+    const val = (document.getElementById('login-' + campo) || {}).value || '';
+    if (campo === 'email') {
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
+      _setFieldState('login-email', val.trim() ? (ok ? 'valid' : 'error') : 'none');
+      const err = document.getElementById('err-login-email');
+      if (err) err.textContent = 'Introduce un email válido';
+    }
   }
 
   // ===== REGISTRO =====
