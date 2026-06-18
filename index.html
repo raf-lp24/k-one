@@ -1882,10 +1882,12 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    height: 100dvh; /* dvh = altura visible real en móvil (excluye la barra del navegador) */
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--humo);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .dash-sidebar .logo { margin-bottom: 40px; }
@@ -3391,6 +3393,7 @@
       width: 80%;
       max-width: 300px;
       height: 100vh;
+      height: 100dvh; /* altura visible real en móvil para no cortar los botones del fondo */
       z-index: 200;
       transform: translateX(-100%);
       transition: transform 0.25s ease;
@@ -8332,8 +8335,14 @@
       const razones = [];
       const p = userData.progreso || {};
       const semana = progreso.semana;
+      const soloDietaPanel = !!generatedPlan.soloDieta;
 
-      if (semana <= 1) {
+      if (soloDietaPanel) {
+        // Plan solo nutrición: trazabilidad centrada en la alimentación, sin entrenamiento.
+        razones.push('Plan de nutrición personalizado a partir de tu cuestionario');
+        razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu peso, altura, edad y actividad`);
+        razones.push('5 tomas al día con 5 opciones cada una, ajustadas a tus cantidades');
+      } else if (semana <= 1) {
         razones.push(`Plan inicial personalizado basado en tu cuestionario de ${userData.deporte || 'entrenamiento'}`);
         razones.push(`Nivel ${(userData.nivel || '').split(',')[0].toLowerCase() || 'adaptado'} · ${userData.diasEntreno || '3'} días/semana · ${userData.lugar || 'tu zona'}`);
         razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu metabolismo`);
@@ -8347,7 +8356,7 @@
         if (p.ultimaNota) razones.push(`Tu nota del check-in: "${p.ultimaNota.slice(0,80)}${p.ultimaNota.length > 80 ? '…' : ''}"`);
       }
 
-      if (userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
+      if (!soloDietaPanel && userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
         razones.push(`Ejercicios adaptados a tu historial de ${userData.lesion.toLowerCase()}`);
       }
       if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
@@ -8365,12 +8374,17 @@
     aplicarAvatarPerfil();
     document.getElementById('userGoal').textContent = userData.objetivo || 'Tu objetivo';
 
-    // Entrenamiento hoy
+    // Entrenamiento hoy. En planes "solo nutrición" no hay entrenamiento: se oculta
+    // el bloque entero para no dejar contenido de gimnasio que no corresponde.
+    const todayPlanEl = document.getElementById('todayPlan');
+    if (todayPlanEl) todayPlanEl.style.display = generatedPlan.soloDieta ? 'none' : '';
     const diaHoyPlan = generatedPlan.semana?.[getIndiceDiaHoy()];
     const esDescansoHoy = !generatedPlan.soloDieta && diaHoyPlan && diaHoyPlan.tipo === 'Descanso';
     const btnCompletado = document.getElementById('btnCompletado');
     const btnFeedback = document.getElementById('btnFeedback');
-    if (esDescansoHoy) {
+    if (generatedPlan.soloDieta) {
+      // Sin entrenamiento: no se rellena ni se tocan los botones (el bloque está oculto).
+    } else if (esDescansoHoy) {
       document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy +
         `<strong>${diaHoyPlan.dia} — ${diaHoyPlan.resumen}</strong><br><br>Hoy toca descanso. Aprovecha para recuperar: duerme bien, hidrátate y, si te apetece, dale un paseo suave.`;
       if (btnCompletado) btnCompletado.style.display = 'none';
