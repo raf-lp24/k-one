@@ -10557,8 +10557,10 @@
         });
       }
     }
-    // Verificar admin silenciosamente tras cada login/restauración de sesión.
-    verificarAdminSilencioso();
+    // Verificar admin ANTES de devolver el control: el acceso del admin (sin paywall)
+    // depende de _adminVerificado, así que hay que esperar a que se resuelva para que
+    // comprobarPaywall() no muestre el paywall por una carrera de tiempos.
+    await verificarAdminSilencioso();
   }
 
   // ===== TOAST =====
@@ -11215,7 +11217,14 @@
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.isAdmin) { _adminVerificado = true; actualizarBtnAdmin(); }
+        if (data.isAdmin) {
+          _adminVerificado = true;
+          actualizarBtnAdmin();
+          // El admin nunca tiene paywall. Si por una carrera de tiempos el paywall
+          // ya se mostró (la verificación es asíncrona), lo ocultamos al confirmarse.
+          const modal = document.getElementById('modalPaywall');
+          if (modal) modal.classList.remove('visible');
+        }
       }
     } catch {}
   }
