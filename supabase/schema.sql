@@ -27,12 +27,35 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- Columna opcional para marcar beta testers (acceso completo sin pago).
--- Solo la pones tú a mano desde el Table Editor / SQL; el usuario no puede tocarla
--- (RLS de update solo permite cambiar la propia fila, pero no es sensible).
+-- Columna para marcar beta testers (acceso completo sin pago). Es SENSIBLE: concede
+-- acceso gratuito, así que el usuario NO debe poder cambiarla. La política RLS de update
+-- permite al usuario modificar su propia fila y Postgres no restringe por columna, por lo
+-- que sin protección extra un usuario podría ejecutar
+--   supabase.from('profiles').update({ is_beta: true })
+-- y darse premium gratis. El trigger de abajo lo impide.
 alter table public.profiles add column if not exists is_beta boolean not null default false;
 
 alter table public.profiles enable row level security;
+
+-- Protección de columnas sensibles: los roles de cliente (authenticated/anon) no pueden
+-- cambiar is_beta. Si lo intentan, se conserva el valor anterior silenciosamente. Solo
+-- service_role / postgres (SQL Editor, scripts de admin) pueden modificarla.
+create or replace function public.protect_profile_sensitive_cols()
+returns trigger
+language plpgsql
+as $$
+begin
+  if current_user in ('authenticated', 'anon') then
+    new.is_beta := old.is_beta;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_sensitive on public.profiles;
+create trigger profiles_protect_sensitive
+  before update on public.profiles
+  for each row execute function public.protect_profile_sensitive_cols();
 
 -- Cada usuario solo puede ver y modificar su propia fila.
 drop policy if exists "profiles_select_own" on public.profiles;

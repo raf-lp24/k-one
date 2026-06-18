@@ -26,20 +26,6 @@ module.exports = async (req, res) => {
     const ofertaPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
     const usarOferta = !!oferta && !!ofertaPriceId;
 
-    let priceId;
-    if (usarOferta) {
-      priceId = ofertaPriceId;
-    } else {
-      // A-2 + B-2: getPriceId ya no hace fallback silencioso
-      if (!tipoPlan || !periodicidad) {
-        return res.status(400).json({ error: 'tipoPlan y periodicidad son obligatorios' });
-      }
-      priceId = getPriceId(tipoPlan, periodicidad);
-      if (!priceId) {
-        return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
-      }
-    }
-
     const { data: existingSub } = await supabaseAdmin
       .from('subscriptions')
       .select('stripe_customer_id')
@@ -48,7 +34,10 @@ module.exports = async (req, res) => {
 
     // C-2: buscar cliente existente en Stripe por metadata antes de crear uno nuevo,
     // para evitar duplicados si la misma request llega dos veces en paralelo.
+    // Se resuelve el customer ANTES de decidir el precio para poder verificar la
+    // elegibilidad de la oferta contra el historial real de Stripe.
     let customerId = existingSub?.stripe_customer_id;
+    let customerEraNuevo = false;
     if (!customerId) {
       const search = await stripe.customers.search({
         query: `metadata['supabase_user_id']:'${user.id}'`,
@@ -62,11 +51,36 @@ module.exports = async (req, res) => {
           metadata: { supabase_user_id: user.id }
         });
         customerId = customer.id;
+        customerEraNuevo = true;
       }
 
       await supabaseAdmin
         .from('subscriptions')
         .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: 'user_id' });
+    }
+
+    let priceId;
+    if (usarOferta) {
+      // SEGURIDAD: la oferta de primer mes (0,99€) solo es válida para quien NUNCA ha
+      // tenido una suscripción. No basta con el flag del cliente (sería manipulable):
+      // se verifica el historial de Stripe del cliente. Un customer recién creado no
+      // tiene historial, así que se salta la llamada.
+      if (!customerEraNuevo) {
+        const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
+        if (prev.data.length > 0) {
+          return res.status(400).json({ error: 'La oferta de primer mes ya no está disponible para esta cuenta.' });
+        }
+      }
+      priceId = ofertaPriceId;
+    } else {
+      // A-2 + B-2: getPriceId ya no hace fallback silencioso
+      if (!tipoPlan || !periodicidad) {
+        return res.status(400).json({ error: 'tipoPlan y periodicidad son obligatorios' });
+      }
+      priceId = getPriceId(tipoPlan, periodicidad);
+      if (!priceId) {
+        return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
+      }
     }
 
     // M-4: origen desde variable de entorno para evitar header Host manipulado
