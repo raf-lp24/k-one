@@ -49,11 +49,11 @@ module.exports = async (req, res) => {
         `
       }));
 
-      // 2) Email de bienvenida al lead
+      // 2) Email de bienvenida al lead con ejemplo real del plan
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
         to: datos.email,
-        subject: 'Tu plan de entrenamiento y nutrición te está esperando — K-ONE',
+        subject: 'Así es un día dentro de K-ONE — mira tu plan',
         html: `
           <div style="background:#0b0b0b;padding:40px 20px;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
             <div style="max-width:560px;margin:0 auto">
@@ -63,39 +63,93 @@ module.exports = async (req, res) => {
               </div>
 
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin-bottom:8px;text-align:center">
-                Tu plan personalizado te está esperando
+                Esto es lo que recibirías hoy
               </h1>
-
-              <p style="color:#b5b2ad;font-size:15px;line-height:1.7;text-align:center;margin-bottom:28px">
-                Gracias por tu interés en K-ONE. Esto es lo que vas a encontrar cuando des el paso:
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;text-align:center;margin-bottom:28px">
+                Un ejemplo real de un día dentro de K-ONE. Tu plan se adapta a tu deporte, nivel, objetivo y lesiones — esto es solo una muestra.
               </p>
 
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:20px 24px;margin-bottom:16px">
-                <p style="margin:0 0 6px;font-weight:700;color:#fff;font-size:14px">Plan de entrenamiento adaptado a ti</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.6">Según tu deporte (gimnasio, running, CrossFit, Hyrox o combinación), tu nivel, tus días disponibles y tus lesiones. No es un PDF genérico: se recalcula cada semana según tu progreso real.</p>
+              <!-- ENTRENAMIENTO -->
+              <div style="background:#141414;padding:24px;margin-bottom:4px">
+                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// Entrenamiento de hoy</p>
+                <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#fff">Lunes — Tren superior (Fuerza)</p>
+
+                <table style="width:100%;border-collapse:collapse;font-size:13px">
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Press banca</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">4×8</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Remo con mancuerna</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">4×10</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Press militar</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×10</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Jalón al pecho</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×12</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Curl bíceps + tríceps polea</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×12</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;color:#fff;font-weight:600">Elevaciones laterales</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×15</td>
+                  </tr>
+                </table>
+                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Descanso entre series: 60-90s. Peso que cueste las 2 últimas reps.</p>
               </div>
 
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:20px 24px;margin-bottom:16px">
-                <p style="margin:0 0 6px;font-weight:700;color:#fff;font-size:14px">Plan de nutrición con 5 opciones por comida</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.6">5 tomas al día, cada una con 5 opciones distintas. Calorías y proteínas calculadas con tu peso, altura, edad y objetivo. Con recetario paso a paso.</p>
+              <!-- NUTRICIÓN -->
+              <div style="background:#141414;padding:24px;margin-bottom:4px">
+                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// Nutrición — Comida (ejemplo)</p>
+                <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#fff">Pollo a la plancha con arroz y verduras</p>
+                <p style="margin:0 0 12px;font-size:12px;color:#b5b2ad">180g pechuga de pollo, 150g arroz integral, 200g brócoli al vapor, 1 cda AOVE</p>
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">520 kcal</span>
+                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">42g prot</span>
+                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">48g carbs</span>
+                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">14g grasa</span>
+                </div>
+                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Esta es 1 de las 5 opciones que tendrías para esta toma. Cada comida tiene 5 alternativas.</p>
               </div>
 
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:20px 24px;margin-bottom:16px">
-                <p style="margin:0 0 6px;font-weight:700;color:#fff;font-size:14px">Check-in semanal que adapta tu plan</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.6">Cada semana nos cuentas cómo te fue y el plan se ajusta: más volumen si vas sobrado, menos carga si necesitas recuperar. Sin apps genéricas que te dejan solo.</p>
+              <!-- OTRAS COMIDAS -->
+              <div style="background:#141414;padding:24px;margin-bottom:4px">
+                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// El resto de tu día</p>
+                <table style="width:100%;border-collapse:collapse;font-size:13px">
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff">Desayuno</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Tortilla de claras con avena y fruta</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff">Media mañana</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Yogur griego con nueces</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #222">
+                    <td style="padding:8px 0;color:#fff">Merienda</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Tostada de pavo con aguacate</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;color:#fff">Cena</td>
+                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Salmón al horno con patata y ensalada</td>
+                  </tr>
+                </table>
+                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Calorías y gramos ajustados a tu peso, altura, edad y objetivo. Nada inventado.</p>
               </div>
 
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:20px 24px;margin-bottom:28px">
-                <p style="margin:0 0 6px;font-weight:700;color:#fff;font-size:14px">Todo por 0,99€ el primer mes</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.6">Sin compromiso. Si no te convence, cancelas con un clic antes de que termine el mes. Sin llamadas, sin formularios, sin excusas.</p>
+              <!-- CTA -->
+              <div style="background:#141414;padding:28px 24px;margin-bottom:24px;text-align:center">
+                <p style="margin:0 0 6px;font-size:18px;font-weight:700;color:#fff">Tu primer mes por 0,99€</p>
+                <p style="margin:0 0 16px;font-size:13px;color:#b5b2ad">Sin compromiso. Cancelas cuando quieras con un clic.</p>
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:14px 36px;font-size:15px;font-weight:700;letter-spacing:0.5px">QUIERO MI PLAN →</a>
               </div>
 
-              <div style="text-align:center;margin-bottom:32px">
-                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:14px 36px;font-size:15px;font-weight:700;letter-spacing:0.5px">EMPIEZA POR 0,99€ →</a>
-              </div>
-
-              <p style="color:#666;font-size:11px;text-align:center;line-height:1.6;margin-top:32px;border-top:1px solid #222;padding-top:20px">
-                Recibes este email porque dejaste tu dirección en k-one-six.vercel.app.<br>
+              <p style="color:#666;font-size:11px;text-align:center;line-height:1.6;border-top:1px solid #222;padding-top:20px">
+                Recibes este email porque dejaste tu dirección en nuestra web.<br>
                 Si no fuiste tú, ignora este mensaje.<br><br>
                 K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
                 <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F">k.one.fit26@gmail.com</a>
