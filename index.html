@@ -10064,9 +10064,13 @@
         </div>
 
         <div style="display:flex;gap:10px;margin-top:20px;border-top:1px solid var(--humo);padding-top:16px">
-          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="copiarListaCompra()">
+          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="descargarListaCompra()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Descargar
+          </button>
+          <button class="btn-ghost" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="copiarListaCompra()">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copiar lista
+            Copiar
           </button>
           <button class="btn-ghost" style="flex:1" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
         </div>
@@ -10104,6 +10108,68 @@
         return `☐ ${nombre.charAt(0).toUpperCase() + nombre.slice(1)} — ${cant}`;
       }).join('\n');
     navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles'));
+  }
+
+  function descargarListaCompra() {
+    if (!generatedPlan?.nutricion) return;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    const categorias = {
+      'PROTEÍNAS': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan/,
+      'LÁCTEOS': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage/,
+      'CEREALES E HIDRATOS': /arroz|avena|pan |tostada|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|wasa|fajita|wrap/,
+      'VERDURAS Y HORTALIZAS': /brócoli|brocoli|espinac|tomate|lechuga|pepino|pimiento|cebolla|champiñon|champinon|calabacín|calabacin|zanahoria|espárrago|esparrago|rúcula|rucula|judías|judias|berenjena|aguacate|alcachofa|maíz|maiz/,
+      'FRUTAS': /plátano|platano|manzana|pera|kiwi|naranja|fresas|arándanos|arandanos|frutos rojos|melocotón|melocoton|fruta/,
+      'LEGUMBRES': /garbanz|lenteja|edamame|alubia|fabe/,
+      'FRUTOS SECOS Y SEMILLAS': /nueces|almendras|cacahuete|semillas|pipas|avellanas|lino|chía|chia/,
+      'OTROS': /.*/
+    };
+    const ingredientes = {};
+    for (let dia = 0; dia < 7; dia++) {
+      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+        const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
+        const opt = meal.opciones[optIdx];
+        if (!opt) return;
+        opt.ingredientes.split(',').forEach(ing => {
+          const clean = ing.trim().toLowerCase();
+          if (!clean || clean.length < 2) return;
+          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
+          if (!ingredientes[key]) ingredientes[key] = { nombre: clean, cantidad: 0, veces: 0 };
+          ingredientes[key].veces++;
+          const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
+          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+        });
+      });
+    }
+    const items = Object.values(ingredientes).sort((a, b) => b.veces - a.veces).map(ing => {
+      const cant = ing.cantidad > 0 ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`) : `x${ing.veces}`;
+      const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
+      const cap = nombre.charAt(0).toUpperCase() + nombre.slice(1);
+      let cat = 'OTROS';
+      for (const [c, re] of Object.entries(categorias)) { if (c !== 'OTROS' && re.test(nombre)) { cat = c; break; } }
+      return { nombre: cap, cant, cat };
+    });
+    const porCat = {};
+    items.forEach(i => { if (!porCat[i.cat]) porCat[i.cat] = []; porCat[i.cat].push(i); });
+    const orden = ['PROTEÍNAS','LÁCTEOS','CEREALES E HIDRATOS','VERDURAS Y HORTALIZAS','FRUTAS','LEGUMBRES','FRUTOS SECOS Y SEMILLAS','OTROS'];
+    let txt = '🛒 LISTA DE LA COMPRA SEMANAL — K-ONE\n';
+    txt += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    orden.forEach(cat => {
+      if (!porCat[cat]?.length) return;
+      txt += `📌 ${cat}\n`;
+      porCat[cat].forEach(i => { txt += `  ☐ ${i.nombre}  ·····  ${i.cant}\n`; });
+      txt += '\n';
+    });
+    txt += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    txt += `Total: ${items.length} ingredientes\n`;
+    txt += 'Generado en k-one.fit\n';
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lista-compra-kone.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Lista descargada');
   }
 
   // ===== RESUMEN NUTRICIONAL DEL DÍA (suma según opciones elegidas) =====
