@@ -213,7 +213,49 @@ as $$
 $$;
 
 -- ============================================================
--- 7. CUENTA DE TEST (opcional)
+-- 7. TABLA: leads
+-- Emails recogidos desde el formulario "Avísame de ofertas" de la
+-- landing. Cualquier visitante puede insertar; solo el admin lee.
+-- ============================================================
+create table if not exists public.leads (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.leads enable row level security;
+
+drop policy if exists "leads_insert" on public.leads;
+create policy "leads_insert" on public.leads
+  for insert with check (true);
+
+-- ============================================================
+-- 8. TABLA: testimonios
+-- Opiniones de clientes (públicas). Cualquiera puede insertar y leer.
+-- ============================================================
+create table if not exists public.testimonios (
+  id uuid primary key default gen_random_uuid(),
+  nombre text,
+  inicial text,
+  edad int,
+  plan text,
+  estrellas int not null default 5,
+  texto text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.testimonios enable row level security;
+
+drop policy if exists "testimonios_insert" on public.testimonios;
+create policy "testimonios_insert" on public.testimonios
+  for insert with check (true);
+
+drop policy if exists "testimonios_select" on public.testimonios;
+create policy "testimonios_select" on public.testimonios
+  for select using (true);
+
+-- ============================================================
+-- 9. CUENTA DE TEST (opcional)
 -- La cuenta de demo (test@k-one.es / kone123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales
 -- (login() la registra vía supabase.auth.signUp si no existe).
