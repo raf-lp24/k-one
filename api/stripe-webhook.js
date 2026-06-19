@@ -102,10 +102,8 @@ module.exports = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
-        // En la oferta de primer mes (0,99€) la suscripción no debe renovarse automáticamente.
-        if (session.metadata?.oferta === 'si') {
-          await stripe.subscriptions.update(session.subscription, { cancel_at_period_end: true });
-        }
+        // Renovación automática: todas las suscripciones (incluida la oferta 0,99€)
+        // se renuevan automáticamente al precio del plan elegido.
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
         break;

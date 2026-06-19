@@ -71,11 +71,9 @@ module.exports = async (req, res) => {
 
     const updateParams = {
       items: [{ id: itemId, price: newPriceId }],
-      proration_behavior: 'create_prorations'
+      proration_behavior: 'create_prorations',
+      cancel_at_period_end: false
     };
-    if (subscription.cancel_at_period_end) {
-      updateParams.cancel_at_period_end = true;
-    }
     const updated = await stripe.subscriptions.update(subscriptionId, updateParams);
 
     return res.status(200).json({ ok: true, currentPeriodEnd: updated.current_period_end });
