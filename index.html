@@ -6129,9 +6129,9 @@
     if (!email) return false;
     input.value = '';
     document.getElementById('leadMagnetNote').textContent = 'Hecho. En cuanto decidas dar el paso, aquí tienes tu plan esperando.';
-    try {
-      await supa.from('leads').insert({ email });
-    } catch (e) {}
+    supa.from('leads').insert({ email }).then(({ error }) => {
+      if (error) console.error('Error guardando lead:', error);
+    });
     notificarAdmin('lead', { email });
     return false;
   }
@@ -11217,22 +11217,23 @@
       const parts = nombre.trim().split(' ');
       return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
     })();
-    try {
-      await supa.from('testimonios').insert({
-        nombre: nombrePublico,
-        inicial,
-        edad,
-        plan: null,
-        estrellas: _opPublicaEstrellas,
-        texto: texto || null
-      });
-      showToast('Opinión enviada. Gracias por tu tiempo.');
-      document.getElementById('modalOpinionPublica').classList.remove('visible');
-      notificarAdmin('opinion', { nombre: nombrePublico, estrellas: _opPublicaEstrellas, texto: texto || '(sin texto)' });
-      cargarTestimoniosLanding();
-    } catch (e) {
+    const { error } = await supa.from('testimonios').insert({
+      nombre: nombrePublico,
+      inicial,
+      edad,
+      plan: null,
+      estrellas: _opPublicaEstrellas,
+      texto: texto || null
+    });
+    if (error) {
+      console.error('Error guardando opinión:', error);
       showToast('No se pudo enviar la opinión. Inténtalo de nuevo.', 4000);
+      return;
     }
+    showToast('Opinión enviada. Gracias por tu tiempo.');
+    document.getElementById('modalOpinionPublica').classList.remove('visible');
+    notificarAdmin('opinion', { nombre: nombrePublico, estrellas: _opPublicaEstrellas, texto: texto || '(sin texto)' });
+    cargarTestimoniosLanding();
   }
 
   // ===== TESTIMONIALES: CARGA DINÁMICA DESDE SUPABASE =====
