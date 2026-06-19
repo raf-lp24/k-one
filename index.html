@@ -1141,6 +1141,24 @@
     margin-top: 2px;
   }
 
+  .btn-volver-dashboard {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 200;
+    background: var(--brasa);
+    color: var(--blanco-puro);
+    border: none;
+    padding: 12px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(232,73,15,0.4);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-volver-dashboard:hover { background: #ff5a10; transform: translateY(-2px); }
+
   .testimonials-empty {
     text-align: center;
     padding: 60px 20px;
@@ -4428,6 +4446,7 @@
 
 <!-- ==================== LANDING ==================== -->
 <div class="screen" id="landing">
+  <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
   <nav class="landing-nav">
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
     <div class="nav-links">
@@ -5546,12 +5565,12 @@
 <div class="screen" id="dashboard">
   <div class="dash-layout">
     <div class="dash-mobile-bar">
-      <div class="logo" onclick="showSection('hoy')" style="cursor:pointer">K-<span>ONE</span></div>
+      <div class="logo" onclick="verLandingComoVisitante()" style="cursor:pointer">K-<span>ONE</span></div>
       <button class="dash-menu-btn" onclick="toggleDashMenu()" aria-label="Abrir menú">☰</button>
     </div>
     <div class="dash-overlay" id="dashOverlay" onclick="closeDashMenu()"></div>
     <aside class="dash-sidebar">
-      <div class="logo" onclick="showSection('hoy')" style="cursor:pointer">K-<span>ONE</span></div>
+      <div class="logo" onclick="verLandingComoVisitante()" style="cursor:pointer">K-<span>ONE</span></div>
       <div class="dash-user">
         <div class="user-avatar" id="userAvatar" onclick="document.getElementById('fotoPerfilInput').click()" title="Cambiar foto de perfil">
           <span id="userAvatarLetter">A</span>
@@ -5990,19 +6009,20 @@
 
   // ===== NAVEGACIÓN SCREENS =====
   function goTo(screenId) {
-    if (screenId === 'landing' || screenId === 'login' || screenId === 'bienvenida') {
-      const u = getCurrentUser();
-      if (u && getUserData(u.email)?.plan) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('dashboard').classList.add('active');
-        window.scrollTo(0,0);
-        loadUserDashboard(u.email);
-        return;
-      }
-    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
+    // Si vamos a la landing estando logueado, mostrar botón flotante para volver
+    const btnVolver = document.getElementById('btnVolverDashboard');
+    if (btnVolver) {
+      const user = getCurrentUser();
+      btnVolver.style.display = (screenId === 'landing' && user && getUserData(user.email)?.plan) ? '' : 'none';
+    }
+  }
+
+  function verLandingComoVisitante() {
+    closeDashMenu();
+    goTo('landing');
   }
 
   function entrarODashboard() {
