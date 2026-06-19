@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://k-one-six.vercel.app/sitemap.xml
+Sitemap: https://k-one.fit/sitemap.xml

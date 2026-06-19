@@ -3,7 +3,7 @@
 // Variable de entorno necesaria: RESEND_API_KEY
 
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
-const APP_URL = 'https://k-one-six.vercel.app';
+const APP_URL = 'https://k-one.fit';
 
 function enviarEmail(apiKey, { from, to, subject, html }) {
   return fetch('https://api.resend.com/emails', {
