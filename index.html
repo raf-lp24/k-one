@@ -72,7 +72,7 @@
         {
           "@type": "Question",
           "name": "¿Qué pasa después del mes de prueba a 0,99€?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Nada automático. Al terminar los 30 días recibes un aviso y tú decides si continuar y con qué plan. No hay renovación sin que la confirmes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes, tu suscripción pasa automáticamente al plan completo por 14,99€/mes. Puedes cambiar de plan o cancelar en cualquier momento desde tu perfil, sin llamadas ni formularios." }
         },
         {
           "@type": "Question",
@@ -4206,7 +4206,7 @@
     <!-- Modo "primer mes": oferta de 0,99€ (sin elegir plan todavía) -->
     <div id="paywallOfertaBox" style="display:none">
       <div class="price-amount" style="margin-bottom:4px"><span>0,99€</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
-      <p class="field-hint" style="margin-bottom:8px">Cuando termine tu primer mes podrás elegir tu plan: mensual, trimestral, anual o solo nutrición.</p>
+      <p class="field-hint" style="margin-bottom:8px">Al terminar el mes, tu plan pasa automáticamente a 14,99€/mes. Puedes cambiar de plan o cancelar en cualquier momento.</p>
     </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
     <div id="paywallPlanChooser">
@@ -4867,7 +4867,7 @@
     <div class="faq-grid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes de prueba a 0,99€?</summary>
-        <p class="faq-a">Nada automático. Al terminar los 30 días recibes un aviso y tú decides si continuar y con qué plan. No hay renovación sin que la confirmes.</p>
+        <p class="faq-a">Al terminar tu primer mes, tu suscripción pasa automáticamente al plan completo por 14,99€/mes. Puedes cambiar de plan (trimestral, anual o solo nutrición) o cancelar en cualquier momento desde tu perfil, sin llamadas ni formularios.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
@@ -4887,7 +4887,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">Si cambio de plan a mitad de mes, ¿cómo se cobra?</summary>
-        <p class="faq-a">De forma proporcional y sin sorpresas. <strong>Durante tu primer mes a 0,99€</strong> puedes cambiar de plan las veces que quieras sin coste: sigues pagando 0,99€ y eliges tu plan definitivo al renovar.<br><br><strong>Si ya tienes un plan de pago</strong> y cambias a mitad de ciclo (por ejemplo, de "Solo nutrición" a "Completo"), no se te cobra nada en ese momento: Stripe te abona los días que no has usado del plan anterior y te cobra la parte proporcional del nuevo, y la diferencia se refleja en tu <strong>próxima factura</strong>. Tu fecha de renovación no cambia.<br><br><em>Ejemplo:</em> pagas 6,99€ de nutrición el 15/06 y el 29/06 subes a Completo. En tu factura del 15/07 verás el plan Completo (14,99€) más un pequeño ajuste prorrateado por esos días de transición. Bajar de plan funciona igual, pero a tu favor (se te descuenta).</p>
+        <p class="faq-a">De forma proporcional y sin sorpresas. <strong>Durante tu primer mes a 0,99€</strong> puedes cambiar de plan las veces que quieras sin coste adicional. Al renovar pasarás al plan que hayas elegido (por defecto, completo mensual a 14,99€).<br><br><strong>Si ya tienes un plan de pago</strong> y cambias a mitad de ciclo (por ejemplo, de "Solo nutrición" a "Completo"), no se te cobra nada en ese momento: se te abona la parte no usada del plan anterior y se cobra la parte proporcional del nuevo, y la diferencia se refleja en tu <strong>próxima factura</strong>. Tu fecha de renovación no cambia.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
@@ -4911,15 +4911,15 @@
   <section class="pricing" id="pricing">
     <div class="section-header">
       <h2 class="section-title">Sin letra pequeña</h2>
-      <p class="section-note">Tu primer mes son 0,99€. Al terminar, eliges el plan que mejor se adapte a ti. Precios claros, cancela cuando quieras.</p>
+      <p class="section-note">Tu primer mes son 0,99€. Al terminar, pasa automáticamente a 14,99€/mes. Puedes cambiar de plan o cancelar cuando quieras.</p>
     </div>
     <div class="pricing-cards">
       <div class="price-card">
         <div class="price-badge">Oferta del mes</div>
         <div class="price-tag">// Empieza aquí</div>
         <div class="price-amount">0,99€</div>
-        <div class="price-period">30 días · Se renueva automáticamente</div>
-        <p class="price-desc">Acceso completo. Al terminar el mes eliges si continuar y con qué plan. Sin trampa.</p>
+        <div class="price-period">30 días · Después 14,99€/mes</div>
+        <p class="price-desc">Acceso completo. Al terminar el mes pasa a 14,99€/mes automáticamente. Puedes cambiar de plan o cancelar en cualquier momento.</p>
         <ul class="price-features">
           <li>Plan de entreno personalizado</li>
           <li>Plan de nutrición con 5 opciones/comida</li>
@@ -5181,7 +5181,7 @@
       <h3>3.2. Registro</h3>
       <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud.</p>
       <h3>3.3. Precios, pago y prueba</h3>
-      <p>El primer mes tiene un precio promocional de 0,99€. Transcurrido el periodo de prueba se aplica la tarifa del plan elegido (mensual, trimestral o anual), según se detalla en la web. Los precios incluyen los impuestos aplicables.</p>
+      <p>El primer mes tiene un precio promocional de 0,99€. Al finalizar, la suscripción se renueva automáticamente al plan completo mensual (14,99€/mes), salvo que el usuario haya elegido otro plan antes de la renovación. El usuario puede cambiar de plan o cancelar en cualquier momento desde su perfil, sin permanencia. Los precios incluyen los impuestos aplicables.</p>
       <h3>3.4. Cancelación</h3>
       <p>Puedes cancelar tu suscripción en cualquier momento, sin permanencia. La cancelación detiene futuras renovaciones; el periodo ya abonado se mantiene activo hasta su vencimiento.</p>
       <h3>3.5. Exención de responsabilidad</h3>
@@ -9379,7 +9379,7 @@
   function precioPlanActual(tipoPlan, creadoISO, periodicidad) {
     const dias = creadoISO ? (Date.now() - new Date(creadoISO).getTime()) / (1000 * 60 * 60 * 24) : Infinity;
     if (dias <= DIAS_PRUEBA) {
-      return { precio: '0,99€', detalle: 'Sigues en tu primer mes: 0,99€, sea cual sea el plan que elijas.' };
+      return { precio: '0,99€', detalle: 'Sigues en tu primer mes a 0,99€. Al renovar pasará a 14,99€/mes (o al plan que elijas).' };
     }
     const opcion = preciosPlan(tipoPlan)[periodicidad || 'mensual'] || preciosPlan(tipoPlan).mensual;
     return { precio: `${opcion.precio}/${opcion.periodo}`, detalle: opcion.detalle };
@@ -9807,7 +9807,7 @@
     let msgPago = '';
     if (enOferta) {
       // Sigue en el primer mes a 0,99€: no se cambia la facturación, solo el plan.
-      msgPago = ' Sigues en tu primer mes a 0,99€; elegirás (y pagarás) tu plan definitivo al renovar.';
+      msgPago = ' Sigues en tu primer mes a 0,99€. Al renovar pasarás automáticamente a 14,99€/mes (o al plan que elijas).';
     } else if (planCambia || periodCambia) {
       // proration_behavior 'create_prorations' NO cobra al instante: la diferencia
       // (a favor o en contra) se prorratea y aparece en la próxima factura.
@@ -10561,7 +10561,7 @@
     const btn = document.getElementById('paywallBtn');
     if (primerMes) {
       if (titulo) titulo.textContent = 'Tu plan está listo';
-      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 0,99€. Sin permanencia, cancela cuando quieras.';
+      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 0,99€. Después 14,99€/mes. Sin permanencia, cancela cuando quieras.';
       if (btn) btn.textContent = 'Empezar por 0,99€ →';
     } else {
       if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
