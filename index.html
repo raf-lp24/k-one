@@ -5960,6 +5960,16 @@
 
   // ===== NAVEGACIÓN SCREENS =====
   function goTo(screenId) {
+    if (screenId === 'landing' || screenId === 'login' || screenId === 'bienvenida') {
+      const u = getCurrentUser();
+      if (u && getUserData(u.email)?.plan) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('dashboard').classList.add('active');
+        window.scrollTo(0,0);
+        loadUserDashboard(u.email);
+        return;
+      }
+    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
