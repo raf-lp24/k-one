@@ -2187,6 +2187,48 @@
   }
 
   /* RESUMEN NUTRICIONAL DEL DÍA */
+  .nutri-dias {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .nutri-dia {
+    width: 40px; height: 40px;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    color: var(--metal);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nutri-dia:hover { border-color: var(--brasa); color: var(--blanco); }
+  .nutri-dia.selected { background: var(--brasa); border-color: var(--brasa); color: var(--blanco-puro); }
+  .nutri-dia.has-selection { border-bottom: 2px solid var(--brasa); }
+  .btn-lista-compra {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--brasa);
+    border: none;
+    color: var(--blanco-puro);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: auto;
+  }
+  .btn-lista-compra:hover { background: #ff5a10; }
+
   .nutri-resumen {
     margin-bottom: 32px;
   }
@@ -5884,8 +5926,22 @@
       <div class="dash-section" id="section-nutricion">
         <div class="dash-header">
           <div class="dash-greeting">// Tu alimentación</div>
-          <h1 class="dash-title">Hoy comes</h1>
-          <p class="dash-subtitle" id="nutricionSubtitle">Tienes 5 tomas al día con 5 opciones cada una. Toca cualquiera y elige lo que más te apetezca hoy. Si tienes dudas de cómo preparar algún plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span> para ver los pasos de cada receta.</p>
+          <h1 class="dash-title">Plan semanal</h1>
+          <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas para cada día de la semana. Cuando termines, pulsa <strong>"Lista de la compra"</strong> y te generamos todo lo que necesitas comprar. Pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span> para ver cómo preparar cada plato.</p>
+          <!-- Selector de días de la semana -->
+          <div class="nutri-dias" id="nutriDias">
+            <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">L</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(1)">M</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(2)">X</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(3)">J</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(4)">V</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(5)">S</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(6)">D</button>
+            <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Lista de la compra
+            </button>
+          </div>
           <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
           <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
             <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
@@ -6067,7 +6123,10 @@
   const totalBlocks = 6;
   let userData = {};
   let generatedPlan = null;
-  let comidasSeleccionadas = []; // índice de la opción elegida por comida (0-3)
+  let comidasSeleccionadas = []; // índice de la opción elegida por comida (0-4) para el día actual
+  let comidasSemana = []; // 7 arrays (L-D), cada uno con 5 índices (una por toma)
+  let diaNutriActual = 0; // 0=L, 1=M, ... 6=D
+  const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   // ===== NAVEGACIÓN SCREENS =====
   function goTo(screenId) {
@@ -8433,10 +8492,14 @@
     // Nutrición con múltiples opciones
     const nutritionGrid = document.getElementById('nutritionGrid');
     nutritionGrid.innerHTML = '';
+    diaNutriActual = 0;
     comidasSeleccionadas = generatedPlan.nutricion.map((meal, mealIdx) => {
       const guardada = (userData.comidasSeleccionadas || [])[mealIdx];
       return (guardada !== undefined && guardada < meal.opciones.length) ? guardada : 0;
     });
+    inicializarComidasSemana();
+    actualizarIndicadoresDias();
+    document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
     generatedPlan.nutricion.forEach((meal, mealIdx) => {
       const previewHTML = meal.opciones.map((opt, optIdx) => `
         <div class="meal-preview-pill ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="event.stopPropagation(); selectMealOptionPreview(${mealIdx}, ${optIdx})">
@@ -9842,11 +9905,151 @@
     if (label && nombre) label.textContent = `Elegida: ${nombre}`;
 
     comidasSeleccionadas[mealIdx] = optIdx;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
     userData.comidasSeleccionadas = comidasSeleccionadas;
+    userData.comidasSemana = comidasSemana;
+    actualizarIndicadoresDias();
     const user = getCurrentUser();
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
 
     actualizarResumenNutricional();
+  }
+
+  function inicializarComidasSemana() {
+    if (userData.comidasSemana && userData.comidasSemana.length === 7) {
+      comidasSemana = userData.comidasSemana;
+    } else {
+      const base = comidasSeleccionadas.length ? [...comidasSeleccionadas] : generatedPlan.nutricion.map(() => 0);
+      comidasSemana = Array.from({ length: 7 }, () => [...base]);
+    }
+  }
+
+  function seleccionarDiaNutri(dia) {
+    if (!generatedPlan?.nutricion) return;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
+    diaNutriActual = dia;
+    comidasSeleccionadas = [...comidasSemana[dia]];
+    document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === dia));
+    generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      const optIdx = comidasSeleccionadas[mealIdx] || 0;
+      const previewRow = document.getElementById('mealPreview' + mealIdx);
+      previewRow?.querySelectorAll('.meal-preview-pill').forEach((p, i) => p.classList.toggle('selected', i === optIdx));
+      const block = document.getElementById('mealBlock' + mealIdx);
+      block?.querySelectorAll('.meal-option').forEach((o, i) => o.classList.toggle('selected', i === optIdx));
+      const label = document.getElementById('mealSelected' + mealIdx);
+      if (label) label.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
+    });
+    actualizarResumenNutricional();
+  }
+
+  function actualizarIndicadoresDias() {
+    document.querySelectorAll('.nutri-dia').forEach((btn, i) => {
+      if (i < 7 && comidasSemana[i]) {
+        const tieneSeleccion = comidasSemana[i].some((v, j) => v !== (comidasSemana[0]?.[j] ?? 0) || i > 0);
+        btn.classList.toggle('has-selection', i === 0 || tieneSeleccion);
+      }
+    });
+  }
+
+  function generarListaCompra() {
+    if (!generatedPlan?.nutricion) return;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
+
+    const ingredientes = {};
+    const diasNombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+    for (let dia = 0; dia < 7; dia++) {
+      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+        const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
+        const opt = meal.opciones[optIdx];
+        if (!opt) return;
+        opt.ingredientes.split(',').forEach(ing => {
+          const clean = ing.trim().toLowerCase();
+          if (!clean || clean.length < 2) return;
+          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
+          if (!ingredientes[key]) {
+            ingredientes[key] = { nombre: clean, cantidad: 0, dias: new Set(), veces: 0 };
+          }
+          ingredientes[key].veces++;
+          ingredientes[key].dias.add(diasNombres[dia]);
+          const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
+          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+        });
+      });
+    }
+
+    const lista = Object.values(ingredientes)
+      .sort((a, b) => b.veces - a.veces)
+      .map(ing => {
+        const cant = ing.cantidad > 0
+          ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
+          : `×${ing.veces}`;
+        const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
+        const capitalizado = nombre.charAt(0).toUpperCase() + nombre.slice(1);
+        return { nombre: capitalizado, cant, veces: ing.veces };
+      });
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay visible';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    modal.innerHTML = `
+      <div class="modal-box modal-box-wide" style="max-width:600px">
+        <div class="modal-title" style="font-size:20px;display:flex;align-items:center;gap:10px">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Lista de la compra semanal
+        </div>
+        <p class="modal-desc" style="margin-bottom:16px">Todo lo que necesitas comprar para tus comidas de la semana (${lista.length} ingredientes).</p>
+        <div style="max-height:55vh;overflow-y:auto">
+          ${lista.map(i => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--humo)">
+              <div>
+                <span style="color:var(--blanco);font-size:14px">${i.nombre}</span>
+                <span style="color:var(--metal);font-size:11px;margin-left:8px">×${i.veces} usos</span>
+              </div>
+              <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--brasa);font-weight:600">${i.cant}</span>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn-primary" style="flex:1" onclick="copiarListaCompra(this)">Copiar lista</button>
+          <button class="btn-ghost" style="flex:1" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+
+  function copiarListaCompra(btn) {
+    if (!generatedPlan?.nutricion) return;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    const ingredientes = {};
+    for (let dia = 0; dia < 7; dia++) {
+      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+        const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
+        const opt = meal.opciones[optIdx];
+        if (!opt) return;
+        opt.ingredientes.split(',').forEach(ing => {
+          const clean = ing.trim().toLowerCase();
+          if (!clean || clean.length < 2) return;
+          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
+          if (!ingredientes[key]) ingredientes[key] = { nombre: clean, cantidad: 0, veces: 0 };
+          ingredientes[key].veces++;
+          const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
+          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+        });
+      });
+    }
+    const texto = '🛒 LISTA DE LA COMPRA — K-ONE\n\n' + Object.values(ingredientes)
+      .sort((a, b) => b.veces - a.veces)
+      .map(ing => {
+        const cant = ing.cantidad > 0
+          ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
+          : `×${ing.veces}`;
+        const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
+        return `☐ ${nombre.charAt(0).toUpperCase() + nombre.slice(1)} — ${cant}`;
+      }).join('\n');
+    navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles'));
   }
 
   // ===== RESUMEN NUTRICIONAL DEL DÍA (suma según opciones elegidas) =====
