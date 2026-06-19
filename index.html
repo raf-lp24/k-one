@@ -9981,6 +9981,17 @@
       });
     }
 
+    const categorias = {
+      'Proteínas': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan/,
+      'Lácteos': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage/,
+      'Cereales e hidratos': /arroz|avena|pan |tostada|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|wasa|fajita|wrap/,
+      'Frutas': /plátano|platano|manzana|pera|kiwi|naranja|fresas|arándanos|arandanos|frutos rojos|melocotón|melocoton|fruta/,
+      'Verduras y hortalizas': /brócoli|brocoli|espinac|tomate|lechuga|pepino|pimiento|cebolla|champiñon|champinon|calabacín|calabacin|zanahoria|espárrago|esparrago|rúcula|rucula|judías|judias|berenjena|aguacate|alcachofa|maíz|maiz/,
+      'Legumbres': /garbanz|lenteja|edamame|alubia|fabe/,
+      'Frutos secos y semillas': /nueces|almendras|cacahuete|semillas|pipas|avellanas|lino|chía|chia/,
+      'Otros': /.*/
+    };
+
     const lista = Object.values(ingredientes)
       .sort((a, b) => b.veces - a.veces)
       .map(ing => {
@@ -9989,31 +10000,74 @@
           : `×${ing.veces}`;
         const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
         const capitalizado = nombre.charAt(0).toUpperCase() + nombre.slice(1);
-        return { nombre: capitalizado, cant, veces: ing.veces };
+        let cat = 'Otros';
+        for (const [c, re] of Object.entries(categorias)) {
+          if (c !== 'Otros' && re.test(nombre.toLowerCase())) { cat = c; break; }
+        }
+        return { nombre: capitalizado, cant, veces: ing.veces, cat };
       });
+
+    const porCategoria = {};
+    lista.forEach(i => {
+      if (!porCategoria[i.cat]) porCategoria[i.cat] = [];
+      porCategoria[i.cat].push(i);
+    });
+
+    const catIcons = {
+      'Proteínas': '🥩', 'Lácteos': '🥛', 'Cereales e hidratos': '🌾',
+      'Frutas': '🍎', 'Verduras y hortalizas': '🥦', 'Legumbres': '🫘',
+      'Frutos secos y semillas': '🥜', 'Otros': '🧂'
+    };
+
+    const catOrder = ['Proteínas', 'Lácteos', 'Cereales e hidratos', 'Verduras y hortalizas', 'Frutas', 'Legumbres', 'Frutos secos y semillas', 'Otros'];
+
+    let htmlCats = '';
+    catOrder.forEach(cat => {
+      const items = porCategoria[cat];
+      if (!items || !items.length) return;
+      htmlCats += `
+        <div style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--humo)">
+            <span style="font-size:18px">${catIcons[cat] || '📦'}</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--blanco)">${cat.toUpperCase()}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);margin-left:auto">${items.length}</span>
+          </div>
+          ${items.map(i => `
+            <label style="display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;transition:background 0.15s;border-radius:4px" onmouseover="this.style.background='rgba(232,73,15,0.06)'" onmouseout="this.style.background='transparent'" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.opacity=this.querySelector('input').checked?'0.4':'1'">
+              <input type="checkbox" style="accent-color:var(--brasa);width:18px;height:18px;flex-shrink:0;cursor:pointer" onclick="event.stopPropagation();this.closest('label').style.opacity=this.checked?'0.4':'1'">
+              <div style="flex:1;min-width:0">
+                <div style="color:var(--blanco);font-size:14px;font-weight:500">${i.nombre}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--brasa);font-weight:700">${i.cant}</div>
+              </div>
+            </label>`).join('')}
+        </div>`;
+    });
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay visible';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
-      <div class="modal-box modal-box-wide" style="max-width:600px">
-        <div class="modal-title" style="font-size:20px;display:flex;align-items:center;gap:10px">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          Lista de la compra semanal
+      <div class="modal-box modal-box-wide" style="max-width:560px;padding:32px 28px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--blanco)">Lista de la compra</span>
+          </div>
+          <button style="background:none;border:none;color:var(--metal);font-size:22px;cursor:pointer" onclick="this.closest('.modal-overlay').remove()">✕</button>
         </div>
-        <p class="modal-desc" style="margin-bottom:16px">Todo lo que necesitas comprar para tus comidas de la semana (${lista.length} ingredientes).</p>
-        <div style="max-height:55vh;overflow-y:auto">
-          ${lista.map(i => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--humo)">
-              <div>
-                <span style="color:var(--blanco);font-size:14px">${i.nombre}</span>
-                <span style="color:var(--metal);font-size:11px;margin-left:8px">×${i.veces} usos</span>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--brasa);font-weight:600">${i.cant}</span>
-            </div>`).join('')}
+        <p style="font-size:13px;color:var(--metal-claro);margin-bottom:20px">${lista.length} ingredientes para toda la semana. Marca lo que ya tengas en casa.</p>
+
+        <div style="max-height:60vh;overflow-y:auto;padding-right:4px">
+          ${htmlCats}
         </div>
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="btn-primary" style="flex:1" onclick="copiarListaCompra(this)">Copiar lista</button>
+
+        <div style="display:flex;gap:10px;margin-top:20px;border-top:1px solid var(--humo);padding-top:16px">
+          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="copiarListaCompra()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar lista
+          </button>
           <button class="btn-ghost" style="flex:1" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
         </div>
       </div>`;
