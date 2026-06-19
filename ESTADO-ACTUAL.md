@@ -240,7 +240,7 @@ Verificado en preview: meta tags, favicon, sección de testimonios (3 tarjetas) 
 ### 22. Despliegue a producción (Vercel + GitHub)
 - Repositorio creado en GitHub: `raf-lp24/k-one` (rama `main`), conectado a Vercel (equipo `rafas-projects24`).
 - Proyecto Vercel `k-one` desplegado como sitio estático (preset "Other", sin build).
-- **URL pública**: `https://k-one-six.vercel.app` — `index.html` redirige a `fragua-fitness.html` (verificado con código 200 en ambas).
+- **URL pública**: `https://k-one.fit` — `index.html` redirige a `fragua-fitness.html` (verificado con código 200 en ambas).
 - Flujo de actualización: cualquier `git push` a `main` en `raf-lp24/k-one` dispara un nuevo deploy automático en Vercel.
 - Repo local inicializado con `.gitignore` (excluye `desktop.ini`).
 
@@ -306,7 +306,7 @@ Verificado en preview (escritorio y 375x812): las descripciones de "Tu deporte, 
 **Nota sobre ortografía**: se revisó el HTML/JS en busca de palabras en minúscula al inicio de frase; los textos visibles de la landing y los `.sport-desc` del ejemplo no presentan ese problema (todos empiezan en mayúscula). Si el usuario detecta casos concretos, indicarlos para corregirlos puntualmente.
 
 ### 35. Fix: la cuenta de test podía dar "Email no encontrado" en algunos navegadores
-Un usuario reportó en producción (móvil, k-one-six.vercel.app) que al intentar entrar con la cuenta de testeo (`test@fragua.es` / `fragua123`) precargada en el formulario, salía el error "Email no encontrado". Causa: la cuenta de test se "siembra" en `localStorage` durante `window.onload` (`fragua_users`), pero si ese navegador bloquea o no persiste `localStorage` (modo privado, restricciones de cookies/storage, etc.), el guardado falla en silencio y `login()` no encuentra la cuenta.
+Un usuario reportó en producción (móvil, k-one.fit) que al intentar entrar con la cuenta de testeo (`test@fragua.es` / `fragua123`) precargada en el formulario, salía el error "Email no encontrado". Causa: la cuenta de test se "siembra" en `localStorage` durante `window.onload` (`fragua_users`), pero si ese navegador bloquea o no persiste `localStorage` (modo privado, restricciones de cookies/storage, etc.), el guardado falla en silencio y `login()` no encuentra la cuenta.
 
 **Solución**: se extrajo la lógica de siembra a una función reutilizable `ensureTestAccount()`, que sigue ejecutándose en `window.onload` pero ahora también se invoca como respaldo dentro de `login()`: si el email/contraseña introducidos son los de la cuenta de test (`TEST_EMAIL`/`TEST_PASS`) y `users[email]` no existe, se vuelve a intentar `ensureTestAccount()` justo antes de validar, usando el objeto en memoria que devuelve aunque el guardado en `localStorage` vuelva a fallar. Así la cuenta de demo siempre permite entrar, incluso en navegadores que bloquean el almacenamiento local.
 
@@ -658,7 +658,7 @@ El usuario compartió una captura desde su móvil mostrando el menú de escritor
 Verificado en preview en tres anchos: 375px (menú hamburguesa, precios en 1 columna, sin desbordamiento), 800-1024px (menú hamburguesa en vez del menú de escritorio desbordado, precios en 2 columnas, `scrollWidth === clientWidth` sin desbordamiento) y 1440px (menú de escritorio completo con "Entrar" primero, precios en 5 columnas). Orden de secciones confirmado por DOM: manifesto → pillars → app-preview → how → transparencia → sports → pricing → testimonials. Sin errores de consola. No requiere restaurar cuenta de test (solo contenido/estilos de la landing).
 
 ### 57. Bloqueo del scroll horizontal de toda la página en móvil
-El usuario envió un vídeo grabado desde su móvil (sitio en producción, k-one-six.vercel.app) mostrando que tanto la landing como el dashboard se podían desplazar horizontalmente unos 15-20px, cortando el logo "K-ONE" y el texto del hero/título por el borde izquierdo, con una barra de scroll horizontal visible.
+El usuario envió un vídeo grabado desde su móvil (sitio en producción, k-one.fit) mostrando que tanto la landing como el dashboard se podían desplazar horizontalmente unos 15-20px, cortando el logo "K-ONE" y el texto del hero/título por el borde izquierdo, con una barra de scroll horizontal visible.
 
 - Las comprobaciones programáticas en el preview (375, 414, 800, 1024, 1440px) no detectaron ningún elemento que sobresaliera del viewport (`scrollWidth === clientWidth` en todos los casos), por lo que el origen exacto del pequeño desbordamiento en el dispositivo real no se pudo aislar con certeza.
 - Como red de seguridad, se añade `overflow-x: hidden` en `html, body` (y `width: 100%` en `body`): así, aunque algún elemento sobresalga ligeramente del viewport, la página ya no podrá desplazarse horizontalmente como conjunto. El carrusel de "Opiniones" (`.testimonials-track`) conserva su propio scroll horizontal interno (`overflow-x: auto`), que es intencional.
@@ -862,7 +862,7 @@ Verificado en preview: login de la cuenta de test sigue entrando correctamente a
 ### 76. Eliminado "Fragua" de toda la app: ahora todo es K-ONE
 El usuario pidió que el nombre "Fragua" no aparezca en ningún sitio (interfaz, URL, código interno), solo "K-ONE".
 
-- **URL de producción**: `fragua-fitness.html` pasa a ser `index.html` (la home del sitio, `https://k-one-six.vercel.app/`). El antiguo `fragua-fitness.html` ahora es una página de redirección a `/` para no romper enlaces antiguos compartidos. `serve.ps1` (servidor de preview local) actualizado para servir `index.html` en la raíz.
+- **URL de producción**: `fragua-fitness.html` pasa a ser `index.html` (la home del sitio, `https://k-one.fit/`). El antiguo `fragua-fitness.html` ahora es una página de redirección a `/` para no romper enlaces antiguos compartidos. `serve.ps1` (servidor de preview local) actualizado para servir `index.html` en la raíz.
 - **Caja visible de credenciales de test** en la pantalla de login (con `test@fragua.es` / `fragua123` a la vista de cualquier visitante) — eliminada por completo.
 - **Claves de `localStorage`** renombradas con prefijo `k1_`: `fragua_current_user` → `k1_current_user`, `fragua_data_<email>` → `k1_data_<email>`, `fragua_leads` → `k1_leads`, `fragua_storage_test` → `k1_storage_test` (diagnóstico de `window.onload`).
 - **Cuenta de test**: nuevas credenciales `test@k-one.es` / `kone123` (antes `test@fragua.es` / `fragua123`), creada en Supabase Auth desde la propia app (flujo normal de `ensureTestAccount()`/`signUp`, sin usar claves privadas). `supabase/schema.sql` actualizado con las nuevas credenciales en sus comentarios.
@@ -903,7 +903,7 @@ Se conecta el paywall de fin de mes de prueba a Stripe (modo suscripción), sigu
    - `STRIPE_SECRET_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `STRIPE_PRICE_COMPLETO_MENSUAL`, `STRIPE_PRICE_COMPLETO_TRIMESTRAL`, `STRIPE_PRICE_COMPLETO_ANUAL`, `STRIPE_PRICE_NUTRICION_MENSUAL`
-5. Desplegar (push a `main` ya dispara el deploy). Una vez desplegado, en Stripe → Developers → Webhooks: crear un endpoint a `https://k-one-six.vercel.app/api/stripe-webhook` para los eventos `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, y copiar su **Signing secret** (`whsec_...`) a Vercel como `STRIPE_WEBHOOK_SECRET` (y volver a desplegar para que la función lo recoja).
+5. Desplegar (push a `main` ya dispara el deploy). Una vez desplegado, en Stripe → Developers → Webhooks: crear un endpoint a `https://k-one.fit/api/stripe-webhook` para los eventos `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, y copiar su **Signing secret** (`whsec_...`) a Vercel como `STRIPE_WEBHOOK_SECRET` (y volver a desplegar para que la función lo recoja).
 6. Activar el **Portal de Clientes** de Stripe (Settings → Billing → Customer portal) para que `api/create-portal-session.js` funcione.
 
 **No probado end-to-end todavía** (requiere los pasos anteriores + despliegue): el flujo de Checkout, el webhook y el Portal de Clientes. Una vez configurado, probar con la tarjeta de test `4242 4242 4242 4242` desde una cuenta real (no la de test, que ya tiene `suscripcionActiva` forzado).
@@ -953,7 +953,7 @@ Se completaron los pasos pendientes del punto 78 (creación de productos/precios
 - `SUPABASE_SERVICE_ROLE_KEY` (en proyectos nuevos de Supabase es la clave `sb_secret_...`, equivalente a la `service_role`; nunca va en el HTML).
 - `STRIPE_WEBHOOK_SECRET` (`whsec_...` del endpoint de webhook).
 
-**Webhook de Stripe.** Endpoint creado en Stripe → Developers → Webhooks apuntando a `https://k-one-six.vercel.app/api/stripe-webhook`, escuchando `checkout.session.completed`, `customer.subscription.updated` y `customer.subscription.deleted`. Su Signing secret se guardó como `STRIPE_WEBHOOK_SECRET` en Vercel.
+**Webhook de Stripe.** Endpoint creado en Stripe → Developers → Webhooks apuntando a `https://k-one.fit/api/stripe-webhook`, escuchando `checkout.session.completed`, `customer.subscription.updated` y `customer.subscription.deleted`. Su Signing secret se guardó como `STRIPE_WEBHOOK_SECRET` en Vercel.
 
 **Portal de Clientes** de Stripe activado (Settings → Billing → Customer portal) para que `api/create-portal-session.js` (botón "Gestionar suscripción") funcione.
 
