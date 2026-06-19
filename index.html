@@ -84,7 +84,7 @@
         {
           "@type": "Question",
           "name": "¿Y si tengo lesiones o alergias alimentarias?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición. Ante cualquier duda, consulta siempre con un profesional sanitario." }
         },
         {
           "@type": "Question",
@@ -2585,7 +2585,7 @@
     color: var(--brasa);
   }
 
-  /* INGREDIENTE CON SUSTITUCIÓN */
+  /* INGREDIENTE */
   .ingredient-tag {
     display: inline-block;
     background: var(--acero);
@@ -2594,45 +2594,8 @@
     font-size: 11px;
     color: var(--blanco);
     margin: 2px 2px 2px 0;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
     line-height: 1.6;
-    position: relative;
   }
-
-  .ingredient-tag:hover {
-    border-color: var(--brasa);
-    background: rgba(232,73,15,0.1);
-  }
-
-  .ingredient-tag::after {
-    content: ' ↻';
-    font-size: 10px;
-    color: var(--metal);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .ingredient-tag:hover::after { opacity: 1; color: var(--brasa); }
-
-  .ingredient-tag.substituted {
-    border-color: var(--brasa);
-    background: rgba(232,73,15,0.15);
-    color: var(--blanco);
-  }
-
-  /* MODAL DE SUSTITUCIÓN */
-  .subst-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(10,10,10,0.92);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 300;
-    display: none;
-  }
-  .subst-modal.visible { display: flex; }
 
   /* TOUR DE BIENVENIDA */
   .onboarding-modal {
@@ -2706,96 +2669,6 @@
     gap: 12px;
   }
 
-  .subst-box {
-    background: var(--carbon);
-    border: 1px solid var(--humo);
-    padding: 40px;
-    width: 100%;
-    max-width: 520px;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-  }
-
-  .subst-close {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none; border: none;
-    color: var(--metal); font-size: 20px;
-    cursor: pointer; transition: color 0.2s;
-  }
-  .subst-close:hover { color: var(--blanco); }
-
-  .subst-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  .subst-subtitle {
-    font-size: 12px;
-    color: var(--metal);
-    margin-bottom: 24px;
-    font-weight: 300;
-  }
-
-  .subst-reasons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-
-  .subst-reason {
-    padding: 7px 14px;
-    background: var(--grafito);
-    border: 1px solid var(--humo);
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .subst-reason:hover, .subst-reason.selected {
-    border-color: var(--brasa);
-    background: rgba(232,73,15,0.1);
-    color: var(--blanco);
-  }
-
-  .subst-options { display: flex; flex-direction: column; gap: 8px; }
-
-  .subst-opt {
-    padding: 16px 18px;
-    background: var(--grafito);
-    border: 1px solid var(--humo);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .subst-opt:hover { border-color: var(--brasa); background: rgba(232,73,15,0.06); }
-  .subst-opt.selected { border-color: var(--brasa); background: rgba(232,73,15,0.1); }
-
-  .subst-opt-name {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .subst-opt-desc {
-    font-size: 12px;
-    color: var(--metal-claro);
-    line-height: 1.5;
-  }
-
-  .subst-opt-tag {
-    display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: var(--brasa);
-    background: rgba(232,73,15,0.1);
-    padding: 2px 8px;
-    margin-top: 6px;
-    text-transform: uppercase;
-  }
 
   .meal-opt-num {
     font-family: 'DM Mono', monospace;
@@ -2850,25 +2723,6 @@
     line-height: 1.4;
   }
 
-  .subst-hint {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    color: var(--metal-claro);
-    background: rgba(181,178,173,0.07);
-    border: 1px solid rgba(181,178,173,0.15);
-    padding: 4px 9px;
-    margin-bottom: 10px;
-    cursor: default;
-  }
-  .subst-hint svg {
-    width: 11px; height: 11px;
-    stroke: var(--brasa);
-    flex-shrink: 0;
-  }
 
   /* CHECKIN */
   .checkin-card {
@@ -3454,7 +3308,7 @@
     .motivation-text { font-size: 16px; }
     .stat-card { padding: 16px 18px; }
     .stat-card-value { font-size: 30px; }
-    #todayPlan, #feedbackPanel, .checkin-card, .subst-box { padding: 20px !important; }
+    #todayPlan, #feedbackPanel, .checkin-card { padding: 20px !important; }
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
     .manifesto, .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
@@ -4065,27 +3919,6 @@
 </head>
 <body>
 
-<!-- MODAL SUSTITUCIÓN DE ALIMENTO -->
-<div class="subst-modal" id="substModal">
-  <div class="subst-box">
-    <button class="subst-close" onclick="closeSubstModal()">✕</button>
-    <div class="subst-title" id="substIngName">Sustituir alimento</div>
-    <div class="subst-subtitle">¿Por qué quieres cambiarlo?</div>
-    <div class="subst-reasons" id="substReasons">
-      <div class="subst-reason" onclick="selectReason(this,'alergia')">🚫 Alergia</div>
-      <div class="subst-reason" onclick="selectReason(this,'intolerancia')">⚠️ Intolerancia</div>
-      <div class="subst-reason" onclick="selectReason(this,'noMegusta')">😕 No me gusta</div>
-      <div class="subst-reason" onclick="selectReason(this,'noTengo')">🛒 No lo tengo en casa</div>
-      <div class="subst-reason" onclick="selectReason(this,'vegano')">🌱 Prefiero opción vegetal</div>
-      <div class="subst-reason" onclick="selectReason(this,'presupuesto')">💶 Más económico</div>
-    </div>
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--brasa);text-transform:uppercase;margin-bottom:14px">// Elige tu sustituto</div>
-    <div class="subst-options" id="substOptions">
-      <!-- generado por JS -->
-    </div>
-    <button class="btn-primary" onclick="confirmSubstitution()" style="width:100%;padding:14px;margin-top:20px;font-size:13px">Confirmar sustitución →</button>
-  </div>
-</div>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -4938,7 +4771,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Y si tengo lesiones o alergias alimentarias?</summary>
-        <p class="faq-a">Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición.</p>
+        <p class="faq-a">Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición. Ante cualquier duda, consulta siempre con un profesional sanitario.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo cambiar de objetivo o de deporte más adelante?</summary>
@@ -6658,7 +6491,7 @@
   const ONBOARDING_STEPS = [
     { section: 'hoy', icon: '⚡', title: 'Hoy', text: 'Aquí tienes tu entrenamiento de hoy explicado paso a paso. Cuando lo termines, márcalo como completado: eso es lo que empieza tu racha.' },
     { section: 'semana', icon: '📅', title: 'Plan semanal', text: 'Consulta toda tu semana de un vistazo, y las próximas semanas de tu plan, que se irán ajustando según tu progreso.' },
-    { section: 'nutricion', icon: '🥗', title: 'Nutrición', text: 'Tienes 5 tomas al día con 5 opciones cada una. Toca cualquier ingrediente para sustituirlo si no te gusta. Y si tienes dudas de cómo preparar algo, usa el botón "Ver recetario completo" para ver los pasos de cada receta.' },
+    { section: 'nutricion', icon: '🥗', title: 'Nutrición', text: 'Tienes 5 tomas al día con 5 opciones cada una. Si tienes dudas de cómo preparar algo, usa el botón "Ver recetario completo" para ver los pasos de cada receta.' },
     { section: 'checkin', icon: '✓', title: 'Check-in semanal', text: 'Cada semana cuéntanos cómo te fue (días entrenados, energía, sensaciones) y ajustamos tu plan de la semana siguiente automáticamente.' },
     { section: 'progreso', icon: '📈', title: 'Mi progreso', text: 'Aquí verás tu evolución: pesos, fotos e hitos conseguidos. Cuanto más registres, más útil será.' }
   ];
@@ -7756,7 +7589,7 @@
       notasSalud.push('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
     }
     if (alergiaSalud.includes('Otra')) {
-      notasSalud.push('Nos indicaste una alergia o intolerancia alimentaria. Revisa los ingredientes de cada comida y usa el botón de sustitución en cualquier ingrediente que no puedas tomar.');
+      notasSalud.push('Nos indicaste una alergia o intolerancia alimentaria. Tu plan de comidas ya tiene en cuenta esta información y evita los ingredientes problemáticos. Ante cualquier duda, consulta con un profesional.');
     }
 
     // Ajuste de intensidad según el último check-in (progreso.ajuste: -1 baja, 0 igual, +1 sube)
@@ -8253,18 +8086,6 @@
     return partes.join(' ');
   }
 
-  // Extrae el nombre del alimento sin la cantidad: "220g judías verdes" → "judías verdes".
-  // Se usa para reescribir el título de la opción cuando se sustituye un ingrediente.
-  function nombreBaseAlimento(s) {
-    return (s || '')
-      .toLowerCase()
-      .replace(/\d+([.,]\d+)?\s*(g|gr|gramos|ml|cl|l|kg|ud|uds|unidad|unidades|cucharada|cucharadas|cda|loncha|lonchas|puñado|puñados|taza|tazas|rebanada|rebanadas|filete|filetes)\b/g, '')
-      .replace(/\d+([.,]\d+)?/g, '')
-      .replace(/\s*\+\s*/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
-
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) return;
@@ -8272,8 +8093,7 @@
     // Backfill de objetivos nutricionales: los planes generados antes de incorporar
     // kcalObj/protObj/tdee no los tienen guardados, así que el KPI "Kcal objetivo",
     // el subtítulo personalizado y el resumen del perfil salían vacíos. Se recalculan
-    // desde el perfil del usuario sin tocar el resto del plan (que puede estar
-    // personalizado con sustituciones de ingredientes).
+    // desde el perfil del usuario sin tocar el resto del plan.
     if (generatedPlan.kcalObj === undefined && userData && userData.peso && userData.altura && userData.edad) {
       try {
         const _obj = buildPlanFromData(userData);
@@ -8435,9 +8255,9 @@
 
       const optionsHTML = meal.opciones.map((opt, optIdx) => {
         // Convertir ingredientes en tags clicables
-        const ingredTags = opt.ingredientes.split(',').map((ing, ingredIdx) => {
+        const ingredTags = opt.ingredientes.split(',').map((ing) => {
           const clean = ing.trim();
-          return `<span class="ingredient-tag" onclick="openSubstModal(event,'${clean.replace(/'/g,"\\'")}',${mealIdx},${optIdx},${ingredIdx})">${capitalizarIngrediente(clean)}</span>`;
+          return `<span class="ingredient-tag">${capitalizarIngrediente(clean)}</span>`;
         }).join('');
 
         return `
@@ -8445,7 +8265,6 @@
           <div class="meal-opt-num">Opción ${optIdx + 1}</div>
           <div class="meal-opt-name">${opt.nombre}</div>
           <div class="meal-opt-ingredients" style="margin-bottom:8px">${ingredTags}</div>
-          <div class="subst-hint"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Toca un ingrediente para cambiarlo</div>
           <div class="meal-opt-prep">⏱ ${opt.prep}</div>
           <div class="meal-opt-macros">
             <span class="macro-pill">🔥 ${opt.kcal}</span>
@@ -9553,17 +9372,12 @@
       const cards = meal.opciones.map((opt, i) => {
         const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
         const pasos = RECETA_PASOS[opt.nombre] || '';
-        // Si la opción se ha personalizado (ingrediente sustituido) y ya no
-        // tenemos pasos exactos para el nuevo nombre, lo indicamos con honestidad.
-        const notaPersonalizada = (!pasos && opt.personalizada)
-          ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos" style="color:var(--ceniza)">Has personalizado esta receta sustituyendo un ingrediente. Prepárala igual que la original, cambiando el ingrediente sustituido por el nuevo (mismo método de cocción y tiempos).</div>`
-          : '';
         return `
           <div class="receta-card">
             <div class="receta-num">Opción ${i + 1}</div>
             <div class="receta-nombre">${opt.nombre}</div>
             <div class="receta-ingredientes"><ul>${items}</ul></div>
-            ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : notaPersonalizada}
+            ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : ''}
             <div class="receta-footer">
               <div class="receta-prep">⏱ ${opt.prep}</div>
               <div class="receta-macros">
@@ -9877,579 +9691,6 @@
   // ===== DESPLEGAR / PLEGAR DÍA DE LA SEMANA =====
   function toggleWeekDay(el) {
     el.classList.toggle('expanded');
-  }
-
-  // ===== SISTEMA DE SUSTITUCIÓN DE INGREDIENTES =====
-  let currentSubst = { tag: null, ingredient: '', mealIdx: 0, optIdx: 0, ingredIdx: 0, selectedReason: '', selectedSub: null };
-
-  // ===== ESTIMACIÓN APROXIMADA DE MACROS POR INGREDIENTE =====
-  // Tabla orientativa (kcal/proteína/carbohidratos/grasa por cada 100g o 100ml).
-  // No sustituye una tabla nutricional profesional: sirve para que el resumen
-  // de "Total de hoy" reaccione de forma razonable cuando se sustituye un ingrediente.
-  const TABLA_MACROS_100G = [
-    [/avena|copos de avena/, {kcal:380, prot:13, carbs:60, grasa:7}],
-    [/copos de arroz/, {kcal:370, prot:7, carbs:82, grasa:1}],
-    [/quinoa/, {kcal:120, prot:4.4, carbs:21, grasa:1.9}],
-    [/mijo/, {kcal:119, prot:3.5, carbs:23, grasa:1}],
-    [/muesli|granola/, {kcal:400, prot:10, carbs:62, grasa:12}],
-    [/leche de avena/, {kcal:45, prot:1, carbs:7, grasa:1.5}],
-    [/leche de almendra/, {kcal:13, prot:0.4, carbs:0.3, grasa:1.1}],
-    [/leche de soja/, {kcal:33, prot:3.3, carbs:1.8, grasa:1.8}],
-    [/leche (de )?coco/, {kcal:50, prot:1, carbs:3, grasa:4}],
-    [/leche sin lactosa|leche desnatada/, {kcal:35, prot:3.4, carbs:5, grasa:0.1}],
-    [/leche/, {kcal:64, prot:3.2, carbs:4.8, grasa:3.6}],
-    [/yogur de soja/, {kcal:55, prot:3.5, carbs:3, grasa:2.5}],
-    [/yogur de coco/, {kcal:150, prot:1, carbs:6, grasa:14}],
-    [/yogur de almendra/, {kcal:25, prot:1, carbs:2, grasa:1.5}],
-    [/yogur griego/, {kcal:97, prot:9, carbs:4, grasa:5}],
-    [/yogur|kéfir|kefir/, {kcal:60, prot:3.5, carbs:4.5, grasa:3}],
-    [/queso cottage|requesón|queso fresco|queso batido|queso de burgos/, {kcal:100, prot:11, carbs:3.5, grasa:4.5}],
-    [/queso tierno|queso/, {kcal:300, prot:20, carbs:1, grasa:24}],
-    [/clara/, {kcal:52, prot:11, carbs:0.7, grasa:0.2}],
-    [/aquafaba/, {kcal:20, prot:0.8, carbs:4, grasa:0}],
-    [/huevo/, {kcal:140, prot:12.5, carbs:1, grasa:10}],
-    [/tempeh/, {kcal:192, prot:20, carbs:7.6, grasa:11}],
-    [/seitán|seitan/, {kcal:370, prot:75, carbs:14, grasa:1.9}],
-    [/proteína de soja texturizada|soja texturizada/, {kcal:330, prot:50, carbs:30, grasa:1}],
-    [/tofu/, {kcal:76, prot:8, carbs:1.9, grasa:4.8}],
-    [/pechuga de pollo|pollo/, {kcal:165, prot:31, carbs:0, grasa:3.6}],
-    [/pavo/, {kcal:135, prot:30, carbs:0, grasa:1}],
-    [/conejo/, {kcal:173, prot:33, carbs:0, grasa:3.5}],
-    [/lomo de cerdo|cerdo/, {kcal:143, prot:21, carbs:0, grasa:6}],
-    [/ternera|carne picada|solomillo|filete de ternera|buey|res/, {kcal:250, prot:26, carbs:0, grasa:15}],
-    [/salmón|salmon/, {kcal:208, prot:20, carbs:0, grasa:13}],
-    [/caballa/, {kcal:190, prot:19, carbs:0, grasa:12}],
-    [/sardinas/, {kcal:208, prot:25, carbs:0, grasa:11}],
-    [/atún|atun/, {kcal:116, prot:26, carbs:0, grasa:1}],
-    [/merluza|dorada|lubina|bacalao|rape|fletán|pescado/, {kcal:90, prot:18, carbs:0, grasa:1.5}],
-    [/garbanzos/, {kcal:164, prot:8.9, carbs:27, grasa:2.6}],
-    [/lentejas/, {kcal:116, prot:9, carbs:20, grasa:0.4}],
-    [/legumbres/, {kcal:120, prot:9, carbs:20, grasa:1}],
-    [/tort(it|)as? de arroz|tortas de arroz/, {kcal:387, prot:8, carbs:81, grasa:3}],
-    [/crema de arroz|harina de arroz/, {kcal:360, prot:7, carbs:80, grasa:1}],
-    [/arroz/, {kcal:130, prot:2.7, carbs:28, grasa:0.3}],
-    [/pasta|fideos/, {kcal:124, prot:5, carbs:25, grasa:1}],
-    [/cuscús|cuscus/, {kcal:112, prot:3.8, carbs:23, grasa:0.2}],
-    [/batata|boniato/, {kcal:90, prot:2, carbs:21, grasa:0.1}],
-    [/patata/, {kcal:87, prot:2, carbs:20, grasa:0.1}],
-    [/pan integral|tostada|pan centeno|rebanada|centeno|pan/, {kcal:250, prot:9, carbs:43, grasa:2.5}],
-    [/aguacate/, {kcal:160, prot:2, carbs:8.5, grasa:14.7}],
-    [/crema de cacahuete|cacahuete|tahini/, {kcal:588, prot:25, carbs:20, grasa:50}],
-    [/nueces|almendra|frutos secos|semillas/, {kcal:620, prot:18, carbs:18, grasa:55}],
-    [/aceite|aove/, {kcal:884, prot:0, carbs:0, grasa:100}],
-    [/hummus/, {kcal:166, prot:8, carbs:14, grasa:10}],
-    [/palmitos/, {kcal:26, prot:2.6, carbs:4, grasa:0.6}],
-    [/plátano|platano/, {kcal:89, prot:1.1, carbs:23, grasa:0.3}],
-    [/miel/, {kcal:304, prot:0.3, carbs:82, grasa:0}],
-    [/cacao puro|cacao/, {kcal:228, prot:20, carbs:58, grasa:14}],
-    [/proteína|proteina|whey|\biso\b|scoop|esenciales|bcaa/, {kcal:380, prot:75, carbs:8, grasa:5}],
-    [/brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|espárrago|esparrago|tomate|pepino|lechuga|rúcula|rucula|berenjena|alcachofa|puerro|apio|verdura/, {kcal:30, prot:2.2, carbs:5, grasa:0.3}],
-    [/manzana|\bpera\b|naranja|mandarina|kiwi|melocotón|melocoton|mango|fresas?|arándanos|arandanos|frambuesas?|frutos rojos|fruta(?! seca)/, {kcal:52, prot:0.6, carbs:12, grasa:0.2}],
-    [/champiñones|champinones|setas/, {kcal:22, prot:3.1, carbs:3.3, grasa:0.3}],
-    [/jamón serrano|jamon serrano/, {kcal:241, prot:30, carbs:0, grasa:13}],
-    [/lomo embuchado|embuchado|cecina|lacón|lacon/, {kcal:245, prot:42, carbs:1, grasa:8}],
-    [/jamón|jamon/, {kcal:110, prot:18, carbs:1, grasa:3}],
-    [/guacamole/, {kcal:160, prot:2, carbs:8, grasa:14}],
-    [/crackers|wasa|wassa|pan crujiente|biscote/, {kcal:380, prot:11, carbs:70, grasa:4}],
-    [/fajita|tortilla de trigo|wrap|tortilla de ma[ií]z/, {kcal:300, prot:8, carbs:50, grasa:7}],
-    [/gambas|langostinos|camarones/, {kcal:85, prot:20, carbs:0.2, grasa:1}],
-    [/edamame/, {kcal:122, prot:11, carbs:10, grasa:5}],
-    [/cebolla/, {kcal:40, prot:1.1, carbs:9.3, grasa:0.1}],
-    [/chorizo/, {kcal:455, prot:24, carbs:2, grasa:38}],
-    [/aceitunas|olivas/, {kcal:115, prot:1, carbs:6, grasa:11}],
-    [/tort(it)?as? (de )?ma[ií]z/, {kcal:380, prot:8, carbs:75, grasa:3}],
-    [/maíz|maiz/, {kcal:86, prot:3.3, carbs:19, grasa:1.2}],
-    [/dátiles|datiles/, {kcal:282, prot:2.5, carbs:75, grasa:0.4}],
-    [/sirope/, {kcal:310, prot:0.1, carbs:76, grasa:0}],
-    [/harina.*sarraceno|trigo sarraceno/, {kcal:335, prot:13, carbs:70, grasa:3}],
-    [/salsa de soja|salsa soja|tamari/, {kcal:60, prot:6, carbs:6, grasa:0.6}],
-    [/gazpacho|crema (de )?(calabaza|zanahoria|verduras)/, {kcal:35, prot:1.5, carbs:5, grasa:1.5}],
-  ];
-
-  // Pesos orientativos (en gramos/ml) de unidades de ración no expresadas en g/ml
-  const PESO_UNIDAD = {
-    huevo:50, huevos:50, clara:33, claras:33,
-    plátano:120, platano:120,
-    tostada:25, tostadas:25, rebanada:30, rebanadas:30, loncha:25, lonchas:25, lonja:25, lonjas:25,
-    tortita:9, tortitas:9, torta:9, tortas:9,
-    wasa:11, wassa:11, biscote:11, biscotes:11, cracker:11, crackers:11,
-    fajita:40, fajitas:40, wrap:40, wraps:40,
-    cucharada:15, cucharadas:15, cucharadita:5, cucharaditas:5,
-    taza:240, tazas:240, vaso:200, vasos:200,
-    lata:80, latas:80, filete:150, filetes:150,
-    diente:3, dientes:3, puñado:30, puñados:30, hoja:5, hojas:5,
-    unidad:100, unidades:100, ración:100, raciones:100, porción:100, porciones:100, scoop:30,
-  };
-
-  // Pesos de condimentos/aromáticos cuando aparecen solos, sin cantidad indicada (ej. "AOVE", "ajo")
-  const PESO_CONDIMENTO = {
-    aove:5, aceite:5,
-    ajo:3, jengibre:5, limón:15, limon:15,
-    perejil:2, cilantro:2, orégano:1, oregano:1, canela:1,
-    pimentón:1, pimenton:1, curry:2, azafrán:0.1, azafran:0.1,
-    laurel:0.5, vinagre:10, sésamo:5, sesamo:5,
-    'ralladura de limón':2, 'ralladura de limon':2,
-    'salsa tamari':10, 'salsa de soja':10, 'salsa soja':10, tamari:10,
-  };
-
-  // Convierte la cantidad indicada en un texto de ingrediente a gramos/ml aproximados
-  function estimarGramos(texto) {
-    const t = texto.toLowerCase().trim();
-    // Rango "20-30g" -> media
-    let m = t.match(/^(\d+)\s*-\s*(\d+)\s*(g|ml)?\b/);
-    if (m) return (parseInt(m[1]) + parseInt(m[2])) / 2;
-    // Fracción "1/2 aguacate", "1/4 aguacate"
-    m = t.match(/^(\d+)\/(\d+)\s+(\w+)/);
-    if (m) {
-      const frac = parseInt(m[1]) / parseInt(m[2]);
-      return frac * (PESO_UNIDAD[m[3]] || 100);
-    }
-    // Número + g/gr/grs/ml/kg/l (acepta la notación "220gr" habitual en planes)
-    m = t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|grs?|g|l|ml)\b/);
-    if (m) {
-      let val = parseFloat(m[1].replace(',', '.'));
-      if (m[2] === 'kg' || m[2] === 'l') val *= 1000;
-      return val;
-    }
-    // Número + palabra de unidad (huevos, cucharadas, tostadas...)
-    m = t.match(/^(\d+(?:[.,]\d+)?)\s+(\w+)/);
-    if (m) {
-      const val = parseFloat(m[1].replace(',', '.'));
-      return val * (PESO_UNIDAD[m[2]] || 100);
-    }
-    // Condimento/aromático sin cantidad indicada (ej. "AOVE", "ajo", "limón")
-    if (PESO_CONDIMENTO[t] !== undefined) return PESO_CONDIMENTO[t];
-    // Sin cantidad indicada -> ración estándar
-    return 100;
-  }
-
-  // Estima {kcal, prot, carbs, grasa} de un ingrediente a partir de su texto
-  function estimarMacros(texto) {
-    const t = texto.toLowerCase().trim();
-    const entry = TABLA_MACROS_100G.find(([re]) => re.test(t));
-    const macros100 = entry ? entry[1] : { kcal: 150, prot: 8, carbs: 15, grasa: 6 };
-    const factor = estimarGramos(t) / 100;
-    return {
-      kcal: Math.round(macros100.kcal * factor),
-      prot: Math.round(macros100.prot * factor),
-      carbs: Math.round(macros100.carbs * factor),
-      grasa: Math.round(macros100.grasa * factor),
-    };
-  }
-
-  // Base de datos de sustituciones por ingrediente y motivo
-
-  // Función para obtener substituciones por ingrediente
-  function getSubstitutions(ingredient, reason) {
-    const ingLower = ingredient.toLowerCase().trim();
-    // Separa número + unidad de peso (ej. "200g") de número + unidad de ración
-    // (ej. "1 tostada", "2 rebanadas", "3 tallos") para no arrastrar la unidad
-    // de ración dentro de "tipo" ni generar nombres como "1 tostada quinoa".
-    const qm = ingLower.match(/^(\d+(?:[.,]\d+)?)(grs?|g|ml|kg|l)?(?:\s+(tostadas?|rebanadas?|lonchas?|lonjas?|rodajas?|tallos?|cucharadas?|cucharaditas?|tazas?|vasos?|filetes?|latas?|unidades?|dientes?|puñados?|hojas?|raciones?|porciones?))?\s+(.+)$/);
-    let cantidad = '';
-    let cantidadUnidad = '';
-    let unidadPalabra = '';
-    let tipo = ingLower;
-    if (qm) {
-      const [, numero, unidadPeso, unidadRacion, resto] = qm;
-      tipo = resto.trim();
-      if (unidadPeso) {
-        cantidad = numero + unidadPeso;
-      } else if (unidadRacion) {
-        unidadPalabra = unidadRacion;
-        cantidadUnidad = `${numero} ${unidadRacion}`;
-      }
-    }
-    // Unidades de ración que combinan de forma natural con "de <sustituto>"
-    // (ej. "1 tostada de quinoa", "2 cucharadas de quinoa"). El resto de
-    // unidades (tallos, lonchas, latas...) no encajan con sustitutos tipo
-    // hidrato, así que en esos casos se devuelve solo el nombre del sustituto.
-    const unidadesConDe = /^(tostadas?|rebanadas?|tazas?|vasos?|cucharadas?|cucharaditas?|raciones?|porciones?|puñados?)$/;
-    const conSustituto = (sustituto) => {
-      if (cantidadUnidad) return unidadesConDe.test(unidadPalabra) ? `${cantidadUnidad} de ${sustituto}` : sustituto;
-      return cantidad ? `${cantidad} ${sustituto}` : sustituto;
-    };
-    const r = reason || 'default';
-
-    // TERNERA / CARNE ROJA
-    if (/ternera|carne picada|solomillo|filete|buey|res/.test(tipo)) {
-      const s = {
-        noMegusta:   [{n:`${cantidad||'180g'} pechuga de pollo picada`,d:'Mismo uso que la ternera. Más magra, menos grasa saturada, proteína idéntica.',t:'Más magro'},{n:`${cantidad||'180g'} pavo picado`,d:'Sabor suave, casi sin grasa. Funciona igual en hamburguesas, boloñesa o al horno.',t:'Muy magro'},{n:`${cantidad||'180g'} salmón picado`,d:'Hamburguesas de salmón: misma textura, más omega-3.',t:'Pescado'}],
-        alergia:     [{n:`${cantidad||'180g'} pechuga de pollo`,d:'Sin alérgenos de la carne roja. Mismos gramos, misma proteína.',t:'Sin carne roja'},{n:`${cantidad||'180g'} merluza`,d:'Pescado blanco magro, sin alérgenos de mamíferos.',t:'Pescado blanco'},{n:`${cantidad||'180g'} tofu firme`,d:'Sin proteína animal.',t:'Vegetal'}],
-        intolerancia:[{n:`${cantidad||'180g'} pollo`,d:'Sin histaminas de la carne roja madurada. Más fácil de digerir.',t:'Más digestivo'},{n:`${cantidad||'180g'} pavo`,d:'El menos problemático. Bajo en histaminas.',t:'Bajo histaminas'},{n:`${cantidad||'180g'} merluza fresca`,d:'Pescado fresco sin histaminas de conserva.',t:'Fresco'}],
-        noTengo:     [{n:`${cantidad||'180g'} huevos (≈3-4 uds)`,d:'La proteína siempre en casa. En tortilla o revueltos.',t:'Siempre en casa'},{n:`${cantidad||'180g'} legumbres cocidas`,d:'Garbanzos o lentejas: proteína+fibra del armario.',t:'Despensa'},{n:'2 latas de atún',d:'Proteína inmediata sin cocinar.',t:'Sin cocinar'}],
-        vegano:      [{n:`${cantidad||'180g'} seitán`,d:'La sustitución más cercana en textura para platos de carne.',t:'Textura cárnica'},{n:`${cantidad||'180g'} proteína de soja texturizada`,d:'Hidratada y especiada, casi indistinguible en boloñesa.',t:'Vegetal'},{n:`${cantidad||'180g'} tempeh desmenuzado`,d:'Fermentado, más digestivo y mejor perfil nutricional.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'180g'} huevos (≈3-4 uds)`,d:'La proteína más barata por gramo que existe.',t:'Muy económico'},{n:`${cantidad||'180g'} lentejas`,d:'Una cuarta parte del precio. Proteína + hidratos + fibra.',t:'Muy económico'},{n:'2 latas de sardinas',d:'Proteína y omega-3 al mínimo coste.',t:'Económico'}],
-      };
-      return s[r] || s.noMegusta;
-    }
-
-    // POLLO
-    if (/pollo|pechuga/.test(tipo)) {
-      const s = {
-        noMegusta:   [{n:`${cantidad||'180g'} pavo a la plancha`,d:'Sabor más neutro. Mismos macros, muy magro.',t:'Más neutro'},{n:`${cantidad||'180g'} lomo de cerdo`,d:'Más jugoso y sabroso. Algo más de grasa pero muy proteico.',t:'Más sabor'},{n:`${cantidad||'180g'} dorada al horno`,d:'Cambio a pescado blanco. Mismo aporte proteico.',t:'Pescado'}],
-        alergia:     [{n:`${cantidad||'180g'} merluza`,d:'Sin proteínas de ave.',t:'Sin ave'},{n:`${cantidad||'180g'} tofu firme`,d:'Sin proteína animal.',t:'Vegetal'},{n:`${cantidad||'180g'} conejo`,d:'Carne diferente a las aves. Muy magra.',t:'Diferente'}],
-        intolerancia:[{n:`${cantidad||'180g'} pavo fresco`,d:'Carne magra fresca, baja en histaminas.',t:'Bajo histaminas'},{n:`${cantidad||'180g'} merluza fresca`,d:'Pescado fresco, fácil de digerir.',t:'Fresco'},{n:`${cantidad||'180g'} huevos (≈3-4 uds)`,d:'Proteína de fácil digestión.',t:'Digestivo'}],
-        noTengo:     [{n:'2 latas de atún al natural',d:'Sin cocinar, proteína equivalente al instante.',t:'Sin cocinar'},{n:`${cantidad||'180g'} huevos (≈3-4)`,d:'Siempre en casa.',t:'Siempre disponible'},{n:'2 latas de sardinas',d:'Proteína y omega-3.',t:'Rápido'}],
-        vegano:      [{n:`${cantidad||'180g'} seitán`,d:'El sustituto vegetal más parecido al pollo en textura.',t:'Vegetal'},{n:`${cantidad||'180g'} tofu firme marinado`,d:'Con ajo y limón se acerca al sabor del pollo.',t:'Vegetal'},{n:`${cantidad||'180g'} tempeh`,d:'Más firme y sabroso que el tofu.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'180g'} muslo de pollo sin hueso`,d:'Más económico que la pechuga, más jugoso.',t:'Económico'},{n:'2 latas de sardinas',d:'Proteína y omega-3 al mínimo coste.',t:'Muy económico'},{n:`${cantidad||'180g'} huevos`,d:'La proteína más barata.',t:'Muy económico'}],
-      };
-      return s[r] || s.noMegusta;
-    }
-
-    // SALMÓN / PESCADO AZUL Y CONSERVAS
-    if (/salmón|salmon|atún|atun|caballa|sardinas/.test(tipo)) {
-      const s = {
-        noMegusta:   [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin sabor a pescado. Proteína equivalente.',t:'Sin pescado'},{n:`${cantidad||'200g'} dorada o lubina`,d:'Pescado blanco muy suave. Casi no sabe a pescado.',t:'Más suave'},{n:`${cantidad||'200g'} lomo de cerdo`,d:'Carne sin rastro de mar.',t:'Carne'}],
-        alergia:     [{n:`${cantidad||'200g'} pollo`,d:'Sin alérgenos de pescado.',t:'Sin pescado'},{n:`${cantidad||'200g'} ternera magra`,d:'Carne sin alérgenos de pescado.',t:'Sin pescado'},{n:`${cantidad||'200g'} tofu`,d:'Vegetal, sin alérgenos.',t:'Vegetal'}],
-        intolerancia:[{n:`${cantidad||'200g'} pollo fresco`,d:'Sin histaminas del pescado azul.',t:'Bajo histaminas'},{n:`${cantidad||'200g'} dorada o lubina fresca`,d:'Pescado blanco fresco, menos histamina que el azul.',t:'Más digestivo'},{n:`${cantidad||'200g'} huevos`,d:'Proteína fácil de digerir.',t:'Digestivo'}],
-        noTengo:     [{n:'2 latas de atún al natural',d:'Omega-3 similar, listo sin cocinar.',t:'Sin cocinar'},{n:'2 latas de sardinas',d:'Más omega-3 que el atún.',t:'Más omega-3'},{n:`${cantidad||'200g'} pollo`,d:'Si no hay pescado.',t:'Siempre disponible'}],
-        vegano:      [{n:`${cantidad||'200g'} tofu ahumado`,d:'El ahumado imita el sabor del salmón. Sorprendente.',t:'Vegetal'},{n:'Algas nori + aguacate',d:'Sabor a mar sin pescado.',t:'Vegetal marino'},{n:`${cantidad||'200g'} tempeh marinado`,d:'Con limón y salsa soja.',t:'Vegetal'}],
-        presupuesto: [{n:'2 latas de caballa al natural',d:'Más omega-3 que el salmón a 1/8 del precio.',t:'Muy económico'},{n:'2 latas de sardinas',d:'Omega-3, proteína y calcio.',t:'Muy económico'},{n:'2 latas de atún',d:'El clásico económico.',t:'Económico'}],
-      };
-      return s[r] || s.noMegusta;
-    }
-
-    // PESCADO BLANCO
-    if (/merluza|dorada|lubina|bacalao|rape|fletán/.test(tipo)) {
-      const s = {
-        noMegusta:   [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin sabor a pescado. Misma proteína.',t:'Sin pescado'},{n:`${cantidad||'200g'} pavo`,d:'Carne blanca muy magra.',t:'Neutro'},{n:`${cantidad||'200g'} salmón`,d:'Pescado azul con más sabor y grasa saludable.',t:'Más sabor'}],
-        alergia:     [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin alérgenos de pescado.',t:'Sin pescado'},{n:`${cantidad||'200g'} tofu firme`,d:'Sin proteína animal ni alérgenos de pescado.',t:'Vegetal'},{n:`${cantidad||'200g'} legumbres cocidas`,d:'Proteína vegetal, sin alérgenos de pescado.',t:'Vegetal'}],
-        intolerancia:[{n:`${cantidad||'200g'} pescado fresco del día`,d:'Si la intolerancia es a histaminas de conserva o congelado, el pescado fresco suele tolerarse mejor.',t:'Fresco'},{n:`${cantidad||'200g'} pollo`,d:'Sin histaminas de pescado.',t:'Bajo histaminas'},{n:`${cantidad||'200g'} huevos`,d:'Proteína de fácil digestión.',t:'Digestivo'}],
-        noTengo:     [{n:'2 latas de atún',d:'Proteína de pescado lista al instante.',t:'Sin cocinar'},{n:`${cantidad||'200g'} huevos (≈3-4)`,d:'Proteína inmediata.',t:'Siempre en casa'},{n:`${cantidad||'200g'} pollo`,d:'Siempre disponible.',t:'Fácil'}],
-        vegano:      [{n:`${cantidad||'200g'} tofu firme`,d:'Textura suave similar al pescado blanco.',t:'Vegetal'},{n:`${cantidad||'200g'} seitán rebozado`,d:'Textura parecida al pescado rebozado.',t:'Vegetal'},{n:'Palmitos rebozados',d:'Imitación vegana muy lograda.',t:'Vegetal'}],
-        default:     [{n:`${cantidad||'200g'} dorada o lubina`,d:'Mismo tipo de pescado blanco.',t:'Similar'},{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin pescado, proteína equivalente.',t:'Sin pescado'},{n:`${cantidad||'200g'} rape`,d:'Pescado blanco más firme y sabroso.',t:'Más sabor'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // HUEVOS
-    if (/huevo|claras/.test(tipo)) {
-      const s = {
-        alergia:     [{n:'3 cucharadas de aquafaba',d:'Agua de cocción de garbanzos. Monta como las claras.',t:'Sin huevo'},{n:`${cantidad||'150g'} tofu sedoso`,d:'Para revueltos y recetas cremosas.',t:'Sin huevo'},{n:'1 cucharada semillas lino + 3 agua',d:'Sustituto clásico en repostería y tortillas veganas.',t:'Sin huevo'}],
-        intolerancia:[{n:`${cantidad||'150g'} queso cottage`,d:'Proteína fácil de digerir, sin huevo.',t:'Digestivo'},{n:`${cantidad||'150g'} tofu sedoso`,d:'Sin huevo, suave para el estómago.',t:'Sin huevo'},{n:'2 latas de atún',d:'Proteína magra sin huevo.',t:'Sin huevo'}],
-        noMegusta:   [{n:`${cantidad||'150g'} queso cottage`,d:'Proteína láctea muy similar, sabor suave.',t:'Sin huevo'},{n:`${cantidad||'150g'} requesón`,d:'Cremoso y suave, sin sabor a huevo.',t:'Sin huevo'},{n:`${cantidad||'150g'} pechuga de pavo`,d:'Proteína magra sólida.',t:'Sin huevo'}],
-        vegano:      [{n:'Tofu revuelto con cúrcuma y sal negra',d:'La sal negra da sabor a azufre igual que el huevo.',t:'Vegetal'},{n:'Aquafaba montada',d:'Para recetas que necesitan volumen.',t:'Vegetal'},{n:`${cantidad||'150g'} proteína de soja texturizada`,d:'Para platos que necesitan proteína sólida.',t:'Vegetal'}],
-        noTengo:     [{n:'2 latas de atún',d:'Proteína inmediata sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'150g'} queso tierno`,d:'Proteína láctea accesible.',t:'Lácteo'},{n:`${cantidad||'150g'} legumbres cocidas`,d:'Del armario, lista al instante.',t:'Despensa'}],
-        default:     [{n:'Claras pasteurizadas (doble cantidad)',d:'Toda la proteína sin la grasa de la yema.',t:'Más proteína'},{n:`${cantidad||'150g'} tofu sedoso`,d:'Vegetal, textura suave similar.',t:'Vegetal'},{n:`${cantidad||'150g'} queso cottage`,d:'Proteína láctea de sabor suave.',t:'Lácteo'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // ARROZ
-    if (/arroz/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'150g'} patata cocida`,d:'Hidrato sin arroz ni gluten, muy poco alergénico.',t:'Hipoalergénico'},{n:`${cantidad||'100g'} mijo`,d:'Cereal sin gluten, alternativa al arroz.',t:'Sin arroz'},{n:`${cantidad||'150g'} batata asada`,d:'Hidrato natural sin cereales.',t:'Sin cereales'}],
-        intolerancia:[{n:`${cantidad||'100g'} quinoa`,d:'Sin gluten. Más proteína y todos los aminoácidos.',t:'Sin gluten'},{n:`${cantidad||'100g'} mijo`,d:'Cereal muy digestivo, sin gluten.',t:'Sin gluten'},{n:`${cantidad||'150g'} patata cocida`,d:'Hidrato limpio, sin gluten.',t:'Sin gluten'}],
-        noMegusta:   [{n:`${cantidad||'100g'} quinoa`,d:'Sabor a nuez, textura similar. Más nutritiva.',t:'Más nutritivo'},{n:`${cantidad||'100g'} pasta integral`,d:'La alternativa más cómoda si no te gusta el arroz.',t:'Más familiar'},{n:`${cantidad||'150g'} patata cocida`,d:'Hidrato clásico sin el sabor del arroz.',t:'Diferente'}],
-        noTengo:     [{n:`${cantidad||'150g'} patata`,d:'Siempre en casa.',t:'Siempre en casa'},{n:`${cantidad||'100g'} cuscús`,d:'Se hidrata en 5 minutos, sin cocinar.',t:'5 minutos'},{n:`${cantidad||'100g'} pan integral`,d:'Hidrato listo al instante.',t:'Inmediato'}],
-        vegano:      [{n:`${cantidad||'100g'} quinoa`,d:'Proteína completa + hidratos.',t:'Vegetal completo'},{n:`${cantidad||'100g'} cuscús integral`,d:'Rápido y versátil.',t:'Vegetal'},{n:`${cantidad||'150g'} batata asada`,d:'Más nutritiva, dulce y saciante.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'150g'} patata`,d:'El hidrato más barato.',t:'Muy económico'},{n:`${cantidad||'100g'} cuscús`,d:'Más económico que el arroz integral.',t:'Económico'},{n:`${cantidad||'100g'} arroz blanco`,d:'Más barato que el integral.',t:'Más barato'}],
-        default:     [{n:`${cantidad||'100g'} quinoa`,d:'La mejor upgrade del arroz. Más proteína.',t:'Más nutritivo'},{n:`${cantidad||'150g'} patata cocida`,d:'Hidrato limpio y saciante.',t:'Simple'},{n:`${cantidad||'100g'} pasta integral`,d:'Misma función, diferente sabor.',t:'Familiar'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // AVENA
-    if (/avena|copos/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'60g'} copos de arroz`,d:'Sin avena, textura similar para porridge.',t:'Sin avena'},{n:`${cantidad||'150g'} patata cocida`,d:'Hidrato alternativo sin cereales con avenina/gluten.',t:'Sin cereales'},{n:`${cantidad||'60g'} cuscús`,d:'Cereal diferente, sin avena.',t:'Sin avena'}],
-        intolerancia:[{n:`${cantidad||'60g'} copos de arroz`,d:'Sin gluten, mismo uso que la avena.',t:'Sin gluten'},{n:`${cantidad||'60g'} quinoa en copos`,d:'Sin gluten, más proteína.',t:'Sin gluten'},{n:`${cantidad||'60g'} copos de mijo`,d:'Cereal sin gluten muy nutritivo.',t:'Sin gluten'}],
-        noMegusta:   [{n:`${cantidad||'60g'} muesli sin azúcar`,d:'Más textura que la avena. Mezcla de cereales y frutos secos.',t:'Más textura'},{n:'2 rebanadas pan centeno + fruta',d:'Desayuno sólido si no te gusta el porridge.',t:'Sólido'},{n:'Yogur griego + granola + fruta',d:'Frío y crujiente, sin nada caliente.',t:'Crujiente'}],
-        noTengo:     [{n:'Pan integral + fruta',d:'Hidrato de calidad disponible en cualquier tienda.',t:'Fácil'},{n:`${cantidad||'60g'} muesli`,d:'Sin cocinar, listo con leche.',t:'Rápido'},{n:'Cereales integrales sin azúcar',d:'En cualquier super.',t:'Universal'}],
-        default:     [{n:`${cantidad||'60g'} quinoa en copos`,d:'Más proteína, sin gluten, mismo tiempo.',t:'Más nutritivo'},{n:`${cantidad||'60g'} muesli sin azúcar`,d:'Más variedad y textura.',t:'Más variedad'},{n:'Tostadas centeno + fruta + frutos secos',d:'Equivalente en calorías y nutrientes.',t:'Sólido'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // LÁCTEOS
-    if (/leche|bebida vegetal/.test(tipo)) {
-      const s = {
-        intolerancia:[{n:tipo.replace('leche','leche sin lactosa'),d:'Sabor idéntico, sin lactosa.',t:'Sin lactosa'},{n:`${cantidad||'200ml'} leche de avena`,d:'Sin lactosa, cremosa.',t:'Sin lactosa'},{n:`${cantidad||'200ml'} leche de almendra`,d:'Ligera, sin lactosa.',t:'Sin lactosa'}],
-        alergia:     [{n:`${cantidad||'200ml'} leche de avena`,d:'Sin proteínas lácteas.',t:'Sin lácteo'},{n:`${cantidad||'200ml'} leche de coco`,d:'Sin lácteo, cremosa.',t:'Sin lácteo'},{n:`${cantidad||'200ml'} agua`,d:'Para porridges, funciona.',t:'Sin lácteo'}],
-        vegano:      [{n:`${cantidad||'200ml'} leche de avena`,d:'La más cremosa de las vegetales.',t:'Vegetal'},{n:`${cantidad||'200ml'} leche de soja`,d:'La que más proteína tiene.',t:'Vegetal'},{n:`${cantidad||'200ml'} leche de almendra`,d:'Ligera y neutra.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'200ml'} agua`,d:'Para porridges funciona igual.',t:'Gratis'},{n:`${cantidad||'200ml'} leche desnatada`,d:'La más económica.',t:'Económico'},{n:`${cantidad||'200ml'} leche de soja marca blanca`,d:'La vegetal más barata.',t:'Económico'}],
-        default:     [{n:`${cantidad||'200ml'} leche de avena`,d:'Cremosa y sostenible.',t:'Vegetal'},{n:`${cantidad||'200ml'} leche sin lactosa`,d:'Sabor idéntico.',t:'Sin lactosa'},{n:`${cantidad||'200ml'} leche de soja`,d:'Más proteína.',t:'Más proteína'}],
-      };
-      return s[r] || s.default;
-    }
-
-    if (/yogur|kéfir|kefir/.test(tipo)) {
-      const s = {
-        intolerancia:[{n:`${cantidad||'200g'} yogur de soja`,d:'Misma textura cremosa, sin lactosa.',t:'Sin lactosa'},{n:`${cantidad||'200g'} yogur de coco`,d:'Más graso, sin lactosa.',t:'Sin lactosa'},{n:`${cantidad||'200g'} queso cottage sin lactosa`,d:'Alta proteína.',t:'Sin lactosa'}],
-        alergia:     [{n:`${cantidad||'200g'} yogur de soja`,d:'Sin caseína ni suero.',t:'Sin lácteo'},{n:`${cantidad||'200g'} yogur de almendra`,d:'Sin proteínas lácteas.',t:'Sin lácteo'},{n:`${cantidad||'200g'} yogur de coco`,d:'Sin lácteo, muy cremoso.',t:'Sin lácteo'}],
-        noMegusta:   [{n:`${cantidad||'200g'} queso cottage`,d:'Más neutro y suave que el yogur.',t:'Más suave'},{n:`${cantidad||'200g'} requesón`,d:'Sin acidez del yogur.',t:'Sin acidez'},{n:`${cantidad||'200g'} queso fresco batido`,d:'Suave y cremoso.',t:'Sin acidez'}],
-        vegano:      [{n:`${cantidad||'200g'} yogur de soja`,d:'El más proteico de los vegetales.',t:'Vegetal'},{n:`${cantidad||'200g'} yogur de coco`,d:'El más cremoso.',t:'Vegetal'},{n:`${cantidad||'200g'} yogur de avena`,d:'El más ligero.',t:'Vegetal'}],
-        default:     [{n:`${cantidad||'200g'} queso cottage`,d:'Más proteína, sabor más suave.',t:'Más proteína'},{n:`${cantidad||'200g'} yogur de soja`,d:'Vegetal con proteína similar.',t:'Vegetal'},{n:`${cantidad||'200g'} kéfir natural`,d:'Más probióticos.',t:'Más probióticos'}],
-      };
-      return s[r] || s.default;
-    }
-
-    if (/tofu|tempeh|seitán|seitan/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'180g'} pechuga de pollo`,d:'Sin soja ni gluten, proteína animal magra.',t:'Sin soja/gluten'},{n:`${cantidad||'180g'} legumbres cocidas (garbanzos o lentejas)`,d:'Proteína vegetal sin soja.',t:'Sin soja'},{n:`${cantidad||'180g'} huevos (≈3-4 uds)`,d:'Proteína sin soja ni gluten.',t:'Sin soja/gluten'}],
-        intolerancia:[{n:`${cantidad||'180g'} legumbres cocidas`,d:'Si la intolerancia es al gluten del seitán, las legumbres son una alternativa sin gluten.',t:'Sin gluten'},{n:`${cantidad||'180g'} pollo o pavo`,d:'Proteína animal de fácil digestión.',t:'Digestivo'},{n:`${cantidad||'180g'} huevos`,d:'Proteína fácil de digerir.',t:'Digestivo'}],
-        noMegusta:   [{n:`${cantidad||'180g'} pechuga de pollo`,d:'Sin sabor de soja.',t:'Animal'},{n:`${cantidad||'180g'} legumbres cocidas`,d:'Proteína vegetal sin sabor del tofu.',t:'Vegetal neutro'},{n:`${cantidad||'180g'} seitán`,d:'Textura más cárnica, sabor diferente.',t:'Más textura'}],
-        noTengo:     [{n:`${cantidad||'180g'} garbanzos en lata`,d:'Proteína vegetal lista al instante.',t:'Sin cocinar'},{n:`${cantidad||'180g'} lentejas cocidas`,d:'De la despensa.',t:'Despensa'},{n:`${cantidad||'180g'} huevos`,d:'La proteína más accesible.',t:'Fácil'}],
-        default:     [{n:`${cantidad||'180g'} tempeh`,d:'Más digestivo y mejor sabor que el tofu.',t:'Mejor sabor'},{n:`${cantidad||'180g'} seitán`,d:'Textura más firme.',t:'Más textura'},{n:`${cantidad||'180g'} proteína soja texturizada`,d:'Económica y versátil.',t:'Económico'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // MARISCO (gambas, langostinos, camarones...)
-    if (/gambas|langostinos|camarones|marisco/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin alérgenos de crustáceos/marisco.',t:'Sin marisco'},{n:`${cantidad||'180g'} tofu firme`,d:'Proteína vegetal, sin alérgenos de marisco.',t:'Vegetal'},{n:`${cantidad||'2'} huevos`,d:'Proteína sin marisco.',t:'Sin marisco'}],
-        intolerancia:[{n:`${cantidad||'200g'} pollo fresco`,d:'Sin histaminas del marisco.',t:'Bajo histaminas'},{n:`${cantidad||'200g'} merluza fresca`,d:'Pescado blanco fresco, fácil digestión.',t:'Fresco'},{n:`${cantidad||'2'} huevos`,d:'Proteína de fácil digestión.',t:'Digestivo'}],
-        noMegusta:   [{n:`${cantidad||'200g'} pechuga de pollo`,d:'Sin sabor a mar.',t:'Sin marisco'},{n:`${cantidad||'200g'} merluza o dorada`,d:'Pescado blanco suave.',t:'Pescado'},{n:`${cantidad||'180g'} tofu a la plancha`,d:'Textura firme, sin sabor a marisco.',t:'Vegetal'}],
-        noTengo:     [{n:'2 latas de atún',d:'Proteína marina sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'2'} huevos`,d:'Siempre en casa.',t:'Siempre disponible'},{n:`${cantidad||'200g'} pollo`,d:'Si no hay marisco.',t:'Fácil'}],
-        vegano:      [{n:`${cantidad||'180g'} tofu firme marinado`,d:'Con ajo y limón, textura firme similar.',t:'Vegetal'},{n:'Setas ostra salteadas',d:'Textura jugosa que recuerda al marisco.',t:'Vegetal'},{n:`${cantidad||'180g'} corazones de alcachofa`,d:'Sabor de mar suave en versión vegetal.',t:'Vegetal'}],
-        presupuesto: [{n:'2 latas de sardinas',d:'Proteína y omega-3 al mínimo coste.',t:'Muy económico'},{n:`${cantidad||'2'} huevos`,d:'La proteína más barata.',t:'Muy económico'},{n:`${cantidad||'200g'} muslo de pollo`,d:'Mucho más barato que el marisco.',t:'Económico'}],
-        default:     [{n:`${cantidad||'200g'} merluza o dorada`,d:'Pescado blanco, proteína similar.',t:'Pescado'},{n:`${cantidad||'200g'} pechuga de pollo`,d:'Proteína magra sin marisco.',t:'Carne'},{n:'2 latas de atún',d:'Proteína marina rápida.',t:'Rápido'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // LEGUMBRES (garbanzos, lentejas, edamame, alubias, fabes...)
-    if (/garbanzos|lentejas|edamame|alubias|fabes/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'150g'} pollo`,d:'Proteína animal sin legumbres.',t:'Sin legumbre'},{n:`${cantidad||'100g'} quinoa`,d:'Hidrato con proteína, sin legumbres.',t:'Sin legumbre'},{n:`${cantidad||'150g'} arroz integral`,d:'Hidrato sin legumbres.',t:'Sin legumbre'}],
-        intolerancia:[{n:`${cantidad||'100g'} quinoa`,d:'Sin los fermentables (FODMAP) de las legumbres.',t:'Bajo FODMAP'},{n:`${cantidad||'150g'} arroz integral`,d:'Hidrato fácil de digerir.',t:'Bajo FODMAP'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal con menos FODMAP que las legumbres.',t:'Bajo FODMAP'}],
-        noMegusta:   [{n:`${cantidad||'100g'} quinoa`,d:'Proteína vegetal con textura diferente.',t:'Diferente'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal sin sabor a legumbre.',t:'Vegetal'},{n:`${cantidad||'150g'} pollo o pavo`,d:'Si prefieres proteína animal.',t:'Animal'}],
-        noTengo:     [{n:`${cantidad||'150g'} garbanzos en lata`,d:'Lista al instante, solo escurrir.',t:'Sin cocinar'},{n:'2 latas de atún',d:'Proteína inmediata.',t:'Rápido'},{n:`${cantidad||'2'} huevos`,d:'Siempre en casa.',t:'Siempre disponible'}],
-        vegano:      [{n:`${cantidad||'150g'} otra legumbre (lentejas, garbanzos o alubias)`,d:'Rota entre legumbres para variar.',t:'Vegetal'},{n:`${cantidad||'150g'} tofu o tempeh`,d:'Proteína vegetal concentrada.',t:'Vegetal'},{n:`${cantidad||'100g'} quinoa`,d:'Proteína completa vegetal.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'150g'} lentejas`,d:'La legumbre más barata y rápida de cocinar.',t:'Muy económico'},{n:`${cantidad||'150g'} garbanzos secos cocidos en casa`,d:'Mucho más barato que en lata.',t:'Económico'},{n:`${cantidad||'2'} huevos`,d:'Proteína barata si rotas con legumbre.',t:'Económico'}],
-        default:     [{n:`${cantidad||'150g'} otra legumbre (lentejas, garbanzos, alubias o edamame)`,d:'Mismo perfil nutricional, varía el sabor.',t:'Similar'},{n:`${cantidad||'100g'} quinoa`,d:'Proteína vegetal completa, sin legumbre.',t:'Diferente'},{n:`${cantidad||'150g'} tofu`,d:'Proteína vegetal concentrada.',t:'Vegetal'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // QUESOS (queso tierno, fresco, rallado, requesón, cottage...)
-    if (/queso|requesón|requeson/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'30g'} levadura nutricional`,d:'Aporta sabor "a queso" sin lácteos. Apta para alergia a la leche.',t:'Sin lácteo'},{n:`${cantidad||'30g'} queso vegano`,d:'Sin proteínas de leche.',t:'Sin lácteo'},{n:`${cantidad||'30g'} aguacate`,d:'Cremosidad sin lácteos.',t:'Sin lácteo'}],
-        intolerancia:[{n:`${cantidad||'30g'} queso curado`,d:'Los curados apenas tienen lactosa, suelen tolerarse mejor.',t:'Bajo lactosa'},{n:`${cantidad||'30g'} queso sin lactosa`,d:'Mismo sabor, sin lactosa.',t:'Sin lactosa'},{n:`${cantidad||'30g'} queso de cabra`,d:'Más fácil de digerir que el de vaca.',t:'Más digestivo'}],
-        noMegusta:   [{n:`${cantidad||'30g'} hummus`,d:'Cremoso, sin sabor a queso.',t:'Diferente'},{n:`${cantidad||'30g'} aguacate`,d:'Cremoso y suave.',t:'Diferente'},{n:`${cantidad||'50g'} pechuga de pavo`,d:'Proteína sin lácteos.',t:'Animal'}],
-        noTengo:     [{n:`${cantidad||'30g'} yogur griego espeso`,d:'Cremosidad similar.',t:'Similar'},{n:'1 huevo duro',d:'Proteína de despensa.',t:'Despensa'},{n:`${cantidad||'30g'} jamón o pavo`,d:'Si tienes fiambre a mano.',t:'Alternativa'}],
-        vegano:      [{n:`${cantidad||'30g'} queso vegano`,d:'A base de anacardos o coco.',t:'Vegetal'},{n:`${cantidad||'30g'} levadura nutricional`,d:'Sabor umami "a queso" sin lácteos.',t:'Vegetal'},{n:`${cantidad||'30g'} hummus`,d:'Cremoso y proteico.',t:'Vegetal'}],
-        presupuesto: [{n:`${cantidad||'30g'} queso de marca blanca`,d:'Mismo aporte, mucho más barato.',t:'Económico'},{n:'2 huevos',d:'Proteína más barata.',t:'Muy económico'},{n:`${cantidad||'30g'} requesón`,d:'Más barato que quesos curados.',t:'Económico'}],
-        default:     [{n:`${cantidad||'30g'} requesón o queso cottage`,d:'Menos grasa, más proteína.',t:'Más proteína'},{n:`${cantidad||'30g'} queso de cabra`,d:'Sabor diferente, fácil digestión.',t:'Diferente'},{n:`${cantidad||'30g'} hummus`,d:'Opción vegetal cremosa.',t:'Vegetal'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // FIAMBRE / EMBUTIDO (jamón, chorizo, pavo en lonchas...)
-    if (/jamón|jamon|chorizo|fiambre|embutido|embuchado|cecina|lacón|lacon|salchichón|salchichon|salami|mortadela|pavo en lonchas/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Fiambre más simple, menor riesgo de aditivos alergénicos que otros embutidos.',t:'Más simple'},{n:'2 huevos',d:'Proteína sin embutido ni aditivos.',t:'Sin embutido'},{n:`${cantidad||'50g'} pollo cocido`,d:'Proteína magra sin aditivos de embutido.',t:'Sin embutido'}],
-        intolerancia:[{n:`${cantidad||'50g'} pavo fresco cocido`,d:'Sin las histaminas de los curados/fermentados.',t:'Bajo histaminas'},{n:`${cantidad||'50g'} pollo fresco`,d:'Carne fresca, sin curar.',t:'Fresco'},{n:'2 huevos',d:'Proteína de fácil digestión.',t:'Digestivo'}],
-        noMegusta:   [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Sabor más suave.',t:'Más suave'},{n:'2 huevos',d:'Proteína sin curar.',t:'Diferente'},{n:`${cantidad||'50g'} salmón ahumado`,d:'Otro tipo de "fiambre" con más omega-3.',t:'Pescado'}],
-        noTengo:     [{n:'2 huevos',d:'Siempre en casa.',t:'Siempre disponible'},{n:'2 latas de atún',d:'Proteína inmediata sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'50g'} queso`,d:'Si tienes queso a mano.',t:'Alternativa'}],
-        vegano:      [{n:`${cantidad||'50g'} tofu ahumado en lonchas`,d:'El ahumado imita el sabor del fiambre.',t:'Vegetal'},{n:`${cantidad||'50g'} seitán en lonchas`,d:'Textura similar al fiambre.',t:'Vegetal'},{n:'4 cucharadas hummus',d:'Proteína vegetal cremosa.',t:'Vegetal'}],
-        presupuesto: [{n:'2 huevos',d:'La proteína más barata.',t:'Muy económico'},{n:`${cantidad||'50g'} pavo en lonchas de marca blanca`,d:'Igual de bueno y más barato.',t:'Económico'},{n:'2 latas de sardinas',d:'Proteína y omega-3 económicos.',t:'Económico'}],
-        default:     [{n:`${cantidad||'50g'} pechuga de pavo en lonchas`,d:'Más magro que el resto de embutidos.',t:'Más magro'},{n:'2 huevos',d:'Proteína sin curar ni procesar.',t:'Sin procesar'},{n:`${cantidad||'50g'} salmón ahumado`,d:'Más omega-3, menos sal.',t:'Diferente'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // FRUTA FRESCA (manzana, pera, naranja, kiwi, plátano, frutos rojos, dátiles...)
-    if (/manzana|\bpera\b|naranja|mandarina|kiwi|melocotón|melocoton|mango|fresas?|arándanos|arandanos|frambuesas?|frutos rojos|plátano|platano|dátiles|datiles/.test(tipo)) {
-      const s = {
-        alergia:     [{n:'1 pieza de pera',d:'Fruta de bajo potencial alergénico, a diferencia del kiwi o las frutas con hueso (frecuentes en alergia oral al polen).',t:'Hipoalergénico'},{n:'1 plátano',d:'Muy bien tolerado, raramente alergénico.',t:'Hipoalergénico'},{n:'150g manzana asada',d:'Cocinada reduce el riesgo de alergia oral (síndrome polen-frutas).',t:'Cocinada'}],
-        intolerancia:[{n:'1 plátano maduro',d:'Baja en FODMAP cuando está bien maduro.',t:'Bajo FODMAP'},{n:'1 naranja',d:'Cítrico bien tolerado en raciones moderadas.',t:'Bajo FODMAP'},{n:'150g fresas',d:'Fruta baja en FODMAP.',t:'Bajo FODMAP'}],
-        noMegusta:   [{n:'1 pieza de fruta de temporada (manzana, pera, naranja...)',d:'Cambia por la fruta que más te guste, el aporte es similar.',t:'A tu gusto'},{n:'150g yogur griego con canela',d:'Si no apetece fruta, opción dulce con más proteína.',t:'Alternativa'},{n:'1 puñado de frutos secos',d:'Snack dulce-salado sin fruta.',t:'Diferente'}],
-        noTengo:     [{n:'1 pieza de la fruta que tengas en casa',d:'Cualquier fruta fresca cumple la misma función.',t:'Lo que tengas'},{n:'1 puñado de fruta desecada (orejones, ciruelas)',d:'Dura mucho en la despensa.',t:'Despensa'},{n:'150g yogur natural',d:'Si no tienes fruta a mano.',t:'Alternativa'}],
-        vegano:      [{n:'1 pieza de fruta de temporada',d:'Cualquier fruta fresca es vegana.',t:'Vegetal'},{n:'1 puñado de fruta desecada',d:'Concentrado energético vegano.',t:'Vegetal'},{n:'150g compota sin azúcar',d:'Misma fruta, otra textura.',t:'Vegetal'}],
-        presupuesto: [{n:'1 manzana o plátano',d:'Las frutas más económicas y de todo el año.',t:'Muy económico'},{n:'1 pieza de fruta de temporada',d:'Siempre más barata fuera de temporada de otras.',t:'Económico'},{n:'1 puñado de fruta congelada',d:'Más barata que la fresca fuera de temporada.',t:'Económico'}],
-        default:     [{n:'1 pieza de fruta de temporada (manzana, pera, naranja, kiwi...)',d:'Cualquier fruta fresca aporta un perfil similar de vitaminas y fibra.',t:'Similar'},{n:'150g yogur griego 0% con fruta',d:'Añade proteína al snack.',t:'Más proteína'},{n:'1 puñado de frutos secos',d:'Cambia dulce por graso-saciante.',t:'Diferente'}],
-      };
-      return s[r] || s.default;
-    }
-
-    if (/aguacate/.test(tipo)) {
-      const s = {
-        alergia:     [{n:'2 cucharadas aceite de oliva virgen extra',d:'Grasa saludable sin alérgenos del aguacate (síndrome látex-frutas).',t:'Sin aguacate'},{n:'30g nueces',d:'Grasas saludables alternativas, sin aguacate.',t:'Frutos secos'},{n:'4 cucharadas hummus',d:'Grasas vegetales sin aguacate.',t:'Sin aguacate'}],
-        intolerancia:[{n:'2 cucharadas aceite de oliva virgen extra',d:'Grasa de fácil digestión, sin los fermentables (FODMAP) del aguacate.',t:'Bajo FODMAP'},{n:'30g nueces',d:'Grasas saludables en menor cantidad por ración.',t:'Bajo FODMAP'},{n:'4 cucharadas hummus',d:'Si la intolerancia es leve, en pequeñas cantidades suele tolerarse.',t:'Alternativa'}],
-        noTengo:     [{n:'4 cucharadas hummus',d:'Grasas saludables en formato cremoso.',t:'Similar'},{n:'2 cucharadas aceite de oliva virgen extra',d:'La grasa más saludable en líquido.',t:'AOVE'},{n:'30g nueces',d:'Omega-3 en sólido.',t:'Frutos secos'}],
-        noMegusta:   [{n:'4 cucharadas hummus',d:'Cremoso, grasas saludables.',t:'Cremoso'},{n:'30g queso feta',d:'Grasa y sabor. Diferente textura.',t:'Diferente'},{n:'30g nueces picadas',d:'Omega-3 sin sabor a aguacate.',t:'Crujiente'}],
-        presupuesto: [{n:'2 cucharadas aceite de oliva',d:'Grasa saludable más económica.',t:'Muy económico'},{n:'30g nueces a granel',d:'Omega-3 más barato.',t:'Económico'},{n:'4 cucharadas hummus casero',d:'Garbanzos + AOVE = muy económico.',t:'Económico'}],
-        default:     [{n:'4 cucharadas hummus',d:'Grasas vegetales en textura similar.',t:'Similar'},{n:'30g nueces',d:'Omega-3 en sólido.',t:'Diferente'},{n:'2 cucharadas crema de cacahuete',d:'Grasas saludables + proteína.',t:'Dulce'}],
-      };
-      return s[r] || s.default;
-    }
-
-    if (/verdura|brócoli|brocoli|espinac|kale|acelga|coliflor|judía|judia|zanahoria|calabacín|calabacin|tomate|pepino|lechuga|rúcula|rucula|pimiento|cebolla|champiñones|champinones|setas|espárrago|esparrago|berenjena|puerro|apio|alcachofa|maíz|maiz/.test(tipo)) {
-      const s = {
-        alergia:     [{n:`${cantidad||'200g'} calabacín`,d:'Vegetal de bajo potencial alergénico.',t:'Hipoalergénico'},{n:`${cantidad||'200g'} zanahoria`,d:'Muy poco alergénico, fácil de tolerar.',t:'Hipoalergénico'},{n:`${cantidad||'200g'} judías verdes`,d:'Alternativa con bajo riesgo de alergia.',t:'Hipoalergénico'}],
-        intolerancia:[{n:`${cantidad||'200g'} zanahoria`,d:'Vegetal bajo en FODMAP, fácil de digerir.',t:'Bajo FODMAP'},{n:`${cantidad||'200g'} calabacín`,d:'Bajo en FODMAP, suave para el intestino.',t:'Bajo FODMAP'},{n:`${cantidad||'200g'} espinaca`,d:'Verdura de hoja baja en FODMAP.',t:'Bajo FODMAP'}],
-        noMegusta:   [{n:`${cantidad||'200g'} judías verdes`,d:'Sabor muy suave, poco amarga.',t:'Suave'},{n:`${cantidad||'200g'} calabacín salteado`,d:'El vegetal más neutro que existe.',t:'Neutro'},{n:`${cantidad||'200g'} zanahoria cocida`,d:'Dulce y fácil de comer.',t:'Dulce'}],
-        noTengo:     [{n:`${cantidad||'200g'} lechuga o rúcula`,d:'Siempre en cualquier tienda.',t:'Fácil'},{n:`${cantidad||'200g'} tomate + pepino`,d:'Crudo, sin cocinar.',t:'Sin cocinar'},{n:`${cantidad||'200g'} zanahoria`,d:'Dura mucho en nevera.',t:'Siempre en casa'}],
-        default:     [{n:`${cantidad||'200g'} coliflor`,d:'Sabor más suave que el brócoli.',t:'Similar'},{n:`${cantidad||'200g'} judías verdes`,d:'Vegetal muy neutro.',t:'Neutro'},{n:`${cantidad||'200g'} espárragos`,d:'Mismo perfil, sabor diferente.',t:'Diferente'}],
-      };
-      return s[r] || s.default;
-    }
-
-    // ─── GENÉRICO INTELIGENTE ─────────────────────────────────────────────
-    const esHidrato = /patata|boniato|batata|pasta|fideos|pan|tostada|centeno|espelta|cuscús|cuscus|quinoa|mijo|arroz|tortitas? de|tortas de|crackers|wasa|wassa|biscote|fajita|wrap|avena|cereales|muesli|plátano|platano|fruta/.test(tipo);
-    const esGrasa   = /aceite|aove|nuez|nueces|almendra|cacahuete|mantequilla|semilla|tahini|aceitunas|olivas|guacamole/.test(tipo);
-
-    // Para alergia/intolerancia, si el ingrediente no encaja en ninguna categoría
-    // anterior no arriesgamos una sugerencia genérica: lo indicamos directamente.
-    if (r === 'alergia' || r === 'intolerancia') {
-      return [{
-        n: `Sin alternativa específica para "${tipo}"`,
-        d: `No tenemos registrada una sustitución segura para este ingrediente por ${r === 'alergia' ? 'alergia' : 'intolerancia'}. Coméntalo con tu entrenador o nutricionista antes de cambiarlo.`,
-        t: 'Consulta profesional',
-        sinAlternativa: true,
-      }];
-    }
-    if (esHidrato) return [
-      {n:conSustituto('quinoa'),d:`Alternativa con más proteína. Misma función que ${tipo}.`,t:'Más nutritivo'},
-      {n:conSustituto('patata cocida'),d:'Hidrato limpio y saciante.',t:'Sencillo'},
-      {n:conSustituto('arroz integral'),d:'Clásico hidrato de calidad.',t:'Clásico'},
-    ];
-    if (esGrasa) return [
-      {n:'Aceite de oliva virgen extra',d:'La grasa más saludable.',t:'AOVE'},
-      {n:'1/4 aguacate',d:'Grasa vegetal con fibra.',t:'Vegetal'},
-      {n:'20-30g frutos secos',d:'Omega-3 en sólido.',t:'Sólido'},
-    ];
-    return [
-      {n:`${tipo} en versión diferente`,d:'Cambia la preparación: asado en vez de cocido, plancha en vez de vapor.',t:'Técnica'},
-      {n:'Proteína equivalente de temporada',d:'La proteína o vegetal de temporada más accesible ahora.',t:'Temporada'},
-      {n:'Versión vegetal equivalente',d:`Legumbre o tofu en sustitución de ${tipo}.`,t:'Vegetal'},
-    ];
-  }
-
-  function openSubstModal(event, ingredient, mealIdx, optIdx, ingredIdx) {
-    event.stopPropagation(); // No seleccionar la opción al tocar ingrediente
-    currentSubst = { tag: event.target, ingredient, mealIdx, optIdx, ingredIdx, selectedReason: '', selectedSub: null };
-
-    document.getElementById('substIngName').textContent = `Sustituir: ${ingredient}`;
-    document.querySelectorAll('.subst-reason').forEach(r => r.classList.remove('selected'));
-    document.getElementById('substOptions').innerHTML = `
-      <div style="font-size:13px;color:var(--metal);font-style:italic;padding:16px 0">
-        Selecciona el motivo para ver las mejores alternativas →
-      </div>`;
-    document.getElementById('substModal').classList.add('visible');
-  }
-
-  function closeSubstModal() {
-    document.getElementById('substModal').classList.remove('visible');
-    currentSubst = { tag: null, ingredient: '', mealIdx: 0, optIdx: 0, ingredIdx: 0, selectedReason: '', selectedSub: null };
-  }
-
-  function selectReason(el, reason) {
-    document.querySelectorAll('.subst-reason').forEach(r => r.classList.remove('selected'));
-    el.classList.add('selected');
-    currentSubst.selectedReason = reason;
-    currentSubst.selectedSub = null;
-
-    const subs = getSubstitutions(currentSubst.ingredient, reason);
-    const container = document.getElementById('substOptions');
-    if (subs.length === 1 && subs[0].sinAlternativa) {
-      container.innerHTML = `
-        <div class="subst-opt" style="text-align:center" onclick="selectSubstitute(this, 0)">
-          <div class="subst-opt-tag" style="margin:0">Consultar con profesional</div>
-        </div>`;
-      return;
-    }
-    container.innerHTML = subs.map((s, i) => `
-      <div class="subst-opt" onclick="selectSubstitute(this, ${i})">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-          <div class="subst-opt-name">${s.n}</div>
-          <div class="subst-opt-tag">${s.t}</div>
-        </div>
-        <div class="subst-opt-desc">${s.d}</div>
-      </div>`).join('');
-  }
-
-  function selectSubstitute(el, idx) {
-    document.querySelectorAll('.subst-opt').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    const subs = getSubstitutions(currentSubst.ingredient, currentSubst.selectedReason);
-    currentSubst.selectedSub = subs[idx];
-  }
-
-  function confirmSubstitution() {
-    if (!currentSubst.selectedSub) {
-      showToast('Selecciona una alternativa primero');
-      return;
-    }
-    // Casos sin alternativa segura registrada: no se sustituye nada, solo se informa
-    if (currentSubst.selectedSub.sinAlternativa) {
-      showToast('No hay alternativa específica registrada para este caso. Consúltalo con tu entrenador o nutricionista.');
-      closeSubstModal();
-      return;
-    }
-    if (currentSubst.tag) {
-      const { mealIdx, optIdx, ingredIdx } = currentSubst;
-      const opt = generatedPlan.nutricion[mealIdx].opciones[optIdx];
-
-      // Recalcular macros de la opción según la diferencia entre el ingrediente
-      // original y el sustituto (estimación aproximada, ver TABLA_MACROS_100G)
-      const macrosAntes = estimarMacros(currentSubst.ingredient);
-      const macrosDespues = estimarMacros(currentSubst.selectedSub.n);
-      const delta = {
-        kcal: macrosDespues.kcal - macrosAntes.kcal,
-        prot: macrosDespues.prot - macrosAntes.prot,
-        carbs: macrosDespues.carbs - macrosAntes.carbs,
-        grasa: macrosDespues.grasa - macrosAntes.grasa,
-      };
-      opt.kcal = Math.max(0, (parseInt(opt.kcal) || 0) + delta.kcal) + ' kcal';
-      opt.prot = Math.max(0, (parseInt(opt.prot) || 0) + delta.prot) + 'g prot';
-      opt.carbs = Math.max(0, (parseInt(opt.carbs) || 0) + delta.carbs) + 'g carbs';
-      opt.grasa = Math.max(0, (parseInt(opt.grasa) || 0) + delta.grasa) + 'g grasa';
-
-      // Actualizar las píldoras de macros de esta opción en el DOM
-      const pills = currentSubst.tag.closest('.meal-option')?.querySelectorAll('.meal-opt-macros .macro-pill');
-      if (pills && pills.length === 4) {
-        pills[0].textContent = `🔥 ${opt.kcal}`;
-        pills[1].textContent = `💪 ${opt.prot}`;
-        pills[2].textContent = `⚡ ${opt.carbs}`;
-        pills[3].textContent = `🫒 ${opt.grasa}`;
-      }
-
-      // Sustituir el ingrediente en los datos del plan (persiste y se refleja al recargar)
-      const ingredientesArr = opt.ingredientes.split(',');
-      ingredientesArr[ingredIdx] = (ingredIdx === 0 ? '' : ' ') + currentSubst.selectedSub.n.toLowerCase();
-      opt.ingredientes = ingredientesArr.join(',');
-
-      currentSubst.tag.textContent = capitalizarIngrediente(currentSubst.selectedSub.n);
-      currentSubst.tag.classList.add('substituted');
-      currentSubst.tag.title = `Sustituido por: ${currentSubst.selectedSub.n}`;
-
-      // Reescribir el título de la opción para que refleje el ingrediente sustituido
-      // ("Revuelto ... con setas y jamón" → "... con judías verdes y jamón").
-      // Solo si el alimento original aparece realmente en el nombre.
-      const origFood = nombreBaseAlimento(currentSubst.ingredient);
-      const subFood  = nombreBaseAlimento(currentSubst.selectedSub.n);
-      if (origFood && subFood) {
-        const re = new RegExp(origFood.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-        if (re.test(opt.nombre)) {
-          opt.nombre = opt.nombre.replace(re, subFood);
-          opt.personalizada = true; // marca que la receta se ha adaptado
-          // Actualizar el nombre en la tarjeta abierta
-          const cardEl = currentSubst.tag.closest('.meal-option');
-          const nameEl = cardEl?.querySelector('.meal-opt-name');
-          if (nameEl) nameEl.textContent = opt.nombre;
-          // Actualizar la píldora de preview de esta opción
-          const previewName = document.querySelectorAll(`#mealPreview${mealIdx} .meal-preview-name`)[optIdx];
-          if (previewName) previewName.textContent = opt.nombre;
-          // Si es la opción elegida, actualizar la etiqueta "Elegida: ..."
-          if (comidasSeleccionadas[mealIdx] === optIdx) {
-            const selEl = document.getElementById(`mealSelected${mealIdx}`);
-            if (selEl) selEl.textContent = `Elegida: ${opt.nombre}`;
-          }
-        }
-      }
-
-      // Recalcular el resumen "Total de hoy" y persistir
-      actualizarResumenNutricional();
-      const user = getCurrentUser();
-      if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
-    }
-    showToast(`✓ ${currentSubst.ingredient} → ${currentSubst.selectedSub.n}`);
-    closeSubstModal();
   }
 
   // ===== AUTH: STORAGE =====
