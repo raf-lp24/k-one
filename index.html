@@ -8193,7 +8193,7 @@
             const texto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
             return !noComidaRegexes.some(re => re.test(texto));
           });
-          return { ...meal, opciones: filtradas.length >= 2 ? filtradas : meal.opciones };
+          return { ...meal, opciones: filtradas.length >= 1 ? filtradas : meal.opciones };
         });
       }
     }
