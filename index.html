@@ -10072,30 +10072,32 @@
     modal.className = 'modal-overlay visible';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
-      <div class="modal-box modal-box-wide" style="max-width:560px;padding:32px 28px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--blanco)">Lista de la compra</span>
+      <div style="background:var(--carbon);border:1px solid var(--humo);width:100%;max-width:520px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;margin:10px">
+        <div style="padding:20px 20px 0;flex-shrink:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--blanco)">Lista de la compra</span>
+            </div>
+            <button style="background:none;border:none;color:var(--metal);font-size:20px;cursor:pointer;padding:4px 8px" onclick="this.closest('.modal-overlay').remove()">✕</button>
           </div>
-          <button style="background:none;border:none;color:var(--metal);font-size:22px;cursor:pointer" onclick="this.closest('.modal-overlay').remove()">✕</button>
+          <p style="font-size:12px;color:var(--metal-claro);margin-bottom:12px">${lista.length} ingredientes · Marca lo que ya tengas</p>
         </div>
-        <p style="font-size:13px;color:var(--metal-claro);margin-bottom:20px">${lista.length} ingredientes para toda la semana. Marca lo que ya tengas en casa.</p>
 
-        <div style="max-height:60vh;overflow-y:auto;padding-right:4px">
+        <div style="flex:1;overflow-y:auto;padding:0 20px;-webkit-overflow-scrolling:touch">
           ${htmlCats}
         </div>
 
-        <div style="display:flex;gap:10px;margin-top:20px;border-top:1px solid var(--humo);padding-top:16px">
-          <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="descargarListaCompra()">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <div style="padding:12px 20px;border-top:1px solid var(--humo);flex-shrink:0;display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="descargarListaCompra()">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Descargar
           </button>
-          <button class="btn-ghost" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px" onclick="copiarListaCompra()">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <button class="btn-ghost" style="flex:1;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="copiarListaCompra()">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copiar
           </button>
-          <button class="btn-ghost" style="flex:1" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
+          <button class="btn-ghost" style="flex:1;padding:10px;font-size:12px" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
         </div>
       </div>`;
     document.body.appendChild(modal);
