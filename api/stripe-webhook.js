@@ -102,9 +102,35 @@ module.exports = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
-        // Renovación automática: todas las suscripciones (incluida la oferta 0,99€)
-        // se renuevan automáticamente al precio del plan elegido.
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
+
+        // Oferta 0,99€: al terminar el primer mes, pasa automáticamente a 14,99€/mes
+        // (plan completo mensual). Si el cliente cambia de plan antes, el schedule se
+        // sobreescribe con el nuevo plan elegido.
+        if (session.metadata?.oferta === 'si') {
+          const completoMensualId = process.env.STRIPE_PRICE_COMPLETO_MENSUAL;
+          if (completoMensualId) {
+            try {
+              await stripe.subscriptionSchedules.create({
+                from_subscription: subscription.id,
+                phases: [
+                  {
+                    items: [{ price: subscription.items.data[0].price.id, quantity: 1 }],
+                    start_date: subscription.current_period_start,
+                    end_date: subscription.current_period_end,
+                  },
+                  {
+                    items: [{ price: completoMensualId, quantity: 1 }],
+                    iterations: null,
+                  }
+                ],
+              });
+            } catch (schedErr) {
+              console.error('[stripe-webhook] Error creando schedule oferta→completo:', schedErr.message);
+            }
+          }
+        }
+
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
         break;
       }
