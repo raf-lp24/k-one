@@ -4393,6 +4393,36 @@
   </div>
 </div>
 
+<!-- MODAL OPINIÓN PÚBLICA (landing) -->
+<div class="modal-overlay" id="modalOpinionPublica">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title" style="font-size:20px">Deja tu opinión</div>
+    <p class="modal-desc" style="margin-bottom:16px">Tu experiencia puede ayudar a otros a decidirse. Rellena lo que quieras y dale a enviar.</p>
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Nombre</label>
+        <input type="text" id="opPublicaNombre" placeholder="Tu nombre" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box">
+      </div>
+      <div style="width:80px">
+        <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Edad</label>
+        <input type="number" id="opPublicaEdad" placeholder="—" min="14" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
+      </div>
+    </div>
+    <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Valoración</label>
+    <div class="encuesta-stars" id="opPublicaStars" style="margin-top:4px">
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(1)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(2)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(3)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(4)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(5)">★</span>
+    </div>
+    <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu opinión</label>
+    <textarea class="encuesta-textarea" id="opPublicaTexto" placeholder="¿Qué te parece K-One? Cualquier cosa vale."></textarea>
+    <button class="btn-primary" style="width:100%" onclick="enviarOpinionPublica()">Enviar opinión →</button>
+    <button class="encuesta-skip" onclick="document.getElementById('modalOpinionPublica').classList.remove('visible')">Cancelar</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -4946,7 +4976,7 @@
       </div>
       <p class="testimonials-empty-title">Las primeras opiniones llegarán pronto</p>
       <p class="testimonials-empty-desc">Cuando nuestros clientes compartan su experiencia, aparecerán aquí. Opiniones reales, sin inventar.</p>
-      <button class="btn-primary" onclick="getCurrentUser() ? mostrarEncuestaOpinion() : goTo('bienvenida')" style="margin-top:20px;padding:12px 28px;font-size:13px" id="btnPrimeraOpinion">Sé el primero en probarlo →</button>
+      <button class="btn-primary" onclick="abrirOpinionPublica()" style="margin-top:20px;padding:12px 28px;font-size:13px">Dejar mi opinión →</button>
     </div>
   </section>
 
@@ -5993,8 +6023,6 @@
     const elM = document.getElementById('navEntrarMobile');
     if (el) el.textContent = label;
     if (elM) elM.textContent = label;
-    const btnOp = document.getElementById('btnPrimeraOpinion');
-    if (btnOp) btnOp.textContent = logueado ? 'Dejar mi opinión →' : 'Sé el primero en probarlo →';
   }
 
   function scrollToSection(id) {
@@ -11068,6 +11096,53 @@
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     if (_onEncuestaCerrada) _onEncuestaCerrada();
     _onEncuestaCerrada = null;
+  }
+
+  // ===== OPINIÓN PÚBLICA (desde la landing, sin login) =====
+  let _opPublicaEstrellas = 0;
+
+  function abrirOpinionPublica() {
+    _opPublicaEstrellas = 0;
+    document.getElementById('opPublicaNombre').value = '';
+    document.getElementById('opPublicaEdad').value = '';
+    document.getElementById('opPublicaTexto').value = '';
+    document.querySelectorAll('#opPublicaStars .encuesta-star').forEach(s => s.classList.remove('activa'));
+    document.getElementById('modalOpinionPublica').classList.add('visible');
+  }
+
+  function seleccionarEstrellaPublica(n) {
+    _opPublicaEstrellas = n;
+    document.querySelectorAll('#opPublicaStars .encuesta-star').forEach((s, i) => {
+      s.classList.toggle('activa', i < n);
+    });
+  }
+
+  async function enviarOpinionPublica() {
+    const nombre = (document.getElementById('opPublicaNombre').value || '').trim();
+    const edad = parseInt(document.getElementById('opPublicaEdad').value) || null;
+    const texto = (document.getElementById('opPublicaTexto').value || '').trim();
+    if (!nombre) { showToast('Pon tu nombre para enviar la opinión'); return; }
+    if (_opPublicaEstrellas === 0) { showToast('Selecciona una valoración con las estrellas'); return; }
+    const inicial = nombre.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    const nombrePublico = (() => {
+      const parts = nombre.trim().split(' ');
+      return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
+    })();
+    try {
+      await supa.from('testimonios').insert({
+        nombre: nombrePublico,
+        inicial,
+        edad,
+        plan: null,
+        estrellas: _opPublicaEstrellas,
+        texto: texto || null
+      });
+      showToast('Opinión enviada. Gracias por tu tiempo.');
+      document.getElementById('modalOpinionPublica').classList.remove('visible');
+      cargarTestimoniosLanding();
+    } catch (e) {
+      showToast('No se pudo enviar la opinión. Inténtalo de nuevo.', 4000);
+    }
   }
 
   // ===== TESTIMONIALES: CARGA DINÁMICA DESDE SUPABASE =====
