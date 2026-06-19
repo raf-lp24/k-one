@@ -4401,7 +4401,7 @@
   <nav class="landing-nav">
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
     <div class="nav-links">
-      <span class="nav-link" onclick="goTo('login')">Entrar</span>
+      <span class="nav-link" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
       <span class="nav-link" onclick="scrollToSection('sports')">Deportes</span>
       <span class="nav-link" onclick="scrollToSection('how')">Cómo funciona</span>
       <span class="nav-link" onclick="scrollToSection('faq')">FAQ</span>
@@ -4415,7 +4415,7 @@
   </nav>
 
   <div class="mobile-menu" id="mobileMenu">
-    <span class="nav-link" onclick="closeMobileMenu(); goTo('login')">Entrar</span>
+    <span class="nav-link" id="navEntrarMobile" onclick="closeMobileMenu(); entrarODashboard()">Entrar</span>
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
@@ -4946,7 +4946,7 @@
       </div>
       <p class="testimonials-empty-title">Las primeras opiniones llegarán pronto</p>
       <p class="testimonials-empty-desc">Cuando nuestros clientes compartan su experiencia, aparecerán aquí. Opiniones reales, sin inventar.</p>
-      <button class="btn-primary" onclick="goTo('bienvenida')" style="margin-top:20px;padding:12px 28px;font-size:13px">Sé el primero en probarlo →</button>
+      <button class="btn-primary" onclick="getCurrentUser() ? mostrarEncuestaOpinion() : goTo('bienvenida')" style="margin-top:20px;padding:12px 28px;font-size:13px" id="btnPrimeraOpinion">Sé el primero en probarlo →</button>
     </div>
   </section>
 
@@ -5516,13 +5516,12 @@
 <div class="screen" id="dashboard">
   <div class="dash-layout">
     <div class="dash-mobile-bar">
-      <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
+      <div class="logo" onclick="showSection('hoy')" style="cursor:pointer">K-<span>ONE</span></div>
       <button class="dash-menu-btn" onclick="toggleDashMenu()" aria-label="Abrir menú">☰</button>
     </div>
     <div class="dash-overlay" id="dashOverlay" onclick="closeDashMenu()"></div>
     <aside class="dash-sidebar">
-      <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
-      <div class="back-to-landing" onclick="goTo('landing')">← Volver al inicio</div>
+      <div class="logo" onclick="showSection('hoy')" style="cursor:pointer">K-<span>ONE</span></div>
       <div class="dash-user">
         <div class="user-avatar" id="userAvatar" onclick="document.getElementById('fotoPerfilInput').click()" title="Cambiar foto de perfil">
           <span id="userAvatarLetter">A</span>
@@ -5964,6 +5963,28 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
+  }
+
+  function entrarODashboard() {
+    const user = getCurrentUser();
+    if (user && getUserData(user.email)?.plan) {
+      loadUserDashboard(user.email);
+      goTo('dashboard');
+    } else {
+      goTo('login');
+    }
+  }
+
+  function actualizarNavSesion() {
+    const user = getCurrentUser();
+    const logueado = !!(user && getUserData(user.email)?.plan);
+    const label = logueado ? 'Mi plan' : 'Entrar';
+    const el = document.getElementById('navEntrar');
+    const elM = document.getElementById('navEntrarMobile');
+    if (el) el.textContent = label;
+    if (elM) elM.textContent = label;
+    const btnOp = document.getElementById('btnPrimeraOpinion');
+    if (btnOp) btnOp.textContent = logueado ? 'Dejar mi opinión →' : 'Sé el primero en probarlo →';
   }
 
   function scrollToSection(id) {
@@ -10214,6 +10235,7 @@
     await supa.auth.signOut();
     _supaUserId = null;
     clearCurrentUser();
+    actualizarNavSesion();
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('visible'));
     document.body.style.overflow = '';
     showToast('Sesión cerrada. Hasta pronto.');
@@ -11804,6 +11826,7 @@
     }
 
     const user = getCurrentUser();
+    actualizarNavSesion();
     if (user) {
       const saved = getUserData(user.email);
       if (saved && saved.plan) {
