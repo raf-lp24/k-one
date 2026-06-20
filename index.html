@@ -5891,18 +5891,20 @@
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> Contacto
         </div>
       </nav>
-      <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa)">
-        <span>⬡</span> Panel de admin
-      </button>
-      <button class="logout-btn" onclick="gestionarSuscripcion()">
-        <span>⬡</span> Gestionar suscripción
-      </button>
-      <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px">
-        <span>⬡</span> Cancelar suscripción
-      </button>
-      <button class="logout-btn" onclick="logout()">
-        <span>⬡</span> Cerrar sesión
-      </button>
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--humo);display:flex;flex-direction:column;gap:4px">
+        <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+          <span>⬡</span> Panel de admin
+        </button>
+        <button class="logout-btn" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+          <span>⬡</span> Gestionar suscripción
+        </button>
+        <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
+          <span>⬡</span> Cancelar suscripción
+        </button>
+        <button class="logout-btn" onclick="logout()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+          <span>⬡</span> Cerrar sesión
+        </button>
+      </div>
     </aside>
 
     <main class="dash-main">
