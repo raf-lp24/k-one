@@ -51,112 +51,112 @@ module.exports = async (req, res) => {
         `
       }));
 
-      // 2) Email de bienvenida al lead con ejemplo real del plan
+      // 2) Email al lead con preview del área de clientes
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
-        subject: 'Así es un día dentro de K-ONE — mira tu plan',
+        subject: 'Esto es lo que tendrías dentro de K-ONE',
         html: `
-          <div style="background:#0b0b0b;padding:40px 20px;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
+          <div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
             <div style="max-width:560px;margin:0 auto">
 
-              <div style="text-align:center;margin-bottom:32px">
-                <span style="font-size:28px;font-weight:800;letter-spacing:2px;color:#fff">K-<span style="color:#E8490F">ONE</span></span>
+              <!-- Header -->
+              <div style="background:#E8490F;padding:28px 24px;text-align:center">
+                <div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:5px;letter-spacing:1px">TU PREPARADOR DE ÉLITE, 24/7</div>
               </div>
 
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin-bottom:8px;text-align:center">
-                Esto es lo que recibirías hoy
-              </h1>
-              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;text-align:center;margin-bottom:28px">
-                Un ejemplo real de un día dentro de K-ONE. Tu plan se adapta a tu deporte, nivel, objetivo y lesiones — esto es solo una muestra.
-              </p>
-
-              <!-- ENTRENAMIENTO -->
-              <div style="background:#141414;padding:24px;margin-bottom:4px">
-                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// Entrenamiento de hoy</p>
-                <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#fff">Lunes — Tren superior (Fuerza)</p>
-
-                <table style="width:100%;border-collapse:collapse;font-size:13px">
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Press banca</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">4×8</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Remo con mancuerna</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">4×10</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Press militar</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×10</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Jalón al pecho</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×12</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Curl bíceps + tríceps polea</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×12</td>
-                  </tr>
-                  <tr>
-                    <td style="padding:8px 0;color:#fff;font-weight:600">Elevaciones laterales</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">3×15</td>
-                  </tr>
-                </table>
-                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Descanso entre series: 60-90s. Peso que cueste las 2 últimas reps.</p>
+              <!-- Intro -->
+              <div style="padding:30px 28px 0">
+                <h1 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 8px">Esto es lo que tendrías hoy</h1>
+                <p style="color:#888;font-size:13px;line-height:1.6;margin:0 0 24px">No es una plantilla genérica. Tu plan se genera con tu peso, altura, deporte, objetivo y lesiones. Se recalcula cada semana según tu progreso.</p>
               </div>
 
-              <!-- NUTRICIÓN -->
-              <div style="background:#141414;padding:24px;margin-bottom:4px">
-                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// Nutrición — Comida (ejemplo)</p>
-                <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#fff">Pollo a la plancha con arroz y verduras</p>
-                <p style="margin:0 0 12px;font-size:12px;color:#b5b2ad">180g pechuga de pollo, 150g arroz integral, 200g brócoli al vapor, 1 cda AOVE</p>
-                <div style="display:flex;gap:12px;flex-wrap:wrap">
-                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">520 kcal</span>
-                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">42g prot</span>
-                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">48g carbs</span>
-                  <span style="background:#1a1a1a;padding:4px 10px;font-size:11px;color:#b5b2ad;font-family:monospace">14g grasa</span>
+              <!-- Mini preview entrenamiento -->
+              <div style="padding:0 28px">
+                <div style="background:#141414;padding:18px;margin-bottom:3px">
+                  <div style="font-size:10px;letter-spacing:2px;color:#E8490F;font-family:monospace;margin-bottom:8px">ENTRENAMIENTO DE HOY</div>
+                  <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:10px">Lunes — Tren superior</div>
+                  <table style="width:100%;border-collapse:collapse;font-size:12px">
+                    <tr style="border-bottom:1px solid #1a1a1a"><td style="padding:5px 0;color:#ccc">Press banca</td><td style="color:#888;text-align:right;padding:5px 0">4×8</td></tr>
+                    <tr style="border-bottom:1px solid #1a1a1a"><td style="padding:5px 0;color:#ccc">Remo con mancuerna</td><td style="color:#888;text-align:right;padding:5px 0">4×10</td></tr>
+                    <tr style="border-bottom:1px solid #1a1a1a"><td style="padding:5px 0;color:#ccc">Press militar</td><td style="color:#888;text-align:right;padding:5px 0">3×10</td></tr>
+                    <tr><td style="padding:5px 0;color:#666;font-style:italic" colspan="2">+ 3 ejercicios más...</td></tr>
+                  </table>
                 </div>
-                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Esta es 1 de las 5 opciones que tendrías para esta toma. Cada comida tiene 5 alternativas.</p>
+
+                <!-- Mini preview nutrición -->
+                <div style="background:#141414;padding:18px;margin-bottom:3px">
+                  <div style="font-size:10px;letter-spacing:2px;color:#E8490F;font-family:monospace;margin-bottom:8px">COMIDA DEL DÍA (1 de 5 opciones)</div>
+                  <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Pollo con arroz y brócoli</div>
+                  <div style="font-size:11px;color:#888;margin-bottom:8px">180g pollo, 150g arroz integral, 200g brócoli, AOVE</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <span style="background:#1a1a1a;padding:3px 8px;font-size:10px;color:#E8490F;font-family:monospace;font-weight:600">520 kcal</span>
+                    <span style="background:#1a1a1a;padding:3px 8px;font-size:10px;color:#888;font-family:monospace">42g prot</span>
+                    <span style="background:#1a1a1a;padding:3px 8px;font-size:10px;color:#888;font-family:monospace">48g carbs</span>
+                    <span style="background:#1a1a1a;padding:3px 8px;font-size:10px;color:#888;font-family:monospace">14g grasa</span>
+                  </div>
+                </div>
               </div>
 
-              <!-- OTRAS COMIDAS -->
-              <div style="background:#141414;padding:24px;margin-bottom:4px">
-                <p style="margin:0 0 2px;font-size:10px;letter-spacing:2px;color:#E8490F;text-transform:uppercase;font-family:monospace">// El resto de tu día</p>
-                <table style="width:100%;border-collapse:collapse;font-size:13px">
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff">Desayuno</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Tortilla de claras con avena y fruta</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff">Media mañana</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Yogur griego con nueces</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #222">
-                    <td style="padding:8px 0;color:#fff">Merienda</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Tostada de pavo con aguacate</td>
+              <!-- Qué incluye el área de clientes -->
+              <div style="padding:24px 28px 0">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:2px;font-weight:700;margin-bottom:14px">TU ÁREA DE CLIENTE INCLUYE</div>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <td style="padding:12px;background:#141414;border-bottom:1px solid #1a1a1a;width:50%;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">🏋️</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Plan de entrenamiento</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">Gimnasio, running, CrossFit, Hyrox o combinación. Con series, reps y descansos.</div>
+                    </td>
+                    <td style="padding:12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">🥗</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Plan semanal de nutrición</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">5 comidas al día, 5 opciones cada una. Eliges por día de la semana.</div>
+                    </td>
                   </tr>
                   <tr>
-                    <td style="padding:8px 0;color:#fff">Cena</td>
-                    <td style="padding:8px 0;color:#b5b2ad;text-align:right">Salmón al horno con patata y ensalada</td>
+                    <td style="padding:12px;background:#141414;border-bottom:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">🛒</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Lista de la compra</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">Todo lo de la semana sumado por categorías. Descárgala o cópiala.</div>
+                    </td>
+                    <td style="padding:12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">📊</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Check-in semanal</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">Cuentas cómo te fue y el plan se ajusta: sube o baja según tu progreso.</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px;background:#141414;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">📈</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Progreso y racha</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">Pesos, fotos mensuales, hitos y racha de días entrenados.</div>
+                    </td>
+                    <td style="padding:12px;background:#141414;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:16px;margin-bottom:3px">💬</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Contacto directo</div>
+                      <div style="font-size:10px;color:#666;line-height:1.4">Escríbenos desde tu panel. Sugerencias, dudas, lo que sea.</div>
+                    </td>
                   </tr>
                 </table>
-                <p style="margin:12px 0 0;font-size:11px;color:#666;font-style:italic">Calorías y gramos ajustados a tu peso, altura, edad y objetivo. Nada inventado.</p>
               </div>
 
               <!-- CTA -->
-              <div style="background:#141414;padding:28px 24px;margin-bottom:24px;text-align:center">
-                <p style="margin:0 0 6px;font-size:18px;font-weight:700;color:#fff">Tu primer mes por 0,99€</p>
-                <p style="margin:0 0 16px;font-size:13px;color:#b5b2ad">Sin compromiso. Cancelas cuando quieras con un clic.</p>
-                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:14px 36px;font-size:15px;font-weight:700;letter-spacing:0.5px">QUIERO MI PLAN →</a>
+              <div style="padding:28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:16px 48px;font-size:16px;font-weight:700;letter-spacing:0.5px;border-radius:6px">EMPEZAR POR 0,99€ →</a>
+                <p style="color:#555;font-size:12px;margin:10px 0 0">Primer mes completo. Después 14,99€/mes. Cancelas cuando quieras.</p>
               </div>
 
-              <p style="color:#666;font-size:11px;text-align:center;line-height:1.6;border-top:1px solid #222;padding-top:20px">
-                Recibes este email porque dejaste tu dirección en nuestra web.<br>
-                Si no fuiste tú, ignora este mensaje.<br><br>
-                K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
-                <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F">k.one.fit26@gmail.com</a>
-              </p>
+              <!-- Footer -->
+              <div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center">
+                <p style="color:#444;font-size:10px;line-height:1.6;margin:0">
+                  Recibes este email porque dejaste tu dirección en k-one.fit<br>
+                  K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
+                  <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a>
+                </p>
+              </div>
 
             </div>
           </div>
