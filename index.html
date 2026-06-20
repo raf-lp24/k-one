@@ -6168,10 +6168,16 @@
           <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
             <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
           </div>
-          <button class="btn-recetario" onclick="abrirRecetario()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
-            Ver recetario completo
-          </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-recetario" onclick="abrirRecetario()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
+              Ver recetario completo
+            </button>
+            <button class="btn-recetario" onclick="descargarPlanPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar plan semanal
+            </button>
+          </div>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
@@ -10398,6 +10404,86 @@
         return `☐ ${nombre.charAt(0).toUpperCase() + nombre.slice(1)} — ${cant}`;
       }).join('\n');
     navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles'));
+  }
+
+  function descargarPlanPDF() {
+    if (!generatedPlan) { showToast('No hay plan generado'); return; }
+    const user = getCurrentUser();
+    const nombre = user?.nombre || 'Cliente';
+    const semana = userData.progreso?.semana || 1;
+    const dias = DIAS_SEMANA;
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
+
+    let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Plan Semanal K-ONE</title>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:Arial,sans-serif;background:#fff;color:#222;padding:24px;max-width:800px;margin:0 auto}
+      h1{font-size:22px;font-weight:800;margin-bottom:2px}
+      h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#E8490F;border-bottom:2px solid #E8490F;padding-bottom:4px}
+      h3{font-size:13px;font-weight:700;margin:12px 0 4px;color:#333}
+      .header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #E8490F;padding-bottom:12px;margin-bottom:16px}
+      .logo{font-size:24px;font-weight:900;letter-spacing:2px}
+      .logo span{color:#E8490F}
+      .meta{font-size:11px;color:#888;text-align:right}
+      .day{margin-bottom:16px;page-break-inside:avoid}
+      .exercise{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid #eee}
+      .meal{margin-bottom:8px}
+      .meal-name{font-size:12px;font-weight:600}
+      .meal-ing{font-size:11px;color:#666}
+      .meal-macros{font-size:10px;color:#E8490F;margin-top:2px}
+      .section{margin-bottom:24px}
+      .nutri-day{margin-bottom:12px;padding:8px;background:#f9f9f9;border-radius:6px}
+      .nutri-day-title{font-size:12px;font-weight:700;color:#E8490F;margin-bottom:6px}
+      @media print{body{padding:12px}h2{font-size:14px}.exercise,.meal-name{font-size:11px}}
+    </style></head><body>`;
+
+    html += `<div class="header"><div><div class="logo">K-<span>ONE</span></div><h1>${nombre}</h1></div>
+      <div class="meta">Semana ${semana}<br>${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}<br>k-one.fit</div></div>`;
+
+    if (generatedPlan.semana && generatedPlan.semana.length && !generatedPlan.soloDieta) {
+      html += `<div class="section"><h2>Entrenamiento</h2>`;
+      generatedPlan.semana.forEach(dia => {
+        html += `<div class="day"><h3>${dia.dia} — ${dia.split || 'Descanso'}</h3>`;
+        if (dia.ejercicios && dia.ejercicios.length) {
+          dia.ejercicios.forEach(ej => {
+            html += `<div class="exercise"><span>${ej.nombre || ej}</span><span style="color:#888">${ej.series || ''}</span></div>`;
+          });
+        } else if (dia.detalle) {
+          html += `<div style="font-size:11px;color:#666;padding:3px 0">${dia.detalle}</div>`;
+        }
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `<div class="section"><h2>Nutrición semanal</h2>`;
+    if (generatedPlan.kcalObj) {
+      html += `<p style="font-size:11px;color:#666;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal · ${generatedPlan.protObj}g proteína</p>`;
+    }
+    dias.forEach((dia, diaIdx) => {
+      html += `<div class="nutri-day"><div class="nutri-day-title">${dia}</div>`;
+      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+        const optIdx = comidasSemana[diaIdx]?.[mealIdx] || 0;
+        const opt = meal.opciones[optIdx];
+        if (!opt) return;
+        html += `<div class="meal"><span class="meal-name">${meal.momento}: ${opt.nombre}</span>
+          <div class="meal-ing">${opt.ingredientes}</div>
+          <div class="meal-macros">${opt.kcal} · ${opt.prot} · ${opt.carbs} · ${opt.grasa}</div></div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+
+    html += `<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #ddd">
+      <p style="font-size:10px;color:#888">Generado en k-one.fit · K-ONE · R. López Pinto</p></div>`;
+    html += `</body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 500);
+    showToast('PDF listo — usa "Guardar como PDF" en el diálogo de impresión');
   }
 
   function descargarListaCompra() {
