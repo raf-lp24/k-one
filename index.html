@@ -10377,9 +10377,13 @@
         });
       }
     }
-    // Verificar admin ANTES de devolver el control: el acceso del admin (sin paywall)
-    // depende de _adminVerificado, así que hay que esperar a que se resuelva para que
-    // comprobarPaywall() no muestre el paywall por una carrera de tiempos.
+    // Si profiles.nombre está vacío, rellenarlo desde user_metadata
+    const nombreFinal = profile?.nombre || authUser.user_metadata?.nombre || '';
+    if (nombreFinal && (!profile?.nombre || profile.nombre === '')) {
+      supa.from('profiles').update({ nombre: nombreFinal }).eq('id', authUser.id);
+    }
+
+    // Verificar admin ANTES de devolver el control
     await verificarAdminSilencioso();
   }
 
