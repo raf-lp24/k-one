@@ -21,7 +21,7 @@
 - **Cobertura de 4 deportes + nutrición en un solo producto**: nadie lo hace bien hoy (Runna = solo running; RoxFit/CompTrain = solo Hyrox/CrossFit sin nutrición; Centr/Sweat = multideporte pero contenido pre-grabado, no generado).
 - **Sistema de sustitución de ingredientes**: es, con diferencia, la parte más elaborada del prototipo actual y un hueco real de mercado — ningún competidor analizado lo ofrece de forma robusta.
 - **Onboarding profundo (~30 preguntas)** como base teórica de personalización, frente a programas predefinidos de la competencia.
-- **Pricing de entrada agresivo (0,99€ primer mes)**: estrategia de conversión no replicada por ningún competidor directo (la mayoría usa trials gratuitos de 7-14 días).
+- **Pricing de entrada agresivo (1,99€ primer mes)**: estrategia de conversión no replicada por ningún competidor directo (la mayoría usa trials gratuitos de 7-14 días).
 - **Mercado hispanohablante todo-en-uno desatendido**: las alternativas en español son coaches humanos caros (25-340€/mes) o apps de nutrición pura (Fitia).
 
 ### Debilidades (del prototipo actual)
@@ -49,17 +49,17 @@
 - **Progresión real semana a semana** como eje de retención (justifica la suscripción mensual frente a apps con contenido estático).
 
 ### Amenazas
-- **Cora (corahealth.app)** es el competidor conceptualmente más parecido y **más barato** ($9,99/mes vs 14,99€/mes), ya con programación específica de Hyrox. Su debilidad (depende de wearables) es la oportunidad de Fragua, pero hay que vigilarlo de cerca.
+- **Cora (corahealth.app)** es el competidor conceptualmente más parecido y **más barato** ($9,99/mes vs 19,99€/mes), ya con programación específica de Hyrox. Su debilidad (depende de wearables) es la oportunidad de Fragua, pero hay que vigilarlo de cerca.
 - **Gigantes añadiendo IA a bases de usuarios masivas a coste marginal cero**: MyFitnessPal Premium+, Strava AI Coach, Whoop Coach. Si alguno ofrece "plan completo + nutrición + sustitución" dentro de su suscripción ya pagada, compiten desde una posición de distribución que Fragua no tiene.
 - **Freeletics y Centr** ya tienen bundle entreno+nutrición a precio similar o menor (7-12,50€/mes en planes largos), con marcas reconocidas.
-- **Riesgo de churn alto por el pricing de entrada**: 0,99€ el primer mes puede atraer usuarios de bajo compromiso que cancelen antes del segundo mes — especialmente si el "ajuste semanal" prometido no se nota porque (en el estado actual) no existe.
+- **Riesgo de churn alto por el pricing de entrada**: 1,99€ el primer mes puede atraer usuarios de bajo compromiso que cancelen antes del segundo mes — especialmente si el "ajuste semanal" prometido no se nota porque (en el estado actual) no existe.
 - **Pricing opaco de varios competidores directos al nicho Hyrox/multideporte** (ChAIron, RoxFit) — riesgo de que ya estén lanzando algo similar sin que se haya detectado en esta investigación.
 
 ---
 
 ## 3. Panorama competitivo (resumen)
 
-| Categoría | Competidores clave | Precio aprox. vs 14,99€/mes Fragua | Qué les falta frente a Fragua |
+| Categoría | Competidores clave | Precio aprox. vs 19,99€/mes Fragua | Qué les falta frente a Fragua |
 |---|---|---|---|
 | Entrenamiento IA (gym) | Fitbod, FitnessAI, BodBot | Similar o menor | Sin nutrición real, sin Hyrox/CrossFit/Running integrados |
 | Entreno + nutrición (contenido) | Freeletics, Centr, Sweat | Menor o similar | Contenido pre-programado, no generado dinámicamente; sin sustitución de ingredientes |
@@ -78,7 +78,7 @@
 2. **Convertir el onboarding de salud en personalización real**, no solo en un formulario largo. "Tu plan evita sentadilla profunda porque nos dijiste que tienes molestias de rodilla" es un mensaje que ningún competidor genérico puede dar.
 3. **Pulir y promocionar la sustitución de ingredientes con macros recalculados de verdad.** Es ya el módulo más fuerte del prototipo; con el recálculo de macros corregido, es un diferenciador defendible.
 4. **Especializar de verdad CrossFit y Hyrox** (WODs, AMRAPs, EMOMs, ejercicios específicos como wall balls/burpees/ski erg en la base de variantes) — actualmente se diluyen en plantillas de gimnasio/running, justo el hueco que Cora/RoxFit están intentando ocupar.
-5. **Mantener el pricing de entrada (0,99€) pero vigilar retención** del segundo mes — si la adaptación real no está lista, considerar retrasar esta promo hasta que el ciclo de feedback funcione, para no quemar la primera impresión con los usuarios más sensibles al precio.
+5. **Mantener el pricing de entrada (1,99€) pero vigilar retención** del segundo mes — si la adaptación real no está lista, considerar retrasar esta promo hasta que el ciclo de feedback funcione, para no quemar la primera impresión con los usuarios más sensibles al precio.
 6. **Doblar la apuesta por el tono de marca** ("disciplina silenciosa") en todos los textos generados (planes, mensajes motivacionales, check-ins) — es el diferenciador más fácil de defender porque no depende de tecnología, solo de consistencia editorial.
 
 ---
@@ -131,4 +131,4 @@
 
 - **Idea**: viable, con diferenciación real y hueco de mercado verificado (especialmente frente a Cora, Centr, Freeletics y Runna).
 - **Producto actual**: prototipo de alta fidelidad visual pero funcionalmente una maqueta — **no apto para cobrar** sin resolver los 6 puntos bloqueantes.
-- **Mayor riesgo a corto plazo**: no es la competencia, es la **disonancia entre lo que la marca promete** ("tu plan se adapta cada semana", "personalización basada en tu salud") **y lo que el código hace hoy**. Cerrar esa brecha es el camino crítico antes de cualquier lanzamiento, campaña de pricing agresivo (0,99€) o inversión en adquisición.
+- **Mayor riesgo a corto plazo**: no es la competencia, es la **disonancia entre lo que la marca promete** ("tu plan se adapta cada semana", "personalización basada en tu salud") **y lo que el código hace hoy**. Cerrar esa brecha es el camino crítico antes de cualquier lanzamiento, campaña de pricing agresivo (1,99€) o inversión en adquisición.

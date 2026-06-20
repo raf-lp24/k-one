@@ -167,10 +167,10 @@ Revisión hecha navegando como visitante y como cliente (`test@fragua.es`). Arre
 - Verificado en preview con "Miel" → motivo "Alergia": el modal muestra solo el recuadro centrado "CONSULTAR CON PROFESIONAL" (captura confirmada). Al confirmar, `confirmSubstitution()` sigue mostrando el toast explicativo y no aplica ningún cambio (comportamiento ya cubierto en la sección 16).
 
 ### 18. Estudio de mercado de precios
-- Se hizo un estudio comparando Fragua con apps de IA de un solo propósito (Fitbod ~12-15€/mes, Freeletics ~14€/mes, MyFitnessPal Premium ~8€/mes, Yazio, Fitia) y con coaching humano online en España (35-340€/mes). Conclusión: Fragua (entreno + nutrición + adaptación semanal automática) tiene margen para subir de 14,99€/mes (ej. 17,99€/mes) y el descuento anual podría acercarse más al estándar del sector (40-50% en vez del 22% actual).
-- Se probó a subir a 17,99€/mes (anual 119,99€) pero **se decidió mantener los precios originales (14,99€/mes mensual, 139,99€/año anual, 0,99€ primer mes, 4,99€/mes solo nutrición)** para el lanzamiento/fase de testeo. La subida queda como recomendación para más adelante, cuando haya tracción.
+- Se hizo un estudio comparando Fragua con apps de IA de un solo propósito (Fitbod ~12-15€/mes, Freeletics ~14€/mes, MyFitnessPal Premium ~8€/mes, Yazio, Fitia) y con coaching humano online en España (35-340€/mes). Conclusión: Fragua (entreno + nutrición + adaptación semanal automática) tiene margen para subir de 19,99€/mes (ej. 17,99€/mes) y el descuento anual podría acercarse más al estándar del sector (40-50% en vez del 22% actual).
+- Se probó a subir a 17,99€/mes (anual 119,99€) pero **se decidió mantener los precios originales (19,99€/mes mensual, 139,99€/año anual, 1,99€ primer mes, 4,99€/mes solo nutrición)** para el lanzamiento/fase de testeo. La subida queda como recomendación para más adelante, cuando haya tracción.
 - Quitado "Desde 4,99€/mes." de la tarjeta "Solo nutrición" en la sección "Tu deporte, tu plan" (quedaba suelto/feo); el precio sigue visible en la sección "Precios".
-- **Rediseño del precio del hero**: el texto plano "Primer mes 0,99€ · Después 14,99€/mes" (monospace pequeño, poco visible) se sustituye por una tarjeta (`.hero-price`) con fondo y borde en tono brasa, mostrando solo "PRIMER MES" + "0,99€" en grande y naranja (estilo Bebas Neue, 42px). Se quitó la parte "Después 14,99€/mes" por decisión del cliente (quedaba feo/poco legible). Verificado en preview a 1280px y 390px.
+- **Rediseño del precio del hero**: el texto plano "Primer mes 1,99€ · Después 19,99€/mes" (monospace pequeño, poco visible) se sustituye por una tarjeta (`.hero-price`) con fondo y borde en tono brasa, mostrando solo "PRIMER MES" + "1,99€" en grande y naranja (estilo Bebas Neue, 42px). Se quitó la parte "Después 19,99€/mes" por decisión del cliente (quedaba feo/poco legible). Verificado en preview a 1280px y 390px.
 
 ### 20. Renombrado del proyecto: Fragua → K-One Step → K-One
 - Cambiado el nombre de marca en todo el contenido visible: `<title>`, logo (en landing, sidebar del dashboard, formulario, login/registro y pantalla de carga), manifiesto, filosofía, footer, etiqueta de la IA, mensajes de toast (creación de cuenta y confirmación de pago) y el texto del paywall.
@@ -182,11 +182,11 @@ Revisión hecha navegando como visitante y como cliente (`test@fragua.es`). Arre
 - Verificado en preview: logo "K-<span style='color:var(--brasa)'>ONE</span>" correcto en sidebar y header de landing; sección "Precios" con los 4 botones "EMPEZAR" en naranja (captura confirmada). Sesión de test restaurada al finalizar.
 
 ### 19. Bloqueo tras el mes de prueba (paywall)
-- Objetivo: evitar que un usuario se dé de baja y se vuelva a registrar con el mismo correo solo para aprovechar repetidamente el mes de prueba a 0,99€. El registro ya impedía crear una cuenta con un email ya existente (`users[email]`, mensaje "Este email ya está registrado"), así que el foco ha sido bloquear el acceso una vez pasado el mes de prueba si no se ha confirmado el pago.
+- Objetivo: evitar que un usuario se dé de baja y se vuelva a registrar con el mismo correo solo para aprovechar repetidamente el mes de prueba a 1,99€. El registro ya impedía crear una cuenta con un email ya existente (`users[email]`, mensaje "Este email ya está registrado"), así que el foco ha sido bloquear el acceso una vez pasado el mes de prueba si no se ha confirmado el pago.
 - **Nuevos campos en `fragua_users`**: al registrarse, cada usuario guarda `creado` (fecha ISO, ya existía) y ahora también `suscripcionActiva: false`. Al "pagar" se añade `fechaPago` y `suscripcionActiva` pasa a `true`.
 - **`tieneAccesoActivo(email)`**: devuelve `true` si `suscripcionActiva` es `true`, o si la cuenta no tiene `creado` (cuentas antiguas, no se bloquean), o si han pasado 30 días o menos desde `creado` (`DIAS_PRUEBA = 30`). En caso contrario, `false`.
 - **`comprobarPaywall(email)`**: muestra/oculta el modal `#modalPaywall` según `tieneAccesoActivo(email)`. Se llama desde `loadUserDashboard(email)`, por lo que se evalúa cada vez que se entra al área personal (login, recarga con sesión activa, tras registro con plan ya generado).
-- **Modal `#modalPaywall`**: overlay a pantalla completa, sin botón de cerrar (no se puede descartar). Muestra "Tu mes de prueba ha terminado", el precio actual (14,99€/mes) y un botón "Continuar con Fragua →" que llama a `confirmarPagoSuscripcion()` (marca `suscripcionActiva: true` y `fechaPago`, simulando el cobro; en producción aquí iría la pasarela de pago real). También incluye un enlace "Cerrar sesión".
+- **Modal `#modalPaywall`**: overlay a pantalla completa, sin botón de cerrar (no se puede descartar). Muestra "Tu mes de prueba ha terminado", el precio actual (19,99€/mes) y un botón "Continuar con Fragua →" que llama a `confirmarPagoSuscripcion()` (marca `suscripcionActiva: true` y `fechaPago`, simulando el cobro; en producción aquí iría la pasarela de pago real). También incluye un enlace "Cerrar sesión".
 - **Cuenta de test**: `test@fragua.es` se crea/actualiza en `window.onload` con `suscripcionActiva: true`, para que nunca quede bloqueada durante las pruebas.
 - Verificado en preview: se creó una cuenta de prueba con `creado` hace 40 días y `suscripcionActiva: false` → al cargar el dashboard aparece el paywall a pantalla completa (captura confirmada). Al pulsar "Continuar con Fragua", el modal se oculta y `suscripcionActiva` pasa a `true` (ya no vuelve a aparecer). Cuenta de prueba eliminada y sesión de test restaurada al finalizar.
 
@@ -246,7 +246,7 @@ Verificado en preview: meta tags, favicon, sección de testimonios (3 tarjetas) 
 
 ### 23. Mejoras de accesibilidad y conversión (siguiente lote del análisis)
 - Los 5 emojis decorativos de `.sport-icon` (🏋️ 🏃 ⚡ 🔥 🥗) ahora llevan `aria-hidden="true"`, ya que su significado ya está en `.sport-name`.
-- Tarjeta de precio destacada (`.price-card.featured`, "Mensual 14,99€") ahora muestra un badge "MÁS POPULAR" (`.price-badge`, fondo `--brasa`, posicionado sobre el borde superior) para guiar la elección del usuario.
+- Tarjeta de precio destacada (`.price-card.featured`, "Mensual 19,99€") ahora muestra un badge "MÁS POPULAR" (`.price-badge`, fondo `--brasa`, posicionado sobre el borde superior) para guiar la elección del usuario.
 
 Verificado en preview: badge visible y bien posicionado sobre la tarjeta "Mensual", sin errores en consola.
 
@@ -275,7 +275,7 @@ Verificado en preview (desktop y móvil): iconos y barbell se renderizan correct
 Verificado en preview (375x812): el menú se abre con todas las secciones, "Volver al inicio" y "Cerrar sesión"; al elegir una sección se cierra y se muestra el contenido correctamente. Desktop sin cambios visuales.
 
 ### 27. Menú hamburguesa en la landing (móvil)
-Resuelve el pendiente detectado en el punto 25: en `max-width: 768px`, los 6 enlaces de `.nav-links` (Cómo funciona, Deportes, Opiniones, Precios, Entrar, "Empieza por 0,99€") no cabían en una fila, se envolvían en varias líneas y, al ser `.landing-nav` `position: fixed`, ese bloque tapaba el `hero-eyebrow` y el inicio del `hero-title`.
+Resuelve el pendiente detectado en el punto 25: en `max-width: 768px`, los 6 enlaces de `.nav-links` (Cómo funciona, Deportes, Opiniones, Precios, Entrar, "Empieza por 1,99€") no cabían en una fila, se envolvían en varias líneas y, al ser `.landing-nav` `position: fixed`, ese bloque tapaba el `hero-eyebrow` y el inicio del `hero-title`.
 
 **Solución**:
 - En la media query `max-width: 768px` se oculta `.nav-links` (`display: none`) y se muestra `.nav-toggle` (botón hamburguesa de 3 líneas, oculto por defecto en desktop).
@@ -290,7 +290,7 @@ Verificado en preview (375x812): con `.nav-links` oculto, la nav vuelve a ocupar
 Sin colisiones con el menú del dashboard (punto 26): nombres de clases (`.nav-toggle`/`.mobile-menu` vs `.dash-overlay`/`.dash-menu-btn`), funciones JS (`toggleMobileMenu`/`closeMobileMenu` vs `toggleDashMenu`/`closeDashMenu`) y z-index (`.nav-toggle`: 101, `.mobile-menu`: 99, `.dash-overlay`: 150) son todos independientes.
 
 ### 28. "Entrar" como primera opción del menú móvil
-A petición del usuario, en `#mobileMenu` el enlace "Entrar" pasa a ser el primero de la lista (antes era el penúltimo, justo antes del botón "Empieza por 0,99€").
+A petición del usuario, en `#mobileMenu` el enlace "Entrar" pasa a ser el primero de la lista (antes era el penúltimo, justo antes del botón "Empieza por 1,99€").
 
 ### 29. Texto descriptivo más legible (toda la web, móvil y escritorio)
 El usuario reportó que los párrafos descriptivos de las tarjetas (p. ej. las descripciones de cada deporte en "Tu deporte, tu plan") apenas se veían: texto pequeño (12-13px), `font-weight: 300` y color `var(--metal)` (#8A8A8A), poco contraste sobre fondos oscuros.
@@ -421,23 +421,23 @@ El usuario pidió que un cliente pueda, cuando termine el mes o cuando quiera, c
 Verificado en preview con la cuenta de test: cambiando de "Ganar músculo"/Gimnasio/3 días/60-90min a "Mejorar resistencia"/Running/4 días/45-60min/Al aire libre, "Hoy" pasa a mostrar "MEJORAR RESISTENCIA", "RUNNING", semana 1/0 días, y el entrenamiento de hoy cambia a "Rodaje suave" (cardio). "Plan semanal" (Semana 1, Lunes) muestra el mismo "Rodaje suave" con bloque de acondicionamiento. "Nutrición" muestra "Enfoque nutricional: Equilibrado" con macros recalculados. Sin errores en consola. Tras la prueba se restauró la cuenta de test a sus valores originales (Ganar músculo / Gimnasio / Fuerza).
 
 ### 41. Regla de precios al cambiar de plan (Plan completo ↔ Solo nutrición)
-El usuario aclaró la regla de precios que debe regir tanto el cuestionario inicial como el cambio de plan (punto 40): durante el **primer mes desde el registro** (`DIAS_PRUEBA = 30`, ya existente), el coste es **0,99€ sea cual sea el plan elegido**; pasado ese primer mes, el "Plan completo" cuesta **14,99€/mes** (o 119,99€/año con el anual) y "Solo nutrición" cuesta **4,99€/mes**.
+El usuario aclaró la regla de precios que debe regir tanto el cuestionario inicial como el cambio de plan (punto 40): durante el **primer mes desde el registro** (`DIAS_PRUEBA = 30`, ya existente), el coste es **1,99€ sea cual sea el plan elegido**; pasado ese primer mes, el "Plan completo" cuesta **19,99€/mes** (o 119,99€/año con el anual) y "Solo nutrición" cuesta **4,99€/mes**.
 
 - Nueva función `precioPlanActual(tipoPlan, creadoISO)`: aplica esa regla y devuelve un texto explicativo según el tipo de plan y los días transcurridos desde `creado`.
 - En el modal "Cambiar tu plan" (punto 40), bajo "¿Qué tipo de plan quieres?" se añadió un `field-hint` (`#cpPrecioInfo`) que muestra en vivo, vía `actualizarPrecioCambioPlan()`, el precio que corresponde según el plan seleccionado y la fecha de registro del usuario. Se actualiza al abrir el modal y al cambiar la selección de tipo de plan.
-- El paywall de fin de mes de prueba (`modalPaywall`) ahora muestra el precio correcto según `userData.tipoPlan`: 14,99€ para "Plan completo", 4,99€ para "Solo nutrición" (antes mostraba siempre 14,99€). `comprobarPaywall()` actualiza el `#paywallPrecio` dinámicamente.
+- El paywall de fin de mes de prueba (`modalPaywall`) ahora muestra el precio correcto según `userData.tipoPlan`: 19,99€ para "Plan completo", 4,99€ para "Solo nutrición" (antes mostraba siempre 19,99€). `comprobarPaywall()` actualiza el `#paywallPrecio` dinámicamente.
 
-Verificado en preview con datos controlados: `precioPlanActual` devuelve "Sigues en tu primer mes: 0,99€..." para ambos tipos de plan si `creado` es reciente, y "...14,99€/mes (o 119,99€/año)..." / "...4,99€/mes..." respectivamente si `creado` tiene más de 30 días. En el modal "Cambiar tu plan", el hint cambia correctamente al alternar entre "Plan completo" y "Solo nutrición" con una fecha de registro de hace 60 días. Cuenta de test restaurada a sus valores originales al finalizar.
+Verificado en preview con datos controlados: `precioPlanActual` devuelve "Sigues en tu primer mes: 1,99€..." para ambos tipos de plan si `creado` es reciente, y "...19,99€/mes (o 119,99€/año)..." / "...4,99€/mes..." respectivamente si `creado` tiene más de 30 días. En el modal "Cambiar tu plan", el hint cambia correctamente al alternar entre "Plan completo" y "Solo nutrición" con una fecha de registro de hace 60 días. Cuenta de test restaurada a sus valores originales al finalizar.
 
 ### 42. Contador de días restantes del plan en "Hoy"
 El usuario pidió añadir, en la página de inicio del dashboard ("Hoy"), un contador que muestre al cliente cuántos días le quedan de su plan/ciclo actual.
 
 - En `#section-hoy`, justo encima de "Entrenamiento de hoy", se sustituyó la fila que solo tenía el botón "Cambiar objetivo / deporte" por una fila con `display:flex; justify-content:space-between` que combina: a la izquierda, el texto `<span id="diasRestantesPlan">` (número, destacado en color "brasa") + `<span id="diasRestantesPlanLabel">` (texto descriptivo); a la derecha, el mismo botón "Cambiar objetivo / deporte".
 - Nueva función `actualizarDiasRestantesPlan()`, llamada desde `buildDashboard()`: calcula los días restantes del ciclo de `DIAS_PRUEBA` (30) días.
-  - Si el usuario aún no tiene `suscripcionActiva` (mes de prueba), cuenta desde `creado` y muestra la etiqueta "días restantes de tu mes de prueba (0,99€)".
+  - Si el usuario aún no tiene `suscripcionActiva` (mes de prueba), cuenta desde `creado` y muestra la etiqueta "días restantes de tu mes de prueba (1,99€)".
   - Si tiene `suscripcionActiva`, cuenta desde `fechaPago` (o `creado` si no hay `fechaPago`) en ciclos de 30 días, mostrando "días restantes de tu plan actual" (el plan anual aún no se gestiona de forma distinta porque no hay Stripe).
 
-Verificado en preview con la cuenta de test en dos escenarios simulados: suscripción activa con `fechaPago` de hace 10 días → muestra "20 días restantes de tu plan actual"; usuario en prueba con `creado` de hace 22 días → muestra "8 días restantes de tu mes de prueba (0,99€)". Tras las pruebas, la cuenta de test se restauró a `suscripcionActiva: true` con `creado` en el momento actual (sin `fechaPago`), mostrando correctamente "30 días restantes de tu plan actual" junto al plan original (Ganar músculo / Gimnasio). Sin errores en consola.
+Verificado en preview con la cuenta de test en dos escenarios simulados: suscripción activa con `fechaPago` de hace 10 días → muestra "20 días restantes de tu plan actual"; usuario en prueba con `creado` de hace 22 días → muestra "8 días restantes de tu mes de prueba (1,99€)". Tras las pruebas, la cuenta de test se restauró a `suscripcionActiva: true` con `creado` en el momento actual (sin `fechaPago`), mostrando correctamente "30 días restantes de tu plan actual" junto al plan original (Ganar músculo / Gimnasio). Sin errores en consola.
 
 ### 42.1 Mejora visual de "Volver al inicio" y del contador de días restantes
 A petición del usuario, se mejoró la visibilidad de dos elementos del dashboard que quedaban demasiado discretos:
@@ -450,8 +450,8 @@ Verificado en preview con la cuenta de test: ambos elementos se ven correctament
 ### 42.2 Contador de días restantes como tarjeta de estadística (`.stat-card`)
 El usuario pidió que las etiquetas del nuevo contador de días restantes (punto 42) siguieran el mismo estilo tipográfico que las tarjetas "Semana / Días entrenados / Objetivo / Deporte" (`.stat-card-label` en DM Mono mayúsculas gris, `.stat-card-value` en Bebas Neue naranja "brasa", `.stat-card-sub` en gris), tanto para lo nuevo como para lo existente. Tras revisar el resto de la web, las etiquetas/subtextos ya siguen mayoritariamente esa convención (DM Mono + mayúsculas + `var(--metal)`/`var(--brasa)`), por lo que el cambio se centró en el contador nuevo, que era el elemento que no la seguía.
 
-- El contador ahora reutiliza directamente las clases `.stat-card`/`.stat-card-label`/`.stat-card-value`/`.stat-card-sub`: etiqueta "Días restantes" arriba, número grande en el medio (`#diasRestantesPlan`), y subtexto "de tu plan actual" / "de tu mes de prueba (0,99€)" abajo (`#diasRestantesPlanLabel`).
-- `actualizarDiasRestantesPlan()` actualizado: el texto del subtítulo ya no repite "días restantes de...", solo "de tu plan actual" / "de tu mes de prueba (0,99€)" / "de tu mes de prueba (0,99€)".
+- El contador ahora reutiliza directamente las clases `.stat-card`/`.stat-card-label`/`.stat-card-value`/`.stat-card-sub`: etiqueta "Días restantes" arriba, número grande en el medio (`#diasRestantesPlan`), y subtexto "de tu plan actual" / "de tu mes de prueba (1,99€)" abajo (`#diasRestantesPlanLabel`).
+- `actualizarDiasRestantesPlan()` actualizado: el texto del subtítulo ya no repite "días restantes de...", solo "de tu plan actual" / "de tu mes de prueba (1,99€)" / "de tu mes de prueba (1,99€)".
 
 Verificado en preview con la cuenta de test: la tarjeta "DÍAS RESTANTES / 30 / de tu plan actual" se ve visualmente idéntica en estilo a las tarjetas de la fila de estadísticas. Sin errores en consola.
 
@@ -521,10 +521,10 @@ Verificado en preview en escritorio y móvil (375px): "Mi progreso" muestra corr
 ### 44. Nuevos precios (plan trimestral, anual rebajado, solo nutrición) + periodicidad en la lógica de planes
 Tras una discusión sobre precios, se acordó: bajar el plan anual de 119,99€ a 99,99€ (≈8,33€/mes), subir "Solo nutrición" de 4,99€ a 6,99€/mes, y crear un plan trimestral nuevo (Plan completo, 35,99€) para fidelizar clientes que pagan por trimestres. El usuario pidió además que la lógica de datos (contadores, precios, pagos) se actualizara acorde a estos planes, manteniendo todo en `localStorage` (sin tocar Supabase/Stripe, que sigue aparcado). En un segundo ajuste se descartó el plan "Solo nutrición trimestral", se bajó el Trimestral de 39,99€ a 35,99€, se pidió que las 5 tarjetas se vean en una sola fila en escritorio, y se añadió un badge "Oferta" a la tarjeta "Primer mes".
 
-- **Tarjetas de precios** (`#pricing`): 5 tarjetas en una sola fila en escritorio (`.pricing-cards` ahora `grid-template-columns: repeat(5, 1fr)`, `max-width: 1400px`, `.price-card` con padding reducido a `40px 24px` y `.price-badge` con `right: 24px` para que quepan): Primer mes (0,99€, con nuevo badge "Oferta del mes"), Mensual (14,99€, "Más popular"), **Trimestral** (35,99€, "Cada 3 meses · Equivale a 12€/mes · Ahorras 9€"), Anual (99,99€, antes 119,99€, "Equivale a 8,33€/mes · Ahorras 80€"), Solo nutrición (6,99€/mes, antes 4,99€). En móvil sigue colapsando a 1 columna.
+- **Tarjetas de precios** (`#pricing`): 5 tarjetas en una sola fila en escritorio (`.pricing-cards` ahora `grid-template-columns: repeat(5, 1fr)`, `max-width: 1400px`, `.price-card` con padding reducido a `40px 24px` y `.price-badge` con `right: 24px` para que quepan): Primer mes (1,99€, con nuevo badge "Oferta del mes"), Mensual (19,99€, "Más popular"), **Trimestral** (35,99€, "Cada 3 meses · Equivale a 12€/mes · Ahorras 9€"), Anual (99,99€, antes 119,99€, "Equivale a 8,33€/mes · Ahorras 80€"), Solo nutrición (6,99€/mes, antes 4,99€). En móvil sigue colapsando a 1 columna.
 - **Hero**: "¿Solo buscas nutrición? También hay plan para ti, desde 4,99€/mes" → "desde 6,99€/mes".
 - **Tabla de precios centralizada (`PRECIOS`)**: objeto con el precio, periodo, días de ciclo (30/90/365) y texto de detalle para cada combinación tipoPlan × periodicidad (Plan completo: mensual/trimestral/anual; Solo nutrición: solo mensual). Función `preciosPlan(tipoPlan)` para acceder con fallback al plan completo.
-- **`userData.periodicidad`** (nuevo campo, 'mensual' por defecto): determina el ciclo de facturación del usuario. `precioPlanActual(tipoPlan, creadoISO, periodicidad)` calcula el precio/detalle según la tabla `PRECIOS` (en el mes de prueba sigue devolviendo siempre 0,99€). `actualizarDiasRestantesPlan()` usa el ciclo de la periodicidad activa (30/90/365 días) en lugar de fijo a 30.
+- **`userData.periodicidad`** (nuevo campo, 'mensual' por defecto): determina el ciclo de facturación del usuario. `precioPlanActual(tipoPlan, creadoISO, periodicidad)` calcula el precio/detalle según la tabla `PRECIOS` (en el mes de prueba sigue devolviendo siempre 1,99€). `actualizarDiasRestantesPlan()` usa el ciclo de la periodicidad activa (30/90/365 días) en lugar de fijo a 30.
 - **Selector de periodicidad**: nuevo grupo de radios "¿Con qué periodicidad quieres pagar?" (Mensual/Trimestral/Anual) en el modal "Cambiar tu plan" (`cp-periodicidad`) y en el modal de fin de prueba/paywall (`pw-periodicidad`). Nueva función `actualizarOpcionesPeriodicidad(tipoPlan, grupoId)` oculta "Trimestral" y "Anual" cuando el tipo de plan es "Solo nutrición" (solo tiene tarifa mensual) y reasigna a "Mensual" si alguna estaba seleccionada. `valorPeriodicidad(grupoId)` traduce el radio elegido a la clave usada por `PRECIOS`.
 - **Modal "Cambiar tu plan"**: `abrirModalCambiarPlan()` preselecciona la periodicidad guardada del usuario y ajusta las opciones visibles según el tipo de plan; `actualizarPrecioCambioPlan()` y `guardarCambioPlan()` ahora también leen/guardan `userData.periodicidad`.
 - **Modal de paywall**: ahora muestra el selector de periodicidad y el precio/detalle se recalculan en vivo (`actualizarPrecioPaywall()`). `comprobarPaywall()` preselecciona la periodicidad guardada del usuario. `confirmarPagoSuscripcion()` guarda la periodicidad elegida (en `users[email]` y en `userData`, persistiendo con `saveUserData` salvo cuenta demo) y refresca el contador de días restantes.
@@ -581,7 +581,7 @@ El usuario indicó que la página es muy larga (explicación del sistema, de la 
 - **"Tu deporte, tu plan"**: el aviso de hibridación y el bloque "¿Solo buscas nutrición?" se acortan ligeramente (se elimina la pregunta retórica inicial en este último).
 - **Precios**: las descripciones de los planes Mensual, Trimestral, Anual y Solo nutrición se acortan, manteniendo el dato clave de cada uno.
 - **Testimonios**: de 20 a 10 tarjetas, conservando variedad de deportes (Gimnasio, Running, Hyrox, CrossFit, Solo nutrición, Combinación, Casa/Calistenia) y casos relevantes (alergias, lesiones, condición médica, edad).
-- **CTA final**: se fusionan las secciones `.philosophy` y `.lead-magnet` (antes dos secciones consecutivas con CTA) en una sola: la frase "Lo que se construye despacio no se rompe fácil" + botón "Empieza por 0,99€" + un formulario de email más discreto ("O déjanos tu email y te avisamos" / botón "Avísame") debajo. Se eliminó la sección `.lead-magnet` y su CSS específico (`.lead-magnet-title`, `.lead-magnet-sub`, etc.), conservando `.lead-magnet-form`/`.lead-magnet-note` reutilizados dentro de `.philosophy`.
+- **CTA final**: se fusionan las secciones `.philosophy` y `.lead-magnet` (antes dos secciones consecutivas con CTA) en una sola: la frase "Lo que se construye despacio no se rompe fácil" + botón "Empieza por 1,99€" + un formulario de email más discreto ("O déjanos tu email y te avisamos" / botón "Avísame") debajo. Se eliminó la sección `.lead-magnet` y su CSS específico (`.lead-magnet-title`, `.lead-magnet-sub`, etc.), conservando `.lead-magnet-form`/`.lead-magnet-note` reutilizados dentro de `.philosophy`.
 
 Verificado en preview en escritorio (10 testimonios en el carrusel, formulario de email dentro de la sección `.philosophy`, sección `.lead-magnet` ya no existe en el DOM) y en móvil 375px (formulario en columna, sin overflow horizontal adicional al ya existente del carrusel de testimonios). Sin errores de consola. No requiere restaurar cuenta de test (solo contenido de la landing, sin datos de usuario).
 
@@ -615,7 +615,7 @@ El usuario compartió una captura del input de peso en "Hoy" (un simple `<input 
 Verificado en preview con la cuenta de test: el stepper se ve correctamente en escritorio y móvil (375px), los botones +/- incrementan/decrementan el peso de "Press banca" en pasos de 2,5 kg y persisten el valor; con un historial de ejemplo (40→42,5→45→45→50 kg), el mini-historial muestra 5 barras crecientes con la última en naranja, sincronizado entre "Hoy" y "Plan semanal", y la tarjeta de "Press banca" en "Progresión de pesos" (Mi progreso) sigue mostrando el mismo historial con su gráfico de barras grande. Sin errores de consola. Cuenta de test restaurada a su estado original tras la prueba.
 
 ### 53. Botón de precio del hero más grande ("Oferta del mes") y reordenación del menú
-El usuario compartió capturas del badge de precio del hero ("PRIMER MES 0,99€") y de la barra de navegación, pidiendo que el badge fuera más grande y dijera "Oferta del mes", y que en el menú "Entrar" apareciera primero.
+El usuario compartió capturas del badge de precio del hero ("PRIMER MES 1,99€") y de la barra de navegación, pidiendo que el badge fuera más grande y dijera "Oferta del mes", y que en el menú "Entrar" apareciera primero.
 
 - **`.hero-price`**: padding de `12px 22px` a `16px 28px`, borde de `1px solid rgba(232,73,15,0.35)` a `2px solid var(--brasa)` (más visible).
 - **`.hero-price-main`**: tamaño de fuente de `42px` a `56px`.
@@ -740,7 +740,7 @@ El usuario compartió una captura "ERRORES Y PROBLEMAS DETECTADOS" señalando qu
 Verificado en preview con la cuenta de test: los 4 huecos muestran "+ AÑADIR FOTO" en naranja bajo el icono de cámara, y el texto explicativo aparece sobre la rejilla. Sin errores de consola.
 
 ### 66. Modal "Cambiar tu plan" dividido en dos pasos (preferencias vs. periodicidad de pago)
-La misma captura señalaba que la sección de precios (Mensual/Trimestral/Anual + "0,99€ primer mes") aparecía mezclada dentro del modal de "Cambiar objetivo/deporte", mezclando configuración funcional con decisión de compra.
+La misma captura señalaba que la sección de precios (Mensual/Trimestral/Anual + "1,99€ primer mes") aparecía mezclada dentro del modal de "Cambiar objetivo/deporte", mezclando configuración funcional con decisión de compra.
 
 - `#modalCambiarPlan` se dividió en `#cpStep1` (todas las preferencias: tipo de plan, objetivo, enfoque nutricional, deporte, días, tiempo, nivel, lugar) y `#cpStep2` (nuevo paso "Confirma tu periodicidad de pago", con el campo `cp-periodicidad`/`#cpPrecioInfo` que antes estaba mezclado en el paso 1).
 - El botón final del paso 1 pasa de "Recalcular mi plan →" a "Continuar →" (`irPasoPrecioCambioPlan()`); el paso 2 añade "← Volver" (`volverPasoCambioPlan()`) y "Confirmar y recalcular →" (`guardarCambioPlan()`, sin cambios en su lógica de guardado).
@@ -824,7 +824,7 @@ A raíz del análisis de producto, se añade la capa legal obligatoria (se recog
   - **Aviso de salud destacado** arriba (banner `.legal-disclaimer`): no es consejo médico, consultar antes de empezar, parar si hay dolor/mareo.
   - **1. Aviso legal** (LSSI-CE): datos del titular con placeholders `[NOMBRE/RAZÓN SOCIAL]`, `[NIF/CIF]`, `[DIRECCIÓN FISCAL]`, `[EMAIL DE CONTACTO]` (7 en total, marcados con `.legal-placeholder`, pendientes de rellenar por el usuario).
   - **2. Política de privacidad (RGPD/LOPDGDD)**: responsable, datos tratados (incluida categoría especial de salud), finalidad, base jurídica (ejecución de contrato + consentimiento explícito art. 9.2.a), conservación, destinatarios/encargados, derechos ARCO+RGPD y reclamación ante la AEPD, seguridad (con nota honesta de que en esta fase los datos viven en el localStorage del navegador).
-  - **3. Términos y condiciones**: objeto, registro, precios/prueba 0,99€, cancelación sin permanencia, exención de responsabilidad, modificaciones.
+  - **3. Términos y condiciones**: objeto, registro, precios/prueba 1,99€, cancelación sin permanencia, exención de responsabilidad, modificaciones.
   - **4. Cookies**: actualmente sin cookies de seguimiento, solo localStorage técnico.
 - Navegación: enlaces nuevos en el `footer` (Aviso legal / Privacidad / Términos) y `nav` interno con scroll a cada sección. Funciones `goToLegal(seccion)` (abre y salta) y `scrollToLegal(id)`.
 - La casilla de términos del registro ahora enlaza a las secciones reales (`goToLegal('terminos')` / `goToLegal('privacidad')`) y menciona explícitamente el consentimiento para tratar datos de salud.
@@ -892,7 +892,7 @@ Se conecta el paywall de fin de mes de prueba a Stripe (modo suscripción), sigu
 
 **Pendiente del usuario, imprescindible para que funcione en producción** (nada de esto se prueba en el preview local, que es solo HTML estático — requiere despliegue en Vercel):
 1. En el [Dashboard de Stripe](https://dashboard.stripe.com) (modo *test* para probar primero): crear un producto "K-ONE" con 4 precios recurrentes:
-   - Plan completo mensual → 14,99€/mes
+   - Plan completo mensual → 19,99€/mes
    - Plan completo trimestral → 35,99€/3 meses
    - Plan completo anual → 99,99€/año
    - Solo nutrición mensual → 6,99€/mes
@@ -940,8 +940,8 @@ Se completaron los pasos pendientes del punto 78 (creación de productos/precios
 
 **Productos y precios creados en Stripe (modo test).** En vez de 3 productos separados, se usan **2 productos** con varios precios cada uno:
 - **K-ONE — Plan completo** (`prod_UhhzHe1rdxhepx`), 4 precios recurrentes en EUR:
-  - Oferta del mes (primer mes): 0,99€/mes → `price_1TiIZJArPjnnOdT9v8qnqnCY` *(aún no la usa el código; reservada para la futura lógica de "primer mes a 0,99€ y luego precio normal", que requerirá un Subscription Schedule)*
-  - Mensual: 14,99€/mes → `price_1TiIa5ArPjnnOdT94UvnsP4P`
+  - Oferta del mes (primer mes): 1,99€/mes → `price_1TiIZJArPjnnOdT9v8qnqnCY` *(aún no la usa el código; reservada para la futura lógica de "primer mes a 1,99€ y luego precio normal", que requerirá un Subscription Schedule)*
+  - Mensual: 19,99€/mes → `price_1TiIa5ArPjnnOdT94UvnsP4P`
   - Trimestral: 35,99€/3 meses → `price_1TiIa5ArPjnnOdT9KqyvbKu5`
   - Anual: 99,99€/año → `price_1TiIa5ArPjnnOdT92XFvzouZ`
 - **Nutricion** (`prod_Uhi1fN9PETu0qE`), 1 precio:
@@ -964,7 +964,7 @@ Se completaron los pasos pendientes del punto 78 (creación de productos/precios
 
 **Verificación end-to-end (producción, modo test de Stripe):** registro de una cuenta real nueva → paywall (forzado con `document.getElementById('modalPaywall').classList.add('visible')` desde la consola) → Checkout de Stripe con el precio correcto → pago con `4242 4242 4242 4242` → vuelta a la app con "checkout=exito". Tras desplegar el arreglo del webhook, Stripe reintentó el evento `customer.subscription.updated` que había fallado y quedó como **"Entrega recuperada"** (200 OK). La tabla `public.subscriptions` quedó con `status: active` y `current_period_end` con fecha futura correcta. Flujo de Checkout + webhook + Portal verificado.
 
-**Pendiente para más adelante (no bloqueante):** conectar el precio "Oferta del mes" (0,99€, `STRIPE_PRICE_OFERTA_MES`) a la lógica de "primer mes a 0,99€ y luego el precio normal del plan elegido". Esto requiere implementar un **Stripe Subscription Schedule** (o equivalente) en el backend, que todavía no existe.
+**Pendiente para más adelante (no bloqueante):** conectar el precio "Oferta del mes" (1,99€, `STRIPE_PRICE_OFERTA_MES`) a la lógica de "primer mes a 1,99€ y luego el precio normal del plan elegido". Esto requiere implementar un **Stripe Subscription Schedule** (o equivalente) en el backend, que todavía no existe.
 
 ### 83. Arreglo del contador "Días restantes" con suscripción de Stripe activa (mostraba 32 en vez de los días reales hasta la renovación)
 Tras pagar de verdad (punto 82), el dashboard "Hoy" mostraba "32 días restantes de tu plan actual" para una suscripción trimestral recién contratada, un valor sin sentido.
@@ -974,23 +974,23 @@ Tras pagar de verdad (punto 82), el dashboard "Hoy" mostraba "32 días restantes
 
 Verificado en preview reproduciendo el cálculo: con una `fechaPago` a 92 días en el futuro, la lógica vieja daba 32 (el bug observado) y la nueva da 92 (correcto). La función carga sin errores de sintaxis (`typeof actualizarDiasRestantesPlan === 'function'`).
 
-### 84. Oferta real de "primer mes por 0,99€": cobro al registrarse y elección de plan al mes
-Hasta ahora el "0,99€" era solo marketing (el registro daba 30 días gratis y al día 30 el paywall cobraba el precio normal). Se conecta de verdad: **el usuario paga 0,99€ con tarjeta al terminar el cuestionario, y cuando ese primer mes acaba elige plan (mensual/trimestral/anual/solo nutrición) y paga el precio normal.** Decidido con el usuario: el pago de 0,99€ es **obligatorio al registrarse** (sustituye al acceso gratis de 30 días).
+### 84. Oferta real de "primer mes por 1,99€": cobro al registrarse y elección de plan al mes
+Hasta ahora el "1,99€" era solo marketing (el registro daba 30 días gratis y al día 30 el paywall cobraba el precio normal). Se conecta de verdad: **el usuario paga 1,99€ con tarjeta al terminar el cuestionario, y cuando ese primer mes acaba elige plan (mensual/trimestral/anual/solo nutrición) y paga el precio normal.** Decidido con el usuario: el pago de 1,99€ es **obligatorio al registrarse** (sustituye al acceso gratis de 30 días).
 
 **Backend:**
-- `api/create-checkout-session.js`: nuevo flag `oferta` en el body. En modo oferta, la Checkout Session usa `STRIPE_PRICE_OFERTA_MES` (0,99€) como line item y NO requiere plan elegido (se elige al mes); en `metadata` se marca `oferta: 'si'`. En modo normal sigue usando `getPriceId(tipoPlan, periodicidad)`.
-- `api/stripe-webhook.js`: en `checkout.session.completed`, si `metadata.oferta === 'si'`, hace `stripe.subscriptions.update(sub, { cancel_at_period_end: true })` para que el 0,99€ **no se renueve**: se cobra una vez, da acceso ~1 mes y luego se cancela solo, momento en que reaparece el paywall (ahora en modo "elige tu plan"). No se usan Subscription Schedules (más simple y robusto).
+- `api/create-checkout-session.js`: nuevo flag `oferta` en el body. En modo oferta, la Checkout Session usa `STRIPE_PRICE_OFERTA_MES` (1,99€) como line item y NO requiere plan elegido (se elige al mes); en `metadata` se marca `oferta: 'si'`. En modo normal sigue usando `getPriceId(tipoPlan, periodicidad)`.
+- `api/stripe-webhook.js`: en `checkout.session.completed`, si `metadata.oferta === 'si'`, hace `stripe.subscriptions.update(sub, { cancel_at_period_end: true })` para que el 1,99€ **no se renueve**: se cobra una vez, da acceso ~1 mes y luego se cancela solo, momento en que reaparece el paywall (ahora en modo "elige tu plan"). No se usan Subscription Schedules (más simple y robusto).
 
 **Frontend (`index.html`):**
 - **Paywall `#modalPaywall` con dos modos** (mismo modal, distinto contenido):
-  - *Primer mes* (usuario que nunca ha pagado, `!user.tieneSub`): título "Tu plan está listo", caja `#paywallOfertaBox` con "0,99€ · primer mes", sin selector de plan; botón "Empezar por 0,99€ →".
-  - *Elige tu plan* (terminó el mes de 0,99€, `user.tieneSub`): título "Tu primer mes ha terminado", selector de periodicidad `#paywallPlanChooser` + precio normal; botón "Continuar con K-One →".
+  - *Primer mes* (usuario que nunca ha pagado, `!user.tieneSub`): título "Tu plan está listo", caja `#paywallOfertaBox` con "1,99€ · primer mes", sin selector de plan; botón "Empezar por 1,99€ →".
+  - *Elige tu plan* (terminó el mes de 1,99€, `user.tieneSub`): título "Tu primer mes ha terminado", selector de periodicidad `#paywallPlanChooser` + precio normal; botón "Continuar con K-One →".
 - Nueva función `pagarDesdePaywall()` que despacha a `confirmarPagoSuscripcion(oferta)` según el modo. `confirmarPagoSuscripcion(oferta)` envía `oferta` al backend (en modo oferta no manda plan).
 - Nuevo campo `user.tieneSub` (en `syncProfileFromSupabase`: `!!sub || !!cuenta.suscripcionActiva`) para distinguir los dos modos.
-- `tieneAccesoActivo()`: **se elimina el acceso gratis de 30 días**; ahora el acceso requiere `suscripcionActiva` (el 0,99€ del primer mes o el plan normal). La cuenta de test sigue con acceso porque tiene `_cuenta.suscripcionActiva = true` forzado.
-- `generatePlan()`: al terminar el cuestionario, si no hay acceso activo muestra el paywall (0,99€) en vez de entrar gratis. Al volver de Stripe con `?checkout=exito`, arranca el tour de onboarding si no se había hecho.
+- `tieneAccesoActivo()`: **se elimina el acceso gratis de 30 días**; ahora el acceso requiere `suscripcionActiva` (el 1,99€ del primer mes o el plan normal). La cuenta de test sigue con acceso porque tiene `_cuenta.suscripcionActiva = true` forzado.
+- `generatePlan()`: al terminar el cuestionario, si no hay acceso activo muestra el paywall (1,99€) en vez de entrar gratis. Al volver de Stripe con `?checkout=exito`, arranca el tour de onboarding si no se había hecho.
 
-Verificado en preview: ambos modos del paywall se renderizan con el texto/botón correctos (`primerMes` → "Tu plan está listo" / "Empezar por 0,99€ →" / oferta visible y selector oculto; `elegirPlan` → "Tu primer mes ha terminado" / "Continuar con K-One →" / selector visible). Captura del modo primer mes confirmada. Sin errores de consola. Todas las funciones cargan (`pagarDesdePaywall`, `confirmarPagoSuscripcion`, etc.). **Pendiente:** desplegar y probar end-to-end en Stripe test (cobro de 0,99€, no renovación, y reaparición del paywall en modo "elige plan").
+Verificado en preview: ambos modos del paywall se renderizan con el texto/botón correctos (`primerMes` → "Tu plan está listo" / "Empezar por 1,99€ →" / oferta visible y selector oculto; `elegirPlan` → "Tu primer mes ha terminado" / "Continuar con K-One →" / selector visible). Captura del modo primer mes confirmada. Sin errores de consola. Todas las funciones cargan (`pagarDesdePaywall`, `confirmarPagoSuscripcion`, etc.). **Pendiente:** desplegar y probar end-to-end en Stripe test (cobro de 1,99€, no renovación, y reaparición del paywall en modo "elige plan").
 
 ## Notas técnicas del entorno
 - No hay Node.js, Python ni WSL instalados en esta máquina — para verificar JS/servir archivos hay que usar PowerShell puro (HttpListener, etc.) o el navegador.
