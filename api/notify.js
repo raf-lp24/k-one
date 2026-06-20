@@ -2,6 +2,7 @@
 // Usa Resend (resend.com) — gratis hasta 100 emails/día.
 // Variable de entorno necesaria: RESEND_API_KEY
 
+const { getSupabaseAdmin } = require('./_stripeHelpers');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
 
@@ -189,6 +190,19 @@ module.exports = async (req, res) => {
         console.error(`[notify] Email ${i} error:`, r.reason || r.value?.statusText);
       }
     });
+
+    // Guardar historial de emails enviados
+    try {
+      const supa = getSupabaseAdmin();
+      const destinatario = tipo === 'lead' ? datos.email : (tipo === 'opinion' ? datos.nombre : ADMIN_EMAIL);
+      const asunto = tipo === 'lead' ? 'Ejemplo de plan K-ONE' : tipo === 'opinion' ? `Nueva opinión de ${datos.nombre}` : tipo;
+      await supa.from('email_log').insert({
+        tipo,
+        destinatario,
+        asunto,
+        datos: JSON.stringify(datos)
+      });
+    } catch (e) {}
 
     return res.status(200).json({ ok: true });
 

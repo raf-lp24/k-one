@@ -171,7 +171,7 @@ module.exports = async (req, res) => {
       return {
         id:           p.id,
         isBeta:       !!p.is_beta,
-        nombre:       p.nombre || '—',
+        nombre:       p.nombre || ud.nombre || p.email?.split('@')[0] || '—',
         email:        p.email  || '—',
         alta:         p.created_at,
         diasDesdeAlta,
@@ -213,7 +213,14 @@ module.exports = async (req, res) => {
       leads = leadsData || [];
     } catch (e) {}
 
-    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads });
+    let emailLog = [];
+    try {
+      const { data: logData } = await supabaseAdmin
+        .from('email_log').select('tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(50);
+      emailLog = logData || [];
+    } catch (e) {}
+
+    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog });
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);

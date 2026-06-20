@@ -4367,6 +4367,18 @@
       </div>
       <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
     </div>
+
+    <!-- EMAILS ENVIADOS -->
+    <div style="margin-top:32px;border-top:1px solid #2a2a2a;padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--brasa);letter-spacing:1px">// EMAILS ENVIADOS</div>
+          <div style="font-size:18px;font-weight:700;color:var(--blanco)">Historial de correos</div>
+        </div>
+        <span id="adminEmailsCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--metal)"></span>
+      </div>
+      <div id="adminEmailsList" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
   </div>
 </div>
 
@@ -11201,6 +11213,27 @@
     if (totalEl) totalEl.textContent = data.clientes.length;
 
     renderTablaAdmin();
+
+    // Emails enviados
+    const emailLog = data.emailLog || [];
+    const emailsCount = document.getElementById('adminEmailsCount');
+    if (emailsCount) emailsCount.textContent = emailLog.length + ' emails';
+    const emailsList = document.getElementById('adminEmailsList');
+    if (emailsList) {
+      const tipoIcon = { lead: '📩', opinion: '⭐' };
+      const tipoLabel = { lead: 'Email de plan al lead', opinion: 'Notificación de opinión' };
+      emailsList.innerHTML = emailLog.length === 0
+        ? '<p style="color:var(--metal);font-size:13px">Aún no hay emails enviados.</p>'
+        : emailLog.map(e => `
+          <div style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px">
+            <span style="font-size:20px;flex-shrink:0">${tipoIcon[e.tipo] || '📧'}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:var(--blanco);font-weight:500">${_esc(tipoLabel[e.tipo] || e.tipo)}</div>
+              <div style="font-size:12px;color:var(--metal);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">→ ${_esc(e.destinatario)} · ${e.asunto ? _esc(e.asunto) : ''}</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);flex-shrink:0;text-align:right">${_fmtFecha(e.created_at)}</div>
+          </div>`).join('');
+    }
 
     // Leads
     const leads = data.leads || [];
