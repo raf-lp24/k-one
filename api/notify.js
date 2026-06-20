@@ -170,41 +170,101 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
-        subject: `Bienvenido/a a K-ONE, ${primerNombre}`,
+        subject: `${primerNombre}, tu plan te está esperando — K-ONE`,
         html: `
-          <div style="background:#0b0b0b;padding:40px 20px;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
-            <div style="max-width:520px;margin:0 auto">
-              <div style="text-align:center;margin-bottom:28px">
-                <span style="font-size:28px;font-weight:800;letter-spacing:2px;color:#fff">K-<span style="color:#E8490F">ONE</span></span>
-              </div>
-              <h1 style="color:#fff;font-size:24px;font-weight:700;text-align:center;margin-bottom:8px">
-                Bienvenido/a, ${primerNombre}
-              </h1>
-              <p style="color:#b5b2ad;font-size:15px;line-height:1.7;text-align:center;margin-bottom:28px">
-                Tu cuenta está creada. A partir de aquí empieza lo que importa.
-              </p>
+          <div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
+            <div style="max-width:560px;margin:0 auto">
 
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:12px">
-                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">1. Rellena tu cuestionario</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Deporte, objetivo, nivel, lesiones, alergias… Con eso generamos tu plan personalizado.</p>
-              </div>
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:12px">
-                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">2. Activa tu primer mes por 0,99€</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Acceso completo a entrenamiento y nutrición. Después pasa a 14,99€/mes. Cancelas cuando quieras.</p>
-              </div>
-              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:24px">
-                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">3. Empieza a entrenar</p>
-                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Tu plan de entrenamiento y nutrición te esperan. Cada semana se adaptan según tu progreso real.</p>
+              <!-- Header con logo -->
+              <div style="background:#E8490F;padding:32px 24px;text-align:center">
+                <div style="font-size:32px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div>
+                <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:6px;letter-spacing:1px">NO HAY ATAJOS. HAY PASOS.</div>
               </div>
 
-              <div style="text-align:center;margin-bottom:28px">
-                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:14px 36px;font-size:15px;font-weight:700;letter-spacing:0.5px">IR A MI PLAN →</a>
+              <!-- Saludo -->
+              <div style="padding:36px 28px 0">
+                <h1 style="color:#fff;font-size:26px;font-weight:700;margin:0 0 8px">${primerNombre}, bienvenido/a.</h1>
+                <p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 28px">Tu cuenta está lista. En 3 pasos tienes tu plan de entrenamiento y nutrición personalizado funcionando.</p>
               </div>
 
-              <p style="color:#666;font-size:11px;text-align:center;line-height:1.6;border-top:1px solid #222;padding-top:20px">
-                K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
-                <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F">k.one.fit26@gmail.com</a>
-              </p>
+              <!-- 3 Pasos -->
+              <div style="padding:0 28px">
+                <table style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <td style="width:48px;vertical-align:top;padding:16px 14px 16px 0">
+                      <div style="width:40px;height:40px;background:#E8490F;color:#fff;font-size:18px;font-weight:800;text-align:center;line-height:40px;border-radius:50%">1</div>
+                    </td>
+                    <td style="vertical-align:top;padding:16px 0;border-bottom:1px solid #1a1a1a">
+                      <p style="margin:0 0 3px;font-weight:700;color:#fff;font-size:15px">Rellena el cuestionario</p>
+                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">5 minutos. Nos cuentas tu deporte, objetivo, nivel, lesiones y alergias. Con eso construimos todo.</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="width:48px;vertical-align:top;padding:16px 14px 16px 0">
+                      <div style="width:40px;height:40px;background:#E8490F;color:#fff;font-size:18px;font-weight:800;text-align:center;line-height:40px;border-radius:50%">2</div>
+                    </td>
+                    <td style="vertical-align:top;padding:16px 0;border-bottom:1px solid #1a1a1a">
+                      <p style="margin:0 0 3px;font-weight:700;color:#fff;font-size:15px">Activa tu primer mes — 0,99€</p>
+                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Acceso completo. Después 14,99€/mes. Sin permanencia: cancelas con un clic.</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="width:48px;vertical-align:top;padding:16px 14px 16px 0">
+                      <div style="width:40px;height:40px;background:#E8490F;color:#fff;font-size:18px;font-weight:800;text-align:center;line-height:40px;border-radius:50%">3</div>
+                    </td>
+                    <td style="vertical-align:top;padding:16px 0">
+                      <p style="margin:0 0 3px;font-weight:700;color:#fff;font-size:15px">Empieza hoy</p>
+                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Tu plan de entrenamiento y nutrición listos. Cada semana se adaptan a cómo evoluciones.</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Qué incluye -->
+              <div style="padding:28px 28px 0">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:2px;font-weight:700;margin-bottom:14px">QUÉ VAS A ENCONTRAR</div>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <td style="padding:10px 12px;background:#141414;border-bottom:1px solid #1a1a1a;width:50%">
+                      <div style="font-size:18px;margin-bottom:2px">🏋️</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Entrenamiento</div>
+                      <div style="font-size:11px;color:#666">Adaptado a tu deporte y nivel</div>
+                    </td>
+                    <td style="padding:10px 12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a">
+                      <div style="font-size:18px;margin-bottom:2px">🥗</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Nutrición</div>
+                      <div style="font-size:11px;color:#666">5 comidas, 5 opciones cada una</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:10px 12px;background:#141414">
+                      <div style="font-size:18px;margin-bottom:2px">📊</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Check-in semanal</div>
+                      <div style="font-size:11px;color:#666">El plan se ajusta a tu progreso</div>
+                    </td>
+                    <td style="padding:10px 12px;background:#141414;border-left:1px solid #1a1a1a">
+                      <div style="font-size:18px;margin-bottom:2px">🛒</div>
+                      <div style="font-size:12px;color:#fff;font-weight:600">Lista de la compra</div>
+                      <div style="font-size:11px;color:#666">Toda la semana en un clic</div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- CTA -->
+              <div style="padding:32px 28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:16px 48px;font-size:16px;font-weight:700;letter-spacing:0.5px;border-radius:6px">EMPEZAR AHORA →</a>
+                <p style="color:#555;font-size:12px;margin:12px 0 0">Primer mes completo por 0,99€</p>
+              </div>
+
+              <!-- Footer -->
+              <div style="padding:20px 28px;border-top:1px solid #1a1a1a;text-align:center">
+                <p style="color:#444;font-size:10px;line-height:1.6;margin:0">
+                  K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
+                  <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a>
+                </p>
+              </div>
+
             </div>
           </div>
         `
