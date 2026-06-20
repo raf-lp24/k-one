@@ -4510,6 +4510,49 @@
 </div>
     <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
 
+<!-- MODAL RENOVACIÓN MENSUAL -->
+<div class="modal-overlay" id="modalRenovacion">
+  <div class="modal-box" style="max-width:500px;padding:32px">
+    <div style="text-align:center;margin-bottom:8px">
+      <span style="font-size:36px">🔄</span>
+    </div>
+    <div class="modal-title" style="font-size:22px;text-align:center">Nuevo mes, nuevo plan</div>
+    <p class="modal-desc" style="text-align:center;margin-bottom:20px">Tu suscripción se ha renovado. Vamos a actualizar tu plan con tus datos actuales.</p>
+
+    <div id="renovacionResumen" style="background:var(--grafito);border:1px solid var(--humo);border-radius:10px;padding:16px;margin-bottom:20px"></div>
+
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">PESO ACTUAL (kg)</label>
+      <div class="stepper-wrap" style="max-width:200px">
+        <button class="stepper-btn" onclick="stepVal('renovPeso',-0.5)">−</button>
+        <input type="number" id="renovPeso" min="40" max="180" step="0.5" class="stepper-input">
+        <span class="stepper-unit">kg</span>
+        <button class="stepper-btn" onclick="stepVal('renovPeso',0.5)">+</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">¿QUIERES CAMBIAR ALGO?</label>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blanco);cursor:pointer">
+          <input type="checkbox" id="renovCambiarObj" style="accent-color:var(--brasa);width:16px;height:16px"> Cambiar objetivo
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blanco);cursor:pointer">
+          <input type="checkbox" id="renovCambiarDeporte" style="accent-color:var(--brasa);width:16px;height:16px"> Cambiar deporte o días
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blanco);cursor:pointer">
+          <input type="checkbox" id="renovCambiarComida" style="accent-color:var(--brasa);width:16px;height:16px"> Cambiar alimentos no deseados
+        </label>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button class="btn-primary" style="flex:1;padding:14px;font-size:14px;border-radius:10px" onclick="confirmarRenovacion()">Actualizar y generar plan →</button>
+    </div>
+    <button style="background:none;border:none;color:var(--metal);font-size:12px;cursor:pointer;margin-top:12px;width:100%;text-align:center" onclick="cerrarRenovacion()">Mantener plan actual</button>
+  </div>
+</div>
+
 <!-- MODAL DETALLE DE CLIENTE (Jarvis) -->
 <div id="modalJarvisCliente" style="position:fixed;inset:0;z-index:10100;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)cerrarDetalleCliente()">
   <div style="background:#111;border:1px solid #2a2a2a;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:28px">
@@ -10989,6 +11032,76 @@
       aplicarAvatarPerfil();
     }
     comprobarPaywall(email);
+    comprobarRenovacionMensual();
+  }
+
+  function comprobarRenovacionMensual() {
+    const user = getCurrentUser();
+    if (!user || !user.suscripcionActiva || !user.inicioPeriodo) return;
+    if (_adminVerificado || user.isBeta) return;
+    const periodoActual = user.inicioPeriodo;
+    const ultimoRecalculo = userData._ultimoRecalculoMes || null;
+    if (ultimoRecalculo === periodoActual) return;
+    const altaDate = new Date(user.creado);
+    const inicioDate = new Date(periodoActual);
+    const diasDesdeAlta = Math.round((inicioDate - altaDate) / 86400000);
+    if (diasDesdeAlta < 25) return;
+
+    const entrenosTotal = Array.isArray(userData.historialEntrenos) ? userData.historialEntrenos.length : 0;
+    const pesoActual = userData.peso || userData.pesoActual || '—';
+    const semana = userData.progreso?.semana || 1;
+    const racha = userData.progreso?.rachaActual || 0;
+
+    const resumenEl = document.getElementById('renovacionResumen');
+    if (resumenEl) {
+      resumenEl.innerHTML = `
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px">RESUMEN DEL MES ANTERIOR</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><div style="font-size:11px;color:var(--metal)">Entrenos</div><div style="font-size:20px;font-weight:700;color:#27ae60">${entrenosTotal}</div></div>
+          <div><div style="font-size:11px;color:var(--metal)">Semana</div><div style="font-size:20px;font-weight:700;color:var(--blanco)">${semana}</div></div>
+          <div><div style="font-size:11px;color:var(--metal)">Racha</div><div style="font-size:20px;font-weight:700;color:var(--brasa)">${racha} días</div></div>
+          <div><div style="font-size:11px;color:var(--metal)">Peso último</div><div style="font-size:20px;font-weight:700;color:var(--blanco)">${pesoActual} kg</div></div>
+        </div>`;
+    }
+    const pesoInput = document.getElementById('renovPeso');
+    if (pesoInput) pesoInput.value = parseFloat(pesoActual) || 75;
+
+    document.getElementById('modalRenovacion').classList.add('visible');
+  }
+
+  function confirmarRenovacion() {
+    const nuevoPeso = parseFloat(document.getElementById('renovPeso').value);
+    if (nuevoPeso && nuevoPeso > 30) {
+      userData.peso = String(nuevoPeso);
+      userData.pesoActual = String(nuevoPeso);
+    }
+
+    const cambiarObj = document.getElementById('renovCambiarObj').checked;
+    const cambiarDeporte = document.getElementById('renovCambiarDeporte').checked;
+    const cambiarComida = document.getElementById('renovCambiarComida').checked;
+
+    userData._ultimoRecalculoMes = getCurrentUser()?.inicioPeriodo;
+
+    generatedPlan = buildPlanFromData(userData);
+    buildDashboard();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+
+    document.getElementById('modalRenovacion').classList.remove('visible');
+
+    if (cambiarObj || cambiarDeporte || cambiarComida) {
+      showToast('Plan recalculado con tu nuevo peso. Ahora puedes cambiar objetivo, deporte o alimentos desde el panel.', 5000);
+      abrirModalCambiarPlan();
+    } else {
+      showToast('Plan actualizado con tu nuevo peso. Calorías y macros recalculados.', 4000);
+    }
+  }
+
+  function cerrarRenovacion() {
+    userData._ultimoRecalculoMes = getCurrentUser()?.inicioPeriodo;
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    document.getElementById('modalRenovacion').classList.remove('visible');
   }
 
   // ===== FIN DEL MES DE PRUEBA =====
