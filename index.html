@@ -4320,10 +4320,11 @@
 <div class="modal-overlay" id="modalRecetario" onclick="if(event.target===this)cerrarRecetario()">
   <div class="modal-box modal-box-recetario">
     <button class="modal-close" onclick="cerrarRecetario()">✕</button>
-    <div style="margin-bottom:24px">
+    <div style="margin-bottom:20px">
       <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">// Recetario</div>
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
-      <div style="font-size:12px;color:var(--metal)">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
+      <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
+      <input type="text" id="recetarioBuscador" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
     <div id="recetarioContenido"></div>
   </div>
@@ -4746,6 +4747,7 @@
       <span class="nav-link" onclick="scrollToSection('faq')">FAQ</span>
       <span class="nav-link" onclick="scrollToSection('pricing')">Precios</span>
       <span class="nav-link" onclick="scrollToSection('testimonials')">Opiniones</span>
+      <span class="nav-link" onclick="scrollToSection('sobre-nosotros')">Nosotros</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 1,99€</button>
     </div>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
@@ -4760,6 +4762,7 @@
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
     <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
+    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('sobre-nosotros')">Nosotros</span>
     <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza por 1,99€</button>
   </div>
 
@@ -5307,6 +5310,38 @@
       <button type="submit" class="btn-ghost">Avísame de ofertas</button>
     </form>
     <p class="lead-magnet-note" id="leadMagnetNote"></p>
+  </section>
+
+  <!-- SOBRE NOSOTROS -->
+  <section id="sobre-nosotros" style="padding:100px 40px;border-top:1px solid var(--humo)">
+    <div style="max-width:800px;margin:0 auto">
+      <div class="section-header">
+        <h2 class="section-title">Quién está detrás</h2>
+        <p class="section-note">No somos una startup de Silicon Valley. Somos gente que entrena.</p>
+      </div>
+
+      <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;margin-top:48px">
+        <div style="width:100px;height:100px;border-radius:50%;background:var(--brasa);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:42px;color:#fff;flex-shrink:0">R</div>
+        <div style="flex:1;min-width:260px">
+          <h3 style="font-size:20px;font-weight:700;color:var(--blanco);margin:0 0 4px">R. López Pinto</h3>
+          <p style="font-size:12px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:1px;margin:0 0 16px">FUNDADOR DE K-ONE</p>
+          <p style="font-size:14px;color:var(--metal-claro);line-height:1.8;margin:0 0 16px">
+            K-ONE nació de una frustración real: contratar un entrenador personal cuesta 200-300€ al mes, y las apps genéricas te dan un plan que no sabe nada de ti. Quería algo intermedio — la lógica de un preparador de élite, accesible para cualquiera, que se adaptara cada semana a cómo te va de verdad.
+          </p>
+          <p style="font-size:14px;color:var(--metal-claro);line-height:1.8;margin:0 0 16px">
+            No usamos IA conversacional que inventa. K-ONE funciona con un motor de reglas basado en principios reales de entrenamiento y nutrición deportiva: periodización, progresión de cargas, déficit o superávit calórico calculado con tu metabolismo basal real, y adaptación semanal según tu check-in.
+          </p>
+          <p style="font-size:14px;color:var(--metal-claro);line-height:1.8;margin:0">
+            Si tienes una duda, un problema con tu plan o una sugerencia, escríbenos directamente desde tu panel. Leemos todo y respondemos personalmente.
+          </p>
+          <div style="margin-top:20px">
+            <a href="mailto:k.one.fit26@gmail.com" style="color:var(--brasa);font-size:13px;font-family:'DM Mono',monospace;text-decoration:none">k.one.fit26@gmail.com</a>
+            <span style="color:var(--humo);margin:0 10px">·</span>
+            <span style="color:var(--metal);font-size:13px;font-family:'DM Mono',monospace">Alcalá de Henares, Madrid</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <div class="share-bar">
@@ -9956,6 +9991,20 @@
 
   function toggleRecetarioSec(idx) {
     document.getElementById('recSec' + idx).classList.toggle('open');
+  }
+
+  function filtrarRecetario(q) {
+    const query = q.toLowerCase().trim();
+    document.querySelectorAll('#recetarioContenido .recetario-section').forEach(sec => {
+      let visibles = 0;
+      sec.querySelectorAll('.receta-card').forEach(card => {
+        const texto = (card.textContent || '').toLowerCase();
+        const match = !query || texto.includes(query);
+        card.style.display = match ? '' : 'none';
+        if (match) visibles++;
+      });
+      sec.style.display = !query || visibles > 0 ? '' : 'none';
+    });
   }
 
   function cerrarRecetario() {
