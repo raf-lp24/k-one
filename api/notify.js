@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
       // 1) Notificación al admin
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nuevo lead: ${datos.email}`,
         html: `
@@ -53,6 +54,7 @@ module.exports = async (req, res) => {
       // 2) Email de bienvenida al lead con ejemplo real del plan
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: datos.email,
         subject: 'Así es un día dentro de K-ONE — mira tu plan',
         html: `
@@ -166,6 +168,7 @@ module.exports = async (req, res) => {
       // 1) Email al cliente
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: datos.email,
         subject: `Bienvenido/a a K-ONE, ${primerNombre}`,
         html: `
@@ -209,6 +212,7 @@ module.exports = async (req, res) => {
       // 2) Notificación al admin
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nuevo registro: ${datos.nombre} (${datos.email})`,
         html: `
@@ -223,6 +227,7 @@ module.exports = async (req, res) => {
       const estrellas = '★'.repeat(datos.estrellas || 0) + '☆'.repeat(5 - (datos.estrellas || 0));
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nueva opinión: ${datos.nombre} (${datos.estrellas}★)`,
         html: `
@@ -236,6 +241,7 @@ module.exports = async (req, res) => {
     } else {
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <onboarding@resend.dev>',
+        reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Notificación: ${tipo}`,
         html: `<pre>${JSON.stringify(datos, null, 2)}</pre>`

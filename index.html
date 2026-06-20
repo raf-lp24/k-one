@@ -10531,6 +10531,10 @@
     }
 
     await syncProfileFromSupabase(data.user);
+    // Forzar el nombre en profiles (el trigger puede fallar o no copiar bien)
+    if (data.user?.id) {
+      supa.from('profiles').update({ nombre }).eq('id', data.user.id);
+    }
     showToast('Cuenta creada. Bienvenido/a a K-One.');
 
     // Un usuario recién registrado nunca tiene datos previos: al cuestionario.
