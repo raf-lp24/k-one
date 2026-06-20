@@ -64,10 +64,13 @@ module.exports = async (req, res) => {
     const email = (user.email || '').toLowerCase();
     if (!admins.includes(email)) return res.status(403).json({ error: 'No autorizado' });
 
+    const page = parseInt(req.body?.page) || 0;
+    const pageSize = 50;
     const { data: perfiles, error: e1 } = await supabaseAdmin
       .from('profiles')
       .select('id, nombre, email, created_at, userdata, is_beta, beta_expires')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(page * pageSize, (page + 1) * pageSize - 1);
 
     // Traer nombres de auth.users (user_metadata.nombre) para los que no tienen nombre en profiles
     let authNames = {};
