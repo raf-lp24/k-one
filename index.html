@@ -12,13 +12,14 @@
 <meta property="og:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
 <meta property="og:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Se ajusta cada semana según tu progreso. Desde 0,99€/mes.">
 <meta property="og:locale" content="es_ES">
-<meta property="og:image" content="https://k-one.fit/og-image.svg">
+<meta property="og:image" content="https://k-one.fit/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
 <meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Desde 0,99€/mes.">
-<meta name="twitter:image" content="https://k-one.fit/og-image.svg">
+<meta name="twitter:image" content="https://k-one.fit/og-image.png">
 <meta name="theme-color" content="#0a0a0a">
 <script type="application/ld+json">
 {
@@ -4254,15 +4255,6 @@
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Bienvenido/a</h2>
     <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('registro')">Créala aquí →</a></p>
-
-    <!-- AVISO CUENTA DE TEST -->
-    <div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:24px">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--brasa);text-transform:uppercase;margin-bottom:6px">// Cuenta de testeo</div>
-      <div style="font-size:12px;color:var(--metal);line-height:1.6">
-        Email: <strong style="color:var(--blanco)">test@k-one.es</strong><br>
-        Contraseña: <strong style="color:var(--blanco)">kone123</strong>
-      </div>
-    </div>
 
     <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
     <div class="auth-field">
@@ -10868,6 +10860,10 @@
     if (!ok) return;
 
     if (email === TEST_EMAIL && pass === TEST_PASS) {
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        showToast('La cuenta de demostración no está disponible en producción.', 4000);
+        return;
+      }
       try {
         await ensureTestAccount();
       } catch (e) {
