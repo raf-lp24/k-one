@@ -395,10 +395,10 @@
   .hero-sub {
     font-size: 17px;
     color: var(--metal-claro);
-    max-width: 480px;
+    max-width: 520px;
     line-height: 1.7;
     margin-bottom: 48px;
-    font-weight: 400;
+    font-weight: 500;
   }
 
   .hero-cta { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
@@ -921,8 +921,8 @@
 
   .pricing-cards {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 4px;
     margin-top: 64px;
     max-width: 1400px;
     margin-left: auto;
@@ -955,7 +955,7 @@
 
   .price-features li {
     font-size: 13px;
-    color: var(--smoke);
+    color: var(--metal-claro);
     padding-left: 18px;
     position: relative;
     line-height: 1.4;
@@ -965,18 +965,18 @@
     content: '✓';
     position: absolute;
     left: 0;
-    color: var(--brand);
+    color: var(--brasa);
     font-weight: 700;
     font-size: 12px;
   }
 
   .price-features li.feat-no::before {
     content: '·';
-    color: var(--muted);
+    color: var(--metal);
   }
 
   .price-features li.feat-no {
-    color: var(--muted);
+    color: var(--metal);
   }
 
   .price-card.featured {
@@ -1221,10 +1221,10 @@
   }
 
   .faq-q {
-    font-family: var(--font-mono);
+    font-family: 'DM Mono', monospace;
     font-size: 14px;
     font-weight: 500;
-    color: var(--cream);
+    color: var(--blanco);
     padding: 24px 28px;
     display: flex;
     justify-content: space-between;
@@ -1241,10 +1241,10 @@
   .faq-q::after {
     content: '+';
     font-size: 20px;
-    color: var(--brand);
+    color: var(--brasa);
     flex-shrink: 0;
     transition: transform 0.2s;
-    font-family: var(--font-sans);
+    font-family: 'Inter', sans-serif;
     font-weight: 300;
   }
 
@@ -1254,7 +1254,7 @@
 
   .faq-a {
     font-size: 14px;
-    color: var(--smoke);
+    color: var(--metal-claro);
     line-height: 1.7;
     padding: 0 28px 24px;
     margin: 0;
