@@ -4355,6 +4355,18 @@
       <table id="adminTabla" style="width:100%;border-collapse:collapse;font-size:13px;color:var(--blanco);min-width:1050px"></table>
     </div>
     <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
+
+    <!-- LEADS (emails de "Avísame de ofertas") -->
+    <div style="margin-top:32px;border-top:1px solid #2a2a2a;padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--brasa);letter-spacing:1px">// LEADS</div>
+          <div style="font-size:18px;font-weight:700;color:var(--blanco)">Emails interesados</div>
+        </div>
+        <span id="adminLeadsCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--metal)"></span>
+      </div>
+      <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+    </div>
   </div>
 </div>
 
@@ -11189,6 +11201,24 @@
     if (totalEl) totalEl.textContent = data.clientes.length;
 
     renderTablaAdmin();
+
+    // Leads
+    const leads = data.leads || [];
+    const leadsCount = document.getElementById('adminLeadsCount');
+    if (leadsCount) leadsCount.textContent = leads.length + ' leads';
+    const leadsList = document.getElementById('adminLeadsList');
+    if (leadsList) {
+      leadsList.innerHTML = leads.length === 0
+        ? '<p style="color:var(--metal);font-size:13px;grid-column:1/-1">Aún no hay leads registrados.</p>'
+        : leads.map(l => `
+          <div style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="min-width:0">
+              <div style="font-size:13px;color:var(--blanco);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(l.email)}</div>
+              <div style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace;margin-top:2px">${_fmtFecha(l.created_at)}</div>
+            </div>
+            <a href="mailto:${_esc(l.email)}" onclick="event.stopPropagation()" style="color:var(--brasa);font-size:16px;text-decoration:none;flex-shrink:0" title="Enviar email">✉</a>
+          </div>`).join('');
+    }
   }
 
   // Renderiza solo la tabla (filtros + orden sin volver a la API)
@@ -11391,6 +11421,15 @@
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
         c.alerta==='red' ? '#e74c3c' : c.alerta==='orange' ? '#e67e22' : '#f0a500') : ''}
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#27ae60' : 'var(--metal)')}
+      ${row('Premium (is_beta)', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#27ae60' : 'var(--metal)')}
+      <div style="display:flex;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid #2a2a2a">
+        <button class="btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
+          ${c.isBeta ? 'Quitar premium' : 'Hacer premium'}
+        </button>
+        <a href="mailto:${_esc(c.email)}" class="btn-ghost" style="flex:1;padding:10px;font-size:12px;text-align:center;text-decoration:none">
+          Enviar email
+        </a>
+      </div>
     `;
     const modal = document.getElementById('modalJarvisCliente');
     if (modal) modal.classList.add('visible');
@@ -11399,6 +11438,28 @@
   function cerrarDetalleCliente() {
     const modal = document.getElementById('modalJarvisCliente');
     if (modal) modal.classList.remove('visible');
+  }
+
+  async function togglePremiumCliente(userId, premium, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Actualizando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-set-premium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, premium })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast(premium ? 'Cliente marcado como premium' : 'Premium desactivado');
+      cerrarDetalleCliente();
+      abrirPanelAdmin();
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      btn.disabled = false;
+      btn.textContent = premium ? 'Hacer premium' : 'Quitar premium';
+    }
   }
 
   async function cancelarSuscripcion() {

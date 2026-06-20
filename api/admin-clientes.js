@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
 
     const { data: perfiles, error: e1 } = await supabaseAdmin
       .from('profiles')
-      .select('id, nombre, email, created_at, userdata')
+      .select('id, nombre, email, created_at, userdata, is_beta')
       .order('created_at', { ascending: false });
 
     if (e1) {
@@ -169,6 +169,8 @@ module.exports = async (req, res) => {
       if (esSemanaPasada) m.nuevosSemanaPasada++;
 
       return {
+        id:           p.id,
+        isBeta:       !!p.is_beta,
         nombre:       p.nombre || '—',
         email:        p.email  || '—',
         alta:         p.created_at,
@@ -204,7 +206,14 @@ module.exports = async (req, res) => {
     const distObjetivo = distribucion(clientes.filter(c => c.objetivo !== '—'), 'objetivo');
     const distPlan     = distribucion(clientes.filter(c => c.tipoPlan !== '—'), 'tipoPlan');
 
-    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion });
+    let leads = [];
+    try {
+      const { data: leadsData } = await supabaseAdmin
+        .from('leads').select('email, created_at').order('created_at', { ascending: false }).limit(50);
+      leads = leadsData || [];
+    } catch (e) {}
+
+    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads });
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);
