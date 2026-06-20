@@ -231,7 +231,15 @@ module.exports = async (req, res) => {
       emailLog = logData || [];
     } catch (e) {}
 
-    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog });
+    let mensajes = [];
+    try {
+      const { data: msgData } = await supabaseAdmin
+        .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at')
+        .order('created_at', { ascending: false }).limit(50);
+      mensajes = msgData || [];
+    } catch (e) {}
+
+    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog, mensajes });
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);

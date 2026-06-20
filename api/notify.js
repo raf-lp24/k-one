@@ -223,6 +223,33 @@ module.exports = async (req, res) => {
         `
       }));
 
+    } else if (tipo === 'mensaje') {
+      emails.push(enviarEmail(apiKey, {
+        from: 'K-ONE <equipo@k-one.fit>',
+        reply_to: datos.email,
+        to: ADMIN_EMAIL,
+        subject: `K-ONE · Mensaje de ${datos.nombre}: ${datos.asunto}`,
+        html: `
+          <div style="background:#0b0b0b;padding:32px 20px;font-family:Arial,sans-serif;color:#e0e0e0">
+            <div style="max-width:520px;margin:0 auto">
+              <div style="margin-bottom:20px">
+                <span style="font-size:22px;font-weight:800;color:#fff">K-<span style="color:#E8490F">ONE</span></span>
+                <span style="font-size:12px;color:#888;margin-left:12px">Mensaje de cliente</span>
+              </div>
+              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:16px">
+                <p style="margin:0 0 4px;font-size:11px;color:#888">DE</p>
+                <p style="margin:0;color:#fff;font-weight:600">${datos.nombre} · <span style="color:#b5b2ad">${datos.email}</span></p>
+              </div>
+              <div style="background:#141414;padding:18px 22px;margin-bottom:16px">
+                <p style="margin:0 0 4px;font-size:11px;color:#E8490F;font-weight:600">${datos.asunto}</p>
+                <p style="margin:0;color:#e0e0e0;line-height:1.6;font-size:14px">${datos.mensaje.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p>
+              </div>
+              <p style="color:#555;font-size:11px;margin:0">Responde a este email para contestar directamente al cliente.</p>
+            </div>
+          </div>
+        `
+      }));
+
     } else if (tipo === 'opinion') {
       const estrellas = '★'.repeat(datos.estrellas || 0) + '☆'.repeat(5 - (datos.estrellas || 0));
       emails.push(enviarEmail(apiKey, {
