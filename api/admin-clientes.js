@@ -69,6 +69,16 @@ module.exports = async (req, res) => {
       .select('id, nombre, email, created_at, userdata, is_beta')
       .order('created_at', { ascending: false });
 
+    // Traer nombres de auth.users (user_metadata.nombre) para los que no tienen nombre en profiles
+    let authNames = {};
+    try {
+      const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+      (users || []).forEach(u => {
+        const n = u.user_metadata?.nombre;
+        if (n) authNames[u.id] = n;
+      });
+    } catch (e) {}
+
     if (e1) {
       // B-4: no exponer el mensaje crudo de Supabase al cliente
       console.error('[admin-clientes] profiles query error:', e1);
@@ -171,7 +181,7 @@ module.exports = async (req, res) => {
       return {
         id:           p.id,
         isBeta:       !!p.is_beta,
-        nombre:       p.nombre || ud.nombre || p.email?.split('@')[0] || '—',
+        nombre:       p.nombre || ud.nombre || authNames[p.id] || '—',
         email:        p.email  || '—',
         alta:         p.created_at,
         diasDesdeAlta,
