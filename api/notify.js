@@ -17,9 +17,19 @@ function enviarEmail(apiKey, { from, to, subject, html }) {
   });
 }
 
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  const origin = req.headers.origin || req.headers.referer || '';
+  const appUrl = process.env.APP_URL || 'https://k-one.fit';
+  if (!origin.includes('k-one.fit') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
+    return res.status(403).json({ error: 'Origen no permitido' });
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -33,6 +43,15 @@ module.exports = async (req, res) => {
     if (!tipo || !datos) {
       return res.status(400).json({ error: 'tipo y datos son obligatorios' });
     }
+    const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje'];
+    if (!tiposValidos.includes(tipo)) {
+      return res.status(400).json({ error: 'Tipo no válido' });
+    }
+    if (tipo === 'lead' && datos.email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) {
+        return res.status(400).json({ error: 'Email no válido' });
+      }
+    }
 
     const emails = [];
 
@@ -42,10 +61,10 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
-        subject: `K-ONE · Nuevo lead: ${datos.email}`,
+        subject: `K-ONE · Nuevo lead: ${esc(datos.email)}`,
         html: `
           <h2 style="color:#E8490F">Nuevo lead en K-ONE</h2>
-          <p><strong>Email:</strong> ${datos.email}</p>
+          <p><strong>Email:</strong> ${esc(datos.email)}</p>
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
           <p style="color:#888;font-size:12px">Se ha registrado desde el formulario "Avísame de ofertas" de la landing.</p>
         `
@@ -170,7 +189,7 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
-        subject: `${primerNombre}, tu plan te está esperando — K-ONE`,
+        subject: `${esc(primerNombre)}, tu plan te está esperando — K-ONE`,
         html: `
           <div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
             <div style="max-width:560px;margin:0 auto">
@@ -183,7 +202,7 @@ module.exports = async (req, res) => {
 
               <!-- Saludo -->
               <div style="padding:36px 28px 0">
-                <h1 style="color:#fff;font-size:26px;font-weight:700;margin:0 0 8px">${primerNombre}, bienvenido/a.</h1>
+                <h1 style="color:#fff;font-size:26px;font-weight:700;margin:0 0 8px">${esc(primerNombre)}, bienvenido/a.</h1>
                 <p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 28px">Tu cuenta está lista. En 3 pasos tienes tu plan de entrenamiento y nutrición personalizado funcionando.</p>
               </div>
 
@@ -274,11 +293,11 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
-        subject: `K-ONE · Nuevo registro: ${datos.nombre} (${datos.email})`,
+        subject: `K-ONE · Nuevo registro: ${esc(datos.nombre)} (${esc(datos.email)})`,
         html: `
           <h2 style="color:#E8490F">Nuevo cliente registrado</h2>
-          <p><strong>Nombre:</strong> ${datos.nombre}</p>
-          <p><strong>Email:</strong> ${datos.email}</p>
+          <p><strong>Nombre:</strong> ${esc(datos.nombre)}</p>
+          <p><strong>Email:</strong> ${esc(datos.email)}</p>
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
       }));
@@ -288,7 +307,7 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: datos.email,
         to: ADMIN_EMAIL,
-        subject: `K-ONE · Mensaje de ${datos.nombre}: ${datos.asunto}`,
+        subject: `K-ONE · Mensaje de ${esc(datos.nombre)}: ${esc(datos.asunto)}`,
         html: `
           <div style="background:#0b0b0b;padding:32px 20px;font-family:Arial,sans-serif;color:#e0e0e0">
             <div style="max-width:520px;margin:0 auto">
@@ -298,10 +317,10 @@ module.exports = async (req, res) => {
               </div>
               <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:16px">
                 <p style="margin:0 0 4px;font-size:11px;color:#888">DE</p>
-                <p style="margin:0;color:#fff;font-weight:600">${datos.nombre} · <span style="color:#b5b2ad">${datos.email}</span></p>
+                <p style="margin:0;color:#fff;font-weight:600">${esc(datos.nombre)} · <span style="color:#b5b2ad">${esc(datos.email)}</span></p>
               </div>
               <div style="background:#141414;padding:18px 22px;margin-bottom:16px">
-                <p style="margin:0 0 4px;font-size:11px;color:#E8490F;font-weight:600">${datos.asunto}</p>
+                <p style="margin:0 0 4px;font-size:11px;color:#E8490F;font-weight:600">${esc(datos.asunto)}</p>
                 <p style="margin:0;color:#e0e0e0;line-height:1.6;font-size:14px">${datos.mensaje.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p>
               </div>
               <p style="color:#555;font-size:11px;margin:0">Responde a este email para contestar directamente al cliente.</p>
@@ -316,12 +335,12 @@ module.exports = async (req, res) => {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
-        subject: `K-ONE · Nueva opinión: ${datos.nombre} (${datos.estrellas}★)`,
+        subject: `K-ONE · Nueva opinión: ${esc(datos.nombre)} (${datos.estrellas}★)`,
         html: `
           <h2 style="color:#E8490F">Nueva opinión en K-ONE</h2>
-          <p><strong>Nombre:</strong> ${datos.nombre || 'Anónimo'}</p>
+          <p><strong>Nombre:</strong> ${esc(datos.nombre) || 'Anónimo'}</p>
           <p><strong>Valoración:</strong> <span style="color:#E8490F;font-size:18px">${estrellas}</span></p>
-          <p><strong>Texto:</strong> ${datos.texto || '(sin texto)'}</p>
+          <p><strong>Texto:</strong> ${esc(datos.texto || '(sin texto)'}</p>
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
       }));
@@ -346,7 +365,7 @@ module.exports = async (req, res) => {
     try {
       const supa = getSupabaseAdmin();
       const destinatario = tipo === 'lead' ? datos.email : (tipo === 'opinion' ? datos.nombre : ADMIN_EMAIL);
-      const asunto = tipo === 'lead' ? 'Ejemplo de plan K-ONE' : tipo === 'opinion' ? `Nueva opinión de ${datos.nombre}` : tipo;
+      const asunto = tipo === 'lead' ? 'Ejemplo de plan K-ONE' : tipo === 'opinion' ? `Nueva opinión de ${esc(datos.nombre)}` : tipo;
       await supa.from('email_log').insert({
         tipo,
         destinatario,
@@ -359,6 +378,6 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[notify] error:', err);
-    return res.status(200).json({ ok: true });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

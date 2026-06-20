@@ -12987,7 +12987,9 @@
       showToast('¡Pago confirmado! Verificando tu suscripción...', 3000);
       let intentos = 0;
       const verificarSuscripcion = async () => {
-        await syncProfileFromSupabase(session.user);
+        const { data: { session: freshSession } } = await supa.auth.getSession();
+        const authUser = freshSession?.user || session.user;
+        await syncProfileFromSupabase(authUser);
         const u = getCurrentUser();
         if (u && tieneAccesoActivo(u.email)) {
           const modal = document.getElementById('modalPaywall');
