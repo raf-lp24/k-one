@@ -10329,8 +10329,11 @@
     let esBeta = false;
     try {
       const { data: betaRow } = await supa.from('profiles')
-        .select('is_beta').eq('id', authUser.id).maybeSingle();
+        .select('is_beta, beta_expires').eq('id', authUser.id).maybeSingle();
       esBeta = !!betaRow?.is_beta;
+      if (esBeta && betaRow.beta_expires && new Date(betaRow.beta_expires) < new Date()) {
+        esBeta = false;
+      }
     } catch (e) { esBeta = false; }
     const esTest = authUser.email === TEST_EMAIL; // cuenta de demo, acceso siempre
     // El acceso de pago se decide SOLO con la tabla "subscriptions", que únicamente
@@ -11465,10 +11468,11 @@
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
         c.alerta==='red' ? '#e74c3c' : c.alerta==='orange' ? '#e67e22' : '#f0a500') : ''}
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#27ae60' : 'var(--metal)')}
-      ${row('Premium (is_beta)', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#27ae60' : 'var(--metal)')}
+      ${row('Premium gratuito', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#27ae60' : 'var(--metal)')}
+      ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? '#e74c3c' : '#f0a500') : ''}
       <div style="display:flex;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid #2a2a2a">
-        <button class="btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
-          ${c.isBeta ? 'Quitar premium' : 'Hacer premium'}
+        <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;background:${c.isBeta ? '#e74c3c' : 'var(--brasa)'}" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
+          ${c.isBeta ? 'Quitar premium' : 'Dar premium (1 año)'}
         </button>
         <a href="mailto:${_esc(c.email)}" class="btn-ghost" style="flex:1;padding:10px;font-size:12px;text-align:center;text-decoration:none">
           Enviar email

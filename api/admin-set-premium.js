@@ -16,9 +16,21 @@ module.exports = async (req, res) => {
     const { userId, premium } = req.body || {};
     if (!userId) return res.status(400).json({ error: 'userId requerido' });
 
-    await supabaseAdmin.from('profiles').update({ is_beta: !!premium }).eq('id', userId);
-
-    return res.status(200).json({ ok: true, is_beta: !!premium });
+    if (premium) {
+      const expira = new Date();
+      expira.setFullYear(expira.getFullYear() + 1);
+      await supabaseAdmin.from('profiles').update({
+        is_beta: true,
+        beta_expires: expira.toISOString()
+      }).eq('id', userId);
+      return res.status(200).json({ ok: true, is_beta: true, beta_expires: expira.toISOString() });
+    } else {
+      await supabaseAdmin.from('profiles').update({
+        is_beta: false,
+        beta_expires: null
+      }).eq('id', userId);
+      return res.status(200).json({ ok: true, is_beta: false });
+    }
   } catch (err) {
     console.error('[admin-set-premium] error:', err);
     return res.status(500).json({ error: 'Error interno' });

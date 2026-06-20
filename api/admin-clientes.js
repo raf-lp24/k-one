@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
 
     const { data: perfiles, error: e1 } = await supabaseAdmin
       .from('profiles')
-      .select('id, nombre, email, created_at, userdata, is_beta')
+      .select('id, nombre, email, created_at, userdata, is_beta, beta_expires')
       .order('created_at', { ascending: false });
 
     // Traer nombres de auth.users (user_metadata.nombre) para los que no tienen nombre en profiles
@@ -181,6 +181,7 @@ module.exports = async (req, res) => {
       return {
         id:           p.id,
         isBeta:       !!p.is_beta,
+        betaExpires:  p.beta_expires || null,
         nombre:       p.nombre || ud.nombre || authNames[p.id] || '—',
         email:        p.email  || '—',
         alta:         p.created_at,
