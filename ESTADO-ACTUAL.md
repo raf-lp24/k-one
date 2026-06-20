@@ -519,17 +519,17 @@ Tras una revisión general de la web, el usuario pidió abordar varias mejoras: 
 Verificado en preview en escritorio y móvil (375px): "Mi progreso" muestra correctamente fotos subidas/eliminadas y hitos "CONSEGUIDO" con fecha al simular progreso avanzado; `og-image.svg` se renderiza correctamente al abrirlo directamente; el mensaje de confianza se ve bien en el hero (desktop y móvil) y en el modal de paywall; el formulario de email guarda el lead en `localStorage` y muestra el mensaje de confirmación. Sin errores de consola. Cuenta de test restaurada a su estado original (sin fotos ni hitos forzados).
 
 ### 44. Nuevos precios (plan trimestral, anual rebajado, solo nutrición) + periodicidad en la lógica de planes
-Tras una discusión sobre precios, se acordó: bajar el plan anual de 119,99€ a 99,99€ (≈8,33€/mes), subir "Solo nutrición" de 4,99€ a 6,99€/mes, y crear un plan trimestral nuevo (Plan completo, 35,99€) para fidelizar clientes que pagan por trimestres. El usuario pidió además que la lógica de datos (contadores, precios, pagos) se actualizara acorde a estos planes, manteniendo todo en `localStorage` (sin tocar Supabase/Stripe, que sigue aparcado). En un segundo ajuste se descartó el plan "Solo nutrición trimestral", se bajó el Trimestral de 39,99€ a 35,99€, se pidió que las 5 tarjetas se vean en una sola fila en escritorio, y se añadió un badge "Oferta" a la tarjeta "Primer mes".
+Tras una discusión sobre precios, se acordó: bajar el plan anual de 119,99€ a 149,99€ (≈8,33€/mes), subir "Solo nutrición" de 4,99€ a 9,99€/mes, y crear un plan trimestral nuevo (Plan completo, 44,99€) para fidelizar clientes que pagan por trimestres. El usuario pidió además que la lógica de datos (contadores, precios, pagos) se actualizara acorde a estos planes, manteniendo todo en `localStorage` (sin tocar Supabase/Stripe, que sigue aparcado). En un segundo ajuste se descartó el plan "Solo nutrición trimestral", se bajó el Trimestral de 39,99€ a 44,99€, se pidió que las 5 tarjetas se vean en una sola fila en escritorio, y se añadió un badge "Oferta" a la tarjeta "Primer mes".
 
-- **Tarjetas de precios** (`#pricing`): 5 tarjetas en una sola fila en escritorio (`.pricing-cards` ahora `grid-template-columns: repeat(5, 1fr)`, `max-width: 1400px`, `.price-card` con padding reducido a `40px 24px` y `.price-badge` con `right: 24px` para que quepan): Primer mes (1,99€, con nuevo badge "Oferta del mes"), Mensual (19,99€, "Más popular"), **Trimestral** (35,99€, "Cada 3 meses · Equivale a 12€/mes · Ahorras 9€"), Anual (99,99€, antes 119,99€, "Equivale a 8,33€/mes · Ahorras 80€"), Solo nutrición (6,99€/mes, antes 4,99€). En móvil sigue colapsando a 1 columna.
-- **Hero**: "¿Solo buscas nutrición? También hay plan para ti, desde 4,99€/mes" → "desde 6,99€/mes".
+- **Tarjetas de precios** (`#pricing`): 5 tarjetas en una sola fila en escritorio (`.pricing-cards` ahora `grid-template-columns: repeat(5, 1fr)`, `max-width: 1400px`, `.price-card` con padding reducido a `40px 24px` y `.price-badge` con `right: 24px` para que quepan): Primer mes (1,99€, con nuevo badge "Oferta del mes"), Mensual (19,99€, "Más popular"), **Trimestral** (44,99€, "Cada 3 meses · Equivale a 12€/mes · Ahorras 9€"), Anual (149,99€, antes 119,99€, "Equivale a 8,33€/mes · Ahorras 80€"), Solo nutrición (9,99€/mes, antes 4,99€). En móvil sigue colapsando a 1 columna.
+- **Hero**: "¿Solo buscas nutrición? También hay plan para ti, desde 4,99€/mes" → "desde 9,99€/mes".
 - **Tabla de precios centralizada (`PRECIOS`)**: objeto con el precio, periodo, días de ciclo (30/90/365) y texto de detalle para cada combinación tipoPlan × periodicidad (Plan completo: mensual/trimestral/anual; Solo nutrición: solo mensual). Función `preciosPlan(tipoPlan)` para acceder con fallback al plan completo.
 - **`userData.periodicidad`** (nuevo campo, 'mensual' por defecto): determina el ciclo de facturación del usuario. `precioPlanActual(tipoPlan, creadoISO, periodicidad)` calcula el precio/detalle según la tabla `PRECIOS` (en el mes de prueba sigue devolviendo siempre 1,99€). `actualizarDiasRestantesPlan()` usa el ciclo de la periodicidad activa (30/90/365 días) en lugar de fijo a 30.
 - **Selector de periodicidad**: nuevo grupo de radios "¿Con qué periodicidad quieres pagar?" (Mensual/Trimestral/Anual) en el modal "Cambiar tu plan" (`cp-periodicidad`) y en el modal de fin de prueba/paywall (`pw-periodicidad`). Nueva función `actualizarOpcionesPeriodicidad(tipoPlan, grupoId)` oculta "Trimestral" y "Anual" cuando el tipo de plan es "Solo nutrición" (solo tiene tarifa mensual) y reasigna a "Mensual" si alguna estaba seleccionada. `valorPeriodicidad(grupoId)` traduce el radio elegido a la clave usada por `PRECIOS`.
 - **Modal "Cambiar tu plan"**: `abrirModalCambiarPlan()` preselecciona la periodicidad guardada del usuario y ajusta las opciones visibles según el tipo de plan; `actualizarPrecioCambioPlan()` y `guardarCambioPlan()` ahora también leen/guardan `userData.periodicidad`.
 - **Modal de paywall**: ahora muestra el selector de periodicidad y el precio/detalle se recalculan en vivo (`actualizarPrecioPaywall()`). `comprobarPaywall()` preselecciona la periodicidad guardada del usuario. `confirmarPagoSuscripcion()` guarda la periodicidad elegida (en `users[email]` y en `userData`, persistiendo con `saveUserData` salvo cuenta demo) y refresca el contador de días restantes.
 
-Verificado en preview en escritorio y móvil (375px): las 5 tarjetas de precios se muestran en una sola fila en escritorio (con el badge "Oferta del mes" en "Primer mes") y colapsan a 1 columna en móvil; en el modal "Cambiar tu plan", elegir "Solo nutrición" oculta las opciones "Trimestral" y "Anual" de periodicidad; `precioPlanActual` devuelve 35,99€/trimestre (≈12€/mes) para el plan completo trimestral; simulando fin del mes de prueba, el paywall muestra el selector de periodicidad y al confirmar el pago se guarda la periodicidad elegida y se actualiza el contador de días restantes. Sin errores de consola. Cuenta de test restaurada a su estado original.
+Verificado en preview en escritorio y móvil (375px): las 5 tarjetas de precios se muestran en una sola fila en escritorio (con el badge "Oferta del mes" en "Primer mes") y colapsan a 1 columna en móvil; en el modal "Cambiar tu plan", elegir "Solo nutrición" oculta las opciones "Trimestral" y "Anual" de periodicidad; `precioPlanActual` devuelve 44,99€/trimestre (≈12€/mes) para el plan completo trimestral; simulando fin del mes de prueba, el paywall muestra el selector de periodicidad y al confirmar el pago se guarda la periodicidad elegida y se actualiza el contador de días restantes. Sin errores de consola. Cuenta de test restaurada a su estado original.
 
 ### 45. Mejora visual del mensaje de confianza del hero ("Pago seguro · Cancela cuando quieras · Sin permanencia")
 El usuario compartió una captura de la línea de confianza bajo los botones del hero y dijo que "no se ve bien" (texto pequeño, monoespaciado y en gris claro de baja legibilidad sobre el fondo oscuro).
@@ -893,9 +893,9 @@ Se conecta el paywall de fin de mes de prueba a Stripe (modo suscripción), sigu
 **Pendiente del usuario, imprescindible para que funcione en producción** (nada de esto se prueba en el preview local, que es solo HTML estático — requiere despliegue en Vercel):
 1. En el [Dashboard de Stripe](https://dashboard.stripe.com) (modo *test* para probar primero): crear un producto "K-ONE" con 4 precios recurrentes:
    - Plan completo mensual → 19,99€/mes
-   - Plan completo trimestral → 35,99€/3 meses
-   - Plan completo anual → 99,99€/año
-   - Solo nutrición mensual → 6,99€/mes
+   - Plan completo trimestral → 44,99€/3 meses
+   - Plan completo anual → 149,99€/año
+   - Solo nutrición mensual → 9,99€/mes
    - Pasarme los 4 **Price ID** (`price_...`).
 2. Copiar la **clave secreta** de Stripe (`sk_test_...` en modo test).
 3. En Supabase → Project Settings → API: copiar la **`service_role` key** (secreta, nunca va en el HTML).
@@ -942,10 +942,10 @@ Se completaron los pasos pendientes del punto 78 (creación de productos/precios
 - **K-ONE — Plan completo** (`prod_UhhzHe1rdxhepx`), 4 precios recurrentes en EUR:
   - Oferta del mes (primer mes): 1,99€/mes → `price_1TiIZJArPjnnOdT9v8qnqnCY` *(aún no la usa el código; reservada para la futura lógica de "primer mes a 1,99€ y luego precio normal", que requerirá un Subscription Schedule)*
   - Mensual: 19,99€/mes → `price_1TiIa5ArPjnnOdT94UvnsP4P`
-  - Trimestral: 35,99€/3 meses → `price_1TiIa5ArPjnnOdT9KqyvbKu5`
-  - Anual: 99,99€/año → `price_1TiIa5ArPjnnOdT92XFvzouZ`
+  - Trimestral: 44,99€/3 meses → `price_1TiIa5ArPjnnOdT9KqyvbKu5`
+  - Anual: 149,99€/año → `price_1TiIa5ArPjnnOdT92XFvzouZ`
 - **Nutricion** (`prod_Uhi1fN9PETu0qE`), 1 precio:
-  - Mensual: 6,99€/mes → `price_1TiIbSArPjnnOdT9p8Obe6mn`
+  - Mensual: 9,99€/mes → `price_1TiIbSArPjnnOdT9p8Obe6mn`
 
 **Variables de entorno configuradas en Vercel** (entornos Production + Preview; "Development" no es necesario porque no se usa `vercel dev` en local):
 - `STRIPE_PRICE_COMPLETO_MENSUAL`, `STRIPE_PRICE_COMPLETO_TRIMESTRAL`, `STRIPE_PRICE_COMPLETO_ANUAL`, `STRIPE_PRICE_NUTRICION_MENSUAL`, `STRIPE_PRICE_OFERTA_MES` (las 5 anteriores; el código usa las 4 primeras vía el mapeo de `api/_stripeHelpers.js`).

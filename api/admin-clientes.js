@@ -15,9 +15,9 @@ function buildMrrMap() {
   const m = {};
   const add = (id, eur) => { if (id) m[id] = eur; };
   add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    19.99);
-  add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 35.99 / 3);
-  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL,      99.99 / 12);
-  add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,   6.99);
+  add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 44.99 / 3);
+  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL,      149.99 / 12);
+  add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,   9.99);
   add(process.env.STRIPE_PRICE_OFERTA_MES,          1.99);
   return m;
 }
