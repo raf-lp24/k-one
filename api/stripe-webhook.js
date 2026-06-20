@@ -104,7 +104,7 @@ module.exports = async (req, res) => {
         const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
-        // Oferta 0,99€: al terminar el primer mes, pasa automáticamente a 14,99€/mes
+        // Oferta 1,99€: al terminar el primer mes, pasa automáticamente a 19,99€/mes
         // (plan completo mensual). Si el cliente cambia de plan antes, el schedule se
         // sobreescribe con el nuevo plan elegido.
         if (session.metadata?.oferta === 'si') {

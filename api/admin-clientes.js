@@ -14,11 +14,11 @@ function getAdmins() {
 function buildMrrMap() {
   const m = {};
   const add = (id, eur) => { if (id) m[id] = eur; };
-  add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    14.99);
+  add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    19.99);
   add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 35.99 / 3);
   add(process.env.STRIPE_PRICE_COMPLETO_ANUAL,      99.99 / 12);
   add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,   6.99);
-  add(process.env.STRIPE_PRICE_OFERTA_MES,          0.99);
+  add(process.env.STRIPE_PRICE_OFERTA_MES,          1.99);
   return m;
 }
 const MRR_MAP = buildMrrMap();

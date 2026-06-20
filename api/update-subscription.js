@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
 
     const currentPriceId = subscription.items.data[0]?.price?.id;
 
-    // Durante el mes de oferta (0,99€) no se toca la facturación.
+    // Durante el mes de oferta (1,99€) no se toca la facturación.
     const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
     if (offerPriceId && currentPriceId === offerPriceId) {
       return res.status(200).json({ ok: true, enOferta: true, noChange: true });

@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
 
     const { tipoPlan, periodicidad, oferta } = req.body;
 
-    // Modo oferta: primer mes a 0,99€. Modo normal: plan elegido en el paywall.
+    // Modo oferta: primer mes a 1,99€. Modo normal: plan elegido en el paywall.
     const ofertaPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
     const usarOferta = !!oferta && !!ofertaPriceId;
 
@@ -61,7 +61,7 @@ module.exports = async (req, res) => {
 
     let priceId;
     if (usarOferta) {
-      // SEGURIDAD: la oferta de primer mes (0,99€) solo es válida para quien NUNCA ha
+      // SEGURIDAD: la oferta de primer mes (1,99€) solo es válida para quien NUNCA ha
       // tenido una suscripción. No basta con el flag del cliente (sería manipulable):
       // se verifica el historial de Stripe del cliente. Un customer recién creado no
       // tiene historial, así que se salta la llamada.

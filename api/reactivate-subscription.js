@@ -8,7 +8,7 @@ const {
 //
 // Casos:
 // - Plan de pago real cancelado y aún activo  → reactiva (ok: reactivated).
-// - Primer mes de oferta (0,99€)              → no se reactiva; el cliente elige plan
+// - Primer mes de oferta (1,99€)              → no se reactiva; el cliente elige plan
 //                                               definitivo en el paywall (needsCheckout, enOferta).
 // - Sin suscripción vigente (ya expiró)       → hay que pasar por checkout (needsCheckout).
 module.exports = async (req, res) => {
