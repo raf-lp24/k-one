@@ -6221,7 +6221,6 @@
           <button class="btn-primary" onclick="enviarContacto()" style="align-self:flex-start;padding:12px 28px">Enviar mensaje →</button>
         </div>
 
-        <div id="contactoHistorial" style="margin-top:20px"></div>
       </div>
 
     </main>
@@ -8859,7 +8858,6 @@
     document.getElementById(`section-${id}`).classList.add('active');
     document.getElementById(`nav-${id}`)?.classList.add('active');
     closeDashMenu();
-    if (id === 'contacto') cargarHistorialContacto();
   }
 
   // ===== MENÚ MÓVIL DEL DASHBOARD =====
@@ -9386,40 +9384,11 @@
       notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: asuntoTexto[asunto], mensaje });
       document.getElementById('contactoMensaje').value = '';
       showToast('Mensaje enviado. Te responderemos lo antes posible.');
-      cargarHistorialContacto();
     } catch (e) {
       showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
     }
   }
 
-  async function cargarHistorialContacto() {
-    if (!_supaUserId) return;
-    const el = document.getElementById('contactoHistorial');
-    if (!el) return;
-    const { data } = await supa.from('mensajes_cliente')
-      .select('asunto, mensaje, respuesta, created_at')
-      .eq('user_id', _supaUserId)
-      .order('created_at', { ascending: false })
-      .limit(20);
-    if (!data || !data.length) {
-      el.innerHTML = '<p style="color:var(--metal);font-size:13px">Aún no has enviado ningún mensaje.</p>';
-      return;
-    }
-    el.innerHTML = `
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">// Tus mensajes</div>
-      ${data.map(m => `
-        <div style="background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:14px 16px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:12px;font-weight:600;color:var(--brasa)">${m.asunto}</span>
-            <span style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace">${new Date(m.created_at).toLocaleDateString('es-ES')}</span>
-          </div>
-          <p style="font-size:13px;color:var(--blanco);line-height:1.5;margin:0">${m.mensaje.replace(/</g,'&lt;')}</p>
-          ${m.respuesta ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--humo)">
-            <span style="font-size:10px;color:#f0a500;font-family:'DM Mono',monospace">// RESPUESTA K-ONE</span>
-            <p style="font-size:13px;color:var(--metal-claro);line-height:1.5;margin:4px 0 0">${m.respuesta.replace(/</g,'&lt;')}</p>
-          </div>` : '<div style="margin-top:8px"><span style="font-size:10px;color:var(--metal);font-family:\'DM Mono\',monospace">Pendiente de respuesta</span></div>'}
-        </div>`).join('')}`;
-  }
 
   function addNota() {
     const input = document.getElementById('notaInput');
