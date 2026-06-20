@@ -161,6 +161,64 @@ module.exports = async (req, res) => {
         `
       }));
 
+    } else if (tipo === 'bienvenida') {
+      const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
+      // 1) Email al cliente
+      emails.push(enviarEmail(apiKey, {
+        from: 'K-ONE <onboarding@resend.dev>',
+        to: datos.email,
+        subject: `Bienvenido/a a K-ONE, ${primerNombre}`,
+        html: `
+          <div style="background:#0b0b0b;padding:40px 20px;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
+            <div style="max-width:520px;margin:0 auto">
+              <div style="text-align:center;margin-bottom:28px">
+                <span style="font-size:28px;font-weight:800;letter-spacing:2px;color:#fff">K-<span style="color:#E8490F">ONE</span></span>
+              </div>
+              <h1 style="color:#fff;font-size:24px;font-weight:700;text-align:center;margin-bottom:8px">
+                Bienvenido/a, ${primerNombre}
+              </h1>
+              <p style="color:#b5b2ad;font-size:15px;line-height:1.7;text-align:center;margin-bottom:28px">
+                Tu cuenta está creada. A partir de aquí empieza lo que importa.
+              </p>
+
+              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:12px">
+                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">1. Rellena tu cuestionario</p>
+                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Deporte, objetivo, nivel, lesiones, alergias… Con eso generamos tu plan personalizado.</p>
+              </div>
+              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:12px">
+                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">2. Activa tu primer mes por 0,99€</p>
+                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Acceso completo a entrenamiento y nutrición. Después pasa a 14,99€/mes. Cancelas cuando quieras.</p>
+              </div>
+              <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:24px">
+                <p style="margin:0 0 4px;font-weight:700;color:#fff;font-size:14px">3. Empieza a entrenar</p>
+                <p style="margin:0;color:#b5b2ad;font-size:13px;line-height:1.5">Tu plan de entrenamiento y nutrición te esperan. Cada semana se adaptan según tu progreso real.</p>
+              </div>
+
+              <div style="text-align:center;margin-bottom:28px">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:14px 36px;font-size:15px;font-weight:700;letter-spacing:0.5px">IR A MI PLAN →</a>
+              </div>
+
+              <p style="color:#666;font-size:11px;text-align:center;line-height:1.6;border-top:1px solid #222;padding-top:20px">
+                K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
+                <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F">k.one.fit26@gmail.com</a>
+              </p>
+            </div>
+          </div>
+        `
+      }));
+      // 2) Notificación al admin
+      emails.push(enviarEmail(apiKey, {
+        from: 'K-ONE <onboarding@resend.dev>',
+        to: ADMIN_EMAIL,
+        subject: `K-ONE · Nuevo registro: ${datos.nombre} (${datos.email})`,
+        html: `
+          <h2 style="color:#E8490F">Nuevo cliente registrado</h2>
+          <p><strong>Nombre:</strong> ${datos.nombre}</p>
+          <p><strong>Email:</strong> ${datos.email}</p>
+          <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
+        `
+      }));
+
     } else if (tipo === 'opinion') {
       const estrellas = '★'.repeat(datos.estrellas || 0) + '☆'.repeat(5 - (datos.estrellas || 0));
       emails.push(enviarEmail(apiKey, {

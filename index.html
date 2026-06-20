@@ -4116,14 +4116,14 @@
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
-      <label>Nombre</label>
+      <label>Nombre y apellidos</label>
       <div class="auth-field-wrap">
-        <input type="text" id="reg-nombre" placeholder="Tu nombre" autocomplete="name"
+        <input type="text" id="reg-nombre" placeholder="Ej: Carlos García López" autocomplete="name"
           oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
         <span class="auth-field-check" id="check-nombre">✓</span>
       </div>
     </div>
-    <div class="auth-error" id="err-nombre">Introduce tu nombre</div>
+    <div class="auth-error" id="err-nombre">Introduce tu nombre y apellidos</div>
 
     <div class="auth-field">
       <label>Email</label>
@@ -10411,7 +10411,7 @@
     const val = (document.getElementById('reg-' + campo) || {}).value || '';
     switch (campo) {
       case 'nombre':
-        _setFieldState('reg-nombre', val.trim().length >= 2 ? 'valid' : val.trim() ? 'error' : 'none');
+        _setFieldState('reg-nombre', val.trim().split(/\s+/).length >= 2 && val.trim().length >= 5 ? 'valid' : val.trim() ? 'error' : 'none');
         break;
       case 'email': {
         const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
@@ -10471,7 +10471,7 @@
       if (input) input.classList.remove('error');
     });
 
-    if (!nombre) {
+    if (!nombre || nombre.split(/\s+/).length < 2 || nombre.length < 5) {
       document.getElementById('err-nombre').classList.add('visible');
       document.getElementById('reg-nombre').classList.add('error');
       ok = false;
@@ -10512,6 +10512,9 @@
       }
       return;
     }
+
+    // Email de bienvenida al nuevo cliente
+    notificarAdmin('bienvenida', { email, nombre });
 
     // Limpiar campos
     ['reg-nombre','reg-email','reg-pass','reg-pass2'].forEach(id => {
