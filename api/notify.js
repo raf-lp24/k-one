@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
     if (tipo === 'lead') {
       // 1) Notificación al admin
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nuevo lead: ${datos.email}`,
@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
 
       // 2) Email de bienvenida al lead con ejemplo real del plan
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
         subject: 'Así es un día dentro de K-ONE — mira tu plan',
@@ -167,7 +167,7 @@ module.exports = async (req, res) => {
       const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
       // 1) Email al cliente
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
         subject: `Bienvenido/a a K-ONE, ${primerNombre}`,
@@ -211,7 +211,7 @@ module.exports = async (req, res) => {
       }));
       // 2) Notificación al admin
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nuevo registro: ${datos.nombre} (${datos.email})`,
@@ -226,7 +226,7 @@ module.exports = async (req, res) => {
     } else if (tipo === 'opinion') {
       const estrellas = '★'.repeat(datos.estrellas || 0) + '☆'.repeat(5 - (datos.estrellas || 0));
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Nueva opinión: ${datos.nombre} (${datos.estrellas}★)`,
@@ -240,7 +240,7 @@ module.exports = async (req, res) => {
       }));
     } else {
       emails.push(enviarEmail(apiKey, {
-        from: 'K-ONE <onboarding@resend.dev>',
+        from: 'K-ONE <hola@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Notificación: ${tipo}`,
