@@ -12890,7 +12890,13 @@
         enterFormulario();
       }
     } else {
-      goTo('landing');
+      const goParam = new URLSearchParams(window.location.search).get('go');
+      if (goParam === 'registro') {
+        window.history.replaceState({}, '', window.location.pathname);
+        goTo('registro');
+      } else {
+        goTo('landing');
+      }
     }
 
     // Vuelta desde Stripe con pago completado: el webhook puede tardar 1-5s en actualizar
