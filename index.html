@@ -1801,6 +1801,55 @@
     text-transform: none;
   }
 
+  .stepper-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 240px;
+  }
+  .stepper-btn {
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: none;
+    color: var(--brasa);
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stepper-btn:hover { background: rgba(232,73,15,0.15); }
+  .stepper-btn:active { background: rgba(232,73,15,0.25); }
+  .stepper-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--blanco);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    text-align: center;
+    width: 60px;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .stepper-input::-webkit-outer-spin-button,
+  .stepper-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--metal);
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+  }
+
   .field input[type="range"] {
     appearance: none;
     -webkit-appearance: none;
@@ -2888,59 +2937,71 @@
     background: var(--carbon);
     padding: 40px;
     margin-bottom: 32px;
+    border-radius: 12px;
+    border: 1px solid var(--humo);
   }
 
   .checkin-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
+    align-items: center;
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--humo);
   }
 
   .checkin-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
+    font-size: 28px;
     letter-spacing: 1px;
   }
 
   .checkin-week {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--blanco);
+    color: var(--brasa);
+    background: rgba(232,73,15,0.1);
+    padding: 6px 12px;
+    border-radius: 6px;
   }
 
-  .checkin-questions { display: flex; flex-direction: column; gap: 24px; }
+  .checkin-questions { display: flex; flex-direction: column; gap: 32px; }
 
   .checkin-q label {
     display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
     color: var(--blanco);
   }
 
   .rating-scale {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .rating-btn {
-    width: 40px;
-    height: 40px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 14px;
     background: var(--grafito);
     border: 1px solid var(--humo);
-    color: var(--blanco);
+    border-radius: 10px;
+    color: var(--metal-claro);
     cursor: pointer;
-    font-family: 'DM Mono', monospace;
+    font-family: inherit;
     font-size: 13px;
+    font-weight: 500;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
   }
 
-  .rating-btn:hover { border-color: var(--brasa); color: var(--blanco); }
-  .rating-btn.selected { background: var(--brasa); border-color: var(--brasa); color: white; }
+  .rating-btn:hover { border-color: var(--brasa); color: var(--blanco); background: rgba(232,73,15,0.08); }
+  .rating-btn.selected { background: var(--brasa); border-color: var(--brasa); color: white; transform: scale(1.05); box-shadow: 0 2px 12px rgba(232,73,15,0.3); }
 
   .checkin-textarea {
     width: 100%;
@@ -5436,11 +5497,13 @@
         </div>
         <div class="form-grid">
           <div class="field">
-            <div class="field-slider-row">
-              <label>Edad</label>
-              <span class="slider-value" id="edadVal">28</span>
+            <label>Edad</label>
+            <div class="stepper-wrap">
+              <button class="stepper-btn" onclick="stepVal('edad',-1)">−</button>
+              <input type="number" id="edad" min="14" max="80" value="28" class="stepper-input" oninput="updateBmrPanel()">
+              <span class="stepper-unit">años</span>
+              <button class="stepper-btn" onclick="stepVal('edad',1)">+</button>
             </div>
-            <input type="range" id="edad" min="14" max="80" value="28" oninput="document.getElementById('edadVal').textContent=this.value; updateBmrPanel();">
           </div>
           <div class="field">
             <label>Sexo</label>
@@ -5452,19 +5515,23 @@
             </select>
           </div>
           <div class="field">
-            <div class="field-slider-row">
-              <label>Peso actual (kg)</label>
-              <span class="slider-value" id="pesoVal">75</span>
+            <label>Peso actual</label>
+            <div class="stepper-wrap">
+              <button class="stepper-btn" onclick="stepVal('peso',-1)">−</button>
+              <input type="number" id="peso" min="40" max="180" value="75" step="0.5" class="stepper-input" oninput="updateBmrPanel()">
+              <span class="stepper-unit">kg</span>
+              <button class="stepper-btn" onclick="stepVal('peso',1)">+</button>
             </div>
-            <input type="range" id="peso" min="40" max="180" value="75" oninput="document.getElementById('pesoVal').textContent=this.value; updateBmrPanel();">
             <span class="field-hint">Lo usamos para calcular tu metabolismo basal y ajustar las calorías de tu plan.</span>
           </div>
           <div class="field">
-            <div class="field-slider-row">
-              <label>Altura (cm)</label>
-              <span class="slider-value" id="alturaVal">175</span>
+            <label>Altura</label>
+            <div class="stepper-wrap">
+              <button class="stepper-btn" onclick="stepVal('altura',-1)">−</button>
+              <input type="number" id="altura" min="140" max="210" value="175" class="stepper-input" oninput="updateBmrPanel()">
+              <span class="stepper-unit">cm</span>
+              <button class="stepper-btn" onclick="stepVal('altura',1)">+</button>
             </div>
-            <input type="range" id="altura" min="140" max="210" value="175" oninput="document.getElementById('alturaVal').textContent=this.value; updateBmrPanel();">
           </div>
         </div>
         <div class="field" style="margin-bottom:32px">
@@ -6116,7 +6183,7 @@
           </div>
           <div class="checkin-questions">
             <div class="checkin-q">
-              <label>¿Cuántos días entrenaste de los planificados?</label>
+              <label>Días entrenados esta semana</label>
               <div class="rating-scale" id="rating-dias">
                 <button class="rating-btn" onclick="selectRating(this,'dias')">0</button>
                 <button class="rating-btn" onclick="selectRating(this,'dias')">1</button>
@@ -6127,40 +6194,40 @@
               </div>
             </div>
             <div class="checkin-q">
-              <label>¿Cómo te sentiste físicamente durante los entrenamientos?</label>
+              <label>Sensación física en los entrenos</label>
               <div class="rating-scale" id="rating-fisico">
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">😓 Muy mal</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">😐 Regular</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">🙂 Bien</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">💪 Muy bien</button>
+                <button class="rating-btn" onclick="selectRating(this,'fisico')"><span style="font-size:20px">😩</span> Fatal</button>
+                <button class="rating-btn" onclick="selectRating(this,'fisico')"><span style="font-size:20px">😕</span> Flojo</button>
+                <button class="rating-btn" onclick="selectRating(this,'fisico')"><span style="font-size:20px">😊</span> Bien</button>
+                <button class="rating-btn" onclick="selectRating(this,'fisico')"><span style="font-size:20px">💪</span> Bestia</button>
               </div>
             </div>
             <div class="checkin-q">
-              <label>¿Cómo está tu nivel de energía esta semana?</label>
+              <label>Nivel de energía general</label>
               <div class="rating-scale" id="rating-energia">
-                <button class="rating-btn" onclick="selectRating(this,'energia')">1</button>
-                <button class="rating-btn" onclick="selectRating(this,'energia')">2</button>
-                <button class="rating-btn" onclick="selectRating(this,'energia')">3</button>
-                <button class="rating-btn" onclick="selectRating(this,'energia')">4</button>
-                <button class="rating-btn" onclick="selectRating(this,'energia')">5</button>
+                <button class="rating-btn" onclick="selectRating(this,'energia')"><span style="font-size:18px">🔋</span> 1</button>
+                <button class="rating-btn" onclick="selectRating(this,'energia')"><span style="font-size:18px">🔋</span> 2</button>
+                <button class="rating-btn" onclick="selectRating(this,'energia')"><span style="font-size:18px">🔋</span> 3</button>
+                <button class="rating-btn" onclick="selectRating(this,'energia')"><span style="font-size:18px">🔋</span> 4</button>
+                <button class="rating-btn" onclick="selectRating(this,'energia')"><span style="font-size:18px">⚡</span> 5</button>
               </div>
             </div>
             <div class="checkin-q">
-              <label>¿Cómo está tu cabeza? Trabajo, vida, estrés...</label>
+              <label>Estado mental (estrés, motivación, descanso)</label>
               <div class="rating-scale" id="rating-mente">
-                <button class="rating-btn" onclick="selectRating(this,'mente')">Muy mal</button>
-                <button class="rating-btn" onclick="selectRating(this,'mente')">Regular</button>
-                <button class="rating-btn" onclick="selectRating(this,'mente')">Bien</button>
-                <button class="rating-btn" onclick="selectRating(this,'mente')">Muy bien</button>
+                <button class="rating-btn" onclick="selectRating(this,'mente')"><span style="font-size:20px">🌧️</span> Mal</button>
+                <button class="rating-btn" onclick="selectRating(this,'mente')"><span style="font-size:20px">⛅</span> Regular</button>
+                <button class="rating-btn" onclick="selectRating(this,'mente')"><span style="font-size:20px">☀️</span> Bien</button>
+                <button class="rating-btn" onclick="selectRating(this,'mente')"><span style="font-size:20px">🔥</span> Top</button>
               </div>
             </div>
             <div class="checkin-q">
-              <label>¿Hay algo que quieras contarnos de esta semana?</label>
-              <textarea class="checkin-textarea" id="checkinNota" placeholder="Cualquier cosa que creas que debemos saber para adaptar el plan..."></textarea>
+              <label>¿Algo que contarnos?</label>
+              <textarea class="checkin-textarea" id="checkinNota" placeholder="Lesión nueva, cambio de horario, semana dura... lo que sea."></textarea>
             </div>
           </div>
           <div style="margin-top:32px">
-            <button class="btn-primary" onclick="submitCheckin()">Enviar check-in y generar nuevo plan →</button>
+            <button class="btn-primary" style="padding:14px 32px;font-size:14px;border-radius:10px" onclick="submitCheckin()">Enviar check-in y generar nuevo plan →</button>
           </div>
         </div>
 
@@ -6452,6 +6519,18 @@
 
   // ===== FEEDBACK INMEDIATO: metabolismo basal estimado (Bloque 1) =====
   // Fórmula de Mifflin-St Jeor. Se actualiza en vivo según edad/peso/altura/sexo.
+  function stepVal(id, delta) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const step = parseFloat(el.step) || 1;
+    const min = parseFloat(el.min) || 0;
+    const max = parseFloat(el.max) || 999;
+    let val = parseFloat(el.value) || 0;
+    val = Math.round((val + delta * step) * 10) / 10;
+    el.value = Math.max(min, Math.min(max, val));
+    updateBmrPanel();
+  }
+
   function updateBmrPanel() {
     const panel = document.getElementById('bmrPanel');
     const sexo = document.getElementById('sexo').value;
