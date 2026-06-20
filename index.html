@@ -4378,8 +4378,37 @@
             <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('alertas')">Alertas</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('activos')">Activos</button>
+            <button class="jarvis-filtro" onclick="filtrarAdminTipo('premium')">Premium</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('sinpago')">Sin pago</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('nuevos')">Nuevos</button>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);letter-spacing:0.5px;margin-top:8px">ESTUDIO DE MERCADO</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+            <select id="adminFiltroPlan" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
+              <option value="">Plan: todos</option>
+              <option value="completo">Completo</option>
+              <option value="nutricion">Solo nutrición</option>
+            </select>
+            <select id="adminFiltroDeporte" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
+              <option value="">Deporte: todos</option>
+              <option value="Gimnasio">Gimnasio</option>
+              <option value="Running">Running</option>
+              <option value="CrossFit">CrossFit</option>
+              <option value="Hyrox">Hyrox</option>
+              <option value="Combinación">Combinación</option>
+            </select>
+            <select id="adminFiltroObjetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
+              <option value="">Objetivo: todos</option>
+              <option value="Perder">Perder grasa</option>
+              <option value="músculo">Ganar músculo</option>
+              <option value="mejor">Sentirme mejor</option>
+            </select>
+            <select id="adminFiltroEntrenos" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
+              <option value="">Entrenos: todos</option>
+              <option value="0">0 entrenos</option>
+              <option value="1-5">1-5 entrenos</option>
+              <option value="6+">6+ entrenos</option>
+            </select>
           </div>
         </div>
       </div>
@@ -11453,6 +11482,7 @@
       switch (_adminFiltro.tipo) {
         case 'alertas': return c.alerta === 'red' || c.alerta === 'orange';
         case 'activos': return ['active','trialing'].includes(c.estado);
+        case 'premium': return c.isBeta;
         case 'sinpago': return !['active','trialing','past_due'].includes(c.estado);
         case 'nuevos':  return c.esNuevo;
         default: return true;
@@ -11466,6 +11496,24 @@
         (c.nombre || '').toLowerCase().includes(q) ||
         (c.email  || '').toLowerCase().includes(q)
       );
+    }
+
+    // Filtros de estudio de mercado
+    const fPlan = document.getElementById('adminFiltroPlan')?.value;
+    if (fPlan) {
+      lista = lista.filter(c => fPlan === 'completo'
+        ? (c.tipoPlan || '').toLowerCase().includes('completo')
+        : (c.tipoPlan || '').toLowerCase().includes('nutrici'));
+    }
+    const fDeporte = document.getElementById('adminFiltroDeporte')?.value;
+    if (fDeporte) lista = lista.filter(c => (c.deporte || '').includes(fDeporte));
+    const fObjetivo = document.getElementById('adminFiltroObjetivo')?.value;
+    if (fObjetivo) lista = lista.filter(c => (c.objetivo || '').includes(fObjetivo));
+    const fEntrenos = document.getElementById('adminFiltroEntrenos')?.value;
+    if (fEntrenos) {
+      if (fEntrenos === '0') lista = lista.filter(c => (c.entrenosTotal || 0) === 0);
+      else if (fEntrenos === '1-5') lista = lista.filter(c => c.entrenosTotal >= 1 && c.entrenosTotal <= 5);
+      else if (fEntrenos === '6+') lista = lista.filter(c => c.entrenosTotal >= 6);
     }
 
     // Orden

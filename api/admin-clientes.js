@@ -100,6 +100,7 @@ module.exports = async (req, res) => {
     const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
 
     const ahora   = new Date();
+    const hace1d  = new Date(ahora.getTime() - 1  * 86400000);
     const hace7d  = new Date(ahora.getTime() - 7  * 86400000);
     const hace14d = new Date(ahora.getTime() - 14 * 86400000);
     const en7d    = new Date(ahora.getTime() + 7  * 86400000);
@@ -128,7 +129,7 @@ module.exports = async (req, res) => {
       const cancela   = activo && !!s?.cancel_at_period_end;
       const diasDesdeAlta = diasEntre(p.created_at, ahora);
       const altaDate  = new Date(p.created_at);
-      const esNuevo   = altaDate >= hace7d;
+      const esNuevo   = altaDate >= hace1d;
       const esSemanaPasada = !esNuevo && altaDate >= hace14d;
 
       const entrenosTotal = Array.isArray(ud.historialEntrenos)
