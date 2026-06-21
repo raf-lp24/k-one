@@ -11109,12 +11109,16 @@
       return;
     }
 
-    await syncProfileFromSupabase(data.user);
+    try {
+      await syncProfileFromSupabase(data.user);
+    } catch (e) {
+      console.error('Error en syncProfile tras registro:', e);
+    }
     // Forzar el nombre en profiles (el trigger puede fallar o no copiar bien)
     if (data.user?.id) {
-      supa.from('profiles').update({ nombre }).eq('id', data.user.id);
-      // Comprobar si tiene invitación premium (añadida desde Jarvis)
       try {
+        await supa.from('profiles').update({ nombre }).eq('id', data.user.id);
+        // Comprobar si tiene invitación premium (añadida desde Jarvis)
         const { data: inv } = await supa.from('invitaciones_premium')
           .select('email').eq('email', email).maybeSingle();
         if (inv) {
@@ -11122,8 +11126,11 @@
           expira.setFullYear(expira.getFullYear() + 1);
           await supa.from('profiles').update({ is_beta: true, beta_expires: expira.toISOString() }).eq('id', data.user.id);
           await supa.from('invitaciones_premium').delete().eq('email', email);
+          await syncProfileFromSupabase(data.user);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error post-registro:', e);
+      }
     }
     showToast('Cuenta creada. Bienvenido/a a K-One.');
 
@@ -11225,20 +11232,29 @@
         }
         return;
       }
-      await syncProfileFromSupabase(data.user);
+      try {
+        await syncProfileFromSupabase(data.user);
+      } catch (e) {
+        console.error('Error en syncProfile tras login:', e);
+      }
     }
 
     const user = getCurrentUser();
-    showToast(`Bienvenido/a de vuelta, ${user.nombre}.`);
+    showToast(`Bienvenido/a de vuelta, ${user?.nombre || ''}.`);
 
     document.getElementById('login-email').value = '';
     document.getElementById('login-pass').value = '';
 
-    const existingData = getUserData(email);
-    if (existingData && existingData.plan) {
-      loadUserDashboard(email);
-      goTo('dashboard');
-    } else {
+    try {
+      const existingData = getUserData(email);
+      if (existingData && existingData.plan) {
+        loadUserDashboard(email);
+        goTo('dashboard');
+      } else {
+        enterFormulario();
+      }
+    } catch (e) {
+      console.error('Error cargando datos tras login:', e);
       enterFormulario();
     }
   }
