@@ -134,7 +134,57 @@ module.exports = async (req, res) => {
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
         break;
       }
-      case 'customer.subscription.updated':
+      case 'customer.subscription.updated': {
+        const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
+        await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
+        const prev = event.data.previous_attributes;
+        if (subscription.status === 'active' && prev?.current_period_start) {
+          try {
+            let prof = null;
+            if (subscription.metadata?.supabase_user_id) {
+              const { data } = await supabaseAdmin.from('profiles')
+                .select('nombre, email, userdata')
+                .eq('id', subscription.metadata.supabase_user_id)
+                .maybeSingle();
+              prof = data;
+            }
+            if (!prof) {
+              const { data: sub } = await supabaseAdmin.from('subscriptions')
+                .select('user_id').eq('stripe_customer_id', subscription.customer).maybeSingle();
+              if (sub?.user_id) {
+                const { data } = await supabaseAdmin.from('profiles')
+                  .select('nombre, email, userdata').eq('id', sub.user_id).maybeSingle();
+                prof = data;
+              }
+            }
+            if (prof?.email) {
+              const ud = prof.userdata || {};
+              const entrenos = String(Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length : 0);
+              const racha = String(ud.progreso?.mejorRacha || ud.progreso?.rachaActual || 0);
+              const semana = String(ud.progreso?.semana || 1);
+              const primerNombre = (prof.nombre || '').split(' ')[0] || 'Crack';
+              const APP_URL = process.env.APP_URL || 'https://k-one.fit';
+              const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
+              const apiKey = process.env.RESEND_API_KEY;
+              if (apiKey) {
+                fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    from: 'K-ONE <equipo@k-one.fit>',
+                    to: [prof.email],
+                    reply_to: ADMIN_EMAIL,
+                    subject: `${primerNombre}, la constancia es tu mejor ejercicio — K-ONE`,
+                    html: `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div><div style="padding:32px 28px 0;text-align:center"><div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:rgba(232,73,15,0.12);font-size:28px;margin-bottom:12px">&#127942;</div><h1 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 16px">La constancia es tu mejor ejercicio</h1></div><div style="padding:0 28px"><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${primerNombre}</span>,</p><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Tu suscripción se ha renovado y eso dice mucho de ti. La mayoría abandona después del primer mes — <span style="color:#F0EDE8;font-weight:500">tú has decidido seguir</span>. Esa disciplina vale más que cualquier plan de entrenamiento.</p><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Mira lo que has conseguido hasta ahora:</p><div style="background:#141414;border-radius:10px;padding:18px 20px;margin:0 0 18px"><div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:12px">TU PROGRESO</div><table style="width:100%;border-collapse:collapse;text-align:center"><tr><td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#27ae60">${entrenos}</div><div style="font-size:11px;color:#888;margin-top:2px">Entrenos</div></td><td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#E8490F">${racha}</div><div style="font-size:11px;color:#888;margin-top:2px">Mejor racha</div></td><td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#F0EDE8">S${semana}</div><div style="font-size:11px;color:#888;margin-top:2px">Semana</div></td></tr></table></div><div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 24px"><p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">Nuevo mes, nuevo reto.</span> Tu plan se ha actualizado según tu progreso — entrenamiento y nutrición recalculados. No entrenas como el primer día porque ya no eres el del primer día.</p></div></div><div style="padding:0 28px 28px;text-align:center"><a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI NUEVO PLAN</a></div><div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p></div></div></div>`
+                  })
+                }).catch(e => console.warn('[stripe-webhook] renovacion email error:', e.message));
+                supabaseAdmin.from('email_log').insert({ tipo: 'renovacion', destinatario: prof.email, asunto: `${primerNombre}, la constancia es tu mejor ejercicio`, datos: JSON.stringify({ nombre: prof.nombre, entrenos, racha, semana, resumen: `Renovación: ${entrenos} entrenos, racha ${racha}, semana ${semana}.` }) }).then(() => {}).catch(() => {});
+              }
+            }
+          } catch (e) { console.warn('[stripe-webhook] renovacion error:', e.message); }
+        }
+        break;
+      }
       case 'customer.subscription.deleted': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);

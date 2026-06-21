@@ -1,6 +1,8 @@
-// Envía emails de notificación (leads, opiniones) y email de bienvenida al lead.
+// Envía emails de notificación (leads, opiniones, bienvenida, renovación, retención).
 // Usa Resend (resend.com) — gratis hasta 100 emails/día.
-// Variable de entorno necesaria: RESEND_API_KEY
+// POST: envío individual (lead, bienvenida, opinion, mensaje, renovacion)
+// GET:  cron de retención (día 3 sin cuestionario, día 8 sin pagar) — protegido por CRON_SECRET
+// Variables de entorno: RESEND_API_KEY, CRON_SECRET
 
 const { getSupabaseAdmin } = require('./_stripeHelpers');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
@@ -21,7 +23,134 @@ function esc(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function emailWrapper(contenido) {
+  return `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div>${contenido}<div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p><p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p></div></div></div>`;
+}
+
+async function handleCronRetencion(req, res) {
+  const secret = req.headers.authorization?.replace('Bearer ', '') || req.query?.secret;
+  if (!secret || secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return res.status(200).json({ ok: true, skipped: true });
+
+  try {
+    const supa = getSupabaseAdmin();
+    const ahora = new Date();
+    const hace3d = new Date(ahora.getTime() - 3 * 86400000).toISOString();
+    const hace4d = new Date(ahora.getTime() - 4 * 86400000).toISOString();
+    const hace8d = new Date(ahora.getTime() - 8 * 86400000).toISOString();
+    const hace9d = new Date(ahora.getTime() - 9 * 86400000).toISOString();
+
+    const { data: perfiles } = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
+    const { data: subs } = await supa.from('subscriptions').select('user_id, status');
+    const subByUser = {};
+    (subs || []).forEach(s => { subByUser[s.user_id] = s; });
+
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8']);
+    const yaEnviado = new Set();
+    (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
+
+    let enviados3 = 0, enviados8 = 0;
+
+    for (const p of (perfiles || [])) {
+      const ud = p.userdata || {};
+      const sub = subByUser[p.id];
+      const tieneSubActiva = sub && ['active', 'trialing'].includes(sub.status);
+      const nombre = p.nombre || ud.nombre || '';
+      const primerNombre = nombre.split(' ')[0] || 'Crack';
+      const email = p.email;
+      if (!email) continue;
+
+      // DÍA 3: registrado hace 3-4 días, NO completó cuestionario, NO tiene sub activa
+      if (p.created_at >= hace4d && p.created_at < hace3d && !ud.onboardingCompletado && !tieneSubActiva) {
+        if (yaEnviado.has(`retencion_dia3:${email}`)) continue;
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: email,
+          subject: `${esc(primerNombre)}, el mejor momento para empezar siempre es hoy`,
+          html: emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">El mejor momento para empezar siempre es hoy</h1>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Te registraste en K-ONE hace unos días y eso ya dice algo de ti: <span style="color:#F0EDE8">que quieres dar el paso</span>. A veces lo difícil no es entrenar, es empezar.</p>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Tu plan personalizado está a <span style="color:#F0EDE8;font-weight:500">menos de 2 minutos</span>. Solo necesitamos que completes un cuestionario rápido y nosotros nos encargamos del resto: entrenamiento, nutrición y progresión semanal.</p>
+              <div style="background:#141414;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">QUÉ VAS A CONSEGUIR</div>
+                <table style="width:100%;border-collapse:collapse"><tr>
+                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Plan de entreno adaptado a ti</td>
+                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Nutrición con 4 opciones/comida</td>
+                </tr><tr>
+                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Progresión semanal automática</td>
+                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Vídeos de cada ejercicio</td>
+                </tr></table>
+              </div>
+              <p style="margin:0 0 20px;font-size:14px;color:#b5b2ad;text-align:center"><span style="color:#F0EDE8;font-style:italic">"Un paso cada vez"</span> — y este es el primero.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">COMPLETAR MI PLAN</a>
+            </div>
+          `)
+        });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia3', destinatario: email, asunto: 'El mejor momento para empezar siempre es hoy', datos: JSON.stringify({ nombre, resumen: 'Retención día 3: motivacional para completar cuestionario.' }) });
+        enviados3++;
+      }
+
+      // DÍA 8: registrado hace 8-9 días, SÍ completó cuestionario, NO tiene sub activa
+      if (p.created_at >= hace9d && p.created_at < hace8d && ud.onboardingCompletado && !tieneSubActiva) {
+        if (yaEnviado.has(`retencion_dia8:${email}`)) continue;
+        const deporte = ud.deporte || 'Tu deporte';
+        const objetivo = ud.objetivo || 'Tu objetivo';
+        const dias = ud.diasEntreno || ud.dias || '3-5';
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: email,
+          subject: `${esc(primerNombre)}, ya sabes qué quieres. Ahora toca ir a por ello.`,
+          html: emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Ya sabes qué quieres. Ahora toca ir a por ello.</h1>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hace una semana dedicaste tu tiempo a generar tu plan en K-ONE. Eso no lo hace cualquiera — la mayoría se queda en "ya lo haré mañana".</p>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Tu plan sigue guardado, preparado para ti:</p>
+              <div style="background:#141414;border-radius:10px;padding:18px 20px;margin:0 0 18px">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:12px">TU PLAN PERSONALIZADO</div>
+                <table style="width:100%;border-collapse:collapse"><tr>
+                  <td style="padding:6px;width:50%"><div style="background:#1E1E1E;border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:#888;margin-bottom:4px">Deporte</div><div style="font-size:15px;font-weight:600;color:#F0EDE8">${esc(deporte)}</div></div></td>
+                  <td style="padding:6px"><div style="background:#1E1E1E;border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:#888;margin-bottom:4px">Objetivo</div><div style="font-size:15px;font-weight:600;color:#F0EDE8">${esc(objetivo)}</div></div></td>
+                </tr><tr>
+                  <td style="padding:6px"><div style="background:#1E1E1E;border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:#888;margin-bottom:4px">Entrenos</div><div style="font-size:15px;font-weight:600;color:#E8490F">${esc(String(dias))} días/sem</div></div></td>
+                  <td style="padding:6px"><div style="background:#1E1E1E;border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:#888;margin-bottom:4px">Nutrición</div><div style="font-size:15px;font-weight:600;color:#F0EDE8">5 comidas</div></div></td>
+                </tr></table>
+              </div>
+              <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 20px">
+                <p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">La diferencia entre querer y hacer es empezar.</span> Tu plan ya está hecho — solo falta que lo actives.</p>
+              </div>
+              <p style="margin:0 0 20px;font-size:13px;color:#888;text-align:center">Primer mes a <span style="color:#E8490F;font-weight:600;font-size:16px">1,99 €</span> · Sin permanencia · Cancela cuando quieras</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTIVAR MI PLAN</a>
+            </div>
+          `)
+        });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA 1,99€.` }) });
+        enviados8++;
+      }
+    }
+
+    console.log(`[notify-cron] Retención: ${enviados3} emails día 3, ${enviados8} emails día 8`);
+    return res.status(200).json({ ok: true, enviados3, enviados8 });
+  } catch (err) {
+    console.error('[notify-cron] error:', err);
+    return res.status(500).json({ error: 'Error interno' });
+  }
+}
+
 module.exports = async (req, res) => {
+  if (req.method === 'GET') return handleCronRetencion(req, res);
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
@@ -48,7 +177,7 @@ module.exports = async (req, res) => {
     if (!tipo || !datos) {
       return res.status(400).json({ error: 'tipo y datos son obligatorios' });
     }
-    const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje'];
+    const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje', 'renovacion'];
     if (!tiposValidos.includes(tipo)) {
       return res.status(400).json({ error: 'Tipo no válido' });
     }
@@ -350,6 +479,55 @@ module.exports = async (req, res) => {
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
       }));
+    } else if (tipo === 'renovacion') {
+      const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
+      const entrenos = datos.entrenos || 0;
+      const racha = datos.racha || 0;
+      const semana = datos.semana || 1;
+      emails.push(enviarEmail(apiKey, {
+        from: 'K-ONE <equipo@k-one.fit>',
+        reply_to: ADMIN_EMAIL,
+        to: datos.email,
+        subject: `${esc(primerNombre)}, la constancia es tu mejor ejercicio — K-ONE`,
+        html: `
+          <div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
+            <div style="max-width:560px;margin:0 auto">
+              <div style="background:#E8490F;padding:24px;text-align:center">
+                <div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div>
+              </div>
+              <div style="padding:32px 28px 0;text-align:center">
+                <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:rgba(232,73,15,0.12);font-size:28px;margin-bottom:12px">&#127942;</div>
+                <h1 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 16px">La constancia es tu mejor ejercicio</h1>
+              </div>
+              <div style="padding:0 28px">
+                <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+                <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Tu suscripción se ha renovado y eso dice mucho de ti. La mayoría abandona después del primer mes — <span style="color:#F0EDE8;font-weight:500">tú has decidido seguir</span>. Esa disciplina vale más que cualquier plan de entrenamiento.</p>
+                <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Mira lo que has conseguido hasta ahora:</p>
+                <div style="background:#141414;border-radius:10px;padding:18px 20px;margin:0 0 18px">
+                  <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:12px">TU PROGRESO</div>
+                  <table style="width:100%;border-collapse:collapse;text-align:center">
+                    <tr>
+                      <td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#27ae60">${entrenos}</div><div style="font-size:11px;color:#888;margin-top:2px">Entrenos</div></td>
+                      <td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#E8490F">${racha}</div><div style="font-size:11px;color:#888;margin-top:2px">Mejor racha</div></td>
+                      <td style="padding:8px"><div style="font-size:26px;font-weight:700;color:#F0EDE8">S${semana}</div><div style="font-size:11px;color:#888;margin-top:2px">Semana</div></td>
+                    </tr>
+                  </table>
+                </div>
+                <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 24px">
+                  <p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">Nuevo mes, nuevo reto.</span> Tu plan se ha actualizado según tu progreso — entrenamiento y nutrición recalculados. No entrenas como el primer día porque ya no eres el del primer día.</p>
+                </div>
+              </div>
+              <div style="padding:0 28px 28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI NUEVO PLAN</a>
+              </div>
+              <div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center">
+                <p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p>
+                <p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p>
+              </div>
+            </div>
+          </div>
+        `
+      }));
     } else {
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <equipo@k-one.fit>',
@@ -388,6 +566,10 @@ module.exports = async (req, res) => {
         destinatario = ADMIN_EMAIL;
         asunto = `Nueva opinión de ${datos.nombre} (${datos.estrellas}★)`;
         resumen = `Opinión de ${datos.nombre || 'Anónimo'}: ${'★'.repeat(datos.estrellas || 0)}${'☆'.repeat(5-(datos.estrellas||0))}\n\n${datos.texto || '(sin texto)'}`;
+      } else if (tipo === 'renovacion') {
+        destinatario = datos.email;
+        asunto = `${(datos.nombre || '').split(' ')[0]}, la constancia es tu mejor ejercicio`;
+        resumen = `Email de renovación a ${datos.nombre} (${datos.email}). Progreso: ${datos.entrenos || 0} entrenos, racha ${datos.racha || 0}, semana ${datos.semana || 1}. Motivacional sobre constancia y disciplina.`;
       } else {
         destinatario = ADMIN_EMAIL;
         asunto = `Notificación: ${tipo}`;
