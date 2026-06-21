@@ -7266,6 +7266,44 @@
     'crunch': 'https://www.youtube.com/results?search_query=crunch+abdominal+técnica',
     'jumping jacks': 'https://www.youtube.com/results?search_query=jumping+jacks+técnica',
     'saltos verticales': 'https://www.youtube.com/results?search_query=saltos+verticales+técnica',
+    'muscle-up': 'https://www.youtube.com/results?search_query=muscle+up+técnica+crossfit',
+    'muscle up': 'https://www.youtube.com/results?search_query=muscle+up+técnica+crossfit',
+    'toes-to-bar': 'https://www.youtube.com/results?search_query=toes+to+bar+técnica',
+    'toes to bar': 'https://www.youtube.com/results?search_query=toes+to+bar+técnica',
+    'pistol squat': 'https://www.youtube.com/results?search_query=pistol+squat+técnica+progresión',
+    'pistol': 'https://www.youtube.com/results?search_query=pistol+squat+técnica',
+    'power clean': 'https://www.youtube.com/results?search_query=power+clean+técnica+crossfit',
+    'push press': 'https://www.youtube.com/results?search_query=push+press+técnica',
+    'push jerk': 'https://www.youtube.com/results?search_query=push+jerk+técnica',
+    'jerk': 'https://www.youtube.com/results?search_query=jerk+técnica+halterofilia',
+    'double under': 'https://www.youtube.com/results?search_query=double+unders+técnica+comba',
+    'rope climb': 'https://www.youtube.com/results?search_query=rope+climb+técnica+crossfit',
+    'handstand push': 'https://www.youtube.com/results?search_query=handstand+push+up+técnica',
+    'hand stand': 'https://www.youtube.com/results?search_query=handstand+push+up+técnica',
+    'pull-up': 'https://www.youtube.com/results?search_query=pull+ups+técnica+crossfit',
+    'pull up': 'https://www.youtube.com/results?search_query=pull+ups+técnica+crossfit',
+    'kipping': 'https://www.youtube.com/results?search_query=kipping+pull+up+técnica',
+    'turkish get-up': 'https://www.youtube.com/results?search_query=turkish+get+up+técnica',
+    'turkish': 'https://www.youtube.com/results?search_query=turkish+get+up+técnica',
+    'devil press': 'https://www.youtube.com/results?search_query=devil+press+técnica',
+    'dips': 'https://www.youtube.com/results?search_query=dips+técnica+correcta',
+    'l-sit': 'https://www.youtube.com/results?search_query=l+sit+técnica+progresión',
+    'ring dip': 'https://www.youtube.com/results?search_query=ring+dips+técnica+crossfit',
+    'ring row': 'https://www.youtube.com/results?search_query=ring+rows+técnica',
+    'deadlift': 'https://www.youtube.com/results?search_query=deadlift+técnica+correcta',
+    'front squat': 'https://www.youtube.com/results?search_query=front+squat+técnica',
+    'overhead squat': 'https://www.youtube.com/results?search_query=overhead+squat+técnica',
+    'hang clean': 'https://www.youtube.com/results?search_query=hang+clean+técnica',
+    'hang snatch': 'https://www.youtube.com/results?search_query=hang+snatch+técnica',
+    'row erg': 'https://www.youtube.com/results?search_query=remo+ergómetro+técnica',
+    'flexiones explosivas': 'https://www.youtube.com/results?search_query=flexiones+explosivas+técnica',
+    'flexiones pique': 'https://www.youtube.com/results?search_query=flexiones+pique+técnica',
+    'sentadilla con salto': 'https://www.youtube.com/results?search_query=sentadilla+con+salto+técnica',
+    'elevaciones de piernas': 'https://www.youtube.com/results?search_query=elevaciones+de+piernas+técnica',
+    'plancha lateral': 'https://www.youtube.com/results?search_query=plancha+lateral+técnica',
+    'remo bajo mesa': 'https://www.youtube.com/results?search_query=remo+invertido+bajo+mesa+técnica',
+    'lunges': 'https://www.youtube.com/results?search_query=lunges+zancadas+técnica',
+    'sandbag': 'https://www.youtube.com/results?search_query=sandbag+carry+técnica',
   };
 
   function getVideoUrl(nombreEjercicio) {
@@ -7295,7 +7333,7 @@
     const videoUrl = getVideoUrl(nombre);
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
-      <a href="${videoUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ejercicio-video-btn" title="Ver técnica del ejercicio">▶</a>
+      <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();window.open(this.href,'_blank');return false;" class="ejercicio-video-btn" title="Ver técnica: ${nombre}">▶</a>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
           <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
