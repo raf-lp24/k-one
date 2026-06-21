@@ -4532,6 +4532,16 @@
               <option value="1-5">1-5 entrenos</option>
               <option value="6+">6+ entrenos</option>
             </select>
+            <select id="adminFiltroPrecio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
+              <option value="">Precio: todos</option>
+              <option value="Oferta 1,99">Oferta 1,99€</option>
+              <option value="Mensual 19,99">Mensual 19,99€</option>
+              <option value="Trimestral 44,99">Trimestral 44,99€</option>
+              <option value="Anual 149,99">Anual 149,99€</option>
+              <option value="Nutrición 9,99">Nutrición 9,99€</option>
+              <option value="premium">Premium gratuito</option>
+              <option value="sinpago">Sin pago</option>
+            </select>
           </div>
         </div>
       </div>
@@ -12188,6 +12198,12 @@
       else if (fEntrenos === '1-5') lista = lista.filter(c => c.entrenosTotal >= 1 && c.entrenosTotal <= 5);
       else if (fEntrenos === '6+') lista = lista.filter(c => c.entrenosTotal >= 6);
     }
+    const fPrecio = document.getElementById('adminFiltroPrecio')?.value;
+    if (fPrecio) {
+      if (fPrecio === 'premium') lista = lista.filter(c => c.isBeta);
+      else if (fPrecio === 'sinpago') lista = lista.filter(c => (c.planPrecio || '—') === '—');
+      else lista = lista.filter(c => (c.planPrecio || '').includes(fPrecio));
+    }
 
     // Orden
     lista = [...lista].sort((a, b) => {
@@ -12251,7 +12267,7 @@
             ${td('<span style="color:var(--metal);font-size:12px">' + _esc(c.email) + '</span>')}
             ${td('<span style="color:var(--metal)">' + _fmtFecha(c.alta) + '</span>')}
             ${td(_estadoLegible(c))}
-            ${td('<span style="color:var(--metal)">' + _esc(c.tipoPlan) + '</span>')}
+            ${td('<span style="color:var(--metal)">' + _esc(c.tipoPlan) + '</span>' + (c.planPrecio && c.planPrecio !== '—' ? '<br><span style="font-size:10px;color:' + (c.enOferta ? '#f0a500' : '#27ae60') + ';font-family:\'DM Mono\',monospace">' + _esc(c.planPrecio) + '</span>' : ''))}
             ${td(_esc(c.objetivo))}
             ${td(_esc(c.deporte))}
             ${td(c.entrenosTotal > 0
@@ -12348,7 +12364,7 @@
     document.getElementById('jcBody').innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Estado', estadoTexto, estadoColor)}
-        ${row('Plan', c.tipoPlan)}
+        ${row('Plan', c.tipoPlan + (c.planPrecio && c.planPrecio !== '—' ? ' · ' + c.planPrecio : ''))}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Alta', _fmtFecha(c.alta))}

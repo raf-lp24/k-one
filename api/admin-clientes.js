@@ -102,6 +102,14 @@ module.exports = async (req, res) => {
 
     const offerPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
 
+    const PRICE_LABELS = {};
+    const addLabel = (id, label) => { if (id) PRICE_LABELS[id] = label; };
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    'Mensual 19,99€');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 'Trimestral 44,99€');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_ANUAL,      'Anual 149,99€');
+    addLabel(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,   'Nutrición 9,99€');
+    addLabel(process.env.STRIPE_PRICE_OFERTA_MES,          'Oferta 1,99€');
+
     const ahora   = new Date();
     const hace1d  = new Date(ahora.getTime() - 1  * 86400000);
     const hace7d  = new Date(ahora.getTime() - 7  * 86400000);
@@ -193,6 +201,7 @@ module.exports = async (req, res) => {
         esNuevo,
         estado:       status,
         enOferta:     !!enOferta,
+        planPrecio:   s?.plan ? (PRICE_LABELS[s.plan] || '—') : '—',
         cancelaAlFinal: cancela,
         renovacion,
         objetivo:     ud.objetivo     || '—',
