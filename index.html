@@ -7575,86 +7575,93 @@
     return MENSAJES_DIA[dayOfYear % MENSAJES_DIA.length];
   }
 
+  const FAMILIAS_ALIMENTOS = {
+    'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones'],
+    'marisco': ['gambas','langostinos','mejillones','almejas','calamares','pulpo','sepia','vieiras','cangrejo','langosta','cigalas'],
+    'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas'],
+    'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon'],
+    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco'],
+    'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones'],
+    'legumbres': ['garbanzos','lentejas','judías','judias','alubias','habas','guisantes','edamame','soja'],
+    'verduras': ['brócoli','brocoli','espinacas','espinaca','lechuga','rúcula','rucula','calabacín','calabacin','berenjena','pimiento','pepino','tomate','cebolla','zanahoria','espárrago','esparrago','alcachofa','champiñón','champiñon','setas','apio','puerro','col','repollo','coliflor','calabaza'],
+    'frutas': ['plátano','platano','manzana','pera','naranja','mandarina','fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','kiwi','piña','sandía','sandia','melón','melon','mango','uva','uvas','cereza','cerezas','higo','higos','melocotón','melocoton','ciruela'],
+    'huevos': ['huevo','huevos','tortilla','revuelto','claras'],
+    'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','cereales','harina','fideos','cuscús','cuscus'],
+  };
+
   const SUSTITUCIONES_NOCOMIDA = {
-    'pepino': 'calabacín',
-    'calabacín': 'calabaza',
-    'calabaza': 'zanahoria',
-    'tomate': 'pimiento rojo',
-    'pimiento': 'calabacín',
-    'cebolla': 'puerro',
-    'champiñón': 'calabacín',
-    'champiñon': 'calabacín',
-    'berenjena': 'calabacín',
-    'espinaca': 'acelga',
-    'espinacas': 'acelgas',
-    'brócoli': 'coliflor',
-    'brocoli': 'coliflor',
-    'coliflor': 'brócoli',
-    'lechuga': 'rúcula',
-    'rúcula': 'canónigos',
-    'rucula': 'canónigos',
-    'aguacate': 'hummus',
-    'atún': 'pollo',
-    'atun': 'pollo',
-    'salmón': 'merluza',
-    'salmon': 'merluza',
-    'merluza': 'lubina',
-    'gambas': 'pollo',
-    'pescado': 'pollo',
-    'pollo': 'pavo',
-    'pavo': 'pollo',
-    'ternera': 'pollo',
-    'cerdo': 'pavo',
-    'huevo': 'tofu',
-    'huevos': 'tofu',
-    'arroz': 'quinoa',
-    'quinoa': 'arroz',
-    'pasta': 'arroz',
-    'patata': 'boniato',
-    'boniato': 'patata',
-    'avena': 'copos de espelta',
-    'leche': 'bebida de avena',
-    'yogur': 'yogur de soja',
-    'queso': 'hummus',
-    'legumbres': 'quinoa',
-    'garbanzos': 'lentejas',
-    'lentejas': 'garbanzos',
-    'judías': 'garbanzos',
-    'maíz': 'guisantes',
-    'zanahoria': 'calabaza',
-    'espárrago': 'judías verdes',
-    'esparrago': 'judías verdes',
-    'alcachofa': 'judías verdes',
-    'setas': 'calabacín',
-    'miel': 'sirope de agave',
-    'plátano': 'manzana',
-    'platano': 'manzana',
-    'manzana': 'pera',
-    'naranja': 'mandarina',
-    'fresa': 'frambuesa',
-    'fresas': 'frambuesas',
-    'arándanos': 'frambuesas',
-    'arandanos': 'frambuesas',
-    'kiwi': 'mandarina',
-    'piña': 'mango',
-    'sandía': 'melón',
-    'melón': 'sandía',
+    'pepino': 'calabacín', 'pepinillo': 'calabacín', 'calabacín': 'calabaza', 'calabacin': 'calabaza', 'calabaza': 'zanahoria',
+    'tomate': 'pimiento rojo', 'pimiento': 'calabacín', 'cebolla': 'puerro', 'puerro': 'cebolla',
+    'champiñón': 'calabacín', 'champiñon': 'calabacín', 'setas': 'calabacín', 'berenjena': 'calabacín',
+    'espinaca': 'acelga', 'espinacas': 'acelgas', 'acelga': 'espinacas', 'acelgas': 'espinacas',
+    'brócoli': 'coliflor', 'brocoli': 'coliflor', 'coliflor': 'brócoli',
+    'lechuga': 'rúcula', 'rúcula': 'canónigos', 'rucula': 'canónigos', 'canónigos': 'rúcula',
+    'aguacate': 'hummus', 'apio': 'pepino', 'col': 'lechuga', 'repollo': 'lechuga',
+    'zanahoria': 'calabaza', 'espárrago': 'judías verdes', 'esparrago': 'judías verdes', 'alcachofa': 'judías verdes',
+    'atún': 'pollo', 'atun': 'pollo', 'salmón': 'merluza', 'salmon': 'merluza',
+    'merluza': 'lubina', 'lubina': 'dorada', 'dorada': 'merluza', 'bacalao': 'merluza',
+    'sardina': 'merluza', 'sardinas': 'merluza', 'caballa': 'merluza', 'trucha': 'merluza', 'anchoa': 'atún', 'anchoas': 'atún',
+    'gambas': 'pollo', 'langostinos': 'pollo', 'mejillones': 'pollo', 'calamares': 'pollo', 'pulpo': 'pollo', 'sepia': 'pollo',
+    'pescado': 'pollo', 'marisco': 'pollo',
+    'pollo': 'pavo', 'pavo': 'pollo', 'ternera': 'pollo', 'cerdo': 'pavo',
+    'jamón': 'pavo en lonchas', 'jamon': 'pavo en lonchas', 'lomo': 'pechuga de pollo', 'bacon': 'pavo',
+    'solomillo': 'pechuga de pollo', 'cordero': 'pollo',
+    'huevo': 'tofu', 'huevos': 'tofu', 'claras': 'tofu firme',
+    'arroz': 'quinoa', 'quinoa': 'arroz', 'pasta': 'arroz', 'fideos': 'arroz',
+    'patata': 'boniato', 'boniato': 'patata',
+    'avena': 'copos de espelta', 'pan': 'tostadas de arroz', 'cereales': 'copos de avena',
+    'leche': 'bebida de avena', 'yogur': 'yogur de soja', 'queso': 'hummus',
+    'requesón': 'tofu sedoso', 'requeson': 'tofu sedoso', 'kéfir': 'kombucha', 'kefir': 'kombucha',
+    'cottage': 'hummus', 'nata': 'leche de coco', 'mantequilla': 'AOVE',
+    'garbanzos': 'lentejas', 'lentejas': 'garbanzos', 'judías': 'garbanzos', 'judias': 'garbanzos',
+    'alubias': 'garbanzos', 'edamame': 'garbanzos', 'soja': 'garbanzos', 'habas': 'guisantes',
+    'legumbres': 'quinoa', 'maíz': 'guisantes', 'maiz': 'guisantes', 'guisantes': 'maíz',
+    'miel': 'sirope de agave', 'sirope': 'miel',
+    'plátano': 'manzana', 'platano': 'manzana', 'manzana': 'pera', 'pera': 'manzana',
+    'naranja': 'mandarina', 'mandarina': 'naranja', 'limón': 'lima', 'lima': 'limón',
+    'fresa': 'frambuesa', 'fresas': 'frambuesas', 'frambuesa': 'fresa', 'frambuesas': 'fresas',
+    'arándanos': 'frambuesas', 'arandanos': 'frambuesas',
+    'kiwi': 'mandarina', 'piña': 'mango', 'mango': 'piña',
+    'sandía': 'melón', 'sandia': 'melón', 'melón': 'sandía', 'melon': 'sandía',
+    'uva': 'fresas', 'uvas': 'fresas', 'cereza': 'frambuesa', 'cerezas': 'frambuesas',
+    'higo': 'dátil', 'higos': 'dátiles', 'melocotón': 'mango', 'melocoton': 'mango', 'ciruela': 'melocotón',
+    'nueces': 'semillas de calabaza', 'almendras': 'semillas de girasol', 'avellanas': 'semillas de calabaza',
+    'cacahuete': 'semillas de girasol', 'cacahuetes': 'semillas de girasol',
+    'pistachos': 'semillas de calabaza', 'anacardos': 'semillas de girasol', 'piñones': 'semillas de sésamo',
+    'frutos secos': 'semillas',
+    'tofu': 'pollo', 'seitán': 'pollo', 'seitan': 'pollo', 'tempeh': 'pollo',
+    'cuscús': 'arroz', 'cuscus': 'arroz', 'harina': 'harina de arroz',
   };
 
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
-    const tokens = raw.split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
-    if (!tokens.length) return nutricion;
-    const regexes = tokens.map(t => new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'));
-    const susMap = {};
-    tokens.forEach((t, i) => {
-      for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
-        if (t === clave || clave.includes(t) || t.includes(clave)) {
-          if (!tokens.some(tok => tok === valor.toLowerCase() || valor.toLowerCase().includes(tok))) {
-            susMap[i] = valor;
-            break;
+    const tokensOriginales = raw.split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
+    if (!tokensOriginales.length) return nutricion;
+    const todosTokens = new Set(tokensOriginales);
+    tokensOriginales.forEach(t => {
+      for (const [familia, miembros] of Object.entries(FAMILIAS_ALIMENTOS)) {
+        if (t === familia || miembros.some(m => m === t || m.includes(t) || t.includes(m))) {
+          if (t === familia) miembros.forEach(m => todosTokens.add(m));
+          else {
+            const aliasSinTilde = t.normalize('NFD').replace(/[̀-ͯ]/g, '');
+            miembros.forEach(m => {
+              const mNorm = m.normalize('NFD').replace(/[̀-ͯ]/g, '');
+              if (mNorm === aliasSinTilde || m === t) todosTokens.add(m);
+            });
           }
+        }
+      }
+    });
+    const tokenArr = [...todosTokens];
+    const regexes = tokenArr.map(t => new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-záéíóúñ]*', 'gi'));
+    const susMap = {};
+    tokenArr.forEach((t, i) => {
+      const s = SUSTITUCIONES_NOCOMIDA[t];
+      if (s && !todosTokens.has(s.toLowerCase())) { susMap[i] = s; return; }
+      for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
+        if ((clave.includes(t) || t.includes(clave)) && !todosTokens.has(valor.toLowerCase())) {
+          susMap[i] = valor; return;
         }
       }
     });
@@ -7663,18 +7670,30 @@
         const textoCompleto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
-        const enNombre = regexes.some(re => { re.lastIndex = 0; return re.test(opt.nombre.toLowerCase()); });
-        if (enNombre) return null;
+        const nombreLower = opt.nombre.toLowerCase();
+        const palabrasNombre = nombreLower.split(/\s+/);
+        const esIngredientePrincipal = regexes.some(re => {
+          re.lastIndex = 0;
+          if (!re.test(nombreLower)) return false;
+          const matchWord = nombreLower.match(re);
+          if (!matchWord) return false;
+          const preposiciones = ['con','de','del','al','a','la','el','y','en','sin'];
+          const palabrasClave = palabrasNombre.filter(p => !preposiciones.includes(p) && p.length > 2);
+          return palabrasClave.slice(0, 2).some(p => matchWord.some(m => p.includes(m.toLowerCase())));
+        });
+        if (esIngredientePrincipal) return null;
         let nuevoIng = opt.ingredientes;
+        let nuevoNombre = opt.nombre;
         regexes.forEach((re, i) => {
           re.lastIndex = 0;
-          if (re.test(nuevoIng)) {
-            const reemplazo = susMap[i] || '';
-            nuevoIng = nuevoIng.replace(re, reemplazo);
-          }
+          const reemplazo = susMap[i] || '';
+          nuevoIng = nuevoIng.replace(re, reemplazo);
+          re.lastIndex = 0;
+          nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
-        nuevoIng = nuevoIng.replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/^\s*,/, '').trim();
-        return { ...opt, ingredientes: nuevoIng };
+        nuevoIng = nuevoIng.replace(/,\s*,+/g, ',').replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
+        nuevoNombre = nuevoNombre.replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+        return { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
       }).filter(Boolean);
       return { ...meal, opciones: procesadas.length >= 1 ? procesadas : meal.opciones };
     });
