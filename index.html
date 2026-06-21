@@ -7922,149 +7922,103 @@
       }
 
     } else if (esCrossfit) {
-      // ── CROSSFIT ── diferenciado por nivel y lugar
+      // ── CROSSFIT ── programación real de box: strength + metcon variado
       const lugarCF  = u.lugar || 'Box CrossFit';
       const cfAireLib = lugarCF.includes('aire libre');
+      const cf = cfAireLib; // alias corto
 
       if (esPrincipiante) {
-        // Fundamentos: técnica y bodyweight. Sin barra olímpica, sin pesos pesados.
         semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fundamentos · Squat y empuje",
-           detalle:`Técnica y acondicionamiento · Sentadilla aérea 4×10 (técnica: rodillas sobre pies, pecho arriba), flexiones 4×máx (o en rodillas), 10 min AMRAP: 10 sentadillas aéreas + 8 flexiones (rodillas ok) + 10 abdominales`,
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fundamentos · Squat + AMRAP",
+           detalle:`Strength · Sentadilla goblet 4×10 (técnica: pecho arriba, rodillas sobre pies) + peso muerto KB 4×10 (bisagra de cadera, espalda neutra). WOD "Cindy Scaled" AMRAP 15 min: 3 ring rows o remo bajo mesa, 6 flexiones (rodillas ok), 9 sentadillas aéreas. Anota rondas`,
            etiqueta:"WOD"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? "Monostructural · Cardio técnico" : "Recuperación",
+           detalle: numDias >= 5 ? `Cardio técnica · ${cf ? '20 min carrera zona 2 + 4 strides de 50m' : 'Row 3×500m (descanso 2 min) + assault bike 3×1 min (descanso 1 min)'}. Movilidad 10 min: cadera, hombros, tobillos` : "",
+           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 2 ? "Fundamentos · Peso muerto y tracción" : "Movilidad",
-           detalle: numDias >= 2 ? `Técnica · Peso muerto con barra vacía o KB 4×10 (foco en bisagra de cadera, espalda neutra, sin redondear), remo en barra baja (ring rows) 4×10. WOD: For Time 3 rondas: 10 peso muerto KB, 10 ring rows, 200m carrera` : "",
+           resumen: numDias >= 2 ? "Fundamentos · Press + For Time" : "Movilidad",
+           detalle: numDias >= 2 ? `Strength · Press con mancuernas 4×10 + fondos en banco 3×10 + hollow body hold 3×20s. WOD For Time (cap 12 min): 3 rondas de 10 push press con mancuernas (ligero), 15 sentadillas aéreas, 200m carrera. Anota tiempo` : "",
            etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Metcon bodyweight · AMRAP" : "Descanso activo",
-           detalle: numDias >= 3 ? `AMRAP 12 min: 10 sentadillas aéreas, 8 flexiones, 10 jumping jacks, 5 burpees. Anota las rondas completas. Sin barra, todo con peso corporal. Objetivo: moverte bien, no rápido` : "",
+           resumen: numDias >= 3 ? "Metcon · Chipper bodyweight" : "Descanso activo",
+           detalle: numDias >= 3 ? `WOD Chipper For Time (cap 15 min): 30 sentadillas aéreas, 20 flexiones (rodillas ok), 20 sit-ups, 15 burpees, 10 jumping lunges por pierna, 200m carrera. Todo seguido, sin descanso programado. Anota tiempo y scaling` : "",
            etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 4 ? "Fundamentos · Empuje y core" : "Descanso activo",
-           detalle: numDias >= 4 ? `Técnica complementaria · Press con mancuernas 3×10, fondos en banco 3×10, plancha 4×30s, hollow body hold 3×20s, 10 min AMRAP: 8 flexiones + 8 sentadillas + 8 burpees` : "",
+           resumen: numDias >= 4 ? "EMOM + Core" : "Descanso",
+           detalle: numDias >= 4 ? `EMOM 12 min: min1: 8 KB swings (12/8kg) o sentadillas con salto · min2: 8 flexiones + 8 sit-ups · min3: 10 step-ups sobre cajón/banco + descanso restante. Cierre: plancha 3×30s, hollow body 3×15s, superman hold 3×15s` : "",
            etiqueta: numDias >= 4 ? "WOD" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else if (numDias <= 3) {
-        if (esAvanzado) {
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle: cfAireLib
-               ? `Strength exterior · Dominadas en barra 5×5, saltos verticales al cajón o sobre línea 4×5. AMRAP 12 min: 10 burpees con salto, 10 box jumps o saltos, 5 dominadas. Anota rondas`
-               : `Strength · Sentadilla trasera 5×3 al 80-85% + Power clean técnica 4×3. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 5 pull-ups. Anota rondas`,
-             etiqueta:"WOD"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-            {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 2 ? "WOD For Time" : "Movilidad",
-             detalle: numDias >= 2 ? (cfAireLib
-               ? `For Time · 21-15-9: KB swings (24/16kg), burpees sobre línea, dominadas o flexiones explosivas. Cronometra. Anota el tiempo y el scaling usado`
-               : `For Time · 21-15-9: peso muerto (100/70kg), burpees sobre cajón, pull-ups. Cronometra. Si superas 20 min, escala el peso. Anota el tiempo y el scaling usado`) : "",
-             etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
-            {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 3 ? "EMOM + Gimnástica avanzada" : "Descanso activo",
-             detalle: numDias >= 3 ? (cfAireLib
-               ? `EMOM 20 min: min impar: 5 dominadas + 8 flexiones explosivas · min par: 15 KB swings (24/16kg) o sentadillas con salto. Cierre: L-sit en paralelas 4×10s o elevaciones de piernas 4×15`
-               : `EMOM 20 min: min impar: 3 muscle-ups o 6 dips + 6 pull-ups · min par: 12 kettlebell swings (32/24kg). Cierre: 4×máx toes-to-bar`) : "",
-             etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
-            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        } else {
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle: cfAireLib
-               ? `Fuerza exterior · Sentadilla aérea 5×12 + saltos al cajón o sobre línea 3×8. AMRAP 10 min: 10 burpees con salto, 10 step-ups sobre banco, 10 abdominales. Anota rondas`
-               : `Strength · Sentadilla trasera con barra 5×5 al 70-75%. AMRAP 10 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 10 abdominales. Anota rondas y escala si necesitas`,
-             etiqueta:"WOD"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-            {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 2 ? "WOD For Time" : "Movilidad",
-             detalle: numDias >= 2 ? (cfAireLib
-               ? `For Time · 21-15-9: KB swings (16/12kg o escala), burpees, dominadas o flexiones con pies elevados en banco. Cronometra y anota el scaling usado`
-               : `For Time · 21-15-9: peso muerto (60/40kg o escala), burpees, dominadas o remo en barra baja. Cronometra y anota el peso y scaling usado`) : "",
-             etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
-            {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 3 ? "EMOM + Gimnástica" : "Descanso activo",
-             detalle: numDias >= 3 ? (cfAireLib
-               ? `EMOM 16 min alterno: min impar: 12 sentadillas con salto · min par: 30s plancha + 10 flexiones. Cierre: dominadas en barra o flexiones explosivas 4×máx`
-               : `EMOM 16 min alterno: min impar: 12 kettlebell swings (16/12kg) · min par: 30s plancha + 10 sentadillas aéreas. Cierre: progresión de pull-ups 4×máx (band si necesitas)`) : "",
-             etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
-            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        }
+        semana = [
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Strength + Sprint Metcon",
+           detalle: cf
+             ? `Strength · Sentadilla ${esAvanzado ? '5×3 al 80%' : '5×5 al 70-75%'}. WOD "Helen${esAvanzado ? '' : ' Scaled'}": 3 RFT: 400m carrera, ${esAvanzado ? '21 KB swings (24/16kg), 12 pull-ups' : '15 KB swings (16/12kg), 12 ring rows'}. Cronometra`
+             : `Strength · ${esAvanzado ? 'Sentadilla trasera 5×3 al 80-85% + power clean 4×3' : 'Sentadilla trasera 5×5 al 70-75%'}. WOD "Helen${esAvanzado ? '' : ' Scaled'}": 3 RFT: 400m carrera, ${esAvanzado ? '21 KB swings (24/16kg), 12 pull-ups' : '15 KB swings (16/12kg), 12 ring rows'}. Cronometra`,
+           etiqueta:"WOD"},
+          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 2 ? "Weightlifting + AMRAP largo" : "Movilidad",
+           detalle: numDias >= 2 ? (cf
+             ? `Skill · ${esAvanzado ? 'Hang clean 4×3 + push jerk 4×3' : 'Hang clean con KB o mancuerna 4×6 + push press 4×8'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 dumbbell clean & press, 10 sit-ups, 12 box jumps o step-ups'}. Anota rondas`
+             : `Skill · ${esAvanzado ? 'Clean & jerk 4×3 al 70% + snatch técnica 4×2' : 'Power clean técnica 5×3 (barra vacía o ligero)'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 power clean (40/30kg), 10 sit-ups, 12 box jumps'}. Anota rondas`) : "",
+           etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 3 ? (esAvanzado ? "Benchmark · Diane" : "EMOM + Gimnástica") : "Descanso",
+           detalle: numDias >= 3 ? (esAvanzado
+             ? (cf
+               ? `WOD "Diane" adaptado For Time: 21-15-9 peso muerto (${cf ? 'KB pesada' : '102/70kg'}), HSPU o flexiones pique. Cronometra. Cierre: 3×máx muscle-ups o dominadas + 3×10 toes-to-bar`
+               : `WOD "Diane" For Time: 21-15-9 peso muerto (102/70kg), HSPU (kipping ok, abmat si necesitas). Cronometra. Cierre: 3×máx muscle-ups o dips + 3×10 toes-to-bar`)
+             : `EMOM 16 min: min1: ${cf ? '10 sentadillas con salto' : '10 KB swings (16/12kg)'} · min2: 8 flexiones + 30s plancha · min3: ${cf ? '8 burpees' : '10 wall balls (6/4kg)'} · min4: descanso. Cierre: pull-ups progresión 4×máx`) : "",
+           etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
+          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
+          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+        ];
       } else {
-        // 4-5 días CrossFit
-        if (esAvanzado) {
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle: cfAireLib
-               ? `Fuerza exterior · Dominadas 4×6 + saltos verticales 4×5. AMRAP 12 min: 10 burpees con salto, 10 box jumps o saltos sobre línea, 200m carrera`
-               : `Strength · Snatch técnica 4×3 al 75% + sentadilla frontal 4×4. AMRAP 12 min: 10 wall balls (9/6kg), 10 box jumps, 200m carrera`,
-             etiqueta:"WOD"},
-            {dia:"Martes", tipo:"Entrenamiento", resumen:"WOD For Time",
-             detalle: cfAireLib
-               ? `For Time · 21-15-9: KB swings (24/16kg), burpees sobre línea, dominadas o flexiones explosivas. Cronometra. Si excedes 18 min, reduce el peso la próxima vez`
-               : `For Time · 21-15-9: thrusters (43/30kg), burpees sobre cajón, pull-ups. Cronometra. Si excedes 18 min, escala el peso la próxima vez`,
-             etiqueta:"WOD"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
-            {dia:"Jueves", tipo:"Entrenamiento", resumen:"Hero WOD",
-             detalle: cfAireLib
-               ? `For Time (cap 30 min) · 5 rondas: 400m carrera, 15 KB swings (24/16kg), 15 dominadas o flexiones con pies elevados. Escala a 3 rondas si es la primera vez. Anota tiempo y scaling`
-               : `For Time (cap 30 min) · 5 rondas: 400m carrera, 15 peso muerto (100/70kg), 15 pull-ups. Escala rondas a 3 si es tu primera vez con este WOD. Anota tiempo y scaling`,
-             etiqueta:"WOD"},
-            {dia:"Viernes", tipo:"Entrenamiento", resumen:"EMOM + Gymnastic skills",
-             detalle: cfAireLib
-               ? `EMOM 20 min: min1: 5 dominadas + 5 flexiones explosivas · min2: 30s plancha · min3: 10 pistol squats asistidos o sentadillas con salto · min4: descanso. Cierre: L-sit en paralelas 4×10s o elevaciones de piernas 4×15`
-               : `EMOM 20 min: min1: 3-5 muscle-ups · min2: 30s plancha · min3: 10 pistol squats o sentadillas con salto · min4: descanso. Cierre: toes-to-bar 4×10`,
-             etiqueta:"WOD"},
-            {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 5 ? "WOD sábado · Largo" : "Descanso",
-             detalle: numDias >= 5 ? (cfAireLib
-               ? `AMRAP 20 min: 400m carrera, 15 KB swings (24/16kg) o sentadillas con salto, 10 dominadas o flexiones explosivas, 15 burpees. Ritmo sostenible. Anota rondas`
-               : `AMRAP 20 min: 400m carrera, 15 KB swings (32/24kg), 10 pull-ups, 15 wall balls. Ritmo sostenible. Anota rondas`) : "",
-             etiqueta: numDias >= 5 ? "WOD" : "Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        } else {
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza + Metcon",
-             detalle: cfAireLib
-               ? `Fuerza exterior · Sentadilla aérea 5×12 + saltos 3×8. AMRAP 12 min: 10 burpees con salto, 10 step-ups sobre banco o box jumps, 200m carrera. Anota rondas`
-               : `Strength · Sentadilla trasera 5×5 al 70-75%. AMRAP 12 min: 10 wall balls (6/4kg), 10 box jumps o step-ups, 200m carrera. Anota rondas`,
-             etiqueta:"WOD"},
-            {dia:"Martes", tipo:"Cardio", resumen:"Recuperación activa · Zona 2",
-             detalle:`Recuperación activa · 20-25 min zona 2 a ritmo suave + 10 min movilidad de cadera y hombros`,
-             etiqueta:"Descanso"},
-            {dia:"Miércoles", tipo:"Entrenamiento", resumen:"WOD For Time",
-             detalle: cfAireLib
-               ? `For Time · 21-15-9: KB swings (16/12kg o escala), burpees sobre línea, dominadas o flexiones con pies elevados. Cronometra y anota`
-               : `For Time · 21-15-9: thrusters (20/15kg o escala), burpees sobre cajón, abdominales. Cronometra y anota`,
-             etiqueta:"WOD"},
-            {dia:"Jueves", tipo:"Entrenamiento", resumen:"WOD largo + fuerza",
-             detalle: cfAireLib
-               ? `For Time (cap 25 min) · 3-4 rondas: 400m carrera, 12 KB swings (16/12kg o escala), 12 dominadas o flexiones con pies elevados. Escala rondas o peso si es necesario`
-               : `For Time (cap 25 min) · 3-4 rondas: 400m carrera, 12 peso muerto (60/40kg o escala), 12 dominadas o ring rows. Escala las rondas o el peso si es necesario`,
-             etiqueta:"WOD"},
-            {dia:"Viernes", tipo:"Entrenamiento", resumen:"EMOM + Gimnástica",
-             detalle: cfAireLib
-               ? `EMOM 20 min: min1: 12 sentadillas con salto · min2: 30s plancha · min3: 10 dominadas o flexiones explosivas · min4: descanso. Cierre: dominadas en barra 4×máx`
-               : `EMOM 20 min: min1: 12 KB swings (16/12kg) · min2: 30s plancha · min3: 10 sentadillas con salto · min4: descanso. Cierre: pull-ups progresión 4×máx`,
-             etiqueta:"WOD"},
-            {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 5 ? "WOD del sábado" : "Descanso",
-             detalle: numDias >= 5 ? (cfAireLib
-               ? `AMRAP 15 min: 5 burpees, 10 sentadillas con salto, 15 sentadillas aéreas, 200m carrera. Ritmo sostenible. Anota rondas`
-               : `AMRAP 15 min: 5 burpees, 10 KB swings, 15 sentadillas aéreas, 200m carrera. Ritmo sostenible. Anota rondas`) : "",
-             etiqueta: numDias >= 5 ? "WOD" : "Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        }
+        // 4-5 días CrossFit — programación variada de box real
+        const rx = esAvanzado;
+        semana = [
+          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Squat Strength + Sprint WOD",
+           detalle: cf
+             ? `Strength · ${rx ? 'Sentadilla overhead 4×3 + front squat 4×4' : 'Sentadilla aérea 5×8 + sentadilla goblet 4×10'}. WOD "Fran${rx ? '' : ' Scaled'}" 21-15-9 For Time: ${rx ? 'thrusters (43/30kg) + pull-ups' : 'thrusters con mancuernas (10/7kg) + ring rows o flexiones'}. Cronometra. Objetivo: sub-8 min`
+             : `Strength · ${rx ? 'Back squat 5×3 al 82% + front squat 4×4 al 70%' : 'Back squat 5×5 al 70-75%'}. WOD "Fran${rx ? '' : ' Scaled'}" 21-15-9 For Time: ${rx ? 'thrusters (43/30kg) + pull-ups' : 'thrusters (20/15kg) + ring rows'}. Cronometra. Objetivo: sub-8 min`,
+           etiqueta:"WOD"},
+          {dia:"Martes", tipo:"Entrenamiento", resumen:"Weightlifting + AMRAP mixto",
+           detalle: cf
+             ? `Skill · ${rx ? 'Hang snatch 4×2 + hang clean & jerk 4×2' : 'Hang clean con KB 4×6 + push press mancuernas 4×8'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '6 dumbbell snatches (alternando), 8 burpees, 12 sit-ups'}. Anota rondas`
+             : `Skill · ${rx ? 'Power snatch 4×2 al 70% + clean & jerk 4×2 al 70%' : 'Power clean 5×3 ligero (técnica)'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '5 power cleans (40/30kg), 8 burpees, 10 sit-ups'}. Anota rondas`,
+           etiqueta:"WOD"},
+          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · Movilidad",
+           detalle:`Recuperación · 20 min zona 2 suave + movilidad de cadera, hombros y tobillos 15 min`, etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Entrenamiento", resumen: rx ? "Hero WOD · DT" : "For Time · Couplet pesado",
+           detalle: rx
+             ? (cf
+               ? `Hero WOD "DT" · 5 RFT: 12 deadlift KB (pesada), 9 hang clean KB, 6 push jerk KB. Cronometra. Si superas 15 min, reduce la carga. Anota tiempo y peso`
+               : `Hero WOD "DT" · 5 RFT: 12 deadlift (70/47kg), 9 hang clean (70/47kg), 6 push jerk (70/47kg). Todo con la misma barra. Cronometra. Anota tiempo`)
+             : (cf
+               ? `For Time (cap 20 min) · 4 RFT: 12 KB swings (16/12kg), 10 burpees, 8 goblet squats, 200m carrera. Cronometra y escala si necesitas`
+               : `For Time (cap 20 min) · 4 RFT: 12 deadlift (60/40kg), 10 burpees over bar, 8 front squat (40/30kg), 200m carrera. Cronometra`),
+           etiqueta:"WOD"},
+          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Gymnastic Skills + EMOM",
+           detalle: cf
+             ? `Skill gimnástico · ${rx ? 'Muscle-up progresión 4×2-3 o dips 4×6 + strict pull-ups 4×5' : 'Pull-up progresión con banda 4×máx + dips en banco 4×10'}. EMOM 20 min: min1: ${rx ? '4 bar muscle-ups o 8 chest-to-bar' : '6 pull-ups o 8 ring rows'} · min2: ${rx ? '12 pistol squats (alternando)' : '12 sentadillas con salto'} · min3: 15 ${rx ? 'GHD sit-ups o V-ups' : 'sit-ups'} · min4: descanso. Anota si completaste cada minuto`
+             : `Skill gimnástico · ${rx ? 'Muscle-up 4×2-3, strict HSPU 4×3-5, L-sit 4×10s' : 'Strict pull-up 4×máx (banda ok), push-up 4×12, hollow hold 4×20s'}. EMOM 20 min: min1: ${rx ? '4 bar muscle-ups o 8 chest-to-bar' : '6 pull-ups o 8 ring rows'} · min2: ${rx ? '12 pistols alternando' : '10 step-ups + 10 sentadillas'} · min3: ${rx ? '15 GHD sit-ups' : '15 sit-ups'} · min4: descanso`,
+           etiqueta:"WOD"},
+          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+           resumen: numDias >= 5 ? (rx ? "Chipper largo · Team style" : "WOD largo aeróbico") : "Descanso",
+           detalle: numDias >= 5 ? (rx
+             ? (cf
+               ? `Chipper For Time (cap 25 min): 50 double-unders o 100 single-unders, 40 wall balls (9/6kg) o KB goblet squats, 30 toes-to-bar o hanging knee raises, 20 clean & jerk (61/43kg) o KB C&J, 10 muscle-ups o 20 pull-ups. Anota tiempo y scaling`
+               : `Chipper For Time (cap 25 min): 50 double-unders, 40 wall balls (9/6kg), 30 toes-to-bar, 20 clean & jerk (61/43kg), 10 bar muscle-ups (o 20 pull-ups si escalas). Anota tiempo y scaling`)
+             : (cf
+               ? `AMRAP 20 min: 400m carrera, 12 KB swings (16/12kg), 8 burpees, 10 goblet squats, 200m carrera. Ritmo sostenible. Anota rondas`
+               : `AMRAP 20 min "Cindy": 5 pull-ups (banda ok), 10 push-ups, 15 air squats. Ritmo constante, buena técnica. Anota rondas`)) : "",
+           etiqueta: numDias >= 5 ? "WOD" : "Descanso"},
+          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+        ];
       }
 
     } else {
