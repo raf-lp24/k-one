@@ -259,16 +259,17 @@
     color: var(--blanco-puro);
     border: none;
     padding: 12px 28px;
+    border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   }
-  .btn-primary:hover { background: var(--brasa-oscura); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:hover { background: var(--brasa-oscura); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(232,73,15,0.25); }
+  .btn-primary:active { transform: translateY(0); box-shadow: none; }
 
   .jarvis-tab {
     background: transparent;
@@ -2056,6 +2057,7 @@
     gap: 12px;
     padding: 12px;
     background: var(--grafito);
+    border-radius: 10px;
     margin-bottom: 16px;
   }
 
@@ -2106,18 +2108,19 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 9px 14px;
+    padding: 10px 14px;
     color: var(--metal);
     cursor: pointer;
-    transition: color 0.2s, background 0.2s;
+    transition: all 0.2s;
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
+    border-radius: 8px;
   }
 
   .dash-nav-item:hover { color: var(--blanco); background: var(--grafito); }
-  .dash-nav-item.active { color: var(--blanco); background: var(--grafito); border-left: 2px solid var(--brasa); }
+  .dash-nav-item.active { color: var(--blanco); background: rgba(232,73,15,0.1); border-left: 3px solid var(--brasa); }
 
   .dash-nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
@@ -2162,15 +2165,19 @@
   .dash-overlay.open { display: block; }
 
   .dash-section { display: none; }
-  .dash-section.active { display: block; }
+  .dash-section.active { display: block; animation: fadeInUp 0.25s ease; }
 
   .dash-header {
-    margin-bottom: 48px;
+    margin-bottom: 36px;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #1a1008 0%, #141414 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(232,73,15,0.15);
   }
 
   .dash-greeting {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 2px;
     color: var(--brasa);
     text-transform: uppercase;
@@ -2179,39 +2186,40 @@
 
   .dash-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
+    font-size: 42px;
     letter-spacing: 1px;
     line-height: 1;
     margin-bottom: 8px;
   }
 
   .dash-subtitle {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--metal-claro);
     font-weight: 400;
+    line-height: 1.6;
   }
 
-  /* MENSAJE MOTIVACIONAL */
   .motivation-card {
-    background: var(--grafito);
-    border-left: 3px solid var(--brasa);
-    padding: 28px 32px;
-    margin-bottom: 40px;
+    background: linear-gradient(135deg, #141414 0%, #1a0e06 100%);
+    border: 1px solid rgba(232,73,15,0.2);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
     position: relative;
   }
 
   .motivation-label {
     font-family: 'DM Mono', monospace;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--brasa);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .motivation-text {
-    font-size: 18px;
-    font-weight: 300;
+    font-size: 16px;
+    font-weight: 400;
     line-height: 1.6;
     color: var(--blanco);
     font-style: italic;
@@ -2227,8 +2235,12 @@
 
   .stat-card {
     background: var(--carbon);
-    padding: 24px 28px;
+    padding: 22px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--humo);
+    transition: border-color 0.2s;
   }
+  .stat-card:hover { border-color: rgba(232,73,15,0.3); }
 
   .stat-card-label {
     font-family: 'DM Mono', monospace;
@@ -2373,18 +2385,21 @@
 
   .week-day-row {
     background: var(--carbon);
-    padding: 28px 32px;
+    padding: 24px 28px;
     position: relative;
-    transition: background 0.2s;
+    transition: all 0.2s;
     display: flex;
-    gap: 40px;
+    gap: 32px;
+    border-radius: 12px;
+    border: 1px solid var(--humo);
+    margin-bottom: 8px;
   }
 
   .week-day-row:not(.rest) { cursor: pointer; }
-  .week-day-row:hover { background: var(--grafito); }
-  .week-day-row.today { border-left: 3px solid var(--brasa); }
-  .week-day-row.rest { opacity: 0.5; }
-  .week-day-row.rest:hover { opacity: 0.7; }
+  .week-day-row:hover { background: var(--grafito); transform: translateX(4px); }
+  .week-day-row.today { border-left: 3px solid var(--brasa); background: rgba(232,73,15,0.04); }
+  .week-day-row.rest { opacity: 0.45; }
+  .week-day-row.rest:hover { opacity: 0.65; }
 
   .week-day-toggle {
     position: absolute;
@@ -2641,8 +2656,11 @@
 
   /* NUTRICIÓN - nuevo diseño multi-opción */
   .meal-block {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     background: var(--carbon);
+    border-radius: 14px;
+    border: 1px solid var(--humo);
+    overflow: hidden;
   }
 
   .meal-block-header {
@@ -2783,18 +2801,20 @@
   }
 
   .meal-option {
-    padding: 20px 22px;
+    padding: 18px 20px;
     background: var(--grafito);
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: all 0.2s;
     border: 2px solid transparent;
+    border-radius: 10px;
     position: relative;
   }
 
-  .meal-option:hover { background: var(--acero); }
+  .meal-option:hover { background: var(--acero); transform: translateY(-1px); }
 
   .meal-option.selected {
     border-color: var(--brasa);
+    background: rgba(232,73,15,0.06);
     background: rgba(232,73,15,0.06);
   }
 
@@ -3344,11 +3364,14 @@
     background: var(--carbon);
     padding: 24px;
     margin-bottom: 24px;
+    border-radius: 14px;
+    border: 1px solid var(--humo);
   }
   .notes-form textarea {
     width: 100%;
     background: var(--grafito);
     border: 1px solid var(--humo);
+    border-radius: 10px;
     color: var(--blanco);
     padding: 16px;
     font-family: 'Inter', sans-serif;
@@ -3358,18 +3381,21 @@
     min-height: 80px;
     transition: border-color 0.2s;
     margin-bottom: 16px;
+    box-sizing: border-box;
   }
   .notes-form textarea:focus { border-color: var(--brasa); }
 
-  .notes-list { display: flex; flex-direction: column; gap: 2px; }
+  .notes-list { display: flex; flex-direction: column; gap: 8px; }
 
   .nota-item {
     background: var(--carbon);
-    padding: 18px 24px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 20px;
+    gap: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--humo);
   }
   .nota-content { flex: 1; }
   .nota-date {
