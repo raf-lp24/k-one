@@ -7633,6 +7633,75 @@
     'cuscús': 'arroz', 'cuscus': 'arroz', 'harina': 'harina de arroz',
   };
 
+  const RECETAS_SUSTITUCION = [
+    [/solomillo de ternera/gi, 'pechuga de pollo a la plancha'],
+    [/ternera magra/gi, 'pechuga de pollo'],
+    [/cinta de lomo/gi, 'pechuga de pavo a la plancha'],
+    [/lomo de cerdo/gi, 'pechuga de pavo'],
+    [/chuletas? de cerdo/gi, 'muslo de pollo deshuesado'],
+    [/chuletas? de cordero/gi, 'contramuslo de pollo'],
+    [/costillas? de cerdo/gi, 'muslo de pollo al horno'],
+    [/costillas? de ternera/gi, 'contramuslo de pollo al horno'],
+    [/cordero al horno/gi, 'pollo al horno'],
+    [/estofado de ternera/gi, 'estofado de pollo'],
+    [/guiso de ternera/gi, 'guiso de pollo'],
+    [/ragú de ternera/gi, 'ragú de pollo'],
+    [/carne picada de ternera/gi, 'carne picada de pollo'],
+    [/carne picada/gi, 'pechuga picada de pollo'],
+    [/hamburguesa de ternera/gi, 'hamburguesa de pollo'],
+    [/filete de ternera/gi, 'filete de pechuga de pollo'],
+    [/entrecot/gi, 'pechuga de pollo gruesa a la plancha'],
+    [/redondo de ternera/gi, 'pechuga de pavo entera al horno'],
+    [/jamón serrano/gi, 'pavo en lonchas'],
+    [/jamón cocido/gi, 'pechuga de pavo en lonchas'],
+    [/bacon/gi, 'pavo ahumado en lonchas'],
+    [/panceta/gi, 'pavo ahumado'],
+    [/chorizo/gi, 'pavo curado'],
+    [/salchichón/gi, 'pavo curado en lonchas'],
+    [/salmón ahumado/gi, 'pechuga de pavo ahumada'],
+    [/salmón a la plancha/gi, 'pechuga de pollo a la plancha'],
+    [/salmón a la parrilla/gi, 'pechuga de pollo a la parrilla'],
+    [/salmón al horno/gi, 'pollo al horno'],
+    [/merluza al horno/gi, 'pollo al horno'],
+    [/merluza a la plancha/gi, 'pechuga de pollo a la plancha'],
+    [/lubina al horno/gi, 'pollo al horno con limón'],
+    [/dorada al horno/gi, 'pollo al horno con especias'],
+    [/bacalao al horno/gi, 'pechuga de pavo al horno'],
+    [/atún a la plancha/gi, 'pechuga de pollo a la plancha'],
+    [/gambas a la plancha/gi, 'tiras de pollo a la plancha'],
+    [/langostinos a la plancha/gi, 'pollo a la plancha'],
+    [/calamares a la plancha/gi, 'tiras de pavo a la plancha'],
+    [/revuelto de gambas/gi, 'revuelto de champiñones'],
+    [/tortilla de atún/gi, 'tortilla de pavo'],
+    [/ensalada de atún/gi, 'ensalada de pollo'],
+    [/lata de atún/gi, 'pechuga de pollo desmechada'],
+    [/atún al natural/gi, 'pechuga de pollo desmechada'],
+    [/atún en conserva/gi, 'pollo desmechado'],
+    [/pescado azul/gi, 'pollo'],
+    [/pescado blanco/gi, 'pechuga de pavo'],
+    [/yogur griego/gi, 'yogur de soja'],
+    [/queso cottage/gi, 'hummus'],
+    [/queso batido 0%/gi, 'yogur de soja natural'],
+    [/queso batido/gi, 'yogur de soja'],
+    [/queso fresco batido/gi, 'yogur de soja natural'],
+    [/queso fresco/gi, 'tofu sedoso'],
+    [/requesón/gi, 'tofu sedoso'],
+    [/crema de cacahuete/gi, 'crema de semillas de girasol'],
+    [/mantequilla de almendra/gi, 'tahini'],
+    [/mantequilla de cacahuete/gi, 'crema de semillas de girasol'],
+    [/tomate cherry/gi, 'pimiento rojo en dados'],
+    [/tomate triturado/gi, 'pimiento rojo triturado'],
+    [/tomate frito/gi, 'sofrito de pimiento'],
+    [/salsa de tomate/gi, 'sofrito de pimiento y cebolla'],
+    [/pasta integral/gi, 'arroz integral'],
+    [/pasta sin gluten/gi, 'arroz'],
+    [/huevos revueltos/gi, 'tofu revuelto'],
+    [/huevos cocidos/gi, 'tofu firme en dados'],
+    [/tortilla francesa/gi, 'tofu a la plancha'],
+    [/clara de huevo/gi, 'tofu sedoso'],
+    [/claras de huevo/gi, 'tofu sedoso batido'],
+  ];
+
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
@@ -7654,6 +7723,10 @@
       }
     });
     const tokenArr = [...todosTokens];
+    const recetasActivas = RECETAS_SUSTITUCION.filter(([re]) => {
+      const src = re.source.toLowerCase();
+      return tokenArr.some(t => src.includes(t));
+    });
     const regexes = tokenArr.map(t => new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-záéíóúñ]*', 'gi'));
     const susMap = {};
     tokenArr.forEach((t, i) => {
@@ -7671,32 +7744,22 @@
         const textoCompleto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
-        let nuevoIng = opt.ingredientes;
         let nuevoNombre = opt.nombre;
-        let tieneSustitucion = true;
+        let nuevoIng = opt.ingredientes;
+        recetasActivas.forEach(([re, reemplazo]) => {
+          nuevoNombre = nuevoNombre.replace(re, reemplazo);
+          nuevoIng = nuevoIng.replace(re, reemplazo);
+        });
         regexes.forEach((re, i) => {
           const reemplazo = susMap[i] || '';
-          if (!reemplazo) {
-            re.lastIndex = 0;
-            if (re.test(nuevoNombre) || re.test(nuevoIng)) tieneSustitucion = false;
-          }
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
-        if (!tieneSustitucion) {
-          const nombreLower = opt.nombre.toLowerCase();
-          const preposiciones = ['con','de','del','al','a','la','el','y','en','sin'];
-          const palabrasClave = nombreLower.split(/\s+/).filter(p => !preposiciones.includes(p) && p.length > 2);
-          const esPrincipal = regexes.some(re => {
-            re.lastIndex = 0;
-            const m = nombreLower.match(re);
-            return m && palabrasClave.slice(0, 2).some(p => m.some(w => p.includes(w.toLowerCase())));
-          });
-          if (esPrincipal) return null;
-        }
         nuevoIng = limpiar(nuevoIng);
         nuevoNombre = nuevoNombre.replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
         if (!nuevoNombre) return null;
+        const aun = regexes.some(re => { re.lastIndex = 0; return re.test(nuevoNombre + ' ' + nuevoIng); });
+        if (aun) return null;
         return { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
       }).filter(Boolean);
       return { ...meal, opciones: procesadas.length >= 1 ? procesadas : meal.opciones };
