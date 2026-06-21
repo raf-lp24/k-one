@@ -11033,6 +11033,17 @@
     // Forzar el nombre en profiles (el trigger puede fallar o no copiar bien)
     if (data.user?.id) {
       supa.from('profiles').update({ nombre }).eq('id', data.user.id);
+      // Comprobar si tiene invitación premium (añadida desde Jarvis)
+      try {
+        const { data: inv } = await supa.from('invitaciones_premium')
+          .select('email').eq('email', email).maybeSingle();
+        if (inv) {
+          const expira = new Date();
+          expira.setFullYear(expira.getFullYear() + 1);
+          await supa.from('profiles').update({ is_beta: true, beta_expires: expira.toISOString() }).eq('id', data.user.id);
+          await supa.from('invitaciones_premium').delete().eq('email', email);
+        }
+      } catch (e) {}
     }
     showToast('Cuenta creada. Bienvenido/a a K-One.');
 
@@ -11663,28 +11674,15 @@
     modal.style.zIndex = '10200';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
-      <div class="modal-box" style="max-width:440px;padding:28px">
-        <div class="modal-title" style="font-size:18px">Añadir cliente</div>
-        <p class="modal-desc" style="margin-bottom:16px">Crea una cuenta y dale acceso premium directo (1 año, sin pasar por Stripe).</p>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div>
-            <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:4px">NOMBRE Y APELLIDOS</label>
-            <input type="text" id="altaNombre" placeholder="Carlos García López" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;border-radius:6px">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:4px">EMAIL</label>
-            <input type="email" id="altaEmail" placeholder="cliente@email.com" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;border-radius:6px">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:4px">CONTRASEÑA</label>
-            <input type="text" id="altaPass" value="kone2026" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;border-radius:6px">
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--blanco);cursor:pointer;margin-top:4px">
-            <input type="checkbox" id="altaPremium" checked style="accent-color:var(--brasa);width:16px;height:16px"> Dar acceso premium (1 año)
-          </label>
+      <div class="modal-box" style="max-width:400px;padding:28px">
+        <div class="modal-title" style="font-size:18px">Invitar cliente premium</div>
+        <p class="modal-desc" style="margin-bottom:16px">Introduce el email del cliente. Cuando se registre en k-one.fit con ese email, tendrá acceso premium automático durante 1 año sin pasar por Stripe.</p>
+        <div>
+          <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:4px">EMAIL DEL CLIENTE</label>
+          <input type="email" id="altaEmail" placeholder="cliente@email.com" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:12px 14px;font-size:14px;font-family:inherit;box-sizing:border-box;border-radius:8px">
         </div>
         <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="btn-primary" style="flex:1;padding:12px;font-size:13px;border-radius:8px" onclick="ejecutarAltaCliente(this)">Crear cuenta →</button>
+          <button class="btn-primary" style="flex:1;padding:12px;font-size:13px;border-radius:8px" onclick="ejecutarAltaCliente(this)">Invitar →</button>
           <button class="btn-ghost" style="flex:1;padding:12px;font-size:13px;border-radius:8px" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
         </div>
       </div>`;
@@ -11692,31 +11690,26 @@
   }
 
   async function ejecutarAltaCliente(btn) {
-    const nombre = document.getElementById('altaNombre').value.trim();
     const email = document.getElementById('altaEmail').value.trim().toLowerCase();
-    const pass = document.getElementById('altaPass').value;
-    const premium = document.getElementById('altaPremium').checked;
-    if (!nombre || nombre.split(/\s+/).length < 2) { showToast('Pon nombre y apellidos'); return; }
     if (!email || !email.includes('@')) { showToast('Pon un email válido'); return; }
-    if (pass.length < 6) { showToast('La contraseña necesita mínimo 6 caracteres'); return; }
     btn.disabled = true;
-    btn.textContent = 'Creando...';
+    btn.textContent = 'Invitando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
       const res = await fetch('/api/admin-crear-cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ nombre, email, password: pass, premium })
+        body: JSON.stringify({ email })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      showToast(`Cliente ${nombre} creado${premium ? ' con premium' : ''}`);
+      showToast(`Invitación premium guardada para ${email}`);
       btn.closest('.modal-overlay').remove();
       abrirPanelAdmin();
     } catch (e) {
       showToast('Error: ' + e.message, 5000);
       btn.disabled = false;
-      btn.textContent = 'Crear cuenta →';
+      btn.textContent = 'Invitar →';
     }
   }
 

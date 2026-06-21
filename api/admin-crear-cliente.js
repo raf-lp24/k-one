@@ -13,39 +13,22 @@ module.exports = async (req, res) => {
       return res.status(403).json({ error: 'No autorizado' });
     }
 
-    const { nombre, email, password, premium } = req.body || {};
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ error: 'nombre, email y password son obligatorios' });
+    const { email } = req.body || {};
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Email válido requerido' });
     }
 
-    const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { nombre }
-    });
+    const emailLower = email.trim().toLowerCase();
 
-    if (createErr) {
-      if (/already|registered|exists/i.test(createErr.message)) {
-        return res.status(400).json({ error: 'Este email ya está registrado' });
-      }
-      return res.status(400).json({ error: createErr.message });
+    const { error: insertErr } = await supabaseAdmin
+      .from('invitaciones_premium')
+      .upsert({ email: emailLower }, { onConflict: 'email' });
+
+    if (insertErr) {
+      return res.status(500).json({ error: 'Error guardando invitación: ' + insertErr.message });
     }
 
-    const userId = newUser.user.id;
-
-    await supabaseAdmin.from('profiles').update({ nombre }).eq('id', userId);
-
-    if (premium) {
-      const expira = new Date();
-      expira.setFullYear(expira.getFullYear() + 1);
-      await supabaseAdmin.from('profiles').update({
-        is_beta: true,
-        beta_expires: expira.toISOString()
-      }).eq('id', userId);
-    }
-
-    return res.status(200).json({ ok: true, userId });
+    return res.status(200).json({ ok: true, email: emailLower });
   } catch (err) {
     console.error('[admin-crear-cliente] error:', err);
     return res.status(500).json({ error: 'Error interno' });
