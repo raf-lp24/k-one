@@ -1,0 +1,4 @@
+Contact: mailto:k.one.fit26@gmail.com
+Expires: 2027-06-21T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://k-one.fit/.well-known/security.txt
