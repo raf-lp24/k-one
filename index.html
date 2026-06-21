@@ -2920,6 +2920,13 @@
     margin-bottom: 10px;
   }
 
+  .meal-opt-macros-visual { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+  .macro-bar-row { display: flex; align-items: center; gap: 8px; }
+  .macro-bar-label { font-size: 11px; color: var(--metal); width: 34px; flex-shrink: 0; }
+  .macro-bar-track { flex: 1; height: 5px; background: var(--humo); border-radius: 3px; overflow: hidden; }
+  .macro-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .macro-bar-val { font-size: 11px; color: var(--blanco); width: 30px; text-align: right; flex-shrink: 0; }
+
   .meal-opt-macros {
     display: flex;
     gap: 10px;
@@ -8865,23 +8872,26 @@
         </div>`).join('');
 
       const optionsHTML = meal.opciones.map((opt, optIdx) => {
-        // Convertir ingredientes en tags clicables
-        const ingredTags = opt.ingredientes.split(',').map((ing) => {
-          const clean = ing.trim();
-          return `<span class="ingredient-tag">${capitalizarIngrediente(clean)}</span>`;
-        }).join('');
+        const ingredTexto = opt.ingredientes.split(',').map(s => s.trim()).join(', ');
+        const kcalNum = parseInt(opt.kcal) || 0;
+        const protNum = parseInt(opt.prot) || 0;
+        const carbsNum = parseInt(opt.carbs) || 0;
+        const grasaNum = parseInt(opt.grasa) || 0;
+        const maxMacro = Math.max(protNum, carbsNum, grasaNum, 1);
 
         return `
         <div class="meal-option ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="selectMealOption(this, ${mealIdx}, ${optIdx})">
           <div class="meal-opt-num">Opción ${optIdx + 1}</div>
           <div class="meal-opt-name">${opt.nombre}</div>
-          <div class="meal-opt-ingredients" style="margin-bottom:8px">${ingredTags}</div>
-          <div class="meal-opt-prep">⏱ ${opt.prep}</div>
-          <div class="meal-opt-macros">
-            <span class="macro-pill">🔥 ${opt.kcal}</span>
-            <span class="macro-pill">💪 ${opt.prot}</span>
-            <span class="macro-pill">⚡ ${opt.carbs}</span>
-            <span class="macro-pill">🫒 ${opt.grasa}</span>
+          <div class="meal-opt-ingredients" style="margin-bottom:10px;font-size:13px;color:var(--metal-claro);line-height:1.6">${ingredTexto}</div>
+          <div class="meal-opt-macros-visual">
+            <div class="macro-bar-row"><span class="macro-bar-label">Prot</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(protNum/maxMacro*100)}%;background:var(--brasa)"></div></div><span class="macro-bar-val">${protNum}g</span></div>
+            <div class="macro-bar-row"><span class="macro-bar-label">Carbs</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(carbsNum/maxMacro*100)}%;background:#f0a500"></div></div><span class="macro-bar-val">${carbsNum}g</span></div>
+            <div class="macro-bar-row"><span class="macro-bar-label">Grasa</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(grasaNum/maxMacro*100)}%;background:#27ae60"></div></div><span class="macro-bar-val">${grasaNum}g</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
+            <span style="font-size:14px;color:var(--brasa);font-weight:600">${opt.kcal}</span>
+            <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
           </div>
         </div>`;
       }).join('');
