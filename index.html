@@ -3756,6 +3756,7 @@
   }
   .auth-error.visible { display: block; }
   @keyframes fadeInDown { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
 
   .auth-pass-strength {
     display: none; height: 3px; border-radius: 2px; margin-top: -14px; margin-bottom: 8px;
@@ -9097,12 +9098,42 @@
   }
 
   // ===== DASHBOARD NAV =====
+  const GUIAS_SECCION = {
+    hoy: { titulo: 'Tu entrenamiento de hoy', texto: 'Aquí tienes los ejercicios del día con series, repeticiones y descansos. Registra el peso que usas en cada ejercicio para llevar tu progresión. Cuando termines, márcalo como completado.' },
+    semana: { titulo: 'Plan semanal', texto: 'Consulta los 7 días de tu semana y las próximas semanas. Cada día tiene un objetivo diferente. Los días de descanso también forman parte del plan.' },
+    nutricion: { titulo: 'Tu nutrición', texto: 'Elige las comidas para cada día de la semana (L-D). Tienes 5 opciones por toma. Cuando termines, pulsa "Lista de la compra" para llevar todo al super. Puedes descargar el plan en PDF.' },
+    checkin: { titulo: 'Check-in semanal', texto: 'Cada semana cuéntanos cómo te fue: días entrenados, sensación física, energía y estado mental. Con eso ajustamos tu plan de la semana siguiente. Es lo que hace que K-ONE se adapte a ti.' },
+    progreso: { titulo: 'Tu progreso', texto: 'Aquí ves tu evolución: pesos registrados en cada ejercicio con gráfico, fotos mensuales, hitos conseguidos y racha de días entrenados. Cuanto más registres, más útil es.' },
+    notas: { titulo: 'Notas personales', texto: 'Apunta lo que quieras: pesos, sensaciones, ideas para tu próximo entreno. Solo tú las ves.' },
+    contacto: { titulo: 'Contacto directo', texto: 'Escríbenos lo que necesites: sugerencias, problemas con un alimento, dudas sobre tu plan. Leemos todo y te respondemos.' }
+  };
+
   function showSection(id) {
     document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`section-${id}`).classList.add('active');
     document.getElementById(`nav-${id}`)?.classList.add('active');
     closeDashMenu();
+    mostrarGuiaSeccion(id);
+  }
+
+  function mostrarGuiaSeccion(id) {
+    const key = `kone_guia_${id}`;
+    if (localStorage.getItem(key)) return;
+    const guia = GUIAS_SECCION[id];
+    if (!guia) return;
+    localStorage.setItem(key, '1');
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:340px;background:#141414;border:1px solid var(--brasa);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(232,73,15,0.15);animation:fadeInUp 0.3s ease';
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:32px;height:32px;background:var(--brasa);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0">?</div>
+        <div style="font-size:14px;font-weight:600;color:var(--blanco)">${guia.titulo}</div>
+      </div>
+      <p style="font-size:13px;color:var(--metal-claro);line-height:1.6;margin:0 0 14px">${guia.texto}</p>
+      <button onclick="this.closest('div[style]').remove()" style="background:var(--brasa);border:none;color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;width:100%">Entendido</button>`;
+    document.body.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 15000);
   }
 
   // ===== MENÚ MÓVIL DEL DASHBOARD =====
