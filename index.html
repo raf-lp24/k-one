@@ -301,6 +301,8 @@
   .jc-row { background:#161616; border:1px solid #222; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
   .jc-label { font-size:10px; color:var(--metal); text-transform:uppercase; letter-spacing:.5px; font-family:'DM Mono',monospace; margin-bottom:3px; }
   .jc-val { font-size:13px; color:var(--blanco); font-weight:500; }
+  .email-body-open { max-height:300px !important; }
+  .email-chevron-open { transform:rotate(180deg); }
 
   .btn-ghost {
     background: transparent;
@@ -4501,6 +4503,7 @@
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('premium')">Premium</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('sinpago')">Sin pago</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('nuevos')">Nuevos</button>
+            <button class="jarvis-filtro" onclick="filtrarAdminTipo('bajas')">Bajas</button>
           </div>
           <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);letter-spacing:0.5px;margin-top:8px">ESTUDIO DE MERCADO</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
@@ -4539,29 +4542,53 @@
 
     <!-- TAB: Buzón -->
     <div class="jarvis-panel" id="jarvisPanel-buzon" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:16px;font-weight:700;color:#fff">Mensajes de clientes</div>
-        <span id="adminMensajesCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--metal)"></span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3498db,#2980b9);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Buzón de mensajes</div>
+            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Contactos de clientes</div>
+          </div>
+        </div>
+        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#3498db15;color:#3498db;font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
-      <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
     <!-- TAB: Leads -->
     <div class="jarvis-panel" id="jarvisPanel-leads" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:16px;font-weight:700;color:#fff">Emails interesados</div>
-        <span id="adminLeadsCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--metal)"></span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#27ae60,#229954);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Leads interesados</div>
+            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Emails que pidieron información</div>
+          </div>
+        </div>
+        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#27ae6015;color:#27ae60;font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
-      <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+      <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px"></div>
     </div>
 
     <!-- TAB: Emails -->
     <div class="jarvis-panel" id="jarvisPanel-emails" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:16px;font-weight:700;color:#fff">Historial de correos enviados</div>
-        <span id="adminEmailsCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--metal)"></span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Correos enviados</div>
+            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Historial completo con contenido</div>
+          </div>
+        </div>
+        <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
-      <div id="adminEmailsList" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div id="adminEmailsList" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
     <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
@@ -11937,19 +11964,70 @@
     if (emailsCount) emailsCount.textContent = emailLog.length + ' emails';
     const emailsList = document.getElementById('adminEmailsList');
     if (emailsList) {
-      const tipoIcon = { lead: '📩', opinion: '⭐' };
-      const tipoLabel = { lead: 'Email de plan al lead', opinion: 'Notificación de opinión' };
+      const tipoIcon = { lead: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#E8490F" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+        bienvenida: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        opinion: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f0a500" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        mensaje: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3498db" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' };
+      const tipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente' };
+      const tipoColor = { lead: '#E8490F', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db' };
+      const fmtHora = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      };
       emailsList.innerHTML = emailLog.length === 0
         ? '<p style="color:var(--metal);font-size:13px">Aún no hay emails enviados.</p>'
-        : emailLog.map(e => `
-          <div style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px">
-            <span style="font-size:20px;flex-shrink:0">${tipoIcon[e.tipo] || '📧'}</span>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:13px;color:var(--blanco);font-weight:500">${_esc(tipoLabel[e.tipo] || e.tipo)}</div>
-              <div style="font-size:12px;color:var(--metal);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">→ ${_esc(e.destinatario)} · ${e.asunto ? _esc(e.asunto) : ''}</div>
+        : emailLog.map((e, i) => {
+          const color = tipoColor[e.tipo] || '#888';
+          const icon = tipoIcon[e.tipo] || tipoIcon.mensaje;
+          let cuerpoPreview = '';
+          if (e.datos) {
+            try {
+              const d = typeof e.datos === 'string' ? JSON.parse(e.datos) : e.datos;
+              if (d.mensaje) cuerpoPreview = d.mensaje;
+              else if (d.texto) cuerpoPreview = d.texto;
+              else if (d.email) cuerpoPreview = 'Destinatario: ' + d.email;
+            } catch(ex) {}
+          }
+          return `
+          <div style="background:#111;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden;transition:all .2s">
+            <div onclick="this.parentElement.querySelector('.email-body').classList.toggle('email-body-open');this.querySelector('.email-chevron').classList.toggle('email-chevron-open')" style="padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#1a1a1a'" onmouseleave="this.style.background='transparent'">
+              <div style="width:36px;height:36px;border-radius:10px;background:${color}15;border:1px solid ${color}30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                ${icon}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+                  <span style="font-size:13px;color:var(--blanco);font-weight:600">${_esc(tipoLabel[e.tipo] || e.tipo)}</span>
+                  <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:${color}18;color:${color};font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px">${_esc(e.tipo)}</span>
+                </div>
+                <div style="font-size:12px;color:var(--metal);display:flex;align-items:center;gap:6px">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                  <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(e.destinatario)}</span>
+                  ${e.asunto ? '<span style="color:#333">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _esc(e.asunto) + '</span>' : ''}
+                </div>
+              </div>
+              <div style="flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--metal)">${_fmtFecha(e.created_at)}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555">${fmtHora(e.created_at)}</div>
+              </div>
+              <svg class="email-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#555" stroke-width="2" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);flex-shrink:0;text-align:right">${_fmtFecha(e.created_at)}</div>
-          </div>`).join('');
+            <div class="email-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:0 solid #1e1e1e">
+              <div style="padding:0 18px 16px;font-size:12px;color:var(--metal-claro);line-height:1.6">
+                <div style="border-top:1px solid #1e1e1e;padding-top:14px">
+                  ${cuerpoPreview
+                    ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:12px 14px;white-space:pre-wrap;word-break:break-word">' + _esc(cuerpoPreview) + '</div>'
+                    : '<span style="color:#555;font-style:italic">Sin contenido de texto disponible</span>'}
+                  <div style="margin-top:10px;display:flex;gap:14px;font-size:10px;color:#555;font-family:\'DM Mono\',monospace">
+                    <span>Tipo: ${_esc(e.tipo)}</span>
+                    <span>Destino: ${_esc(e.destinatario)}</span>
+                    <span>Hora: ${fmtHora(e.created_at)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
     }
 
     // Mensajes de clientes
@@ -11966,31 +12044,58 @@
     }
     const mensajesList = document.getElementById('adminMensajesList');
     if (mensajesList) {
+      const fmtMsgHora = (iso) => iso ? new Date(iso).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}) : '';
       mensajesList.innerHTML = mensajes.length === 0
         ? '<p style="color:var(--metal);font-size:13px">No hay mensajes de clientes.</p>'
-        : mensajes.map(m => `
-          <div style="background:#151515;border:1px solid ${m.respuesta ? '#2a2a2a' : '#E8490F'};border-radius:8px;padding:14px 16px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <div>
-                <span style="font-weight:600;color:var(--blanco);font-size:13px">${_esc(m.nombre)}</span>
-                <span style="color:var(--metal);font-size:11px;margin-left:8px">${_esc(m.email)}</span>
+        : mensajes.map(m => {
+          const pendiente = !m.respuesta;
+          const motivoIcons = {'Sugerencia':'💡','Alimento':'🥗','Ejercicio':'🏋️','Mi plan':'📋','Pago':'💳','Otro':'💬'};
+          const motivoIcon = motivoIcons[m.asunto] || '💬';
+          return `
+          <div style="background:#111;border:1px solid ${pendiente ? '#E8490F30' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .15s">
+            <div style="padding:16px 18px">
+              <div style="display:flex;align-items:flex-start;gap:14px">
+                <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,#E8490F,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
+                  ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+                    <span style="font-size:14px;font-weight:600;color:var(--blanco)">${_esc(m.nombre)}</span>
+                    <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#E8490F18' : '#27ae6018'};color:${pendiente ? '#E8490F' : '#27ae60'};font-family:'DM Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
+                  </div>
+                  <div style="font-size:11px;color:#555;display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace">
+                    <span>${_esc(m.email)}</span>
+                    <span style="color:#333">·</span>
+                    <span>${_fmtFecha(m.created_at)}</span>
+                    <span style="color:#333">·</span>
+                    <span>${fmtMsgHora(m.created_at)}</span>
+                  </div>
+                </div>
               </div>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal)">${_fmtFecha(m.created_at)}</span>
+              <div style="margin:12px 0 0 54px">
+                <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:8px;background:#E8490F10;padding:3px 10px;border-radius:6px">
+                  <span>${motivoIcon}</span> ${_esc(m.asunto)}
+                </div>
+                <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:12px 14px;font-size:13px;color:var(--metal-claro);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(m.mensaje)}</div>
+              </div>
             </div>
-            <div style="font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:6px">${_esc(m.asunto)}</div>
-            <p style="font-size:13px;color:var(--metal-claro);line-height:1.5;margin:0">${_esc(m.mensaje)}</p>
-            ${m.respuesta
-              ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between">
-                  <span style="font-size:10px;color:#27ae60;font-weight:600">✓ Gestionado</span>
-                  <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="background:none;border:1px solid #333;border-radius:6px;color:#666;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'DM Mono',monospace">Eliminar</button>
-                </div>`
-              : `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #2a2a2a;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                  <span style="font-size:10px;color:#E8490F;font-weight:600">● Pendiente</span>
-                  <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.asunto + ' — K-ONE')}&body=${encodeURIComponent('Hola ' + m.nombre + ',\n\n')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--brasa);text-decoration:underline">Responder →</a>
-                  <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" style="background:#27ae60;border:none;border-radius:6px;color:#fff;font-size:10px;padding:5px 12px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:auto">✓ Gestionado</button>
-                  <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="background:none;border:1px solid #333;border-radius:6px;color:#666;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'DM Mono',monospace">Eliminar</button>
-                </div>`}
-          </div>`).join('');
+            <div style="border-top:1px solid #1e1e1e;padding:10px 18px;display:flex;align-items:center;gap:8px;background:#0d0d0d">
+              ${pendiente ? `
+                <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.asunto + ' — K-ONE')}&body=${encodeURIComponent('Hola ' + m.nombre + ',\n\n')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;background:var(--brasa);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;font-family:'DM Mono',monospace;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                  Responder
+                </a>
+                <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Gestionado
+                </button>` : ''}
+              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #222;border-radius:8px;color:#555;font-size:11px;padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:auto;transition:all .15s" onmouseenter="this.style.borderColor='#e74c3c';this.style.color='#e74c3c'" onmouseleave="this.style.borderColor='#222';this.style.color='#555'">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                Eliminar
+              </button>
+            </div>
+          </div>`;
+        }).join('');
     }
 
     // Leads
@@ -11999,16 +12104,32 @@
     if (leadsCount) leadsCount.textContent = leads.length + ' leads';
     const leadsList = document.getElementById('adminLeadsList');
     if (leadsList) {
+      const fmtLeadHora = (iso) => iso ? new Date(iso).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}) : '';
+      const ahora = Date.now();
       leadsList.innerHTML = leads.length === 0
         ? '<p style="color:var(--metal);font-size:13px;grid-column:1/-1">Aún no hay leads registrados.</p>'
-        : leads.map(l => `
-          <div style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-            <div style="min-width:0">
-              <div style="font-size:13px;color:var(--blanco);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(l.email)}</div>
-              <div style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace;margin-top:2px">${_fmtFecha(l.created_at)}</div>
+        : leads.map(l => {
+          const horasDesde = Math.floor((ahora - new Date(l.created_at).getTime()) / 3600000);
+          const esReciente = horasDesde < 24;
+          return `
+          <div style="background:#111;border:1px solid ${esReciente ? '#E8490F30' : '#1e1e1e'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='#1a1a1a';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='#111';this.style.transform='none'">
+            <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,#E8490F,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? '#fff' : '#666'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <a href="mailto:${_esc(l.email)}" onclick="event.stopPropagation()" style="color:var(--brasa);font-size:16px;text-decoration:none;flex-shrink:0" title="Enviar email">✉</a>
-          </div>`).join('');
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:var(--blanco);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(l.email)}</div>
+              <div style="font-size:10px;color:#555;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px">
+                <span>${_fmtFecha(l.created_at)}</span>
+                <span style="color:#333">·</span>
+                <span>${fmtLeadHora(l.created_at)}</span>
+                ${esReciente ? '<span style="color:#E8490F;font-weight:600">· NUEVO</span>' : ''}
+              </div>
+            </div>
+            <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(l.email)}&su=${encodeURIComponent('Tu plan personalizado — K-ONE')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="width:32px;height:32px;border-radius:8px;background:var(--brasa);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='none'">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+          </div>`;
+        }).join('');
     }
   }
 
@@ -12023,8 +12144,9 @@
         case 'alertas': return c.alerta === 'red' || c.alerta === 'orange';
         case 'activos': return ['active','trialing'].includes(c.estado);
         case 'premium': return c.isBeta;
-        case 'sinpago': return !['active','trialing','past_due'].includes(c.estado);
+        case 'sinpago': return !['active','trialing','past_due','canceled','unpaid'].includes(c.estado);
         case 'nuevos':  return c.esNuevo;
+        case 'bajas':   return ['canceled','unpaid'].includes(c.estado);
         default: return true;
       }
     });
@@ -12108,12 +12230,13 @@
       ? `<tr><td colspan="13" style="text-align:center;padding:30px;color:var(--metal);font-size:13px">No hay clientes que coincidan con el filtro.</td></tr>`
       : lista.map((c, idx) => {
           const rowBg = c.isBeta ? 'background:rgba(212,165,0,.06)' : c.alerta==='red' ? 'background:rgba(231,76,60,.05)' : c.alerta==='orange' ? 'background:rgba(230,126,34,.04)' : '';
-          const badgeNuevo = c.esNuevo ? '<span style="background:#1a0d06;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:1px 5px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace">NUEVO</span>' : '';
-          const badgePremium = c.isBeta ? '<span style="background:#2a2006;border:1px solid #d4a500;color:#ffd700;font-size:9px;padding:1px 5px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace">★ PREMIUM</span>' : '';
+          const badgeNuevo = c.esNuevo ? '<span style="background:#1a0d06;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">NUEVO</span>' : '';
+          const badgePremium = c.isBeta ? '<span style="background:#2a2006;border:1px solid #d4a500;color:#ffd700;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">★ PREMIUM</span>' : '';
+          const isBaja = ['canceled','unpaid'].includes(c.estado);
           const realIdx = clientes.indexOf(c);
-          return `<tr style="${rowBg};cursor:pointer" onclick="verDetalleCliente(${realIdx})">
+          return `<tr style="${rowBg};cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#151515'" onmouseleave="this.style.background='${rowBg.replace('background:','') || 'transparent'}'" onclick="verDetalleCliente(${realIdx})">
             ${td(alertaDot(c))}
-            ${td('<strong>' + _esc(c.nombre) + '</strong>' + badgePremium + badgeNuevo)}
+            ${td('<strong' + (isBaja ? ' style="opacity:.5"' : '') + '>' + _esc(c.nombre) + '</strong>' + badgePremium + badgeNuevo + (isBaja ? '<span style="background:#e74c3c18;color:#e74c3c;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">BAJA</span>' : ''))}
             ${td('<span style="color:var(--metal);font-size:12px">' + _esc(c.email) + '</span>')}
             ${td('<span style="color:var(--metal)">' + _fmtFecha(c.alta) + '</span>')}
             ${td(_estadoLegible(c))}
@@ -12126,9 +12249,9 @@
             ${td('<span style="color:var(--metal)">Sem. ' + (c.semanaActual || 1) + '</span>')}
             ${td(_fmtFecha(c.renovacion))}
             ${td(c.lesion
-              ? '<span style="color:#e67e22;font-size:11px">Con lesión</span>'
+              ? '<span style="color:#e67e22;font-size:11px">⚠ Lesión</span>'
               : '<span style="color:var(--metal)">—</span>')}
-            ${td('<a href="mailto:' + _esc(c.email) + '" onclick="event.stopPropagation()" title="Enviar email" style="color:var(--metal);text-decoration:none;font-size:14px">✉</a>')}
+            ${td('<a href="mailto:' + _esc(c.email) + '" onclick="event.stopPropagation()" title="Enviar email" style="color:var(--brasa);text-decoration:none;font-size:14px;transition:transform .15s;display:inline-block" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>')}
           </tr>`;
         }).join('');
 
@@ -12152,7 +12275,10 @@
         tipo === 'todos' ? 'todos' :
         tipo === 'alertas' ? 'alertas' :
         tipo === 'activos' ? 'activos' :
-        tipo === 'sinpago' ? 'sin pago' : 'nuevos'
+        tipo === 'premium' ? 'premium' :
+        tipo === 'sinpago' ? 'sin pago' :
+        tipo === 'nuevos' ? 'nuevos' :
+        tipo === 'bajas' ? 'bajas' : 'todos'
       ));
     });
   }
@@ -12242,6 +12368,12 @@
           Enviar email
         </a>
       </div>
+      <div style="margin-top:12px;text-align:center">
+        <button onclick="borrarCliente('${c.id}','${_esc(c.nombre)}','${_esc(c.email)}',this)" style="background:none;border:1px solid #333;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 20px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          Eliminar cliente
+        </button>
+      </div>
     `;
     const modal = document.getElementById('modalJarvisCliente');
     if (modal) modal.classList.add('visible');
@@ -12271,6 +12403,32 @@
       showToast('Error: ' + e.message, 4000);
       btn.disabled = false;
       btn.textContent = premium ? 'Hacer premium' : 'Quitar premium';
+    }
+  }
+
+  async function borrarCliente(userId, nombre, email, btn) {
+    const confirmar = window.confirm(`¿Seguro que quieres ELIMINAR permanentemente a ${nombre} (${email})?\n\nEsto borrará:\n• Su cuenta de usuario\n• Su perfil y datos\n• Su suscripción\n\nEsta acción NO se puede deshacer.`);
+    if (!confirmar) return;
+    const confirmar2 = window.confirm(`Última confirmación: ¿Borrar a ${email} de la base de datos?`);
+    if (!confirmar2) return;
+    btn.disabled = true;
+    btn.textContent = 'Eliminando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-borrar-cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast('Cliente eliminado correctamente');
+      cerrarDetalleCliente();
+      abrirPanelAdmin();
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      btn.disabled = false;
+      btn.textContent = 'Eliminar cliente';
     }
   }
 

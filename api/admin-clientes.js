@@ -231,7 +231,7 @@ module.exports = async (req, res) => {
     let emailLog = [];
     try {
       const { data: logData } = await supabaseAdmin
-        .from('email_log').select('tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(50);
+        .from('email_log').select('tipo, destinatario, asunto, datos, created_at').order('created_at', { ascending: false }).limit(50);
       emailLog = logData || [];
     } catch (e) {}
 
