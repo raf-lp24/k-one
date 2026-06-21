@@ -7665,34 +7665,38 @@
         }
       }
     });
+    const limpiar = s => s.replace(/,\s*,+/g, ',').replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
         const textoCompleto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
-        const nombreLower = opt.nombre.toLowerCase();
-        const palabrasNombre = nombreLower.split(/\s+/);
-        const esIngredientePrincipal = regexes.some(re => {
-          re.lastIndex = 0;
-          if (!re.test(nombreLower)) return false;
-          const matchWord = nombreLower.match(re);
-          if (!matchWord) return false;
-          const preposiciones = ['con','de','del','al','a','la','el','y','en','sin'];
-          const palabrasClave = palabrasNombre.filter(p => !preposiciones.includes(p) && p.length > 2);
-          return palabrasClave.slice(0, 2).some(p => matchWord.some(m => p.includes(m.toLowerCase())));
-        });
-        if (esIngredientePrincipal) return null;
         let nuevoIng = opt.ingredientes;
         let nuevoNombre = opt.nombre;
+        let tieneSustitucion = true;
         regexes.forEach((re, i) => {
-          re.lastIndex = 0;
           const reemplazo = susMap[i] || '';
-          nuevoIng = nuevoIng.replace(re, reemplazo);
-          re.lastIndex = 0;
-          nuevoNombre = nuevoNombre.replace(re, reemplazo);
+          if (!reemplazo) {
+            re.lastIndex = 0;
+            if (re.test(nuevoNombre) || re.test(nuevoIng)) tieneSustitucion = false;
+          }
+          re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
+          re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
-        nuevoIng = nuevoIng.replace(/,\s*,+/g, ',').replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
+        if (!tieneSustitucion) {
+          const nombreLower = opt.nombre.toLowerCase();
+          const preposiciones = ['con','de','del','al','a','la','el','y','en','sin'];
+          const palabrasClave = nombreLower.split(/\s+/).filter(p => !preposiciones.includes(p) && p.length > 2);
+          const esPrincipal = regexes.some(re => {
+            re.lastIndex = 0;
+            const m = nombreLower.match(re);
+            return m && palabrasClave.slice(0, 2).some(p => m.some(w => p.includes(w.toLowerCase())));
+          });
+          if (esPrincipal) return null;
+        }
+        nuevoIng = limpiar(nuevoIng);
         nuevoNombre = nuevoNombre.replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+        if (!nuevoNombre) return null;
         return { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
       }).filter(Boolean);
       return { ...meal, opciones: procesadas.length >= 1 ? procesadas : meal.opciones };
