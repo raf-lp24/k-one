@@ -2503,6 +2503,22 @@
   .ejercicio-fila:last-child { border-bottom: none; }
 
   .ejercicio-fila-texto { flex: 1; }
+  .ejercicio-video-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(232,73,15,0.15);
+    border-radius: 50%;
+    color: var(--brasa);
+    font-size: 11px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.2s;
+    margin-right: 6px;
+  }
+  .ejercicio-video-btn:hover { background: var(--brasa); color: #fff; transform: scale(1.1); }
 
   .ejercicio-fila-controls {
     display: flex;
@@ -7083,6 +7099,74 @@
     ).join('');
   }
 
+  const VIDEOS_EJERCICIOS = {
+    'press banca': 'https://www.youtube.com/results?search_query=press+banca+técnica+correcta',
+    'press militar': 'https://www.youtube.com/results?search_query=press+militar+técnica',
+    'press inclinado': 'https://www.youtube.com/results?search_query=press+inclinado+mancuernas',
+    'remo con barra': 'https://www.youtube.com/results?search_query=remo+con+barra+técnica',
+    'remo con mancuerna': 'https://www.youtube.com/results?search_query=remo+con+mancuerna+técnica',
+    'remo barra': 'https://www.youtube.com/results?search_query=remo+con+barra+técnica',
+    'jalón al pecho': 'https://www.youtube.com/results?search_query=jalón+al+pecho+técnica',
+    'jalón': 'https://www.youtube.com/results?search_query=jalón+al+pecho+polea',
+    'dominadas': 'https://www.youtube.com/results?search_query=dominadas+técnica+correcta',
+    'sentadilla': 'https://www.youtube.com/results?search_query=sentadilla+con+barra+técnica',
+    'sentadilla goblet': 'https://www.youtube.com/results?search_query=sentadilla+goblet+técnica',
+    'sentadilla búlgara': 'https://www.youtube.com/results?search_query=sentadilla+búlgara+técnica',
+    'sentadilla aérea': 'https://www.youtube.com/results?search_query=sentadilla+sin+peso+técnica',
+    'peso muerto': 'https://www.youtube.com/results?search_query=peso+muerto+técnica+correcta',
+    'peso muerto rumano': 'https://www.youtube.com/results?search_query=peso+muerto+rumano+técnica',
+    'prensa': 'https://www.youtube.com/results?search_query=prensa+de+piernas+técnica',
+    'hip thrust': 'https://www.youtube.com/results?search_query=hip+thrust+técnica+correcta',
+    'zancadas': 'https://www.youtube.com/results?search_query=zancadas+técnica+correcta',
+    'curl bíceps': 'https://www.youtube.com/results?search_query=curl+bíceps+mancuerna+técnica',
+    'curl': 'https://www.youtube.com/results?search_query=curl+bíceps+técnica',
+    'extensión tríceps': 'https://www.youtube.com/results?search_query=extensión+tríceps+polea+técnica',
+    'tríceps polea': 'https://www.youtube.com/results?search_query=extensión+tríceps+polea',
+    'fondos': 'https://www.youtube.com/results?search_query=fondos+en+paralelas+técnica',
+    'fondos en paralelas': 'https://www.youtube.com/results?search_query=fondos+en+paralelas+técnica',
+    'elevaciones laterales': 'https://www.youtube.com/results?search_query=elevaciones+laterales+técnica',
+    'face pull': 'https://www.youtube.com/results?search_query=face+pull+polea+técnica',
+    'aperturas': 'https://www.youtube.com/results?search_query=aperturas+pecho+mancuernas',
+    'aperturas en polea': 'https://www.youtube.com/results?search_query=aperturas+polea+cruce+cables',
+    'plancha': 'https://www.youtube.com/results?search_query=plancha+abdominal+técnica',
+    'plancha frontal': 'https://www.youtube.com/results?search_query=plancha+frontal+técnica',
+    'mountain climbers': 'https://www.youtube.com/results?search_query=mountain+climbers+técnica',
+    'burpees': 'https://www.youtube.com/results?search_query=burpees+técnica+correcta',
+    'flexiones': 'https://www.youtube.com/results?search_query=flexiones+técnica+correcta',
+    'gemelos': 'https://www.youtube.com/results?search_query=elevación+de+gemelos+técnica',
+    'gemelos en escalón': 'https://www.youtube.com/results?search_query=gemelos+en+escalón',
+    'puente de glúteo': 'https://www.youtube.com/results?search_query=puente+de+glúteo+técnica',
+    'nordic curl': 'https://www.youtube.com/results?search_query=nordic+curl+técnica',
+    'farmer carry': 'https://www.youtube.com/results?search_query=farmer+carry+técnica',
+    'sled push': 'https://www.youtube.com/results?search_query=sled+push+técnica',
+    'wall ball': 'https://www.youtube.com/results?search_query=wall+ball+técnica+crossfit',
+    'box jump': 'https://www.youtube.com/results?search_query=box+jump+técnica',
+    'thrusters': 'https://www.youtube.com/results?search_query=thrusters+técnica+crossfit',
+    'clean': 'https://www.youtube.com/results?search_query=clean+técnica+halterofilia',
+    'snatch': 'https://www.youtube.com/results?search_query=snatch+técnica+halterofilia',
+    'kettlebell swing': 'https://www.youtube.com/results?search_query=kettlebell+swing+técnica',
+    'remo en máquina': 'https://www.youtube.com/results?search_query=remo+en+máquina+skierg',
+    'skierg': 'https://www.youtube.com/results?search_query=skierg+técnica',
+    'assault bike': 'https://www.youtube.com/results?search_query=assault+bike+técnica',
+    'pullover': 'https://www.youtube.com/results?search_query=pullover+polea+técnica',
+    'encogimientos': 'https://www.youtube.com/results?search_query=encogimientos+trapecio+técnica',
+    'pájaros': 'https://www.youtube.com/results?search_query=pájaros+deltoides+posterior',
+    'extensión cuádriceps': 'https://www.youtube.com/results?search_query=extensión+cuádriceps+máquina',
+    'curl femoral': 'https://www.youtube.com/results?search_query=curl+femoral+máquina',
+    'abdominales': 'https://www.youtube.com/results?search_query=abdominales+crunch+técnica',
+    'crunch': 'https://www.youtube.com/results?search_query=crunch+abdominal+técnica',
+    'jumping jacks': 'https://www.youtube.com/results?search_query=jumping+jacks+técnica',
+    'saltos verticales': 'https://www.youtube.com/results?search_query=saltos+verticales+técnica',
+  };
+
+  function getVideoUrl(nombreEjercicio) {
+    const n = nombreEjercicio.toLowerCase().trim();
+    for (const [key, url] of Object.entries(VIDEOS_EJERCICIOS)) {
+      if (n.includes(key)) return url;
+    }
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(nombreEjercicio + ' técnica correcta')}`;
+  }
+
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
   // en una fila con el texto, un stepper de peso (kg, con botones +/-) que recuerda
   // el último valor guardado para ese ejercicio, y un mini-historial de registros previos.
@@ -7099,8 +7183,10 @@
     const miniHistorial = renderMiniHistorialHTML(entry?.historial);
     const pesoUltimoTexto = entry?.pesoAnterior != null ? `Anterior: ${entry.pesoAnterior} kg` : '';
 
+    const videoUrl = getVideoUrl(nombre);
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
+      <a href="${videoUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ejercicio-video-btn" title="Ver técnica del ejercicio">▶</a>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
           <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
