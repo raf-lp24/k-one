@@ -11980,25 +11980,30 @@
         : emailLog.map((e, i) => {
           const color = tipoColor[e.tipo] || '#888';
           const icon = tipoIcon[e.tipo] || tipoIcon.mensaje;
-          let cuerpoPreview = '';
+          let cuerpoPreview = '', esGestionado = false;
           if (e.datos) {
             try {
               const d = typeof e.datos === 'string' ? JSON.parse(e.datos) : e.datos;
-              if (d.mensaje) cuerpoPreview = d.mensaje;
+              if (d.resumen) cuerpoPreview = d.resumen;
+              else if (d.mensaje) cuerpoPreview = d.mensaje;
               else if (d.texto) cuerpoPreview = d.texto;
-              else if (d.email) cuerpoPreview = 'Destinatario: ' + d.email;
+              else if (d.nombre && d.email) cuerpoPreview = 'Para: ' + d.nombre + ' (' + d.email + ')';
+              else if (d.email) cuerpoPreview = 'Para: ' + d.email;
+              esGestionado = !!d.gestionado;
             } catch(ex) {}
           }
+          const gestionadoId = e.id || i;
           return `
-          <div style="background:#111;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden;transition:all .2s">
+          <div id="email-row-${gestionadoId}" style="background:#111;border:1px solid ${esGestionado ? '#1e1e1e' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .2s">
             <div onclick="this.parentElement.querySelector('.email-body').classList.toggle('email-body-open');this.querySelector('.email-chevron').classList.toggle('email-chevron-open')" style="padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#1a1a1a'" onmouseleave="this.style.background='transparent'">
               <div style="width:36px;height:36px;border-radius:10px;background:${color}15;border:1px solid ${color}30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
                 ${icon}
               </div>
               <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
                   <span style="font-size:13px;color:var(--blanco);font-weight:600">${_esc(tipoLabel[e.tipo] || e.tipo)}</span>
                   <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:${color}18;color:${color};font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px">${_esc(e.tipo)}</span>
+                  ${esGestionado ? '<span style="font-size:9px;padding:2px 7px;border-radius:4px;background:#27ae6018;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600">✓ VISTO</span>' : ''}
                 </div>
                 <div style="font-size:12px;color:var(--metal);display:flex;align-items:center;gap:6px">
                   <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -12012,16 +12017,22 @@
               </div>
               <svg class="email-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#555" stroke-width="2" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="email-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:0 solid #1e1e1e">
+            <div class="email-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
               <div style="padding:0 18px 16px;font-size:12px;color:var(--metal-claro);line-height:1.6">
                 <div style="border-top:1px solid #1e1e1e;padding-top:14px">
+                  <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">Contenido del email</div>
                   ${cuerpoPreview
-                    ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:12px 14px;white-space:pre-wrap;word-break:break-word">' + _esc(cuerpoPreview) + '</div>'
-                    : '<span style="color:#555;font-style:italic">Sin contenido de texto disponible</span>'}
-                  <div style="margin-top:10px;display:flex;gap:14px;font-size:10px;color:#555;font-family:\'DM Mono\',monospace">
-                    <span>Tipo: ${_esc(e.tipo)}</span>
-                    <span>Destino: ${_esc(e.destinatario)}</span>
-                    <span>Hora: ${fmtHora(e.created_at)}</span>
+                    ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--metal-claro)">' + _esc(cuerpoPreview) + '</div>'
+                    : '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;color:#555;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
+                  <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                    <div style="display:flex;gap:14px;font-size:10px;color:#555;font-family:'DM Mono',monospace">
+                      <span>Tipo: ${_esc(e.tipo)}</span>
+                      <span>Destino: ${_esc(e.destinatario)}</span>
+                      <span>${_fmtFecha(e.created_at)} ${fmtHora(e.created_at)}</span>
+                    </div>
+                    ${esGestionado
+                      ? '<span style="font-size:10px;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>'
+                      : '<button onclick="event.stopPropagation();marcarEmailGestionado(' + gestionadoId + ',this)" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:\'DM Mono\',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar como visto</button>'}
                   </div>
                 </div>
               </div>
@@ -12403,6 +12414,32 @@
       showToast('Error: ' + e.message, 4000);
       btn.disabled = false;
       btn.textContent = premium ? 'Hacer premium' : 'Quitar premium';
+    }
+  }
+
+  async function marcarEmailGestionado(emailId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Marcando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'email_gestionado', id: emailId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      btn.outerHTML = '<span style="font-size:10px;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>';
+      const row = document.getElementById('email-row-' + emailId);
+      if (row) {
+        const badges = row.querySelector('.email-body-open, div');
+        const headerDiv = row.querySelector('div > div > div:first-child');
+      }
+      showToast('Email marcado como visto');
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      btn.disabled = false;
+      btn.textContent = 'Marcar como visto';
     }
   }
 

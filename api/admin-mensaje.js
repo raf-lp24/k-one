@@ -22,6 +22,14 @@ module.exports = async (req, res) => {
     } else if (accion === 'eliminar') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
+    } else if (accion === 'email_gestionado') {
+      if (!id) return res.status(400).json({ error: 'id requerido' });
+      const { data: row } = await supabaseAdmin.from('email_log').select('datos').eq('id', id).single();
+      let datos = {};
+      try { datos = typeof row?.datos === 'string' ? JSON.parse(row.datos) : (row?.datos || {}); } catch(e) {}
+      datos.gestionado = true;
+      datos.gestionado_at = new Date().toISOString();
+      await supabaseAdmin.from('email_log').update({ datos: JSON.stringify(datos) }).eq('id', id);
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });

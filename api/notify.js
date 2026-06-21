@@ -361,16 +361,35 @@ module.exports = async (req, res) => {
       }
     });
 
-    // Guardar historial de emails enviados
+    // Guardar historial de emails enviados con resumen del cuerpo
     try {
       const supa = getSupabaseAdmin();
-      const destinatario = tipo === 'lead' ? datos.email : (tipo === 'opinion' ? datos.nombre : ADMIN_EMAIL);
-      const asunto = tipo === 'lead' ? 'Ejemplo de plan K-ONE' : tipo === 'opinion' ? `Nueva opinión de ${esc(datos.nombre)}` : tipo;
+      let destinatario, asunto, resumen;
+      if (tipo === 'lead') {
+        destinatario = datos.email;
+        asunto = 'Esto es lo que tendrías dentro de K-ONE';
+        resumen = 'Email al lead con preview del área de clientes: entrenamiento (press banca, remo, press militar), nutrición (pollo con arroz y brócoli, 520 kcal), y las 6 funciones del área de cliente. CTA: Empezar por 1,99€.';
+      } else if (tipo === 'bienvenida') {
+        const primerNombre = (datos.nombre || '').split(' ')[0] || 'Cliente';
+        destinatario = datos.email;
+        asunto = `${primerNombre}, tu plan te está esperando — K-ONE`;
+        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye grid de funciones: entrenamiento, nutrición, check-in semanal, lista de la compra.`;
+      } else if (tipo === 'mensaje') {
+        destinatario = ADMIN_EMAIL;
+        asunto = `Mensaje de ${datos.nombre}: ${datos.asunto}`;
+        resumen = `De: ${datos.nombre} (${datos.email})\nMotivo: ${datos.asunto}\n\n${datos.mensaje || ''}`;
+      } else if (tipo === 'opinion') {
+        destinatario = ADMIN_EMAIL;
+        asunto = `Nueva opinión de ${datos.nombre} (${datos.estrellas}★)`;
+        resumen = `Opinión de ${datos.nombre || 'Anónimo'}: ${'★'.repeat(datos.estrellas || 0)}${'☆'.repeat(5-(datos.estrellas||0))}\n\n${datos.texto || '(sin texto)'}`;
+      } else {
+        destinatario = ADMIN_EMAIL;
+        asunto = `Notificación: ${tipo}`;
+        resumen = JSON.stringify(datos, null, 2);
+      }
       await supa.from('email_log').insert({
-        tipo,
-        destinatario,
-        asunto,
-        datos: JSON.stringify(datos)
+        tipo, destinatario, asunto,
+        datos: JSON.stringify({ ...datos, resumen })
       });
     } catch (e) {}
 
