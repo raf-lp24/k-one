@@ -9207,13 +9207,63 @@
 
   // ===== DASHBOARD NAV =====
   const GUIAS_SECCION = {
-    hoy: { titulo: 'Tu entrenamiento de hoy', texto: 'Aquí tienes los ejercicios del día con series, repeticiones y descansos. Registra el peso que usas en cada ejercicio para llevar tu progresión. Cuando termines, márcalo como completado.' },
-    semana: { titulo: 'Plan semanal', texto: 'Consulta los 7 días de tu semana y las próximas semanas. Cada día tiene un objetivo diferente. Los días de descanso también forman parte del plan.' },
-    nutricion: { titulo: 'Tu nutrición', texto: 'Elige las comidas para cada día de la semana (L-D). Tienes 5 opciones por toma. Cuando termines, pulsa "Lista de la compra" para llevar todo al super. Puedes descargar el plan en PDF.' },
-    checkin: { titulo: 'Check-in semanal', texto: 'Cada semana cuéntanos cómo te fue: días entrenados, sensación física, energía y estado mental. Con eso ajustamos tu plan de la semana siguiente. Es lo que hace que K-ONE se adapte a ti.' },
-    progreso: { titulo: 'Tu progreso', texto: 'Aquí ves tu evolución: pesos registrados en cada ejercicio con gráfico, fotos mensuales, hitos conseguidos y racha de días entrenados. Cuanto más registres, más útil es.' },
-    notas: { titulo: 'Notas personales', texto: 'Apunta lo que quieras: pesos, sensaciones, ideas para tu próximo entreno. Solo tú las ves.' },
-    contacto: { titulo: 'Contacto directo', texto: 'Escríbenos lo que necesites: sugerencias, problemas con un alimento, dudas sobre tu plan. Leemos todo y te respondemos.' }
+    hoy: {
+      titulo: 'Tu entrenamiento de hoy',
+      items: [
+        { icon: '🏋️', label: 'Marca completado', desc: 'Cuando termines un ejercicio, pulsa el botón verde para registrarlo' },
+        { icon: '📝', label: 'Registra tus pesos', desc: 'Apunta el peso que usas en cada ejercicio — así ves tu progresión semana a semana' },
+        { icon: '▶️', label: 'Vídeos de apoyo', desc: 'Si no conoces un ejercicio, pulsa el botón de vídeo para ver cómo se ejecuta' },
+        { icon: '🔥', label: 'Racha de entrenos', desc: 'Cada día que entrenas sube tu racha. ¡Intenta no romperla!' }
+      ]
+    },
+    semana: {
+      titulo: 'Tu plan semanal',
+      items: [
+        { icon: '📅', label: '4 semanas completas', desc: 'Navega entre semanas. Cada una progresa en intensidad respecto a la anterior' },
+        { icon: '💪', label: 'Abre cada día', desc: 'Despliega cualquier día para ver los ejercicios, series, repeticiones y descansos' },
+        { icon: '⚖️', label: 'Pesos sugeridos', desc: 'Verás pesos orientativos. Ajústalos a tu nivel y anótalos en "Hoy"' },
+        { icon: '😴', label: 'Días de descanso', desc: 'Los descansos son parte del plan — no los saltes' }
+      ]
+    },
+    nutricion: {
+      titulo: 'Tu nutrición',
+      items: [
+        { icon: '🍽️', label: '5 opciones por comida', desc: 'Para cada toma (desayuno, media mañana, comida, merienda, cena) tienes 5 opciones. Elige la que más te apetezca' },
+        { icon: '📆', label: 'Planificador semanal', desc: 'Pulsa L, M, X, J, V, S, D para elegir las comidas de cada día de la semana' },
+        { icon: '🛒', label: 'Lista de la compra', desc: 'Una vez elegidas, genera tu lista de la compra con todo sumado por categorías' },
+        { icon: '📖', label: 'Recetario', desc: 'Busca recetas por nombre o ingrediente — tienes cientos de opciones con los macros calculados' }
+      ]
+    },
+    checkin: {
+      titulo: 'Check-in semanal',
+      items: [
+        { icon: '📊', label: 'Ajusta tu plan', desc: 'Cuéntanos cómo te fue la semana: días entrenados, sensación física, energía y estado mental' },
+        { icon: '🔄', label: 'Se adapta a ti', desc: 'Con tus respuestas, el plan de la semana siguiente se recalcula automáticamente' },
+        { icon: '⚖️', label: 'Actualiza tu peso', desc: 'Si cambió tu peso, indícalo aquí para que los macros se ajusten' }
+      ]
+    },
+    progreso: {
+      titulo: 'Tu progreso',
+      items: [
+        { icon: '📈', label: 'Gráfico de pesos', desc: 'Ve cómo progresan tus pesos en cada ejercicio semana a semana' },
+        { icon: '📸', label: 'Fotos mensuales', desc: 'Sube una foto cada mes para ver tu transformación visual' },
+        { icon: '🏆', label: 'Hitos', desc: 'Desbloquea logros conforme avanzas: primer entreno, racha de 7 días, primera semana completa...' },
+        { icon: '🔥', label: 'Racha', desc: 'Tu racha de días consecutivos entrenando. ¡A ver cuántos acumulas!' }
+      ]
+    },
+    notas: {
+      titulo: 'Notas personales',
+      items: [
+        { icon: '✏️', label: 'Escribe lo que quieras', desc: 'Sensaciones, ideas, ajustes que quieras recordar. Solo tú las ves' }
+      ]
+    },
+    contacto: {
+      titulo: 'Contacto directo',
+      items: [
+        { icon: '💬', label: 'Escríbenos', desc: 'Elige el motivo (sugerencia, alimento, ejercicio, plan, pago) y manda tu mensaje' },
+        { icon: '📧', label: 'Email directo', desc: 'También puedes escribirnos a equipo@k-one.fit. Respondemos en menos de 24h' }
+      ]
+    }
   };
 
   function showSection(id) {
@@ -9231,17 +9281,32 @@
     const guia = GUIAS_SECCION[id];
     if (!guia) return;
     localStorage.setItem(key, '1');
+    const itemsHtml = (guia.items || []).map(it => `
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0">
+        <span style="font-size:18px;flex-shrink:0;width:28px;text-align:center">${it.icon}</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--blanco);margin-bottom:2px">${it.label}</div>
+          <div style="font-size:12px;color:var(--metal-claro);line-height:1.5">${it.desc}</div>
+        </div>
+      </div>`).join('');
     const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:340px;background:#141414;border:1px solid var(--brasa);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(232,73,15,0.15);animation:fadeInUp 0.3s ease';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:380px;background:#111;border:1px solid #E8490F40;border-radius:14px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.5);animation:fadeInUp 0.3s ease';
     el.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="width:32px;height:32px;background:var(--brasa);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0">?</div>
-        <div style="font-size:14px;font-weight:600;color:var(--blanco)">${guia.titulo}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#E8490F,#ff6b2b);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:var(--blanco)">${guia.titulo}</div>
+        </div>
+        <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:0 4px">✕</button>
       </div>
-      <p style="font-size:13px;color:var(--metal-claro);line-height:1.6;margin:0 0 14px">${guia.texto}</p>
-      <button onclick="this.closest('div[style]').remove()" style="background:var(--brasa);border:none;color:#fff;padding:8px 20px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;width:100%">Entendido</button>`;
+      <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px;border-left:2px solid #E8490F30;padding-left:12px">
+        ${itemsHtml}
+      </div>
+      <button onclick="this.closest('div[style]').remove()" style="background:var(--brasa);border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;width:100%;transition:transform .15s" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='none'">Entendido</button>`;
     document.body.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.remove(); }, 15000);
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 20000);
   }
 
   // ===== MENÚ MÓVIL DEL DASHBOARD =====
