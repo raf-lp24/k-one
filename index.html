@@ -6859,27 +6859,35 @@
   // Inicia (o reinicia) el formulario y deja un punto en el historial para que
   // el botón "atrás" del navegador/móvil retroceda bloques en vez de salir.
   function enterFormulario() {
-    document.querySelectorAll('.form-block').forEach(b => b.classList.remove('active'));
-    currentBlock = 0;
-    maxBlockReached = 0;
-    document.querySelector('.form-block[data-block="0"]').classList.add('active');
+    try {
+      document.querySelectorAll('.form-block').forEach(b => b.classList.remove('active'));
+      currentBlock = 0;
+      maxBlockReached = 0;
+      const firstBlock = document.querySelector('.form-block[data-block="0"]');
+      if (firstBlock) firstBlock.classList.add('active');
 
-    // Reset de sliders, panel de feedback y campos condicionales
-    ['edad', 'peso', 'altura'].forEach(id => {
-      const input = document.getElementById(id);
-      input.value = input.defaultValue;
-      document.getElementById(id + 'Val').textContent = input.value;
-    });
-    document.getElementById('bmrPanel').style.display = 'none';
-    ['enfermedadExtra', 'lesionExtra', 'alergiaExtra'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
+      ['edad', 'peso', 'altura'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.value = input.defaultValue;
+          const valEl = document.getElementById(id + 'Val');
+          if (valEl) valEl.textContent = input.value;
+        }
+      });
+      const bmr = document.getElementById('bmrPanel');
+      if (bmr) bmr.style.display = 'none';
+      ['enfermedadExtra', 'lesionExtra', 'alergiaExtra'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
 
-    // Reset de la preselección de enfoque nutricional
-    enfoqueMacrosManual = false;
-    document.querySelectorAll('#enfoqueMacros .radio-opt').forEach(o => o.classList.remove('selected'));
-    document.getElementById('enfoqueMacrosHint').textContent =
-      'Te sugerimos un enfoque automáticamente al elegir tu objetivo, pero puedes cambiarlo cuando quieras.';
+      enfoqueMacrosManual = false;
+      document.querySelectorAll('#enfoqueMacros .radio-opt').forEach(o => o.classList.remove('selected'));
+      const hint = document.getElementById('enfoqueMacrosHint');
+      if (hint) hint.textContent = 'Te sugerimos un enfoque automáticamente al elegir tu objetivo, pero puedes cambiarlo cuando quieras.';
+    } catch (e) {
+      console.error('Error reseteando formulario:', e);
+    }
 
     goTo('formulario');
     updateProgress();
