@@ -4472,7 +4472,7 @@
               <option value="Running">Running</option>
               <option value="CrossFit">CrossFit</option>
               <option value="Hyrox">Hyrox</option>
-              <option value="Combinación">Combinación</option>
+              <option value="Híbrido">Híbrido</option>
             </select>
             <select id="adminFiltroObjetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Objetivo: todos</option>
@@ -4642,7 +4642,7 @@
             <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Running</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Hyrox</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">CrossFit</div>
-            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Combinación</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Híbrido</div>
           </div>
         </div>
         <div class="field">
@@ -4876,13 +4876,13 @@
   <section class="sports" id="sports">
     <div class="section-header">
       <h2 class="section-title">Tu deporte, tu plan</h2>
-      <p class="section-note">Da igual si haces gimnasio, running, CrossFit, Hyrox o combinación. El plan se construye para ti.</p>
+      <p class="section-note">Da igual si haces gimnasio, running, CrossFit, Hyrox o híbrido. El plan se construye para ti.</p>
     </div>
     <div class="hybrid-callout">
       <span class="hybrid-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 H7 L17 17 H21"/><path d="M3 17 H7 L17 7 H21"/><path d="M18 4 L21 7 L18 10"/><path d="M18 14 L21 17 L18 20"/></svg></span>
       <div class="hybrid-callout-text">
         <div class="hybrid-callout-title">¿Entrenas para más de una cosa?</div>
-        <p class="hybrid-callout-desc">Si preparas una maratón o un Hyrox sin perder lo ganado en el gimnasio, elige "Combinación": un plan semanal que reparte fuerza y resistencia sin que se pisen.</p>
+        <p class="hybrid-callout-desc">Si preparas una maratón o un Hyrox sin perder lo ganado en el gimnasio, elige "Híbrido": un plan semanal que reparte fuerza y resistencia sin que se pisen.</p>
       </div>
     </div>
     <div class="sports-grid">
@@ -5851,7 +5851,7 @@
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">Running</div>
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">Hyrox</div>
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">CrossFit</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporte')">Combinación</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporte')">Híbrido</div>
             </div>
           </div>
           <div class="field">
@@ -6521,7 +6521,7 @@
     const numDias       = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
     const esPrincipiante = nivel.includes('Principiante');
     const sinMat         = lugar.includes('sin material');
-    const esGym          = deporte.includes('Gimnasio') || deporte.includes('Fuerza') || deporte.includes('Combinación') || deporte.includes('casa');
+    const esGym          = deporte.includes('Gimnasio') || deporte.includes('Fuerza') || deporte.includes('Híbrido') || deporte.includes('casa');
 
     let split = '', desc = '', nota = '';
 
@@ -6574,7 +6574,7 @@
       opciones = ['Box CrossFit', 'Al aire libre'];
     } else if (deporte.includes('Gimnasio') || deporte.includes('Fuerza')) {
       opciones = ['Gimnasio', 'En casa con material', 'En casa sin material'];
-    } else if (deporte.includes('Combinación')) {
+    } else if (deporte.includes('Híbrido')) {
       opciones = ['Gimnasio + exterior', 'En casa con material', 'En casa sin material'];
     } else {
       opciones = ['Gimnasio', 'En casa con material', 'En casa sin material'];
@@ -7417,7 +7417,7 @@
     const esGimnasio = deporte.includes('Gimnasio') || deporte.includes('Fuerza');
     const esHyrox = deporte.includes('Hyrox');
     const esCrossfit = deporte.includes('CrossFit');
-    const esCombinacion = deporte.includes('Combinación');
+    const esCombinacion = deporte.includes('Híbrido');
     const tieneEvento = u.evento && u.evento.trim().length > 0;
     const tiempoSesion = u.tiempoSesion || '45-60 min';
     const sesionCorta = tiempoSesion.includes('30-45');
@@ -11611,6 +11611,7 @@
   function mostrarFormAltaCliente() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay visible';
+    modal.style.zIndex = '10200';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
       <div class="modal-box" style="max-width:440px;padding:28px">
