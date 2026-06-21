@@ -13391,6 +13391,13 @@
   }
 
   // ===== INIT =====
+  window.onerror = function() {
+    if (!document.querySelector('.screen[style*="display: block"], .screen[style*="display:block"]')) {
+      var landing = document.getElementById('landing');
+      if (landing) landing.style.display = 'block';
+    }
+  };
+
   window.onload = async () => {
     cargarTestimoniosLanding();
     mostrarCookieBanner();
@@ -13420,10 +13427,17 @@
     });
 
     // Restaura la sesión activa de Supabase (si la hay) y sincroniza el perfil.
-    const { data: { session } } = await supa.auth.getSession();
-    if (session) {
-      await syncProfileFromSupabase(session.user);
-    } else {
+    let session = null;
+    try {
+      const { data } = await supa.auth.getSession();
+      session = data?.session;
+      if (session) {
+        await syncProfileFromSupabase(session.user);
+      } else {
+        clearCurrentUser();
+      }
+    } catch (e) {
+      console.error('Error restaurando sesión:', e);
       clearCurrentUser();
     }
 
@@ -13439,12 +13453,17 @@
     const user = getCurrentUser();
     actualizarNavSesion();
     if (user) {
-      const saved = getUserData(user.email);
-      if (saved && saved.plan) {
-        loadUserDashboard(user.email);
-        goTo('dashboard');
-      } else {
-        enterFormulario();
+      try {
+        const saved = getUserData(user.email);
+        if (saved && saved.plan) {
+          loadUserDashboard(user.email);
+          goTo('dashboard');
+        } else {
+          enterFormulario();
+        }
+      } catch (e) {
+        console.error('Error cargando dashboard:', e);
+        goTo('landing');
       }
     } else {
       const goParam = new URLSearchParams(window.location.search).get('go');
