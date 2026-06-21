@@ -7307,7 +7307,12 @@
     const bloqueConPeso = (titulo, lista) => lista.length
       ? `<strong>${titulo}</strong><div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`
       : '';
-    const bloquePrincipalHTML = [bloqueConPeso('Bloque de fuerza', fuerza), bloqueConPeso('Bloque de hipertrofia', hipertrofia), bloque('Bloque de acondicionamiento', acondicionamiento), bloque('Core', core)]
+    const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
+    const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
+    const tituloFuerza = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Bloque de fuerza';
+    const tituloAccesorio = esCardio ? 'Trabajo complementario' : esFuncional ? 'Accesorios' : 'Bloque de hipertrofia';
+    const tituloAcond = esCardio ? 'Sesión principal' : esFuncional ? 'WOD / Acondicionamiento' : 'Acondicionamiento';
+    const bloquePrincipalHTML = [bloqueConPeso(tituloFuerza, fuerza), bloqueConPeso(tituloAccesorio, hipertrofia), bloque(tituloAcond, acondicionamiento), bloque('Core', core)]
       .filter(Boolean).join('<br><br>');
 
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
