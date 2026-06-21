@@ -13,13 +13,25 @@ module.exports = async (req, res) => {
       return res.status(403).json({ error: 'No autorizado' });
     }
 
-    const { id, accion } = req.body || {};
-    if (!id || !accion) return res.status(400).json({ error: 'id y accion requeridos' });
+    const { id, accion, userId } = req.body || {};
+    if (!accion) return res.status(400).json({ error: 'accion requerida' });
 
     if (accion === 'gestionado') {
+      if (!id) return res.status(400).json({ error: 'id requerido' });
       await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id);
     } else if (accion === 'eliminar') {
+      if (!id) return res.status(400).json({ error: 'id requerido' });
       await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
+    } else if (accion === 'borrar_cliente') {
+      if (!userId) return res.status(400).json({ error: 'userId requerido' });
+      if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
+      await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
+      await supabaseAdmin.from('profiles').delete().eq('id', userId);
+      const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      if (authErr) {
+        console.error('[admin-mensaje] borrar_cliente auth error:', authErr);
+        return res.status(500).json({ error: 'Error eliminando usuario: ' + authErr.message });
+      }
     } else {
       return res.status(400).json({ error: 'Acción no válida' });
     }

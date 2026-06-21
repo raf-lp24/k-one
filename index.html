@@ -12415,10 +12415,10 @@
     btn.textContent = 'Eliminando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-borrar-cliente', {
+      const res = await fetch('/api/admin-mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({ accion: 'borrar_cliente', userId })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
