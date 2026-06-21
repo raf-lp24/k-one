@@ -3360,6 +3360,22 @@
   .btn-completado.completado:hover { background: var(--brasa-oscura); border-color: var(--brasa-oscura); color: var(--blanco-puro); }
 
   /* NOTAS / AGENDA */
+  .contacto-motivo {
+    padding: 10px 16px;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    border-radius: 10px;
+    color: var(--metal-claro);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .contacto-motivo:hover { border-color: var(--brasa); color: var(--blanco); }
+  .contacto-motivo.selected { background: rgba(232,73,15,0.12); border-color: var(--brasa); color: var(--blanco); }
+
   .notes-form {
     background: var(--carbon);
     padding: 24px;
@@ -6381,28 +6397,49 @@
         <div class="dash-header">
           <div class="dash-greeting">// Comunicación directa</div>
           <h1 class="dash-title">Contacto</h1>
-          <p class="dash-subtitle">¿Algo que mejorar en tu plan? ¿Un alimento que no te gusta? ¿Una duda? Escríbenos y te respondemos.</p>
+          <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
-          <div>
-            <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">ASUNTO</label>
-            <select id="contactoAsunto" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit">
-              <option value="sugerencia">Sugerencia de mejora</option>
-              <option value="alimento">No me gusta un alimento</option>
-              <option value="ejercicio">Problema con un ejercicio</option>
-              <option value="plan">Duda sobre mi plan</option>
-              <option value="pago">Problema con el pago</option>
-              <option value="otro">Otro</option>
-            </select>
+        <!-- Motivos rápidos como botones -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:10px">¿SOBRE QUÉ QUIERES ESCRIBIRNOS?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="contactoMotivos">
+            <button class="contacto-motivo selected" onclick="seleccionarMotivo(this,'sugerencia')">💡 Sugerencia</button>
+            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'alimento')">🥗 Alimento</button>
+            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'ejercicio')">🏋️ Ejercicio</button>
+            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'plan')">📋 Mi plan</button>
+            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'pago')">💳 Pago</button>
+            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'otro')">💬 Otro</button>
           </div>
-          <div>
-            <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">MENSAJE</label>
-            <textarea id="contactoMensaje" placeholder="Cuéntanos lo que necesites..." style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);font-family:inherit;font-size:14px;padding:12px;min-height:120px;resize:none;box-sizing:border-box"></textarea>
-          </div>
-          <button class="btn-primary" onclick="enviarContacto()" style="align-self:flex-start;padding:12px 28px">Enviar mensaje →</button>
+          <input type="hidden" id="contactoAsunto" value="sugerencia">
         </div>
 
+        <!-- Mensaje -->
+        <div style="background:var(--carbon);border:1px solid var(--humo);border-radius:14px;padding:20px;margin-bottom:20px">
+          <textarea id="contactoMensaje" placeholder="Cuéntanos lo que necesites..." style="width:100%;background:transparent;border:none;color:var(--blanco);font-family:inherit;font-size:15px;padding:0;min-height:140px;resize:none;box-sizing:border-box;outline:none;line-height:1.6"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--humo)">
+            <span style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">Te respondemos en menos de 24h</span>
+            <button class="btn-primary" onclick="enviarContacto()" style="padding:10px 24px;font-size:12px">Enviar →</button>
+          </div>
+        </div>
+
+        <!-- Info de contacto -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;background:rgba(232,73,15,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✉️</div>
+            <div>
+              <div style="font-size:11px;color:var(--metal)">Email directo</div>
+              <div style="font-size:13px;color:var(--blanco)">k.one.fit26@gmail.com</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;background:rgba(232,73,15,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⏱️</div>
+            <div>
+              <div style="font-size:11px;color:var(--metal)">Tiempo de respuesta</div>
+              <div style="font-size:13px;color:var(--blanco)">Menos de 24 horas</div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -9668,6 +9705,12 @@
   }
 
   // ===== CONTACTO / SUGERENCIAS =====
+  function seleccionarMotivo(el, valor) {
+    document.querySelectorAll('.contacto-motivo').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('contactoAsunto').value = valor;
+  }
+
   async function enviarContacto() {
     const asunto = document.getElementById('contactoAsunto').value;
     const mensaje = (document.getElementById('contactoMensaje').value || '').trim();
