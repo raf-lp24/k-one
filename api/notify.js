@@ -28,8 +28,13 @@ module.exports = async (req, res) => {
 
   const origin = req.headers.origin || req.headers.referer || '';
   const appUrl = process.env.APP_URL || 'https://k-one.fit';
-  if (!origin.includes('k-one.fit') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
-    return res.status(403).json({ error: 'Origen no permitido' });
+  try {
+    const h = new URL(origin).hostname;
+    if (h !== 'k-one.fit' && h !== 'www.k-one.fit' && h !== 'localhost' && !h.endsWith('.vercel.app')) {
+      return res.status(403).json({ error: 'Origen no permitido' });
+    }
+  } catch (_) {
+    if (origin) return res.status(403).json({ error: 'Origen no permitido' });
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -321,7 +326,7 @@ module.exports = async (req, res) => {
               </div>
               <div style="background:#141414;padding:18px 22px;margin-bottom:16px">
                 <p style="margin:0 0 4px;font-size:11px;color:#E8490F;font-weight:600">${esc(datos.asunto)}</p>
-                <p style="margin:0;color:#e0e0e0;line-height:1.6;font-size:14px">${datos.mensaje.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p>
+                <p style="margin:0;color:#e0e0e0;line-height:1.6;font-size:14px">${esc(datos.mensaje).replace(/\n/g,'<br>')}</p>
               </div>
               <p style="color:#555;font-size:11px;margin:0">Responde a este email para contestar directamente al cliente.</p>
             </div>
@@ -330,7 +335,8 @@ module.exports = async (req, res) => {
       }));
 
     } else if (tipo === 'opinion') {
-      const estrellas = '★'.repeat(datos.estrellas || 0) + '☆'.repeat(5 - (datos.estrellas || 0));
+      const nEstrellas = Math.min(Math.max(parseInt(datos.estrellas) || 0, 0), 5);
+      const estrellas = '★'.repeat(nEstrellas) + '☆'.repeat(5 - nEstrellas);
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
@@ -340,7 +346,7 @@ module.exports = async (req, res) => {
           <h2 style="color:#E8490F">Nueva opinión en K-ONE</h2>
           <p><strong>Nombre:</strong> ${esc(datos.nombre) || 'Anónimo'}</p>
           <p><strong>Valoración:</strong> <span style="color:#E8490F;font-size:18px">${estrellas}</span></p>
-          <p><strong>Texto:</strong> ${esc(datos.texto || '(sin texto)'}</p>
+          <p><strong>Texto:</strong> ${esc(datos.texto || '(sin texto)')}</p>
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
       }));

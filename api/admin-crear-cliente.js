@@ -25,7 +25,8 @@ module.exports = async (req, res) => {
       .upsert({ email: emailLower }, { onConflict: 'email' });
 
     if (insertErr) {
-      return res.status(500).json({ error: 'Error guardando invitación: ' + insertErr.message });
+      console.error('[admin-crear-cliente] insert error:', insertErr.message);
+      return res.status(500).json({ error: 'No se pudo guardar la invitación' });
     }
 
     return res.status(200).json({ ok: true, email: emailLower });

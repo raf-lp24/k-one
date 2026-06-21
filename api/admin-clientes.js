@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
         const n = u.user_metadata?.nombre;
         if (n) authNames[u.id] = n;
       });
-    } catch (e) {}
+    } catch (e) { console.warn('[admin-clientes] listUsers error:', e.message); }
 
     if (e1) {
       // B-4: no exponer el mensaje crudo de Supabase al cliente
@@ -235,14 +235,14 @@ module.exports = async (req, res) => {
       const { data: leadsData } = await supabaseAdmin
         .from('leads').select('email, created_at').order('created_at', { ascending: false }).limit(50);
       leads = leadsData || [];
-    } catch (e) {}
+    } catch (e) { console.warn('[admin-clientes] leads query error:', e.message); }
 
     let emailLog = [];
     try {
       const { data: logData } = await supabaseAdmin
         .from('email_log').select('id, tipo, destinatario, asunto, datos, created_at').order('created_at', { ascending: false }).limit(50);
       emailLog = logData || [];
-    } catch (e) {}
+    } catch (e) { console.warn('[admin-clientes] emailLog query error:', e.message); }
 
     let mensajes = [];
     try {
@@ -250,7 +250,7 @@ module.exports = async (req, res) => {
         .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at')
         .order('created_at', { ascending: false }).limit(50);
       mensajes = msgData || [];
-    } catch (e) {}
+    } catch (e) { console.warn('[admin-clientes] mensajes query error:', e.message); }
 
     return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog, mensajes });
 

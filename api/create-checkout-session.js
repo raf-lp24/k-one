@@ -83,8 +83,8 @@ module.exports = async (req, res) => {
       }
     }
 
-    // M-4: origen desde variable de entorno para evitar header Host manipulado
-    const origin = process.env.APP_URL || `https://${req.headers.host}`;
+    const origin = process.env.APP_URL;
+    if (!origin) return res.status(500).json({ error: 'APP_URL no configurada' });
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

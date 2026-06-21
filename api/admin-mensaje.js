@@ -18,10 +18,12 @@ module.exports = async (req, res) => {
 
     if (accion === 'gestionado') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
-      await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id);
+      const { error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id);
+      if (e) { console.error('[admin-mensaje] gestionado error:', e.message); return res.status(500).json({ error: 'Error actualizando mensaje' }); }
     } else if (accion === 'eliminar') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
-      await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
+      const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
+      if (e) { console.error('[admin-mensaje] eliminar error:', e.message); return res.status(500).json({ error: 'Error eliminando mensaje' }); }
     } else if (accion === 'email_gestionado') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { data: row } = await supabaseAdmin.from('email_log').select('datos').eq('id', id).single();
@@ -29,7 +31,8 @@ module.exports = async (req, res) => {
       try { datos = typeof row?.datos === 'string' ? JSON.parse(row.datos) : (row?.datos || {}); } catch(e) {}
       datos.gestionado = true;
       datos.gestionado_at = new Date().toISOString();
-      await supabaseAdmin.from('email_log').update({ datos: JSON.stringify(datos) }).eq('id', id);
+      const { error: e } = await supabaseAdmin.from('email_log').update({ datos: JSON.stringify(datos) }).eq('id', id);
+      if (e) { console.error('[admin-mensaje] email_gestionado error:', e.message); return res.status(500).json({ error: 'Error marcando email' }); }
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
@@ -38,7 +41,7 @@ module.exports = async (req, res) => {
       const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
       if (authErr) {
         console.error('[admin-mensaje] borrar_cliente auth error:', authErr);
-        return res.status(500).json({ error: 'Error eliminando usuario: ' + authErr.message });
+        return res.status(500).json({ error: 'Error eliminando usuario' });
       }
     } else {
       return res.status(400).json({ error: 'Acción no válida' });

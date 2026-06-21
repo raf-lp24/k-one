@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
 function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY no definida');
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
