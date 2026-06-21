@@ -7575,6 +7575,111 @@
     return MENSAJES_DIA[dayOfYear % MENSAJES_DIA.length];
   }
 
+  const SUSTITUCIONES_NOCOMIDA = {
+    'pepino': 'calabacín',
+    'calabacín': 'calabaza',
+    'calabaza': 'zanahoria',
+    'tomate': 'pimiento rojo',
+    'pimiento': 'calabacín',
+    'cebolla': 'puerro',
+    'champiñón': 'calabacín',
+    'champiñon': 'calabacín',
+    'berenjena': 'calabacín',
+    'espinaca': 'acelga',
+    'espinacas': 'acelgas',
+    'brócoli': 'coliflor',
+    'brocoli': 'coliflor',
+    'coliflor': 'brócoli',
+    'lechuga': 'rúcula',
+    'rúcula': 'canónigos',
+    'rucula': 'canónigos',
+    'aguacate': 'hummus',
+    'atún': 'pollo',
+    'atun': 'pollo',
+    'salmón': 'merluza',
+    'salmon': 'merluza',
+    'merluza': 'lubina',
+    'gambas': 'pollo',
+    'pescado': 'pollo',
+    'pollo': 'pavo',
+    'pavo': 'pollo',
+    'ternera': 'pollo',
+    'cerdo': 'pavo',
+    'huevo': 'tofu',
+    'huevos': 'tofu',
+    'arroz': 'quinoa',
+    'quinoa': 'arroz',
+    'pasta': 'arroz',
+    'patata': 'boniato',
+    'boniato': 'patata',
+    'avena': 'copos de espelta',
+    'leche': 'bebida de avena',
+    'yogur': 'yogur de soja',
+    'queso': 'hummus',
+    'legumbres': 'quinoa',
+    'garbanzos': 'lentejas',
+    'lentejas': 'garbanzos',
+    'judías': 'garbanzos',
+    'maíz': 'guisantes',
+    'zanahoria': 'calabaza',
+    'espárrago': 'judías verdes',
+    'esparrago': 'judías verdes',
+    'alcachofa': 'judías verdes',
+    'setas': 'calabacín',
+    'miel': 'sirope de agave',
+    'plátano': 'manzana',
+    'platano': 'manzana',
+    'manzana': 'pera',
+    'naranja': 'mandarina',
+    'fresa': 'frambuesa',
+    'fresas': 'frambuesas',
+    'arándanos': 'frambuesas',
+    'arandanos': 'frambuesas',
+    'kiwi': 'mandarina',
+    'piña': 'mango',
+    'sandía': 'melón',
+    'melón': 'sandía',
+  };
+
+  function filtrarNoComida(nutricion, noComidaRaw) {
+    const raw = (noComidaRaw || '').trim();
+    if (!raw) return nutricion;
+    const tokens = raw.split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
+    if (!tokens.length) return nutricion;
+    const regexes = tokens.map(t => new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'));
+    const susMap = {};
+    tokens.forEach((t, i) => {
+      for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
+        if (t === clave || clave.includes(t) || t.includes(clave)) {
+          if (!tokens.some(tok => tok === valor.toLowerCase() || valor.toLowerCase().includes(tok))) {
+            susMap[i] = valor;
+            break;
+          }
+        }
+      }
+    });
+    return nutricion.map(meal => {
+      const procesadas = meal.opciones.map(opt => {
+        const textoCompleto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
+        const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
+        if (!coincide) return opt;
+        const enNombre = regexes.some(re => { re.lastIndex = 0; return re.test(opt.nombre.toLowerCase()); });
+        if (enNombre) return null;
+        let nuevoIng = opt.ingredientes;
+        regexes.forEach((re, i) => {
+          re.lastIndex = 0;
+          if (re.test(nuevoIng)) {
+            const reemplazo = susMap[i] || '';
+            nuevoIng = nuevoIng.replace(re, reemplazo);
+          }
+        });
+        nuevoIng = nuevoIng.replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/^\s*,/, '').trim();
+        return { ...opt, ingredientes: nuevoIng };
+      }).filter(Boolean);
+      return { ...meal, opciones: procesadas.length >= 1 ? procesadas : meal.opciones };
+    });
+  }
+
   function buildPlanFromData(u) {
     const soloDieta = (u.tipoPlan || '').includes('Solo nutrición');
     const deporte = u.deporte || 'Gimnasio / Fuerza';
@@ -8764,28 +8869,8 @@
       });
     }
 
-    // FILTRAR ALIMENTOS NO DESEADOS: el usuario indica en el cuestionario (campo noComida)
-    // qué alimentos no quiere comer. Se eliminan las opciones cuyo nombre o ingredientes
-    // contengan esos alimentos. Se garantiza un mínimo de 2 opciones por toma.
-    const noComidaRaw = (u.noComida || '').trim();
-    if (noComidaRaw) {
-      const tokens = noComidaRaw
-        .split(/[,;]+/)
-        .map(t => t.trim().toLowerCase())
-        .filter(t => t.length >= 2);
-      if (tokens.length) {
-        const noComidaRegexes = tokens.map(t =>
-          new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
-        );
-        nutricion = nutricion.map(meal => {
-          const filtradas = meal.opciones.filter(opt => {
-            const texto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
-            return !noComidaRegexes.some(re => re.test(texto));
-          });
-          return { ...meal, opciones: filtradas.length >= 1 ? filtradas : meal.opciones };
-        });
-      }
-    }
+    // FILTRAR ALIMENTOS NO DESEADOS
+    nutricion = filtrarNoComida(nutricion, u.noComida);
 
     // VARIEDAD DE COMIDAS por usuario: rota el orden de las opciones de cada toma según la
     // semilla, de modo que la opción "recomendada" (la primera) y el orden cambian entre
@@ -11455,6 +11540,9 @@
       userData = saved.userData || {};
       generatedPlan = saved.plan || null;
       if (generatedPlan) {
+        if (generatedPlan.nutricion && userData.noComida) {
+          generatedPlan.nutricion = filtrarNoComida(generatedPlan.nutricion, userData.noComida);
+        }
         regenerarEntrenamientoHoy(generatedPlan);
         buildDashboard();
       }
