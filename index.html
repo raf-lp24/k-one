@@ -7593,47 +7593,78 @@
   };
 
   const SUSTITUCIONES_NOCOMIDA = {
-    'pepino': 'calabacín', 'pepinillo': 'calabacín', 'calabacín': 'calabaza', 'calabacin': 'calabaza', 'calabaza': 'zanahoria',
-    'tomate': 'pimiento rojo', 'pimiento': 'calabacín', 'cebolla': 'puerro', 'puerro': 'cebolla',
-    'champiñón': 'calabacín', 'champiñon': 'calabacín', 'setas': 'calabacín', 'berenjena': 'calabacín',
-    'espinaca': 'acelga', 'espinacas': 'acelgas', 'acelga': 'espinacas', 'acelgas': 'espinacas',
-    'brócoli': 'coliflor', 'brocoli': 'coliflor', 'coliflor': 'brócoli',
-    'lechuga': 'rúcula', 'rúcula': 'canónigos', 'rucula': 'canónigos', 'canónigos': 'rúcula',
-    'aguacate': 'hummus', 'apio': 'pepino', 'col': 'lechuga', 'repollo': 'lechuga',
-    'zanahoria': 'calabaza', 'espárrago': 'judías verdes', 'esparrago': 'judías verdes', 'alcachofa': 'judías verdes',
-    'atún': 'pollo', 'atun': 'pollo', 'salmón': 'merluza', 'salmon': 'merluza',
-    'merluza': 'lubina', 'lubina': 'dorada', 'dorada': 'merluza', 'bacalao': 'merluza',
-    'sardina': 'merluza', 'sardinas': 'merluza', 'caballa': 'merluza', 'trucha': 'merluza', 'anchoa': 'atún', 'anchoas': 'atún',
-    'gambas': 'pollo', 'langostinos': 'pollo', 'mejillones': 'pollo', 'calamares': 'pollo', 'pulpo': 'pollo', 'sepia': 'pollo',
-    'pescado': 'pollo', 'marisco': 'pollo',
-    'pollo': 'pavo', 'pavo': 'pollo', 'ternera': 'pollo', 'cerdo': 'pavo',
-    'jamón': 'pavo en lonchas', 'jamon': 'pavo en lonchas', 'lomo': 'pechuga de pollo', 'bacon': 'pavo',
-    'solomillo': 'pechuga de pollo', 'cordero': 'pollo',
-    'huevo': 'tofu', 'huevos': 'tofu', 'claras': 'tofu firme',
-    'arroz': 'quinoa', 'quinoa': 'arroz', 'pasta': 'arroz', 'fideos': 'arroz',
-    'patata': 'boniato', 'boniato': 'patata',
-    'avena': 'copos de espelta', 'pan': 'tostadas de arroz', 'cereales': 'copos de avena',
-    'leche': 'bebida de avena', 'yogur': 'yogur de soja', 'queso': 'hummus',
-    'requesón': 'tofu sedoso', 'requeson': 'tofu sedoso', 'kéfir': 'kombucha', 'kefir': 'kombucha',
+    'pepino': 'calabacín', 'pepinillo': 'calabacín',
+    'calabacín': 'calabaza', 'calabacin': 'calabaza',
+    'calabaza': 'zanahoria', 'zanahoria': 'judías verdes',
+    'tomate': 'pimiento rojo', 'pimiento': 'zanahoria',
+    'cebolla': 'puerro', 'puerro': 'cebolleta',
+    'champiñón': 'calabacín', 'champiñon': 'calabacín', 'setas': 'calabacín',
+    'berenjena': 'calabacín',
+    'espinaca': 'acelga', 'espinacas': 'acelgas',
+    'acelga': 'kale', 'acelgas': 'kale',
+    'brócoli': 'coliflor', 'brocoli': 'coliflor',
+    'coliflor': 'judías verdes',
+    'lechuga': 'rúcula', 'rúcula': 'canónigos', 'rucula': 'canónigos',
+    'canónigos': 'berros',
+    'aguacate': 'hummus', 'apio': 'zanahoria',
+    'col': 'lechuga', 'repollo': 'lechuga',
+    'espárrago': 'judías verdes', 'esparrago': 'judías verdes',
+    'alcachofa': 'judías verdes',
+    'atún': 'pechuga de pollo', 'atun': 'pechuga de pollo',
+    'salmón': 'merluza', 'salmon': 'merluza',
+    'merluza': 'lubina', 'lubina': 'dorada',
+    'dorada': 'pechuga de pavo', 'bacalao': 'lubina',
+    'sardina': 'lubina', 'sardinas': 'lubina',
+    'caballa': 'lubina', 'trucha': 'lubina',
+    'anchoa': 'pechuga de pollo', 'anchoas': 'pechuga de pollo',
+    'gambas': 'pechuga de pollo', 'langostinos': 'pechuga de pollo',
+    'mejillones': 'pechuga de pollo', 'calamares': 'pechuga de pavo',
+    'pulpo': 'pechuga de pavo', 'sepia': 'pechuga de pavo',
+    'pescado': 'pechuga de pollo', 'marisco': 'pechuga de pollo',
+    'pollo': 'pavo', 'pavo': 'ternera magra',
+    'ternera': 'pechuga de pollo', 'cerdo': 'pavo',
+    'jamón': 'pavo en lonchas', 'jamon': 'pavo en lonchas',
+    'lomo': 'pechuga de pavo', 'bacon': 'pavo ahumado',
+    'solomillo': 'pechuga de pollo', 'cordero': 'pechuga de pavo',
+    'huevo': 'tofu firme', 'huevos': 'tofu firme', 'claras': 'tofu sedoso',
+    'arroz': 'quinoa', 'quinoa': 'cuscús',
+    'pasta': 'arroz integral', 'fideos': 'arroz',
+    'patata': 'boniato', 'boniato': 'patata cocida',
+    'avena': 'copos de espelta', 'pan': 'tortas de arroz', 'cereales': 'copos de avena',
+    'leche': 'bebida de avena', 'yogur': 'yogur de soja',
+    'queso': 'hummus', 'requesón': 'tofu sedoso', 'requeson': 'tofu sedoso',
+    'kéfir': 'yogur de soja', 'kefir': 'yogur de soja',
     'cottage': 'hummus', 'nata': 'leche de coco', 'mantequilla': 'AOVE',
-    'garbanzos': 'lentejas', 'lentejas': 'garbanzos', 'judías': 'garbanzos', 'judias': 'garbanzos',
-    'alubias': 'garbanzos', 'edamame': 'garbanzos', 'soja': 'garbanzos', 'habas': 'guisantes',
-    'legumbres': 'quinoa', 'maíz': 'guisantes', 'maiz': 'guisantes', 'guisantes': 'maíz',
-    'miel': 'sirope de agave', 'sirope': 'miel',
-    'plátano': 'manzana', 'platano': 'manzana', 'manzana': 'pera', 'pera': 'manzana',
-    'naranja': 'mandarina', 'mandarina': 'naranja', 'limón': 'lima', 'lima': 'limón',
-    'fresa': 'frambuesa', 'fresas': 'frambuesas', 'frambuesa': 'fresa', 'frambuesas': 'fresas',
-    'arándanos': 'frambuesas', 'arandanos': 'frambuesas',
-    'kiwi': 'mandarina', 'piña': 'mango', 'mango': 'piña',
-    'sandía': 'melón', 'sandia': 'melón', 'melón': 'sandía', 'melon': 'sandía',
-    'uva': 'fresas', 'uvas': 'fresas', 'cereza': 'frambuesa', 'cerezas': 'frambuesas',
-    'higo': 'dátil', 'higos': 'dátiles', 'melocotón': 'mango', 'melocoton': 'mango', 'ciruela': 'melocotón',
-    'nueces': 'semillas de calabaza', 'almendras': 'semillas de girasol', 'avellanas': 'semillas de calabaza',
+    'garbanzos': 'lentejas', 'lentejas': 'alubias',
+    'judías': 'garbanzos', 'judias': 'garbanzos',
+    'alubias': 'garbanzos', 'edamame': 'garbanzos',
+    'soja': 'garbanzos', 'habas': 'guisantes',
+    'legumbres': 'quinoa',
+    'maíz': 'guisantes', 'maiz': 'guisantes', 'guisantes': 'edamame',
+    'miel': 'sirope de agave', 'sirope': 'dátil triturado',
+    'plátano': 'manzana', 'platano': 'manzana',
+    'manzana': 'pera', 'pera': 'melocotón',
+    'naranja': 'mandarina', 'mandarina': 'pomelo',
+    'limón': 'lima', 'lima': 'vinagre',
+    'fresa': 'frambuesa', 'fresas': 'frambuesas',
+    'frambuesa': 'arándanos', 'frambuesas': 'arándanos',
+    'arándanos': 'moras', 'arandanos': 'moras',
+    'kiwi': 'mandarina', 'piña': 'mango', 'mango': 'papaya',
+    'sandía': 'melón', 'sandia': 'melón',
+    'melón': 'piña', 'melon': 'piña',
+    'uva': 'fresas', 'uvas': 'fresas',
+    'cereza': 'frambuesa', 'cerezas': 'frambuesas',
+    'higo': 'dátil', 'higos': 'dátiles',
+    'melocotón': 'nectarina', 'melocoton': 'nectarina', 'ciruela': 'nectarina',
+    'nueces': 'semillas de calabaza', 'almendras': 'semillas de girasol',
+    'avellanas': 'semillas de calabaza',
     'cacahuete': 'semillas de girasol', 'cacahuetes': 'semillas de girasol',
-    'pistachos': 'semillas de calabaza', 'anacardos': 'semillas de girasol', 'piñones': 'semillas de sésamo',
-    'frutos secos': 'semillas',
-    'tofu': 'pollo', 'seitán': 'pollo', 'seitan': 'pollo', 'tempeh': 'pollo',
-    'cuscús': 'arroz', 'cuscus': 'arroz', 'harina': 'harina de arroz',
+    'pistachos': 'semillas de calabaza', 'anacardos': 'semillas de girasol',
+    'piñones': 'semillas de sésamo', 'frutos secos': 'semillas',
+    'tofu': 'pechuga de pollo', 'seitán': 'pechuga de pavo',
+    'seitan': 'pechuga de pavo', 'tempeh': 'pechuga de pollo',
+    'cuscús': 'arroz integral', 'cuscus': 'arroz integral',
+    'harina': 'harina de arroz',
   };
 
   const RECETAS_SUSTITUCION = [
@@ -8664,7 +8695,7 @@
             op("Requesón con fruta y canela", "200g requesón 0%, 1 manzana o pera, canela, 10g nueces trituradas", "295 kcal", "26g prot", "28g carbs", "8g grasa", "Sin cocción · 2 min"),
             op("Claras revueltas con pavo y tosta", "200ml claras + 1 huevo, 30g pavo o jamón cocido, 1 tosta de pan integral", "276 kcal", "36g prot", "13g carbs", "8g grasa", "Fácil · 8 min"),
             op("Tortita de avena con claras y kiwi", "40g harina de avena, 180ml claras de huevo, 1 huevo, café solo, 1 kiwi", "330 kcal", "30g prot", "34g carbs", "7g grasa", "Fácil · 10 min"),
-            op("Tostadas con guacamole, huevo plancha y pavo", "50g tostadas integrales, 40g guacamole, 2 huevos a la plancha, 40g pavo en lonchas, 1 kiwi", "370 kcal", "30g prot", "28g carbs", "14g grasa", "Fácil · 10 min")
+            op("Tostadas con guacamole, huevo y pavo", "2 tostadas integrales, 40g guacamole, 2 huevos a la plancha, 40g pavo en lonchas", "460 kcal", "30g prot", "30g carbs", "22g grasa", "Fácil · 10 min")
           ]
         },
         {
@@ -8673,7 +8704,7 @@
           opciones: [
             op("Skyr con fruta y canela", "150g skyr natural, 1 pieza de fruta de temporada, canela al gusto", "190 kcal", "18g prot", "22g carbs", "2g grasa", "Sin cocción · 2 min"),
             op("Infusión + barrita de proteína casera", "Dátiles, 30g avena y 1 scoop proteína en polvo. Prepara el domingo para toda la semana.", "200 kcal", "18g prot", "22g carbs", "5g grasa", "Prep dominical"),
-            op("Queso batido con pepino y semillas", "150g queso batido 0%, pepino en rodajas, orégano, 10g pipas de calabaza", "145 kcal", "18g prot", "6g carbs", "5g grasa", "Sin cocción · 2 min"),
+            op("Queso batido con manzana y canela", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "195 kcal", "18g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Kéfir con frutos rojos", "200ml kéfir natural, 80g frutos rojos, 5g semillas de lino", "160 kcal", "8g prot", "20g carbs", "4g grasa", "Sin cocción · 1 min"),
             op("Tortas de arroz con queso batido", "4 tortas de arroz, 150g queso batido 0%, canela", "195 kcal", "18g prot", "28g carbs", "2g grasa", "Sin cocción · 2 min"),
             op("Salmón ahumado con pan wassa", "60g salmón ahumado, 2 panes wassa, pimienta negra al gusto", "195 kcal", "18g prot", "14g carbs", "8g grasa", "Sin cocción · 2 min"),
@@ -8690,13 +8721,13 @@
             op("Ensalada de quinoa con edamame y aguacate", "100g quinoa cocida, 150g edamame, 1/4 aguacate, pepino, tomate cherry, limón", "390 kcal", "22g prot", "36g carbs", "15g grasa", "Prep anterior · 10 min"),
             op("Salteado de seitán con verduras y quinoa", "150g seitán, 60g quinoa cocida, brócoli, pimiento, salsa de soja", "400 kcal", "34g prot", "40g carbs", "8g grasa", "Medio · 20 min")
           ] : [
-            op("Pechuga de pollo con ensalada y arroz", "180g pollo a la plancha, ensalada grande, 100g arroz integral cocido, AOVE", "480 kcal", "40g prot", "30g carbs", "14g grasa", "Fácil · 20 min"),
-            op("Merluza al horno con patata y verduras", "200g merluza, 120g patata cocida, judías verdes, tomate cherry", "420 kcal", "38g prot", "38g carbs", "8g grasa", "Fácil · 25 min"),
-            op("Solomillo de ternera con verduras salteadas", "160g solomillo, pimiento, calabacín, cebolla salteados con AOVE, 50g pan centeno", "487 kcal", "48g prot", "32g carbs", "18g grasa", "Medio · 20 min"),
-            op("Ensalada de pollo con garbanzos", "150g pollo desmechado, 100g garbanzos, lechuga, pepino, tomate, AOVE", "430 kcal", "40g prot", "32g carbs", "12g grasa", "Fácil · 15 min"),
-            op("Pollo con boniato y ensalada", "200g pechuga de pollo, 150g boniato cocido, ensalada variada, AOVE", "563 kcal", "65g prot", "34g carbs", "17g grasa", "Fácil · 25 min"),
-            op("Boniato con ternera magra y ensalada", "200g boniato cocido, 180g ternera magra a la plancha, ensalada con AOVE y vinagre", "535 kcal", "51g prot", "44g carbs", "17g grasa", "Fácil · 20 min"),
-            op("Quinoa con pavo, aguacate y atún", "150g quinoa cocida, 150g pavo en tacos, 1/2 aguacate, 1 lata atún al natural", "551 kcal", "54g prot", "41g carbs", "20g grasa", "Sin cocción · 8 min")
+            op("Pechuga de pollo con ensalada y arroz", "180g pollo a la plancha, ensalada grande, 100g arroz integral cocido, AOVE", "480 kcal", "42g prot", "32g carbs", "14g grasa", "Fácil · 20 min"),
+            op("Merluza al horno con patata y verduras", "200g merluza, 150g patata cocida, judías verdes, zanahoria, AOVE", "350 kcal", "36g prot", "30g carbs", "10g grasa", "Fácil · 25 min"),
+            op("Solomillo de ternera con verduras salteadas", "160g solomillo, pimiento, calabacín, cebolla salteados con AOVE, 50g pan centeno", "490 kcal", "44g prot", "32g carbs", "18g grasa", "Medio · 20 min"),
+            op("Ensalada de pollo con garbanzos", "150g pollo desmechado, 100g garbanzos, lechuga, zanahoria rallada, AOVE", "440 kcal", "38g prot", "30g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Pollo con boniato y ensalada", "200g pechuga de pollo, 150g boniato cocido, ensalada variada, AOVE", "520 kcal", "48g prot", "34g carbs", "17g grasa", "Fácil · 25 min"),
+            op("Boniato con ternera magra y ensalada", "200g boniato cocido, 180g ternera magra a la plancha, ensalada con AOVE y vinagre", "530 kcal", "46g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Bol de quinoa con pavo y aguacate", "150g quinoa cocida, 180g pavo en tacos a la plancha, 1/4 aguacate, rúcula, limón", "490 kcal", "44g prot", "38g carbs", "16g grasa", "Fácil · 15 min")
           ]
         },
         {
@@ -8706,9 +8737,9 @@
             op("Plátano + yogur griego", "1 plátano maduro, 150g yogur griego 0%", "230 kcal", "12g prot", "38g carbs", "2g grasa", "Sin cocción · 1 min"),
             op("Fruta de temporada + frutos secos", "1 pera o melocotón, 15g nueces o almendras", "190 kcal", "4g prot", "26g carbs", "9g grasa", "Sin cocción · 1 min"),
             op("Tostada de pavo con queso fresco", "1 tostada pan integral, 80g pavo en lonchas, 30g queso fresco, tomate cherry", "220 kcal", "22g prot", "18g carbs", "6g grasa", "Sin cocción · 3 min"),
-            op("Queso cottage con pepino y aceitunas", "150g queso cottage, pepino en rodajas, 8 aceitunas, orégano", "170 kcal", "18g prot", "6g carbs", "8g grasa", "Sin cocción · 2 min"),
-            op("Queso batido con frutos secos", "250g queso batido 0%, 20g almendras, canela", "270 kcal", "30g prot", "12g carbs", "12g grasa", "Sin cocción · 1 min"),
-            op("Queso fresco batido 0% solo", "250g queso fresco batido 0% natural, canela", "170 kcal", "22g prot", "8g carbs", "3g grasa", "Sin cocción · 1 min"),
+            op("Hummus con bastones de zanahoria", "80g hummus casero, 2 zanahorias en bastones, pimentón", "180 kcal", "6g prot", "18g carbs", "10g grasa", "Sin cocción · 3 min"),
+            op("Queso batido con arándanos y nueces", "200g queso batido 0%, 60g arándanos, 15g nueces troceadas", "240 kcal", "24g prot", "22g carbs", "8g grasa", "Sin cocción · 1 min"),
+            op("Yogur griego con semillas de chía", "150g yogur griego 0%, 10g semillas de chía, canela, 1 kiwi troceado", "195 kcal", "16g prot", "20g carbs", "6g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con pavo", "2 tortas de arroz, 100g pavo en lonchas", "195 kcal", "18g prot", "22g carbs", "3g grasa", "Sin cocción · 2 min")
           ]
         },
@@ -8727,7 +8758,7 @@
             op("Revuelto de claras y huevo con setas y jamón", "2 huevos + 4 claras, 150g champiñones, 30g jamón serrano, 5ml AOVE, perejil", "365 kcal", "39g prot", "8g carbs", "22g grasa", "Fácil · 10 min"),
             op("Gambas a la plancha con ensalada", "200g gambas peladas, lechuga, tomate, pepino, AOVE, limón", "273 kcal", "37g prot", "3g carbs", "12g grasa", "Fácil · 10 min"),
             op("Lubina al horno con verduras", "200g lubina, calabacín, pimiento, tomate cherry, AOVE, limón", "280 kcal", "38g prot", "8g carbs", "11g grasa", "Fácil · 25 min"),
-            op("Pechuga de pollo con champiñones y ensalada", "200g pechuga de pollo a la plancha, 150g champiñones a la plancha, ensalada grande con vinagre", "373 kcal", "68g prot", "7g carbs", "8g grasa", "Fácil · 15 min"),
+            op("Pechuga de pollo con champiñones y ensalada", "200g pechuga de pollo a la plancha, 150g champiñones a la plancha, ensalada grande con AOVE y vinagre", "380 kcal", "48g prot", "8g carbs", "14g grasa", "Fácil · 15 min"),
             op("Tortilla de claras con atún y verduras", "3 claras + 1 huevo, 1 lata atún al natural, ensalada o verduras al gusto", "250 kcal", "35g prot", "4g carbs", "9g grasa", "Fácil · 8 min")
           ]
         }
@@ -8776,26 +8807,26 @@
             op("Lasaña de lentejas y berenjena", "200g lentejas, 1 berenjena, tomate frito, bechamel vegetal, queso rallado", "580 kcal", "28g prot", "68g carbs", "18g grasa", "Exigente · 45 min"),
             op("Bowl de tofu con arroz y edamame", "200g tofu firme, 120g arroz integral, 100g edamame, salsa teriyaki, sésamo", "620 kcal", "38g prot", "74g carbs", "18g grasa", "Medio · 25 min")
           ] : [
-            op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja", "620 kcal", "48g prot", "68g carbs", "10g grasa", "Medio · 25 min"),
-            op("Pasta integral con atún y tomate", "120g pasta integral, 2 latas atún, tomate frito casero, aceitunas, albahaca", "580 kcal", "40g prot", "72g carbs", "12g grasa", "Fácil · 15 min"),
-            op("Salmón con patata asada y ensalada", "200g salmón al horno, 200g patata asada, ensalada verde grande, limón", "605 kcal", "45g prot", "43g carbs", "26g grasa", "Medio · 30 min"),
-            op("Hamburguesa de ternera con arroz y aguacate", "180g ternera picada, 100g arroz integral cocido, 1/2 aguacate, tomate, lechuga", "515 kcal", "52g prot", "35g carbs", "19g grasa", "Medio · 20 min"),
-            op("Ternera con pasta y verduras", "200g ternera picada, 120g pasta, tomate frito casero, pimiento, cebolla", "640 kcal", "48g prot", "70g carbs", "18g grasa", "Medio · 20 min"),
-            op("Salmón a la parrilla con patata y ensalada", "200g salmón a la parrilla, 250g patata cocida, ensalada con tomate y pepino", "649 kcal", "46g prot", "53g carbs", "26g grasa", "Fácil · 20 min"),
-            op("Fajitas de trigo con pollo y verduras", "2 fajitas de trigo, 200g pechuga de pollo, pimiento, cebolla salteados", "600 kcal", "52g prot", "58g carbs", "12g grasa", "Medio · 20 min")
+            op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja", "560 kcal", "48g prot", "52g carbs", "12g grasa", "Medio · 25 min"),
+            op("Pasta integral con atún y tomate", "100g pasta integral, 2 latas atún, tomate frito casero, aceitunas, albahaca", "620 kcal", "42g prot", "62g carbs", "16g grasa", "Fácil · 15 min"),
+            op("Salmón con patata asada y ensalada", "200g salmón al horno, 200g patata asada, ensalada verde grande, limón", "610 kcal", "44g prot", "42g carbs", "28g grasa", "Medio · 30 min"),
+            op("Hamburguesa casera de ternera con arroz", "180g ternera picada a la plancha, 100g arroz integral cocido, 1/4 aguacate, lechuga, tomate", "580 kcal", "44g prot", "38g carbs", "24g grasa", "Medio · 20 min"),
+            op("Boloñesa de ternera con pasta", "180g ternera picada, 100g pasta integral, tomate frito casero, zanahoria, cebolla", "620 kcal", "42g prot", "64g carbs", "18g grasa", "Medio · 25 min"),
+            op("Salmón a la parrilla con boniato y ensalada", "200g salmón a la parrilla, 200g boniato cocido, ensalada verde, AOVE", "640 kcal", "44g prot", "48g carbs", "28g grasa", "Fácil · 25 min"),
+            op("Fajitas de pollo con verduras", "2 tortillas de trigo, 200g pechuga de pollo, pimiento, cebolla salteados, AOVE", "580 kcal", "48g prot", "50g carbs", "16g grasa", "Medio · 20 min")
           ]
         },
         {
           momento: "Merienda", hora: "17:30",
           porque: "Pre o post entreno: el momento más importante del día para recargar músculo. Tómalo en los 30-60 min antes o después de la sesión para maximizar la síntesis proteica",
           opciones: [
-            op("Plátano + batido de proteína", "1 plátano grande, 1 scoop proteína en agua o leche", "320 kcal", "28g prot", "42g carbs", "4g grasa", "Fácil · 2 min"),
-            op("Arroz con leche proteico", "50g arroz, 200ml leche entera, canela, 1 scoop proteína vainilla", "430 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 20 min"),
-            op("Pan de centeno con mantequilla de almendra y batido", "2 rebanadas centeno, 1.5 cdas mantequilla almendra, 1 scoop proteína en 250ml leche desnatada, miel", "490 kcal", "43g prot", "52g carbs", "13g grasa", "Sin cocción · 3 min"),
-            op("Tostas de centeno con atún y aguacate", "2 rebanadas centeno, 2 latas atún al natural, 1/4 aguacate, tomate cherry", "380 kcal", "36g prot", "36g carbs", "12g grasa", "Sin cocción · 5 min"),
-            op("Yogur proteico con tortas de arroz y frutos secos", "2 yogures proteína, 4 tortas de arroz, 20g frutos secos", "400 kcal", "28g prot", "44g carbs", "12g grasa", "Sin cocción · 2 min"),
-            op("ISO post-entreno con plátano", "40g proteína ISO en agua, 1 plátano maduro", "330 kcal", "32g prot", "44g carbs", "4g grasa", "Sin cocción · 1 min"),
-            op("Pavo con tortas de arroz y kiwi", "100g pavo en lonchas, 3 tortas de arroz, 1 kiwi", "285 kcal", "24g prot", "34g carbs", "4g grasa", "Sin cocción · 2 min")
+            op("Plátano con batido de proteína", "1 plátano grande, 1 scoop proteína en agua o leche desnatada", "260 kcal", "26g prot", "36g carbs", "3g grasa", "Sin cocción · 2 min"),
+            op("Arroz con leche proteico", "50g arroz, 200ml leche semidesnatada, canela, 1 scoop proteína vainilla", "400 kcal", "32g prot", "50g carbs", "8g grasa", "Fácil · 20 min"),
+            op("Tostadas con crema de cacahuete y batido", "2 rebanadas pan centeno, 20g crema de cacahuete, 1 scoop proteína en 250ml leche desnatada", "480 kcal", "40g prot", "48g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Tostas de centeno con atún y aguacate", "2 rebanadas centeno, 1 lata atún al natural, 1/4 aguacate, tomate cherry", "420 kcal", "30g prot", "32g carbs", "16g grasa", "Sin cocción · 5 min"),
+            op("Yogur proteico con tortas de arroz y nueces", "2 yogures proteicos, 3 tortas de arroz, 15g nueces", "430 kcal", "30g prot", "42g carbs", "14g grasa", "Sin cocción · 2 min"),
+            op("Batido post-entreno con avena", "40g proteína whey en agua, 30g avena fina, 1 plátano", "350 kcal", "34g prot", "44g carbs", "4g grasa", "Sin cocción · 2 min"),
+            op("Pavo con tortas de arroz y fruta", "100g pavo en lonchas, 3 tortas de arroz, 1 kiwi o manzana", "230 kcal", "22g prot", "28g carbs", "4g grasa", "Sin cocción · 2 min")
           ]
         },
         {
@@ -8808,13 +8839,13 @@
             op("Revuelto de edamame con patata y espinacas", "150g edamame, 150g patata cocida, espinacas, ajo, AOVE, pimentón", "430 kcal", "24g prot", "46g carbs", "14g grasa", "Fácil · 15 min"),
             op("Revuelto de tofu y patata con queso", "200g tofu, 150g patata cocida, 40g queso, espinacas, AOVE", "480 kcal", "30g prot", "42g carbs", "20g grasa", "Fácil · 15 min")
           ] : [
-            op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral cocido, 200g brócoli al vapor, limón, AOVE", "670 kcal", "48g prot", "35g carbs", "38g grasa", "Fácil · 20 min"),
-            op("Ternera con patata y ensalada", "180g solomillo ternera, 150g patata cocida, ensalada verde, AOVE", "540 kcal", "40g prot", "38g carbs", "20g grasa", "Medio · 25 min"),
-            op("Tortilla francesa con queso y jamón + pan", "4 huevos, 50g jamón cocido, 40g queso, 2 rebanadas centeno", "500 kcal", "42g prot", "26g carbs", "24g grasa", "Fácil · 10 min"),
-            op("Bacalao al pil-pil con patata y pimiento", "200g bacalao, 150g patata, pimiento verde, ajo, AOVE", "490 kcal", "40g prot", "36g carbs", "18g grasa", "Medio · 25 min"),
-            op("Salmón con boniato y espárragos", "200g salmón, 200g boniato asado, espárragos verdes, AOVE, limón", "704 kcal", "45g prot", "46g carbs", "36g grasa", "Medio · 30 min"),
-            op("Lomo de cerdo con verduras al vapor", "180g cinta de lomo a la plancha, brócoli, zanahoria y judías verdes al vapor, AOVE", "400 kcal", "36g prot", "10g carbs", "22g grasa", "Fácil · 15 min"),
-            op("Tortilla de claras con champiñones y queso batido", "200ml claras + 1 huevo, 150g champiñones a la plancha, 100g queso batido 0%", "267 kcal", "41g prot", "11g carbs", "7g grasa", "Fácil · 10 min")
+            op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral cocido, 200g brócoli al vapor, limón, AOVE", "620 kcal", "46g prot", "34g carbs", "34g grasa", "Fácil · 20 min"),
+            op("Solomillo de ternera con patata y ensalada", "180g solomillo ternera a la plancha, 150g patata cocida, ensalada verde, AOVE", "560 kcal", "44g prot", "36g carbs", "22g grasa", "Medio · 25 min"),
+            op("Tortilla de huevos con jamón y queso + pan", "4 huevos, 50g jamón cocido, 40g queso, 2 rebanadas pan centeno", "640 kcal", "44g prot", "30g carbs", "36g grasa", "Fácil · 10 min"),
+            op("Bacalao al pil-pil con patata y pimiento", "200g bacalao, 150g patata, pimiento verde, ajo, AOVE", "420 kcal", "38g prot", "32g carbs", "16g grasa", "Medio · 25 min"),
+            op("Salmón con boniato y espárragos", "200g salmón, 200g boniato asado, espárragos verdes, AOVE, limón", "660 kcal", "44g prot", "44g carbs", "34g grasa", "Medio · 30 min"),
+            op("Cinta de lomo con verduras al vapor", "180g cinta de lomo a la plancha, brócoli, zanahoria y judías verdes al vapor, AOVE", "380 kcal", "36g prot", "12g carbs", "20g grasa", "Fácil · 15 min"),
+            op("Revuelto de claras con champiñones y queso", "200ml claras + 2 huevos, 150g champiñones a la plancha, 30g queso rallado, AOVE", "340 kcal", "38g prot", "8g carbs", "16g grasa", "Fácil · 10 min")
           ]
         }
       ];
