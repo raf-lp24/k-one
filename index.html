@@ -150,21 +150,12 @@
     --blanco-puro: #FFFFFF;
   }
 
-  [data-theme="light"] body,
-  [data-theme="light"] .dash-main,
-  [data-theme="light"] .dash-content,
-  [data-theme="light"] #landing,
-  [data-theme="light"] #dashboard,
-  [data-theme="light"] #formulario,
-  [data-theme="light"] #registro,
-  [data-theme="light"] #login,
-  [data-theme="light"] #legal,
-  [data-theme="light"] #modalAdmin {
-    filter: invert(1) hue-rotate(180deg);
-    background: #0A0A0A;
+  html[data-theme="light"] {
+    filter: invert(0.92) hue-rotate(180deg) contrast(1.05);
   }
   [data-theme="light"] img,
   [data-theme="light"] video,
+  [data-theme="light"] svg,
   [data-theme="light"] .user-avatar,
   [data-theme="light"] .btn-primary,
   [data-theme="light"] .btn-completado,
@@ -172,11 +163,15 @@
   [data-theme="light"] .price-badge,
   [data-theme="light"] [style*="background:#E8490F"],
   [data-theme="light"] [style*="background:#27ae60"],
-  [data-theme="light"] [style*="background:linear-gradient(135deg,#E8490F"] {
+  [data-theme="light"] [style*="background:linear-gradient(135deg,#E8490F"],
+  [data-theme="light"] [style*="color:#E8490F"],
+  [data-theme="light"] [style*="color:#27ae60"],
+  [data-theme="light"] [style*="color:#e74c3c"],
+  [data-theme="light"] [style*="color:#f39c12"] {
     filter: invert(1) hue-rotate(180deg);
   }
-  [data-theme="light"] #toast { filter: none; }
-  [data-theme="light"] .dash-sidebar { filter: invert(1) hue-rotate(180deg); background: #0A0A0A; }
+  [data-theme="light"] .brasa, [data-theme="light"] .motivation-label,
+  [data-theme="light"] .dash-greeting { filter: invert(1) hue-rotate(180deg); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
