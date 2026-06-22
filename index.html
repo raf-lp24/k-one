@@ -21,6 +21,7 @@
 <meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Desde 1,99€/mes.">
 <meta name="twitter:image" content="https://k-one.fit/og-image.png">
 <meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="/manifest.json">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -14085,6 +14086,10 @@
         }
       };
       setTimeout(verificarSuscripcion, 1500);
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
   };
 </script>
