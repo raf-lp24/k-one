@@ -6200,7 +6200,10 @@
             <div id="ejerciciosList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px">
               <!-- generado por JS -->
             </div>
-            <button class="btn-primary" onclick="showVariants()" style="font-size:13px;padding:12px 24px">Ver variantes para los ejercicios seleccionados →</button>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="btn-primary" onclick="showVariants()" style="font-size:13px;padding:12px 24px">Ver variantes para los seleccionados →</button>
+              <button class="btn-ghost" onclick="skipFeedbackExercises()" style="font-size:13px;padding:12px 24px;border-color:var(--acero);color:var(--metal)">Todo bien, no quiero cambiar nada ✓</button>
+            </div>
           </div>
 
           <!-- PASO 2: variantes -->
@@ -13598,6 +13601,24 @@
     el.style.borderColor = 'var(--brasa)';
     el.style.background = 'rgba(232,73,15,0.08)';
     selectedVariants[key] = idx;
+  }
+
+  function skipFeedbackExercises() {
+    const sensacion = document.querySelector('#feedbackStep1 .radio-opt.selected')?.textContent?.trim() || '';
+    let mensaje = '';
+    if (sensacion.includes('tope')) {
+      mensaje = 'Perfecto, se nota que vas con todo. Tu plan sigue igual — si funciona, no hay que tocarlo. ¡A por el entreno!';
+    } else if (sensacion.includes('Cansado')) {
+      mensaje = 'Semana dura pero sigues aquí, eso es lo que cuenta. Tu plan no cambia — descansa bien hoy y mañana con más fuerza.';
+    } else if (sensacion.includes('molestia')) {
+      mensaje = 'Si la molestia es leve y no te impide entrenar, adelante con cuidado. Si persiste, vuelve y cambia el ejercicio que te moleste.';
+    } else {
+      mensaje = 'Todo correcto, tu plan sigue como estaba. A por el entreno de hoy.';
+    }
+    document.getElementById('feedbackStep1').style.display = 'none';
+    document.getElementById('feedbackStep3').style.display = 'block';
+    document.getElementById('feedbackConfirmMsg').textContent = mensaje;
+    showToast('Todo bien, a entrenar.');
   }
 
   function confirmVariants() {
