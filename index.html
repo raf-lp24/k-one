@@ -4520,7 +4520,7 @@
           <span id="adminTotalFiltro">0</span> de <span id="adminTotalClientes">0</span> clientes
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <input id="adminBuscador" type="text" placeholder="Buscar..." oninput="buscarAdmin(this.value)"
+          <input id="adminBuscador" type="text" placeholder="Buscar..." aria-label="Buscar clientes" oninput="buscarAdmin(this.value)"
             style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px;font-size:12px;color:#fff;width:180px;outline:none">
           <div style="display:flex;gap:4px" id="adminFiltrosBtns">
             <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
@@ -4630,7 +4630,6 @@
     <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
   </div>
 </div>
-    <div id="adminEstado" style="text-align:center;color:var(--metal);font-size:13px;padding:30px"></div>
 
 <!-- MODAL RENOVACIÓN MENSUAL -->
 <div class="modal-overlay" id="modalRenovacion">
@@ -5848,7 +5847,7 @@
           </div>
           <div class="field">
             <label>¿Hay alimentos que no quieras comer? <span class="optional">Opcional</span></label>
-            <input type="text" id="noComida" placeholder="Pescado, vísceras, legumbres... lo que sea">
+            <input type="text" id="noComida" placeholder="Pescado, vísceras, legumbres... lo que sea" aria-label="Alimentos que no te gustan">
           </div>
           <div class="field">
             <label>¿Cuántas veces comes al día? <span class="optional">Obligatorio</span></label>
@@ -6478,11 +6477,11 @@
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
             <div>
               <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Peso (kg)</label>
-              <input type="number" id="rm1Peso" placeholder="60" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
+              <input type="number" id="rm1Peso" placeholder="60" aria-label="Peso en kg para calcular 1RM" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
             </div>
             <div>
               <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Reps</label>
-              <input type="number" id="rm1Reps" placeholder="8" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
+              <input type="number" id="rm1Reps" placeholder="8" aria-label="Repeticiones para calcular 1RM" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
             </div>
             <div>
               <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu 1RM</label>
@@ -6511,7 +6510,7 @@
         </div>
 
         <div class="notes-form">
-          <textarea id="notaInput" placeholder="Escribe una nota... (ej: 'Press banca 60kg x 6, subir peso la próxima semana')"></textarea>
+          <textarea id="notaInput" placeholder="Escribe una nota... (ej: 'Press banca 60kg x 6, subir peso la próxima semana')" aria-label="Escribir nota personal"></textarea>
           <button class="btn-primary" onclick="addNota()">Guardar nota</button>
         </div>
 
@@ -14193,6 +14192,22 @@
     const b = document.getElementById('cookieBanner');
     if (b) b.style.display = 'flex';
   }
+
+  // ===== DETECTOR OFFLINE =====
+  window.addEventListener('offline', () => {
+    showToast('Sin conexión a internet. Algunas funciones no estarán disponibles.', 5000);
+  });
+  window.addEventListener('online', () => {
+    showToast('Conexión restaurada.', 3000);
+  });
+
+  // ===== JWT AUTO-REFRESH =====
+  setInterval(async () => {
+    try {
+      const { data } = await supa.auth.getSession();
+      if (data?.session) await supa.auth.refreshSession();
+    } catch(e) {}
+  }, 45 * 60 * 1000);
 
   // ===== INIT =====
   window.onerror = function() {
