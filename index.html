@@ -4263,7 +4263,7 @@
   <div class="auth-texture"></div>
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
-    <h1 class="welcome-title">
+    <h2 class="welcome-title">
       ¿Es tu primera<br>
       <em>vez aquí?</em>
     </h1>
@@ -4310,13 +4310,13 @@
     <div class="auth-field">
       <label>Contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass" name="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"
+        <input type="password" id="reg-pass" name="password" placeholder="Mínimo 8 caracteres, incluye un número" autocomplete="new-password"
           oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
         <span class="auth-field-check" id="check-pass">✓</span>
       </div>
     </div>
     <div class="auth-pass-strength" id="pass-strength-bar"><div class="auth-pass-strength-bar" id="pass-strength-fill"></div></div>
-    <div class="auth-error" id="err-pass">La contraseña debe tener al menos 6 caracteres</div>
+    <div class="auth-error" id="err-pass">Mínimo 8 caracteres y al menos 1 número</div>
 
     <div class="auth-field">
       <label>Confirmar contraseña</label>
@@ -4393,9 +4393,9 @@
       <p class="modal-desc">Elige una nueva contraseña para tu cuenta.</p>
       <div class="auth-field">
         <label>Nueva contraseña</label>
-        <input type="password" id="forgot-newpass" placeholder="Mínimo 6 caracteres">
+        <input type="password" id="forgot-newpass" placeholder="Mínimo 8 caracteres, incluye un número">
       </div>
-      <div class="auth-error" id="err-forgot-newpass">La contraseña debe tener al menos 6 caracteres</div>
+      <div class="auth-error" id="err-forgot-newpass">Mínimo 8 caracteres y al menos 1 número</div>
       <div class="auth-field">
         <label>Repite la contraseña</label>
         <input type="password" id="forgot-newpass2" placeholder="Repite tu nueva contraseña">
@@ -5484,7 +5484,7 @@
   <div class="legal-wrap">
     <button class="legal-back" onclick="goTo('landing')">← Volver al inicio</button>
 
-    <h1 class="legal-h1">Aviso legal y privacidad</h1>
+    <h2 class="legal-h1">Aviso legal y privacidad</h2>
     <div class="legal-updated">Última actualización: 14 de junio de 2026</div>
 
     <div class="legal-disclaimer">
@@ -6073,7 +6073,7 @@
             <div class="dash-greeting" id="dashWeekDay">// Semana 1 · Día 1</div>
             <span class="kone-save-badge" id="koneCloudBadge">☁ Guardado en la nube</span>
           </div>
-          <h1 class="dash-title" id="dashTitle">Bienvenido/a</h1>
+          <h2 class="dash-title" id="dashTitle">Bienvenido/a</h1>
           <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
         </div>
 
@@ -6260,7 +6260,7 @@
       <div class="dash-section" id="section-semana">
         <div class="dash-header">
           <div class="dash-greeting">// Tu plan</div>
-          <h1 class="dash-title" id="semanaTitle">Semana 1</h1>
+          <h2 class="dash-title" id="semanaTitle">Semana 1</h1>
           <p class="dash-subtitle">Cada día tiene un propósito. Sigue el orden. Consulta también las próximas semanas de tu mes.</p>
         </div>
         <div class="week-tabs" id="weekTabs">
@@ -6278,7 +6278,7 @@
       <div class="dash-section" id="section-nutricion">
         <div class="dash-header">
           <div class="dash-greeting">// Tu alimentación</div>
-          <h1 class="dash-title">Plan semanal</h1>
+          <h2 class="dash-title">Plan semanal</h1>
           <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas para cada día de la semana. Cuando termines, pulsa <strong>"Lista de la compra"</strong> y te generamos todo lo que necesitas comprar. Pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span> para ver cómo preparar cada plato.</p>
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
@@ -6345,7 +6345,7 @@
       <div class="dash-section" id="section-checkin">
         <div class="dash-header">
           <div class="dash-greeting" id="checkinSemanaLabel">// Semana 1</div>
-          <h1 class="dash-title">¿Cómo fue?</h1>
+          <h2 class="dash-title">¿Cómo fue?</h1>
           <p class="dash-subtitle">Cinco minutos. Cuéntanos tu semana y adaptamos el plan.</p>
         </div>
 
@@ -6429,7 +6429,7 @@
       <div class="dash-section" id="section-progreso">
         <div class="dash-header">
           <div class="dash-greeting">// Tu historia</div>
-          <h1 class="dash-title">Tu progreso</h1>
+          <h2 class="dash-title">Tu progreso</h1>
           <p class="dash-subtitle">Lo que no se registra, no se ve. Aquí está todo.</p>
         </div>
 
@@ -6451,7 +6451,7 @@
       <div class="dash-section" id="section-notas">
         <div class="dash-header">
           <div class="dash-greeting">// Tu agenda</div>
-          <h1 class="dash-title">Notas</h1>
+          <h2 class="dash-title">Notas</h1>
           <p class="dash-subtitle">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
         </div>
 
@@ -6467,7 +6467,7 @@
       <div class="dash-section" id="section-contacto">
         <div class="dash-header">
           <div class="dash-greeting">// Comunicación directa</div>
-          <h1 class="dash-title">Contacto</h1>
+          <h2 class="dash-title">Contacto</h1>
           <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
         </div>
 
@@ -11577,7 +11577,7 @@
           if (val.length === 0) { bar.classList.remove('visible'); }
           else {
             bar.classList.add('visible');
-            const fuerza = val.length < 6 ? 1 : val.length < 10 ? 2 : /[A-Z]/.test(val) && /[0-9]/.test(val) ? 3 : 2;
+            const fuerza = val.length < 8 ? 1 : (val.length >= 10 && /[A-Z]/.test(val) && /[0-9]/.test(val)) ? 3 : 2;
             const pct = fuerza === 1 ? '33%' : fuerza === 2 ? '66%' : '100%';
             const col = fuerza === 1 ? '#e74c3c' : fuerza === 2 ? '#f0a500' : '#27ae60';
             fill.style.width = pct; fill.style.background = col;
@@ -11633,7 +11633,7 @@
       document.getElementById('reg-email').classList.add('error');
       ok = false;
     }
-    if (pass.length < 6) {
+    if (pass.length < 8 || !/\d/.test(pass)) {
       document.getElementById('err-pass').classList.add('visible');
       document.getElementById('reg-pass').classList.add('error');
       ok = false;
@@ -11884,7 +11884,7 @@
     document.getElementById('forgot-newpass2').classList.remove('error');
 
     let ok = true;
-    if (newPass.length < 6) {
+    if (newPass.length < 8 || !/\d/.test(newPass)) {
       document.getElementById('err-forgot-newpass').classList.add('visible');
       document.getElementById('forgot-newpass').classList.add('error');
       ok = false;
