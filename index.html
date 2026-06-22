@@ -302,6 +302,31 @@
   .jc-row { background:#161616; border:1px solid #222; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
   .jc-label { font-size:10px; color:var(--metal); text-transform:uppercase; letter-spacing:.5px; font-family:'DM Mono',monospace; margin-bottom:3px; }
   .jc-val { font-size:13px; color:var(--blanco); font-weight:500; }
+
+  @media (max-width: 768px) {
+    #modalAdmin > div { padding: 0 12px 24px !important; max-width: 100% !important; }
+    #modalAdmin .jarvis-tab { font-size: 11px; padding: 6px 10px; }
+    #modalAdmin [style*="grid-template-columns: repeat(auto-fit"] { grid-template-columns: 1fr 1fr !important; }
+    #modalAdmin [style*="grid-template-columns:repeat(auto-fit"] { grid-template-columns: 1fr 1fr !important; }
+    #modalAdmin [style*="grid-template-columns: 1fr 1fr;"] { grid-template-columns: 1fr !important; }
+    #modalAdmin [style*="grid-template-columns:1fr 1fr;"] { grid-template-columns: 1fr !important; }
+    #modalAdmin [style*="font-size:24px"] { font-size: 18px !important; }
+    #modalAdmin table { font-size: 11px !important; }
+    #modalAdmin table th, #modalAdmin table td { padding: 6px 8px !important; }
+    #modalAdmin [style*="display:flex;gap:8px;align-items:center"] { flex-wrap: wrap; }
+    #modalAdmin button { font-size: 11px !important; padding: 6px 10px !important; }
+    #adminBuscador { width: 100% !important; }
+    #adminFiltrosBtns { width: 100%; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .jarvis-filtro { flex-shrink: 0; }
+    #jarvisTabs { gap: 2px !important; }
+    #modalJarvisCliente > div { width: 95vw !important; max-width: 95vw !important; max-height: 90vh !important; padding: 16px !important; }
+    #modalJarvisCliente .jc-row { flex-direction: column; }
+  }
+  @media (max-width: 480px) {
+    #modalAdmin [style*="grid-template-columns: repeat(auto-fit"] { grid-template-columns: 1fr !important; }
+    #modalAdmin [style*="grid-template-columns:repeat(auto-fit"] { grid-template-columns: 1fr !important; }
+    #modalAdmin table { display: block; overflow-x: auto; white-space: nowrap; }
+  }
   .email-body-open { max-height:300px !important; }
   .email-chevron-open { transform:rotate(180deg); }
 
