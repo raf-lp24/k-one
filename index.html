@@ -150,6 +150,43 @@
     --blanco-puro: #FFFFFF;
   }
 
+  :root[data-theme="light"] {
+    --negro: #FFFFFF;
+    --carbon: #F5F5F5;
+    --grafito: #EBEBEB;
+    --acero: #E0E0E0;
+    --metal: #666666;
+    --metal-claro: #555555;
+    --humo: #D0D0D0;
+    --blanco: #1A1A1A;
+    --blanco-puro: #000000;
+  }
+  :root[data-theme="light"] body { background: #FFFFFF; color: #1A1A1A; }
+  :root[data-theme="light"] .hero { background: linear-gradient(180deg, #F8F8F8 0%, #FFFFFF 100%); }
+  :root[data-theme="light"] .nav { background: rgba(255,255,255,0.95); border-bottom: 1px solid #E0E0E0; }
+  :root[data-theme="light"] .nav-link { color: #333; }
+  :root[data-theme="light"] .dash-sidebar { background: #F8F8F8; border-right: 1px solid #E0E0E0; }
+  :root[data-theme="light"] .dash-nav-item { color: #555; }
+  :root[data-theme="light"] .dash-nav-item.active { color: #E8490F; background: rgba(232,73,15,0.08); }
+  :root[data-theme="light"] .dash-section { background: #FFFFFF; }
+  :root[data-theme="light"] .price-card { background: #F8F8F8; border-color: #E0E0E0; }
+  :root[data-theme="light"] .price-card.featured { border-color: #E8490F; }
+  :root[data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.4); }
+  :root[data-theme="light"] .modal-box { background: #FFFFFF; border: 1px solid #E0E0E0; }
+  :root[data-theme="light"] .auth-field input { background: #F5F5F5; border-color: #D0D0D0; color: #1A1A1A; }
+  :root[data-theme="light"] .radio-opt { background: #F0F0F0; border-color: #D0D0D0; color: #333; }
+  :root[data-theme="light"] .radio-opt.selected { border-color: #E8490F; background: rgba(232,73,15,0.08); }
+  :root[data-theme="light"] .btn-ghost { border-color: #D0D0D0; color: #555; }
+  :root[data-theme="light"] .stat-card { background: #F5F5F5; }
+  :root[data-theme="light"] .meal-block { background: #F8F8F8; border-color: #E0E0E0; }
+  :root[data-theme="light"] .meal-option { background: #FFFFFF; border-color: #E0E0E0; }
+  :root[data-theme="light"] .logout-btn { color: #555; }
+  :root[data-theme="light"] #toast { background: #333; color: #fff; }
+  :root[data-theme="light"] #modalAdmin { background: #F8F8F8; }
+  :root[data-theme="light"] .jarvis-tab { color: #888; }
+  :root[data-theme="light"] .jarvis-tab-active { color: #fff !important; }
+  :root[data-theme="light"] #cookieBanner { background: #333; }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body { overflow-x: hidden; }
@@ -6048,6 +6085,9 @@
         </div>
       </nav>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--humo);display:flex;flex-direction:column;gap:4px">
+        <button class="logout-btn" id="btnToggleTheme" onclick="toggleTheme()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+          <span id="themeIcon">☀️</span> <span id="themeLabel">Modo claro</span>
+        </button>
         <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Panel de admin
         </button>
@@ -14192,6 +14232,30 @@
     const b = document.getElementById('cookieBanner');
     if (b) b.style.display = 'flex';
   }
+
+  // ===== TEMA CLARO/OSCURO =====
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('kone_theme', next); } catch(e) {}
+    actualizarBotonTema(next);
+  }
+  function actualizarBotonTema(tema) {
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+    if (icon) icon.textContent = tema === 'light' ? '🌙' : '☀️';
+    if (label) label.textContent = tema === 'light' ? 'Modo oscuro' : 'Modo claro';
+  }
+  (function() {
+    try {
+      const saved = localStorage.getItem('kone_theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        setTimeout(() => actualizarBotonTema('light'), 100);
+      }
+    } catch(e) {}
+  })();
 
   // ===== DETECTOR OFFLINE =====
   window.addEventListener('offline', () => {
