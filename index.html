@@ -8644,16 +8644,30 @@
       : (0.407 * pesoKg + 0.267 * altCm - 19.2);
     const lbmProtMax = Math.round(lbm * 2.4);
 
-    // Objetivo de proteína (g/día): más alto en déficit para preservar músculo; cap por masa magra en déficit
+    // Proteína por deporte: runners necesitan menos, CrossFit/Hyrox más
+    const protMultiplier = perdidaGrasa
+      ? (esRunner ? 2.0 : (esCrossfit || esHyrox) ? 2.3 : 2.2)
+      : ganarMusculo
+      ? (esRunner ? 1.8 : (esCrossfit || esHyrox) ? 2.2 : 2.0)
+      : (esRunner ? 1.4 : (esCrossfit || esHyrox) ? 1.8 : 1.6);
     const protObj = Math.round(
-      perdidaGrasa ? Math.min(Math.max(pesoKg * 2.2, 100), lbmProtMax) :
-      ganarMusculo ? pesoKg * 2.0 :
-      pesoKg * 1.6
+      perdidaGrasa ? Math.min(Math.max(pesoKg * protMultiplier, 100), lbmProtMax) :
+      Math.round(pesoKg * protMultiplier)
     );
+
+    // Carbohidratos por deporte: runners y Hyrox necesitan más glucógeno
+    const carbsAltos = esRunner || esHyrox || esCrossfit;
+    const carbsMultiplier = carbsAltos
+      ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
+      : (perdidaGrasa ? 2.0 : ganarMusculo ? 4.0 : 3.0);
+    const carbsObj = Math.round(pesoKg * carbsMultiplier);
 
     // Factor de escala: ajusta kcal/macros del plan base al objetivo personal
     const baseKcalPlan = perdidaGrasa ? 1480 : ganarMusculo ? 2570 : 1550;
     const escalaRacion = Math.min(2.5, Math.max(0.65, kcalObj / baseKcalPlan));
+
+    // Escala extra de carbohidratos para deportes de resistencia
+    const escalaCarbs = carbsAltos ? Math.min(1.35, escalaRacion * 1.15) : 1.0;
     // ─────────────────────────────────────────────────────────────────────────
 
     // Ajusta gramos y ml en el texto de ingredientes al perfil calórico del usuario
@@ -8669,12 +8683,16 @@
     // op() construye cada opción escalando kcal/macros e ingredientes al perfil del usuario
     const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
       const sc = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion); };
+      const scC = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion * escalaCarbs); };
+      const kcalBase = parseFloat(kcal) || 0;
+      const carbsBase = parseFloat(carbs) || 0;
+      const kcalExtra = Math.round((carbsBase * (escalaCarbs - 1)) * 4 * escalaRacion);
       return {
         nombre,
-        ingredientes: scaleIngredientes(ingredientes, escalaRacion),
-        kcal:  `${sc(kcal)} kcal`,
+        ingredientes: scaleIngredientes(ingredientes, escalaRacion * (carbsAltos ? 1.05 : 1)),
+        kcal:  `${sc(kcal) + kcalExtra} kcal`,
         prot:  `${sc(prot)}g prot`,
-        carbs: `${sc(carbs)}g carbs`,
+        carbs: `${scC(carbs)}g carbs`,
         grasa: `${sc(grasa)}g grasa`,
         prep,
       };
@@ -8994,19 +9012,88 @@
       });
     }
 
+    // PLATOS EXTRA POR DEPORTE — se añaden al pool de opciones para más variedad y especificidad
+    if (esRunner || esHyrox) {
+      const extrasCarbs = [
+        op("Pasta con verduras y atún", "100g pasta integral, 1 lata atún, calabacín, tomate, AOVE", "480 kcal", "32g prot", "58g carbs", "12g grasa", "Fácil · 15 min"),
+        op("Arroz con pollo y boniato", "180g pollo, 80g arroz, 100g boniato, AOVE", "520 kcal", "42g prot", "52g carbs", "14g grasa", "Fácil · 25 min"),
+        op("Bowl de avena salada con huevo", "60g avena cocida en caldo, 2 huevos, espinacas, queso rallado", "380 kcal", "24g prot", "36g carbs", "16g grasa", "Fácil · 10 min"),
+        op("Wrap integral de pollo y hummus", "1 tortilla integral, 150g pollo, 40g hummus, lechuga, zanahoria", "420 kcal", "38g prot", "36g carbs", "14g grasa", "Sin cocción · 5 min"),
+        op("Cuscús con verduras y garbanzos", "100g cuscús, 100g garbanzos, calabacín, pimiento, AOVE, comino", "430 kcal", "18g prot", "62g carbs", "10g grasa", "Fácil · 15 min"),
+        op("Bocadillo de pavo con aguacate", "1 barra pan integral, 100g pavo, 1/4 aguacate, tomate, lechuga", "440 kcal", "32g prot", "42g carbs", "16g grasa", "Sin cocción · 5 min"),
+      ];
+      nutricion.forEach(m => {
+        if (m.momento === 'Comida' || m.momento === 'Cena') m.opciones.push(...extrasCarbs.slice(0, 3));
+        if (m.momento === 'Desayuno') m.opciones.push(
+          op("Porridge cargado pre-carrera", "80g avena, 200ml leche, 1 plátano, 20g miel, 10g pasas", "520 kcal", "14g prot", "92g carbs", "10g grasa", "Fácil · 8 min"),
+          op("Tostadas con mermelada y plátano", "3 tostadas integrales, mermelada sin azúcar, 1 plátano, café", "380 kcal", "10g prot", "72g carbs", "6g grasa", "Sin cocción · 3 min")
+        );
+      });
+    }
+    if (esGimnasio || esCrossfit) {
+      const extrasProte = [
+        op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral, 200g brócoli, AOVE", "540 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
+        op("Steak de ternera con patata asada", "180g ternera magra, 200g patata asada, ensalada verde, AOVE", "520 kcal", "44g prot", "38g carbs", "18g grasa", "Medio · 25 min"),
+        op("Revuelto de claras con avena y pavo", "200ml claras, 2 huevos, 30g avena, 50g pavo, espinacas", "380 kcal", "42g prot", "28g carbs", "10g grasa", "Fácil · 10 min"),
+        op("Bowl de atún con arroz y aguacate", "2 latas atún, 100g arroz, 1/4 aguacate, edamame, soja", "490 kcal", "40g prot", "42g carbs", "16g grasa", "Sin cocción · 8 min"),
+        op("Pechuga de pavo al horno con boniato", "200g pavo, 200g boniato, espárragos, AOVE", "480 kcal", "46g prot", "40g carbs", "12g grasa", "Medio · 30 min"),
+        op("Tortilla de 4 claras con jamón y queso", "4 claras + 1 huevo, 40g jamón cocido, 30g queso, espinacas", "300 kcal", "38g prot", "4g carbs", "14g grasa", "Fácil · 8 min"),
+      ];
+      nutricion.forEach(m => {
+        if (m.momento === 'Comida' || m.momento === 'Cena') m.opciones.push(...extrasProte.slice(0, 3));
+        if (m.momento === 'Merienda') m.opciones.push(
+          op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
+          op("Cottage con frutos rojos y nueces", "200g queso cottage, 80g frutos rojos, 15g nueces", "240 kcal", "26g prot", "18g carbs", "8g grasa", "Sin cocción · 2 min")
+        );
+      });
+    }
+    if (esCombinacion) {
+      nutricion.forEach(m => {
+        if (m.momento === 'Comida') m.opciones.push(
+          op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "520 kcal", "42g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
+          op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "540 kcal", "42g prot", "38g carbs", "22g grasa", "Fácil · 20 min")
+        );
+        if (m.momento === 'Cena') m.opciones.push(
+          op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
+        );
+      });
+    }
+
     // FILTRAR ALIMENTOS NO DESEADOS
     nutricion = filtrarNoComida(nutricion, u.noComida);
 
-    // VARIEDAD DE COMIDAS por usuario: rota el orden de las opciones de cada toma según la
-    // semilla, de modo que la opción "recomendada" (la primera) y el orden cambian entre
-    // clientes con el mismo perfil. Es estable para el mismo usuario, así que las opciones
-    // que guarde siguen apuntando al mismo plato.
-    // Se muestran SIEMPRE 5 opciones por toma (lo que promete la web). Algunas tomas tienen
-    // más platos definidos en el código: la rotación elige qué 5 ve cada usuario (más variedad
-    // entre clientes), pero cada uno ve exactamente 5.
-    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + 1).slice(0, 5) }));
+    // ROTACIÓN SEMANAL: cada semana el cliente ve platos diferentes.
+    // semilla (basada en el email) varía entre usuarios; semanaActual varía entre semanas.
+    const semanaActual = u.progreso?.semana || 1;
+    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + semanaActual * 3).slice(0, 5) }));
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], kcalObj, protObj, tdee };
+    // NOTAS ESPECÍFICAS POR DEPORTE (hidratación, suplementación, calentamiento)
+    const notasDeporte = [];
+    if (esRunner) {
+      notasDeporte.push('Hidratación: bebe 5-7 ml/kg de peso 2-4h antes de correr. Durante sesiones de +60 min, 150-250 ml cada 20 min con electrolitos.');
+      notasDeporte.push('Tus carbohidratos están ajustados al alza para mantener el glucógeno muscular. Los días de tirada larga (>10 km), prioriza la comida rica en hidratos 3h antes.');
+      notasDeporte.push('Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
+    } else if (esCrossfit) {
+      notasDeporte.push('Hidratación: 500-700 ml en las 2h previas al WOD. Durante el WOD no sueles poder beber — hidrata bien antes y después.');
+      notasDeporte.push('Tu plan prioriza proteína y carbohidratos para soportar el volumen alto de CrossFit. Post-WOD: come en los 45 min siguientes, priorizando proteína + carbohidrato rápido.');
+      notasDeporte.push('Suplementación útil para CrossFit: creatina monohidrato (5g/día, todos los días), proteína whey post-WOD, magnesio por la noche para recuperación.');
+    } else if (esHyrox) {
+      notasDeporte.push('Hidratación: como Hyrox mezcla carrera y estaciones, bebe 400-600 ml con electrolitos 2h antes. En competición, aprovecha las transiciones para beber.');
+      notasDeporte.push('Tu plan tiene carbohidratos altos para mantener el rendimiento en las 8 estaciones + 8 km de carrera. Los días de simulacro, carga hidratos la noche anterior.');
+      notasDeporte.push('Suplementación útil para Hyrox: cafeína pre-competición (3-6 mg/kg), creatina diaria (5g), beta-alanina (3-6g/día) para mejorar tolerancia al ácido láctico.');
+    } else if (esGimnasio) {
+      notasDeporte.push('Hidratación: bebe 400-600 ml en la hora previa al entreno. Durante la sesión, 150-200 ml entre series (no esperes a tener sed).');
+      notasDeporte.push('Suplementación útil para fuerza: creatina monohidrato (5g/día, el suplemento con más evidencia científica), proteína whey si no llegas a tu objetivo proteico con comida.');
+    } else if (esCombinacion) {
+      notasDeporte.push('Hidratación: al combinar fuerza y cardio, necesitas más hidratación que solo gimnasio. 500-700 ml pre-entreno, 200 ml cada 15-20 min durante.');
+      notasDeporte.push('Suplementación útil para entrenamiento híbrido: creatina monohidrato (5g/día), cafeína pre-entreno (200-400 mg), proteína post si la sesión es larga.');
+    }
+    if (!soloDieta) {
+      notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
+      notasDeporte.push('Vuelta a la calma: 5 min de estiramientos estáticos (30s por grupo muscular) al terminar. Los músculos que más has trabajado hoy son los que más necesitan estirarse.');
+    }
+
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee };
   }
 
   // Pone en mayúscula la primera palabra alfabética de un ingrediente,
@@ -9246,9 +9333,14 @@
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
     const nutricionNotas = document.getElementById('nutricionNotas');
     if (nutricionNotas) {
-      nutricionNotas.innerHTML = (generatedPlan.notasNutricion && generatedPlan.notasNutricion.length)
-        ? `<div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Tu plan, adaptado</strong><br>${generatedPlan.notasNutricion.map(n => `· ${n}`).join('<br>')}</div>`
-        : '';
+      let notasHTML = '';
+      if (generatedPlan.notasNutricion && generatedPlan.notasNutricion.length) {
+        notasHTML += `<div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Tu plan, adaptado</strong><br>${generatedPlan.notasNutricion.map(n => `· ${n}`).join('<br>')}</div>`;
+      }
+      if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
+        notasHTML += `<div style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Hidratación, suplementación y calentamiento</strong><br>${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div>`;
+      }
+      nutricionNotas.innerHTML = notasHTML;
     }
 
     // Bienvenida personalizada (incluye evento, si lo hay) en la sección Nutrición para planes solo-dieta
@@ -10477,7 +10569,26 @@
     "Fruta + frutos secos": "Lava y trocea la fruta elegida. Sirve junto a los frutos secos. Sin preparación.",
     "Café con leche + galletas de avena": "Prepara el café con leche caliente. Toma junto a las galletas de avena.",
     "Fruta variada": "Pela y trocea la fruta que tengas en casa. Combina al menos dos tipos diferentes.",
-    "Yogur natural con fruta y canela": "Vierte el yogur en un bol. Pela y trocea la fruta por encima. Espolvorea canela al gusto."
+    "Yogur natural con fruta y canela": "Vierte el yogur en un bol. Pela y trocea la fruta por encima. Espolvorea canela al gusto.",
+    "Pasta con verduras y atún": "Cuece la pasta integral al dente. Saltea calabacín en rodajas con AOVE 3 min. Escurre el atún y mezcla todo con tomate troceado. Un chorrito de AOVE al servir.",
+    "Arroz con pollo y boniato": "Cuece el arroz y el boniato en dados (15 min). Plancha el pollo sazonado 4-5 min por lado. Sirve todo junto con un chorrito de AOVE.",
+    "Bowl de avena salada con huevo": "Cuece la avena en caldo de verduras 5 min removiendo. Sirve en bol con espinacas frescas, queso rallado y los huevos a la plancha encima.",
+    "Wrap integral de pollo y hummus": "Extiende el hummus sobre la tortilla. Coloca el pollo en tiras, lechuga y zanahoria rallada. Enrolla bien apretado y corta por la mitad.",
+    "Cuscús con verduras y garbanzos": "Hidrata el cuscús con agua hirviendo tapado 5 min. Saltea calabacín y pimiento en AOVE 5 min. Mezcla todo con los garbanzos y comino.",
+    "Bocadillo de pavo con aguacate": "Abre la barra de pan y unta el aguacate aplastado con limón y sal. Añade el pavo, tomate en rodajas y lechuga.",
+    "Porridge cargado pre-carrera": "Cuece la avena en leche 5-8 min removiendo. Sirve con el plátano en rodajas, la miel y las pasas por encima. Ideal 2-3h antes de correr.",
+    "Tostadas con mermelada y plátano": "Tuesta el pan. Unta mermelada sin azúcar. Añade el plátano en rodajas por encima. Rápido y cargado de energía.",
+    "Pollo a la plancha con arroz y brócoli": "Cuece el arroz integral y el brócoli al vapor (8 min). Plancha el pollo sazonado 4-5 min por lado. Sirve con un chorrito de AOVE.",
+    "Steak de ternera con patata asada": "Precalienta el horno a 200°C. Asa la patata en dados con AOVE 25 min. Plancha la ternera a fuego fuerte 2-3 min por lado. Prepara ensalada verde.",
+    "Revuelto de claras con avena y pavo": "Cuece la avena en agua 3 min. Bate las claras con los huevos y sal. Revuelve en sartén con espinacas y pavo troceado 3 min.",
+    "Bowl de atún con arroz y aguacate": "Cuece el arroz. Escurre el atún. Monta el bowl: arroz, atún, aguacate en láminas, edamame y un chorrito de soja.",
+    "Pechuga de pavo al horno con boniato": "Precalienta horno a 200°C. Sazona el pavo con especias. Hornea con el boniato en dados y espárragos 25 min.",
+    "Tortilla de 4 claras con jamón y queso": "Bate las claras con el huevo y sal. Añade espinacas, jamón picado y vierte en sartén. Cuando cuaje, añade el queso, dobla y sirve.",
+    "Batido de proteína con avena y plátano": "Pon el scoop, la avena, el plátano y la leche en batidora. Bate 30 seg. Sirve frío.",
+    "Cottage con frutos rojos y nueces": "Vierte el cottage en un bol. Añade los frutos rojos y las nueces troceadas. Listo en 1 min.",
+    "Bowl mediterráneo de pollo y quinoa": "Cuece la quinoa 15 min. Plancha el pollo en tiras 5 min. Monta: quinoa, pollo, garbanzos, tomate seco, rúcula y AOVE.",
+    "Salmón con arroz y edamame": "Cuece el arroz. Plancha el salmón con sal 3-4 min por lado. Sirve sobre el arroz con edamame y un toque de soja y sésamo.",
+    "Poke bowl casero de atún": "Cuece el arroz y deja enfriar. Corta el atún en dados (o usa lata escurrida). Monta: arroz, atún, aguacate en láminas, zanahoria rallada, soja y sésamo."
   };
 
   function abrirRecetario() {
