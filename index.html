@@ -4329,7 +4329,7 @@
       <label>Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="login-email" name="username" placeholder="tu@email.com" autocomplete="username"
-          oninput="validarCampoLogin('email')" onblur="validarCampoLogin('email')">
+          oninput="if(typeof validarCampoLogin==='function')validarCampoLogin('email')" onblur="if(typeof validarCampoLogin==='function')validarCampoLogin('email')">
         <span class="auth-field-check" id="check-login-email">✓</span>
       </div>
     </div>
