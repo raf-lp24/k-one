@@ -151,17 +151,17 @@
   }
 
   :root[data-theme="light"] {
-    --negro: #FFFFFF;
-    --carbon: #F5F5F5;
-    --grafito: #EBEBEB;
-    --acero: #E0E0E0;
-    --metal: #666666;
+    --negro: #F0F0F0;
+    --carbon: #E8E8E8;
+    --grafito: #DDDDDD;
+    --acero: #D0D0D0;
+    --metal: #555555;
     --metal-claro: #444444;
-    --humo: #D0D0D0;
+    --humo: #C0C0C0;
     --blanco: #1A1A1A;
     --blanco-puro: #000000;
   }
-  [data-theme="light"] body { background: #FFFFFF !important; color: #1A1A1A !important; }
+  [data-theme="light"] body { background: #F0F0F0 !important; color: #1A1A1A !important; }
   [data-theme="light"] .hero { background: linear-gradient(180deg, #F5F5F5 0%, #FFFFFF 100%) !important; }
   [data-theme="light"] .nav { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #E0E0E0; }
   [data-theme="light"] .nav-link { color: #333 !important; }
@@ -169,7 +169,7 @@
   [data-theme="light"] .dash-nav-item { color: #555 !important; }
   [data-theme="light"] .dash-nav-item.active { color: #E8490F !important; background: rgba(232,73,15,0.06) !important; }
   [data-theme="light"] .dash-section { background: #FFFFFF !important; }
-  [data-theme="light"] .dash-header { background: #FFFFFF !important; border: 1px solid #E8E8E8 !important; }
+  [data-theme="light"] .dash-header { background: #F5F5F5 !important; border: 1px solid #D8D8D8 !important; }
   [data-theme="light"] .dash-header .dash-title { color: #1A1A1A !important; }
   [data-theme="light"] .dash-header .dash-subtitle { color: #555 !important; }
   [data-theme="light"] .motivation-card { background: #FAFAFA !important; border: 1px solid #E8E8E8 !important; }
@@ -221,10 +221,26 @@
   [data-theme="light"] .logout-btn { color: #555 !important; }
   [data-theme="light"] .logout-btn:hover { background: #F0F0F0 !important; }
   [data-theme="light"] #toast { background: #333 !important; color: #fff !important; }
-  [data-theme="light"] #modalAdmin { background: #FAFAFA !important; }
+  [data-theme="light"] #modalAdmin { background: #F0F0F0 !important; }
+  [data-theme="light"] #modalAdmin [style*="background:#141414"],
+  [data-theme="light"] #modalAdmin [style*="background:#111"],
+  [data-theme="light"] #modalAdmin [style*="background:#161616"],
+  [data-theme="light"] #modalAdmin [style*="background:#1a1a1a"] { background: #E8E8E8 !important; }
+  [data-theme="light"] #modalAdmin [style*="color:#fff"],
+  [data-theme="light"] #modalAdmin [style*="color:#e0e0e0"],
+  [data-theme="light"] #modalAdmin [style*="color:var(--blanco)"] { color: #1A1A1A !important; }
+  [data-theme="light"] #modalAdmin [style*="color:#888"],
+  [data-theme="light"] #modalAdmin [style*="color:#999"],
+  [data-theme="light"] #modalAdmin [style*="color:var(--metal)"] { color: #666 !important; }
+  [data-theme="light"] #modalAdmin [style*="border:1px solid #2a2a2a"],
+  [data-theme="light"] #modalAdmin [style*="border:1px solid #222"],
+  [data-theme="light"] #modalAdmin [style*="border-bottom:1px solid #1a1a1a"] { border-color: #D0D0D0 !important; }
+  [data-theme="light"] #modalAdmin table { color: #333 !important; }
+  [data-theme="light"] #modalAdmin table td { color: #333 !important; border-color: #D0D0D0 !important; }
+  [data-theme="light"] #modalAdmin table th { color: #555 !important; border-color: #D0D0D0 !important; }
   [data-theme="light"] .jarvis-tab { color: #888 !important; }
-  [data-theme="light"] .jarvis-tab:hover { background: #EBEBEB !important; color: #333 !important; }
-  [data-theme="light"] .jarvis-filtro { background: #F0F0F0 !important; border-color: #D0D0D0 !important; color: #555 !important; }
+  [data-theme="light"] .jarvis-tab:hover { background: #E0E0E0 !important; color: #333 !important; }
+  [data-theme="light"] .jarvis-filtro { background: #E8E8E8 !important; border-color: #D0D0D0 !important; color: #555 !important; }
   [data-theme="light"] #cookieBanner { background: #333 !important; }
   [data-theme="light"] .dash-greeting { color: #E8490F !important; }
   [data-theme="light"] .dash-title { color: #1A1A1A !important; }
@@ -6330,13 +6346,6 @@
             <div class="motivation-label">// Entrenamiento de hoy</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
-              <div style="display:inline-flex;gap:0;border:1px solid var(--humo);border-radius:6px;overflow:hidden">
-                <button onclick="iniciarDescanso(60)" style="background:var(--grafito);border:none;color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc60">1:00</button>
-                <button onclick="iniciarDescanso(90)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc90">1:30</button>
-                <button onclick="iniciarDescanso(120)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc120">2:00</button>
-                <button onclick="iniciarDescanso(180)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc180">3:00</button>
-              </div>
-              <span id="btnDescanso" style="display:none"></span>
               <button class="btn-ghost" id="btnFeedback" onclick="toggleFeedback()" style="font-size:11px;padding:8px 16px;letter-spacing:1px">¿Cómo va el entreno? →</button>
             </div>
           </div>
@@ -6490,7 +6499,7 @@
           </div>
         </div>
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <button class="btn-ghost" onclick="window.print()" style="font-size:11px;padding:8px 14px">
+          <button class="btn-ghost" onclick="imprimirDieta()" style="font-size:11px;padding:8px 14px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
           </button>
         </div>
@@ -6602,26 +6611,6 @@
         <div class="progress-section">
           <div class="progress-title">Hitos conseguidos</div>
           <div class="milestones" id="milestonesList"></div>
-        </div>
-
-        <div class="progress-section">
-          <div class="progress-title">Calculadora 1RM</div>
-          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Estima tu repetición máxima a partir de un peso y las repeticiones que haces con él (fórmula Epley).</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-            <div>
-              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Peso (kg)</label>
-              <input type="number" id="rm1Peso" placeholder="60" aria-label="Peso en kg para calcular 1RM" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Reps</label>
-              <input type="number" id="rm1Reps" placeholder="8" aria-label="Repeticiones para calcular 1RM" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu 1RM</label>
-              <div id="rm1Result" style="background:var(--grafito);border:1px solid var(--humo);padding:8px 10px;font-size:14px;border-radius:6px;color:var(--brasa);font-weight:700;text-align:center;min-height:36px;display:flex;align-items:center;justify-content:center">—</div>
-            </div>
-          </div>
-          <div id="rm1Tabla" style="display:none;font-size:12px;color:var(--metal);line-height:1.8"></div>
         </div>
 
         <div class="progress-section">
@@ -9825,9 +9814,9 @@
       titulo: 'Tu entrenamiento de hoy',
       items: [
         { icon: '🏋️', label: 'Marca completado', desc: 'Cuando termines, pulsa el botón verde para registrarlo y subir tu racha' },
-        { icon: '⏱️', label: 'Temporizador descanso', desc: 'Elige 1:00, 1:30, 2:00 o 3:00 de descanso entre series. Suena y vibra cuando acaba' },
         { icon: '▶️', label: 'Vídeos de apoyo', desc: 'Si no conoces un ejercicio, pulsa el botón de vídeo para ver cómo se ejecuta' },
-        { icon: '🔄', label: 'Cambiar ejercicios', desc: 'Pulsa "¿Cómo va el entreno?" para sustituir ejercicios que no te gusten por alternativas' }
+        { icon: '🔄', label: 'Cambiar ejercicios', desc: 'Pulsa "¿Cómo va el entreno?" para sustituir ejercicios que no te gusten por alternativas' },
+        { icon: '🔥', label: 'Racha de entrenos', desc: 'Cada día que entrenas sube tu racha. ¡Intenta no romperla!' }
       ]
     },
     semana: {
@@ -9863,7 +9852,6 @@
         { icon: '📈', label: 'Gráfico de pesos', desc: 'Ve cómo progresan tus pesos en cada ejercicio semana a semana' },
         { icon: '📸', label: 'Fotos mensuales', desc: 'Sube una foto cada mes para ver tu transformación visual' },
         { icon: '🏆', label: 'Hitos', desc: 'Desbloquea logros: primer entreno, racha de 7 días, primera semana completa...' },
-        { icon: '🔢', label: 'Calculadora 1RM', desc: 'Mete peso y reps y calcula tu repetición máxima estimada con tabla de porcentajes' },
         { icon: '📤', label: 'Compartir progreso', desc: 'Genera una imagen con tus stats para compartir en redes o WhatsApp' }
       ]
     },
@@ -10056,6 +10044,32 @@
   }
 
   // ===== CONTADOR KCAL DIARIO =====
+  function imprimirDieta() {
+    if (!generatedPlan || !generatedPlan.nutricion) { showToast('No hay plan de nutrición'); return; }
+    const user = getCurrentUser();
+    let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>Mi dieta — K-ONE</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;max-width:700px;margin:0 auto;color:#1A1A1A}
+    h1{font-size:20px;margin-bottom:4px}h2{font-size:16px;color:#E8490F;margin:20px 0 8px;border-bottom:2px solid #E8490F;padding-bottom:4px}
+    .meal{margin-bottom:6px;padding:8px 12px;background:#F5F5F5;border-radius:6px;font-size:13px}
+    .meal b{display:block;margin-bottom:2px}.macros{color:#888;font-size:11px}
+    .back{display:inline-block;margin-bottom:16px;color:#E8490F;text-decoration:none;font-size:14px}
+    @media print{.back,.no-print{display:none !important}}</style></head><body>
+    <a href="javascript:window.close()" class="back">← Volver a K-ONE</a>
+    <h1>Plan de nutrición — ${user?.nombre || 'K-ONE'}</h1>
+    <p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal/día · ${generatedPlan.protObj || ''}g proteína</p>
+    <button onclick="window.print()" class="no-print" style="background:#E8490F;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
+    generatedPlan.nutricion.forEach(meal => {
+      html += `<h2>${meal.momento} · ${meal.hora}</h2>`;
+      meal.opciones.forEach((opt, i) => {
+        html += `<div class="meal"><b>${i+1}. ${opt.nombre}</b>${opt.ingredientes}<br><span class="macros">${opt.kcal} · ${opt.prot} · ${opt.carbs} · ${opt.grasa} · ${opt.prep}</span></div>`;
+      });
+    });
+    html += '</body></html>';
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(html); w.document.close(); }
+    else showToast('Permite las ventanas emergentes para imprimir');
+  }
+
   function actualizarKcalDiario() {
     if (!generatedPlan || !generatedPlan.nutricion || !generatedPlan.kcalObj) return;
     const bar = document.getElementById('kcalDiarioBar');
