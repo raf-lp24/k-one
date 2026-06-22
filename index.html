@@ -8765,17 +8765,17 @@
 
     // op() construye cada opción escalando kcal/macros e ingredientes al perfil del usuario
     const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
-      const sc = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion); };
-      const scC = str => { const n = parseFloat(str); return isNaN(n) ? str : Math.round(n * escalaRacion * escalaCarbs); };
-      const kcalBase = parseFloat(kcal) || 0;
-      const carbsBase = parseFloat(carbs) || 0;
-      const kcalExtra = Math.round((carbsBase * (escalaCarbs - 1)) * 4 * escalaRacion);
+      const sc = str => { const n = parseFloat(str); return isNaN(n) ? 0 : Math.round(n * escalaRacion); };
+      const carbsN = parseFloat(carbs) || 0;
+      const carbsScaled = Math.round(carbsN * escalaRacion * escalaCarbs);
+      const kcalN = parseFloat(kcal) || 0;
+      const kcalScaled = Math.round(kcalN * escalaRacion + (carbsN * (escalaCarbs - 1) * 4 * escalaRacion));
       return {
         nombre,
-        ingredientes: scaleIngredientes(ingredientes, escalaRacion * (carbsAltos ? 1.05 : 1)),
-        kcal:  `${sc(kcal) + kcalExtra} kcal`,
+        ingredientes: scaleIngredientes(ingredientes, escalaRacion),
+        kcal:  `${kcalScaled} kcal`,
         prot:  `${sc(prot)}g prot`,
-        carbs: `${scC(carbs)}g carbs`,
+        carbs: `${carbsScaled}g carbs`,
         grasa: `${sc(grasa)}g grasa`,
         prep,
       };
