@@ -26,7 +26,10 @@
     "api/cancel-subscription.js":     { "maxDuration": 15 },
     "api/reactivate-subscription.js": { "maxDuration": 15 },
     "api/create-portal-session.js":   { "maxDuration": 15 },
-    "api/is-admin.js":                { "maxDuration": 10 }
+    "api/is-admin.js":                { "maxDuration": 10 },
+    "api/admin-mensaje.js":           { "maxDuration": 15 },
+    "api/admin-crear-cliente.js":     { "maxDuration": 10 },
+    "api/admin-set-premium.js":       { "maxDuration": 10 }
   },
   "crons": [
     {

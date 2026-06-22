@@ -13764,9 +13764,11 @@
 
   // ===== INIT =====
   window.onerror = function() {
-    if (!document.querySelector('.screen[style*="display: block"], .screen[style*="display:block"]')) {
+    var hasVisible = document.querySelector('.screen.active') ||
+                     document.querySelector('.screen[style*="display: block"], .screen[style*="display:block"]');
+    if (!hasVisible) {
       var landing = document.getElementById('landing');
-      if (landing) landing.style.display = 'block';
+      if (landing) { landing.classList.add('active'); landing.style.display = 'block'; }
     }
   };
 
