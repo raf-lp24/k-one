@@ -9156,9 +9156,9 @@
     nutricion = filtrarNoComida(nutricion, u.noComida);
 
     // ROTACIÓN SEMANAL: cada semana el cliente ve platos diferentes.
-    // semilla (basada en el email) varía entre usuarios; semanaActual varía entre semanas.
-    const semanaActual = u.progreso?.semana || 1;
-    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + semanaActual * 3).slice(0, 5) }));
+    // semilla (basada en el email) varía entre usuarios; semana varía entre semanas.
+    const semRotacion = (u.progreso && u.progreso.semana) || 1;
+    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + semRotacion * 3).slice(0, 5) }));
 
     // NOTAS ESPECÍFICAS POR DEPORTE (hidratación, suplementación, calentamiento)
     const notasDeporte = [];
