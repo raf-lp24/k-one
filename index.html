@@ -6198,9 +6198,13 @@
             <div class="motivation-label">// Entrenamiento de hoy</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
-              <button class="btn-ghost" onclick="iniciarDescanso()" style="font-size:11px;padding:8px 16px;letter-spacing:1px" id="btnDescanso">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso
-              </button>
+              <div style="display:inline-flex;gap:0;border:1px solid var(--humo);border-radius:6px;overflow:hidden">
+                <button onclick="iniciarDescanso(60)" style="background:var(--grafito);border:none;color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc60">1:00</button>
+                <button onclick="iniciarDescanso(90)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc90">1:30</button>
+                <button onclick="iniciarDescanso(120)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc120">2:00</button>
+                <button onclick="iniciarDescanso(180)" style="background:var(--grafito);border:none;border-left:1px solid var(--humo);color:var(--metal);font-size:11px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace" id="btnDesc180">3:00</button>
+              </div>
+              <span id="btnDescanso" style="display:none"></span>
               <button class="btn-ghost" id="btnFeedback" onclick="toggleFeedback()" style="font-size:11px;padding:8px 16px;letter-spacing:1px">¿Cómo va el entreno? →</button>
             </div>
           </div>
@@ -6339,6 +6343,25 @@
           </div>
         </div>
         <div id="nutricionNotas"></div>
+        <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px">KCAL HOY</span>
+            <span style="font-size:12px;color:var(--metal)" id="kcalDiarioTexto">0 / 0 kcal</span>
+          </div>
+          <div style="background:var(--grafito);height:8px;border-radius:4px;overflow:hidden">
+            <div id="kcalDiarioFill" style="height:100%;background:var(--brasa);border-radius:4px;transition:width 0.5s;width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioProt">Prot: 0g</span>
+            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioCarbs">Carbs: 0g</span>
+            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioGrasa">Grasa: 0g</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="btn-ghost" onclick="window.print()" style="font-size:11px;padding:8px 14px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
+          </button>
+        </div>
         <div id="nutritionGrid">
           <!-- generado por JS -->
         </div>
@@ -6432,7 +6455,7 @@
       <div class="dash-section" id="section-progreso">
         <div class="dash-header">
           <div class="dash-greeting">// Tu historia</div>
-          <h2 class="dash-title">Tu progreso</h1>
+          <h2 class="dash-title">Tu progreso</h2>
           <p class="dash-subtitle">Lo que no se registra, no se ve. Aquí está todo.</p>
         </div>
 
@@ -6448,13 +6471,42 @@
           <div class="progress-title">Hitos conseguidos</div>
           <div class="milestones" id="milestonesList"></div>
         </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Calculadora 1RM</div>
+          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Estima tu repetición máxima a partir de un peso y las repeticiones que haces con él (fórmula Epley).</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+            <div>
+              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Peso (kg)</label>
+              <input type="number" id="rm1Peso" placeholder="60" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Reps</label>
+              <input type="number" id="rm1Reps" placeholder="8" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:8px 10px;font-size:14px;border-radius:6px" oninput="calcular1RM()">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu 1RM</label>
+              <div id="rm1Result" style="background:var(--grafito);border:1px solid var(--humo);padding:8px 10px;font-size:14px;border-radius:6px;color:var(--brasa);font-weight:700;text-align:center;min-height:36px;display:flex;align-items:center;justify-content:center">—</div>
+            </div>
+          </div>
+          <div id="rm1Tabla" style="display:none;font-size:12px;color:var(--metal);line-height:1.8"></div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Compartir progreso</div>
+          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Genera una imagen con tus stats para compartir en redes.</p>
+          <button class="btn-primary" onclick="compartirProgreso()" style="font-size:13px;padding:10px 20px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Generar imagen para compartir
+          </button>
+          <div id="sharePreview" style="margin-top:12px;display:none"></div>
+        </div>
       </div>
 
       <!-- NOTAS -->
       <div class="dash-section" id="section-notas">
         <div class="dash-header">
           <div class="dash-greeting">// Tu agenda</div>
-          <h2 class="dash-title">Notas</h1>
+          <h2 class="dash-title">Notas</h2>
           <p class="dash-subtitle">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
         </div>
 
@@ -6470,7 +6522,7 @@
       <div class="dash-section" id="section-contacto">
         <div class="dash-header">
           <div class="dash-greeting">// Comunicación directa</div>
-          <h2 class="dash-title">Contacto</h1>
+          <h2 class="dash-title">Contacto</h2>
           <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
         </div>
 
@@ -9248,6 +9300,7 @@
     }
 
     actualizarBtnCancelar();
+    try { actualizarKcalDiario(); } catch(e) {}
 
     // Header
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
@@ -9639,10 +9692,10 @@
     hoy: {
       titulo: 'Tu entrenamiento de hoy',
       items: [
-        { icon: '🏋️', label: 'Marca completado', desc: 'Cuando termines un ejercicio, pulsa el botón verde para registrarlo' },
-        { icon: '📝', label: 'Registra tus pesos', desc: 'Apunta el peso que usas en cada ejercicio — así ves tu progresión semana a semana' },
+        { icon: '🏋️', label: 'Marca completado', desc: 'Cuando termines, pulsa el botón verde para registrarlo y subir tu racha' },
+        { icon: '⏱️', label: 'Temporizador descanso', desc: 'Elige 1:00, 1:30, 2:00 o 3:00 de descanso entre series. Suena y vibra cuando acaba' },
         { icon: '▶️', label: 'Vídeos de apoyo', desc: 'Si no conoces un ejercicio, pulsa el botón de vídeo para ver cómo se ejecuta' },
-        { icon: '🔥', label: 'Racha de entrenos', desc: 'Cada día que entrenas sube tu racha. ¡Intenta no romperla!' }
+        { icon: '🔄', label: 'Cambiar ejercicios', desc: 'Pulsa "¿Cómo va el entreno?" para sustituir ejercicios que no te gusten por alternativas' }
       ]
     },
     semana: {
@@ -9657,10 +9710,11 @@
     nutricion: {
       titulo: 'Tu nutrición',
       items: [
-        { icon: '🍽️', label: '5 opciones por comida', desc: 'Para cada toma (desayuno, media mañana, comida, merienda, cena) tienes 5 opciones. Elige la que más te apetezca' },
-        { icon: '📆', label: 'Planificador semanal', desc: 'Pulsa L, M, X, J, V, S, D para elegir las comidas de cada día de la semana' },
-        { icon: '🛒', label: 'Lista de la compra', desc: 'Una vez elegidas, genera tu lista de la compra con todo sumado por categorías' },
-        { icon: '📖', label: 'Recetario', desc: 'Busca recetas por nombre o ingrediente — tienes cientos de opciones con los macros calculados' }
+        { icon: '🍽️', label: '5 opciones por comida', desc: 'Para cada toma tienes 5 opciones. Elige la que más te apetezca — cada semana cambian' },
+        { icon: '📊', label: 'Contador de kcal', desc: 'La barra de arriba muestra tus calorías del día vs tu objetivo, actualizándose al elegir platos' },
+        { icon: '🛒', label: 'Lista de la compra', desc: 'Genera tu lista de la compra con todo sumado por categorías' },
+        { icon: '🖨️', label: 'Imprimir dieta', desc: 'Pulsa "Imprimir dieta" para sacar tu plan en PDF o imprimirlo' },
+        { icon: '📖', label: 'Recetario', desc: 'Cientos de recetas con instrucciones paso a paso y macros calculados' }
       ]
     },
     checkin: {
@@ -9676,8 +9730,9 @@
       items: [
         { icon: '📈', label: 'Gráfico de pesos', desc: 'Ve cómo progresan tus pesos en cada ejercicio semana a semana' },
         { icon: '📸', label: 'Fotos mensuales', desc: 'Sube una foto cada mes para ver tu transformación visual' },
-        { icon: '🏆', label: 'Hitos', desc: 'Desbloquea logros conforme avanzas: primer entreno, racha de 7 días, primera semana completa...' },
-        { icon: '🔥', label: 'Racha', desc: 'Tu racha de días consecutivos entrenando. ¡A ver cuántos acumulas!' }
+        { icon: '🏆', label: 'Hitos', desc: 'Desbloquea logros: primer entreno, racha de 7 días, primera semana completa...' },
+        { icon: '🔢', label: 'Calculadora 1RM', desc: 'Mete peso y reps y calcula tu repetición máxima estimada con tabla de porcentajes' },
+        { icon: '📤', label: 'Compartir progreso', desc: 'Genera una imagen con tus stats para compartir en redes o WhatsApp' }
       ]
     },
     notas: {
@@ -9836,27 +9891,136 @@
   }
 
   let _descansoTimer = null;
+  let _descansoBtn = null;
+  let _descansoDurOriginal = '';
   function iniciarDescanso(seg) {
     const duracion = seg || 90;
-    const btn = document.getElementById('btnDescanso');
-    if (_descansoTimer) { clearInterval(_descansoTimer); _descansoTimer = null; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso'; btn.style.background = ''; btn.style.color = ''; return; }
-    let restante = duracion;
+    const btn = document.getElementById('btnDesc' + duracion);
+    if (_descansoTimer) {
+      clearInterval(_descansoTimer); _descansoTimer = null;
+      if (_descansoBtn) { _descansoBtn.textContent = _descansoDurOriginal; _descansoBtn.style.background = ''; _descansoBtn.style.color = ''; }
+      _descansoBtn = null;
+      return;
+    }
     const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-    btn.style.background = 'var(--brasa)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--brasa)';
+    _descansoBtn = btn;
+    _descansoDurOriginal = btn.textContent;
+    let restante = duracion;
+    btn.style.background = 'var(--brasa)'; btn.style.color = '#fff';
     btn.textContent = fmt(restante);
     _descansoTimer = setInterval(() => {
       restante--;
       if (restante <= 0) {
         clearInterval(_descansoTimer); _descansoTimer = null;
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso';
-        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+        btn.textContent = _descansoDurOriginal; btn.style.background = ''; btn.style.color = '';
+        _descansoBtn = null;
         showToast('Descanso terminado. ¡Siguiente serie!');
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       } else {
         btn.textContent = fmt(restante);
-        if (restante <= 10) { btn.style.background = '#27ae60'; btn.style.borderColor = '#27ae60'; }
+        if (restante <= 10) btn.style.background = '#27ae60';
       }
     }, 1000);
+  }
+
+  // ===== CONTADOR KCAL DIARIO =====
+  function actualizarKcalDiario() {
+    if (!generatedPlan || !generatedPlan.nutricion || !generatedPlan.kcalObj) return;
+    const bar = document.getElementById('kcalDiarioBar');
+    if (!bar) return;
+    bar.style.display = 'block';
+    const sel = comidasSeleccionadas || generatedPlan.nutricion.map(() => 0);
+    let totalKcal = 0, totalProt = 0, totalCarbs = 0, totalGrasa = 0;
+    generatedPlan.nutricion.forEach((meal, i) => {
+      const opt = meal.opciones[sel[i] || 0];
+      if (opt) {
+        totalKcal += parseInt(opt.kcal) || 0;
+        totalProt += parseInt(opt.prot) || 0;
+        totalCarbs += parseInt(opt.carbs) || 0;
+        totalGrasa += parseInt(opt.grasa) || 0;
+      }
+    });
+    const objetivo = generatedPlan.kcalObj || 2000;
+    const pct = Math.min(100, Math.round((totalKcal / objetivo) * 100));
+    document.getElementById('kcalDiarioTexto').textContent = `${totalKcal} / ${objetivo} kcal (${pct}%)`;
+    document.getElementById('kcalDiarioFill').style.width = pct + '%';
+    document.getElementById('kcalDiarioFill').style.background = pct > 110 ? '#e74c3c' : pct > 90 ? '#27ae60' : 'var(--brasa)';
+    document.getElementById('kcalDiarioProt').textContent = `Prot: ${totalProt}g`;
+    document.getElementById('kcalDiarioCarbs').textContent = `Carbs: ${totalCarbs}g`;
+    document.getElementById('kcalDiarioGrasa').textContent = `Grasa: ${totalGrasa}g`;
+  }
+
+  // ===== CALCULADORA 1RM (Epley) =====
+  function calcular1RM() {
+    const peso = parseFloat(document.getElementById('rm1Peso').value);
+    const reps = parseInt(document.getElementById('rm1Reps').value);
+    const resEl = document.getElementById('rm1Result');
+    const tablaEl = document.getElementById('rm1Tabla');
+    if (!peso || !reps || peso <= 0 || reps <= 0) { resEl.textContent = '—'; tablaEl.style.display = 'none'; return; }
+    if (reps === 1) { resEl.textContent = peso + ' kg'; tablaEl.style.display = 'none'; return; }
+    const rm = Math.round(peso * (1 + reps / 30));
+    resEl.textContent = rm + ' kg';
+    tablaEl.style.display = 'block';
+    tablaEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:6px">PORCENTAJES DE TU 1RM</div>' +
+      [100,95,90,85,80,75,70,65,60].map(p => {
+        const kg = Math.round(rm * p / 100);
+        const r = p === 100 ? '1' : p >= 95 ? '1-2' : p >= 90 ? '3-4' : p >= 85 ? '5-6' : p >= 80 ? '7-8' : p >= 75 ? '9-10' : p >= 70 ? '11-12' : p >= 65 ? '13-15' : '15+';
+        return `<span style="display:inline-block;background:var(--grafito);padding:3px 8px;border-radius:4px;margin:2px">${p}% = <strong style="color:var(--blanco)">${kg}kg</strong> · ${r} reps</span>`;
+      }).join(' ');
+  }
+
+  // ===== COMPARTIR PROGRESO =====
+  function compartirProgreso() {
+    const user = getCurrentUser();
+    if (!user) { showToast('Inicia sesión para compartir tu progreso'); return; }
+    const entrenos = userData.historialEntrenos?.length || 0;
+    const racha = userData.progreso?.mejorRacha || userData.progreso?.rachaActual || 0;
+    const semana = userData.progreso?.semana || 1;
+    const deporte = userData.deporte || 'Fitness';
+    const canvas = document.createElement('canvas');
+    canvas.width = 600; canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, 600, 400);
+    ctx.fillStyle = '#E8490F'; ctx.fillRect(0, 0, 600, 6);
+    ctx.font = '900 36px Arial'; ctx.fillStyle = '#F0EDE8'; ctx.fillText('K-', 40, 60);
+    ctx.fillStyle = '#E8490F'; ctx.fillText('ONE', 88, 60);
+    ctx.font = '300 14px Arial'; ctx.fillStyle = '#888'; ctx.fillText('Mi progreso', 40, 90);
+    ctx.fillStyle = '#1E1E1E'; ctx.fillRect(40, 120, 520, 80); ctx.fillRect(40, 210, 520, 80); ctx.fillRect(40, 300, 520, 80);
+    ctx.font = '700 32px Arial';
+    ctx.fillStyle = '#27ae60'; ctx.fillText(entrenos, 70, 170);
+    ctx.fillStyle = '#E8490F'; ctx.fillText(racha, 250, 170);
+    ctx.fillStyle = '#F0EDE8'; ctx.fillText('S' + semana, 430, 170);
+    ctx.font = '400 12px Arial'; ctx.fillStyle = '#888';
+    ctx.fillText('Entrenos', 70, 190); ctx.fillText('Mejor racha', 250, 190); ctx.fillText('Semana', 430, 190);
+    ctx.font = '500 18px Arial'; ctx.fillStyle = '#F0EDE8'; ctx.fillText(user.nombre || 'Atleta', 70, 260);
+    ctx.font = '400 13px Arial'; ctx.fillStyle = '#888'; ctx.fillText(deporte, 70, 280);
+    ctx.font = '400 12px Arial'; ctx.fillStyle = '#E8490F'; ctx.fillText('k-one.fit', 70, 350);
+    ctx.fillStyle = '#888'; ctx.fillText('Un paso cada vez', 150, 350);
+    const dataUrl = canvas.toDataURL('image/png');
+    const preview = document.getElementById('sharePreview');
+    preview.style.display = 'block';
+    preview.innerHTML = `<img src="${dataUrl}" style="width:100%;max-width:400px;border-radius:8px;border:1px solid var(--humo);margin-bottom:10px"><br>
+      <a href="${dataUrl}" download="mi-progreso-kone.png" class="btn-primary" style="font-size:12px;padding:8px 16px;text-decoration:none;display:inline-block">Descargar imagen</a>`;
+    showToast('Imagen generada. Descárgala y compártela.');
+  }
+
+  // ===== RECORDATORIO CHECK-IN SEMANAL =====
+  function comprobarRecordatorioCheckin() {
+    if (!userData || !userData.progreso) return;
+    const semana = userData.progreso.semana || 1;
+    const ultimoCheckin = userData._ultimoCheckin || null;
+    const hoy = new Date();
+    const diaSemana = hoy.getDay();
+    if (diaSemana !== 0 && diaSemana !== 6) return;
+    if (ultimoCheckin) {
+      const fechaCheckin = new Date(ultimoCheckin);
+      const diasDesde = Math.round((hoy - fechaCheckin) / 86400000);
+      if (diasDesde < 5) return;
+    }
+    const clave = 'kone_checkin_reminder_' + semana;
+    try { if (localStorage.getItem(clave)) return; } catch(e) {}
+    showToast('Es fin de semana — buen momento para hacer tu check-in semanal y que tu plan se adapte.', 6000);
+    try { localStorage.setItem(clave, '1'); } catch(e) {}
   }
 
   function toggleEntrenoCompletado() {
@@ -11053,6 +11217,7 @@
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
 
     actualizarResumenNutricional();
+    try { actualizarKcalDiario(); } catch(e) {}
   }
 
   function inicializarComidasSemana() {
@@ -11990,6 +12155,7 @@
     }
     comprobarPaywall(email);
     comprobarRenovacionMensual();
+    comprobarRecordatorioCheckin();
   }
 
   function comprobarRenovacionMensual() {
