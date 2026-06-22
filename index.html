@@ -4474,7 +4474,7 @@
           </div>
           <div>
             <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px">Jarvis</div>
-            <div id="adminTimestamp" style="font-size:11px;color:#666;font-family:'DM Mono',monospace"></div>
+            <div id="adminTimestamp" style="font-size:11px;color:#999;font-family:'DM Mono',monospace"></div>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -4585,7 +4585,7 @@
           </div>
           <div>
             <div style="font-size:16px;font-weight:700;color:#fff">Buzón de mensajes</div>
-            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Contactos de clientes</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Contactos de clientes</div>
           </div>
         </div>
         <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#3498db15;color:#3498db;font-family:'DM Mono',monospace;font-weight:600"></span>
@@ -4602,7 +4602,7 @@
           </div>
           <div>
             <div style="font-size:16px;font-weight:700;color:#fff">Leads interesados</div>
-            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Emails que pidieron información</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Emails que pidieron información</div>
           </div>
         </div>
         <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#27ae6015;color:#27ae60;font-family:'DM Mono',monospace;font-weight:600"></span>
@@ -4619,7 +4619,7 @@
           </div>
           <div>
             <div style="font-size:16px;font-weight:700;color:#fff">Correos enviados</div>
-            <div style="font-size:11px;color:#555;font-family:'DM Mono',monospace">Historial completo con contenido</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Historial completo con contenido</div>
           </div>
         </div>
         <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
@@ -6107,7 +6107,7 @@
               <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6" id="avisoRenovacionDesc">Si quieres, puedes elegir ya tu plan y no esperar al último día. Sin prisa: tu acceso sigue activo hasta entonces.</div>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn-primary" id="avisoRenovacionBtn" style="padding:9px 20px;font-size:13px" onclick="continuarRenovacion()">Continuar con mi plan →</button>
-                <button style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
               </div>
             </div>
           </div>
@@ -6127,7 +6127,7 @@
                   <span style="font-size:13px;color:#aaa">kg</span>
                 </div>
                 <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="confirmarRecalculoPeso()">Actualizar plan →</button>
-                <button style="background:none;border:none;color:#555;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerRecalculo()">Ahora no</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerRecalculo()">Ahora no</button>
               </div>
             </div>
           </div>
@@ -6198,6 +6198,9 @@
             <div class="motivation-label">// Entrenamiento de hoy</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
+              <button class="btn-ghost" onclick="iniciarDescanso()" style="font-size:11px;padding:8px 16px;letter-spacing:1px" id="btnDescanso">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso
+              </button>
               <button class="btn-ghost" id="btnFeedback" onclick="toggleFeedback()" style="font-size:11px;padding:8px 16px;letter-spacing:1px">¿Cómo va el entreno? →</button>
             </div>
           </div>
@@ -9725,7 +9728,7 @@
           </div>
           <div style="font-size:15px;font-weight:700;color:var(--blanco)">${guia.titulo}</div>
         </div>
-        <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:0 4px">✕</button>
+        <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:0 4px">✕</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px;border-left:2px solid #E8490F30;padding-left:12px">
         ${itemsHtml}
@@ -9830,6 +9833,30 @@
     const racha = calcularRachaDias();
     el.textContent = `🔥 ${racha}`;
     if (label) label.textContent = racha === 1 ? 'día seguido entrenando' : 'días seguidos entrenando';
+  }
+
+  let _descansoTimer = null;
+  function iniciarDescanso(seg) {
+    const duracion = seg || 90;
+    const btn = document.getElementById('btnDescanso');
+    if (_descansoTimer) { clearInterval(_descansoTimer); _descansoTimer = null; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso'; btn.style.background = ''; btn.style.color = ''; return; }
+    let restante = duracion;
+    const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    btn.style.background = 'var(--brasa)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--brasa)';
+    btn.textContent = fmt(restante);
+    _descansoTimer = setInterval(() => {
+      restante--;
+      if (restante <= 0) {
+        clearInterval(_descansoTimer); _descansoTimer = null;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Descanso';
+        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+        showToast('Descanso terminado. ¡Siguiente serie!');
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      } else {
+        btn.textContent = fmt(restante);
+        if (restante <= 10) { btn.style.background = '#27ae60'; btn.style.borderColor = '#27ae60'; }
+      }
+    }, 1000);
   }
 
   function toggleEntrenoCompletado() {
@@ -11248,7 +11275,7 @@
       .exercise{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid #eee}
       .meal{margin-bottom:8px}
       .meal-name{font-size:12px;font-weight:600}
-      .meal-ing{font-size:11px;color:#666}
+      .meal-ing{font-size:11px;color:#999}
       .meal-macros{font-size:10px;color:#E8490F;margin-top:2px}
       .section{margin-bottom:24px}
       .nutri-day{margin-bottom:12px;padding:8px;background:#f9f9f9;border-radius:6px}
@@ -11268,7 +11295,7 @@
             html += `<div class="exercise"><span>${ej.nombre || ej}</span><span style="color:#888">${ej.series || ''}</span></div>`;
           });
         } else if (dia.detalle) {
-          html += `<div style="font-size:11px;color:#666;padding:3px 0">${dia.detalle}</div>`;
+          html += `<div style="font-size:11px;color:#999;padding:3px 0">${dia.detalle}</div>`;
         }
         html += `</div>`;
       });
@@ -11277,7 +11304,7 @@
 
     html += `<div class="section"><h2>Nutrición semanal</h2>`;
     if (generatedPlan.kcalObj) {
-      html += `<p style="font-size:11px;color:#666;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal · ${generatedPlan.protObj}g proteína</p>`;
+      html += `<p style="font-size:11px;color:#999;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal · ${generatedPlan.protObj}g proteína</p>`;
     }
     dias.forEach((dia, diaIdx) => {
       html += `<div class="nutri-day"><div class="nutri-day-title">${dia}</div>`;
@@ -12615,7 +12642,7 @@
               </div>
               <div style="flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
                 <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--metal)">${_fmtFecha(e.created_at)}</div>
-                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555">${fmtHora(e.created_at)}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#888">${fmtHora(e.created_at)}</div>
               </div>
               <svg class="email-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#555" stroke-width="2" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -12625,9 +12652,9 @@
                   <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">Contenido del email</div>
                   ${cuerpoPreview
                     ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--metal-claro)">' + _esc(cuerpoPreview) + '</div>'
-                    : '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;color:#555;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
+                    : '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;color:#888;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
                   <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                    <div style="display:flex;gap:14px;font-size:10px;color:#555;font-family:'DM Mono',monospace">
+                    <div style="display:flex;gap:14px;font-size:10px;color:#888;font-family:'DM Mono',monospace">
                       <span>Tipo: ${_esc(e.tipo)}</span>
                       <span>Destino: ${_esc(e.destinatario)}</span>
                       <span>${_fmtFecha(e.created_at)} ${fmtHora(e.created_at)}</span>
@@ -12676,7 +12703,7 @@
                     <span style="font-size:14px;font-weight:600;color:var(--blanco)">${_esc(m.nombre)}</span>
                     <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#E8490F18' : '#27ae6018'};color:${pendiente ? '#E8490F' : '#27ae60'};font-family:'DM Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
                   </div>
-                  <div style="font-size:11px;color:#555;display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace">
+                  <div style="font-size:11px;color:#888;display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace">
                     <span>${_esc(m.email)}</span>
                     <span style="color:#333">·</span>
                     <span>${_fmtFecha(m.created_at)}</span>
@@ -12702,7 +12729,7 @@
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                   Gestionado
                 </button>` : ''}
-              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #222;border-radius:8px;color:#555;font-size:11px;padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:auto;transition:all .15s" onmouseenter="this.style.borderColor='#e74c3c';this.style.color='#e74c3c'" onmouseleave="this.style.borderColor='#222';this.style.color='#555'">
+              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #222;border-radius:8px;color:#888;font-size:11px;padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:auto;transition:all .15s" onmouseenter="this.style.borderColor='#e74c3c';this.style.color='#e74c3c'" onmouseleave="this.style.borderColor='#222';this.style.color='#555'">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 Eliminar
               </button>
@@ -12731,7 +12758,7 @@
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;color:var(--blanco);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(l.email)}</div>
-              <div style="font-size:10px;color:#555;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px">
+              <div style="font-size:10px;color:#888;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px">
                 <span>${_fmtFecha(l.created_at)}</span>
                 <span style="color:#333">·</span>
                 <span>${fmtLeadHora(l.created_at)}</span>
