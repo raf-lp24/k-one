@@ -153,10 +153,17 @@
   [data-theme="light"],
   [data-theme="light"] body { background: #F2F2F2 !important; }
   [data-theme="light"] * { color: #111 !important; border-color: #D0D0D0 !important; }
-  [data-theme="light"] .btn-primary, [data-theme="light"] .btn-completado,
+  [data-theme="light"] *[style] { background-color: #FFF !important; }
+  [data-theme="light"] .btn-primary,
+  [data-theme="light"] .btn-completado,
   [data-theme="light"] .jarvis-tab-active,
-  [data-theme="light"] [style*="background:#E8490F"] *,
-  [data-theme="light"] [style*="background:#27ae60"] * { color: #fff !important; }
+  [data-theme="light"] button[style*="background:#E8490F"],
+  [data-theme="light"] button[style*="background:#27ae60"] { background-color: revert !important; }
+  [data-theme="light"] .btn-primary *, [data-theme="light"] .btn-completado *,
+  [data-theme="light"] .jarvis-tab-active *,
+  [data-theme="light"] button[style*="background:#E8490F"] *,
+  [data-theme="light"] button[style*="background:#27ae60"] * { color: #fff !important; }
+  [data-theme="light"] .btn-primary, [data-theme="light"] .btn-completado { color: #fff !important; }
   [data-theme="light"] .dash-sidebar { background: #FFF !important; }
   [data-theme="light"] .dash-nav-item:hover { background: #E8E8E8 !important; }
   [data-theme="light"] .dash-nav-item.active { background: rgba(232,73,15,0.1) !important; }
@@ -168,6 +175,7 @@
   [data-theme="light"] .stat-card { background: #FFF !important; }
   [data-theme="light"] .dash-section { background: #F2F2F2 !important; }
   [data-theme="light"] .price-card { background: #FFF !important; }
+  [data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.4) !important; }
   [data-theme="light"] .modal-box { background: #FFF !important; }
   [data-theme="light"] .meal-block { background: #FFF !important; }
   [data-theme="light"] .meal-option { background: #FFF !important; }
@@ -180,12 +188,19 @@
   [data-theme="light"] #cookieBanner { background: #333 !important; }
   [data-theme="light"] #cookieBanner * { color: #fff !important; }
   [data-theme="light"] .motivation-label, [data-theme="light"] .dash-greeting { color: #E8490F !important; }
+  [data-theme="light"] .entreno-completado-badge { background: rgba(39,174,96,0.1) !important; }
+  [data-theme="light"] .milestone, [data-theme="light"] .milestone * { background-color: #F5F5F5 !important; }
+  [data-theme="light"] .notes-form { background-color: #FFF !important; }
+  [data-theme="light"] .fotos-slot { background-color: #F0F0F0 !important; }
+  [data-theme="light"] footer { background-color: #E8E8E8 !important; }
+  [data-theme="light"] .nav { background: rgba(255,255,255,0.97) !important; }
+  [data-theme="light"] .hero { background: #F2F2F2 !important; }
   [data-theme="light"] .btn-primary { border-color: #E8490F !important; }
   [data-theme="light"] .btn-completado { border-color: #27ae60 !important; }
-  [data-theme="light"] [style*="color:#E8490F"],
-  [data-theme="light"] [style*="color:#27ae60"],
-  [data-theme="light"] [style*="color:#e74c3c"],
-  [data-theme="light"] [style*="color:#f39c12"] { color: inherit !important; }
+  [data-theme="light"] [style*="color:#E8490F"] { color: #E8490F !important; }
+  [data-theme="light"] [style*="color:#27ae60"] { color: #27ae60 !important; }
+  [data-theme="light"] [style*="color:#e74c3c"] { color: #e74c3c !important; }
+  [data-theme="light"] [style*="color:#f39c12"] { color: #f39c12 !important; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
