@@ -150,28 +150,6 @@
     --blanco-puro: #FFFFFF;
   }
 
-  html[data-theme="light"] {
-    filter: invert(0.92) hue-rotate(180deg);
-  }
-  [data-theme="light"] img,
-  [data-theme="light"] video,
-  [data-theme="light"] svg,
-  [data-theme="light"] .user-avatar,
-  [data-theme="light"] .btn-primary,
-  [data-theme="light"] .btn-completado,
-  [data-theme="light"] .jarvis-tab-active,
-  [data-theme="light"] .price-badge,
-  [data-theme="light"] [style*="background:#E8490F"],
-  [data-theme="light"] [style*="background:#27ae60"],
-  [data-theme="light"] [style*="background:linear-gradient(135deg,#E8490F"],
-  [data-theme="light"] [style*="color:#E8490F"],
-  [data-theme="light"] [style*="color:#27ae60"],
-  [data-theme="light"] [style*="color:#e74c3c"],
-  [data-theme="light"] [style*="color:#f39c12"] {
-    filter: invert(1) hue-rotate(180deg);
-  }
-  [data-theme="light"] .brasa, [data-theme="light"] .motivation-label,
-  [data-theme="light"] .dash-greeting { filter: invert(1) hue-rotate(180deg); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14218,11 +14196,76 @@
   }
 
   // ===== TEMA CLARO/OSCURO =====
+  const _darkColors = new Map();
+  const _brandColors = ['#E8490F','#e8490f','#27ae60','#e74c3c','#f39c12','#C03A08','#c03a08'];
+  const _colorMap = {
+    bg: [
+      [/^#0[aA0]0[aA0]0[aA0]$|^#080808$|^#0b0b0b$/i, '#F2F2F2'],
+      [/^#1[0-4][0-4][0-4][0-4][0-4]$/i, '#E8E8E8'],
+      [/^#1[5-9a-eA-E][0-9a-fA-F]{4}$/i, '#E0E0E0'],
+      [/^#2[0-9a-fA-F]{5}$/i, '#D8D8D8'],
+      [/^#3[0-9a-fA-F]{5}$/i, '#D0D0D0'],
+    ],
+    text: [
+      [/^#[fF][0-9a-fA-F][eE][dD][eE][8]$|^#[fF]{3,6}$/i, '#111111'],
+      [/^#[bB][0-5][bB][0-2][aA][0-9a-dA-D]$/i, '#333333'],
+      [/^#[89aA][0-9a-fA-F]{5}$/i, '#444444'],
+      [/^#[67][0-9a-fA-F]{5}$/i, '#555555'],
+    ]
+  };
+
+  function aplicarTemaClaro() {
+    document.body.style.background = '#F2F2F2';
+    document.body.style.color = '#111';
+    document.querySelectorAll('*').forEach(el => {
+      const s = el.style;
+      if (!s) return;
+      const bg = s.background || s.backgroundColor || '';
+      const color = s.color || '';
+      const border = s.borderColor || '';
+      if (bg && !_brandColors.some(c => bg.includes(c))) {
+        const hex = bg.match(/#[0-9a-fA-F]{6}/)?.[0];
+        if (hex) {
+          for (const [re, rep] of _colorMap.bg) {
+            if (re.test(hex)) { _darkColors.set(el, { bg: s.background, bgc: s.backgroundColor }); s.background ? s.background = s.background.replace(hex, rep) : s.backgroundColor = rep; break; }
+          }
+        }
+        if (bg.includes('linear-gradient') && (bg.includes('#1') || bg.includes('#0'))) {
+          _darkColors.set(el, { ..._darkColors.get(el), bg: s.background }); s.background = '#E8E8E8';
+        }
+      }
+      if (color && !_brandColors.some(c => color.includes(c))) {
+        const hex = color.match(/#[0-9a-fA-F]{6}/)?.[0] || color;
+        for (const [re, rep] of _colorMap.text) {
+          if (re.test(hex)) { const prev = _darkColors.get(el) || {}; prev.color = s.color; _darkColors.set(el, prev); s.color = rep; break; }
+        }
+      }
+      if (border) {
+        const hex = border.match(/#[0-9a-fA-F]{6}/)?.[0];
+        if (hex && /^#[0-3][0-9a-fA-F]{5}$/i.test(hex)) { const prev = _darkColors.get(el) || {}; prev.border = s.borderColor; _darkColors.set(el, prev); s.borderColor = '#D0D0D0'; }
+      }
+    });
+  }
+
+  function restaurarTemaOscuro() {
+    document.body.style.background = '';
+    document.body.style.color = '';
+    _darkColors.forEach((orig, el) => {
+      if (orig.bg !== undefined) el.style.background = orig.bg;
+      if (orig.bgc !== undefined) el.style.backgroundColor = orig.bgc;
+      if (orig.color !== undefined) el.style.color = orig.color;
+      if (orig.border !== undefined) el.style.borderColor = orig.border;
+    });
+    _darkColors.clear();
+  }
+
   function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
     const next = current === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     try { localStorage.setItem('kone_theme', next); } catch(e) {}
+    if (next === 'light') aplicarTemaClaro();
+    else restaurarTemaOscuro();
     actualizarBotonTema(next);
   }
   function actualizarBotonTema(tema) {
@@ -14236,7 +14279,7 @@
       const saved = localStorage.getItem('kone_theme');
       if (saved === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
-        setTimeout(() => actualizarBotonTema('light'), 100);
+        setTimeout(() => { aplicarTemaClaro(); actualizarBotonTema('light'); }, 200);
       }
     } catch(e) {}
   })();
