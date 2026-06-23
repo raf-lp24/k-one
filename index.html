@@ -241,7 +241,15 @@
   [data-theme="light"] .nutri-resumen-label { color: #E8490F !important; }
   [data-theme="light"] .stat-card-label { color: #5A5A5A !important; }
   [data-theme="light"] .nutri-dia:hover { background: #E0DCD5 !important; }
+  [data-theme="light"] .nutri-dia.selected { background: #E8490F !important; border-color: #E8490F !important; }
+  [data-theme="light"] .nutri-dia.selected * { color: #FFF !important; }
   [data-theme="light"] .nutri-dia.has-selection { border-color: #E8490F !important; }
+  [data-theme="light"] .peso-btn, [data-theme="light"] .stepper-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
+  [data-theme="light"] .peso-btn:hover, [data-theme="light"] .stepper-btn:hover { background: #D5D0C8 !important; }
+  [data-theme="light"] .peso-input, [data-theme="light"] .stepper-input { background: #FFF !important; color: #1A1A1A !important; }
+  [data-theme="light"] .peso-display { color: #1A1A1A !important; }
+  [data-theme="light"] .cp-peso-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
+  [data-theme="light"] .cp-peso-btn:hover { background: #D5D0C8 !important; }
   [data-theme="light"] .meal-block-header:hover { background: #F0ECE6 !important; }
   [data-theme="light"] .meal-option:hover { background: #F8F6F3 !important; transform: translateY(-1px); }
   [data-theme="light"] .meal-preview-pill:hover { background: #EDE9E3 !important; }
@@ -4829,12 +4837,12 @@
       <div class="field">
         <label>¿Cuál es tu peso actual?</label>
         <div class="cp-peso-widget">
-          <button class="cp-peso-btn" type="button" onclick="ajustarPeso(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">−</button>
+          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">−</button>
           <div class="cp-peso-num">
             <input type="number" id="cp-peso" placeholder="70" min="30" max="300" step="0.5" oninput="sincronizarPesoSlider()">
             <span>kg</span>
           </div>
-          <button class="cp-peso-btn" type="button" onclick="ajustarPeso(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">+</button>
+          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">+</button>
         </div>
         <input type="range" id="cp-pesoSlider" min="30" max="200" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()">
       </div>
@@ -11087,7 +11095,7 @@
   }
 
   let _pesoRepInterval = null;
-  function ajustarPeso(delta) {
+  function ajustarPesoCambiarPlan(delta) {
     const inp = document.getElementById('cp-peso');
     const val = parseFloat(inp.value) || 70;
     const nuevo = Math.min(300, Math.max(30, Math.round((val + delta) * 2) / 2));
@@ -11096,7 +11104,7 @@
   }
   function iniciarRepeticion(delta) {
     pararRepeticion();
-    _pesoRepInterval = setInterval(() => ajustarPeso(delta), 120);
+    _pesoRepInterval = setInterval(() => ajustarPesoCambiarPlan(delta), 120);
   }
   function pararRepeticion() {
     clearInterval(_pesoRepInterval);
