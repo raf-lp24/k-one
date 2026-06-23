@@ -156,6 +156,16 @@
   /* 1. NUCLEAR: todo texto negro, todo borde suave, todo fondo inline → blanco */
   [data-theme="light"] * { color: #1A1A1A !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] *[style] { background-color: #FFF !important; }
+  [data-theme="light"] [style*="background:#E8490F"] { background-color: #E8490F !important; }
+  [data-theme="light"] [style*="background:#27ae60"] { background-color: #27ae60 !important; }
+  [data-theme="light"] [style*="background:#e74c3c"] { background-color: #e74c3c !important; }
+  [data-theme="light"] [style*="background:#E8490F"] * { color: #FFF !important; }
+  [data-theme="light"] [style*="background:#27ae60"] * { color: #FFF !important; }
+  [data-theme="light"] [style*="background:#e74c3c"] * { color: #FFF !important; }
+  [data-theme="light"] [style*="background:linear-gradient(135deg,#E8490F"] { background: linear-gradient(135deg,#E8490F,#ff6b2b) !important; }
+  [data-theme="light"] [style*="background:rgba(232,73,15"] { background-color: rgba(232,73,15,0.06) !important; }
+  [data-theme="light"] [style*="background:rgba(39,174,96"] { background-color: rgba(39,174,96,0.06) !important; }
+  [data-theme="light"] [style*="background:#151515"] { background-color: #F0ECE6 !important; }
 
   /* 2. FONDOS principales */
   [data-theme="light"], [data-theme="light"] body { background: #F8F6F3 !important; }
@@ -250,6 +260,14 @@
   [data-theme="light"] .peso-display { color: #1A1A1A !important; }
   [data-theme="light"] .cp-peso-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
   [data-theme="light"] .cp-peso-btn:hover { background: #D5D0C8 !important; }
+  [data-theme="light"] .macro-bar-track { background: #E0DCD5 !important; }
+  [data-theme="light"] .macro-bar-fill { background-color: inherit !important; }
+  [data-theme="light"] .macro-bar-fill[style*="background:var(--brasa)"] { background: #E8490F !important; }
+  [data-theme="light"] .macro-bar-fill[style*="background:#f0a500"] { background: #f0a500 !important; }
+  [data-theme="light"] .macro-bar-fill[style*="background:#27ae60"] { background: #27ae60 !important; }
+  [data-theme="light"] #modalAdmin button[style*="background:#E8490F"] { background: #E8490F !important; color: #FFF !important; }
+  [data-theme="light"] #modalAdmin button[style*="Cerrar"],
+  [data-theme="light"] #modalAdmin button:last-child { background: revert !important; }
   [data-theme="light"] .meal-block-header:hover { background: #F0ECE6 !important; }
   [data-theme="light"] .meal-option:hover { background: #F8F6F3 !important; transform: translateY(-1px); }
   [data-theme="light"] .meal-preview-pill:hover { background: #EDE9E3 !important; }
