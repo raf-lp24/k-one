@@ -551,11 +551,21 @@ module.exports = async (req, res) => {
     }
 
     const results = await Promise.allSettled(emails);
-    results.forEach((r, i) => {
-      if (r.status === 'rejected' || (r.value && !r.value.ok)) {
-        console.error(`[notify] Email ${i} error:`, r.reason || r.value?.statusText);
+    const errores = [];
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      if (r.status === 'rejected') {
+        console.error(`[notify] Email ${i} rejected:`, r.reason);
+        errores.push({ i, error: String(r.reason) });
+      } else if (r.value && !r.value.ok) {
+        const body = await r.value.text().catch(() => '');
+        console.error(`[notify] Email ${i} HTTP ${r.value.status}:`, body);
+        errores.push({ i, status: r.value.status, body });
       }
-    });
+    }
+    if (errores.length) {
+      console.error(`[notify] ${errores.length}/${results.length} emails fallaron:`, JSON.stringify(errores));
+    }
 
     // Guardar historial de emails enviados con resumen del cuerpo
     try {
