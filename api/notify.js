@@ -410,8 +410,8 @@ module.exports = async (req, res) => {
                       <div style="font-size:11px;color:#999;line-height:1.5">Apunta lo que quieras: sensaciones, marcas, ideas. Tu diario de entreno.</div>
                     </td>
                     <td style="padding:14px 12px;background:#141414;border-left:1px solid #1a1a1a;vertical-align:top">
-                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9993; CONTACTO DIRECTO</div>
-                      <div style="font-size:11px;color:#999;line-height:1.5">¿Dudas? Escríbenos desde la app. Respuesta rápida del equipo.</div>
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9758; LISTA DE LA COMPRA</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Genera la lista de la compra de toda la semana con un solo clic.</div>
                     </td>
                   </tr>
                 </table>
@@ -568,7 +568,7 @@ module.exports = async (req, res) => {
         const primerNombre = (datos.nombre || '').split(' ')[0] || 'Cliente';
         destinatario = datos.email;
         asunto = `${primerNombre}, tu plan te está esperando — K-ONE`;
-        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y contacto directo.`;
+        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y lista de la compra.`;
       } else if (tipo === 'mensaje') {
         destinatario = ADMIN_EMAIL;
         asunto = `Mensaje de ${datos.nombre}: ${datos.asunto}`;
