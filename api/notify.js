@@ -328,19 +328,16 @@ module.exports = async (req, res) => {
           <div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0">
             <div style="max-width:560px;margin:0 auto">
 
-              <!-- Header con logo -->
               <div style="background:#E8490F;padding:32px 24px;text-align:center">
-                <div style="font-size:32px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div>
+                <div style="font-size:32px;font-weight:900;letter-spacing:3px;color:#fff">K-<span style="color:#fff">ONE</span></div>
                 <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:6px;letter-spacing:1px">NO HAY ATAJOS. HAY PASOS.</div>
               </div>
 
-              <!-- Saludo -->
               <div style="padding:36px 28px 0">
                 <h1 style="color:#fff;font-size:26px;font-weight:700;margin:0 0 8px">${esc(primerNombre)}, bienvenido/a.</h1>
                 <p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 28px">Tu cuenta está lista. En 3 pasos tienes tu plan de entrenamiento y nutrición personalizado funcionando.</p>
               </div>
 
-              <!-- 3 Pasos -->
               <div style="padding:0 28px">
                 <table style="width:100%;border-collapse:collapse">
                   <tr>
@@ -367,50 +364,64 @@ module.exports = async (req, res) => {
                     </td>
                     <td style="vertical-align:top;padding:16px 0">
                       <p style="margin:0 0 3px;font-weight:700;color:#fff;font-size:15px">Empieza hoy</p>
-                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Tu plan de entrenamiento y nutrición listos. Cada semana se adaptan a cómo evoluciones.</p>
+                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Tu plan se adapta cada semana a cómo evoluciones. Sin fórmulas genéricas.</p>
                     </td>
                   </tr>
                 </table>
               </div>
 
-              <!-- Qué incluye -->
-              <div style="padding:28px 28px 0">
-                <div style="font-size:11px;color:#E8490F;letter-spacing:2px;font-weight:700;margin-bottom:14px">QUÉ VAS A ENCONTRAR</div>
+              <div style="padding:32px 28px 0">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:2px;font-weight:700;margin-bottom:18px">TODO ESTO TE ESPERA DENTRO</div>
+
                 <table style="width:100%;border-collapse:collapse">
                   <tr>
-                    <td style="padding:10px 12px;background:#141414;border-bottom:1px solid #1a1a1a;width:50%">
-                      <div style="font-size:18px;margin-bottom:2px">🏋️</div>
-                      <div style="font-size:12px;color:#fff;font-weight:600">Entrenamiento</div>
-                      <div style="font-size:11px;color:#666">Adaptado a tu deporte y nivel</div>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;width:50%;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9654; ENTRENAMIENTO</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Plan semanal adaptado a tu deporte y nivel. Cada ejercicio con vídeo explicativo.</div>
                     </td>
-                    <td style="padding:10px 12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a">
-                      <div style="font-size:18px;margin-bottom:2px">🥗</div>
-                      <div style="font-size:12px;color:#fff;font-weight:600">Nutrición</div>
-                      <div style="font-size:11px;color:#666">5 comidas, 5 opciones cada una</div>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9827; NUTRICIÓN</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">5 comidas al día, 5 opciones por comida. Macros calculados para tu objetivo.</div>
                     </td>
                   </tr>
                   <tr>
-                    <td style="padding:10px 12px;background:#141414">
-                      <div style="font-size:18px;margin-bottom:2px">📊</div>
-                      <div style="font-size:12px;color:#fff;font-weight:600">Check-in semanal</div>
-                      <div style="font-size:11px;color:#666">El plan se ajusta a tu progreso</div>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9881; RECETARIO</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">+200 recetas con instrucciones paso a paso. Rotación semanal para no repetir.</div>
                     </td>
-                    <td style="padding:10px 12px;background:#141414;border-left:1px solid #1a1a1a">
-                      <div style="font-size:18px;margin-bottom:2px">🛒</div>
-                      <div style="font-size:12px;color:#fff;font-weight:600">Lista de la compra</div>
-                      <div style="font-size:11px;color:#666">Toda la semana en un clic</div>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9878; REGISTRO DE PESOS</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Marca tus pesos en cada ejercicio y ve la progresión con gráficas.</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#10003; CHECK-IN SEMANAL</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Cada semana nos dices cómo vas. El plan se ajusta a tu progreso real.</div>
+                    </td>
+                    <td style="padding:14px 12px;background:#141414;border-bottom:1px solid #1a1a1a;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9733; CONTADOR KCAL</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Marca lo que comes y controla tus calorías diarias de forma visual.</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 12px;background:#141414;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9998; NOTAS PERSONALES</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">Apunta lo que quieras: sensaciones, marcas, ideas. Tu diario de entreno.</div>
+                    </td>
+                    <td style="padding:14px 12px;background:#141414;border-left:1px solid #1a1a1a;vertical-align:top">
+                      <div style="font-size:13px;color:#E8490F;font-weight:800;margin-bottom:4px">&#9993; CONTACTO DIRECTO</div>
+                      <div style="font-size:11px;color:#999;line-height:1.5">¿Dudas? Escríbenos desde la app. Respuesta rápida del equipo.</div>
                     </td>
                   </tr>
                 </table>
               </div>
 
-              <!-- CTA -->
               <div style="padding:32px 28px;text-align:center">
                 <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:16px 48px;font-size:16px;font-weight:700;letter-spacing:0.5px;border-radius:6px">EMPEZAR AHORA →</a>
                 <p style="color:#555;font-size:12px;margin:12px 0 0">Primer mes completo por 1,99€</p>
               </div>
 
-              <!-- Footer -->
               <div style="padding:20px 28px;border-top:1px solid #1a1a1a;text-align:center">
                 <p style="color:#444;font-size:10px;line-height:1.6;margin:0">
                   K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
@@ -557,7 +568,7 @@ module.exports = async (req, res) => {
         const primerNombre = (datos.nombre || '').split(' ')[0] || 'Cliente';
         destinatario = datos.email;
         asunto = `${primerNombre}, tu plan te está esperando — K-ONE`;
-        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye grid de funciones: entrenamiento, nutrición, check-in semanal, lista de la compra.`;
+        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y contacto directo.`;
       } else if (tipo === 'mensaje') {
         destinatario = ADMIN_EMAIL;
         asunto = `Mensaje de ${datos.nombre}: ${datos.asunto}`;
