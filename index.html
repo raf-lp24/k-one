@@ -7379,6 +7379,7 @@
       clearInterval(interval);
       overlay.classList.remove('visible');
       generatedPlan = buildPlanFromData(userData);
+      if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 1.99 });
       buildDashboard();
 
       // Guardar datos del usuario si está logueado
@@ -7449,6 +7450,7 @@
     document.getElementById('onboardingModal').classList.remove('visible');
     showSection('hoy');
     userData.onboardingCompletado = true;
+    if (typeof gtag === 'function') gtag('event', 'tutorial_complete');
     const user = getCurrentUser();
     if (user) {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
@@ -12100,6 +12102,7 @@
 
     // Email de bienvenida al nuevo cliente
     notificarAdmin('bienvenida', { email, nombre });
+    if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'email' });
 
     // Limpiar campos
     ['reg-nombre','reg-email','reg-pass','reg-pass2'].forEach(id => {
@@ -12152,9 +12155,9 @@
     enterFormulario();
   }
 
-  // ===== CUENTA DE TEST PRE-CARGADA =====
-  const TEST_EMAIL = 'test@k-one.es';
-  const TEST_PASS = 'kone123';
+  // ===== CUENTA DE TEST (solo desarrollo local) =====
+  const TEST_EMAIL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'test@k-one.es' : '';
+  const TEST_PASS = TEST_EMAIL ? 'kone123' : '';
 
   // Garantiza que la cuenta de test exista en Supabase Auth (se crea la primera
   // vez que alguien entra con sus credenciales) y tenga un plan de ejemplo.
@@ -12709,6 +12712,7 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 1.99 : 19.99 });
       window.location.href = data.url;
     } catch (e) {
       showToast('No se pudo iniciar el pago: ' + e.message, 5000);
@@ -14549,6 +14553,8 @@
       window.history.replaceState({}, '', window.location.pathname);
       if (checkoutParam === 'cancelado') {
         showToast('Pago cancelado. Puedes intentarlo de nuevo cuando quieras.', 4000);
+      } else {
+        if (typeof gtag === 'function') gtag('event', 'purchase', { currency: 'EUR', value: 1.99 });
       }
     }
 
