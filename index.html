@@ -12117,9 +12117,18 @@
       setTimeout(() => {
         const loginCard = document.querySelector('#login .auth-card');
         if (loginCard) {
+          const existente = document.getElementById('emailConfirmAviso');
+          if (existente) existente.remove();
           const aviso = document.createElement('div');
-          aviso.style.cssText = 'background:rgba(39,174,96,0.08);border:1px solid #27ae60;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center';
-          aviso.innerHTML = '<p style="margin:0 0 4px;font-weight:600;color:#27ae60;font-size:14px">Cuenta creada</p><p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.5">Te hemos enviado un email a <strong style="color:var(--blanco)">' + email + '</strong>. Haz clic en el enlace de confirmación y después inicia sesión aquí.</p>';
+          aviso.id = 'emailConfirmAviso';
+          aviso.style.cssText = 'background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center';
+          aviso.innerHTML = `
+            <div style="font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:12px;color:var(--blanco)">K-<span style="color:var(--brasa)">ONE</span></div>
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <p style="margin:0 0 8px;font-weight:600;color:var(--blanco);font-size:15px">Revisa tu correo</p>
+            <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color:var(--brasa)">${email}</strong></p>
+            <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí.</p>
+          `;
           loginCard.insertBefore(aviso, loginCard.children[2]);
         }
       }, 100);
