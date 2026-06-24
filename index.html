@@ -9345,10 +9345,9 @@
     // FILTRAR ALIMENTOS NO DESEADOS
     nutricion = filtrarNoComida(nutricion, u.noComida);
 
-    // ROTACIÓN SEMANAL: cada semana el cliente ve platos diferentes.
-    // semilla (basada en el email) varía entre usuarios; semana varía entre semanas.
-    const semRotacion = (u.progreso && u.progreso.semana) || 1;
-    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + semRotacion * 3).slice(0, 5) }));
+    // ROTACIÓN MENSUAL: la dieta cambia cada mes para que la lista de la compra sea útil todo el mes.
+    const mesRotacion = new Date().getMonth() + 1;
+    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + mesRotacion * 3).slice(0, 5) }));
 
     // NOTAS ESPECÍFICAS POR DEPORTE (hidratación, suplementación, calentamiento)
     const notasDeporte = [];
@@ -9624,6 +9623,7 @@
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
         notasHTML += `<div style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Hidratación, suplementación y calentamiento</strong><br>${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div>`;
       }
+      notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
       nutricionNotas.innerHTML = notasHTML;
     }
 
