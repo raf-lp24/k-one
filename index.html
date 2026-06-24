@@ -12027,7 +12027,7 @@
     if (!ok) return;
 
     const { data, error } = await supa.auth.signUp({
-      email, password: pass, options: { data: { nombre } }
+      email, password: pass, options: { data: { nombre }, emailRedirectTo: window.location.origin }
     });
 
     if (error) {
@@ -12053,8 +12053,16 @@
     // Si el proyecto de Supabase exige confirmar el email, no hay sesión todavía:
     // avisamos y mandamos a login para que entre tras confirmar.
     if (!data.session) {
-      showToast('Cuenta creada. Revisa tu email para confirmarla y poder iniciar sesión.', 6000);
       goTo('login');
+      setTimeout(() => {
+        const loginCard = document.querySelector('#login .auth-card');
+        if (loginCard) {
+          const aviso = document.createElement('div');
+          aviso.style.cssText = 'background:rgba(39,174,96,0.08);border:1px solid #27ae60;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center';
+          aviso.innerHTML = '<p style="margin:0 0 4px;font-weight:600;color:#27ae60;font-size:14px">Cuenta creada</p><p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.5">Te hemos enviado un email a <strong style="color:var(--blanco)">' + email + '</strong>. Haz clic en el enlace de confirmación y después inicia sesión aquí.</p>';
+          loginCard.insertBefore(aviso, loginCard.children[2]);
+        }
+      }, 100);
       return;
     }
 
@@ -14453,6 +14461,10 @@
         document.getElementById('modalForgot').classList.add('visible');
         document.getElementById('forgotStep1').style.display = 'none';
         document.getElementById('forgotStep2').style.display = 'block';
+      }
+      if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+        showToast('Email confirmado. Bienvenido/a a K-ONE.', 4000);
+        window.history.replaceState({}, '', window.location.pathname);
       }
     });
 
