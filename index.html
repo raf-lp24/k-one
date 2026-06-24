@@ -225,7 +225,9 @@
   [data-theme="light"] [style*="color:#e74c3c"] { color: #e74c3c !important; }
   [data-theme="light"] [style*="color:#f39c12"] { color: #f39c12 !important; }
   [data-theme="light"] .logo { color: #1A1A1A !important; }
-  [data-theme="light"] .logo span { color: #E8490F !important; }
+  [data-theme="light"] .logo span, [data-theme="light"] .logo .brasa { color: #E8490F !important; }
+  [data-theme="light"] .auth-logo { color: #1A1A1A !important; }
+  [data-theme="light"] .auth-logo span { color: #E8490F !important; }
 
   /* 8. ELEMENTOS interactivos con estado */
   [data-theme="light"] .radio-opt { background: #F5F2EE !important; border-color: #E0DCD5 !important; }
@@ -6229,7 +6231,7 @@
         </div>
       </nav>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--humo);display:flex;flex-direction:column;gap:4px">
-        <button class="logout-btn" id="btnToggleTheme" onclick="toggleTheme()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+        <button class="logout-btn" id="btnToggleTheme" onclick="toggleTheme()" style="display:none;border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span id="themeIcon">☀️</span> <span id="themeLabel">Modo claro</span>
         </button>
         <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
@@ -14394,12 +14396,9 @@
     if (label) label.textContent = tema === 'light' ? 'Modo oscuro' : 'Modo claro';
   }
   (function() {
-    try {
-      if (localStorage.getItem('kone_theme') === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        setTimeout(() => actualizarBotonTema('light'), 100);
-      }
-    } catch(e) {}
+    // Modo claro desactivado — forzar oscuro siempre
+    document.documentElement.removeAttribute('data-theme');
+    try { localStorage.removeItem('kone_theme'); } catch(e) {}
   })();
 
   // ===== DETECTOR OFFLINE =====
