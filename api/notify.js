@@ -82,7 +82,7 @@ async function handleCronRetencion(req, res) {
                 <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">QUÉ VAS A CONSEGUIR</div>
                 <table style="width:100%;border-collapse:collapse"><tr>
                   <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Plan de entreno adaptado a ti</td>
-                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Nutrición con 4 opciones/comida</td>
+                  <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Nutrición con 5 opciones/comida</td>
                 </tr><tr>
                   <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Progresión semanal automática</td>
                   <td style="padding:4px 0;font-size:13px;color:#b5b2ad"><span style="color:#E8490F">&#10003;</span> Vídeos de cada ejercicio</td>

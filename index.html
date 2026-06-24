@@ -5626,11 +5626,11 @@
 
   <div class="share-bar">
     <span class="share-bar-label">Compartir:</span>
-    <a class="share-btn share-btn--whatsapp" href="https://wa.me/?text=Mira%20este%20plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20%E2%80%94%20desde%201%2C99%E2%82%AC%2Fmes%20%F0%9F%94%A5%20https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
+    <a class="share-btn share-btn--whatsapp" href="https://wa.me/?text=Mira%20este%20plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20%E2%80%94%20desde%201%2C99%E2%82%AC%2Fmes%20https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp
     </a>
-    <a class="share-btn share-btn--x" href="https://x.com/intent/tweet?text=Plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20desde%201%2C99%E2%82%AC%2Fmes%20%F0%9F%94%A5&url=https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
+    <a class="share-btn share-btn--x" href="https://x.com/intent/tweet?text=Plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20desde%201%2C99%E2%82%AC%2Fmes&url=https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X
     </a>
@@ -6757,7 +6757,6 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
-    // Si vamos a la landing estando logueado, mostrar botón flotante para volver
     const btnVolver = document.getElementById('btnVolverDashboard');
     if (btnVolver) {
       const user = getCurrentUser();
@@ -7293,7 +7292,7 @@
       steps.push({ main: 'Equilibrando carga y recuperación semanal...', sub: `${numDias} días de entreno · ${diasLibres} de recuperación · Progresión lineal` });
     }
 
-    steps.push({ main: 'Seleccionando recetas y opciones de comida...', sub: '5 tomas · 4 opciones por comida · Cruzando con tus preferencias' });
+    steps.push({ main: 'Seleccionando recetas y opciones de comida...', sub: '5 tomas · 5 opciones por comida · Cruzando con tus preferencias' });
     steps.push({ main: 'Validando coherencia del plan completo...', sub: 'Comprobación final · Listo para empezar' });
     steps.push({ main: 'Tu plan personalizado está listo.', sub: '' });
 
@@ -8925,7 +8924,7 @@
       entrenamiento_hoy = `<div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Tu plan, adaptado</strong><br>${notasSalud.map(n => `· ${n}`).join('<br>')}</div>` + entrenamiento_hoy;
     }
 
-    // NUTRICIÓN con 4 opciones por comida
+    // NUTRICIÓN con 5 opciones por comida
     const esVegetariano = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
     if (esVegetariano) {
       notasSalud.push('En dietas vegetarianas y veganas hay nutrientes difíciles de cubrir solo con comida: vitamina B12 (suplementación esencial, no negociable), creatina monohidrato (mejora el rendimiento muscular un 10-15% sin carne), omega-3 de algas (DHA+EPA), vitamina D3 y hierro en forma de bisglicinato. El hierro vegetal (no hemo) se absorbe mucho mejor tomándolo con un alimento rico en vitamina C. Consulta tus niveles con un profesional antes de suplementar.');
