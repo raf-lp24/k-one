@@ -423,9 +423,10 @@ module.exports = async (req, res) => {
               </div>
 
               <div style="padding:20px 28px;border-top:1px solid #1a1a1a;text-align:center">
+                <p style="color:#999;font-size:12px;font-weight:700;margin:0 0 6px">Equipo K-<span style="color:#E8490F">ONE</span></p>
                 <p style="color:#444;font-size:10px;line-height:1.6;margin:0">
-                  K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
-                  <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a>
+                  R. López Pinto · Alcalá de Henares, Madrid<br>
+                  <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a>
                 </p>
               </div>
 
