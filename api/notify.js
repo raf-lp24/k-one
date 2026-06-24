@@ -141,8 +141,74 @@ async function handleCronRetencion(req, res) {
       }
     }
 
-    console.log(`[notify-cron] Retención: ${enviados3} emails día 3, ${enviados8} emails día 8`);
-    return res.status(200).json({ ok: true, enviados3, enviados8 });
+    // RESUMEN SEMANAL: cada lunes, email a clientes activos con su progreso
+    let enviadosResumen = 0;
+    const esLunes = ahora.getDay() === 1;
+    if (esLunes) {
+      const semanaMs = 7 * 86400000;
+      const { data: resumenEnviados } = await supa.from('email_log').select('destinatario').eq('tipo', 'resumen_semanal').gte('created_at', new Date(ahora.getTime() - semanaMs).toISOString());
+      const yaResumen = new Set((resumenEnviados || []).map(e => e.destinatario));
+
+      for (const p of (perfiles || [])) {
+        const sub = subByUser[p.id];
+        if (!sub || !['active', 'trialing'].includes(sub.status)) continue;
+        if (!p.email || yaResumen.has(p.email)) continue;
+        const ud = p.userdata || {};
+        if (!ud.onboardingCompletado) continue;
+
+        const nombre = (p.nombre || '').split(' ')[0] || 'Crack';
+        const entrenos = (ud.entrenosCompletados || []).length;
+        const racha = ud.rachaDias || 0;
+        const semana = ud.progreso?.semana || 1;
+
+        const mensajes = [
+          'La constancia gana a la motivación. Cada entreno cuenta.',
+          'No se trata de ser perfecto, se trata de no parar.',
+          'El progreso no siempre se ve en el espejo. Se nota en la energía.',
+          'Quien entrena hoy, agradece mañana.',
+          'La disciplina es elegir entre lo que quieres ahora y lo que quieres de verdad.'
+        ];
+        const mensajeSemana = mensajes[semana % mensajes.length];
+
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: p.email,
+          subject: `${esc(nombre)}, tu semana ${semana} en K-ONE`,
+          html: emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Tu semana en K-ONE</h1>
+              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Hola <span style="color:#E8490F;font-weight:600">${esc(nombre)}</span>, aquí tienes tu resumen de la semana ${semana}.</p>
+              <div style="display:flex;gap:8px;margin-bottom:18px">
+                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:24px;font-weight:700;color:#27ae60">${entrenos}</div>
+                  <div style="font-size:11px;color:#888;margin-top:2px">Entrenos</div>
+                </div>
+                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:24px;font-weight:700;color:#E8490F">${racha}</div>
+                  <div style="font-size:11px;color:#888;margin-top:2px">Racha</div>
+                </div>
+                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:24px;font-weight:700;color:#F0EDE8">S${semana}</div>
+                  <div style="font-size:11px;color:#888;margin-top:2px">Semana</div>
+                </div>
+              </div>
+              <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px">
+                <p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6;font-style:italic">"${mensajeSemana}"</p>
+              </div>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI PLAN</a>
+            </div>
+          `)
+        });
+        await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, datos: JSON.stringify({ nombre, entrenos, racha, semana }) });
+        enviadosResumen++;
+      }
+    }
+
+    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosResumen} resumen`);
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosResumen });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     return res.status(500).json({ error: 'Error interno' });
