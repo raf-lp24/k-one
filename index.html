@@ -69,6 +69,19 @@
       ]
     },
     {
+      "@type": "SoftwareApplication",
+      "name": "K-ONE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "url": "https://k-one.fit/",
+      "description": "Plataforma de entrenamiento y nutrición personalizada con adaptación semanal. Gimnasio, running, Hyrox, CrossFit. 5 comidas al día con 5 opciones, recetario con 200+ recetas, registro de pesos y check-in semanal.",
+      "offers": {
+        "@type": "Offer",
+        "price": "1.99",
+        "priceCurrency": "EUR"
+      }
+    },
+    {
       "@type": "FAQPage",
       "mainEntity": [
         {
@@ -1824,6 +1837,9 @@
     background: var(--brasa);
     transition: width 0.4s ease;
   }
+
+  .form-progress-bar { width:100%; height:4px; background:var(--humo); border-radius:2px; overflow:hidden; margin-top:8px; }
+  .form-progress-bar-fill { height:100%; background:var(--brasa); border-radius:2px; transition:width 0.4s ease; }
 
   .form-main {
     padding: 64px 80px;
@@ -4413,6 +4429,13 @@
     gap: 10px;
   }
   .logout-btn:hover { border-color: var(--metal); color: var(--blanco); }
+
+  .confetti-piece { position:fixed; z-index:9999; width:8px; height:8px; border-radius:2px; pointer-events:none; animation:confettiFall 1.5s ease-out forwards; }
+  @keyframes confettiFall { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(100vh) rotate(720deg)} }
+
+  .skeleton { background:var(--carbon); border-radius:8px; overflow:hidden; position:relative; }
+  .skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation:skeletonShimmer 1.5s infinite; }
+  @keyframes skeletonShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -5829,6 +5852,7 @@
         <div class="progress-bar">
           <div class="progress-fill" id="progressFillMobile" style="width:0%"></div>
         </div>
+        <div class="form-progress-bar"><div class="form-progress-bar-fill" id="formProgressFill" style="width:16.66%"></div></div>
       </div>
       <!-- BLOQUE 1: CUERPO -->
       <div class="form-block active" data-block="0">
@@ -6256,6 +6280,17 @@
 
       <!-- HOY -->
       <div class="dash-section active" id="section-hoy">
+        <div id="dashSkeleton" style="display:none">
+          <div class="skeleton" style="height:80px;margin-bottom:20px"></div>
+          <div class="skeleton" style="height:48px;width:60%;margin-bottom:24px"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">
+            <div class="skeleton" style="height:90px"></div>
+            <div class="skeleton" style="height:90px"></div>
+            <div class="skeleton" style="height:90px"></div>
+            <div class="skeleton" style="height:90px"></div>
+          </div>
+          <div class="skeleton" style="height:120px"></div>
+        </div>
         <div class="dash-header">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <div class="dash-greeting" id="dashWeekDay">// Semana 1 · Día 1</div>
@@ -6660,6 +6695,14 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Generar imagen para compartir
           </button>
           <div id="sharePreview" style="margin-top:12px;display:none"></div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Exportar datos</div>
+          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Descarga tu historial de pesos en formato CSV para Excel.</p>
+          <button class="btn-ghost" onclick="exportarProgresoCSV()" style="font-size:13px;padding:10px 20px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar CSV
+          </button>
         </div>
       </div>
 
@@ -7092,6 +7135,9 @@
     document.getElementById('progressFillMobile').style.width = pct + '%';
     document.getElementById('progressPctMobile').textContent = pct + '%';
     document.getElementById('progressStepLabelMobile').textContent = stepLabel;
+
+    const fill = document.getElementById('formProgressFill');
+    if(fill) fill.style.width = ((currentBlock + 1) / totalBlocks * 100) + '%';
 
     document.querySelectorAll('.form-step-item').forEach((item, i) => {
       item.classList.remove('active', 'done');
@@ -9712,6 +9758,8 @@
     }
 
     checkBannerRecalculo();
+    const _skel = document.getElementById('dashSkeleton');
+    if (_skel) _skel.style.display = 'none';
   }
 
   // ===== BANNER MENSUAL: RECÁLCULO POR PESO =====
@@ -10049,38 +10097,6 @@
     if (label) label.textContent = racha === 1 ? 'día seguido entrenando' : 'días seguidos entrenando';
   }
 
-  let _descansoTimer = null;
-  let _descansoBtn = null;
-  let _descansoDurOriginal = '';
-  function iniciarDescanso(seg) {
-    const duracion = seg || 90;
-    const btn = document.getElementById('btnDesc' + duracion);
-    if (_descansoTimer) {
-      clearInterval(_descansoTimer); _descansoTimer = null;
-      if (_descansoBtn) { _descansoBtn.textContent = _descansoDurOriginal; _descansoBtn.style.background = ''; _descansoBtn.style.color = ''; }
-      _descansoBtn = null;
-      return;
-    }
-    const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-    _descansoBtn = btn;
-    _descansoDurOriginal = btn.textContent;
-    let restante = duracion;
-    btn.style.background = 'var(--brasa)'; btn.style.color = '#fff';
-    btn.textContent = fmt(restante);
-    _descansoTimer = setInterval(() => {
-      restante--;
-      if (restante <= 0) {
-        clearInterval(_descansoTimer); _descansoTimer = null;
-        btn.textContent = _descansoDurOriginal; btn.style.background = ''; btn.style.color = '';
-        _descansoBtn = null;
-        showToast('Descanso terminado. ¡Siguiente serie!');
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      } else {
-        btn.textContent = fmt(restante);
-        if (restante <= 10) btn.style.background = '#27ae60';
-      }
-    }, 1000);
-  }
 
   // ===== CONTADOR KCAL DIARIO =====
   function imprimirDieta() {
@@ -10155,6 +10171,28 @@
   }
 
   // ===== COMPARTIR PROGRESO =====
+  function exportarProgresoCSV() {
+    const user = getCurrentUser();
+    const ud = user ? getUserData(user.email) : null;
+    const pesos = ud?.pesosRegistrados || {};
+    if (!Object.keys(pesos).length) { showToast('No hay pesos registrados todavía'); return; }
+    const rows = [['Ejercicio','Semana','Peso (kg)']];
+    Object.entries(pesos).forEach(([ejercicio, semanas]) => {
+      Object.entries(semanas).forEach(([sem, peso]) => {
+        rows.push([ejercicio, sem, peso]);
+      });
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `k-one-progreso-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV descargado');
+  }
+
   function compartirProgreso() {
     const user = getCurrentUser();
     if (!user) { showToast('Inicia sesión para compartir tu progreso'); return; }
@@ -10208,6 +10246,23 @@
     try { localStorage.setItem(clave, '1'); } catch(e) {}
   }
 
+  function lanzarConfetti() {
+    const colors = ['#E8490F','#27ae60','#f0a500','#3498db','#e74c3c','#F0EDE8'];
+    for(let i=0;i<40;i++){
+      const c=document.createElement('div');
+      c.className='confetti-piece';
+      c.style.left=Math.random()*100+'vw';
+      c.style.top=-10+'px';
+      c.style.background=colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDelay=Math.random()*0.5+'s';
+      c.style.animationDuration=(1+Math.random())+'s';
+      c.style.width=(5+Math.random()*8)+'px';
+      c.style.height=(5+Math.random()*8)+'px';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),2500);
+    }
+  }
+
   function toggleEntrenoCompletado() {
     const hoy = getFechaHoyISO();
     if (!userData.entrenosCompletados) userData.entrenosCompletados = [];
@@ -10220,6 +10275,7 @@
       if (!userData.horaCompletado) userData.horaCompletado = {};
       userData.horaCompletado[hoy] = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       showToast('Entrenamiento de hoy marcado como completado. ¡Buen trabajo!');
+      lanzarConfetti();
     } else {
       userData.entrenosCompletados.splice(idx, 1);
       if (idxHist !== -1) userData.historialEntrenos.splice(idxHist, 1);
@@ -12330,6 +12386,8 @@
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
   function loadUserDashboard(email) {
     const saved = getUserData(email);
+    const skel = document.getElementById('dashSkeleton');
+    if (skel) skel.style.display = '';
     if (saved) {
       userData = saved.userData || {};
       generatedPlan = saved.plan || null;
@@ -12339,6 +12397,7 @@
         }
         regenerarEntrenamientoHoy(generatedPlan);
         buildDashboard();
+        if (skel) skel.style.display = 'none';
       }
     }
     const user = getCurrentUser();
