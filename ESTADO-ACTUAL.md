@@ -1,10 +1,9 @@
-# Fragua — Estado actual (resumen de sesión)
+# K-ONE — Estado actual
 
 *Para retomar sin releer toda la conversación.*
 
 ## Contexto
-Prototipo single-file en `fragua-fitness.html` (HTML/CSS/JS, sin backend, localStorage).
-Análisis DAFO completo en `ANALISIS-DAFO-VIABILIDAD.md` (no tocar, solo referencia).
+SaaS fitness en producción en **k-one.fit**. Single-file SPA (`index.html`), backend en Vercel serverless (12 APIs), Supabase Auth+Postgres con RLS, Stripe Live con webhook, Resend para emails, GA4. PWA con service worker.
 
 ## Cambios implementados en esta sesión
 
@@ -117,7 +116,7 @@ Revisión hecha navegando como visitante y como cliente (`test@fragua.es`). Arre
 - **Footer**: © 2025 → © 2026.
 - **Hero**: añade "¿Solo buscas nutrición? También hay plan para ti, desde 4,99€/mes."
 - **Nota de precios**: "Todo incluido. Sin niveles. Sin sorpresas." (ya había 2 modalidades) → "Precios claros. Cancela cuando quieras. Sin sorpresas."
-- **Verificado sin cambios**: check-in semanal completo (semana 1→2, 3 días, respuesta personalizada, plan regenerado y persistido), plan semanal (7 días, descansos correctos), nutrición 5 comidas × 4 opciones, "Mi progreso", flujo demo (`demoAccess`), login/logout.
+- **Verificado sin cambios**: check-in semanal completo (semana 1→2, 3 días, respuesta personalizada, plan regenerado y persistido), plan semanal (7 días, descansos correctos), nutrición 5 comidas × 5 opciones, "Mi progreso", flujo demo (`demoAccess`), login/logout.
 - Tras las pruebas, la cuenta de test se restauró (se borró `fragua_data_test@fragua.es` para que `onload` la regenere limpia en semana 1).
 
 ### 9. Marcar entrenamiento de hoy como completado + sección "Notas" (agenda personal)
@@ -150,17 +149,17 @@ Revisión hecha navegando como visitante y como cliente (`test@fragua.es`). Arre
 - Verificado en preview: marcar/desmarcar "Hoy" cambia el contador entre 0 y 1 al instante; con varios días simulados (`entrenosCompletados` con 4 fechas) el contador muestra "4". Cuenta de test limpiada (`entrenosCompletados: []`) tras las pruebas.
 
 ### 13. "Hoy comes" (Nutrición) en formato desplegable, sin horas fijas
-- Cada comida (`.meal-block`) ya no muestra sus 4 opciones en una rejilla siempre visible (que obligaba a desplazar horizontalmente). Ahora la cabecera (`.meal-block-header`, con `onclick="toggleMealBlock(mealIdx)"`) muestra solo el nombre de la comida (Desayuno, Media mañana, Comida, Merienda, Cena), la opción actualmente elegida y un icono `▾` que rota al desplegar. Al hacer clic se añade/quita la clase `.expanded` en `.meal-block`, que controla con CSS si `.meal-options` se muestra (`display: grid`) o se oculta (`display: none`).
+- Cada comida (`.meal-block`) ya no muestra sus 5 opciones en una rejilla siempre visible (que obligaba a desplazar horizontalmente). Ahora la cabecera (`.meal-block-header`, con `onclick="toggleMealBlock(mealIdx)"`) muestra solo el nombre de la comida (Desayuno, Media mañana, Comida, Merienda, Cena), la opción actualmente elegida y un icono `▾` que rota al desplegar. Al hacer clic se añade/quita la clase `.expanded` en `.meal-block`, que controla con CSS si `.meal-options` se muestra (`display: grid`) o se oculta (`display: none`).
 - Quitada la hora fija de cada comida (`meal.hora`, ej. "7:30") de la interfaz — cada persona tiene horarios distintos. El campo `hora` se mantiene en los datos (`buildPlanFromData`) pero no se renderiza; se eliminó también la clase CSS `.meal-time-badge`.
 - `selectMealOption()` (había dos copias idénticas, se dejó una sola) ahora también actualiza `#mealSelected{mealIdx}` con el nombre de la opción elegida, para que se vea reflejada en la cabecera aunque el bloque esté colapsado.
 - **Redacciones corregidas**: "Batido de masa ganadora casero" → "Batido casero para ganar masa"; "Tarta de arroz con leche proteica" → "Arroz con leche proteico con vainilla" (consistencia con la opción equivalente de la merienda).
 - Subtítulo de la sección actualizado: "Toca una comida para ver sus cuatro opciones y elige la que más te apetezca hoy...".
-- Verificado en preview (1280px y 375px): las 5 comidas aparecen colapsadas mostrando la opción elegida; al tocar "Desayuno" se despliegan las 4 opciones; al elegir otra opción la cabecera se actualiza ("Batido casero para ganar masa") y el resto de comidas siguen colapsadas. Cuenta de test regenerada con `buildPlanFromData` para aplicar los textos corregidos.
+- Verificado en preview (1280px y 375px): las 5 comidas aparecen colapsadas mostrando la opción elegida; al tocar "Desayuno" se despliegan las 5 opciones; al elegir otra opción la cabecera se actualiza ("Batido casero para ganar masa") y el resto de comidas siguen colapsadas. Cuenta de test regenerada con `buildPlanFromData` para aplicar los textos corregidos.
 
 ### 14. Ingredientes capitalizados en "Hoy comes" (Nutrición)
 - Nueva función global `capitalizarIngrediente(s)`: pone en mayúscula la primera palabra alfabética del texto del ingrediente, ignorando cantidades/unidades iniciales (ej: "80g avena" → "80g Avena", "2 huevos revueltos aparte" → "2 Huevos revueltos aparte", "1/2 aguacate" → "1/2 Aguacate").
 - Aplicada solo al texto mostrado en cada `.ingredient-tag`; el valor pasado a `openSubstModal()` (usado para buscar sustituciones) se mantiene sin modificar (texto original en minúsculas).
-- Verificado en preview: en "Desayuno" las 4 opciones muestran ingredientes con la primera palabra capitalizada ("80g Avena", "Leche entera", "3 Rebanadas centeno", "100g Salmón ahumado", "1/2 Aguacate", "Queso fresco", etc.). Cuenta de test regenerada con `buildPlanFromData` para aplicar el cambio.
+- Verificado en preview: en "Desayuno" las 5 opciones muestran ingredientes con la primera palabra capitalizada ("80g Avena", "Leche entera", "3 Rebanadas centeno", "100g Salmón ahumado", "1/2 Aguacate", "Queso fresco", etc.). Cuenta de test regenerada con `buildPlanFromData` para aplicar el cambio.
 
 ### 17. Caso "sin alternativa" en el modal de sustitución (alergia/intolerancia)
 - Cuando `getSubstitutions()` devuelve el caso especial `sinAlternativa` (sección 16, sin sustitución segura registrada para ese ingrediente), `selectReason()` ya no pinta el layout normal de tres columnas (nombre + etiqueta + descripción). Ahora muestra un único recuadro centrado con el texto "Consultar con profesional", sin nombre de ingrediente ni descripción.
@@ -767,7 +766,7 @@ El usuario compartió un análisis "Puntos a mejorar" de la landing con 6 observ
 - **Identidad de marca, tagline principal y sección "Cómo funciona la IA"**: revisados — ya están resueltos en el código actual (marca "K-ONE"/"K-One" consistente en toda la landing y el dashboard; el `<h1>` del hero ya es "No hay atajos. Hay pasos."; la sección "Cómo funciona la IA" ya usa tarjetas `.pillar-card` con icono SVG propio cada una). Probablemente el análisis se hizo sobre una versión cacheada anterior.
 - **CTA "Ver demo" como acción secundaria**: nueva clase `.btn-link` (sin fondo ni borde, subrayado en `var(--humo)`, texto en `var(--metal-claro)`) aplicada al botón "Ver demo →" del hero, dejando "Empieza ahora" (`.btn-primary`) como único CTA con peso visual fuerte.
 - **Reseña más matizada**: la reseña de Diego F. (calistenia) pasa de 5 a 4 estrellas y su texto ahora menciona que las primeras semanas le costó encontrar hueco y algún día no completó el entreno, antes de llegar a su primera dominada estricta — para no dar la sensación de que todas las experiencias son perfectas desde el día 1.
-- **Feature "elige entre 4 opciones por comida" destacada en landing**: el `.nutrition-callout` de la sección "Tu deporte, tu plan" ahora incluye `.nutrition-callout-demo`, un mockup estático con la fila `.meal-preview-row`/`.meal-preview-pill` (las mismas clases del dashboard, item 61) mostrando 4 opciones de ejemplo para una comida, bajo la etiqueta "// Cada comida, a tu manera — elige entre 4 opciones".
+- **Feature "elige entre 5 opciones por comida" destacada en landing**: el `.nutrition-callout` de la sección "Tu deporte, tu plan" ahora incluye `.nutrition-callout-demo`, un mockup estático con la fila `.meal-preview-row`/`.meal-preview-pill` (las mismas clases del dashboard, item 61) mostrando 5 opciones de ejemplo para una comida, bajo la etiqueta "// Cada comida, a tu manera — elige entre 5 opciones".
 
 Verificado en preview (escritorio 1440px y móvil 375px): el botón "Ver demo →" se ve claramente secundario sin solapar con "Empieza ahora"; la reseña de Diego F. muestra 4 estrellas y el nuevo texto; las 4 píldoras de comida se muestran en 4 columnas en escritorio y 2 en móvil sin desbordamiento horizontal. Sin errores de consola. Solo cambios de landing (sin datos de usuario), no requiere restaurar cuenta de test.
 
