@@ -10029,8 +10029,6 @@
     }
 
     // Nutrición con múltiples opciones
-    const nutritionGrid = document.getElementById('nutritionGrid');
-    nutritionGrid.innerHTML = '';
     diaNutriActual = 0;
     comidasSeleccionadas = generatedPlan.nutricion.map((meal, mealIdx) => {
       const guardada = (userData.comidasSeleccionadas || [])[mealIdx];
@@ -10039,7 +10037,16 @@
     inicializarComidasSemana();
     actualizarIndicadoresDias();
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
-    generatedPlan.nutricion.forEach((meal, mealIdx) => {
+    renderNutritionGrid(0);
+  }
+
+  function renderNutritionGrid(dia) {
+    const nutritionGrid = document.getElementById('nutritionGrid');
+    if (!nutritionGrid) return;
+    nutritionGrid.innerHTML = '';
+    const meals = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+    generatedPlan._nutricionActiva = meals;
+    meals.forEach((meal, mealIdx) => {
       const previewHTML = meal.opciones.map((opt, optIdx) => `
         <div class="meal-preview-pill ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="event.stopPropagation(); selectMealOptionPreview(${mealIdx}, ${optIdx})">
           <div class="meal-preview-num">Opción ${optIdx + 1}</div>
@@ -10090,7 +10097,10 @@
         </div>`;
     });
     actualizarResumenNutricional();
+    actualizarKcalDiario();
+  }
 
+  function buildDashboardNutricionExtra() {
     // Subtítulo con objetivo calórico personalizado
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl && generatedPlan.kcalObj) {
@@ -10149,6 +10159,11 @@
     const _skel = document.getElementById('dashSkeleton');
     if (_skel) _skel.style.display = 'none';
   }
+
+  // Cierre de buildDashboard — llama a las funciones de nutrición extra
+  // (se invoca al final de buildDashboard, justo antes del skeleton hide)
+  // NOTA: buildDashboard termina en renderNutritionGrid(0) arriba.
+  // buildDashboardNutricionExtra() se ejecuta después.
 
   // ===== BANNER MENSUAL: RECÁLCULO POR PESO =====
   function checkBannerRecalculo() {
@@ -11999,29 +12014,9 @@
     if (!comidasSemana.length) inicializarComidasSemana();
     comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
     diaNutriActual = dia;
-    comidasSeleccionadas = [...comidasSemana[dia]];
-    // Usar opciones específicas del día si existen
-    const nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
-    generatedPlan._nutricionActiva = nutriDia;
+    comidasSeleccionadas = [...(comidasSemana[dia] || generatedPlan.nutricion.map(() => 0))];
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === dia));
-    nutriDia.forEach((meal, mealIdx) => {
-      const optIdx = comidasSeleccionadas[mealIdx] || 0;
-      const previewRow = document.getElementById('mealPreview' + mealIdx);
-      previewRow?.querySelectorAll('.meal-preview-pill').forEach((p, i) => p.classList.toggle('selected', i === optIdx));
-      const block = document.getElementById('mealBlock' + mealIdx);
-      block?.querySelectorAll('.meal-option').forEach((o, i) => o.classList.toggle('selected', i === optIdx));
-      const label = document.getElementById('mealSelected' + mealIdx);
-      if (label) label.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
-      // Actualizar nombres y macros visibles en las opciones
-      const header = block?.querySelector('.meal-block-header');
-      if (header) {
-        const titulo = header.querySelector('.meal-title');
-        if (titulo) titulo.textContent = meal.momento;
-        const elegida = header.querySelector('[id^="mealSelected"]');
-        if (elegida) elegida.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
-      }
-    });
-    actualizarResumenNutricional();
+    renderNutritionGrid(dia);
     actualizarBotonConfirmarDia();
   }
 
