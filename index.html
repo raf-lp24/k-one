@@ -5292,7 +5292,13 @@
       <div class="hero-demo-label">Área de cliente real</div>
     </div>
     <div class="hero-content">
-      <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
+        <button id="heroVideoBtn" onclick="document.getElementById('heroVideoModal').style.display='flex'" style="display:none;background:rgba(232,73,15,0.1);border:1px solid rgba(232,73,15,0.4);color:var(--blanco);border-radius:8px;padding:10px 16px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ver demo
+        </button>
+      </div>
       <h1 class="hero-title">
         No hay<br>
         <em>atajos.</em><br>
@@ -5304,10 +5310,6 @@
         <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 1,99€. Crear cuenta nueva" onclick="goTo('registro')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('registro');}">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>1,99€</div>
         </div>
-        <button id="heroVideoBtn" onclick="document.getElementById('heroVideoModal').style.display='flex'" style="display:none;background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:12px 24px;font-size:13px;font-family:'DM Mono',monospace;cursor:pointer;align-items:center;gap:8px">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Ver área de cliente
-        </button>
       </div>
       <div class="hero-trust">
         <span>
@@ -5343,9 +5345,9 @@
   </section>
 
   <!-- Modal vídeo móvil -->
-  <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
+  <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
     <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
-      <button onclick="this.closest('#heroVideoModal').style.display='none'" style="position:absolute;top:-36px;right:0;background:none;border:none;color:#fff;font-size:24px;cursor:pointer">✕</button>
+      <button onclick="this.closest('#heroVideoModal').style.display='none';this.closest('#heroVideoModal').querySelector('video').pause()" style="position:absolute;top:-44px;right:0;background:var(--brasa);border:none;color:#fff;font-size:14px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center">✕</button>
       <video controls autoplay playsinline style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
         <source src="/demo.mp4" type="video/mp4">
       </video>
