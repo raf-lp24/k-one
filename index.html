@@ -123,6 +123,11 @@
           "@type": "Question",
           "name": "¿Puedo cancelar cuando quiera?",
           "acceptedAnswer": { "@type": "Answer", "text": "Sí, desde tu perfil en cualquier momento. Sin llamadas, sin formularios, sin excusas. El acceso se mantiene hasta el final del período pagado." }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo funciona la lista de la compra?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Al elegir tus comidas de la semana, K-ONE genera automáticamente una lista de la compra con todos los ingredientes sumados y organizados por categorías. La copias con un clic y la llevas al supermercado. Como tu dieta se mantiene durante todo el mes, compras una vez y tienes todo cubierto." }
         }
       ]
     }
@@ -1387,6 +1392,26 @@
     font-family: 'DM Mono', monospace;
     margin-top: 2px;
   }
+
+  .landing-cta-float {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    border-top: 1px solid var(--humo);
+    padding: 12px 20px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .landing-cta-float.visible { transform: translateY(0); }
+  .landing-cta-float .btn-primary { width: 100%; padding: 14px; font-size: 14px; }
+  @media (min-width: 769px) { .landing-cta-float { display: none !important; } }
 
   .btn-volver-dashboard {
     position: fixed;
@@ -5494,6 +5519,10 @@
         <summary class="faq-q">¿Mis datos están seguros?</summary>
         <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
       </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
+        <p class="faq-a">Al elegir tus comidas de la semana, K-ONE genera automáticamente una lista de la compra con todos los ingredientes sumados y organizados por categorías (proteínas, verduras, cereales...). La copias con un clic y la llevas al supermercado. Como tu dieta se mantiene durante todo el mes, compras una vez y tienes todo cubierto.</p>
+      </details>
     </div>
   </section>
 
@@ -5661,6 +5690,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       Copiar enlace
     </button>
+  </div>
+
+  <div class="landing-cta-float" id="landingCtaFloat">
+    <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 0,99€ — primer mes</button>
   </div>
 
   <footer>
@@ -6863,6 +6896,20 @@
     notificarAdmin('lead', { email });
     return false;
   }
+
+  (function(){
+    const cta = document.getElementById('landingCtaFloat');
+    if (!cta) return;
+    let lastY = 0;
+    window.addEventListener('scroll', () => {
+      if (!document.getElementById('landing')?.classList.contains('active')) { cta.style.display='none'; return; }
+      if (window.innerWidth > 768) { cta.style.display='none'; return; }
+      cta.style.display = '';
+      const y = window.scrollY;
+      if (y > 400) { cta.classList.add('visible'); } else { cta.classList.remove('visible'); }
+      lastY = y;
+    }, { passive: true });
+  })();
 
   function scrollTestimonials(direction) {
     const track = document.querySelector('.testimonials-track');
