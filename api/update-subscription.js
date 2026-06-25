@@ -69,14 +69,24 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, noChange: true });
     }
 
-    const updateParams = {
-      items: [{ id: itemId, price: newPriceId }],
-      proration_behavior: 'create_prorations',
-      cancel_at_period_end: false
-    };
-    const updated = await stripe.subscriptions.update(subscriptionId, updateParams);
+    // Cambio de plan: se aplica al final del período actual (sin prorrateo).
+    // El cliente mantiene su plan actual hasta que termine el mes/trimestre/año,
+    // y en la próxima renovación se cobra el nuevo plan.
+    const schedule = await stripe.subscriptionSchedules.create({
+      from_subscription: subscriptionId,
+      phases: [
+        {
+          items: [{ price: currentPriceId, quantity: 1 }],
+          start_date: subscription.current_period_start,
+          end_date: subscription.current_period_end,
+        },
+        {
+          items: [{ price: newPriceId, quantity: 1 }],
+        }
+      ],
+    });
 
-    return res.status(200).json({ ok: true, currentPeriodEnd: updated.current_period_end });
+    return res.status(200).json({ ok: true, currentPeriodEnd: subscription.current_period_end, cambioProgamado: true });
 
   } catch (err) {
     console.error('[update-subscription] error:', err);
