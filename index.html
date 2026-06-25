@@ -11933,9 +11933,15 @@
       if (i < 7) {
         btn.classList.toggle('has-selection', diasConfirmados[i]);
         if (diasConfirmados[i]) {
-          btn.innerHTML = DIAS_NOMBRES[i][0] + '<span style="font-size:8px;color:#27ae60;display:block;margin-top:1px">✓</span>';
+          btn.textContent = DIAS_NOMBRES[i][0];
+          btn.style.background = 'rgba(39,174,96,0.15)';
+          btn.style.borderColor = '#27ae60';
+          btn.style.color = '#27ae60';
         } else {
-          btn.innerHTML = DIAS_NOMBRES[i][0];
+          btn.textContent = DIAS_NOMBRES[i][0];
+          btn.style.background = '';
+          btn.style.borderColor = '';
+          btn.style.color = '';
         }
       }
     });
