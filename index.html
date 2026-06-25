@@ -818,6 +818,7 @@
   .gym-bg-deco .bg-d13 { top: 68%; left: 45%; width: 130px; transform: rotate(18deg); }
   .gym-bg-deco .bg-d14 { top: 15%; left: 70%; width: 160px; transform: rotate(-22deg); }
   #landing { position: relative; z-index: 1; }
+  #formulario, #login, #registro, #bienvenida, #dashboard { position: relative; z-index: 2; }
 
   /* MANIFESTO */
   .manifesto {
@@ -3940,7 +3941,7 @@
     .pillars-grid { grid-template-columns: 1fr; }
     .form-layout { grid-template-columns: 1fr; }
     .form-sidebar { display: none; }
-    .form-main { padding: 40px 24px 110px; }
+    .form-main { padding: 40px 16px 110px; max-width: 100%; overflow-x: hidden; }
     .form-progress-mobile { display: block; margin-bottom: 40px; }
     .form-nav {
       position: fixed;
@@ -7063,6 +7064,8 @@
       const user = getCurrentUser();
       btnVolver.style.display = (screenId === 'landing' && user && getUserData(user.email)?.plan) ? '' : 'none';
     }
+    const gymBg = document.querySelector('.gym-bg-deco');
+    if (gymBg) gymBg.style.display = screenId === 'landing' ? '' : 'none';
   }
 
   function verLandingComoVisitante() {
