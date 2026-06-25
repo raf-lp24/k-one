@@ -6818,15 +6818,6 @@
           </div>
         </div>
         <div id="nutricionNotas"></div>
-        <!-- Botón confirmar día -->
-        <div id="confirmarDiaBox" style="margin:20px 0;text-align:center">
-          <button id="btnConfirmarDia" onclick="confirmarDiaNutri()" class="btn-primary" style="width:100%;padding:14px;font-size:14px">
-            <span id="confirmarDiaTexto">Confirmar Lunes → pasar a Martes</span>
-          </button>
-          <div id="diasConfirmadosInfo" style="margin-top:10px;font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">
-            <span id="diasConfirmadosCount">0</span>/7 días completados
-          </div>
-        </div>
         <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px">KCAL HOY</span>
@@ -6848,6 +6839,15 @@
         </div>
         <div id="nutritionGrid">
           <!-- generado por JS -->
+        </div>
+        <!-- Botón confirmar día (al final de las comidas) -->
+        <div id="confirmarDiaBox" style="margin:24px 0;text-align:center">
+          <button id="btnConfirmarDia" onclick="confirmarDiaNutri()" class="btn-primary" style="width:100%;padding:16px;font-size:14px">
+            <span id="confirmarDiaTexto">Confirmar Lunes → pasar a Martes</span>
+          </button>
+          <div style="margin-top:8px;font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">
+            <span id="diasConfirmadosCount">0</span>/7 días completados
+          </div>
         </div>
       </div>
 
@@ -10072,7 +10072,7 @@
         notasHTML += `<div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Tu plan, adaptado</strong><br>${generatedPlan.notasNutricion.map(n => `· ${n}`).join('<br>')}</div>`;
       }
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
-        notasHTML += `<div style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>// Hidratación, suplementación y calentamiento</strong><br>${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div>`;
+        notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div></details>`;
       }
       notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
       nutricionNotas.innerHTML = notasHTML;
