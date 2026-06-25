@@ -750,7 +750,30 @@
   }
   @media (max-width: 768px) {
     .hero-demo { display: none; }
+    #heroVideoBtn { display: block !important; }
   }
+
+  /* Fondo decorativo gym en toda la landing */
+  .gym-bg-deco {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .gym-bg-deco svg {
+    position: absolute;
+    stroke: var(--brasa);
+    fill: none;
+    stroke-width: 1.5;
+    opacity: 0.03;
+  }
+  .gym-bg-deco .bg-d1 { top: 15%; left: -2%; width: 300px; transform: rotate(-20deg); }
+  .gym-bg-deco .bg-d2 { top: 45%; right: -3%; width: 250px; transform: rotate(15deg); }
+  .gym-bg-deco .bg-d3 { bottom: 20%; left: 5%; width: 200px; transform: rotate(-8deg); }
+  .gym-bg-deco .bg-d4 { top: 70%; right: 10%; width: 160px; transform: rotate(25deg); }
+  .gym-bg-deco .bg-d5 { top: 5%; right: 15%; width: 120px; transform: rotate(-30deg); }
+  #landing { position: relative; z-index: 1; }
 
   /* MANIFESTO */
   .manifesto {
@@ -5160,6 +5183,20 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- ==================== LANDING ==================== -->
+<!-- Decoración gym fondo -->
+<div class="gym-bg-deco" aria-hidden="true">
+  <!-- Barra olímpica -->
+  <svg class="bg-d1" viewBox="0 0 400 220"><line x1="40" y1="110" x2="360" y2="110" stroke-width="4"/><rect x="4" y="70" width="22" height="80" rx="3"/><rect x="30" y="50" width="26" height="120" rx="3"/><rect x="374" y="70" width="22" height="80" rx="3"/><rect x="344" y="50" width="26" height="120" rx="3"/></svg>
+  <!-- Mancuerna -->
+  <svg class="bg-d2" viewBox="0 0 200 80"><rect x="10" y="15" width="18" height="50" rx="4"/><rect x="172" y="15" width="18" height="50" rx="4"/><line x1="28" y1="40" x2="172" y2="40" stroke-width="5"/><rect x="28" y="22" width="14" height="36" rx="3"/><rect x="158" y="22" width="14" height="36" rx="3"/></svg>
+  <!-- Kettlebell -->
+  <svg class="bg-d3" viewBox="0 0 100 130"><path d="M35 45 Q35 20 50 15 Q65 20 65 45"/><circle cx="50" cy="75" r="35"/><circle cx="50" cy="75" r="8"/></svg>
+  <!-- Disco de peso -->
+  <svg class="bg-d4" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle cx="60" cy="60" r="35"/><circle cx="60" cy="60" r="12"/></svg>
+  <!-- Cuerda de saltar -->
+  <svg class="bg-d5" viewBox="0 0 100 140"><path d="M20 130 Q20 10 50 10 Q80 10 80 130" stroke-width="2"/><rect x="14" y="125" width="12" height="15" rx="3"/><rect x="74" y="125" width="12" height="15" rx="3"/></svg>
+</div>
+
 <div class="screen" id="landing">
   <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
   <nav class="landing-nav">
@@ -5268,8 +5305,25 @@
           Sin permanencia
         </span>
       </div>
+      <!-- Botón ver vídeo: solo móvil -->
+      <div id="heroVideoBtn" style="display:none;margin-top:20px">
+        <button onclick="document.getElementById('heroVideoModal').style.display='flex'" style="background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:12px 24px;font-size:13px;font-family:'DM Mono',monospace;cursor:pointer;display:flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ver área de cliente
+        </button>
+      </div>
     </div>
   </section>
+
+  <!-- Modal vídeo móvil -->
+  <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
+    <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
+      <button onclick="this.closest('#heroVideoModal').style.display='none'" style="position:absolute;top:-36px;right:0;background:none;border:none;color:#fff;font-size:24px;cursor:pointer">✕</button>
+      <video controls autoplay playsinline style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
+        <source src="/demo.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
 
   <section class="manifesto" id="manifesto">
     <div class="manifesto-left">
