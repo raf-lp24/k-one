@@ -9769,9 +9769,19 @@
     // FILTRAR ALIMENTOS NO DESEADOS
     nutricion = filtrarNoComida(nutricion, u.noComida);
 
-    // ROTACIÓN MENSUAL: la dieta cambia cada mes para que la lista de la compra sea útil todo el mes.
+    // ROTACIÓN POR DÍA: cada día de la semana muestra opciones diferentes.
+    // Se genera un array de 7 variantes (L-D), cada una con 5 opciones rotadas distinto.
+    // La rotación también varía por mes para renovar platos mensualmente.
     const mesRotacion = new Date().getMonth() + 1;
-    nutricion = nutricion.map((m, i) => ({ ...m, opciones: rotar(m.opciones, semilla + i * 2 + mesRotacion * 3).slice(0, 5) }));
+    const nutricionPorDia = [];
+    for (let dia = 0; dia < 7; dia++) {
+      nutricionPorDia.push(nutricion.map((m, i) => ({
+        ...m,
+        opciones: rotar(m.opciones, semilla + i * 2 + mesRotacion * 3 + dia * 7).slice(0, 5)
+      })));
+    }
+    // El plan base guarda el día 0 (lunes) como referencia
+    nutricion = nutricionPorDia[0];
 
     // NOTAS ESPECÍFICAS POR DEPORTE (hidratación, suplementación, calentamiento)
     const notasDeporte = [];
@@ -9820,7 +9830,7 @@
       });
     }
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee };
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee };
   }
 
   // Pone en mayúscula la primera palabra alfabética de un ingrediente,
@@ -10508,13 +10518,14 @@
   }
 
   function actualizarKcalDiario() {
-    if (!generatedPlan || !generatedPlan.nutricion || !generatedPlan.kcalObj) return;
+    const nutriActiva = generatedPlan?._nutricionActiva || generatedPlan?.nutricion;
+    if (!generatedPlan || !nutriActiva || !generatedPlan.kcalObj) return;
     const bar = document.getElementById('kcalDiarioBar');
     if (!bar) return;
     bar.style.display = 'block';
-    const sel = comidasSeleccionadas || generatedPlan.nutricion.map(() => 0);
+    const sel = comidasSeleccionadas || nutriActiva.map(() => 0);
     let totalKcal = 0, totalProt = 0, totalCarbs = 0, totalGrasa = 0;
-    generatedPlan.nutricion.forEach((meal, i) => {
+    nutriActiva.forEach((meal, i) => {
       const opt = meal.opciones[sel[i] || 0];
       if (opt) {
         totalKcal += parseInt(opt.kcal) || 0;
@@ -11989,8 +12000,11 @@
     comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
     diaNutriActual = dia;
     comidasSeleccionadas = [...comidasSemana[dia]];
+    // Usar opciones específicas del día si existen
+    const nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+    generatedPlan._nutricionActiva = nutriDia;
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === dia));
-    generatedPlan.nutricion.forEach((meal, mealIdx) => {
+    nutriDia.forEach((meal, mealIdx) => {
       const optIdx = comidasSeleccionadas[mealIdx] || 0;
       const previewRow = document.getElementById('mealPreview' + mealIdx);
       previewRow?.querySelectorAll('.meal-preview-pill').forEach((p, i) => p.classList.toggle('selected', i === optIdx));
@@ -11998,6 +12012,14 @@
       block?.querySelectorAll('.meal-option').forEach((o, i) => o.classList.toggle('selected', i === optIdx));
       const label = document.getElementById('mealSelected' + mealIdx);
       if (label) label.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
+      // Actualizar nombres y macros visibles en las opciones
+      const header = block?.querySelector('.meal-block-header');
+      if (header) {
+        const titulo = header.querySelector('.meal-title');
+        if (titulo) titulo.textContent = meal.momento;
+        const elegida = header.querySelector('[id^="mealSelected"]');
+        if (elegida) elegida.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
+      }
     });
     actualizarResumenNutricional();
     actualizarBotonConfirmarDia();
@@ -12022,7 +12044,8 @@
     const diasNombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
     for (let dia = 0; dia < 7; dia++) {
-      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
@@ -12145,7 +12168,8 @@
     if (!comidasSemana.length) inicializarComidasSemana();
     const ingredientes = {};
     for (let dia = 0; dia < 7; dia++) {
-      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
@@ -12267,7 +12291,8 @@
     };
     const ingredientes = {};
     for (let dia = 0; dia < 7; dia++) {
-      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
@@ -12316,9 +12341,10 @@
 
   // ===== RESUMEN NUTRICIONAL DEL DÍA (suma según opciones elegidas) =====
   function actualizarResumenNutricional() {
-    if (!generatedPlan?.nutricion) return;
+    const nutriActiva = generatedPlan?._nutricionActiva || generatedPlan?.nutricion;
+    if (!nutriActiva) return;
     let kcal = 0, prot = 0, carbs = 0, grasa = 0;
-    generatedPlan.nutricion.forEach((meal, mealIdx) => {
+    nutriActiva.forEach((meal, mealIdx) => {
       const opt = meal.opciones[comidasSeleccionadas[mealIdx]] || meal.opciones[0];
       kcal += parseInt(opt.kcal) || 0;
       prot += parseInt(opt.prot) || 0;
