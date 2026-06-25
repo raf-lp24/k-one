@@ -9459,7 +9459,11 @@
       });
     }
     if (esGimnasio || esCrossfit) {
-      const extrasProte = [
+      const extrasProte = esVegetariano ? [
+        op("Tofu a la plancha con arroz y brócoli", "220g tofu firme, 100g arroz integral, 200g brócoli, AOVE", "440 kcal", "34g prot", "40g carbs", "16g grasa", "Fácil · 20 min"),
+        op("Garbanzos especiados con boniato", "200g garbanzos cocidos, 200g boniato asado, espinacas, AOVE, pimentón", "460 kcal", "20g prot", "60g carbs", "12g grasa", "Fácil · 25 min"),
+        op("Revuelto de claras con avena y espinacas", "200ml claras, 2 huevos, 30g avena, espinacas, tomate", "340 kcal", "36g prot", "28g carbs", "8g grasa", "Fácil · 10 min"),
+      ] : [
         op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral, 200g brócoli, AOVE", "540 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
         op("Steak de ternera con patata asada", "180g ternera magra, 200g patata asada, ensalada verde, AOVE", "520 kcal", "44g prot", "38g carbs", "18g grasa", "Medio · 25 min"),
         op("Revuelto de claras con avena y pavo", "200ml claras, 2 huevos, 30g avena, 50g pavo, espinacas", "380 kcal", "42g prot", "28g carbs", "10g grasa", "Fácil · 10 min"),
@@ -9470,7 +9474,9 @@
       nutricion.forEach(m => {
         if (m.momento === 'Comida' || m.momento === 'Cena') m.opciones.push(...extrasProte.slice(0, 3));
         if (m.momento === 'Merienda') m.opciones.push(
-          op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
+          esVegetariano
+            ? op("Batido de proteína vegetal con avena y plátano", "1 scoop proteína vegetal, 30g avena, 1 plátano, 250ml leche de avena", "400 kcal", "28g prot", "54g carbs", "8g grasa", "Fácil · 3 min")
+            : op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
           op("Cottage con frutos rojos y nueces", "200g queso cottage, 80g frutos rojos, 15g nueces", "240 kcal", "26g prot", "18g carbs", "8g grasa", "Sin cocción · 2 min")
         );
       });
@@ -9478,13 +9484,28 @@
     if (esCombinacion) {
       nutricion.forEach(m => {
         if (m.momento === 'Comida') m.opciones.push(
-          op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "520 kcal", "42g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
-          op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "540 kcal", "42g prot", "38g carbs", "22g grasa", "Fácil · 20 min")
+          esVegetariano
+            ? op("Bowl mediterráneo de garbanzos y quinoa", "200g garbanzos, 100g quinoa, tomate seco, rúcula, AOVE", "480 kcal", "22g prot", "58g carbs", "14g grasa", "Fácil · 15 min")
+            : op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "520 kcal", "42g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
+          esVegetariano
+            ? op("Tofu teriyaki con arroz y edamame", "200g tofu firme, 80g arroz, 80g edamame, salsa de soja, sésamo", "460 kcal", "32g prot", "42g carbs", "16g grasa", "Fácil · 20 min")
+            : op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "540 kcal", "42g prot", "38g carbs", "22g grasa", "Fácil · 20 min")
         );
         if (m.momento === 'Cena') m.opciones.push(
-          op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
+          esVegetariano
+            ? op("Poke bowl vegano de tofu", "180g tofu marinado, 80g arroz, aguacate, zanahoria, soja, sésamo", "420 kcal", "24g prot", "44g carbs", "16g grasa", "Sin cocción · 10 min")
+            : op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
         );
       });
+    }
+
+    // FILTRO VEGETARIANO: eliminar opciones con carne/pescado que se hayan colado
+    if (esVegetariano) {
+      const carneRegex = /pollo|pechuga|pavo|ternera|solomillo|cerdo|cordero|jamón|jamon|salmón|salmon|atún|atun|merluza|bacalao|lubina|dorada|gambas|langostino|calamar|sepia|anchoa|sardina|caballa|rape|mero/i;
+      nutricion = nutricion.map(m => ({
+        ...m,
+        opciones: m.opciones.filter(o => !carneRegex.test(o.nombre) && !carneRegex.test(o.ingredientes))
+      }));
     }
 
     // FILTRAR ALIMENTOS NO DESEADOS
