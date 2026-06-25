@@ -10754,29 +10754,34 @@
     if (!list) return;
     const { defs, changed } = calcularHitos();
     let proximoAsignado = false;
-    list.innerHTML = defs.map(d => {
+    let proximoIdx = -1;
+    const items = defs.map((d, i) => {
       const fechaISO = userData.hitos[d.key];
-      let badge, subtexto, claseDone = '';
+      let badge, subtexto, claseDone = '', visible = false;
       if (fechaISO) {
         const f = new Date(fechaISO);
-        subtexto = `Conseguido el ${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`;
+        subtexto = `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}/${f.getFullYear()}`;
         badge = 'CONSEGUIDO';
         claseDone = 'done';
+        visible = true;
       } else {
         subtexto = d.desc;
-        if (!proximoAsignado) { badge = 'PRÓXIMO'; proximoAsignado = true; }
+        if (!proximoAsignado) { badge = 'PRÓXIMO'; proximoAsignado = true; proximoIdx = i; visible = true; }
         else badge = '';
       }
-      return `
-        <div class="milestone ${claseDone}">
+      return { html: `
+        <div class="milestone ${claseDone}" ${!visible ? 'style="display:none" data-hito-hidden' : ''}>
           <div class="milestone-icon">${d.icon}</div>
           <div class="milestone-text">
             <div class="milestone-name">${d.name}</div>
             <div class="milestone-date">${subtexto}</div>
           </div>
           ${badge ? `<div class="milestone-badge ${claseDone}">${badge}</div>` : ''}
-        </div>`;
-    }).join('');
+        </div>`, visible };
+    });
+    const hiddenCount = items.filter(i => !i.visible).length;
+    list.innerHTML = items.map(i => i.html).join('') +
+      (hiddenCount > 0 ? `<button class="milestone milestone-toggle" onclick="this.style.display='none';this.parentElement.querySelectorAll('[data-hito-hidden]').forEach(el=>{el.style.display='';el.removeAttribute('data-hito-hidden')});" style="cursor:pointer;border:1px dashed var(--humo);background:transparent;color:var(--metal);font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1px">${hiddenCount} hitos más por desbloquear</button>` : '');
 
     if (changed) guardarProgresoUsuario();
   }
