@@ -6306,9 +6306,6 @@
         <div class="dash-nav-item" onclick="showSection('notas')" id="nav-notas">
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 H15 L19 7 V21 H5 Z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span> Notas
         </div>
-        <div class="dash-nav-item" onclick="showSection('referidos')" id="nav-referidos">
-          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span> Invita amigos
-        </div>
         <div class="dash-nav-item" onclick="showSection('contacto')" id="nav-contacto">
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> Contacto
         </div>
@@ -6530,6 +6527,43 @@
             <div style="background:rgba(232,73,15,0.08);border-left:3px solid var(--brasa);padding:24px 28px">
               <div class="motivation-label" style="margin-bottom:10px">// Plan actualizado</div>
               <p id="feedbackConfirmMsg" style="font-size:15px;color:var(--blanco);line-height:1.7;font-weight:300"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFERTA REFERIDOS (solo primer mes) -->
+      <div id="bannerReferidos" style="display:none;margin:0 0 32px;background:linear-gradient(135deg,#1a0a00,#0a0a0a);border:1px solid var(--brasa);border-radius:12px;overflow:hidden">
+        <div style="padding:24px 28px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+            <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;font-weight:700">OFERTA SOLO ESTE MES</div>
+            <button onclick="this.closest('#bannerReferidos').style.display='none'" style="background:none;border:none;color:var(--metal);font-size:18px;cursor:pointer;padding:0;line-height:1">✕</button>
+          </div>
+          <h3 style="color:var(--blanco);font-size:20px;font-weight:700;margin:0 0 8px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">INVITA A 3 AMIGOS Y AHÓRRATE 15€</h3>
+          <p style="color:var(--metal-claro);font-size:13px;line-height:1.6;margin:0 0 18px">Por cada amigo que se una y pague, te descontamos <strong style="color:var(--brasa)">5€</strong> en tu segunda cuota. Máximo 3 amigos = <strong style="color:var(--brasa)">15€ de descuento</strong>. Solo durante tu primer mes.</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div id="codigoReferido" style="flex:1;background:rgba(232,73,15,0.08);border:1px solid rgba(232,73,15,0.3);border-radius:8px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--brasa);letter-spacing:2px;text-align:center">---</div>
+            <button onclick="copiarCodigoReferido()" style="background:var(--brasa);color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Copiar</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="compartirCodigoReferido()" style="flex:1;background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:10px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.875 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp
+            </button>
+            <button onclick="navigator.clipboard.writeText('Únete a K-ONE con mi código ' + document.getElementById('codigoReferido').textContent + ' y empieza por 1,99€ → https://k-one.fit').then(()=>showToast('Mensaje copiado'))" style="flex:1;background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:10px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace">Copiar mensaje</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(232,73,15,0.06);border-radius:6px">
+              <div id="refPagados" style="font-size:20px;font-weight:700;color:var(--brasa)">0</div>
+              <div style="font-size:10px;color:var(--metal)">amigos</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(232,73,15,0.06);border-radius:6px">
+              <div id="refDescuento" style="font-size:20px;font-weight:700;color:#27ae60">0€</div>
+              <div style="font-size:10px;color:var(--metal)">descuento</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:8px;background:rgba(232,73,15,0.06);border-radius:6px">
+              <div style="font-size:20px;font-weight:700;color:var(--metal)">3</div>
+              <div style="font-size:10px;color:var(--metal)">máximo</div>
             </div>
           </div>
         </div>
@@ -6776,50 +6810,6 @@
         </div>
 
         <div class="notes-list" id="notasList"></div>
-      </div>
-
-      <!-- INVITA AMIGOS (REFERIDOS) -->
-      <div class="dash-section" id="section-referidos">
-        <div class="dash-header">
-          <div class="dash-greeting">// Gana descuentos</div>
-          <h2 class="dash-title">Invita amigos</h2>
-          <p class="dash-subtitle">Por cada amigo que se una y pague, te descontamos 5€ en tu próxima cuota. Máximo 3 amigos = 15€ de descuento.</p>
-        </div>
-
-        <div style="background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:24px;margin-bottom:20px">
-          <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:12px">TU CÓDIGO DE INVITACIÓN</div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <div id="codigoReferido" style="flex:1;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:14px 18px;font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--brasa);letter-spacing:2px;text-align:center">---</div>
-            <button onclick="copiarCodigoReferido()" class="btn-primary" style="padding:14px 20px;font-size:12px;white-space:nowrap">Copiar</button>
-          </div>
-          <button onclick="compartirCodigoReferido()" class="btn-ghost" style="width:100%;padding:12px;font-size:12px">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Compartir por WhatsApp
-          </button>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
-          <div style="background:var(--carbon);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--humo)">
-            <div id="refContador" style="font-size:28px;font-weight:700;color:var(--brasa)">0</div>
-            <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">amigos invitados</div>
-          </div>
-          <div style="background:var(--carbon);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--humo)">
-            <div id="refPagados" style="font-size:28px;font-weight:700;color:#27ae60">0</div>
-            <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">han pagado</div>
-          </div>
-          <div style="background:var(--carbon);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--humo)">
-            <div id="refDescuento" style="font-size:28px;font-weight:700;color:var(--blanco)">0€</div>
-            <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">descuento acumulado</div>
-          </div>
-        </div>
-
-        <div style="background:rgba(232,73,15,0.06);border-left:3px solid var(--brasa);border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;line-height:1.6;color:var(--metal)">
-          <strong style="color:var(--blanco)">¿Cómo funciona?</strong><br>
-          1. Comparte tu código con un amigo<br>
-          2. Tu amigo se registra y lo introduce al crear su cuenta<br>
-          3. Cuando tu amigo pague su primer mes, te descontamos 5€<br>
-          4. Máximo 3 amigos = 15€ de descuento en tu segunda cuota<br>
-          <span style="font-size:11px;color:var(--metal);margin-top:6px;display:block">Solo para el plan completo (entrenamiento + nutrición). El descuento se aplica en tu segundo mes.</span>
-        </div>
       </div>
 
       <!-- CONTACTO / SUGERENCIAS -->
@@ -10888,29 +10878,37 @@
 
   // ===== SISTEMA DE REFERIDOS =====
   async function cargarReferidos() {
+    const banner = document.getElementById('bannerReferidos');
     const codigoEl = document.getElementById('codigoReferido');
-    const contadorEl = document.getElementById('refContador');
     const pagadosEl = document.getElementById('refPagados');
     const descuentoEl = document.getElementById('refDescuento');
-    if (!codigoEl) return;
+    if (!banner || !codigoEl) return;
 
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) return;
 
+      const user = getCurrentUser();
+      if (!user?.creado) return;
+      const diasDesdeRegistro = Math.floor((Date.now() - new Date(user.creado).getTime()) / 86400000);
+      if (diasDesdeRegistro > 30) { banner.style.display = 'none'; return; }
+
+      const tipoPlan = userData?.tipoPlan || '';
+      if (tipoPlan.includes('Solo nutrición')) { banner.style.display = 'none'; return; }
+
       const { data: profile } = await supa.from('profiles').select('codigo_referido, descuento_referidos').eq('id', session.user.id).maybeSingle();
-      if (profile?.codigo_referido) {
-        codigoEl.textContent = profile.codigo_referido;
-      }
+      if (profile?.codigo_referido) codigoEl.textContent = profile.codigo_referido;
 
       const { data: refs } = await supa.from('referidos').select('estado').eq('referrer_id', session.user.id);
-      const total = (refs || []).length;
       const pagados = (refs || []).filter(r => r.estado === 'pagado').length;
       const descuento = Math.min(pagados * 5, 15);
 
-      if (contadorEl) contadorEl.textContent = total;
       if (pagadosEl) pagadosEl.textContent = pagados;
       if (descuentoEl) descuentoEl.textContent = descuento + '€';
+
+      if (pagados >= 3) { banner.style.display = 'none'; return; }
+
+      banner.style.display = '';
     } catch (e) {}
   }
 
