@@ -6353,6 +6353,22 @@
           <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
         </div>
 
+        <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
+        <div id="bannerReferidos" style="display:none;margin:0 0 20px;background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:12px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:12px;font-weight:600;color:var(--blanco);margin-bottom:2px">Invita amigos → 5€/amigo en tu 2ª cuota <span style="font-size:10px;color:var(--metal)">(máx. 15€)</span></div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+                <span id="codigoReferido" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--brasa);letter-spacing:1px">---</span>
+                <button onclick="copiarCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">Copiar</button>
+                <button onclick="compartirCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">WhatsApp</button>
+                <span style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace"><span id="refPagados" style="color:var(--brasa);font-weight:700">0</span>/3</span>
+              </div>
+            </div>
+            <button onclick="this.closest('#bannerReferidos').style.display='none'" style="background:none;border:none;color:var(--metal);font-size:14px;cursor:pointer;padding:0;line-height:1;align-self:flex-start">✕</button>
+          </div>
+        </div>
+
         <div class="motivation-card">
           <div class="motivation-label">// Mensaje del día</div>
           <div class="motivation-text" id="motivationText">
@@ -6529,22 +6545,6 @@
               <p id="feedbackConfirmMsg" style="font-size:15px;color:var(--blanco);line-height:1.7;font-weight:300"></p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- OFERTA REFERIDOS (solo primer mes, desaparece con 3 amigos) -->
-      <div id="bannerReferidos" style="display:none;margin:0 0 20px;background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:12px 16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-          <div style="flex:1;min-width:200px">
-            <div style="font-size:12px;font-weight:600;color:var(--blanco);margin-bottom:2px">Invita amigos → 5€/amigo en tu 2ª cuota <span style="font-size:10px;color:var(--metal)">(máx. 15€)</span></div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-              <span id="codigoReferido" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--brasa);letter-spacing:1px">---</span>
-              <button onclick="copiarCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">Copiar</button>
-              <button onclick="compartirCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">WhatsApp</button>
-              <span style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace"><span id="refPagados" style="color:var(--brasa);font-weight:700">0</span>/3</span>
-            </div>
-          </div>
-          <button onclick="this.closest('#bannerReferidos').style.display='none'" style="background:none;border:none;color:var(--metal);font-size:14px;cursor:pointer;padding:0;line-height:1;align-self:flex-start">✕</button>
         </div>
       </div>
 
