@@ -9597,7 +9597,12 @@
     const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || _diasNombres[getIndiceDiaHoy()];
     document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
     document.getElementById('statSemana').textContent = progreso.semana;
-    document.getElementById('statDiasEntrenados').textContent = (userData.entrenosCompletados || []).length;
+    const _hoyDe = new Date();
+    const _lunesDe = new Date(_hoyDe);
+    _lunesDe.setDate(_hoyDe.getDate() - ((_hoyDe.getDay() + 6) % 7));
+    _lunesDe.setHours(0,0,0,0);
+    const _entrenosSemanaActual = (userData.entrenosCompletados || []).filter(f => new Date(f) >= _lunesDe).length;
+    document.getElementById('statDiasEntrenados').textContent = _entrenosSemanaActual;
 
     // ── KPIs adicionales ──────────────────────────────────────────────────────
     // Peso actual
@@ -9608,10 +9613,17 @@
     const statAdherenciaEl = document.getElementById('statAdherencia');
     const statAdherenciaSubEl = document.getElementById('statAdherenciaSub');
     if (statAdherenciaEl) {
-      const diasHechos = (userData.entrenosCompletados || []).length;
+      const hoyDate = new Date();
+      const lunesDate = new Date(hoyDate);
+      lunesDate.setDate(hoyDate.getDate() - ((hoyDate.getDay() + 6) % 7));
+      lunesDate.setHours(0,0,0,0);
+      const entrenosSemana = (userData.entrenosCompletados || []).filter(fecha => {
+        const d = new Date(fecha);
+        return d >= lunesDate;
+      }).length;
       const diasPlan = parseInt(userData.diasEntreno) || 3;
-      const pct = Math.round((diasHechos / diasPlan) * 100);
-      statAdherenciaEl.textContent = `${diasHechos}/${diasPlan}`;
+      const pct = diasPlan > 0 ? Math.min(100, Math.round((entrenosSemana / diasPlan) * 100)) : 0;
+      statAdherenciaEl.textContent = `${entrenosSemana}/${diasPlan}`;
       if (statAdherenciaSubEl) statAdherenciaSubEl.textContent = `días (${pct}% adherencia)`;
     }
 
@@ -9661,6 +9673,22 @@
 
     const checkinSemanaLabel = document.getElementById('checkinSemanaLabel');
     if (checkinSemanaLabel) checkinSemanaLabel.textContent = `// Semana ${progreso.semana}`;
+    const checkinWeekRange = document.getElementById('checkinWeekRange');
+    if (checkinWeekRange) {
+      const hoy = new Date();
+      const lunes = new Date(hoy);
+      lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+      const domingo = new Date(lunes);
+      domingo.setDate(lunes.getDate() + 6);
+      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const dLun = lunes.getDate();
+      const dDom = domingo.getDate();
+      const mesLun = meses[lunes.getMonth()];
+      const mesDom = meses[domingo.getMonth()];
+      checkinWeekRange.textContent = mesLun === mesDom
+        ? `Semana del ${dLun} al ${dDom} de ${mesDom}`
+        : `Semana del ${dLun} de ${mesLun} al ${dDom} de ${mesDom}`;
+    }
 
     // User avatar
     aplicarAvatarPerfil();
