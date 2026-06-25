@@ -24,7 +24,7 @@ function esc(s) {
 }
 
 function emailWrapper(contenido) {
-  return `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div>${contenido}<div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p><p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p></div></div></div>`;
+  return `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div>${contenido}<div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo K-<span style="color:#E8490F;font-weight:600">ONE</span></p><p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p></div></div></div>`;
 }
 
 async function handleCronRetencion(req, res) {
@@ -372,7 +372,7 @@ module.exports = async (req, res) => {
               <div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center">
                 <p style="color:#444;font-size:10px;line-height:1.6;margin:0">
                   Recibes este email porque dejaste tu dirección en k-one.fit<br>
-                  K-ONE · R. López Pinto · Alcalá de Henares, Madrid<br>
+                  K-ONE · Alcalá de Henares, Madrid<br>
                   <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a>
                 </p>
               </div>
@@ -599,7 +599,7 @@ module.exports = async (req, res) => {
                 <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI NUEVO PLAN</a>
               </div>
               <div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center">
-                <p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p>
+                <p style="color:#555;font-size:13px;margin:0">Equipo K-<span style="color:#E8490F;font-weight:600">ONE</span></p>
                 <p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p>
               </div>
             </div>
