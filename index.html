@@ -753,7 +753,7 @@
   }
   @media (max-width: 768px) {
     .hero-demo { display: none; }
-    #heroVideoBtn { display: block !important; }
+    #heroVideoBtn { display: flex !important; }
   }
 
   /* Fondo decorativo gym en toda la landing */
@@ -5304,6 +5304,10 @@
         <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 1,99€. Crear cuenta nueva" onclick="goTo('registro')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('registro');}">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>1,99€</div>
         </div>
+        <button id="heroVideoBtn" onclick="document.getElementById('heroVideoModal').style.display='flex'" style="display:none;background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:12px 24px;font-size:13px;font-family:'DM Mono',monospace;cursor:pointer;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ver área de cliente
+        </button>
       </div>
       <div class="hero-trust">
         <span>
@@ -5334,13 +5338,6 @@
           </span>
           Sin permanencia
         </span>
-      </div>
-      <!-- Botón ver vídeo: solo móvil -->
-      <div id="heroVideoBtn" style="display:none;margin-top:20px">
-        <button onclick="document.getElementById('heroVideoModal').style.display='flex'" style="background:transparent;border:1px solid var(--humo);color:var(--blanco);border-radius:8px;padding:12px 24px;font-size:13px;font-family:'DM Mono',monospace;cursor:pointer;display:flex;align-items:center;gap:8px">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Ver área de cliente
-        </button>
       </div>
     </div>
   </section>
