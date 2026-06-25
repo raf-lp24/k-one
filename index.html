@@ -9124,11 +9124,14 @@
           momento: "Desayuno", hora: "7:30",
           porque: "Proteína desde primera hora para preservar músculo y controlar el apetito",
           opciones: esVegetariano ? [
-            op("Tostadas de centeno con aguacate y huevo", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos revueltos, tomate cherry", "437 kcal", "20g prot", "37g carbs", "24g grasa", "Fácil · 10 min"),
-            op("Yogur griego con nueces y arándanos", "200g yogur griego 0%, 20g nueces, 80g arándanos, canela", "320 kcal", "20g prot", "22g carbs", "14g grasa", "Sin cocción · 2 min"),
             op("Porridge de avena con proteína y semillas", "60g avena, leche de avena, 1 scoop proteína vegetal, semillas de chía, canela", "390 kcal", "28g prot", "44g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Smoothie proteico verde", "1 plátano, espinacas, leche avena, 1 scoop proteína vegetal, jengibre, limón", "310 kcal", "24g prot", "38g carbs", "6g grasa", "Fácil · 3 min"),
-            op("Tofu revuelto con espinacas y tosta", "150g tofu, espinacas, cúrcuma, tomate, 1 tosta de pan integral", "295 kcal", "30g prot", "18g carbs", "13g grasa", "Fácil · 10 min")
+            op("Smoothie proteico verde", "1 plátano, espinacas, leche de avena, 1 scoop proteína vegetal, jengibre, limón", "310 kcal", "24g prot", "38g carbs", "6g grasa", "Fácil · 3 min"),
+            op("Tofu revuelto con espinacas y tosta", "150g tofu, espinacas, cúrcuma, tomate, 1 tosta de pan integral", "295 kcal", "30g prot", "18g carbs", "13g grasa", "Fácil · 10 min"),
+            op("Tostadas de centeno con aguacate y tomate", "2 rebanadas pan centeno, 1/2 aguacate, tomate cherry, semillas de sésamo, AOVE", "380 kcal", "10g prot", "38g carbs", "22g grasa", "Fácil · 5 min"),
+            op("Bowl de açaí con granola y fruta", "100g pulpa de açaí, 30g granola sin miel, 1 plátano, frutos rojos, coco rallado", "360 kcal", "8g prot", "52g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de avena y plátano veganas", "60g harina de avena, 1 plátano maduro, leche de avena, canela, sirope de arce", "340 kcal", "10g prot", "58g carbs", "8g grasa", "Fácil · 10 min"),
+            op("Tostadas de centeno con aguacate y huevo", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos revueltos, tomate cherry", "437 kcal", "20g prot", "37g carbs", "24g grasa", "Fácil · 10 min"),
+            op("Yogur griego con nueces y arándanos", "200g yogur griego 0%, 20g nueces, 80g arándanos, canela", "320 kcal", "20g prot", "22g carbs", "14g grasa", "Sin cocción · 2 min")
           ] : [
             op("Tortilla de claras con verduras", "4 claras + 1 huevo, pimiento, cebolla, tomate, 1 tostada centeno", "320 kcal", "28g prot", "22g carbs", "10g grasa", "Fácil · 10 min"),
             op("Tostada con huevo, jamón cocido y tomate", "1 tosta de pan centeno, 2 huevos revueltos, 30g jamón cocido, tomate cherry", "271 kcal", "21g prot", "17g carbs", "13g grasa", "Fácil · 8 min"),
@@ -9142,7 +9145,16 @@
         {
           momento: "Media mañana", hora: "10:30",
           porque: "Snack pequeño para estabilizar la glucosa y llegar sin hambre a la comida",
-          opciones: [
+          opciones: esVegetariano ? [
+            op("Hummus con palitos de zanahoria", "100g hummus casero, 150g zanahoria en bastones, pimentón", "180 kcal", "8g prot", "18g carbs", "10g grasa", "Sin cocción · 2 min"),
+            op("Infusión + barrita de proteína vegetal", "Dátiles, 30g avena y 1 scoop proteína vegetal. Prepara el domingo.", "200 kcal", "18g prot", "22g carbs", "5g grasa", "Prep dominical"),
+            op("Tostada de crema de cacahuete y plátano", "1 tosta integral, 20g crema de cacahuete, 1/2 plátano, canela", "250 kcal", "8g prot", "30g carbs", "12g grasa", "Sin cocción · 2 min"),
+            op("Edamame con sal y limón", "150g edamame cocido, sal marina, zumo de limón", "190 kcal", "16g prot", "12g carbs", "8g grasa", "Fácil · 5 min"),
+            op("Batido de plátano y avena", "1 plátano, 30g avena, 200ml leche de avena, canela", "280 kcal", "8g prot", "48g carbs", "6g grasa", "Fácil · 2 min"),
+            op("Yogur de soja con frutos secos", "150g yogur de soja, 15g nueces, 15g arándanos secos", "220 kcal", "12g prot", "18g carbs", "12g grasa", "Sin cocción · 1 min"),
+            op("Skyr con fruta y canela", "150g skyr natural, 1 pieza de fruta de temporada, canela al gusto", "190 kcal", "18g prot", "22g carbs", "2g grasa", "Sin cocción · 2 min"),
+            op("Queso batido con manzana y canela", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "195 kcal", "18g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min")
+          ] : [
             op("Skyr con fruta y canela", "150g skyr natural, 1 pieza de fruta de temporada, canela al gusto", "190 kcal", "18g prot", "22g carbs", "2g grasa", "Sin cocción · 2 min"),
             op("Infusión + barrita de proteína casera", "Dátiles, 30g avena y 1 scoop proteína en polvo. Prepara el domingo para toda la semana.", "200 kcal", "18g prot", "22g carbs", "5g grasa", "Prep dominical"),
             op("Queso batido con manzana y canela", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "195 kcal", "18g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min"),
@@ -9499,12 +9511,19 @@
       });
     }
 
-    // FILTRO VEGETARIANO: eliminar opciones con carne/pescado que se hayan colado
+    // FILTRO VEGETARIANO/VEGANO: eliminar opciones con ingredientes animales
     if (esVegetariano) {
       const carneRegex = /pollo|pechuga|pavo|ternera|solomillo|cerdo|cordero|jamón|jamon|salmón|salmon|atún|atun|merluza|bacalao|lubina|dorada|gambas|langostino|calamar|sepia|anchoa|sardina|caballa|rape|mero/i;
+      const esVegano = u.dieta && u.dieta.includes('Vegano');
+      const veganRegex = /huevo|claras|clara de|tortilla|yogur|queso|requesón|requeson|cottage|kéfir|kefir|skyr|leche(?! de )|whey|miel\b/i;
       nutricion = nutricion.map(m => ({
         ...m,
-        opciones: m.opciones.filter(o => !carneRegex.test(o.nombre) && !carneRegex.test(o.ingredientes))
+        opciones: m.opciones.filter(o => {
+          const txt = o.nombre + ' ' + o.ingredientes;
+          if (carneRegex.test(txt)) return false;
+          if (esVegano && veganRegex.test(txt)) return false;
+          return true;
+        })
       }));
     }
 
@@ -10161,9 +10180,14 @@
     const dayBadge = document.getElementById('dayCompletadoBadge');
     if (dayBadge) dayBadge.style.display = completado ? 'flex' : 'none';
 
-    // Actualizar contador de días entrenados esta semana
     const statDias = document.getElementById('statDiasEntrenados');
-    if (statDias) statDias.textContent = (userData.entrenosCompletados || []).length;
+    if (statDias) {
+      const _h = new Date();
+      const _l = new Date(_h);
+      _l.setDate(_h.getDate() - ((_h.getDay() + 6) % 7));
+      _l.setHours(0,0,0,0);
+      statDias.textContent = (userData.entrenosCompletados || []).filter(f => new Date(f) >= _l).length;
+    }
 
     actualizarRacha();
   }
