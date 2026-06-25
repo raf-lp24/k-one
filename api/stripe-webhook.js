@@ -132,12 +132,67 @@ module.exports = async (req, res) => {
         }
 
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
+
+        // REFERIDOS: si este usuario fue referido, acreditar 5€ al referrer (max 15€)
+        if (userId) {
+          try {
+            const { data: ref } = await supabaseAdmin.from('referidos')
+              .select('id, referrer_id')
+              .eq('referido_id', userId)
+              .eq('estado', 'pendiente')
+              .maybeSingle();
+            if (ref) {
+              await supabaseAdmin.from('referidos').update({ estado: 'pagado', pagado_at: new Date().toISOString() }).eq('id', ref.id);
+              const { data: profile } = await supabaseAdmin.from('profiles')
+                .select('descuento_referidos')
+                .eq('id', ref.referrer_id)
+                .maybeSingle();
+              const actual = profile?.descuento_referidos || 0;
+              if (actual < 15) {
+                const nuevo = Math.min(actual + 5, 15);
+                await supabaseAdmin.from('profiles').update({ descuento_referidos: nuevo }).eq('id', ref.referrer_id);
+                console.log(`[stripe-webhook] Referido acreditado: +5€ a ${ref.referrer_id} (total: ${nuevo}€)`);
+              }
+            }
+          } catch (refErr) {
+            console.error('[stripe-webhook] Error procesando referido:', refErr.message);
+          }
+        }
+
         break;
       }
       case 'customer.subscription.updated': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
         const prev = event.data.previous_attributes;
+
+        // REFERIDOS: aplicar descuento en la segunda cuota si el usuario tiene crédito
+        if (subscription.status === 'active' && prev?.current_period_start && subscription.metadata?.supabase_user_id) {
+          try {
+            const { data: prof } = await supabaseAdmin.from('profiles')
+              .select('descuento_referidos')
+              .eq('id', subscription.metadata.supabase_user_id)
+              .maybeSingle();
+            const descuento = prof?.descuento_referidos || 0;
+            if (descuento > 0) {
+              const coupon = await stripe.coupons.create({
+                amount_off: descuento * 100,
+                currency: 'eur',
+                duration: 'once',
+                name: `Descuento referidos K-ONE (${descuento}€)`
+              });
+              const invoice = await stripe.invoices.retrieveUpcoming({ subscription: subscription.id });
+              if (invoice) {
+                await stripe.invoices.update(invoice.id, { discounts: [{ coupon: coupon.id }] }).catch(() => {});
+              }
+              await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', subscription.metadata.supabase_user_id);
+              console.log(`[stripe-webhook] Descuento referidos ${descuento}€ aplicado a ${subscription.metadata.supabase_user_id}`);
+            }
+          } catch (discErr) {
+            console.error('[stripe-webhook] Error aplicando descuento referidos:', discErr.message);
+          }
+        }
+
         if (subscription.status === 'active' && prev?.current_period_start) {
           try {
             let prof = null;
