@@ -9777,7 +9777,7 @@
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
         ...m,
-        opciones: rotar(m.opciones, semilla + i * 2 + mesRotacion * 3 + dia * 7).slice(0, 5)
+        opciones: rotar(m.opciones, semilla + i * 3 + mesRotacion * 5 + dia * 11).slice(0, 5)
       })));
     }
     // El plan base guarda el día 0 (lunes) como referencia
