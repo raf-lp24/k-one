@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://k-one.fit">
 <meta property="og:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
-<meta property="og:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Se ajusta cada semana según tu progreso. Desde 1,99€/mes.">
+<meta property="og:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Se ajusta cada semana según tu progreso. Primer mes 1,99€.">
 <meta property="og:locale" content="es_ES">
 <meta property="og:image" content="https://k-one.fit/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -18,7 +18,7 @@
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
-<meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Desde 1,99€/mes.">
+<meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Primer mes 1,99€.">
 <meta name="twitter:image" content="https://k-one.fit/og-image.png">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" href="/manifest.json">
@@ -140,7 +140,7 @@
 <link rel="preconnect" href="https://rfdrqbnzceudwclagjvp.supabase.co">
 <link rel="preconnect" href="https://js.stripe.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
-<script>if(location.hostname==='k-one.fit'){console.error=function(){}}</script>
+<script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
 <!-- Google Analytics -->
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -5104,11 +5104,11 @@
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
     <div class="nav-links">
       <span class="nav-link" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
-      <span class="nav-link" onclick="scrollToSection('sports')">Deportes</span>
-      <span class="nav-link" onclick="scrollToSection('how')">Cómo funciona</span>
-      <span class="nav-link" onclick="scrollToSection('faq')">FAQ</span>
-      <span class="nav-link" onclick="scrollToSection('pricing')">Precios</span>
-      <span class="nav-link" onclick="scrollToSection('testimonials')">Opiniones</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('sports')" onkeydown="if(event.key==='Enter')this.click()">Deportes</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('how')" onkeydown="if(event.key==='Enter')this.click()">Cómo funciona</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 1,99€</button>
     </div>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
@@ -5118,11 +5118,11 @@
 
   <div class="mobile-menu" id="mobileMenu">
     <span class="nav-link" id="navEntrarMobile" onclick="closeMobileMenu(); entrarODashboard()">Entrar</span>
-    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
-    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
-    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
-    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
-    <span class="nav-link" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza por 1,99€</button>
   </div>
 
@@ -5809,7 +5809,7 @@
     <section class="legal-section" id="cookies">
       <h2>4. Política de cookies</h2>
       <p>Esta web usa <strong>cookies de sesión técnicamente necesarias</strong> a través de Supabase Auth para gestionar tu autenticación y mantener la sesión activa entre visitas. Estas cookies son estrictamente necesarias para el funcionamiento del servicio y no requieren tu consentimiento previo según el art. 22.2 LSSI. No se usan con fines publicitarios ni de seguimiento.</p>
-      <p>Tus datos de perfil, plan y preferencias se guardan en los servidores de Supabase (infraestructura cloud con acuerdos DPA conformes con el RGPD). <strong>No se usan cookies de analítica ni de terceros.</strong> Si en el futuro se incorporan, se solicitará tu consentimiento previo mediante un banner antes de activarlas.</p>
+      <p>Tus datos de perfil, plan y preferencias se guardan en los servidores de Supabase (infraestructura cloud con acuerdos DPA conformes con el RGPD). Se utiliza <strong>Google Analytics</strong> para medir el uso del servicio de forma anónima y mejorar la experiencia. Google Analytics puede usar cookies propias para este fin. No se usan cookies publicitarias ni de terceros con fines comerciales.</p>
     </section>
 
     <button class="legal-back" onclick="goTo('landing')" style="margin-top:8px">← Volver al inicio</button>
@@ -12820,7 +12820,6 @@
   async function marcarGestionado(msgId) {
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const supaAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       await fetch('/api/admin-mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
@@ -14617,7 +14616,7 @@
       if (checkoutParam === 'cancelado') {
         showToast('Pago cancelado. Puedes intentarlo de nuevo cuando quieras.', 4000);
       } else {
-        if (typeof gtag === 'function') gtag('event', 'purchase', { currency: 'EUR', value: 1.99 });
+        if (typeof gtag === 'function') gtag('event', 'purchase', { currency: 'EUR' });
       }
     }
 
