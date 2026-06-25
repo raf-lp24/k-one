@@ -12898,6 +12898,8 @@
     const saved = getUserData(email);
     const skel = document.getElementById('dashSkeleton');
     if (skel) skel.style.display = '';
+    const gymBg = document.querySelector('.gym-bg-deco');
+    if (gymBg) gymBg.style.display = 'none';
     if (saved) {
       userData = saved.userData || {};
       generatedPlan = saved.plan || null;
