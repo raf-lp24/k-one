@@ -9799,6 +9799,27 @@
       notasDeporte.push('Vuelta a la calma: 5 min de estiramientos estáticos (30s por grupo muscular) al terminar. Los músculos que más has trabajado hoy son los que más necesitan estirarse.');
     }
 
+    // NORMALIZACIÓN CALÓRICA: ajusta las kcal de cada opción para que el total
+    // diario promedio (eligiendo la opción 0 de cada comida) se acerque al objetivo.
+    // Esto corrige el desvío causado por escalaCarbs en deportes de resistencia.
+    const totalBase = nutricion.reduce((s, m) => s + (parseInt(m.opciones[0]?.kcal) || 0), 0);
+    if (totalBase > 0 && Math.abs(totalBase - kcalObj) > kcalObj * 0.05) {
+      const factorNorm = kcalObj / totalBase;
+      nutricion.forEach(m => {
+        m.opciones.forEach(o => {
+          const k = parseInt(o.kcal) || 0;
+          const p = parseInt(o.prot) || 0;
+          const c = parseInt(o.carbs) || 0;
+          const g = parseInt(o.grasa) || 0;
+          o.kcal = Math.round(k * factorNorm) + ' kcal';
+          o.prot = Math.round(p * factorNorm) + 'g prot';
+          o.carbs = Math.round(c * factorNorm) + 'g carbs';
+          o.grasa = Math.round(g * factorNorm) + 'g grasa';
+          o.ingredientes = scaleIngredientes(o.ingredientes, factorNorm);
+        });
+      });
+    }
+
     return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee };
   }
 
