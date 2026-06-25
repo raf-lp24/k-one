@@ -753,7 +753,39 @@
   }
   @media (max-width: 768px) {
     .hero-demo { display: none; }
-    #heroVideoBtn { display: flex !important; }
+    .hero-video-mobile {
+      display: flex !important;
+      position: absolute;
+      top: 28%;
+      right: 8%;
+      z-index: 3;
+    }
+  }
+  .hero-video-mobile {
+    display: none;
+  }
+  .hero-video-mobile button {
+    background: rgba(232,73,15,0.12);
+    border: 2px solid rgba(232,73,15,0.5);
+    color: var(--blanco);
+    border-radius: 50%;
+    width: 72px;
+    height: 72px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .hero-video-mobile button span {
+    font-size: 8px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--brasa);
   }
 
   /* Fondo decorativo gym en toda la landing */
@@ -5283,6 +5315,12 @@
         <circle cx="50" cy="75" r="8" opacity="0.5"/>
       </svg>
     </div>
+    <div class="hero-video-mobile">
+      <button onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';m.querySelector('video').play()">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Ver demo</span>
+      </button>
+    </div>
     <div class="hero-demo" aria-hidden="true">
       <div class="hero-demo-inner">
         <video autoplay muted loop playsinline>
@@ -5292,13 +5330,7 @@
       <div class="hero-demo-label">Área de cliente real</div>
     </div>
     <div class="hero-content">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
-        <button id="heroVideoBtn" onclick="document.getElementById('heroVideoModal').style.display='flex'" style="display:none;background:rgba(232,73,15,0.1);border:1px solid rgba(232,73,15,0.4);color:var(--blanco);border-radius:8px;padding:10px 16px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Ver demo
-        </button>
-      </div>
+      <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
       <h1 class="hero-title">
         No hay<br>
         <em>atajos.</em><br>
@@ -5348,7 +5380,7 @@
   <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
     <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
       <button onclick="this.closest('#heroVideoModal').style.display='none';this.closest('#heroVideoModal').querySelector('video').pause()" style="position:absolute;top:-44px;right:0;background:var(--brasa);border:none;color:#fff;font-size:14px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center">✕</button>
-      <video controls autoplay playsinline style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
+      <video controls playsinline style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
         <source src="/demo.mp4" type="video/mp4">
       </video>
     </div>
