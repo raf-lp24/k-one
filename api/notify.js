@@ -207,8 +207,35 @@ async function handleCronRetencion(req, res) {
       }
     }
 
-    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosResumen} resumen`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosResumen });
+    // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
+    let backupOk = false;
+    try {
+      const { data: allProfiles } = await supa.from('profiles').select('*');
+      const { data: allSubs } = await supa.from('subscriptions').select('*');
+      const { data: allEmails } = await supa.from('email_log').select('id, tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(500);
+      const backup = {
+        fecha: ahora.toISOString(),
+        totalClientes: (allProfiles || []).length,
+        totalSuscripciones: (allSubs || []).length,
+        profiles: allProfiles || [],
+        subscriptions: allSubs || [],
+        emailLog: allEmails || []
+      };
+      const fileName = `backup-${ahora.toISOString().slice(0,10)}.json`;
+      const { error: uploadErr } = await supa.storage
+        .from('backups')
+        .upload(fileName, JSON.stringify(backup, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+      if (uploadErr) console.error('[notify-cron] backup upload error:', uploadErr.message);
+      else backupOk = true;
+    } catch (bErr) {
+      console.error('[notify-cron] backup error:', bErr.message);
+    }
+
+    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosResumen} resumen, backup: ${backupOk ? 'OK' : 'FAIL'}`);
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosResumen, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     return res.status(500).json({ error: 'Error interno' });
