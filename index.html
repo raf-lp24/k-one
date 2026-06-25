@@ -6761,7 +6761,7 @@
         <div class="dash-header">
           <div class="dash-greeting">// Tu alimentación</div>
           <h2 class="dash-title">Plan semanal</h1>
-          <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas para cada día de la semana. Cuando termines, pulsa <strong>"Lista de la compra"</strong> y te generamos todo lo que necesitas comprar. Pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span> para ver cómo preparar cada plato.</p>
+          <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">L</button>
@@ -6771,7 +6771,7 @@
             <button class="nutri-dia" onclick="seleccionarDiaNutri(4)">V</button>
             <button class="nutri-dia" onclick="seleccionarDiaNutri(5)">S</button>
             <button class="nutri-dia" onclick="seleccionarDiaNutri(6)">D</button>
-            <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()">
+            <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
               Lista de la compra
             </button>
@@ -6818,6 +6818,15 @@
           </div>
         </div>
         <div id="nutricionNotas"></div>
+        <!-- Botón confirmar día -->
+        <div id="confirmarDiaBox" style="margin:20px 0;text-align:center">
+          <button id="btnConfirmarDia" onclick="confirmarDiaNutri()" class="btn-primary" style="width:100%;padding:14px;font-size:14px">
+            <span id="confirmarDiaTexto">Confirmar Lunes → pasar a Martes</span>
+          </button>
+          <div id="diasConfirmadosInfo" style="margin-top:10px;font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">
+            <span id="diasConfirmadosCount">0</span>/7 días completados
+          </div>
+        </div>
         <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px">KCAL HOY</span>
@@ -11879,6 +11888,59 @@
     try { actualizarKcalDiario(); } catch(e) {}
   }
 
+  let diasConfirmados = [false,false,false,false,false,false,false];
+  const DIAS_NOMBRES = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+  function confirmarDiaNutri() {
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
+    diasConfirmados[diaNutriActual] = true;
+    userData.diasConfirmados = diasConfirmados;
+    userData.comidasSemana = comidasSemana;
+    guardarProgresoUsuario();
+    actualizarBotonesNutriDia();
+    const siguiente = diasConfirmados.indexOf(false);
+    if (siguiente >= 0 && siguiente < 7) {
+      seleccionarDiaNutri(siguiente);
+      showToast(DIAS_NOMBRES[diaNutriActual - 1 < 0 ? 6 : diaNutriActual] + ' confirmado');
+    } else {
+      showToast('Todos los días completados. Ya puedes generar tu lista de la compra.');
+    }
+    actualizarBotonConfirmarDia();
+  }
+
+  function actualizarBotonConfirmarDia() {
+    const btn = document.getElementById('confirmarDiaTexto');
+    const count = document.getElementById('diasConfirmadosCount');
+    const box = document.getElementById('btnConfirmarDia');
+    if (!btn) return;
+    const completados = diasConfirmados.filter(Boolean).length;
+    if (count) count.textContent = completados;
+    if (diasConfirmados[diaNutriActual]) {
+      btn.textContent = 'Modificar ' + DIAS_NOMBRES[diaNutriActual] + ' (ya confirmado)';
+      if (box) { box.style.background = 'var(--grafito)'; box.style.borderColor = 'var(--humo)'; }
+    } else {
+      const siguiente = diaNutriActual < 6 ? DIAS_NOMBRES[diaNutriActual + 1] : '';
+      btn.textContent = siguiente ? 'Confirmar ' + DIAS_NOMBRES[diaNutriActual] + ' → pasar a ' + siguiente : 'Confirmar ' + DIAS_NOMBRES[diaNutriActual];
+      if (box) { box.style.background = ''; box.style.borderColor = ''; }
+    }
+    const listaBtn = document.getElementById('btnListaCompra');
+    if (listaBtn) listaBtn.style.display = completados >= 7 ? '' : 'none';
+  }
+
+  function actualizarBotonesNutriDia() {
+    document.querySelectorAll('.nutri-dia').forEach((btn, i) => {
+      if (i < 7) {
+        btn.classList.toggle('has-selection', diasConfirmados[i]);
+        if (diasConfirmados[i]) {
+          btn.innerHTML = DIAS_NOMBRES[i][0] + '<span style="font-size:8px;color:#27ae60;display:block;margin-top:1px">✓</span>';
+        } else {
+          btn.innerHTML = DIAS_NOMBRES[i][0];
+        }
+      }
+    });
+  }
+
   function inicializarComidasSemana() {
     if (userData.comidasSemana && userData.comidasSemana.length === 7) {
       comidasSemana = userData.comidasSemana;
@@ -11886,6 +11948,11 @@
       const base = comidasSeleccionadas.length ? [...comidasSeleccionadas] : generatedPlan.nutricion.map(() => 0);
       comidasSemana = Array.from({ length: 7 }, () => [...base]);
     }
+    if (userData.diasConfirmados && userData.diasConfirmados.length === 7) {
+      diasConfirmados = userData.diasConfirmados;
+    }
+    actualizarBotonesNutriDia();
+    actualizarBotonConfirmarDia();
   }
 
   function seleccionarDiaNutri(dia) {
@@ -11905,6 +11972,7 @@
       if (label) label.textContent = `Elegida: ${meal.opciones[optIdx]?.nombre || ''}`;
     });
     actualizarResumenNutricional();
+    actualizarBotonConfirmarDia();
   }
 
   function actualizarIndicadoresDias() {
