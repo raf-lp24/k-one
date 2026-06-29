@@ -7830,11 +7830,20 @@
     'zancadas': 'https://www.youtube.com/results?search_query=zancadas+técnica+correcta',
     'curl bíceps': 'https://www.youtube.com/results?search_query=curl+bíceps+mancuerna+técnica',
     'curl': 'https://www.youtube.com/results?search_query=curl+bíceps+técnica',
+    'curl en polea baja': 'https://www.youtube.com/results?search_query=curl+bíceps+polea+baja+soga+técnica',
+    'curl en polea alta': 'https://www.youtube.com/results?search_query=curl+bíceps+polea+alta+técnica',
+    'curl bíceps con barra z': 'https://www.youtube.com/results?search_query=curl+bíceps+barra+Z+técnica',
+    'curl bíceps en banco scott': 'https://www.youtube.com/results?search_query=curl+banco+scott+técnica',
     'extensión tríceps': 'https://www.youtube.com/results?search_query=extensión+tríceps+polea+técnica',
     'tríceps polea': 'https://www.youtube.com/results?search_query=extensión+tríceps+polea',
+    'copa de tríceps': 'https://www.youtube.com/results?search_query=copa+tríceps+mancuerna+técnica+codos',
+    'extensión de tríceps sobre cabeza': 'https://www.youtube.com/results?search_query=extensión+tríceps+sobre+cabeza+polea+técnica',
+    'press francés': 'https://www.youtube.com/results?search_query=press+francés+tríceps+técnica',
     'fondos': 'https://www.youtube.com/results?search_query=fondos+en+paralelas+técnica',
     'fondos en paralelas': 'https://www.youtube.com/results?search_query=fondos+en+paralelas+técnica',
     'elevaciones laterales': 'https://www.youtube.com/results?search_query=elevaciones+laterales+técnica',
+    'elevaciones laterales tumbado': 'https://www.youtube.com/results?search_query=elevaciones+laterales+tumbado+suelo+técnica',
+    'combo lateral a frontal': 'https://www.youtube.com/results?search_query=elevación+lateral+frontal+combo+hombros',
     'face pull': 'https://www.youtube.com/results?search_query=face+pull+polea+técnica',
     'aperturas': 'https://www.youtube.com/results?search_query=aperturas+pecho+mancuernas',
     'aperturas en polea': 'https://www.youtube.com/results?search_query=aperturas+polea+cruce+cables',
@@ -9047,14 +9056,14 @@
           // Principiante + 4-5 días → Upper/Lower: 2× frecuencia, volumen moderado, foco en técnica
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Upper A · Empuje + tirón",
-             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press mancuernas en hombro (agarre neutro) 3×12, remo mancuerna a un brazo 3×10/lado, fondos en banco (tríceps) 3×15, curl bíceps alterno 3×12, plancha 3×30s${finisher3}`,
+             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press mancuernas en hombro (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo mancuerna a un brazo 3×10/lado, fondos en banco (tríceps, codos pegados al cuerpo) 3×15, curl bíceps alterno 3×12 (controlado en la subida y bajada, sin balanceo), plancha 3×30s${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
              detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
              etiqueta:"Piernas"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Variante",
-             detalle:`Pecho, espalda, hombros, brazos · Press inclinado mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales mancuernas 3×15, remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15, curl martillo 3×12, plancha lateral 3×30s/lado${finisher3}`,
+             detalle:`Pecho, espalda, hombros, brazos · Press inclinado mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales mancuernas 3×15 (sin balanceo, aguanta 1s arriba), remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15 (baja completo, aprieta 1s abajo, sube resistiendo), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Lower B · Isquios + glúteos",
              detalle:`Piernas y glúteos · Prensa de piernas 3×12, peso muerto sumo con mancuernas 3×12, hip thrust a una pierna 3×10/pierna, femoral tumbado en máquina 3×12, step-ups controlados 3×10/pierna, gemelos en prensa o máquina 3×20${finisher3}`,
@@ -9072,14 +9081,14 @@
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
              detalle: sesionCorta
-               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15, extensión tríceps en polea 3×12${finisher3}`
-               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8, elevaciones laterales 4×15, fondos 3×10, extensión de tríceps en polea 3×12${finisher3}`,
+               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo)${finisher3}`
+               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo)${finisher3}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
              detalle: sesionCorta
-               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10${finisher3}`
-               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10, curl martillo 3×10${finisher3}`,
+               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada)${finisher3}`
+               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento)${finisher3}`,
              etiqueta:"Tracción"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
@@ -9094,17 +9103,17 @@
           // Intermedio/Avanzado + 4-5 días → Split clásico diferenciado por objetivo
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps",
-             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, fondos 3×10, extensión de tríceps en polea 3×12, press francés 3×10${finisher4}`,
+             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
-             detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10, curl martillo 3×10${finisher4}`,
+             detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
              etiqueta:"Tracción"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas y glúteos",
              detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volA}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, elevación de gemelos 4×15${finisher4}`,
              etiqueta:"Piernas"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core",
-             detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6, elevaciones laterales 4×15, pájaros 3×15, face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
+             detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6 (baja hasta "L" a 90°, no necesitas tocar los hombros), elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba, no bajes del todo para mantener tensión), pájaros 3×15 (aprieta omóplatos, control excéntrico), face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
              etiqueta:"Hombros"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios y core") : "Descanso",
@@ -9248,11 +9257,13 @@
       const poolsEjercicio = [
         [/press inclinado mancuernas/gi, ['press inclinado mancuernas', 'press inclinado en multipower', 'press inclinado en máquina']],
         [/cruces en polea/gi, ['cruces en polea', 'aperturas en polea', 'cruces de polea desde arriba']],
-        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott']],
-        [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea']],
+        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga (aprieta en el pico)']],
+        [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea', 'curl en polea alta (tensión constante)']],
         [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
-        [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza']],
-        [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco']],
+        [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza (codos pegados)', 'copa de tríceps con mancuerna (codos cerrados junto a la cabeza)']],
+        [/press francés/gi, ['press francés', 'copa de tríceps con mancuerna (codos cerrados, no los abras)']],
+        [/elevaciones laterales/gi, ['elevaciones laterales', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral a frontal con peso ligero (precisión alta)']],
+        [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco (aguanta 1s arriba)']],
       ];
       semana = semana.map(d => {
         if (!d.detalle) return d;
