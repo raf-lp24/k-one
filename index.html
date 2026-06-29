@@ -7701,9 +7701,10 @@
       const u = getCurrentUser();
       if (u && !tieneAccesoActivo(u.email)) {
         comprobarPaywall(u.email);
-      } else if (!userData.onboardingCompletado) {
+      } else if (!userData.onboardingCompletado && !userData._planRegenerado) {
         startOnboarding();
       }
+      userData._planRegenerado = true;
     }, Math.min(loadingSteps.length * 1800, 9000));
   }
 
@@ -8530,8 +8531,7 @@
     // (dos personas idénticas en el cuestionario reciben orden de comidas y selección
     // de ejercicios distintos), pero reproducible para el mismo usuario.
     const semilla = (function () {
-      const fuente = ((typeof user !== 'undefined' && user && user.email) ? user.email : '')
-        || (u.email || '') || (u.nombre || '')
+      const fuente = (u.email || '') || (u.nombre || '')
         || ((u.objetivo || '') + (u.deporte || '') + (u.diasEntreno || ''));
       let h = 0;
       for (let i = 0; i < fuente.length; i++) h = (Math.imul(h, 31) + fuente.charCodeAt(i)) | 0;
@@ -9778,15 +9778,15 @@
       const carneRegex = /pollo|pechuga|pavo|ternera|solomillo|cerdo|cordero|jamón|jamon|salmón|salmon|atún|atun|merluza|bacalao|lubina|dorada|gambas|langostino|calamar|sepia|anchoa|sardina|caballa|rape|mero/i;
       const esVegano = u.dieta && u.dieta.includes('Vegano');
       const veganRegex = /huevo|claras|clara de|tortilla|yogur|queso|requesón|requeson|cottage|kéfir|kefir|skyr|leche(?! de )|whey|miel\b/i;
-      nutricion = nutricion.map(m => ({
-        ...m,
-        opciones: m.opciones.filter(o => {
+      nutricion = nutricion.map(m => {
+        const filtradas = m.opciones.filter(o => {
           const txt = o.nombre + ' ' + o.ingredientes;
           if (carneRegex.test(txt)) return false;
           if (esVegano && veganRegex.test(txt)) return false;
           return true;
-        })
-      }));
+        });
+        return { ...m, opciones: filtradas.length > 0 ? filtradas : m.opciones.slice(0, 1) };
+      });
     }
 
     // FILTRAR ALIMENTOS NO DESEADOS
@@ -10055,7 +10055,7 @@
     diaNutriActual = 0;
     comidasSeleccionadas = generatedPlan.nutricion.map((meal, mealIdx) => {
       const guardada = (userData.comidasSeleccionadas || [])[mealIdx];
-      return (guardada !== undefined && guardada < meal.opciones.length) ? guardada : 0;
+      return (typeof guardada === 'number' && guardada >= 0 && guardada < meal.opciones.length) ? guardada : 0;
     });
     inicializarComidasSemana();
     actualizarIndicadoresDias();
@@ -11292,7 +11292,10 @@
       if (nota && nota.trim()) {
         userData.progreso.ultimaNota = nota.trim();
       }
-      // Nueva semana: reiniciar el contador de entrenos completados marcados desde "Hoy"
+      if (!userData.historialEntrenos) userData.historialEntrenos = [];
+      if (Array.isArray(userData.entrenosCompletados) && userData.entrenosCompletados.length) {
+        userData.historialEntrenos.push(...userData.entrenosCompletados);
+      }
       userData.entrenosCompletados = [];
 
       generatedPlan = buildPlanFromData(userData);
@@ -11874,6 +11877,9 @@
       userData.ultimoRecalculo = new Date().toISOString();
     }
 
+    const _entrenoHaCambiado = nuevoDeporte !== userData.deporte ||
+      nuevosDias !== userData.diasEntreno || nuevoNivel !== userData.nivel || nuevoLugar !== userData.lugar;
+
     userData.tipoPlan = nuevoTipoPlan;
     userData.periodicidad = nuevaPeriodicidad;
     userData.objetivo = nuevoObjetivo;
@@ -11884,13 +11890,8 @@
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
 
-    // Transición suave: conservar los días ya entrenados esta semana para no perder la racha
     const _diasEntrenados = userData.progreso ? (userData.progreso.diasEntrenados || 0) : 0;
     userData.progreso = { semana: getSemanaActual(), diasEntrenados: _diasEntrenados, ajuste: 0 };
-    // Solo resetear el historial si cambiaron los parámetros de entrenamiento.
-    // Si el usuario solo actualizó su peso u objetivo nutricional, sus entrenos de esta semana se conservan.
-    const _entrenoHaCambiado = nuevoDeporte !== userData.deporte ||
-      nuevosDias !== userData.diasEntreno || nuevoNivel !== userData.nivel || nuevoLugar !== userData.lugar;
     if (_entrenoHaCambiado) userData.entrenosCompletados = [];
 
     // Si el recálculo del plan fallara, avisar y no dejar el modal congelado en silencio.

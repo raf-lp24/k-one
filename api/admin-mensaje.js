@@ -36,6 +36,13 @@ module.exports = async (req, res) => {
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
+      const { data: sub } = await supabaseAdmin.from('subscriptions').select('stripe_subscription_id').eq('user_id', userId).maybeSingle();
+      if (sub?.stripe_subscription_id) {
+        try {
+          const { getStripe } = require('./_stripeHelpers');
+          await getStripe().subscriptions.cancel(sub.stripe_subscription_id);
+        } catch (stripeErr) { console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message); }
+      }
       await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
       await supabaseAdmin.from('profiles').delete().eq('id', userId);
       const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);

@@ -4,7 +4,7 @@
 // GET:  cron de retención (día 3 sin cuestionario, día 8 sin pagar) — protegido por CRON_SECRET
 // Variables de entorno: RESEND_API_KEY, CRON_SECRET
 
-const { getSupabaseAdmin } = require('./_stripeHelpers');
+const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
 
@@ -28,8 +28,10 @@ function emailWrapper(contenido) {
 }
 
 async function handleCronRetencion(req, res) {
+  const crypto = require('crypto');
   const secret = req.headers.authorization?.replace('Bearer ', '') || req.query?.secret;
-  if (!secret || secret !== process.env.CRON_SECRET) {
+  const expected = process.env.CRON_SECRET || '';
+  if (!secret || !expected || !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(expected.padEnd(secret.length)))) {
     return res.status(401).json({ error: 'No autorizado' });
   }
 
@@ -273,6 +275,12 @@ module.exports = async (req, res) => {
     const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje', 'renovacion'];
     if (!tiposValidos.includes(tipo)) {
       return res.status(400).json({ error: 'Tipo no válido' });
+    }
+    const tiposProtegidos = ['bienvenida', 'opinion', 'renovacion'];
+    if (tiposProtegidos.includes(tipo)) {
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
     }
     if (tipo === 'lead' && datos.email) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) {

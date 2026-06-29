@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     }
 
     // M-4: origen desde variable de entorno para evitar header Host manipulado
-    const origin = process.env.APP_URL || `https://${req.headers.host}`;
+    const origin = process.env.APP_URL || 'https://k-one.fit';
 
     const session = await stripe.billingPortal.sessions.create({
       customer:   sub.stripe_customer_id,

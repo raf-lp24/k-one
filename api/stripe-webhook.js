@@ -184,11 +184,22 @@ module.exports = async (req, res) => {
                 name: `Descuento referidos K-ONE (${descuento}€)`
               });
               const invoice = await stripe.invoices.retrieveUpcoming({ subscription: subscription.id });
+              let aplicado = false;
               if (invoice) {
-                await stripe.invoices.update(invoice.id, { discounts: [{ coupon: coupon.id }] }).catch(() => {});
+                try {
+                  await stripe.invoices.update(invoice.id, { discounts: [{ coupon: coupon.id }] });
+                  aplicado = true;
+                } catch (invErr) {
+                  console.error('[stripe-webhook] Error aplicando cupón a factura:', invErr.message);
+                }
               }
-              await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', subscription.metadata.supabase_user_id);
-              console.log(`[stripe-webhook] Descuento referidos ${descuento}€ aplicado a ${subscription.metadata.supabase_user_id}`);
+              if (aplicado) {
+                await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', subscription.metadata.supabase_user_id);
+                console.log(`[stripe-webhook] Descuento referidos ${descuento}€ aplicado a ${subscription.metadata.supabase_user_id}`);
+              } else {
+                console.warn(`[stripe-webhook] Cupón creado pero no aplicado, crédito ${descuento}€ conservado para ${subscription.metadata.supabase_user_id}`);
+                await stripe.coupons.del(coupon.id).catch(() => {});
+              }
             }
           } catch (discErr) {
             console.error('[stripe-webhook] Error aplicando descuento referidos:', discErr.message);
