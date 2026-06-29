@@ -3877,7 +3877,11 @@
     letter-spacing: 2px;
     color: var(--metal);
     text-transform: uppercase;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
+    max-width: 320px;
+    text-align: center;
+    padding: 0 16px;
+    line-height: 1.6;
   }
   .loading-sub {
     font-family: 'DM Mono', monospace;
@@ -3888,7 +3892,10 @@
     margin-top: 8px;
     min-height: 14px;
     text-align: center;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
+    max-width: 320px;
+    padding: 0 16px;
+    line-height: 1.5;
   }
 
   /* NAV: pasa a hamburguesa antes de que los enlaces se queden sin sitio */
@@ -7661,13 +7668,13 @@
         if (loadingSubText) loadingSubText.textContent = step.sub || '';
         loadingText.style.opacity = '1';
         if (loadingSubText) loadingSubText.style.opacity = step.sub ? '1' : '0';
-      }, 250);
+      }, 350);
     }
     mostrarStep(loadingSteps[0]);
     const interval = setInterval(() => {
       i++;
       mostrarStep(loadingSteps[i % loadingSteps.length]);
-    }, 550);
+    }, 1800);
 
     // Simulamos procesamiento y generamos plan inteligente basado en los datos
     setTimeout(() => {
@@ -7697,7 +7704,7 @@
       } else if (!userData.onboardingCompletado) {
         startOnboarding();
       }
-    }, 4500);
+    }, Math.min(loadingSteps.length * 1800, 9000));
   }
 
   // ===== TOUR DE BIENVENIDA (DÍA 1) =====
