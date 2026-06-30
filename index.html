@@ -1382,69 +1382,6 @@
     margin-bottom: 32px;
   }
 
-  /* COST COMPARE */
-  .cost-compare { padding: 100px 64px; }
-  .cost-compare-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    max-width: 1100px;
-    margin: 64px auto 0;
-  }
-  .cost-compare-card {
-    background: var(--carbon);
-    padding: 32px 20px;
-    display: flex;
-    flex-direction: column;
-  }
-  .cost-compare-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--metal);
-    margin-bottom: 12px;
-  }
-  .cost-compare-amount {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 34px;
-    line-height: 1;
-    margin-bottom: 12px;
-  }
-  .cost-compare-amount span {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--metal-claro);
-    margin-left: 4px;
-  }
-  .cost-compare-desc {
-    font-size: 13px;
-    color: var(--metal-claro);
-    line-height: 1.6;
-    font-weight: 400;
-  }
-  .cost-compare-vs {
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-  }
-  .cost-compare-vs span {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    color: var(--brasa);
-  }
-  .cost-compare-kone {
-    background: var(--grafito);
-    border-top: 2px solid var(--brasa);
-  }
-  .cost-compare-kone .cost-compare-label { color: var(--brasa); }
-  @media (max-width: 768px) {
-    .cost-compare { padding: 60px 24px; }
-    .cost-compare-grid { grid-template-columns: 1fr; }
-    .cost-compare-vs { padding: 8px; }
-  }
-
   /* TRUST BAR */
   .trust-bar {
     display: flex;
@@ -5602,7 +5539,7 @@
   <section class="how" id="how">
     <div class="section-header">
       <h2 class="section-title">Cómo funciona</h2>
-      <p class="section-note">Respondes un cuestionario, pagas 1,99€ y tienes tu plan listo. Así de simple.</p>
+      <p class="section-note">Respondes un cuestionario, pagas 1,99€ y tienes tu plan listo.</p>
     </div>
     <div class="steps">
       <div class="step">
@@ -5797,33 +5734,6 @@
     </div>
   </section>
 
-  <section class="cost-compare">
-    <div class="section-header">
-      <h2 class="section-title">Esto es lo que cuesta de verdad</h2>
-      <p class="section-note">Un nutricionista y un entrenador personal por separado, en España, rondan estos precios al mes. K-ONE te da las dos cosas, ajustadas cada semana, por una fracción del coste.</p>
-    </div>
-    <div class="cost-compare-grid">
-      <div class="cost-compare-card">
-        <div class="cost-compare-label">Nutricionista</div>
-        <div class="cost-compare-amount">80€ – 150€<span>/mes</span></div>
-        <p class="cost-compare-desc">1 consulta inicial + revisiones mensuales. Plan estático hasta la siguiente cita.</p>
-      </div>
-      <div class="cost-compare-card">
-        <div class="cost-compare-label">Entrenador personal</div>
-        <div class="cost-compare-amount">150€ – 300€<span>/mes</span></div>
-        <p class="cost-compare-desc">2-3 sesiones semanales. Sin seguimiento de nutrición incluido.</p>
-      </div>
-      <div class="cost-compare-card cost-compare-vs" aria-hidden="true">
-        <span>VS</span>
-      </div>
-      <div class="cost-compare-card cost-compare-kone">
-        <div class="cost-compare-label">K-ONE</div>
-        <div class="cost-compare-amount">19,99€<span>/mes</span></div>
-        <p class="cost-compare-desc">Entreno y nutrición juntos. Se ajusta cada semana según tu progreso real, no en la siguiente cita.</p>
-      </div>
-    </div>
-  </section>
-
   <section class="pricing" id="pricing">
     <div class="section-header">
       <h2 class="section-title">Sin letra pequeña</h2>
@@ -6003,7 +5913,6 @@
       <a href="#" onclick="goToLegal('cookies'); return false;">Cookies</a>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;text-align:right">
-      <div class="footer-note"><a href="mailto:k.one.fit26@gmail.com" style="color:var(--metal-claro);text-decoration:none">k.one.fit26@gmail.com</a></div>
       <div class="footer-note">© 2026 K-One · Todos los derechos reservados</div>
       <div class="footer-note">Esta plataforma es orientación personalizada, no consejo médico.</div>
     </div>
