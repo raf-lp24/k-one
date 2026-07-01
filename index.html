@@ -8104,7 +8104,7 @@
     const videoUrl = getVideoUrl(nombre);
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
-      <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();window.open(this.href,'_blank');return false;" class="ejercicio-video-btn" title="Ver técnica: ${nombre}">▶</a>
+      <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="ejercicio-video-btn" title="Ver técnica: ${nombre}">▶</a>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
           <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
@@ -12167,7 +12167,7 @@
     // "lata/bote/rebanada(s) [de] X" → "X"
     s = s.replace(/^(latas?|botes?)\s+de\s+/i, '');
     s = s.replace(/^latas?\s+/i, '');           // "latas atún" (sin "de")
-    s = s.replace(/^rebanadas?\s+/i, '');       // "rebanadas centeno" → "centeno"
+    s = s.replace(/^rebanadas?\s+(?:de\s+)?/i, '');  // "rebanadas de pan centeno" → "pan centeno"
 
     // Quitar métodos de cocción/preparación al FINAL del nombre
     // También soporta "asada con romero", "al horno con especias" (prep + complemento)
@@ -12205,9 +12205,14 @@
       'yogur griego 0%': 'yogur griego',
       // Plátano
       'plátano maduro': 'plátano', 'plátano grande': 'plátano',
+      // Pan (plural y variantes)
+      'panes': 'pan', 'panes integrales': 'pan integral',
       // Pan (rebanadas → tipo de pan)
       'centeno': 'pan de centeno', 'pan centeno': 'pan de centeno',
       'centeno con tomate': 'pan de centeno',
+      // Atún (alias extra de seguridad en caso de que el regex no capture)
+      'latas de atún': 'atún', 'lata de atun': 'atún', 'latas de atun': 'atún',
+      'atas de atún': 'atún', 'atas de atun': 'atún',
       // Patata
       'patata fina': 'patata',
       // Pavo
