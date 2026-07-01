@@ -12222,6 +12222,10 @@
       'panes wassa': 'wasa', 'pan wassa': 'wasa', 'wassa': 'wasa',
       // Tortilla wrap
       'tortilla integral': 'tortilla integral',
+      // Pan genérico: "pan tostado" → "pan" (se compra pan y se tuesta en casa)
+      'pan tostado': 'pan',
+      // Jamón: "cocido" se stripea como prep, restaurar nombre completo
+      'jamón': 'jamón cocido',
       // Atún (variantes sin tilde y con "de" explícito)
       'latas de atún': 'latas de atún', 'lata de atun': 'latas de atún', 'latas de atun': 'latas de atún',
       // Patata
@@ -12302,7 +12306,7 @@
     }
 
     const categorias = {
-      'Proteínas': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas/,
+      'Proteínas': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas|proteína/,
       'Lácteos': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage/,
       'Cereales e hidratos': /\bpan\b|arroz|avena|tostada|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|tortilla integral|wasa|fajita|wrap|harina/,
       'Frutas': /plátano|platano|manzana|pera|kiwi|naranja|fresas|arándanos|arandanos|frutos rojos|melocotón|melocoton|fruta/,
@@ -12541,7 +12545,7 @@
     if (!generatedPlan?.nutricion) return;
     if (!comidasSemana.length) inicializarComidasSemana();
     const categorias = {
-      'PROTEÍNAS': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas/,
+      'PROTEÍNAS': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas|proteína/,
       'LÁCTEOS': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage/,
       'CEREALES E HIDRATOS': /\bpan\b|arroz|avena|tostada|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|tortilla integral|wasa|fajita|wrap|harina/,
       'VERDURAS Y HORTALIZAS': /brócoli|brocoli|espinac|tomate|lechuga|pepino|pimiento|cebolla|champiñon|champinon|calabacín|calabacin|zanahoria|espárrago|esparrago|rúcula|rucula|judías|judias|berenjena|aguacate|alcachofa|maíz|maiz/,
