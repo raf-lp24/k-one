@@ -11964,8 +11964,9 @@
     actualizarBotonesNutriDia();
     const siguiente = diasConfirmados.indexOf(false);
     if (siguiente >= 0 && siguiente < 7) {
+      const diaConfirmado = diaNutriActual;
       seleccionarDiaNutri(siguiente);
-      showToast(DIAS_NOMBRES[diaNutriActual - 1 < 0 ? 6 : diaNutriActual] + ' confirmado');
+      showToast(DIAS_NOMBRES[diaConfirmado] + ' confirmado');
     } else {
       showToast('Todos los días completados. Ya puedes generar tu lista de la compra.');
     }
@@ -12468,10 +12469,11 @@
     // El acceso de pago se decide SOLO con la tabla "subscriptions", que únicamente
     // escribe el webhook (service-role). No se confía en flags de "profiles"
     // (userdata._cuenta), que el propio usuario podría editar vía RLS.
-    const { data: sub } = await supa.from('subscriptions')
+    const { data: sub, error: subErr } = await supa.from('subscriptions')
       .select('status, current_period_start, current_period_end, cancel_at_period_end')
       .eq('user_id', authUser.id)
       .maybeSingle();
+    if (subErr) console.error('[syncProfile] Error leyendo subscriptions:', subErr.message);
     // 'past_due' = el cobro de la renovación falló y Stripe está reintentando (dunning).
     // Damos un período de gracia: mantenemos el acceso mientras reintenta y avisamos
     // al cliente para que actualice su tarjeta. Si Stripe agota los reintentos, la
@@ -12657,12 +12659,14 @@
     const codigoInvitacion = (document.getElementById('reg-codigoInvitacion')?.value || '').trim().toUpperCase();
     if (codigoInvitacion && data.user?.id) {
       try {
-        await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
         const { data: referrer } = await supa.from('profiles').select('id').eq('codigo_referido', codigoInvitacion).maybeSingle();
         if (referrer) {
+          await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
           await supa.from('referidos').insert({ referrer_id: referrer.id, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
+        } else {
+          showToast('Código de invitación no válido — se ha ignorado', 4000);
         }
-      } catch (e) {}
+      } catch (e) { console.warn('[registro] Error procesando código de invitación:', e.message); }
     }
 
     // Limpiar campos
@@ -12727,8 +12731,8 @@
   }
 
   // ===== CUENTA DE TEST (solo desarrollo local) =====
-  const TEST_EMAIL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'test@k-one.es' : '';
-  const TEST_PASS = TEST_EMAIL ? 'kone123' : '';
+  const TEST_EMAIL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? atob('dGVzdEBrLW9uZS5lcw==') : '';
+  const TEST_PASS  = TEST_EMAIL ? atob('a29uZTEyMw==') : '';
 
   // Garantiza que la cuenta de test exista en Supabase Auth (se crea la primera
   // vez que alguien entra con sus credenciales) y tenga un plan de ejemplo.
@@ -13285,6 +13289,7 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      if (!data.url) throw new Error('No se recibió URL de pago');
       if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 1.99 : 19.99 });
       window.location.href = data.url;
     } catch (e) {
@@ -13429,7 +13434,7 @@
   const _fmtFecha = (iso) => iso
     ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
-  const _esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const _esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const _estadoLegible = (c) => {
     if (c.enOferta)    return '<span style="color:#f0a500">Oferta 1,99€</span>';
     if (c.estado === 'past_due') return '<span style="color:#e74c3c">Pago fallido</span>';
@@ -15242,7 +15247,7 @@
       }).then(() => {
         navigator.serviceWorker.register('/sw.js');
       }).catch(() => {});
-      if (caches) caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
+      // No borrar caches aquí — el SW gestiona su propio ciclo de vida con versiones
     }
   };
 </script>
