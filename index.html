@@ -12046,36 +12046,82 @@
   }
 
   // Normaliza un string de ingrediente crudo a nombre canónico para la lista de la compra.
-  // Elimina cantidades, unidades y métodos de cocción, y aplica alias comunes.
   function _normIngrediente(raw) {
     let s = raw.trim().toLowerCase();
-    // Quitar cantidad inicial (enteros, fracciones 1/2, decimales) con o sin unidad
+
+    // Caso especial: scoop de proteína
+    if (/scoop/.test(s)) return /vegetal/.test(s) ? 'proteína vegetal' : 'proteína whey';
+
+    // Quitar cantidad inicial (enteros, fracciones 1/2, decimales 1.5) con o sin unidad
     s = s.replace(/^\d+([./]\d+)?\s*(g|gr|ml|kg|l|ud|uds|cdas?|cditas?|x)?\s*/i, '');
-    // "lata/bote de X" → "X"
-    s = s.replace(/^(lata|latas|bote|botes)\s+de\s+/i, '');
-    // Quitar método de cocinado al final del nombre
+
+    // "lata/bote/rebanada(s) [de] X" → "X"
+    s = s.replace(/^(latas?|botes?)\s+de\s+/i, '');
+    s = s.replace(/^latas?\s+/i, '');           // "latas atún" (sin "de")
+    s = s.replace(/^rebanadas?\s+/i, '');       // "rebanadas centeno" → "centeno"
+
+    // Quitar métodos de cocción/preparación al FINAL del nombre
+    // También soporta "asada con romero", "al horno con especias" (prep + complemento)
     const preps = [
-      'revuelt[ao]s?','pochad[ao]s?','cocid[ao]s?','dur[ao]s?','frit[ao]s?','asad[ao]s?',
-      'en lonchas?','en conserva','en dados?','en filetes?','en rodajas?','en polvo',
-      'picad[ao]s?','rallad[ao]s?','laminad[ao]s?','troceados?','desmenuzad[ao]s?',
-      'enteros?','enteras?','al natural','a la plancha'
+      'revuelt[ao]s?', 'pochad[ao]s?', 'cocid[ao]s?', 'dur[ao]s?', 'frit[ao]s?',
+      'asad[ao]s?(\\s+con\\s+\\w+)?',
+      'al\\s+horno(\\s+con\\s+\\w+)?', 'al\\s+vapor', 'a\\s+la\\s+plancha',
+      'especiad[ao]s?', 'marinad[ao]s?', 'desmechad[ao]s?', 'pelad[ao]s?',
+      'salteads?', 'saltead[ao]s?(\\s+con\\s+\\w+)?',
+      'tostads?', 'tostadas?',        // "almendras tostadas"
+      'en\\s+lonchas?', 'en\\s+conserva', 'en\\s+dados?', 'en\\s+filetes?',
+      'en\\s+rodajas?', 'en\\s+polvo', 'en\\s+tacos?', 'en\\s+bastones?',
+      'picad[ao]s?', 'rallad[ao]s?', 'laminad[ao]s?', 'trocead[ao]s?',
+      'desmenuzad[ao]s?', 'enter[ao]s?', 'al\\s+natural',
     ].join('|');
     s = s.replace(new RegExp(`\\s+(${preps})\\s*$`, 'i'), '').trim();
-    // Alias: singular→plural, sin tilde→con tilde, sinónimos
+
+    // Alias canónicos: singular→plural, sin tilde→con tilde, sinónimos, formatos
     const alias = {
+      // Huevos
       'huevo': 'huevos',
+      // Claras
       'clara': 'claras', 'claras de huevo': 'claras', 'clara de huevo': 'claras',
-      'lata atún': 'atún', 'lata de atún': 'atún',
+      // Atún (lata)
+      'lata atún': 'atún', 'lata de atún': 'atún', 'latas atún': 'atún',
+      'atún fresco o lata': 'atún',
+      // Tildes y variantes ortográficas
       'salmon': 'salmón', 'brocoli': 'brócoli',
       'cuscus': 'cuscús', 'requeson': 'requesón', 'kefir': 'kéfir', 'seitan': 'seitán',
-      'pechuga': 'pechuga de pollo',
+      // Pechuga de pollo
+      'pechuga': 'pechuga de pollo', 'pechuga pollo': 'pechuga de pollo',
+      // Leche de avena (normalizar formato)
+      'leche avena': 'leche de avena',
+      // Yogur griego (con y sin %)
+      'yogur griego 0%': 'yogur griego',
+      // Plátano
+      'plátano maduro': 'plátano', 'plátano grande': 'plátano',
+      // Pan (rebanadas → tipo de pan)
+      'centeno': 'pan de centeno', 'pan centeno': 'pan de centeno',
+      'centeno con tomate': 'pan de centeno',
+      // Patata
+      'patata fina': 'patata',
+      // Pavo
+      'pavo picado': 'pavo',
+      // Granola
+      'granola casera': 'granola',
+      // Fruta genérica
+      'pieza de fruta': 'fruta', 'pieza de fruta de temporada': 'fruta',
+      'fruta de temporada': 'fruta', '1 fruta de temporada': 'fruta',
+      // Compuestos complejos que el regex de fin no alcanza bien
+      'patata asada con romero': 'patata',
+      'garbanzos al horno con especias': 'garbanzos',
+      'espinacas salteadas con ajo': 'espinacas',
+      'brócoli al vapor': 'brócoli',
     };
     return (alias[s] !== undefined ? alias[s] : s).trim();
   }
 
   function _procesarIngredientes(optIngredientes, callback) {
-    // Algunos campos usan " + " para unir dos ingredientes: "4 claras + 1 huevo"
-    const partes = optIngredientes.split(',').flatMap(p => p.split(/\s+\+\s+/));
+    // Separadores: coma, " + " (4 claras + 1 huevo) y " y " (zanahoria y pepino)
+    const partes = optIngredientes.split(',')
+      .flatMap(p => p.split(/\s+\+\s+/))
+      .flatMap(p => p.split(/\s+y\s+(?=[a-záéíóúüñ])/i)); // solo ante letra (no "leche de avena")
     partes.forEach(ing => {
       const clean = ing.trim().toLowerCase();
       if (!clean || clean.length < 2) return;
