@@ -7350,6 +7350,10 @@
     if (group === 'lesion') mostrar = selected !== 'No';
 
     wrapper.style.display = mostrar ? 'flex' : 'none';
+    if (!mostrar) {
+      const input = wrapper.querySelector('input, textarea');
+      if (input) input.value = '';
+    }
   }
 
   // ===== VALIDACIÓN DE CAMPOS OBLIGATORIOS POR BLOQUE =====
@@ -7400,15 +7404,24 @@
     fields.forEach(f => {
       const el = document.getElementById(f.id);
       if (!el) return;
-      const valid = f.type === 'radio'
+      let valid = f.type === 'radio'
         ? !!el.querySelector('.selected')
         : el.value.toString().trim() !== '';
+      // Rangos biológicos para bloque 0
+      if (valid && f.id === 'edad') {
+        const v = parseInt(el.value); valid = v >= 10 && v <= 100;
+      } else if (valid && f.id === 'peso') {
+        const v = parseFloat(el.value); valid = v >= 20 && v <= 400;
+      } else if (valid && f.id === 'altura') {
+        const v = parseInt(el.value); valid = v >= 100 && v <= 250;
+      }
       el.classList.toggle('error', !valid);
       if (!valid && !firstInvalid) firstInvalid = el;
     });
 
     if (firstInvalid) {
-      showToast('Completa los campos obligatorios marcados en rojo antes de continuar.');
+      const rangeErrors = { edad: 'Introduce una edad entre 10 y 100 años.', peso: 'Introduce un peso entre 20 y 400 kg.', altura: 'Introduce una altura entre 100 y 250 cm.' };
+      showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
       firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
     }
@@ -7671,9 +7684,16 @@
     setTimeout(() => {
       clearInterval(interval);
       overlay.classList.remove('visible');
-      generatedPlan = buildPlanFromData(userData);
+      try {
+        generatedPlan = buildPlanFromData(userData);
+      } catch (planErr) {
+        console.error('Error generando plan:', planErr);
+        showToast('Hubo un error generando tu plan. Inténtalo de nuevo.', 5000);
+        goTo('formulario');
+        return;
+      }
       if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 1.99 });
-      buildDashboard();
+      try { buildDashboard(); } catch (dashErr) { console.error('Error cargando dashboard:', dashErr); }
 
       // Guardar datos del usuario si está logueado
       const user = getCurrentUser();
@@ -9878,7 +9898,7 @@
     }
 
     actualizarBtnCancelar();
-    try { actualizarKcalDiario(); } catch(e) {}
+    try { actualizarKcalDiario(); } catch(e) { console.warn('[dashboard] actualizarKcalDiario:', e.message); }
 
     // Header
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
@@ -10378,6 +10398,7 @@
     document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`section-${id}`).classList.add('active');
     document.getElementById(`nav-${id}`)?.classList.add('active');
+    window.scrollTo(0, 0);
     closeDashMenu();
     mostrarGuiaSeccion(id);
   }
@@ -11151,7 +11172,7 @@
       if (pagados >= 3) { banner.style.display = 'none'; return; }
 
       banner.style.display = '';
-    } catch (e) {}
+    } catch (e) { console.warn('[referidos] Error cargando panel:', e.message); }
   }
 
   function copiarCodigoReferido() {
@@ -11948,7 +11969,7 @@
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
 
     actualizarResumenNutricional();
-    try { actualizarKcalDiario(); } catch(e) {}
+    try { actualizarKcalDiario(); } catch(e) { console.warn('[nutricion] actualizarKcalDiario:', e.message); }
   }
 
   let diasConfirmados = [false,false,false,false,false,false,false];
@@ -12555,8 +12576,12 @@
           setTimeout(() => {
             supa.from('profiles').update(payload).eq('id', _supaUserId)
               .then(({ error: e2 }) => {
-                if (e2) console.error('Error guardando en Supabase (retry):', e2);
-                else _mostrarGuardado();
+                if (e2) {
+                  console.error('Error guardando en Supabase (retry):', e2);
+                  showToast('No se pudo guardar en la nube. Tus cambios están en este dispositivo.', 5000);
+                } else {
+                  _mostrarGuardado();
+                }
               });
           }, 2000);
         } else {
@@ -12647,11 +12672,13 @@
   }
 
   // ===== TOAST =====
+  let _toastTimer = null;
   function showToast(msg, duration = 3000) {
     const t = document.getElementById('toast');
+    if (_toastTimer) clearTimeout(_toastTimer);
     t.textContent = msg;
     t.classList.add('visible');
-    setTimeout(() => t.classList.remove('visible'), duration);
+    _toastTimer = setTimeout(() => { t.classList.remove('visible'); _toastTimer = null; }, duration);
   }
 
   // ===== VALIDACIÓN EN TIEMPO REAL =====
@@ -13009,12 +13036,8 @@
     });
 
     document.getElementById('forgotStep1').style.display = 'none';
-    document.getElementById('forgotSuccess').textContent = 'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada.';
+    document.getElementById('forgotSuccess').textContent = 'Si existe una cuenta con ese email, te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y pulsa el enlace para volver aquí.';
     document.getElementById('forgotSuccess').classList.add('visible');
-
-    setTimeout(() => {
-      closeForgotModal();
-    }, 4000);
   }
 
   // Se llama tras volver del enlace del email (evento PASSWORD_RECOVERY de Supabase),
@@ -13061,6 +13084,12 @@
     await supa.auth.signOut();
     _supaUserId = null;
     clearCurrentUser();
+    // Resetear estado global para que un segundo usuario no vea datos del anterior
+    userData = {};
+    generatedPlan = null;
+    comidasSeleccionadas = [];
+    comidasSemana = [];
+    diaNutriActual = 0;
     actualizarNavSesion();
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('visible'));
     document.body.style.overflow = '';
@@ -15196,7 +15225,7 @@
     try {
       const { data } = await supa.auth.getSession();
       if (data?.session) await supa.auth.refreshSession();
-    } catch(e) {}
+    } catch(e) { console.warn('[auth] Error refrescando sesión:', e.message); }
   }, 45 * 60 * 1000);
 
   // ===== INIT =====
@@ -15298,20 +15327,26 @@
       showToast('¡Pago confirmado! Verificando tu suscripción...', 3000);
       let intentos = 0;
       const verificarSuscripcion = async () => {
-        const { data: { session: freshSession } } = await supa.auth.getSession();
-        const authUser = freshSession?.user || session.user;
-        await syncProfileFromSupabase(authUser);
-        const u = getCurrentUser();
-        if (u && tieneAccesoActivo(u.email)) {
-          const modal = document.getElementById('modalPaywall');
-          if (modal) modal.classList.remove('visible');
-          showToast('¡Suscripción activada! Bienvenido a K-One.', 4000);
-          if (!userData.onboardingCompletado) startOnboarding();
-        } else if (intentos < 9) {
-          intentos++;
-          setTimeout(verificarSuscripcion, 2000);
-        } else {
-          showToast('El pago se está procesando. Si en unos minutos no se activa, escríbenos.', 8000);
+        try {
+          const { data: { session: freshSession } } = await supa.auth.getSession();
+          const authUser = freshSession?.user || session.user;
+          await syncProfileFromSupabase(authUser);
+          const u = getCurrentUser();
+          if (u && tieneAccesoActivo(u.email)) {
+            const modal = document.getElementById('modalPaywall');
+            if (modal) modal.classList.remove('visible');
+            showToast('¡Suscripción activada! Bienvenido a K-One.', 4000);
+            if (!userData.onboardingCompletado) startOnboarding();
+          } else if (intentos < 9) {
+            intentos++;
+            setTimeout(verificarSuscripcion, 2000);
+          } else {
+            showToast('El pago se está procesando. Si en unos minutos no se activa, escríbenos.', 8000);
+          }
+        } catch (e) {
+          console.warn('[verificarSuscripcion] Error de red:', e.message);
+          if (intentos < 9) { intentos++; setTimeout(verificarSuscripcion, 3000); }
+          else showToast('Error verificando suscripción. Recarga la página.', 8000);
         }
       };
       setTimeout(verificarSuscripcion, 1500);
