@@ -12187,6 +12187,9 @@
       'Otros': /.*/
     };
 
+    // Condimentos y especias que no tienen cantidad → "al gusto"
+    const reCondimento = /^(aove|sal\b|pimienta|canela|especias|orégano|oregano|curry|comino|cúrcuma|curcuma|pimentón|pimenton|azafrán|azafran|perejil|cilantro|albahaca|eneldo|romero|hierbas|guindilla|tahini|mostaza|limón\b|limon\b|zumo|ralladura|vinagre|salsa|miel\b|sirope|sésamo|sesamo|ajo\b|cebollino)/i;
+
     const lista = Object.values(ingredientes)
       .sort((a, b) => b.veces - a.veces)
       .map(ing => {
@@ -12197,8 +12200,10 @@
             : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
         } else if (ing.unidades > 0) {
           cant = `${Math.ceil(ing.unidades)}`;
+        } else if (reCondimento.test(ing.nombre)) {
+          cant = 'al gusto';
         } else {
-          cant = `×${ing.veces}`;
+          cant = 'c/n';
         }
         let cat = 'Otros';
         for (const [c, re] of Object.entries(categorias)) {
@@ -12299,6 +12304,7 @@
         });
       });
     }
+    const reCondimentoCopia = /^(aove|sal\b|pimienta|canela|especias|orégano|oregano|curry|comino|cúrcuma|curcuma|pimentón|pimenton|azafrán|azafran|perejil|cilantro|albahaca|eneldo|romero|hierbas|guindilla|tahini|mostaza|limón\b|limon\b|zumo|ralladura|vinagre|salsa|miel\b|sirope|sésamo|sesamo|ajo\b|cebollino)/i;
     const texto = 'LISTA DE LA COMPRA — K-ONE\n\n' + Object.values(ingredientes)
       .sort((a, b) => b.veces - a.veces)
       .map(ing => {
@@ -12309,8 +12315,10 @@
             : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
         } else if (ing.unidades > 0) {
           cant = `${Math.ceil(ing.unidades)}`;
+        } else if (reCondimentoCopia.test(ing.nombre)) {
+          cant = 'al gusto';
         } else {
-          cant = `×${ing.veces}`;
+          cant = 'c/n';
         }
         return `☐ ${ing.nombre} — ${cant}`;
       }).join('\n');
