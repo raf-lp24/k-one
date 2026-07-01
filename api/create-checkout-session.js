@@ -99,6 +99,12 @@ module.exports = async (req, res) => {
         tipoPlan:    tipoPlan    || '',
         periodicidad: periodicidad || '',
         oferta: usarOferta ? 'si' : 'no'
+      },
+      // El metadata de la sesión NO se copia a la suscripción. Se propaga aquí para
+      // que los eventos customer.subscription.* del webhook (renovación, descuento de
+      // referidos) puedan identificar al usuario de Supabase directamente.
+      subscription_data: {
+        metadata: { supabase_user_id: user.id }
       }
     });
 

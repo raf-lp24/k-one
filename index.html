@@ -12951,10 +12951,14 @@
     const codigoInvitacion = (document.getElementById('reg-codigoInvitacion')?.value || '').trim().toUpperCase();
     if (codigoInvitacion && data.user?.id) {
       try {
-        const { data: referrer } = await supa.from('profiles').select('id').eq('codigo_referido', codigoInvitacion).maybeSingle();
-        if (referrer) {
+        // La RLS de profiles impide leer la fila de otro usuario, así que se busca
+        // al referrer con una función SECURITY DEFINER que solo devuelve su id.
+        const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigoInvitacion });
+        if (referrerId && referrerId !== data.user.id) {
           await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
-          await supa.from('referidos').insert({ referrer_id: referrer.id, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
+          await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
+        } else if (referrerId === data.user.id) {
+          showToast('No puedes usar tu propio código de invitación', 4000);
         } else {
           showToast('Código de invitación no válido — se ha ignorado', 4000);
         }

@@ -168,37 +168,34 @@ module.exports = async (req, res) => {
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
         const prev = event.data.previous_attributes;
 
-        // REFERIDOS: aplicar descuento en la segunda cuota si el usuario tiene crédito
-        if (subscription.status === 'active' && prev?.current_period_start && subscription.metadata?.supabase_user_id) {
+        // REFERIDOS: aplicar el descuento acumulado en la siguiente cuota del referrer.
+        // Se usa un crédito en el SALDO del cliente (customer balance): Stripe lo aplica
+        // automáticamente a la próxima factura. Es mucho más fiable que crear un cupón y
+        // engancharlo a una factura "upcoming" (que no tiene id estable y suele fallar).
+        if (subscription.status === 'active' && prev?.current_period_start) {
           try {
-            const { data: prof } = await supabaseAdmin.from('profiles')
-              .select('descuento_referidos')
-              .eq('id', subscription.metadata.supabase_user_id)
-              .maybeSingle();
-            const descuento = prof?.descuento_referidos || 0;
-            if (descuento > 0) {
-              const coupon = await stripe.coupons.create({
-                amount_off: descuento * 100,
-                currency: 'eur',
-                duration: 'once',
-                name: `Descuento referidos K-ONE (${descuento}€)`
-              });
-              const invoice = await stripe.invoices.retrieveUpcoming({ subscription: subscription.id });
-              let aplicado = false;
-              if (invoice) {
-                try {
-                  await stripe.invoices.update(invoice.id, { discounts: [{ coupon: coupon.id }] });
-                  aplicado = true;
-                } catch (invErr) {
-                  console.error('[stripe-webhook] Error aplicando cupón a factura:', invErr.message);
-                }
-              }
-              if (aplicado) {
-                await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', subscription.metadata.supabase_user_id);
-                console.log(`[stripe-webhook] Descuento referidos ${descuento}€ aplicado a ${subscription.metadata.supabase_user_id}`);
-              } else {
-                console.warn(`[stripe-webhook] Cupón creado pero no aplicado, crédito ${descuento}€ conservado para ${subscription.metadata.supabase_user_id}`);
-                await stripe.coupons.del(coupon.id).catch(() => {});
+            // Resolver el usuario de Supabase: por metadata (suscripciones nuevas) o,
+            // como fallback, por stripe_customer_id (suscripciones antiguas sin metadata).
+            let refUserId = subscription.metadata?.supabase_user_id;
+            if (!refUserId) {
+              const { data: sub } = await supabaseAdmin.from('subscriptions')
+                .select('user_id').eq('stripe_customer_id', subscription.customer).maybeSingle();
+              refUserId = sub?.user_id;
+            }
+            if (refUserId) {
+              const { data: prof } = await supabaseAdmin.from('profiles')
+                .select('descuento_referidos')
+                .eq('id', refUserId)
+                .maybeSingle();
+              const descuento = prof?.descuento_referidos || 0;
+              if (descuento > 0) {
+                await stripe.customers.createBalanceTransaction(subscription.customer, {
+                  amount: -Math.round(descuento * 100), // negativo = crédito a favor del cliente
+                  currency: 'eur',
+                  description: `Descuento referidos K-ONE (${descuento}€)`
+                });
+                await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', refUserId);
+                console.log(`[stripe-webhook] Crédito referidos ${descuento}€ aplicado al saldo de ${subscription.customer}`);
               }
             }
           } catch (discErr) {
