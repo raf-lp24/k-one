@@ -27,12 +27,32 @@
   "@context": "https://schema.org",
   "@graph": [
     {
+      "@type": "Organization",
+      "@id": "https://k-one.fit/#organization",
+      "name": "K-ONE",
+      "url": "https://k-one.fit/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://k-one.fit/og-image.png",
+        "width": 1200,
+        "height": 630
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "k.one.fit26@gmail.com",
+        "contactType": "customer support",
+        "availableLanguage": "Spanish"
+      },
+      "sameAs": []
+    },
+    {
       "@type": "WebSite",
       "@id": "https://k-one.fit/#website",
       "url": "https://k-one.fit/",
       "name": "K-ONE",
       "description": "Plan de entrenamiento y nutrición personalizado con adaptación semanal",
-      "inLanguage": "es-ES"
+      "inLanguage": "es-ES",
+      "publisher": { "@id": "https://k-one.fit/#organization" }
     },
     {
       "@type": "Product",
@@ -6510,9 +6530,6 @@
         </div>
       </nav>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--humo);display:flex;flex-direction:column;gap:4px">
-        <button class="logout-btn" id="btnToggleTheme" onclick="toggleTheme()" style="display:none;border:none;border-radius:8px;padding:10px 14px;font-size:12px">
-          <span id="themeIcon">☀️</span> <span id="themeLabel">Modo claro</span>
-        </button>
         <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Panel de admin
         </button>
@@ -7134,6 +7151,20 @@
     const input = document.getElementById('leadEmail');
     const email = input.value.trim();
     if (!email) return false;
+
+    // Rate limiting: máx 1 envío por dispositivo cada 60 segundos
+    const RL_KEY = 'kone_lead_ts';
+    const ahora = Date.now();
+    try {
+      const ultimo = parseInt(localStorage.getItem(RL_KEY) || '0', 10);
+      if (ahora - ultimo < 60000) {
+        document.getElementById('leadMagnetNote').textContent = 'Ya hemos apuntado tu email. ¡Nos vemos pronto!';
+        input.value = '';
+        return false;
+      }
+      localStorage.setItem(RL_KEY, String(ahora));
+    } catch (e) { /* localStorage bloqueado: dejamos pasar */ }
+
     input.value = '';
     document.getElementById('leadMagnetNote').textContent = 'Hecho. En cuanto decidas dar el paso, aquí tienes tu plan esperando.';
     supa.from('leads').insert({ email }).then(({ error }) => {
