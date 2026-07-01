@@ -72,15 +72,29 @@ module.exports = async (req, res) => {
       .order('created_at', { ascending: false })
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
-    // Traer nombres de auth.users (user_metadata.nombre) para los que no tienen nombre en profiles
+    // Traer nombres y última sesión de auth.users. last_sign_in_at es el fallback
+    // de "última conexión" cuando aún no hay dato de last_seen (heartbeat del front).
     let authNames = {};
+    let authLastSignIn = {};
     try {
       const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
       (users || []).forEach(u => {
         const n = u.user_metadata?.nombre;
         if (n) authNames[u.id] = n;
+        if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at;
       });
     } catch (e) { console.warn('[admin-clientes] listUsers error:', e.message); }
+
+    // Última conexión precisa (heartbeat). Consulta defensiva: si la columna last_seen
+    // no existe todavía, se ignora y se usa last_sign_in_at como fallback.
+    let lastSeenMap = {};
+    try {
+      const ids = (perfiles || []).map(p => p.id);
+      if (ids.length) {
+        const { data: ls } = await supabaseAdmin.from('profiles').select('id, last_seen').in('id', ids);
+        (ls || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; });
+      }
+    } catch (e) { /* columna last_seen no existe aún: se usa last_sign_in_at */ }
 
     if (e1) {
       // B-4: no exponer el mensaje crudo de Supabase al cliente
@@ -216,6 +230,7 @@ module.exports = async (req, res) => {
         onboarding:   !!ud.onboardingCompletado,
         entrenosTotal,
         semanaActual,
+        ultimaConexion: lastSeenMap[p.id] || authLastSignIn[p.id] || null,
         alerta,
         alertaRazon,
       };

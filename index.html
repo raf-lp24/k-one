@@ -12740,8 +12740,23 @@
 
   // Trae el perfil desde Supabase y rellena las cachés locales (sesión + datos del
   // plan) para que getCurrentUser()/getUserData() sigan funcionando igual que antes.
+  // Latido de "última conexión": actualiza profiles.last_seen como mucho una vez cada
+  // 30 min por usuario. Fire-and-forget: si la columna no existe aún, el error se ignora
+  // y el panel usa last_sign_in_at como fallback.
+  function _registrarUltimaConexion(uid) {
+    if (!uid) return;
+    try {
+      const K = 'kone_last_seen_' + uid, ahora = Date.now();
+      const ultimo = parseInt(localStorage.getItem(K) || '0', 10);
+      if (ahora - ultimo < 1800000) return;
+      localStorage.setItem(K, String(ahora));
+    } catch (_) {}
+    try { supa.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', uid).then(() => {}, () => {}); } catch (_) {}
+  }
+
   async function syncProfileFromSupabase(authUser) {
     _supaUserId = authUser.id;
+    _registrarUltimaConexion(authUser.id);
     // Solo columnas que existen seguro. NO incluir aquí columnas opcionales:
     // si una columna no existe en la BD, PostgREST devuelve error y profile queda
     // null, lo que borraría la restauración del perfil (y reaparecería el
@@ -13741,6 +13756,32 @@
   const _fmtFecha = (iso) => iso
     ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
+  // Tiempo relativo compacto para "última conexión": "Ahora", "hace 3 h", "hace 2 d", "hace 5 sem".
+  const _fmtRelativo = (iso) => {
+    if (!iso) return 'Nunca';
+    const ms = Date.now() - new Date(iso).getTime();
+    if (ms < 0) return 'Ahora';
+    const min = Math.floor(ms / 60000);
+    if (min < 2) return 'Ahora';
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `hace ${h} h`;
+    const d = Math.floor(h / 24);
+    if (d < 7) return `hace ${d} d`;
+    const sem = Math.floor(d / 7);
+    if (sem < 5) return `hace ${sem} sem`;
+    const mes = Math.floor(d / 30);
+    if (mes < 12) return `hace ${mes} mes${mes > 1 ? 'es' : ''}`;
+    return `hace ${Math.floor(d / 365)} año${Math.floor(d / 365) > 1 ? 's' : ''}`;
+  };
+  // Color según antigüedad: verde reciente, gris medio, rojo apagado si lleva mucho.
+  const _colorConexion = (iso) => {
+    if (!iso) return '#555';
+    const d = (Date.now() - new Date(iso).getTime()) / 86400000;
+    if (d <= 3) return '#27ae60';
+    if (d <= 14) return 'var(--metal-claro)';
+    return '#e67e22';
+  };
   const _esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
   const _estadoLegible = (c) => {
     if (c.enOferta)    return '<span style="color:#f0a500">Oferta 1,99€</span>';
@@ -14096,12 +14137,13 @@
       ${thS('Entrenos','entrenosTotal')}
       ${thS('Semana','semanaActual')}
       ${thS('Renueva','renovacion')}
+      ${thS('Última conexión','ultimaConexion')}
       ${thN('Lesión')}
       ${thN('')}
     </tr></thead>`;
 
     const filas = lista.length === 0
-      ? `<tr><td colspan="13" style="text-align:center;padding:30px;color:var(--metal);font-size:13px">No hay clientes que coincidan con el filtro.</td></tr>`
+      ? `<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--metal);font-size:13px">No hay clientes que coincidan con el filtro.</td></tr>`
       : lista.map((c, idx) => {
           const rowBg = c.isBeta ? 'background:rgba(212,165,0,.06)' : c.alerta==='red' ? 'background:rgba(231,76,60,.05)' : c.alerta==='orange' ? 'background:rgba(230,126,34,.04)' : '';
           const badgeNuevo = c.esNuevo ? '<span style="background:#1a0d06;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">NUEVO</span>' : '';
@@ -14122,6 +14164,7 @@
               : '<span style="color:var(--metal)">0</span>')}
             ${td('<span style="color:var(--metal)">Sem. ' + (c.semanaActual || 1) + '</span>')}
             ${td(_fmtFecha(c.renovacion))}
+            ${td('<span style="color:' + _colorConexion(c.ultimaConexion) + ';font-size:12px" title="' + (c.ultimaConexion ? _fmtFecha(c.ultimaConexion) : 'Sin registro') + '">' + _fmtRelativo(c.ultimaConexion) + '</span>')}
             ${td(c.lesion
               ? '<span style="color:#e67e22;font-size:11px">⚠ Lesión</span>'
               : '<span style="color:var(--metal)">—</span>')}
@@ -14166,7 +14209,7 @@
   // Exportar CSV con los datos filtrados/ordenados actuales
   function exportarAdminCSV() {
     if (!_adminDatos) return;
-    const cols = ['Nombre','Email','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Lesión','Alerta'];
+    const cols = ['Nombre','Email','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
     const fila = (c) => [
       c.nombre, c.email,
       c.alta ? new Date(c.alta).toLocaleDateString('es-ES') : '',
@@ -14174,6 +14217,7 @@
       c.tipoPlan, c.objetivo, c.deporte,
       c.entrenosTotal, c.semanaActual,
       c.renovacion ? new Date(c.renovacion).toLocaleDateString('es-ES') : '',
+      c.ultimaConexion ? new Date(c.ultimaConexion).toLocaleString('es-ES') : 'Nunca',
       c.lesion ? 'Sí' : 'No',
       c.alertaRazon || ''
     ].map(v => '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"').join(',');
@@ -14216,6 +14260,9 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Alta', _fmtFecha(c.alta))}
         ${row('Renueva', _fmtFecha(c.renovacion))}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:10px">
+        ${row('Última conexión', _fmtRelativo(c.ultimaConexion) + (c.ultimaConexion ? ' · ' + _fmtFecha(c.ultimaConexion) : ''), _colorConexion(c.ultimaConexion))}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Objetivo', c.objetivo)}
