@@ -12121,15 +12121,30 @@
     // Separadores: coma, " + " (4 claras + 1 huevo) y " y " (zanahoria y pepino)
     const partes = optIngredientes.split(',')
       .flatMap(p => p.split(/\s+\+\s+/))
-      .flatMap(p => p.split(/\s+y\s+(?=[a-záéíóúüñ])/i)); // solo ante letra (no "leche de avena")
+      .flatMap(p => p.split(/\s+y\s+(?=[a-záéíóúüñ])/i));
     partes.forEach(ing => {
       const clean = ing.trim().toLowerCase();
       if (!clean || clean.length < 2) return;
       const key = _normIngrediente(clean);
       if (!key || key.length < 2) return;
-      const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
-      const gramos = m ? parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1) : 0;
-      callback(key, gramos);
+
+      // Cantidad con unidad de peso o volumen (150g, 200ml, 1kg, 1l…)
+      const mG = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
+      const esLiquido = mG ? (mG[2] === 'ml' || mG[2] === 'l') : false;
+      const gramos = mG ? parseFloat(mG[1].replace(',', '.')) * (mG[2] === 'kg' || mG[2] === 'l' ? 1000 : 1) : 0;
+
+      // Número al inicio SIN unidad de peso → contar unidades (huevos, plátanos, kiwis…)
+      let unidades = 0;
+      if (!mG) {
+        const mU = clean.match(/^(\d+(?:\/\d+)?)\s+\w/);
+        if (mU) {
+          const parts = mU[1].split('/');
+          unidades = parts.length === 2 ? parseInt(parts[0]) / parseInt(parts[1]) : parseFloat(parts[0]);
+          if (isNaN(unidades)) unidades = 0;
+        }
+      }
+
+      callback(key, gramos, unidades, esLiquido);
     });
   }
 
@@ -12148,13 +12163,15 @@
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
-        _procesarIngredientes(opt.ingredientes, (key, gramos) => {
+        _procesarIngredientes(opt.ingredientes, (key, gramos, unidades, esLiquido) => {
           if (!ingredientes[key]) {
-            ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, dias: new Set(), veces: 0 };
+            ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, unidades: 0, esLiquido: false, dias: new Set(), veces: 0 };
           }
           ingredientes[key].veces++;
           ingredientes[key].dias.add(diasNombres[dia]);
           if (gramos > 0) ingredientes[key].cantidad += gramos;
+          if (unidades > 0) ingredientes[key].unidades += unidades;
+          if (esLiquido) ingredientes[key].esLiquido = true;
         });
       });
     }
@@ -12173,9 +12190,16 @@
     const lista = Object.values(ingredientes)
       .sort((a, b) => b.veces - a.veces)
       .map(ing => {
-        const cant = ing.cantidad > 0
-          ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
-          : `×${ing.veces}`;
+        let cant;
+        if (ing.cantidad > 0) {
+          cant = ing.esLiquido
+            ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}l` : `${Math.round(ing.cantidad)}ml`)
+            : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
+        } else if (ing.unidades > 0) {
+          cant = `${Math.ceil(ing.unidades)}`;
+        } else {
+          cant = `×${ing.veces}`;
+        }
         let cat = 'Otros';
         for (const [c, re] of Object.entries(categorias)) {
           if (c !== 'Otros' && re.test(ing.nombre.toLowerCase())) { cat = c; break; }
@@ -12266,19 +12290,28 @@
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
-        _procesarIngredientes(opt.ingredientes, (key, gramos) => {
-          if (!ingredientes[key]) ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, veces: 0 };
+        _procesarIngredientes(opt.ingredientes, (key, gramos, unidades, esLiquido) => {
+          if (!ingredientes[key]) ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, unidades: 0, esLiquido: false, veces: 0 };
           ingredientes[key].veces++;
           if (gramos > 0) ingredientes[key].cantidad += gramos;
+          if (unidades > 0) ingredientes[key].unidades += unidades;
+          if (esLiquido) ingredientes[key].esLiquido = true;
         });
       });
     }
     const texto = 'LISTA DE LA COMPRA — K-ONE\n\n' + Object.values(ingredientes)
       .sort((a, b) => b.veces - a.veces)
       .map(ing => {
-        const cant = ing.cantidad > 0
-          ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
-          : `×${ing.veces}`;
+        let cant;
+        if (ing.cantidad > 0) {
+          cant = ing.esLiquido
+            ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}l` : `${Math.round(ing.cantidad)}ml`)
+            : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
+        } else if (ing.unidades > 0) {
+          cant = `${Math.ceil(ing.unidades)}`;
+        } else {
+          cant = `×${ing.veces}`;
+        }
         return `☐ ${ing.nombre} — ${cant}`;
       }).join('\n');
     navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles')).catch(() => showToast('No se pudo copiar'));
