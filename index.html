@@ -12162,7 +12162,7 @@
     if (/scoop/.test(s)) return /vegetal/.test(s) ? 'proteína vegetal' : 'proteína whey';
 
     // Quitar cantidad inicial (enteros, fracciones 1/2, decimales 1.5) con o sin unidad
-    s = s.replace(/^\d+([./]\d+)?\s*(g|gr|ml|kg|l|ud|uds|cdas?|cditas?|x)?\s*/i, '');
+    s = s.replace(/^\d+([./]\d+)?\s*(?:g|gr|ml|kg|l|ud|uds|cdas?|cditas?|x)?\b\s*/i, '');
 
     // "lata/bote/rebanada(s) [de] X" → "X"
     s = s.replace(/^(latas?|botes?)\s+de\s+/i, '');
