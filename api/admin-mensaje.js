@@ -33,6 +33,11 @@ module.exports = async (req, res) => {
       datos.gestionado_at = new Date().toISOString();
       const { error: e } = await supabaseAdmin.from('email_log').update({ datos: JSON.stringify(datos) }).eq('id', id);
       if (e) { console.error('[admin-mensaje] email_gestionado error:', e.message); return res.status(500).json({ error: 'Error marcando email' }); }
+    } else if (accion === 'guardar_nota') {
+      if (!userId) return res.status(400).json({ error: 'userId requerido' });
+      const nota = (req.body?.nota ?? '').toString().slice(0, 2000);
+      const { error: e } = await supabaseAdmin.from('profiles').update({ nota_admin: nota }).eq('id', userId);
+      if (e) { console.error('[admin-mensaje] guardar_nota error:', e.message); return res.status(500).json({ error: 'No se pudo guardar la nota (¿falta la columna nota_admin?)' }); }
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });

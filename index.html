@@ -4882,6 +4882,7 @@
 
     <!-- TAB: Dashboard -->
     <div class="jarvis-panel" id="jarvisPanel-dashboard">
+      <div id="adminAccion" style="margin-bottom:24px"></div>
       <div id="adminMetricsBiz" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
         <div>
@@ -13797,7 +13798,7 @@
     if (m) m.style.display = 'block';
     const estado = document.getElementById('adminEstado');
     if (estado) estado.textContent = 'Cargando datos...';
-    ['adminMetricsBiz','adminMetricsTrend','adminMetricsEng','adminMetricsAlt','adminDist','adminTabla']
+    ['adminAccion','adminMetricsBiz','adminMetricsTrend','adminMetricsEng','adminMetricsAlt','adminDist','adminTabla']
       .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
     try {
       const { data: { session } } = await supa.auth.getSession();
@@ -13823,8 +13824,86 @@
     }
   }
 
+  // ===== JARVIS: predicados de acción (compartidos por el centro de acción y el filtro de tabla) =====
+  const _diasDesde = (iso) => iso ? (Date.now() - new Date(iso).getTime()) / 86400000 : null;
+  const _accPagoFallido  = c => c.estado === 'past_due';
+  const _accSinEntrenar  = c => ['active','trialing'].includes(c.estado) && (c.entrenosTotal || 0) === 0;
+  const _accInactivo     = c => { const d = c.ultimaConexion ? _diasDesde(c.ultimaConexion) : (c.diasDesdeAlta ?? 999); return c.onboarding && d > 14; };
+  const _accPremiumCaduca = c => c.isBeta && c.betaExpires && (new Date(c.betaExpires).getTime() - Date.now()) < 7 * 86400000;
+  const _accCancela      = c => !!c.cancelaAlFinal;
+  const _accRenueva7     = c => ['active','trialing'].includes(c.estado) && !c.cancelaAlFinal && c.renovacion && (() => { const ms = new Date(c.renovacion).getTime() - Date.now(); return ms > 0 && ms < 7 * 86400000; })();
+
+  // Health score 0-100: cruza pago + conexión + entrenos + onboarding. Menor = más riesgo de baja.
+  function _healthScore(c) {
+    let s = 100;
+    if (c.estado === 'past_due') s -= 35;
+    else if (['canceled','unpaid'].includes(c.estado)) s -= 50;
+    else if (!['active','trialing'].includes(c.estado) && !c.isBeta) s -= 15;
+    if (c.cancelaAlFinal) s -= 30; // señal de baja más fuerte: ya ha pedido no renovar
+    const d = c.ultimaConexion ? _diasDesde(c.ultimaConexion) : (c.diasDesdeAlta ?? 999);
+    if (d > 30) s -= 30; else if (d > 14) s -= 20; else if (d > 7) s -= 10;
+    if ((c.entrenosTotal || 0) === 0) s -= 20; else if (c.entrenosTotal <= 3) s -= 5;
+    if (!c.onboarding) s -= 15;
+    s = Math.max(0, Math.min(100, s));
+    const color = s >= 75 ? '#27ae60' : s >= 50 ? '#f0a500' : '#e74c3c';
+    const label = s >= 75 ? 'Saludable' : s >= 50 ? 'Atención' : 'Riesgo de baja';
+    return { score: s, color, label };
+  }
+
+  // Salta a la lista de clientes con un filtro concreto desde una tarjeta de acción.
+  function accionIrClientes(tipo) {
+    jarvisTab('clientes');
+    filtrarAdminTipo(tipo);
+  }
+
+  // Centro de acción diaria: qué requiere tu atención hoy, cada punto clicable.
+  function renderCentroAccion(data) {
+    const cont = document.getElementById('adminAccion');
+    if (!cont) return;
+    const clientes = data.clientes || [];
+    const sinResponder = (data.mensajes || []).filter(m => !m.respuesta).length;
+
+    const items = [
+      { n: clientes.filter(_accPagoFallido).length,   label: 'Pago fallido',        sub: 'Reintentando cobro',      color: '#e74c3c', tipo: 'past_due' },
+      { n: clientes.filter(_accCancela).length,        label: 'Cancela al vencer',   sub: 'Se van al renovar',       color: '#e67e22', tipo: 'cancela' },
+      { n: clientes.filter(_accPremiumCaduca).length,  label: 'Premium por caducar', sub: 'Próximos 7 días',         color: '#f0a500', tipo: 'premiumcaduca' },
+      { n: clientes.filter(_accInactivo).length,       label: 'Inactivos +14 días',  sub: 'Sin abrir la web',        color: '#e67e22', tipo: 'inactivos' },
+      { n: clientes.filter(_accSinEntrenar).length,    label: 'Activos sin entrenar',sub: '0 entrenos, pagando',     color: '#f0a500', tipo: 'sinentrenar' },
+      { n: clientes.filter(_accRenueva7).length,       label: 'Renuevan en 7 días',  sub: 'Cobro próximo',           color: '#3498db', tipo: 'renueva7' },
+      { n: sinResponder,                               label: 'Mensajes sin responder', sub: 'En el buzón',          color: '#9b59b6', tipo: '__buzon' },
+    ].filter(it => it.n > 0);
+
+    if (items.length === 0) {
+      cont.innerHTML = `<div style="background:linear-gradient(135deg,#0d1f14,#14231a);border:1px solid #1e3a28;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:12px">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div><div style="color:#fff;font-weight:600;font-size:14px">Todo en orden</div><div style="color:var(--metal);font-size:12px">Ningún cliente requiere atención urgente ahora mismo.</div></div>
+      </div>`;
+      return;
+    }
+
+    const total = items.reduce((a, it) => a + it.n, 0);
+    const cards = items.map(it => {
+      const onclick = it.tipo === '__buzon' ? "jarvisTab('buzon')" : `accionIrClientes('${it.tipo}')`;
+      return `<button onclick="${onclick}" style="text-align:left;background:#151515;border:1px solid ${it.color}40;border-left:3px solid ${it.color};border-radius:10px;padding:12px 14px;cursor:pointer;transition:transform .12s,background .15s;min-width:0" onmouseenter="this.style.transform='translateY(-2px)';this.style.background='#1a1a1a'" onmouseleave="this.style.transform='none';this.style.background='#151515'">
+        <div style="font-size:26px;font-weight:800;color:${it.color};line-height:1">${it.n}</div>
+        <div style="font-size:12px;color:#fff;font-weight:600;margin-top:4px">${it.label}</div>
+        <div style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace">${it.sub}</div>
+      </button>`;
+    }).join('');
+
+    cont.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px">REQUIERE TU ATENCIÓN HOY</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);margin-left:auto">${total} en total</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${cards}</div>`;
+  }
+
   function renderPanelAdmin(data) {
     const mt = data.metrics || {};
+
+    renderCentroAccion(data);
 
     const renderCards = (id, cards) => {
       const el = document.getElementById(id);
@@ -14056,6 +14135,13 @@
         case 'sinpago': return !['active','trialing','past_due','canceled','unpaid'].includes(c.estado);
         case 'nuevos':  return c.esNuevo;
         case 'bajas':   return ['canceled','unpaid'].includes(c.estado);
+        // Filtros del Centro de acción diaria
+        case 'past_due':     return _accPagoFallido(c);
+        case 'cancela':      return _accCancela(c);
+        case 'premiumcaduca':return _accPremiumCaduca(c);
+        case 'inactivos':    return _accInactivo(c);
+        case 'sinentrenar':  return _accSinEntrenar(c);
+        case 'renueva7':     return _accRenueva7(c);
         default: return true;
       }
     });
@@ -14252,7 +14338,17 @@
       c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
       c.estado === 'canceled' ? 'Cancelado' : c.estado || 'Sin pago';
 
+    const hs = _healthScore(c);
     document.getElementById('jcBody').innerHTML = `
+      <div style="background:#151515;border:1px solid ${hs.color}40;border-radius:10px;padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px">Salud del cliente</span>
+          <span style="font-size:12px;font-weight:700;color:${hs.color}">${hs.score}/100 · ${hs.label}</span>
+        </div>
+        <div style="background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="height:100%;width:${hs.score}%;background:${hs.color};border-radius:6px;transition:width .3s"></div>
+        </div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Estado', estadoTexto, estadoColor)}
         ${row('Plan', c.tipoPlan + (c.planPrecio && c.planPrecio !== '—' ? ' · ' + c.planPrecio : ''))}
@@ -14281,6 +14377,13 @@
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#27ae60' : 'var(--metal)')}
       ${row('Premium gratuito', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#27ae60' : 'var(--metal)')}
       ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? '#e74c3c' : '#f0a500') : ''}
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a2a2a">
+        <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Nota privada (solo la ves tú)</div>
+        <textarea id="jcNota" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:10px;font-family:inherit;resize:vertical;min-height:58px" placeholder="Ej: llamó por lesión de rodilla · prefiere cenas rápidas · reactivar en enero...">${_esc(c.notaAdmin || '')}</textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button onclick="guardarNotaCliente('${c.id}', this)" style="background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 16px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">Guardar nota</button>
+        </div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid #2a2a2a">
         <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;background:${c.isBeta ? '#e74c3c' : 'var(--brasa)'}" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
           ${c.isBeta ? 'Quitar premium' : 'Dar premium (1 año)'}
@@ -14466,6 +14569,32 @@
         </div>
       </div>`;
     }).join('');
+  }
+
+  async function guardarNotaCliente(userId, btn) {
+    const ta = document.getElementById('jcNota');
+    if (!ta) return;
+    const nota = ta.value;
+    const txt = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'guardar_nota', userId, nota })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error guardando');
+      const c = (_adminDatos?.clientes || []).find(x => x.id === userId);
+      if (c) c.notaAdmin = nota;
+      btn.textContent = '✓ Guardada';
+      showToast('Nota guardada');
+      setTimeout(() => { btn.textContent = txt; btn.disabled = false; }, 1500);
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      btn.disabled = false; btn.textContent = txt;
+    }
   }
 
   async function marcarEmailGestionado(emailId, btn) {

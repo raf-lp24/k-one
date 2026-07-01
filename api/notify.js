@@ -209,6 +209,82 @@ async function handleCronRetencion(req, res) {
       }
     }
 
+    // AVISO DIARIO AL ADMIN: "qué requiere tu atención hoy" (una vez al día).
+    // Consultas propias y defensivas para no depender de la lógica de retención.
+    try {
+      const hoyStr = ahora.toISOString().slice(0, 10);
+      const { data: yaDigest } = await supa.from('email_log')
+        .select('id').eq('tipo', 'digest_admin').gte('created_at', hoyStr + 'T00:00:00').limit(1);
+      if (!yaDigest || yaDigest.length === 0) {
+        const { data: subsFull } = await supa.from('subscriptions')
+          .select('user_id, status, cancel_at_period_end');
+        const subMap = {}; (subsFull || []).forEach(s => { subMap[s.user_id] = s; });
+        let profsFull = [];
+        try {
+          const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires, last_seen');
+          profsFull = r.data || [];
+        } catch (_) {
+          const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires');
+          profsFull = r.data || [];
+        }
+        const now = ahora.getTime();
+        let pagoFallido = 0, cancela = 0, premiumCaduca = 0, inactivos = 0, sinEntrenar = 0;
+        for (const p of profsFull) {
+          const s = subMap[p.id]; const st = s?.status || 'none'; const activo = ['active', 'trialing'].includes(st);
+          const ud = p.userdata || {};
+          const ent = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length
+            : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
+          if (st === 'past_due') pagoFallido++;
+          if (activo && s?.cancel_at_period_end) cancela++;
+          if (p.is_beta && p.beta_expires && (new Date(p.beta_expires).getTime() - now) < 7 * 86400000) premiumCaduca++;
+          if (activo && ent === 0) sinEntrenar++;
+          const ls = p.last_seen ? new Date(p.last_seen).getTime() : null;
+          if (ud.onboardingCompletado && ls && (now - ls) / 86400000 > 14) inactivos++;
+        }
+        let sinResponder = 0;
+        try {
+          const { count } = await supa.from('mensajes_cliente').select('id', { count: 'exact', head: true }).is('respuesta', null);
+          sinResponder = count || 0;
+        } catch (_) {}
+
+        const filas = [
+          { n: pagoFallido,   t: 'Pagos fallidos',          c: '#e74c3c' },
+          { n: cancela,       t: 'Cancelan al vencer',      c: '#e67e22' },
+          { n: premiumCaduca, t: 'Premium por caducar (7d)',c: '#f0a500' },
+          { n: inactivos,     t: 'Inactivos +14 días',      c: '#e67e22' },
+          { n: sinEntrenar,   t: 'Activos sin entrenar',    c: '#f0a500' },
+          { n: sinResponder,  t: 'Mensajes sin responder',  c: '#9b59b6' },
+        ].filter(f => f.n > 0);
+        const totalAcc = filas.reduce((a, f) => a + f.n, 0);
+
+        if (totalAcc > 0) {
+          const filasHtml = filas.map(f => `<tr>
+            <td style="padding:10px 14px;border-bottom:1px solid #1a1a1a;color:#e0e0e0;font-size:14px">${f.t}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #1a1a1a;text-align:right;font-size:18px;font-weight:700;color:${f.c}">${f.n}</td>
+          </tr>`).join('');
+          await enviarEmail(apiKey, {
+            from: 'K-ONE Jarvis <equipo@k-one.fit>',
+            to: ADMIN_EMAIL,
+            subject: `Jarvis · ${totalAcc} cosa${totalAcc > 1 ? 's' : ''} requieren tu atención hoy`,
+            html: emailWrapper(`
+              <div style="padding:28px 28px 0">
+                <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 6px">Resumen de Jarvis</h1>
+                <p style="color:#b5b2ad;font-size:13px;line-height:1.6;margin:0 0 18px">Esto es lo que requiere tu atención hoy en K-ONE:</p>
+                <table style="width:100%;border-collapse:collapse;background:#141414;border-radius:10px;overflow:hidden">${filasHtml}</table>
+              </div>
+              <div style="padding:20px 28px 28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;border-radius:8px">ABRIR JARVIS</a>
+              </div>`)
+          });
+          await supa.from('email_log').insert({
+            tipo: 'digest_admin', destinatario: ADMIN_EMAIL,
+            asunto: `Jarvis · ${totalAcc} requieren atención`,
+            datos: JSON.stringify({ resumen: filas.map(f => `${f.t}: ${f.n}`).join(' · '), pagoFallido, cancela, premiumCaduca, inactivos, sinEntrenar, sinResponder })
+          });
+        }
+      }
+    } catch (digestErr) { console.error('[notify] digest admin error:', digestErr.message); }
+
     // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
     let backupOk = false;
     try {

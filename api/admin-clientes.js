@@ -85,16 +85,26 @@ module.exports = async (req, res) => {
       });
     } catch (e) { console.warn('[admin-clientes] listUsers error:', e.message); }
 
-    // Última conexión precisa (heartbeat). Consulta defensiva: si la columna last_seen
-    // no existe todavía, se ignora y se usa last_sign_in_at como fallback.
+    // Columnas opcionales (last_seen, nota_admin). Consulta defensiva: si aún no existen,
+    // se ignora sin romper el panel. last_seen cae a last_sign_in_at; nota_admin queda vacía.
     let lastSeenMap = {};
+    let notaMap = {};
     try {
       const ids = (perfiles || []).map(p => p.id);
       if (ids.length) {
-        const { data: ls } = await supabaseAdmin.from('profiles').select('id, last_seen').in('id', ids);
-        (ls || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; });
+        const { data: ls } = await supabaseAdmin.from('profiles').select('id, last_seen, nota_admin').in('id', ids);
+        (ls || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; if (r.nota_admin) notaMap[r.id] = r.nota_admin; });
       }
-    } catch (e) { /* columna last_seen no existe aún: se usa last_sign_in_at */ }
+    } catch (e) {
+      // Puede que exista last_seen pero no nota_admin (o viceversa). Reintento solo last_seen.
+      try {
+        const ids = (perfiles || []).map(p => p.id);
+        if (ids.length) {
+          const { data: ls2 } = await supabaseAdmin.from('profiles').select('id, last_seen').in('id', ids);
+          (ls2 || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; });
+        }
+      } catch (_) { /* ninguna columna opcional existe todavía */ }
+    }
 
     if (e1) {
       // B-4: no exponer el mensaje crudo de Supabase al cliente
@@ -231,6 +241,7 @@ module.exports = async (req, res) => {
         entrenosTotal,
         semanaActual,
         ultimaConexion: lastSeenMap[p.id] || authLastSignIn[p.id] || null,
+        notaAdmin: notaMap[p.id] || '',
         alerta,
         alertaRazon,
       };
