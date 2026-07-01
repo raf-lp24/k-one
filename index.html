@@ -12045,6 +12045,48 @@
     });
   }
 
+  // Normaliza un string de ingrediente crudo a nombre canónico para la lista de la compra.
+  // Elimina cantidades, unidades y métodos de cocción, y aplica alias comunes.
+  function _normIngrediente(raw) {
+    let s = raw.trim().toLowerCase();
+    // Quitar cantidad inicial (enteros, fracciones 1/2, decimales) con o sin unidad
+    s = s.replace(/^\d+([./]\d+)?\s*(g|gr|ml|kg|l|ud|uds|cdas?|cditas?|x)?\s*/i, '');
+    // "lata/bote de X" → "X"
+    s = s.replace(/^(lata|latas|bote|botes)\s+de\s+/i, '');
+    // Quitar método de cocinado al final del nombre
+    const preps = [
+      'revuelt[ao]s?','pochad[ao]s?','cocid[ao]s?','dur[ao]s?','frit[ao]s?','asad[ao]s?',
+      'en lonchas?','en conserva','en dados?','en filetes?','en rodajas?','en polvo',
+      'picad[ao]s?','rallad[ao]s?','laminad[ao]s?','troceados?','desmenuzad[ao]s?',
+      'enteros?','enteras?','al natural','a la plancha'
+    ].join('|');
+    s = s.replace(new RegExp(`\\s+(${preps})\\s*$`, 'i'), '').trim();
+    // Alias: singular→plural, sin tilde→con tilde, sinónimos
+    const alias = {
+      'huevo': 'huevos',
+      'clara': 'claras', 'claras de huevo': 'claras', 'clara de huevo': 'claras',
+      'lata atún': 'atún', 'lata de atún': 'atún',
+      'salmon': 'salmón', 'brocoli': 'brócoli',
+      'cuscus': 'cuscús', 'requeson': 'requesón', 'kefir': 'kéfir', 'seitan': 'seitán',
+      'pechuga': 'pechuga de pollo',
+    };
+    return (alias[s] !== undefined ? alias[s] : s).trim();
+  }
+
+  function _procesarIngredientes(optIngredientes, callback) {
+    // Algunos campos usan " + " para unir dos ingredientes: "4 claras + 1 huevo"
+    const partes = optIngredientes.split(',').flatMap(p => p.split(/\s+\+\s+/));
+    partes.forEach(ing => {
+      const clean = ing.trim().toLowerCase();
+      if (!clean || clean.length < 2) return;
+      const key = _normIngrediente(clean);
+      if (!key || key.length < 2) return;
+      const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
+      const gramos = m ? parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1) : 0;
+      callback(key, gramos);
+    });
+  }
+
   function generarListaCompra() {
     if (!generatedPlan?.nutricion) return;
     if (!comidasSemana.length) inicializarComidasSemana();
@@ -12060,17 +12102,13 @@
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
-        opt.ingredientes.split(',').forEach(ing => {
-          const clean = ing.trim().toLowerCase();
-          if (!clean || clean.length < 2) return;
-          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
+        _procesarIngredientes(opt.ingredientes, (key, gramos) => {
           if (!ingredientes[key]) {
-            ingredientes[key] = { nombre: clean, cantidad: 0, dias: new Set(), veces: 0 };
+            ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, dias: new Set(), veces: 0 };
           }
           ingredientes[key].veces++;
           ingredientes[key].dias.add(diasNombres[dia]);
-          const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
-          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+          if (gramos > 0) ingredientes[key].cantidad += gramos;
         });
       });
     }
@@ -12092,13 +12130,11 @@
         const cant = ing.cantidad > 0
           ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
           : `×${ing.veces}`;
-        const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
-        const capitalizado = nombre.charAt(0).toUpperCase() + nombre.slice(1);
         let cat = 'Otros';
         for (const [c, re] of Object.entries(categorias)) {
-          if (c !== 'Otros' && re.test(nombre.toLowerCase())) { cat = c; break; }
+          if (c !== 'Otros' && re.test(ing.nombre.toLowerCase())) { cat = c; break; }
         }
-        return { nombre: capitalizado, cant, veces: ing.veces, cat };
+        return { nombre: ing.nombre, cant, veces: ing.veces, cat };
       });
 
     const porCategoria = {};
@@ -12184,14 +12220,10 @@
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
-        opt.ingredientes.split(',').forEach(ing => {
-          const clean = ing.trim().toLowerCase();
-          if (!clean || clean.length < 2) return;
-          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
-          if (!ingredientes[key]) ingredientes[key] = { nombre: clean, cantidad: 0, veces: 0 };
+        _procesarIngredientes(opt.ingredientes, (key, gramos) => {
+          if (!ingredientes[key]) ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, veces: 0 };
           ingredientes[key].veces++;
-          const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
-          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+          if (gramos > 0) ingredientes[key].cantidad += gramos;
         });
       });
     }
@@ -12201,10 +12233,9 @@
         const cant = ing.cantidad > 0
           ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`)
           : `×${ing.veces}`;
-        const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
-        return `☐ ${nombre.charAt(0).toUpperCase() + nombre.slice(1)} — ${cant}`;
+        return `☐ ${ing.nombre} — ${cant}`;
       }).join('\n');
-    navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles'));
+    navigator.clipboard.writeText(texto).then(() => showToast('Lista copiada al portapapeles')).catch(() => showToast('No se pudo copiar'));
   }
 
   function descargarPlanPDF() {
