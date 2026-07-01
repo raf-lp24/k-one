@@ -204,7 +204,7 @@ async function handleCronRetencion(req, res) {
             </div>
           `)
         });
-        await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, datos: JSON.stringify({ nombre, entrenos, racha, semana }) });
+        await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, datos: JSON.stringify({ nombre, entrenos, racha, semana, resumen: `Resumen semana ${semana}: ${entrenos} entrenos, racha ${racha} días. Mensaje: "${mensajeSemana}"` }) });
         enviadosResumen++;
       }
     }
