@@ -5347,7 +5347,7 @@
     </div>
     <div class="hero-demo" aria-hidden="true">
       <div class="hero-demo-inner">
-        <video autoplay muted loop playsinline>
+        <video autoplay muted loop playsinline preload="metadata" poster="/og-image.png">
           <source src="/demo.mp4" type="video/mp4">
         </video>
       </div>
@@ -5404,7 +5404,7 @@
   <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
     <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
       <button onclick="this.closest('#heroVideoModal').style.display='none';this.closest('#heroVideoModal').querySelector('video').pause()" style="position:absolute;top:-44px;right:0;background:var(--brasa);border:none;color:#fff;font-size:14px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center">✕</button>
-      <video controls playsinline style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
+      <video controls playsinline preload="none" poster="/og-image.png" style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
         <source src="/demo.mp4" type="video/mp4">
       </video>
     </div>
@@ -6322,7 +6322,6 @@
             <div class="radio-group" id="dieta">
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Como de todo</div>
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Vegetariano/a</div>
-              <div class="radio-opt" onclick="selectRadio(this,'dieta')">Vegano/a</div>
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Sin gluten</div>
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Sin lactosa</div>
             </div>
@@ -9815,18 +9814,24 @@
       });
     }
 
-    // FILTRO VEGETARIANO/VEGANO: eliminar opciones con ingredientes animales
+    // FILTRO VEGETARIANO/VEGANO: eliminar opciones con ingredientes animales.
+    // La opción "Vegano" ya no se ofrece en el formulario, pero mantenemos el
+    // filtro para cuentas antiguas que la tuvieran guardada. Los fallbacks nunca
+    // devuelven carne/pescado a alguien que eligió una dieta vegetariana/vegana.
     if (esVegetariano) {
       const carneRegex = /pollo|pechuga|pavo|ternera|solomillo|cerdo|cordero|jamón|jamon|salmón|salmon|atún|atun|merluza|bacalao|lubina|dorada|gambas|langostino|calamar|sepia|anchoa|sardina|caballa|rape|mero/i;
       const esVegano = u.dieta && u.dieta.includes('Vegano');
       const veganRegex = /huevo|claras|clara de|tortilla|yogur|queso|requesón|requeson|cottage|kéfir|kefir|skyr|leche(?! de )|whey|miel\b/i;
       nutricion = nutricion.map(m => {
-        const filtradas = m.opciones.filter(o => {
-          const txt = o.nombre + ' ' + o.ingredientes;
-          if (carneRegex.test(txt)) return false;
-          if (esVegano && veganRegex.test(txt)) return false;
-          return true;
-        });
+        // Paso 1: fuera carne y pescado (base vegetariana).
+        const sinCarne = m.opciones.filter(o => !carneRegex.test(o.nombre + ' ' + o.ingredientes));
+        let filtradas = sinCarne;
+        if (esVegano) {
+          // Paso 2 (vegano): fuera también lácteos/huevos/miel. Si esto vaciara la
+          // lista, se cae a la base vegetariana (sin carne), NUNCA a la original.
+          const sinAnimal = sinCarne.filter(o => !veganRegex.test(o.nombre + ' ' + o.ingredientes));
+          filtradas = sinAnimal.length > 0 ? sinAnimal : sinCarne;
+        }
         return { ...m, opciones: filtradas.length > 0 ? filtradas : m.opciones.slice(0, 1) };
       });
     }
@@ -11474,6 +11479,33 @@
     if (paywallDesc) paywallDesc.textContent = `Has disfrutado de K-One por ${KONE_PRICES.oferta} durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.`;
     const ofertaSpan = document.querySelector('#paywallOfertaBox .price-amount span');
     if (ofertaSpan) ofertaSpan.textContent = KONE_PRICES.oferta;
+    _sincronizarPreciosJsonLd();
+  }
+
+  // Mantiene los precios del structured data (JSON-LD) en sync con KONE_PRICES.
+  // El HTML estático ya trae los valores correctos para los crawlers que no ejecutan
+  // JS; esto cubre el render JS de Google y evita desincronización si cambian precios.
+  function _sincronizarPreciosJsonLd() {
+    try {
+      const script = document.querySelector('script[type="application/ld+json"]');
+      if (!script) return;
+      const num = s => (KONE_PRICES[s] || '').replace('€', '').replace(',', '.').trim();
+      const mapaOferta = {
+        'Primer mes de prueba': num('oferta'),
+        'Plan mensual completo': num('completo'),
+        'Solo nutrición': num('nutricion'),
+      };
+      const data = JSON.parse(script.textContent);
+      (data['@graph'] || []).forEach(nodo => {
+        if (nodo['@type'] === 'Product' && Array.isArray(nodo.offers)) {
+          nodo.offers.forEach(of => { if (mapaOferta[of.name]) of.price = mapaOferta[of.name]; });
+        }
+        if (nodo['@type'] === 'SoftwareApplication' && nodo.offers) {
+          nodo.offers.price = num('oferta');
+        }
+      });
+      script.textContent = JSON.stringify(data, null, 2);
+    } catch (e) { /* JSON-LD malformado: no rompemos la app por esto */ }
   }
 
   // Convierte el texto de un radio de periodicidad ("Mensual"/"Trimestral"/"Anual") en su clave.
