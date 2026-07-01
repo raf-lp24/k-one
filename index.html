@@ -12164,10 +12164,12 @@
     // Quitar cantidad inicial (enteros, fracciones 1/2, decimales 1.5) con o sin unidad
     s = s.replace(/^\d+([./]\d+)?\s*(?:g|gr|ml|kg|l|ud|uds|cdas?|cditas?|x)?\b\s*/i, '');
 
-    // "lata/bote/rebanada(s) [de] X" → "X"
+    // "lata/bote/rebanada(s)/tosta(da)(s) [de] [pan] X" → "X"
     s = s.replace(/^(latas?|botes?)\s+de\s+/i, '');
-    s = s.replace(/^latas?\s+/i, '');           // "latas atún" (sin "de")
-    s = s.replace(/^rebanadas?\s+(?:de\s+)?/i, '');  // "rebanadas de pan centeno" → "pan centeno"
+    s = s.replace(/^latas?\s+/i, '');
+    s = s.replace(/^rebanadas?\s+(?:de\s+)?/i, '');
+    s = s.replace(/^tostas?\s+(?:de\s+)?/i, '');           // "tosta de centeno" → "centeno"
+    s = s.replace(/^tostadas?\s+(?:de\s+)?(?:pan\s+)?/i, ''); // "tostadas de pan centeno" → "centeno", "tostadas integrales" → "integrales"
 
     // Quitar métodos de cocción/preparación al FINAL del nombre
     // También soporta "asada con romero", "al horno con especias" (prep + complemento)
@@ -12208,9 +12210,14 @@
       'plátano maduro': 'plátano', 'plátano grande': 'plátano',
       // Pan (plural y variantes)
       'panes': 'pan', 'panes integrales': 'pan integral',
-      // Pan (rebanadas → tipo de pan)
+      // Pan integral — todas las variantes de tostada integral quedan aquí tras stripping
+      'integral': 'pan integral', 'integrales': 'pan integral',
+      'pan tostado integral': 'pan integral',
+      // Pan de centeno — "tosta/tostada/rebanada de centeno" → "centeno" → aquí
       'centeno': 'pan de centeno', 'pan centeno': 'pan de centeno',
       'centeno con tomate': 'pan de centeno',
+      // Otros panes comunes
+      'pan de molde': 'pan de molde', 'pan molde': 'pan de molde',
       // Atún (variantes sin tilde y con "de" explícito)
       'latas de atún': 'latas de atún', 'lata de atun': 'latas de atún', 'latas de atun': 'latas de atún',
       // Patata
