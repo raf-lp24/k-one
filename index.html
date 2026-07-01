@@ -5735,8 +5735,8 @@
       <div class="price-card">
         <div class="price-badge">Oferta del mes</div>
         <div class="price-tag">// Empieza aquí</div>
-        <div class="price-amount">1,99€</div>
-        <div class="price-period">30 días · Después 19,99€/mes</div>
+        <div class="price-amount" data-kp="oferta">1,99€</div>
+        <div class="price-period" data-kp-period="oferta">30 días · Después 19,99€/mes</div>
         <p class="price-desc">Acceso completo. Al terminar, pasa al plan que elijas. Cambio de plan en el siguiente período. Cancela cuando quieras.</p>
         <ul class="price-features">
           <li>Plan de entreno personalizado</li>
@@ -5749,7 +5749,7 @@
       </div>
       <div class="price-card">
         <div class="price-tag">// Mensual</div>
-        <div class="price-amount">19,99€</div>
+        <div class="price-amount" data-kp="completo">19,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">Sin compromiso. Cancela el día que quieras desde tu perfil, sin llamadas.</p>
         <ul class="price-features">
@@ -5764,8 +5764,8 @@
       <div class="price-card featured">
         <div class="price-badge">Más popular</div>
         <div class="price-tag">// Trimestral</div>
-        <div class="price-amount">44,99€</div>
-        <div class="price-period">Cada 3 meses · 15€/mes · Ahorras 15€</div>
+        <div class="price-amount" data-kp="trimestral">44,99€</div>
+        <div class="price-period" data-kp-period="trimestral">Cada 3 meses · 15€/mes · Ahorras 15€</div>
         <p class="price-desc">Un trimestre es donde empieza el cambio real. Precio fijo garantizado.</p>
         <ul class="price-features">
           <li>Todo lo del plan mensual</li>
@@ -5777,7 +5777,7 @@
       </div>
       <div class="price-card">
         <div class="price-tag">// Anual</div>
-        <div class="price-amount">149,99€</div>
+        <div class="price-amount" data-kp="anual">149,99€</div>
         <div class="price-period">Al año · 12,49€/mes · Ahorras 90€</div>
         <p class="price-desc">Para quien se toma en serio el proceso. El precio más bajo de todos los planes.</p>
         <ul class="price-features">
@@ -5790,7 +5790,7 @@
       </div>
       <div class="price-card">
         <div class="price-tag">// Solo nutrición</div>
-        <div class="price-amount">9,99€</div>
+        <div class="price-amount" data-kp="nutricion">9,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">Solo alimentación. Sin entrenamiento. Para quien ya entrena con su entrenador.</p>
         <ul class="price-features">
@@ -10319,11 +10319,23 @@
         const min = Math.min(img.width, img.height);
         const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
         ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
-        userData.fotoPerfil = canvas.toDataURL('image/jpeg', 0.8);
-        aplicarAvatarPerfil();
-        const user = getCurrentUser();
-        if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
-        showToast('Foto de perfil actualizada.');
+        canvas.toBlob(async (blob) => {
+          let fotoUrl = null;
+          if (_supaUserId) {
+            const path = `${_supaUserId}/perfil.jpg`;
+            const { error } = await supa.storage.from('fotos-progreso').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+            if (error) {
+              console.warn('[fotoPerfil] Error subiendo a Storage:', error.message);
+            } else {
+              fotoUrl = supa.storage.from('fotos-progreso').getPublicUrl(path).data.publicUrl;
+            }
+          }
+          userData.fotoPerfil = fotoUrl || canvas.toDataURL('image/jpeg', 0.8);
+          aplicarAvatarPerfil();
+          const user = getCurrentUser();
+          if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+          showToast('Foto de perfil actualizada.');
+        }, 'image/jpeg', 0.8);
       };
       img.onerror = () => showToast('No se pudo procesar la imagen.');
       img.src = e.target.result;
@@ -10938,6 +10950,7 @@
   function onFotoSelected(event) {
     const file = event.target.files[0];
     if (!file || fotoSlotActivo === null) return;
+    const mes = fotoSlotActivo;
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
@@ -10953,10 +10966,22 @@
         canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         normalizarFotos();
-        userData.fotosProgreso[fotoSlotActivo] = canvas.toDataURL('image/jpeg', 0.6);
-        fotoPagina = Math.floor((fotoSlotActivo - 1) / 4);
-        renderFotosProgreso();
-        guardarProgresoUsuario();
+        canvas.toBlob(async (blob) => {
+          let fotoUrl = null;
+          if (_supaUserId) {
+            const path = `${_supaUserId}/mes-${mes}.jpg`;
+            const { error } = await supa.storage.from('fotos-progreso').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+            if (error) {
+              console.warn('[fotosProgreso] Error subiendo a Storage:', error.message);
+            } else {
+              fotoUrl = supa.storage.from('fotos-progreso').getPublicUrl(path).data.publicUrl;
+            }
+          }
+          userData.fotosProgreso[mes] = fotoUrl || canvas.toDataURL('image/jpeg', 0.6);
+          fotoPagina = Math.floor((mes - 1) / 4);
+          renderFotosProgreso();
+          guardarProgresoUsuario();
+        }, 'image/jpeg', 0.6);
       };
       img.src = reader.result;
     };
@@ -10967,6 +10992,11 @@
   function eliminarFoto(event, mes) {
     event.stopPropagation();
     normalizarFotos();
+    const urlActual = userData.fotosProgreso[mes];
+    if (_supaUserId && urlActual && !urlActual.startsWith('data:')) {
+      supa.storage.from('fotos-progreso').remove([`${_supaUserId}/mes-${mes}.jpg`])
+        .then(({ error }) => { if (error) console.warn('[fotosProgreso] Error eliminando de Storage:', error.message); });
+    }
     delete userData.fotosProgreso[mes];
     renderFotosProgreso();
     guardarProgresoUsuario();
@@ -11370,22 +11400,49 @@
   }
 
   // ===== REGLA DE PRECIOS =====
-  // Primer mes desde el registro (DIAS_PRUEBA): 1,99€ siempre, sea cual sea el plan.
+  // Fuente única de verdad para todos los precios mostrados en la app.
+  // Cambiar aquí actualiza automáticamente paywall, modales y tarjetas de precio.
+  const KONE_PRICES = {
+    oferta:     '1,99€',
+    completo:   '19,99€',
+    trimestral: '44,99€',
+    anual:      '149,99€',
+    nutricion:  '9,99€',
+  };
+
+  // Primer mes desde el registro (DIAS_PRUEBA): oferta siempre, sea cual sea el plan.
   // Pasado el primer mes: precio según tipo de plan y periodicidad elegida (ver PRECIOS).
   // Esta regla aplica tanto al paywall (fin de mes de prueba) como al cambio de plan desde "Hoy".
   const PRECIOS = {
     'Plan completo: entrenamiento + nutrición': {
-      mensual: { precio: '19,99€', periodo: 'mes', dias: 30, detalle: 'El plan completo cuesta 19,99€/mes a partir de tu próximo cobro.' },
-      trimestral: { precio: '44,99€', periodo: 'trimestre', dias: 90, detalle: 'El plan completo trimestral cuesta 44,99€ cada 3 meses (≈15€/mes) a partir de tu próximo cobro.' },
-      anual: { precio: '149,99€', periodo: 'año', dias: 365, detalle: 'El plan completo anual cuesta 149,99€/año (≈12,49€/mes) a partir de tu próximo cobro.' }
+      mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` },
+      trimestral: { precio: KONE_PRICES.trimestral, periodo: 'trimestre', dias: 90,  detalle: `El plan completo trimestral cuesta ${KONE_PRICES.trimestral} cada 3 meses (≈15€/mes) a partir de tu próximo cobro.` },
+      anual:      { precio: KONE_PRICES.anual,      periodo: 'año',       dias: 365, detalle: `El plan completo anual cuesta ${KONE_PRICES.anual}/año (≈12,49€/mes) a partir de tu próximo cobro.` }
     },
     'Solo nutrición, sin entrenamiento': {
-      mensual: { precio: '9,99€', periodo: 'mes', dias: 30, detalle: 'El plan "Solo nutrición" cuesta 9,99€/mes a partir de tu próximo cobro.' }
+      mensual:    { precio: KONE_PRICES.nutricion,  periodo: 'mes',       dias: 30,  detalle: `El plan "Solo nutrición" cuesta ${KONE_PRICES.nutricion}/mes a partir de tu próximo cobro.` }
     }
   };
 
   function preciosPlan(tipoPlan) {
     return PRECIOS[tipoPlan] || PRECIOS['Plan completo: entrenamiento + nutrición'];
+  }
+
+  // Sincroniza todos los elementos [data-kp] con KONE_PRICES.
+  // Llamar una vez al cargar y cada vez que KONE_PRICES cambie.
+  function _sincronizarPrecios() {
+    document.querySelectorAll('[data-kp]').forEach(el => {
+      const k = el.getAttribute('data-kp');
+      if (KONE_PRICES[k]) el.textContent = KONE_PRICES[k];
+    });
+    const ofertaPeriod = document.querySelector('[data-kp-period="oferta"]');
+    if (ofertaPeriod) ofertaPeriod.textContent = `30 días · Después ${KONE_PRICES.completo}/mes`;
+    const trimPeriod = document.querySelector('[data-kp-period="trimestral"]');
+    if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 15€/mes · Ahorras 15€`;
+    const paywallDesc = document.getElementById('paywallDesc');
+    if (paywallDesc) paywallDesc.textContent = `Has disfrutado de K-One por ${KONE_PRICES.oferta} durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.`;
+    const ofertaSpan = document.querySelector('#paywallOfertaBox .price-amount span');
+    if (ofertaSpan) ofertaSpan.textContent = KONE_PRICES.oferta;
   }
 
   // Convierte el texto de un radio de periodicidad ("Mensual"/"Trimestral"/"Anual") en su clave.
@@ -11411,7 +11468,7 @@
   function precioPlanActual(tipoPlan, creadoISO, periodicidad) {
     const dias = creadoISO ? (Date.now() - new Date(creadoISO).getTime()) / (1000 * 60 * 60 * 24) : Infinity;
     if (dias <= DIAS_PRUEBA) {
-      return { precio: '1,99€', detalle: 'Sigues en tu primer mes a 1,99€. Al renovar pasará a 19,99€/mes (o al plan que elijas).' };
+      return { precio: KONE_PRICES.oferta, detalle: `Sigues en tu primer mes a ${KONE_PRICES.oferta}. Al renovar pasará a ${KONE_PRICES.completo}/mes (o al plan que elijas).` };
     }
     const opcion = preciosPlan(tipoPlan)[periodicidad || 'mensual'] || preciosPlan(tipoPlan).mensual;
     return { precio: `${opcion.precio}/${opcion.periodo}`, detalle: opcion.detalle };
@@ -15239,6 +15296,7 @@
   };
 
   window.onload = async () => {
+    _sincronizarPrecios();
     cargarTestimoniosLanding();
     mostrarCookieBanner();
     updateProgress();
