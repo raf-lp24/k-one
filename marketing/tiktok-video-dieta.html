@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeo TikTok: dieta y lista de la compra</title>
+<style>
+  body { background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; margin:0; min-height:100vh; justify-content:center; }
+  canvas { height:min(72vh,720px); aspect-ratio:9/16; border-radius:10px; box-shadow:0 0 50px rgba(232,73,15,.2); background:#0b0b0b; }
+  .btns { display:flex; gap:10px; }
+  button { background:#E8490F; color:#fff; border:0; border-radius:8px; padding:13px 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.sec { background:#222; }
+  button:disabled { opacity:.4; cursor:default; }
+  #status { font-size:14px; color:#888; min-height:20px; text-align:center; max-width:460px; line-height:1.5; }
+  a.dl { color:#E8490F; font-weight:700; }
+</style>
+</head>
+<body>
+
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="btns">
+  <button id="gen">🎬 GENERAR VÍDEO (28s)</button>
+  <button class="sec" id="prev">Solo ver</button>
+</div>
+<div id="status">Pulsa <b>Generar vídeo</b>: se reproduce una vez y al acabar se descarga el archivo listo para WhatsApp/TikTok (1080×1920).</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 1080, H = 1920;
+const TOTAL = 28;
+
+const COL = {
+  naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
+  hueso:'#F0EDE8', metal:'#b5b2ad', blanco:'#ffffff', gris:'#888888',
+  borde:'#222222', sep:'#1d1d1d', verde:'#27ae60'
+};
+const FONT = '"Segoe UI", Arial, sans-serif';
+const MONO = 'Consolas, "Courier New", monospace';
+
+/* ---------- helpers ---------- */
+const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+const easeOut = x => 1 - Math.pow(1-x,3);
+function popE(x){ const c = 1.70158; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); }
+function up(tl, d, dur=0.55){ const x = clamp((tl-d)/dur, 0, 1); return { a:x, dy:40*(1-easeOut(x)) }; }
+function pop(tl, d, dur=0.5){ const x = clamp((tl-d)/dur, 0, 1); return { a:clamp(x*2,0,1), s: x===0 ? .6 : .6+.4*popE(x) }; }
+
+function setFont(size, weight='400', mono=false, ls=0){
+  ctx.font = `${weight} ${size}px ${mono?MONO:FONT}`;
+  ctx.letterSpacing = ls + 'px';
+}
+function txt(str, x, y, size, {w='400', col='#fff', align='center', mono=false, ls=0, a=1} = {}){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, w, mono, ls);
+  ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function rich(segs, cx, y, size, weight='900', a=1, dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, weight);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tot = segs.reduce((s,seg)=> s + ctx.measureText(seg.t).width, 0);
+  let x = cx - tot/2;
+  for (const seg of segs){
+    ctx.fillStyle = seg.c || '#fff';
+    ctx.fillText(seg.t, x, y + dy);
+    x += ctx.measureText(seg.t).width;
+  }
+  ctx.restore();
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function card(x,y,w,h,a=1,dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  rrect(x, y+dy, w, h, 22);
+  ctx.fillStyle = COL.grafito; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function cursor(x, y, a=1, tapK=0){
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.beginPath(); ctx.arc(x, y, 26*(1-0.3*tapK), 0, Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.28)'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.stroke();
+  ctx.restore();
+}
+function logoK(cx, y, size, a=1, s=1){
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.translate(cx,y); ctx.scale(s,s); ctx.translate(-cx,-y);
+  setFont(size,'900',false,6);
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  const w1 = ctx.measureText('K-').width, w2 = ctx.measureText('ONE').width;
+  let x = cx-(w1+w2)/2;
+  ctx.fillStyle='#fff'; ctx.fillText('K-',x,y);
+  ctx.fillStyle=COL.naranja; ctx.fillText('ONE',x+w1,y);
+  ctx.restore();
+}
+
+/* ---------- timeline ----------
+   s1 0     hook
+   s2 2.6   logo "así funciona la nutrición"
+   s3 4.4   tu semana día a día (tabs de días + comidas del día)
+   s4 9.4   5 opciones por comida (rotan + selección)
+   s5 14.4  "¿la compra? un botón"
+   s6 17    lista de la compra apareciendo
+   s7 22.4  sumada y agrupada / descárgala
+   s8 25    CTA precio + cierre
+--------------------------------- */
+const T = { s1:0, s2:2.6, s3:4.4, s4:9.4, s5:14.4, s6:17, s7:22.4, s8:25 };
+
+function s1(tl){ // HOOK
+  const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
+  ctx.fillStyle = `rgba(232,73,15,${0.12*fa})`; ctx.fillRect(0,0,W,H);
+  const p = pop(tl, 0.15);
+  ctx.save(); ctx.translate(W/2, 830); ctx.scale(p.s,p.s); ctx.translate(-W/2,-830);
+  rich([{t:'Mi dieta me hace',c:'#fff'}], W/2, 780, 88, '900', p.a);
+  rich([{t:'la ',c:'#fff'},{t:'lista de la compra',c:COL.naranja}], W/2, 888, 88, '900', p.a);
+  ctx.restore();
+  const u = up(tl, 0.75);
+  rich([{t:'sola. ',c:'#fff'},{t:'Mira 👇',c:COL.naranja}], W/2, 1070, 62, '800', u.a, u.dy);
+}
+
+function s2(tl){ // LOGO
+  const p = pop(tl, 0);
+  logoK(W/2, 890, 96, p.a, p.s);
+  const u = up(tl, 0.4);
+  txt('ASÍ FUNCIONA TU NUTRICIÓN', W/2, 1020+u.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u.a});
+}
+
+const DIAS = ['L','M','X','J','V','S','D'];
+const COMIDAS_DIA = [
+  ['Desayuno','Avena con claras y plátano'],
+  ['Almuerzo','Yogur griego con nueces'],
+  ['Comida','Pollo con arroz y brócoli'],
+  ['Merienda','Tostada integral con atún'],
+  ['Cena','Salmón con verduras'],
+];
+function s3(tl){ // TU SEMANA
+  const u0=up(tl,0), u1=up(tl,0.15), u2=up(tl,0.45), u3=up(tl,0.8);
+  txt('PASO 1', W/2, 400+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  txt('Tu semana, día a día', W/2, 495+u1.dy, 58, {w:'800', a:u1.a});
+  // tabs de días
+  const tabW=110, gap=18, totW=7*tabW+6*gap;
+  let x0 = W/2-totW/2;
+  const selDia = tl>=1.9 ? 1 : 0; // cursor pulsa "M"
+  const selK = tl>=1.9 ? clamp((tl-1.9)/0.3,0,1) : 0;
+  ctx.save(); ctx.globalAlpha *= u2.a;
+  DIAS.forEach((d,i)=>{
+    const tx = x0+i*(tabW+gap);
+    const sel = i===selDia;
+    const k = sel ? (i===1?selK:1) : 0;
+    rrect(tx, 590+u2.dy, tabW, 96, 16);
+    ctx.fillStyle = k>0 ? `rgba(232,73,15,${0.18*k})` : COL.grafito; ctx.fill();
+    ctx.strokeStyle = k>0 ? COL.naranja : '#2a2a2a'; ctx.lineWidth=3; ctx.stroke();
+    txt(d, tx+tabW/2, 640+u2.dy, 40, {w:'800', col:k>0?'#fff':COL.metal});
+  });
+  ctx.restore();
+  // cursor sobre la M
+  if (tl>=1.2 && tl<2.6){
+    const mx = x0+1*(tabW+gap)+tabW/2, my=638+u2.dy;
+    const tapK = (tl>1.75 && tl<2.05) ? Math.sin((tl-1.75)/0.3*Math.PI) : 0;
+    const ca = tl<1.5 ? (tl-1.2)/0.3 : (tl>2.35 ? clamp((2.6-tl)/0.25,0,1) : 1);
+    cursor(mx, my, ca, tapK);
+  }
+  // comidas del día (aparecen escalonadas tras elegir día)
+  const cx0=96, cw=W-192;
+  COMIDAS_DIA.forEach((c,i)=>{
+    const ui = up(tl, 2.3+i*0.16, 0.45);
+    card(cx0, 760+i*128, cw, 108, ui.a*u3.a? ui.a : ui.a, ui.dy);
+    ctx.save(); ctx.globalAlpha = ui.a;
+    txt(c[0].toUpperCase(), cx0+46, 760+i*128+34+ui.dy, 24, {col:COL.naranja, w:'700', mono:true, ls:3, align:'left'});
+    txt(c[1], cx0+46, 760+i*128+74+ui.dy, 34, {col:'#e6e3de', w:'600', align:'left'});
+    txt('5 op.', cx0+cw-46, 760+i*128+54+ui.dy, 28, {col:COL.metal, mono:true, align:'right'});
+    ctx.restore();
+  });
+  txt('5 comidas al día, cada día de la semana', W/2, 1500+u3.dy, 37, {col:COL.metal, a: up(tl,3.2).a});
+}
+
+const OPS = [
+  ['Pollo con arroz y brócoli','520 kcal · 42g prot'],
+  ['Ternera con boniato','545 kcal · 40g prot'],
+  ['Merluza con patata y judías','480 kcal · 38g prot'],
+  ['Pavo con cuscús','510 kcal · 41g prot'],
+  ['Tortilla de claras con arroz','495 kcal · 36g prot'],
+];
+function s4(tl){ // 5 OPCIONES
+  const u0=up(tl,0), u1=up(tl,0.15), u2=up(tl,0.45), u3=up(tl,0.75);
+  txt('PASO 2', W/2, 420+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'Eliges entre ',c:'#fff'},{t:'5 opciones',c:COL.naranja}], W/2, 515, 58, '800', u1.a, u1.dy);
+  txt('la que te apetezca hoy', W/2, 590+u1.dy, 58, {w:'800', a:u1.a});
+  const cx0=96, cw=W-192;
+  // la opción elegida (índice 2) se marca a partir de tl 3.3
+  const selI = 2;
+  const selK = tl>=3.3 ? clamp((tl-3.3)/0.3,0,1) : 0;
+  OPS.forEach((o,i)=>{
+    const ui = up(tl, 0.6+i*0.14, 0.45);
+    const y = 700+i*146;
+    const k = i===selI ? selK : 0;
+    ctx.save(); ctx.globalAlpha *= ui.a;
+    rrect(cx0, y+ui.dy, cw, 126, 20);
+    ctx.fillStyle = k>0 ? `rgba(232,73,15,${0.14*k})` : COL.grafito; ctx.fill();
+    ctx.strokeStyle = k>0 ? COL.naranja : COL.borde; ctx.lineWidth=3; ctx.stroke();
+    txt(`OPCIÓN ${i+1}`, cx0+46, y+38+ui.dy, 23, {col:COL.naranja, w:'700', mono:true, ls:3, align:'left'});
+    txt(o[0], cx0+46, y+82+ui.dy, 34, {col:'#e6e3de', w:'600', align:'left'});
+    txt(o[1], cx0+cw-46, y+62+ui.dy, 26, {col:COL.metal, mono:true, align:'right'});
+    if (k>0){
+      ctx.globalAlpha = k;
+      txt('✓', cx0+cw-46, y+30+ui.dy, 38, {col:COL.verde, w:'900', align:'right'});
+    }
+    ctx.restore();
+  });
+  // cursor baja hasta la opción 3 y pulsa
+  if (tl>=2.2 && tl<4.2){
+    const y1 = 700+0*146+63, y2 = 700+selI*146+63;
+    const m = clamp((tl-2.2)/0.8,0,1), e = easeOut(m);
+    const cy2 = y1+(y2-y1)*e;
+    const tapK = (tl>3.2 && tl<3.5) ? Math.sin((tl-3.2)/0.3*Math.PI) : 0;
+    const ca = tl<2.5 ? (tl-2.2)/0.3 : (tl>3.9 ? clamp((4.2-tl)/0.3,0,1) : 1);
+    cursor(W/2+280, cy2, ca, tapK);
+  }
+}
+
+function s5(tl){ // ¿LA COMPRA? UN BOTÓN
+  const p = pop(tl, 0.1);
+  ctx.save(); ctx.translate(W/2,760); ctx.scale(p.s,p.s); ctx.translate(-W/2,-760);
+  rich([{t:'¿Y la compra?',c:'#fff'}], W/2, 760, 88, '900', p.a);
+  ctx.restore();
+  const u = up(tl, 0.6);
+  // botón grande
+  const bw = 720, bh = 130, bx = W/2-bw/2, by = 920;
+  ctx.save(); ctx.globalAlpha = u.a;
+  ctx.shadowColor='rgba(232,73,15,.5)'; ctx.shadowBlur=50;
+  rrect(bx, by+u.dy, bw, bh, 18);
+  ctx.fillStyle = COL.naranja; ctx.fill();
+  ctx.shadowBlur=0;
+  txt('🛒  GENERAR LISTA DE LA COMPRA', W/2, by+bh/2+u.dy, 34, {w:'800', col:'#fff'});
+  ctx.restore();
+  // cursor pulsa el botón
+  if (tl>=1.1 && tl<2.4){
+    const tapK = (tl>1.6 && tl<1.9) ? Math.sin((tl-1.6)/0.3*Math.PI) : 0;
+    const ca = tl<1.4 ? (tl-1.1)/0.3 : (tl>2.1 ? clamp((2.4-tl)/0.3,0,1) : 1);
+    cursor(W/2+140, by+bh/2+u.dy, ca, tapK);
+  }
+  txt('Un botón. En serio.', W/2, 1150+u.dy, 44, {col:COL.metal, a:up(tl,1.9).a, w:'600'});
+}
+
+const LISTA = [
+  ['PROTEÍNAS', [['Pechuga de pollo','1,2 kg'],['Latas de atún','×4'],['Salmón','500 g'],['Huevos','×12']]],
+  ['CEREALES E HIDRATOS', [['Arroz','800 g'],['Pan integral','2 barras'],['Avena','500 g'],['Boniato','600 g']]],
+  ['VERDURAS Y FRUTA', [['Brócoli','600 g'],['Judías verdes','400 g'],['Plátanos','×7'],['Tomates','×6']]],
+];
+function s6(tl){ // LISTA DE LA COMPRA
+  const u0=up(tl,0), u1=up(tl,0.15);
+  txt('TU LISTA DE LA SEMANA', W/2, 330+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  txt('Todo sumado. Nada de pensar.', W/2, 415+u1.dy, 50, {w:'800', a:u1.a});
+  const cx0=96, cw=W-192;
+  let y = 520;
+  let idx = 0;
+  LISTA.forEach(([cat, items], ci)=>{
+    const uc = up(tl, 0.5+idx*0.13, 0.4);
+    ctx.save(); ctx.globalAlpha = uc.a;
+    txt(cat, cx0+8, y+30+uc.dy, 27, {col:COL.naranja, w:'700', mono:true, ls:3, align:'left'});
+    ctx.restore();
+    idx++;
+    y += 66;
+    items.forEach(([n,q])=>{
+      const ui = up(tl, 0.5+idx*0.13, 0.4);
+      ctx.save(); ctx.globalAlpha = ui.a;
+      card(cx0, y, cw, 82, 1, ui.dy);
+      txt('✓', cx0+42, y+42+ui.dy, 32, {col:COL.verde, w:'900', align:'left'});
+      txt(n, cx0+100, y+42+ui.dy, 33, {col:'#e6e3de', w:'600', align:'left'});
+      txt(q, cx0+cw-46, y+42+ui.dy, 31, {col:COL.metal, mono:true, align:'right'});
+      ctx.restore();
+      idx++;
+      y += 94;
+    });
+    y += 22;
+  });
+}
+
+function s7(tl){ // SUMADA Y AGRUPADA
+  const p = pop(tl, 0.1);
+  ctx.save(); ctx.translate(W/2,830); ctx.scale(p.s,p.s); ctx.translate(-W/2,-830);
+  rich([{t:'Sumada y ',c:'#fff'},{t:'agrupada',c:COL.naranja}], W/2, 780, 84, '900', p.a);
+  rich([{t:'por categorías',c:'#fff'}], W/2, 885, 84, '900', p.a);
+  ctx.restore();
+  const u = up(tl, 0.7);
+  txt('Descárgala o cópiala con un toque 📋', W/2, 1060+u.dy, 42, {col:COL.metal, a:u.a, w:'600'});
+}
+
+function s8(tl){ // CTA CIERRE
+  const u0 = up(tl, 0);
+  txt('Plan de dieta + entreno + lista de la compra', W/2, 640+u0.dy, 38, {col:COL.metal, a:u0.a});
+  const p = pop(tl, 0.35, 0.55);
+  ctx.save(); ctx.globalAlpha=p.a;
+  ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+  ctx.shadowColor='rgba(232,73,15,.55)'; ctx.shadowBlur=70;
+  txt('1,99€', W/2, 860, 190, {col:COL.naranja, w:'900'});
+  ctx.restore();
+  txt('el primer mes · sin permanencia', W/2, 1030+u0.dy, 38, {col:COL.metal, a:up(tl,0.8).a});
+  const u2 = up(tl, 1.1), u3 = up(tl, 1.4);
+  logoK(W/2, 1200+u2.dy, 76, u2.a, 1);
+  rich([{t:'k-one',c:'#fff'},{t:'.fit',c:COL.naranja},{t:'  ·  🔗 link en la bio',c:COL.metal}], W/2, 1310, 36, '700', u3.a, u3.dy);
+}
+
+/* ---------- draw ---------- */
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1; ctx.letterSpacing='0px'; ctx.shadowBlur=0;
+  ctx.fillStyle = COL.negro; ctx.fillRect(0,0,W,H);
+
+  let key='s1', start=0;
+  for (const [k,v] of Object.entries(T)) if (t>=v){ key=k; start=v; }
+  const tl = t - start;
+  const fade = clamp(tl/0.3, 0, 1);
+  ctx.globalAlpha = fade;
+  ({s1,s2,s3,s4,s5,s6,s7,s8})[key](tl);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = COL.naranja;
+  ctx.fillRect(0, 0, W*(t/TOTAL), 7);
+}
+
+/* ---------- reproducción / grabación ---------- */
+const status = document.getElementById('status');
+const btnGen = document.getElementById('gen');
+const btnPrev = document.getElementById('prev');
+let running = false;
+
+function play(record){
+  if (running) return; running = true;
+  btnGen.disabled = true; btnPrev.disabled = true;
+  window.__videoDone = 0;
+
+  let rec = null, chunks = [], mime = '', ext = '';
+  if (record){
+    const tipos = [
+      ['video/mp4;codecs=avc1.640028','mp4'],
+      ['video/mp4','mp4'],
+      ['video/webm;codecs=vp9','webm'],
+      ['video/webm','webm'],
+    ];
+    for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
+    if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
+    const stream = cv.captureStream(30);
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 9_000_000 });
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `k-one-dieta-lista.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.__videoDone = blob.size;
+      const mb = (blob.size/1048576).toFixed(1);
+      status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="k-one-dieta-lista.${ext}">k-one-dieta-lista.${ext}</a> (${mb} MB, ${ext.toUpperCase()}). Búscalo en Descargas y mándatelo por WhatsApp.`;
+    };
+    rec.start(250);
+    status.textContent = `⏺ Grabando (${ext.toUpperCase()})… no cambies de pestaña durante 28 s.`;
+  } else {
+    status.textContent = '▶ Reproduciendo (sin grabar)…';
+  }
+
+  const t0 = performance.now();
+  function loop(){
+    const t = (performance.now()-t0)/1000;
+    draw(Math.min(t, TOTAL));
+    if (t < TOTAL + 0.3){ requestAnimationFrame(loop); }
+    else {
+      if (rec) rec.stop();
+      else status.textContent = 'Listo. Pulsa 🎬 para generar el archivo.';
+      running = false; btnGen.disabled = btnPrev.disabled = false;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+btnGen.addEventListener('click', () => play(true));
+btnPrev.addEventListener('click', () => play(false));
+draw(0.001);
+</script>
+</body>
+</html>
