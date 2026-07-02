@@ -175,7 +175,7 @@ module.exports = async (req, res) => {
       const semanaActual = refSemana
         ? Math.max(1, Math.floor((ahora.getTime() - new Date(refSemana).getTime()) / (7 * 86400000)) + 1)
         : (ud.progreso?.semana || 1);
-      const renovacion    = s?.current_period_end || null;
+      const renovacion    = s?.current_period_end || p.beta_expires || null;
       const renovaProximo = activo && renovacion && new Date(renovacion) <= en7d && new Date(renovacion) >= ahora;
       const sinOnboarding14d = !ud.onboardingCompletado && diasDesdeAlta >= 14;
 

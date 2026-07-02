@@ -14355,7 +14355,7 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Alta', _fmtFecha(c.alta))}
-        ${row('Renueva', _fmtFecha(c.renovacion))}
+        ${row(c.isBeta ? 'Expira premium' : 'Renueva', _fmtFecha(c.renovacion))}
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:10px">
         ${row('Última conexión', _fmtRelativo(c.ultimaConexion) + (c.ultimaConexion ? ' · ' + _fmtFecha(c.ultimaConexion) : ''), _colorConexion(c.ultimaConexion))}
