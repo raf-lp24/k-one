@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeo TikTok: entrenamiento, variantes y vídeos</title>
+<style>
+  body { background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; margin:0; min-height:100vh; justify-content:center; }
+  canvas { height:min(72vh,720px); aspect-ratio:9/16; border-radius:10px; box-shadow:0 0 50px rgba(232,73,15,.2); background:#0b0b0b; }
+  .btns { display:flex; gap:10px; }
+  button { background:#E8490F; color:#fff; border:0; border-radius:8px; padding:13px 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.sec { background:#222; }
+  button:disabled { opacity:.4; cursor:default; }
+  #status { font-size:14px; color:#888; min-height:20px; text-align:center; max-width:460px; line-height:1.5; }
+  a.dl { color:#E8490F; font-weight:700; }
+</style>
+</head>
+<body>
+
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="btns">
+  <button id="gen">🎬 GENERAR VÍDEO (28s)</button>
+  <button class="sec" id="prev">Solo ver</button>
+</div>
+<div id="status">Pulsa <b>Generar vídeo</b>: se reproduce una vez y al acabar se descarga el archivo listo para WhatsApp/TikTok (1080×1920).</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 1080, H = 1920;
+const TOTAL = 28;
+
+const COL = {
+  naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
+  hueso:'#F0EDE8', metal:'#b5b2ad', blanco:'#ffffff', gris:'#888888',
+  borde:'#222222', sep:'#1d1d1d', verde:'#27ae60'
+};
+const FONT = '"Segoe UI", Arial, sans-serif';
+const MONO = 'Consolas, "Courier New", monospace';
+
+/* ---------- helpers ---------- */
+const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+const easeOut = x => 1 - Math.pow(1-x,3);
+function popE(x){ const c = 1.70158; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); }
+function up(tl, d, dur=0.55){ const x = clamp((tl-d)/dur, 0, 1); return { a:x, dy:40*(1-easeOut(x)) }; }
+function pop(tl, d, dur=0.5){ const x = clamp((tl-d)/dur, 0, 1); return { a:clamp(x*2,0,1), s: x===0 ? .6 : .6+.4*popE(x) }; }
+
+function setFont(size, weight='400', mono=false, ls=0){
+  ctx.font = `${weight} ${size}px ${mono?MONO:FONT}`;
+  ctx.letterSpacing = ls + 'px';
+}
+function txt(str, x, y, size, {w='400', col='#fff', align='center', mono=false, ls=0, a=1} = {}){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, w, mono, ls);
+  ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function rich(segs, cx, y, size, weight='900', a=1, dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, weight);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tot = segs.reduce((s,seg)=> s + ctx.measureText(seg.t).width, 0);
+  let x = cx - tot/2;
+  for (const seg of segs){
+    ctx.fillStyle = seg.c || '#fff';
+    ctx.fillText(seg.t, x, y + dy);
+    x += ctx.measureText(seg.t).width;
+  }
+  ctx.restore();
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function card(x,y,w,h,a=1,dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  rrect(x, y+dy, w, h, 22);
+  ctx.fillStyle = COL.grafito; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function cursor(x, y, a=1, tapK=0){
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.beginPath(); ctx.arc(x, y, 26*(1-0.3*tapK), 0, Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.28)'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.stroke();
+  ctx.restore();
+}
+function logoK(cx, y, size, a=1, s=1){
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.translate(cx,y); ctx.scale(s,s); ctx.translate(-cx,-y);
+  setFont(size,'900',false,6);
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  const w1 = ctx.measureText('K-').width, w2 = ctx.measureText('ONE').width;
+  let x = cx-(w1+w2)/2;
+  ctx.fillStyle='#fff'; ctx.fillText('K-',x,y);
+  ctx.fillStyle=COL.naranja; ctx.fillText('ONE',x+w1,y);
+  ctx.restore();
+}
+
+/* ---------- timeline ----------
+   s1 0     hook
+   s2 2.6   logo "así funciona tu entrenamiento"
+   s3 4.4   entrenamiento de hoy (plan del día)
+   s4 9     variantes: no te gusta → lo cambias
+   s5 14.6  vídeo de cada ejercicio
+   s6 18.2  registro de pesos + progresión
+   s7 22.2  "cada semana sube la intensidad"
+   s8 24.6  CTA cierre
+--------------------------------- */
+const T = { s1:0, s2:2.6, s3:4.4, s4:9, s5:14.6, s6:18.2, s7:22.2, s8:24.6 };
+
+function s1(tl){ // HOOK
+  const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
+  ctx.fillStyle = `rgba(232,73,15,${0.12*fa})`; ctx.fillRect(0,0,W,H);
+  const p = pop(tl, 0.15);
+  ctx.save(); ctx.translate(W/2, 830); ctx.scale(p.s,p.s); ctx.translate(-W/2,-830);
+  rich([{t:'Llego al gym y ya sé',c:'#fff'}], W/2, 780, 86, '900', p.a);
+  rich([{t:'exactamente',c:COL.naranja},{t:' qué hacer',c:'#fff'}], W/2, 886, 86, '900', p.a);
+  ctx.restore();
+  const u = up(tl, 0.75);
+  rich([{t:'series, reps, pesos y vídeos ',c:'#fff'},{t:'👇',c:COL.naranja}], W/2, 1070, 56, '800', u.a, u.dy);
+}
+
+function s2(tl){ // LOGO
+  const p = pop(tl, 0);
+  logoK(W/2, 890, 96, p.a, p.s);
+  const u = up(tl, 0.4);
+  txt('ASÍ FUNCIONA TU ENTRENAMIENTO', W/2, 1020+u.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:5, a:u.a});
+}
+
+const EJS = [
+  ['Press banca','4×8','80 kg'],
+  ['Remo con mancuerna','4×10','32 kg'],
+  ['Press militar','3×10','45 kg'],
+  ['Dominadas','3×máx','—'],
+  ['Curl bíceps barra','3×12','30 kg'],
+];
+function s3(tl){ // PLAN DE HOY
+  const u0=up(tl,0), u1=up(tl,0.15), u3=up(tl,0.8);
+  txt('PASO 1', W/2, 400+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'Tu entreno de ',c:'#fff'},{t:'hoy',c:COL.naranja}], W/2, 495, 58, '800', u1.a, u1.dy);
+  txt('adaptado a tu deporte y nivel', W/2, 570+u1.dy, 40, {col:COL.metal, a:u1.a});
+  const cx0=96, cw=W-192;
+  // cabecera del día
+  const uh = up(tl, 0.45);
+  card(cx0, 660, cw, 96, uh.a, uh.dy);
+  ctx.save(); ctx.globalAlpha=uh.a;
+  txt('MARTES · TREN SUPERIOR', cx0+46, 660+48+uh.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:3, align:'left'});
+  txt('60 min', cx0+cw-46, 660+48+uh.dy, 28, {col:COL.metal, mono:true, align:'right'});
+  ctx.restore();
+  // ejercicios
+  EJS.forEach((e,i)=>{
+    const ui = up(tl, 0.7+i*0.16, 0.45);
+    const y = 790+i*122;
+    card(cx0, y, cw, 104, ui.a, ui.dy);
+    ctx.save(); ctx.globalAlpha=ui.a;
+    txt(e[0], cx0+46, y+52+ui.dy, 34, {col:'#e6e3de', w:'600', align:'left'});
+    txt(e[1], cx0+cw-200, y+52+ui.dy, 32, {col:COL.naranja, w:'700', mono:true, align:'right'});
+    txt(e[2], cx0+cw-46, y+52+ui.dy, 28, {col:COL.metal, mono:true, align:'right'});
+    ctx.restore();
+  });
+  txt('Con descansos y calentamiento incluidos', W/2, 1500+u3.dy, 37, {col:COL.metal, a:up(tl,1.8).a});
+}
+
+function s4(tl){ // VARIANTES
+  const u0=up(tl,0), u1=up(tl,0.15);
+  txt('PASO 2', W/2, 420+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'¿Máquina ocupada?',c:'#fff'}], W/2, 515, 56, '800', u1.a, u1.dy);
+  rich([{t:'¿No te gusta? ',c:'#fff'},{t:'Lo cambias.',c:COL.naranja}], W/2, 588, 56, '800', u1.a, u1.dy);
+  const cx0=96, cw=W-192;
+  // ejercicio original (se tacha al elegir variante)
+  const swapped = tl >= 3.4;
+  const swapK = swapped ? clamp((tl-3.4)/0.35,0,1) : 0;
+  const u2 = up(tl, 0.5);
+  card(cx0, 700, cw, 110, u2.a, u2.dy);
+  ctx.save(); ctx.globalAlpha = u2.a;
+  const nombre = swapK > 0.5 ? 'Press con mancuernas' : 'Press banca';
+  txt(nombre, cx0+46, 755+u2.dy, 36, {col: swapK>0.5 ? COL.verde : '#e6e3de', w:'700', align:'left'});
+  txt('4×8', cx0+cw-46, 755+u2.dy, 32, {col:COL.naranja, w:'700', mono:true, align:'right'});
+  if (swapK>0.5) txt('✓ cambiado', cx0+cw-160, 755+u2.dy, 26, {col:COL.verde, mono:true, align:'right'});
+  ctx.restore();
+  // popup variantes
+  const uv = up(tl, 1.0);
+  ctx.save(); ctx.globalAlpha = uv.a * (swapped ? clamp(1-(tl-3.4)/0.4, 0, 1) : 1);
+  txt('VARIANTES DISPONIBLES', W/2, 900+uv.dy, 26, {col:COL.naranja, w:'700', mono:true, ls:4});
+  const VARS = ['Press con mancuernas','Press en máquina','Flexiones lastradas'];
+  VARS.forEach((v,i)=>{
+    const y = 960+i*116;
+    const sel = i===0 && tl>=3.1;
+    const k = sel ? clamp((tl-3.1)/0.3,0,1) : 0;
+    rrect(cx0+60, y, cw-120, 96, 18);
+    ctx.fillStyle = k>0 ? `rgba(232,73,15,${0.16*k})` : COL.carbon; ctx.fill();
+    ctx.strokeStyle = k>0 ? COL.naranja : '#2c2c2c'; ctx.lineWidth=3; ctx.stroke();
+    txt(v, W/2, y+48, 33, {col:k>0?'#fff':COL.metal, w:'600'});
+  });
+  ctx.restore();
+  // cursor
+  if (tl>=1.8 && tl<3.8){
+    const y0 = 960+48;
+    const tapK = (tl>2.95 && tl<3.25) ? Math.sin((tl-2.95)/0.3*Math.PI) : 0;
+    const ca = tl<2.1 ? (tl-1.8)/0.3 : (tl>3.5 ? clamp((3.8-tl)/0.3,0,1) : 1);
+    cursor(W/2+230, y0, ca, tapK);
+  }
+  txt('Misma progresión, otro ejercicio. Sin excusas.', W/2, 1400+up(tl,3.9).dy, 37, {col:COL.metal, a:up(tl,3.9).a});
+}
+
+function s5(tl){ // VÍDEOS
+  const u0=up(tl,0), u1=up(tl,0.15);
+  txt('PASO 3', W/2, 430+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'Cada ejercicio ',c:'#fff'},{t:'con vídeo',c:COL.naranja}], W/2, 525, 56, '800', u1.a, u1.dy);
+  txt('técnica correcta desde el día 1', W/2, 598+u1.dy, 40, {col:COL.metal, a:u1.a});
+  // mock reproductor
+  const uv = up(tl, 0.5);
+  const vx = 130, vw = W-260, vy = 700, vh = vw*9/16;
+  ctx.save(); ctx.globalAlpha = uv.a;
+  rrect(vx, vy+uv.dy, vw, vh, 24);
+  ctx.fillStyle = '#0f0f0f'; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth=2; ctx.stroke();
+  // silueta simple de figura con barra (stickman levantando)
+  const cxm = W/2, cym = vy+vh/2+uv.dy;
+  const bob = Math.sin(tl*2.2)*14; // sube y baja la barra
+  ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 10; ctx.lineCap='round';
+  // barra
+  ctx.beginPath(); ctx.moveTo(cxm-150, cym-70+bob); ctx.lineTo(cxm+150, cym-70+bob); ctx.stroke();
+  // discos
+  ctx.fillStyle = '#333';
+  [[-150,26],[150,26]].forEach(([dx,r])=>{ ctx.beginPath(); ctx.arc(cxm+dx, cym-70+bob, r, 0, Math.PI*2); ctx.fill(); });
+  // cuerpo
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.arc(cxm, cym+40, 26, 0, Math.PI*2); ctx.stroke(); // cabeza
+  ctx.beginPath(); ctx.moveTo(cxm, cym+66); ctx.lineTo(cxm, cym+150); ctx.stroke(); // tronco
+  ctx.beginPath(); ctx.moveTo(cxm, cym+80); ctx.lineTo(cxm-110, cym-64+bob); ctx.stroke(); // brazo izq
+  ctx.beginPath(); ctx.moveTo(cxm, cym+80); ctx.lineTo(cxm+110, cym-64+bob); ctx.stroke(); // brazo dcho
+  ctx.beginPath(); ctx.moveTo(cxm, cym+150); ctx.lineTo(cxm-50, cym+230); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cxm, cym+150); ctx.lineTo(cxm+50, cym+230); ctx.stroke();
+  // botón play pulsante
+  const pk = 1 + Math.sin(tl*3)*0.05;
+  ctx.globalAlpha = uv.a*0.92;
+  ctx.beginPath(); ctx.arc(cxm, cym+40, 74*pk, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(232,73,15,.9)'; ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(cxm-20, cym+8); ctx.lineTo(cxm-20, cym+72); ctx.lineTo(cxm+34, cym+40);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+  // etiqueta
+  const ul = up(tl, 0.9);
+  txt('▶ Press militar — técnica y errores comunes', W/2, vy+vh+80+ul.dy, 34, {col:COL.metal, a:ul.a, mono:true});
+  txt('Sin adivinar. Sin lesionarte por mala técnica.', W/2, vy+vh+170+up(tl,1.4).dy, 37, {col:COL.metal, a:up(tl,1.4).a});
+}
+
+function s6(tl){ // PESOS + PROGRESIÓN
+  const u0=up(tl,0), u1=up(tl,0.15);
+  txt('PASO 4', W/2, 420+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'Apuntas tus ',c:'#fff'},{t:'pesos',c:COL.naranja}], W/2, 515, 56, '800', u1.a, u1.dy);
+  txt('y ves tu progresión real', W/2, 588+u1.dy, 56, {w:'800', a:u1.a});
+  // gráfica de línea subiendo
+  const cx0=130, cw=W-260, cy0=720, chh=430;
+  const ug = up(tl, 0.5);
+  card(cx0-34, cy0-50, cw+68, chh+150, ug.a, ug.dy);
+  ctx.save(); ctx.globalAlpha = ug.a; ctx.translate(0, ug.dy);
+  txt('PRESS BANCA · ÚLTIMAS 6 SEMANAS', W/2, cy0-4, 26, {col:COL.naranja, w:'700', mono:true, ls:3});
+  const pesos = [60, 62.5, 65, 65, 70, 72.5];
+  const minP=57, maxP=76;
+  const px = i => cx0 + (cw/(pesos.length-1))*i;
+  const py = v => cy0+40 + (chh-90) * (1 - (v-minP)/(maxP-minP));
+  // progreso de dibujo de la línea
+  const prog = clamp((tl-0.9)/1.6, 0, 1) * (pesos.length-1);
+  ctx.strokeStyle = COL.naranja; ctx.lineWidth = 8; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(pesos[0]));
+  for (let i=1; i<pesos.length; i++){
+    if (prog >= i) ctx.lineTo(px(i), py(pesos[i]));
+    else { const f = prog-(i-1); if (f>0) ctx.lineTo(px(i-1)+(px(i)-px(i-1))*f, py(pesos[i-1])+(py(pesos[i])-py(pesos[i-1]))*f); break; }
+  }
+  ctx.stroke();
+  // puntos + etiquetas
+  pesos.forEach((v,i)=>{
+    if (prog >= i-0.01){
+      ctx.beginPath(); ctx.arc(px(i), py(v), 11, 0, Math.PI*2);
+      ctx.fillStyle = COL.naranja; ctx.fill();
+      ctx.strokeStyle = COL.negro; ctx.lineWidth=4; ctx.stroke();
+      txt(v+'', px(i), py(v)-42, 28, {col:'#e6e3de', w:'700', mono:true});
+    }
+  });
+  // eje semanas
+  pesos.forEach((_,i)=> txt('S'+(i+1), px(i), cy0+chh+18, 24, {col:'#666', mono:true}));
+  ctx.restore();
+  const uf = up(tl, 2.6);
+  rich([{t:'+12,5 kg',c:COL.verde},{t:' en 6 semanas 📈',c:COL.metal}], W/2, cy0+chh+190, 40, '700', uf.a, uf.dy);
+}
+
+function s7(tl){ // PROGRESIÓN SEMANAL
+  const p = pop(tl, 0.1);
+  ctx.save(); ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+  rich([{t:'Cada semana ',c:'#fff'},{t:'sube',c:COL.naranja}], W/2, 810, 84, '900', p.a);
+  rich([{t:'la intensidad',c:'#fff'}], W/2, 915, 84, '900', p.a);
+  ctx.restore();
+  const u = up(tl, 0.7);
+  txt('Periodización real, como un preparador de verdad', W/2, 1090+u.dy, 40, {col:COL.metal, a:u.a, w:'600'});
+}
+
+function s8(tl){ // CTA CIERRE
+  const u0 = up(tl, 0);
+  txt('Entreno + variantes + vídeos + progresión', W/2, 640+u0.dy, 38, {col:COL.metal, a:u0.a});
+  const p = pop(tl, 0.35, 0.55);
+  ctx.save(); ctx.globalAlpha=p.a;
+  ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+  ctx.shadowColor='rgba(232,73,15,.55)'; ctx.shadowBlur=70;
+  txt('1,99€', W/2, 860, 190, {col:COL.naranja, w:'900'});
+  ctx.restore();
+  txt('el primer mes · sin permanencia', W/2, 1030+u0.dy, 38, {col:COL.metal, a:up(tl,0.8).a});
+  const u2 = up(tl, 1.1), u3 = up(tl, 1.4);
+  logoK(W/2, 1200+u2.dy, 76, u2.a, 1);
+  rich([{t:'k-one',c:'#fff'},{t:'.fit',c:COL.naranja},{t:'  ·  🔗 link en la bio',c:COL.metal}], W/2, 1310, 36, '700', u3.a, u3.dy);
+}
+
+/* ---------- draw ---------- */
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1; ctx.letterSpacing='0px'; ctx.shadowBlur=0;
+  ctx.fillStyle = COL.negro; ctx.fillRect(0,0,W,H);
+
+  let key='s1', start=0;
+  for (const [k,v] of Object.entries(T)) if (t>=v){ key=k; start=v; }
+  const tl = t - start;
+  const fade = clamp(tl/0.3, 0, 1);
+  ctx.globalAlpha = fade;
+  ({s1,s2,s3,s4,s5,s6,s7,s8})[key](tl);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = COL.naranja;
+  ctx.fillRect(0, 0, W*(t/TOTAL), 7);
+}
+
+/* ---------- reproducción / grabación ---------- */
+const status = document.getElementById('status');
+const btnGen = document.getElementById('gen');
+const btnPrev = document.getElementById('prev');
+let running = false;
+
+function play(record){
+  if (running) return; running = true;
+  btnGen.disabled = true; btnPrev.disabled = true;
+  window.__videoDone = 0;
+
+  let rec = null, chunks = [], mime = '', ext = '';
+  if (record){
+    const tipos = [
+      ['video/mp4;codecs=avc1.640028','mp4'],
+      ['video/mp4','mp4'],
+      ['video/webm;codecs=vp9','webm'],
+      ['video/webm','webm'],
+    ];
+    for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
+    if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
+    const stream = cv.captureStream(30);
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 9_000_000 });
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `k-one-entreno.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.__videoDone = blob.size;
+      const mb = (blob.size/1048576).toFixed(1);
+      status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="k-one-entreno.${ext}">k-one-entreno.${ext}</a> (${mb} MB, ${ext.toUpperCase()}). Búscalo en Descargas y mándatelo por WhatsApp.`;
+    };
+    rec.start(250);
+    status.textContent = `⏺ Grabando (${ext.toUpperCase()})… no cambies de pestaña durante 28 s.`;
+  } else {
+    status.textContent = '▶ Reproduciendo (sin grabar)…';
+  }
+
+  const t0 = performance.now();
+  function loop(){
+    const t = (performance.now()-t0)/1000;
+    draw(Math.min(t, TOTAL));
+    if (t < TOTAL + 0.3){ requestAnimationFrame(loop); }
+    else {
+      if (rec) rec.stop();
+      else status.textContent = 'Listo. Pulsa 🎬 para generar el archivo.';
+      running = false; btnGen.disabled = btnPrev.disabled = false;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+btnGen.addEventListener('click', () => play(true));
+btnPrev.addEventListener('click', () => play(false));
+draw(0.001);
+</script>
+</body>
+</html>
