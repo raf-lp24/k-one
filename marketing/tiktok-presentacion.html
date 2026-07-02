@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeo TikTok (grabar pantalla)</title>
+<style>
+  :root {
+    --naranja: #E8490F;
+    --negro: #0b0b0b;
+    --grafito: #141414;
+    --carbon: #1E1E1E;
+    --hueso: #F0EDE8;
+    --metal: #b5b2ad;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 14px;
+  }
+
+  /* ===== ESCENARIO 9:16 ===== */
+  #stage {
+    position: relative;
+    width: min(56.25vh, 92vw);
+    aspect-ratio: 9 / 16;
+    background: var(--negro);
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 0 60px rgba(232,73,15,.18);
+  }
+  #stage.rec { border-radius: 0; box-shadow: none; }
+
+  /* barra de progreso tipo tiktok */
+  #prog {
+    position: absolute; top: 0; left: 0; height: 4px; width: 0%;
+    background: var(--naranja); z-index: 99; transition: width .1s linear;
+  }
+
+  .scene {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8%;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .scene.on { opacity: 1; pointer-events: auto; }
+
+  /* tipografías escaladas al alto del stage */
+  .big    { font-size: calc(min(56.25vh, 92vw) * 0.085); font-weight: 900; line-height: 1.15; color: #fff; text-align: center; }
+  .mid    { font-size: calc(min(56.25vh, 92vw) * 0.055); font-weight: 800; color: #fff; text-align: center; }
+  .small  { font-size: calc(min(56.25vh, 92vw) * 0.036); color: var(--metal); text-align: center; }
+  .tag    { font-size: calc(min(56.25vh, 92vw) * 0.028); letter-spacing: 3px; color: var(--naranja); font-weight: 700; font-family: monospace; }
+  .naranja{ color: var(--naranja); }
+
+  .pop    { animation: pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+  .up     { animation: up .55s ease both; }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes up  { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .d1 { animation-delay: .15s; } .d2 { animation-delay: .45s; }
+  .d3 { animation-delay: .75s; } .d4 { animation-delay: 1.05s; }
+  .d5 { animation-delay: 1.35s; } .d6 { animation-delay: 1.65s; }
+
+  /* logo */
+  .logo {
+    font-weight: 900; letter-spacing: 4px; color: #fff;
+    font-size: calc(min(56.25vh, 92vw) * 0.09);
+  }
+  .logo span { color: var(--naranja); }
+
+  /* tarjetas mock UI */
+  .card {
+    width: 100%; background: var(--grafito);
+    border: 1px solid #222; border-radius: 14px;
+    padding: 5% 6%; text-align: left;
+  }
+  .card + .card { margin-top: 3.5%; }
+  .card .t  { font-family: monospace; letter-spacing: 2px; color: var(--naranja); font-size: calc(min(56.25vh,92vw)*0.024); margin-bottom: 4%; font-weight: 700; }
+  .fila { display: flex; justify-content: space-between; padding: 2.5% 0; border-bottom: 1px solid #1d1d1d; font-size: calc(min(56.25vh,92vw)*0.032); }
+  .fila:last-child { border-bottom: 0; }
+  .fila .n { color: #e6e3de; font-weight: 600; }
+  .fila .r { color: var(--metal); font-family: monospace; }
+  .check { color: #27ae60; font-weight: 700; }
+
+  /* chips cuestionario */
+  .chips { display: flex; flex-wrap: wrap; gap: 3%; row-gap: calc(min(56.25vh,92vw)*0.02); justify-content: center; width: 100%; }
+  .chip {
+    border: 1.5px solid #333; color: var(--metal);
+    padding: 2.2% 4.5%; border-radius: 999px;
+    font-size: calc(min(56.25vh,92vw)*0.034); font-weight: 600;
+    background: var(--grafito);
+    transition: all .3s;
+  }
+  .chip.sel { border-color: var(--naranja); color: #fff; background: rgba(232,73,15,.16); transform: scale(1.06); }
+
+  /* macros pills */
+  .pills { display: flex; gap: 2.5%; margin-top: 4%; flex-wrap: wrap; }
+  .pill  { background: var(--carbon); padding: 1.8% 3.5%; border-radius: 6px; font-family: monospace; font-size: calc(min(56.25vh,92vw)*0.026); color: var(--metal); }
+  .pill.k { color: var(--naranja); font-weight: 700; }
+
+  /* precio gigante */
+  .precio {
+    font-size: calc(min(56.25vh, 92vw) * 0.19);
+    font-weight: 900; color: var(--naranja);
+    text-shadow: 0 0 50px rgba(232,73,15,.5);
+    line-height: 1;
+  }
+  .tachado { text-decoration: line-through; color: #555; }
+
+  /* flash de escena hook */
+  .flash { animation: flash 2.4s ease both; }
+  @keyframes flash { 0%,100% { background: transparent; } 8% { background: rgba(232,73,15,.12); } 16% { background: transparent; } }
+
+  /* dots nutricion */
+  .dots { display:flex; gap:8px; justify-content:center; margin-top:4%; }
+  .dot  { width:8px; height:8px; border-radius:50%; background:#333; }
+  .dot.on { background: var(--naranja); }
+
+  /* cursor falso */
+  #cursor {
+    position:absolute; width: 34px; height:34px; border-radius:50%;
+    border: 2.5px solid #fff; background: rgba(255,255,255,.25);
+    z-index: 50; opacity: 0; transform: translate(-50%,-50%);
+    transition: top .5s cubic-bezier(.4,0,.2,1), left .5s cubic-bezier(.4,0,.2,1), opacity .3s;
+  }
+  #cursor.tap { animation: tap .3s ease; }
+  @keyframes tap { 50% { transform: translate(-50%,-50%) scale(.7); } }
+
+  /* controles fuera del stage */
+  #controls { display: flex; gap: 10px; align-items: center; }
+  button {
+    background: var(--naranja); color:#fff; border:0; border-radius: 8px;
+    padding: 12px 28px; font-size: 16px; font-weight: 700; cursor: pointer;
+    font-family: inherit;
+  }
+  button.sec { background: #222; }
+  #hint { color:#777; font-size: 13px; text-align:center; max-width: 420px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="prog"></div>
+  <div id="cursor"></div>
+
+  <!-- ESCENA 1 · HOOK (0 - 2.6s) -->
+  <div class="scene" id="s1">
+    <div class="flash" style="position:absolute;inset:0"></div>
+    <div class="big pop">Pagué <span class="naranja">60€/mes</span><br>a un entrenador…</div>
+    <div class="mid up d3" style="margin-top:6%">hasta que encontré <span class="naranja">esto</span> 👇</div>
+  </div>
+
+  <!-- ESCENA 2 · LOGO INTRO (2.6 - 4.6s) -->
+  <div class="scene" id="s2">
+    <div class="logo pop">K-<span>ONE</span></div>
+    <div class="tag up d2" style="margin-top:4%">TU PREPARADOR DE ÉLITE · 24/7</div>
+  </div>
+
+  <!-- ESCENA 3 · CUESTIONARIO (4.6 - 9s) -->
+  <div class="scene" id="s3">
+    <div class="tag up">PASO 1</div>
+    <div class="mid up d1" style="margin:3% 0 7%">Le dices tu deporte<br>y tu objetivo</div>
+    <div class="chips up d2">
+      <div class="chip" id="c-gym">Gimnasio</div>
+      <div class="chip" id="c-run">Running</div>
+      <div class="chip" id="c-cross">CrossFit</div>
+      <div class="chip" id="c-hyrox">Hyrox</div>
+    </div>
+    <div style="height:5%"></div>
+    <div class="chips up d3">
+      <div class="chip" id="c-perder">Perder grasa</div>
+      <div class="chip" id="c-musculo">Ganar músculo</div>
+      <div class="chip" id="c-rendir">Rendir más</div>
+    </div>
+    <div class="small up d4" style="margin-top:8%">2 minutos. Lesiones y alergias incluidas.</div>
+  </div>
+
+  <!-- ESCENA 4 · PLAN GENERADO (9 - 13.4s) -->
+  <div class="scene" id="s4">
+    <div class="tag up">Y TE GENERA TODO</div>
+    <div class="mid up d1" style="margin:3% 0 6%">Tu plan de<br><span class="naranja">entrenamiento</span></div>
+    <div class="card up d2">
+      <div class="t">HOY · TREN SUPERIOR</div>
+      <div class="fila"><span class="n">Press banca</span><span class="r">4×8</span></div>
+      <div class="fila"><span class="n">Remo con mancuerna</span><span class="r">4×10</span></div>
+      <div class="fila"><span class="n">Press militar</span><span class="r">3×10</span></div>
+      <div class="fila"><span class="n" style="color:#666;font-style:italic">+ 3 ejercicios con vídeo</span><span class="r"></span></div>
+    </div>
+    <div class="small up d4" style="margin-top:6%">Con vídeos, pesos y progresión semanal</div>
+  </div>
+
+  <!-- ESCENA 5 · NUTRICIÓN (13.4 - 18s) -->
+  <div class="scene" id="s5">
+    <div class="tag up">Y ADEMÁS…</div>
+    <div class="mid up d1" style="margin:3% 0 6%"><span class="naranja">5 comidas</span> al día<br>5 opciones cada una</div>
+    <div class="card up d2" id="comidaCard">
+      <div class="t">COMIDA · OPCIÓN <span id="opNum">1</span>/5</div>
+      <div class="fila" style="border:0"><span class="n" id="opNombre">Pollo con arroz y brócoli</span></div>
+      <div class="pills">
+        <div class="pill k" id="opKcal">520 kcal</div>
+        <div class="pill" id="opProt">42g prot</div>
+        <div class="pill" id="opCarb">48g carbs</div>
+      </div>
+    </div>
+    <div class="dots up d3" id="dots">
+      <div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="small up d4" style="margin-top:6%">Macros calculados para TU objetivo<br>+ lista de la compra automática 🛒</div>
+  </div>
+
+  <!-- ESCENA 6 · SE ADAPTA (18 - 20.6s) -->
+  <div class="scene" id="s6">
+    <div class="big pop">Y se <span class="naranja">adapta</span><br>cada semana</div>
+    <div class="small up d3" style="margin-top:6%">Check-in semanal → tu plan sube o baja<br>según tu progreso real</div>
+  </div>
+
+  <!-- ESCENA 7 · PRECIO CTA (20.6 - 24.2s) -->
+  <div class="scene" id="s7">
+    <div class="small up">Un entrenador: <span class="tachado">60€/mes</span></div>
+    <div class="mid up d1" style="margin-top:3%">K-ONE, primer mes:</div>
+    <div class="precio pop d2" style="margin:4% 0">1,99€</div>
+    <div class="small up d4">Sin permanencia. Cancelas con un clic.</div>
+  </div>
+
+  <!-- ESCENA 8 · CIERRE (24.2 - 27s) -->
+  <div class="scene" id="s8">
+    <div class="logo pop">K-<span>ONE</span></div>
+    <div class="mid up d2" style="margin-top:5%">k-one<span class="naranja">.fit</span></div>
+    <div class="tag up d3" style="margin-top:4%">🔗 LINK EN LA BIO</div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="play">▶ REPRODUCIR</button>
+  <button class="sec" id="recmode">Modo grabación</button>
+</div>
+<p id="hint">Pulsa <b>Modo grabación</b> (quita bordes y botones), graba la pantalla en vertical
+(Win + Alt + R, OBS o el móvil) y pulsa <b>▶</b>. Dura ~27 s. Súbelo a TikTok con un
+sonido trending de gym: el beat debe caer en el cambio a la escena del logo (seg. 2,6).</p>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const scenes = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+  // inicio de cada escena en ms
+  const times  = [0, 2600, 4600, 9000, 13400, 18000, 20600, 24200];
+  const TOTAL  = 27000;
+  let timers = [];
+
+  function reset() {
+    timers.forEach(clearTimeout); timers = [];
+    scenes.forEach(s => $(s).classList.remove('on'));
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+    $('prog').style.width = '0%';
+    $('cursor').style.opacity = 0;
+    // reinicia animaciones CSS clonando nodos ligeros: basta con forzar reflow
+    scenes.forEach(s => {
+      const el = $(s);
+      el.querySelectorAll('.pop,.up,.flash').forEach(a => {
+        a.style.animation = 'none'; void a.offsetWidth; a.style.animation = '';
+      });
+    });
+  }
+
+  function moveCursor(x, y, tap) {
+    const c = $('cursor');
+    c.style.opacity = 1; c.style.left = x + '%'; c.style.top = y + '%';
+    if (tap) setTimeout(() => { c.classList.add('tap'); setTimeout(() => c.classList.remove('tap'), 320); }, 520);
+  }
+  const hideCursor = () => $('cursor').style.opacity = 0;
+
+  function play() {
+    reset();
+    const t0 = performance.now();
+    // progreso
+    const iv = setInterval(() => {
+      const p = Math.min(100, (performance.now() - t0) / TOTAL * 100);
+      $('prog').style.width = p + '%';
+      if (p >= 100) clearInterval(iv);
+    }, 80);
+    timers.push({ }); // placeholder
+    // escenas
+    scenes.forEach((s, i) => {
+      timers.push(setTimeout(() => {
+        scenes.forEach(x => $(x).classList.remove('on'));
+        $(s).classList.add('on');
+      }, times[i]));
+    });
+    // cuestionario: cursor selecciona chips
+    timers.push(setTimeout(() => moveCursor(63, 46, true), 5600));
+    timers.push(setTimeout(() => $('c-cross').classList.add('sel'), 6250));
+    timers.push(setTimeout(() => moveCursor(30, 61, true), 6600));
+    timers.push(setTimeout(() => $('c-perder').classList.add('sel'), 7250));
+    timers.push(setTimeout(hideCursor, 7800));
+    // nutrición: rota opciones
+    const ops = [
+      ['Pollo con arroz y brócoli','520 kcal','42g prot','48g carbs'],
+      ['Salmón con quinoa','560 kcal','38g prot','44g carbs'],
+      ['Tortilla de claras y avena','480 kcal','36g prot','50g carbs'],
+      ['Ternera con boniato','545 kcal','40g prot','46g carbs'],
+      ['Wrap integral de pavo','495 kcal','35g prot','49g carbs'],
+    ];
+    ops.forEach((o, i) => {
+      timers.push(setTimeout(() => {
+        $('opNum').textContent = i + 1;
+        $('opNombre').textContent = o[0];
+        $('opKcal').textContent = o[1];
+        $('opProt').textContent = o[2];
+        $('opCarb').textContent = o[3];
+        document.querySelectorAll('#dots .dot').forEach((d, j) => d.classList.toggle('on', j === i));
+      }, 14300 + i * 720));
+    });
+  }
+
+  $('play').addEventListener('click', play);
+  $('recmode').addEventListener('click', () => {
+    $('stage').classList.toggle('rec');
+    document.getElementById('controls').style.opacity =
+      document.getElementById('controls').style.opacity === '0.15' ? '1' : '0.15';
+    $('hint').style.display = $('hint').style.display === 'none' ? '' : 'none';
+  });
+</script>
+</body>
+</html>
