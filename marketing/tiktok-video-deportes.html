@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeos TikTok por deporte</title>
+<style>
+  body { background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; margin:0; min-height:100vh; justify-content:center; }
+  canvas { height:min(66vh,660px); aspect-ratio:9/16; border-radius:10px; box-shadow:0 0 50px rgba(232,73,15,.2); background:#0b0b0b; }
+  .btns, .sports { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  button { background:#E8490F; color:#fff; border:0; border-radius:8px; padding:13px 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.sec { background:#222; }
+  button.sport { background:#1a1a1a; border:2px solid #333; padding:10px 22px; font-size:15px; }
+  button.sport.on { border-color:#E8490F; background:rgba(232,73,15,.15); }
+  button:disabled { opacity:.4; cursor:default; }
+  #status { font-size:14px; color:#888; min-height:20px; text-align:center; max-width:480px; line-height:1.5; }
+  a.dl { color:#E8490F; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="sports" id="sports"></div>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="btns">
+  <button id="gen">🎬 GENERAR VÍDEO</button>
+  <button class="sec" id="prev">Solo ver</button>
+</div>
+<div id="status">Elige un deporte arriba y pulsa <b>Generar vídeo</b>. No cambies de pestaña mientras graba.</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 1080, H = 1920;
+
+const COL = {
+  naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
+  hueso:'#F0EDE8', metal:'#b5b2ad', borde:'#222222', sep:'#1d1d1d', verde:'#27ae60'
+};
+const FONT = '"Segoe UI", Arial, sans-serif';
+const MONO = 'Consolas, "Courier New", monospace';
+const N = COL.naranja, M = COL.metal, B = '#fff';
+
+/* ---------- helpers ---------- */
+const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+const easeOut = x => 1 - Math.pow(1-x,3);
+function popE(x){ const c = 1.70158; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); }
+function up(tl, d, dur=0.55){ const x = clamp((tl-d)/dur, 0, 1); return { a:x, dy:40*(1-easeOut(x)) }; }
+function pop(tl, d, dur=0.5){ const x = clamp((tl-d)/dur, 0, 1); return { a:clamp(x*2,0,1), s: x===0 ? .6 : .6+.4*popE(x) }; }
+
+function setFont(size, weight='400', mono=false, ls=0){
+  ctx.font = `${weight} ${size}px ${mono?MONO:FONT}`;
+  ctx.letterSpacing = ls + 'px';
+}
+function txt(str, x, y, size, {w='400', col:c='#fff', align='center', mono=false, ls=0, a=1} = {}){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, w, mono, ls);
+  ctx.fillStyle = c; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function rich(segs, cx, y, size, weight='900', a=1, dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, weight);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tot = segs.reduce((s,seg)=> s + ctx.measureText(seg.t).width, 0);
+  let x = cx - tot/2;
+  for (const seg of segs){
+    ctx.fillStyle = seg.c || '#fff';
+    ctx.fillText(seg.t, x, y + dy);
+    x += ctx.measureText(seg.t).width;
+  }
+  ctx.restore();
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function card(x,y,w,h,a=1,dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  rrect(x, y+dy, w, h, 22);
+  ctx.fillStyle = COL.grafito; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function cursor(x, y, a=1, tapK=0){
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.beginPath(); ctx.arc(x, y, 26*(1-0.3*tapK), 0, Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.28)'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.stroke();
+  ctx.restore();
+}
+function logoK(cx, y, size, a=1, s=1){
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.translate(cx,y); ctx.scale(s,s); ctx.translate(-cx,-y);
+  setFont(size,'900',false,6);
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  const w1 = ctx.measureText('K-').width, w2 = ctx.measureText('ONE').width;
+  let x = cx-(w1+w2)/2;
+  ctx.fillStyle='#fff'; ctx.fillText('K-',x,y);
+  ctx.fillStyle=N; ctx.fillText('ONE',x+w1,y);
+  ctx.restore();
+}
+
+/* ---------- renderers genéricos de escena ---------- */
+const R = {
+  hook(c, tl){
+    const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
+    ctx.fillStyle = `rgba(232,73,15,${0.12*fa})`; ctx.fillRect(0,0,W,H);
+    const p = pop(tl, 0.15);
+    ctx.save(); ctx.translate(W/2, 830); ctx.scale(p.s,p.s); ctx.translate(-W/2,-830);
+    rich(c.l1, W/2, 780, c.size||86, '900', p.a);
+    rich(c.l2, W/2, 886, c.size||86, '900', p.a);
+    ctx.restore();
+    const u = up(tl, 0.75);
+    rich(c.sub, W/2, 1070, 56, '800', u.a, u.dy);
+  },
+  logo(c, tl){
+    const p = pop(tl, 0);
+    logoK(W/2, 890, 96, p.a, p.s);
+    const u = up(tl, 0.4);
+    txt(c.tag, W/2, 1020+u.dy, 30, {col:N, w:'700', mono:true, ls:5, a:u.a});
+  },
+  list(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    txt(c.paso, W/2, 400+u0.dy, 30, {col:N, w:'700', mono:true, ls:6, a:u0.a});
+    rich(c.t1, W/2, 495, 56, '800', u1.a, u1.dy);
+    if (c.t2) rich(c.t2, W/2, 568, 56, '800', u1.a, u1.dy);
+    const cx0=96, cw=W-192;
+    let y = c.t2 ? 660 : 610;
+    if (c.header){
+      const uh = up(tl, 0.45);
+      card(cx0, y, cw, 96, uh.a, uh.dy);
+      ctx.save(); ctx.globalAlpha=uh.a;
+      txt(c.header[0], cx0+46, y+48+uh.dy, 30, {col:N, w:'700', mono:true, ls:3, align:'left'});
+      if (c.header[1]) txt(c.header[1], cx0+cw-46, y+48+uh.dy, 28, {col:M, mono:true, align:'right'});
+      ctx.restore();
+      y += 130;
+    }
+    c.rows.forEach((r,i)=>{
+      const ui = up(tl, 0.7+i*0.16, 0.45);
+      card(cx0, y, cw, 104, ui.a, ui.dy);
+      ctx.save(); ctx.globalAlpha=ui.a;
+      txt(r[0], cx0+46, y+52+ui.dy, 34, {col:'#e6e3de', w:'600', align:'left'});
+      if (r[1]) txt(r[1], cx0+cw-(r[2]?200:46), y+52+ui.dy, 32, {col:N, w:'700', mono:true, align:'right'});
+      if (r[2]) txt(r[2], cx0+cw-46, y+52+ui.dy, 28, {col:M, mono:true, align:'right'});
+      ctx.restore();
+      y += 122;
+    });
+    if (c.foot) txt(c.foot, W/2, y+64+up(tl,1.8).dy, 37, {col:M, a:up(tl,1.8).a});
+  },
+  swap(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    txt(c.paso, W/2, 420+u0.dy, 30, {col:N, w:'700', mono:true, ls:6, a:u0.a});
+    rich(c.t1, W/2, 515, 56, '800', u1.a, u1.dy);
+    rich(c.t2, W/2, 588, 56, '800', u1.a, u1.dy);
+    const cx0=96, cw=W-192;
+    const swapped = tl >= 3.4;
+    const swapK = swapped ? clamp((tl-3.4)/0.35,0,1) : 0;
+    const u2 = up(tl, 0.5);
+    card(cx0, 700, cw, 110, u2.a, u2.dy);
+    ctx.save(); ctx.globalAlpha = u2.a;
+    const nombre = swapK > 0.5 ? c.variants[0] : c.original;
+    txt(nombre, cx0+46, 755+u2.dy, 36, {col: swapK>0.5 ? COL.verde : '#e6e3de', w:'700', align:'left'});
+    txt(c.reps, cx0+cw-46, 755+u2.dy, 32, {col:N, w:'700', mono:true, align:'right'});
+    if (swapK>0.5) txt('✓ cambiado', cx0+cw-160, 755+u2.dy, 26, {col:COL.verde, mono:true, align:'right'});
+    ctx.restore();
+    const uv = up(tl, 1.0);
+    ctx.save(); ctx.globalAlpha = uv.a * (swapped ? clamp(1-(tl-3.4)/0.4, 0, 1) : 1);
+    txt(c.popup, W/2, 900+uv.dy, 26, {col:N, w:'700', mono:true, ls:4});
+    c.variants.forEach((v,i)=>{
+      const y = 960+i*116;
+      const sel = i===0 && tl>=3.1;
+      const k = sel ? clamp((tl-3.1)/0.3,0,1) : 0;
+      rrect(cx0+60, y, cw-120, 96, 18);
+      ctx.fillStyle = k>0 ? `rgba(232,73,15,${0.16*k})` : COL.carbon; ctx.fill();
+      ctx.strokeStyle = k>0 ? N : '#2c2c2c'; ctx.lineWidth=3; ctx.stroke();
+      txt(v, W/2, y+48, 33, {col:k>0?'#fff':M, w:'600'});
+    });
+    ctx.restore();
+    if (tl>=1.8 && tl<3.8){
+      const tapK = (tl>2.95 && tl<3.25) ? Math.sin((tl-2.95)/0.3*Math.PI) : 0;
+      const ca = tl<2.1 ? (tl-1.8)/0.3 : (tl>3.5 ? clamp((3.8-tl)/0.3,0,1) : 1);
+      cursor(W/2+230, 1008, ca, tapK);
+    }
+    txt(c.foot, W/2, 1400+up(tl,3.9).dy, 37, {col:M, a:up(tl,3.9).a});
+  },
+  chart(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    txt(c.paso, W/2, 420+u0.dy, 30, {col:N, w:'700', mono:true, ls:6, a:u0.a});
+    rich(c.t1, W/2, 515, 56, '800', u1.a, u1.dy);
+    rich(c.t2, W/2, 588, 56, '800', u1.a, u1.dy);
+    const cx0=130, cw=W-260, cy0=720, chh=430;
+    const ug = up(tl, 0.5);
+    card(cx0-34, cy0-50, cw+68, chh+150, ug.a, ug.dy);
+    ctx.save(); ctx.globalAlpha = ug.a; ctx.translate(0, ug.dy);
+    txt(c.title, W/2, cy0-4, 26, {col:N, w:'700', mono:true, ls:3});
+    const d = c.data;
+    const minP = Math.min(...d)-3, maxP = Math.max(...d)+3;
+    const px = i => cx0 + (cw/(d.length-1))*i;
+    const py = v => cy0+40 + (chh-90) * (1 - (v-minP)/(maxP-minP));
+    const prog = clamp((tl-0.9)/1.6, 0, 1) * (d.length-1);
+    ctx.strokeStyle = N; ctx.lineWidth = 8; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(d[0]));
+    for (let i=1; i<d.length; i++){
+      if (prog >= i) ctx.lineTo(px(i), py(d[i]));
+      else { const f = prog-(i-1); if (f>0) ctx.lineTo(px(i-1)+(px(i)-px(i-1))*f, py(d[i-1])+(py(d[i])-py(d[i-1]))*f); break; }
+    }
+    ctx.stroke();
+    d.forEach((v,i)=>{
+      if (prog >= i-0.01){
+        ctx.beginPath(); ctx.arc(px(i), py(v), 11, 0, Math.PI*2);
+        ctx.fillStyle = N; ctx.fill();
+        ctx.strokeStyle = COL.negro; ctx.lineWidth=4; ctx.stroke();
+        txt(String(v).replace('.',','), px(i), py(v)-42, 28, {col:'#e6e3de', w:'700', mono:true});
+      }
+    });
+    d.forEach((_,i)=> txt('S'+(i+1), px(i), cy0+chh+18, 24, {col:'#666', mono:true}));
+    ctx.restore();
+    const uf = up(tl, 2.6);
+    rich(c.foot, W/2, cy0+chh+190, 40, '700', uf.a, uf.dy);
+  },
+  big(c, tl){
+    const p = pop(tl, 0.1);
+    ctx.save(); ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+    rich(c.l1, W/2, 810, 84, '900', p.a);
+    rich(c.l2, W/2, 915, 84, '900', p.a);
+    ctx.restore();
+    const u = up(tl, 0.7);
+    txt(c.sub, W/2, 1090+u.dy, 40, {col:M, a:u.a, w:'600'});
+  },
+  cta(c, tl){
+    const u0 = up(tl, 0);
+    txt(c.lineup, W/2, 640+u0.dy, 38, {col:M, a:u0.a});
+    const p = pop(tl, 0.35, 0.55);
+    ctx.save(); ctx.globalAlpha=p.a;
+    ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+    ctx.shadowColor='rgba(232,73,15,.55)'; ctx.shadowBlur=70;
+    txt(c.price, W/2, 860, 175, {col:N, w:'900'});
+    ctx.restore();
+    txt(c.priceSub, W/2, 1030+u0.dy, 38, {col:M, a:up(tl,0.8).a});
+    const u2 = up(tl, 1.1), u3 = up(tl, 1.4);
+    logoK(W/2, 1200+u2.dy, 76, u2.a, 1);
+    rich([{t:'k-one',c:'#fff'},{t:'.fit',c:N},{t:'  ·  🔗 link en la bio',c:M}], W/2, 1310, 36, '700', u3.a, u3.dy);
+  },
+};
+
+/* ---------- configuración por deporte ---------- */
+const SPORTS = {
+  running: {
+    label: 'Running', file: 'k-one-running',
+    scenes: [
+      { type:'hook', dur:2.6, l1:[{t:'Preparo mi ',c:B},{t:'10K',c:N}], l2:[{t:'sin pagar entrenador',c:B}], sub:[{t:'plan de carrera semana a semana ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'ASÍ FUNCIONA TU PLAN DE RUNNING' },
+      { type:'list', dur:5.2, paso:'PASO 1', t1:[{t:'Tu semana de ',c:B},{t:'carrera',c:N}],
+        rows:[['Lunes · Rodaje suave',"40'",''],['Martes · Series','6×400 m',"r. 2'"],['Jueves · Fuerza','45’',''],['Sábado · Tirada larga','12 km',''],['Domingo · Descanso','—','']],
+        foot:'según tu nivel y tu objetivo' },
+      { type:'list', dur:5, paso:'PASO 2', t1:[{t:'Ritmos ',c:B},{t:'a tu medida',c:N}],
+        rows:[['Rodaje suave','6:10 /km',''],['Series 400 m','4:45 /km',''],['Tirada larga','5:50 /km',''],['Objetivo 10K','5:15 /km','']],
+        foot:'calculados con tu nivel real' },
+      { type:'chart', dur:4.8, paso:'PASO 3', t1:[{t:'Tu volumen ',c:B},{t:'sube solo',c:N}], t2:[{t:'semana a semana',c:B}],
+        title:'KILÓMETROS POR SEMANA', data:[18,20,23,23,26,29],
+        foot:[{t:'+11 km/semana',c:COL.verde},{t:' en 6 semanas 📈',c:M}] },
+      { type:'big', dur:2.6, l1:[{t:'Y fuerza ',c:B},{t:'específica',c:N}], l2:[{t:'para corredores',c:B}], sub:'menos lesiones, más ritmo' },
+      { type:'cta', dur:3.4, lineup:'Plan de carrera + fuerza + nutrición', price:'1,99€', priceSub:'el primer mes · sin permanencia' },
+    ],
+  },
+  crossfit: {
+    label: 'CrossFit', file: 'k-one-crossfit',
+    scenes: [
+      { type:'hook', dur:2.6, l1:[{t:'WODs',c:N},{t:' programados',c:B}], l2:[{t:'toda la semana',c:B}], sub:[{t:'fuerza + metcon + escalado ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'ASÍ FUNCIONA TU CROSSFIT' },
+      { type:'list', dur:5.2, paso:'PASO 1', t1:[{t:'Tu ',c:B},{t:'WOD',c:N},{t:' de hoy',c:B}],
+        header:['MARTES · FUERZA + METCON',"60'"],
+        rows:[['Back squat','5×5','80%'],["AMRAP 12'",'',''],['· Wall balls','10','9 kg'],['· KB swings','12','24 kg'],['· Run','200 m','']],
+        foot:'estructura real: fuerza + metcon' },
+      { type:'swap', dur:5.4, paso:'PASO 2', t1:[{t:'¿Aún sin muscle-up?',c:B}], t2:[{t:'Pues ',c:B},{t:'escalado',c:N},{t:'. Punto.',c:B}],
+        original:'Muscle-up', reps:'3×5', popup:'ESCALADO DISPONIBLE',
+        variants:['Jumping pull-up','Ring row','Band pull-up'],
+        foot:'RX o escalado — mismo estímulo, tu nivel' },
+      { type:'chart', dur:4.8, paso:'PASO 3', t1:[{t:'Registras tus ',c:B},{t:'marcas',c:N}], t2:[{t:'y las ves subir',c:B}],
+        title:'BACK SQUAT · KG', data:[90,95,100,100,105,110],
+        foot:[{t:'+20 kg',c:COL.verde},{t:' en 6 semanas 📈',c:M}] },
+      { type:'cta', dur:3.4, lineup:'WODs + fuerza + nutrición para rendir', price:'1,99€', priceSub:'el primer mes · sin permanencia' },
+    ],
+  },
+  hyrox: {
+    label: 'Hyrox', file: 'k-one-hyrox',
+    scenes: [
+      { type:'hook', dur:2.6, l1:[{t:'Preparo mi primer',c:B}], l2:[{t:'HYROX',c:N},{t:' yo solo',c:B}], sub:[{t:'estaciones + carrera, programado ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'ASÍ FUNCIONA TU PLAN HYROX' },
+      { type:'list', dur:5.2, paso:'PASO 1', t1:[{t:'Entreno tipo ',c:B},{t:'Hyrox',c:N}],
+        header:['SÁBADO · SIMULACRO',"70'"],
+        rows:[['Run','4×1 km','5:20'],['SkiErg','1000 m',''],['Sled push','4×12,5 m',''],['Burpee broad jump','40 m',''],['Wall balls','75','6 kg']],
+        foot:'las 8 estaciones, adaptadas a tu nivel' },
+      { type:'list', dur:5, paso:'PASO 2', t1:[{t:'Fuerza + carrera',c:B}], t2:[{t:'bien ',c:B},{t:'combinado',c:N}],
+        rows:[['Lunes · Fuerza','piernas+core',''],['Miércoles · Series','carrera',''],['Viernes · Estaciones','Hyrox',''],['Sábado · Simulacro','parcial','']],
+        foot:'sin dejarte ninguna pata coja' },
+      { type:'chart', dur:4.8, paso:'PASO 3', t1:[{t:'Y ves cómo ',c:B},{t:'mejoras',c:N}], t2:[{t:'cada semana',c:B}],
+        title:'WALL BALLS SIN PARAR', data:[30,38,45,45,55,65],
+        foot:[{t:'+35 wall balls',c:COL.verde},{t:' en 6 semanas 📈',c:M}] },
+      { type:'big', dur:2.6, l1:[{t:'Sabes tu ritmo',c:B}], l2:[{t:'por ',c:B},{t:'estación',c:N}], sub:'para no morir en el sled push' },
+      { type:'cta', dur:3.4, lineup:'Estaciones + carrera + fuerza + nutrición', price:'1,99€', priceSub:'el primer mes · sin permanencia' },
+    ],
+  },
+  nutricion: {
+    label: 'Solo Nutrición', file: 'k-one-solo-nutricion',
+    scenes: [
+      { type:'hook', dur:2.6, size:80, l1:[{t:'No quiero entrenar.',c:B}], l2:[{t:'Solo ',c:B},{t:'comer bien',c:N},{t:'.',c:B}], sub:[{t:'pues solo pagas la dieta ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'PLAN SOLO NUTRICIÓN' },
+      { type:'list', dur:5.4, paso:'PASO 1', t1:[{t:'Tus ',c:B},{t:'5 comidas',c:N},{t:' del día',c:B}],
+        rows:[['Desayuno · Avena y claras','420 kcal',''],['Almuerzo · Yogur y nueces','280 kcal',''],['Comida · Pollo con arroz','520 kcal',''],['Merienda · Tostada de atún','310 kcal',''],['Cena · Salmón y verduras','450 kcal','']],
+        foot:'macros calculados para tu objetivo' },
+      { type:'big', dur:2.8, l1:[{t:'5 opciones',c:N}], l2:[{t:'por comida',c:B}], sub:'eliges la que te apetezca hoy' },
+      { type:'list', dur:5, paso:'PASO 2', t1:[{t:'Lista de la compra ',c:B},{t:'sola',c:N}],
+        rows:[['Pechuga de pollo','1,2 kg',''],['Latas de atún','×4',''],['Arroz','800 g',''],['Avena','500 g',''],['Brócoli','600 g','']],
+        foot:'sumada y agrupada por categorías' },
+      { type:'big', dur:2.8, l1:[{t:'Y se ',c:B},{t:'ajusta',c:N}], l2:[{t:'cada semana',c:B}], sub:'según tu peso y tu progreso real' },
+      { type:'cta', dur:3.4, lineup:'Dieta completa + lista de la compra', price:'9,99€', priceSub:'al mes · sin permanencia · sin entreno' },
+    ],
+  },
+};
+
+/* ---------- motor ---------- */
+let sportKey = 'running';
+function timeline(){
+  const sc = SPORTS[sportKey].scenes;
+  let t = 0;
+  return sc.map(s => { const o = { ...s, start: t }; t += s.dur; return o; });
+}
+function total(){ return SPORTS[sportKey].scenes.reduce((a,s)=>a+s.dur,0); }
+
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1; ctx.letterSpacing='0px'; ctx.shadowBlur=0;
+  ctx.fillStyle = COL.negro; ctx.fillRect(0,0,W,H);
+  const tl = timeline();
+  let cur = tl[0];
+  for (const s of tl) if (t >= s.start) cur = s;
+  const local = t - cur.start;
+  ctx.globalAlpha = clamp(local/0.3, 0, 1);
+  R[cur.type](cur, local);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = N;
+  ctx.fillRect(0, 0, W*(t/total()), 7);
+}
+
+/* ---------- UI deportes ---------- */
+const sportsDiv = document.getElementById('sports');
+Object.entries(SPORTS).forEach(([k,v])=>{
+  const b = document.createElement('button');
+  b.className = 'sport' + (k===sportKey?' on':'');
+  b.textContent = v.label;
+  b.onclick = ()=>{
+    sportKey = k;
+    document.querySelectorAll('.sport').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    draw(0.001);
+    status.textContent = `Deporte: ${v.label} (${Math.round(total())}s). Pulsa 🎬 para generar.`;
+  };
+  sportsDiv.appendChild(b);
+});
+
+/* ---------- reproducción / grabación ---------- */
+const status = document.getElementById('status');
+const btnGen = document.getElementById('gen');
+const btnPrev = document.getElementById('prev');
+let running = false;
+
+function play(record){
+  if (running) return; running = true;
+  btnGen.disabled = true; btnPrev.disabled = true;
+  window.__videoDone = 0;
+  const TOTAL = total();
+  const fileBase = SPORTS[sportKey].file;
+
+  let rec = null, chunks = [], mime = '', ext = '';
+  if (record){
+    const tipos = [
+      ['video/mp4;codecs=avc1.640028','mp4'],
+      ['video/mp4','mp4'],
+      ['video/webm;codecs=vp9','webm'],
+      ['video/webm','webm'],
+    ];
+    for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
+    if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
+    const stream = cv.captureStream(30);
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 9_000_000 });
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${fileBase}.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.__videoDone = blob.size;
+      const mb = (blob.size/1048576).toFixed(1);
+      status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="${fileBase}.${ext}">${fileBase}.${ext}</a> (${mb} MB, ${ext.toUpperCase()}). Búscalo en Descargas y mándatelo por WhatsApp.`;
+    };
+    rec.start(250);
+    status.textContent = `⏺ Grabando ${SPORTS[sportKey].label} (${ext.toUpperCase()})… no cambies de pestaña durante ${Math.round(TOTAL)} s.`;
+  } else {
+    status.textContent = '▶ Reproduciendo (sin grabar)…';
+  }
+
+  const t0 = performance.now();
+  function loop(){
+    const t = (performance.now()-t0)/1000;
+    draw(Math.min(t, TOTAL));
+    if (t < TOTAL + 0.3){ requestAnimationFrame(loop); }
+    else {
+      if (rec) rec.stop();
+      else status.textContent = 'Listo. Pulsa 🎬 para generar el archivo.';
+      running = false; btnGen.disabled = btnPrev.disabled = false;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+btnGen.addEventListener('click', () => play(true));
+btnPrev.addEventListener('click', () => play(false));
+draw(0.001);
+</script>
+</body>
+</html>
