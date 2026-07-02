@@ -381,7 +381,7 @@ function play(record){
     for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
     if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
     const stream = cv.captureStream(30);
-    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 9_000_000 });
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 14_000_000 });
     rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
     rec.onstop = () => {
       const blob = new Blob(chunks, { type: mime });
