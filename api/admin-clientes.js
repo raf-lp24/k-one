@@ -170,7 +170,11 @@ module.exports = async (req, res) => {
       const entrenosTotal = Array.isArray(ud.historialEntrenos)
         ? ud.historialEntrenos.length
         : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
-      const semanaActual  = ud.progreso?.semana || 1;
+      const refSemana = (activo && !p.is_beta && s?.current_period_start)
+        ? s.current_period_start : p.created_at;
+      const semanaActual = refSemana
+        ? Math.max(1, Math.floor((ahora.getTime() - new Date(refSemana).getTime()) / (7 * 86400000)) + 1)
+        : (ud.progreso?.semana || 1);
       const renovacion    = s?.current_period_end || null;
       const renovaProximo = activo && renovacion && new Date(renovacion) <= en7d && new Date(renovacion) >= ahora;
       const sinOnboarding14d = !ud.onboardingCompletado && diasDesdeAlta >= 14;
