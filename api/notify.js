@@ -46,16 +46,29 @@ async function handleCronRetencion(req, res) {
     const hace8d = new Date(ahora.getTime() - 8 * 86400000).toISOString();
     const hace9d = new Date(ahora.getTime() - 9 * 86400000).toISOString();
 
-    const { data: perfiles } = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
+    let perfiles;
+    try {
+      const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at, last_seen');
+      perfiles = r.data;
+    } catch (_) {
+      const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
+      perfiles = r.data;
+    }
     const { data: subs } = await supa.from('subscriptions').select('user_id, status');
     const subByUser = {};
     (subs || []).forEach(s => { subByUser[s.user_id] = s; });
 
-    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8']);
+    let authLastSignIn = {};
+    try {
+      const { data: { users } } = await supa.auth.admin.listUsers({ perPage: 1000 });
+      (users || []).forEach(u => { if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at; });
+    } catch (_) {}
+
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
 
-    let enviados3 = 0, enviados8 = 0;
+    let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0;
 
     for (const p of (perfiles || [])) {
       const ud = p.userdata || {};
@@ -140,6 +153,116 @@ async function handleCronRetencion(req, res) {
         });
         await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA 1,99€.` }) });
         enviados8++;
+      }
+
+      // RE-ENGAGEMENT: clientes ACTIVOS que llevan días sin abrir la web.
+      // Usa last_seen (heartbeat del front) con fallback a last_sign_in_at (auth).
+      // 3 niveles: 7d (suave), 14d (directo), 21d (urgente). Cada uno se envía una sola vez.
+      if (tieneSubActiva && ud.onboardingCompletado) {
+        const ultimaVez = p.last_seen || authLastSignIn[p.id] || null;
+        if (ultimaVez) {
+          const diasInactivo = (ahora.getTime() - new Date(ultimaVez).getTime()) / 86400000;
+
+          // 7 DÍAS sin entrar
+          if (diasInactivo >= 7 && diasInactivo < 14 && !yaEnviado.has(`reenganche_7d:${email}`)) {
+            const frases7 = [
+              'Una semana sin entrenar no es el fin — es el principio de volver con más ganas.',
+              'La motivación va y viene. La disciplina se queda.',
+              'No se trata de no caer, se trata de levantarse cada vez.',
+            ];
+            const frase = frases7[Math.floor(Math.random() * frases7.length)];
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, tu plan te sigue esperando`,
+              html: emailWrapper(`
+                <div style="padding:28px 28px 0">
+                  <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Llevas una semana fuera. Tu plan sigue aquí.</h1>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Llevas unos días sin pasarte por K-ONE. No pasa nada — todos tenemos semanas complicadas. Pero tu plan de entrenamiento y nutrición sigue ahí, adaptado a ti, listo para cuando vuelvas.</p>
+                  <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 20px">
+                    <p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6;font-style:italic">"${frase}"</p>
+                  </div>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 20px">Un solo entreno hoy puede cambiar toda la semana. <span style="color:#F0EDE8;font-weight:500">¿Volvemos?</span></p>
+                </div>
+                <div style="padding:0 28px 28px;text-align:center">
+                  <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VOLVER A MI PLAN</a>
+                </div>
+              `)
+            });
+            await supa.from('email_log').insert({ tipo: 'reenganche_7d', destinatario: email, asunto: 'Tu plan te sigue esperando', datos: JSON.stringify({ nombre, resumen: `Re-engagement 7d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Motivacional suave.` }) });
+            enviadosReenganche++;
+          }
+
+          // 14 DÍAS sin entrar
+          if (diasInactivo >= 14 && diasInactivo < 21 && !yaEnviado.has(`reenganche_14d:${email}`)) {
+            const entrenos = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length : 0;
+            const semana = ud.progreso?.semana || 1;
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, no dejes que se enfríe lo que ya empezaste`,
+              html: emailWrapper(`
+                <div style="padding:28px 28px 0">
+                  <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Dos semanas. Tu cuerpo lo nota.</h1>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Llevas 2 semanas sin abrir K-ONE. No te escribo para presionarte — te escribo porque sé que <span style="color:#F0EDE8">cuando empezaste, lo hiciste por algo</span>. Ese objetivo sigue ahí.</p>
+                  <div style="background:#141414;border-radius:10px;padding:18px 20px;margin:0 0 18px">
+                    <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:12px">LO QUE HAS CONSTRUIDO HASTA AHORA</div>
+                    <div style="display:flex;gap:8px">
+                      <div style="flex:1;background:#1E1E1E;border-radius:8px;padding:12px;text-align:center">
+                        <div style="font-size:22px;font-weight:700;color:#27ae60">${entrenos}</div>
+                        <div style="font-size:10px;color:#888;margin-top:2px">Entrenos</div>
+                      </div>
+                      <div style="flex:1;background:#1E1E1E;border-radius:8px;padding:12px;text-align:center">
+                        <div style="font-size:22px;font-weight:700;color:#F0EDE8">S${semana}</div>
+                        <div style="font-size:10px;color:#888;margin-top:2px">Semana</div>
+                      </div>
+                    </div>
+                  </div>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 20px">No tienes que empezar de cero. Solo tienes que <span style="color:#F0EDE8;font-weight:500">volver a abrir la puerta</span>. Tu plan está actualizado y esperándote.</p>
+                </div>
+                <div style="padding:0 28px 28px;text-align:center">
+                  <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">RETOMAR MI ENTRENAMIENTO</a>
+                </div>
+              `)
+            });
+            await supa.from('email_log').insert({ tipo: 'reenganche_14d', destinatario: email, asunto: 'No dejes que se enfríe lo que ya empezaste', datos: JSON.stringify({ nombre, entrenos, semana, resumen: `Re-engagement 14d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. ${entrenos} entrenos, semana ${semana}.` }) });
+            enviadosReenganche++;
+          }
+
+          // 21 DÍAS (3 semanas) sin entrar
+          if (diasInactivo >= 21 && !yaEnviado.has(`reenganche_21d:${email}`)) {
+            const deporte = ud.deporte || 'tu deporte';
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, llevas 3 semanas sin entrar. ¿Todo bien?`,
+              html: emailWrapper(`
+                <div style="padding:28px 28px 0">
+                  <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Tres semanas. Esto es un aviso de tu yo del futuro.</h1>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Llevas 3 semanas sin entrar en K-ONE. No sé qué ha pasado — quizá la vida, el trabajo, la pereza, o simplemente que no era el momento. <span style="color:#F0EDE8">Todo eso es normal</span>.</p>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Pero te cuento algo: <span style="color:#F0EDE8;font-weight:500">la disciplina no es entrenar cuando te apetece. Es hacerlo cuando no te apetece</span>. Y hoy puede ser ese día.</p>
+                  <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 18px">
+                    <p style="margin:0;font-size:14px;color:#F0EDE8;line-height:1.6;font-weight:500">Prepárate. Tu plan de ${esc(deporte)} te está esperando. Solo necesitas 45 minutos para volver a sentirte bien.</p>
+                  </div>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 8px">Si algo no te convence del plan o necesitas un cambio, escríbenos. Para eso estamos.</p>
+                  <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 20px">Si quieres cancelar, puedes hacerlo desde tu perfil con un clic. Pero antes — <span style="color:#E8490F;font-weight:600">dale una oportunidad más</span>.</p>
+                </div>
+                <div style="padding:0 28px 28px;text-align:center">
+                  <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VOLVER A ENTRENAR</a>
+                  <p style="margin:12px 0 0;font-size:12px;color:#666">¿Dudas? Responde a este email y te ayudamos.</p>
+                </div>
+              `)
+            });
+            await supa.from('email_log').insert({ tipo: 'reenganche_21d', destinatario: email, asunto: 'Llevas 3 semanas sin entrar', datos: JSON.stringify({ nombre, deporte, resumen: `Re-engagement 21d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Último aviso. Deporte: ${deporte}.` }) });
+            enviadosReenganche++;
+          }
+        }
       }
     }
 
@@ -312,8 +435,8 @@ async function handleCronRetencion(req, res) {
       console.error('[notify-cron] backup error:', bErr.message);
     }
 
-    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosResumen} resumen, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosResumen, backupOk });
+    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, backup: ${backupOk ? 'OK' : 'FAIL'}`);
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosResumen, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     return res.status(500).json({ error: 'Error interno' });

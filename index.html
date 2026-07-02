@@ -14431,8 +14431,8 @@
   }
 
   // ===== PANEL DE EMAILS: tipos, filtros y render =====
-  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', renovacion: 'Email de renovación' };
-  const _emailTipoColor = { lead: '#E8490F', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db', resumen_semanal: '#9b59b6', retencion_dia3: '#e67e22', retencion_dia8: '#d35400', renovacion: '#1abc9c' };
+  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario' };
+  const _emailTipoColor = { lead: '#E8490F', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db', resumen_semanal: '#9b59b6', retencion_dia3: '#e67e22', retencion_dia8: '#d35400', reenganche_7d: '#e74c3c', reenganche_14d: '#c0392b', reenganche_21d: '#922b21', renovacion: '#1abc9c', digest_admin: '#7f8c8d' };
   function _emailIcon(tipo) {
     const c = _emailTipoColor[tipo] || '#888';
     const iconos = {
@@ -14442,7 +14442,11 @@
       resumen_semanal: `<path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/>`,
       retencion_dia3: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
       retencion_dia8: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+      reenganche_7d: `<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
+      reenganche_14d: `<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
+      reenganche_21d: `<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
       renovacion: `<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>`,
+      digest_admin: `<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
       mensaje: `<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>`
     };
     return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${c}" stroke-width="2">${iconos[tipo] || iconos.mensaje}</svg>`;
