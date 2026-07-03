@@ -31,7 +31,10 @@ async function handleCronRetencion(req, res) {
   const crypto = require('crypto');
   const secret = req.headers.authorization?.replace('Bearer ', '') || req.query?.secret;
   const expected = process.env.CRON_SECRET || '';
-  if (!secret || !expected || !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(expected.padEnd(secret.length)))) {
+  // Comparar hashes: longitud siempre igual, así timingSafeEqual nunca lanza
+  // (con buffers de distinta longitud lanzaría RangeError → 500 en vez de 401).
+  const h = s => crypto.createHash('sha256').update(String(s)).digest();
+  if (!secret || !expected || !crypto.timingSafeEqual(h(secret), h(expected))) {
     return res.status(401).json({ error: 'No autorizado' });
   }
 
@@ -46,13 +49,17 @@ async function handleCronRetencion(req, res) {
     const hace8d = new Date(ahora.getTime() - 8 * 86400000).toISOString();
     const hace9d = new Date(ahora.getTime() - 9 * 86400000).toISOString();
 
+    // supabase-js no lanza: devuelve {data, error}. Si last_seen aún no existe,
+    // reintentar sin esa columna para no dejar el cron entero sin perfiles.
     let perfiles;
-    try {
+    {
       const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at, last_seen');
-      perfiles = r.data;
-    } catch (_) {
-      const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
-      perfiles = r.data;
+      if (r.error) {
+        const r2 = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
+        perfiles = r2.data;
+      } else {
+        perfiles = r.data;
+      }
     }
     const { data: subs } = await supa.from('subscriptions').select('user_id, status');
     const subByUser = {};
@@ -343,12 +350,14 @@ async function handleCronRetencion(req, res) {
           .select('user_id, status, cancel_at_period_end');
         const subMap = {}; (subsFull || []).forEach(s => { subMap[s.user_id] = s; });
         let profsFull = [];
-        try {
+        {
           const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires, last_seen');
-          profsFull = r.data || [];
-        } catch (_) {
-          const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires');
-          profsFull = r.data || [];
+          if (r.error) {
+            const r2 = await supa.from('profiles').select('id, userdata, is_beta, beta_expires');
+            profsFull = r2.data || [];
+          } else {
+            profsFull = r.data || [];
+          }
         }
         const now = ahora.getTime();
         let pagoFallido = 0, cancela = 0, premiumCaduca = 0, inactivos = 0, sinEntrenar = 0;

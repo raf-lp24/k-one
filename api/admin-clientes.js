@@ -87,23 +87,22 @@ module.exports = async (req, res) => {
 
     // Columnas opcionales (last_seen, nota_admin). Consulta defensiva: si aún no existen,
     // se ignora sin romper el panel. last_seen cae a last_sign_in_at; nota_admin queda vacía.
+    // supabase-js no lanza: devuelve {data, error}. Si falta alguna columna opcional
+    // se reintenta con menos columnas; si no existe ninguna, los mapas quedan vacíos.
     let lastSeenMap = {};
     let notaMap = {};
-    try {
+    {
       const ids = (perfiles || []).map(p => p.id);
       if (ids.length) {
-        const { data: ls } = await supabaseAdmin.from('profiles').select('id, last_seen, nota_admin').in('id', ids);
-        (ls || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; if (r.nota_admin) notaMap[r.id] = r.nota_admin; });
-      }
-    } catch (e) {
-      // Puede que exista last_seen pero no nota_admin (o viceversa). Reintento solo last_seen.
-      try {
-        const ids = (perfiles || []).map(p => p.id);
-        if (ids.length) {
-          const { data: ls2 } = await supabaseAdmin.from('profiles').select('id, last_seen').in('id', ids);
-          (ls2 || []).forEach(r => { if (r.last_seen) lastSeenMap[r.id] = r.last_seen; });
+        const r = await supabaseAdmin.from('profiles').select('id, last_seen, nota_admin').in('id', ids);
+        if (!r.error) {
+          (r.data || []).forEach(x => { if (x.last_seen) lastSeenMap[x.id] = x.last_seen; if (x.nota_admin) notaMap[x.id] = x.nota_admin; });
+        } else {
+          // Puede que exista last_seen pero no nota_admin (o viceversa). Reintento solo last_seen.
+          const r2 = await supabaseAdmin.from('profiles').select('id, last_seen').in('id', ids);
+          if (!r2.error) (r2.data || []).forEach(x => { if (x.last_seen) lastSeenMap[x.id] = x.last_seen; });
         }
-      } catch (_) { /* ninguna columna opcional existe todavía */ }
+      }
     }
 
     if (e1) {
