@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeos TikTok: oferta 1,99€ y referidos</title>
+<style>
+  body { background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; margin:0; min-height:100vh; justify-content:center; }
+  canvas { height:min(66vh,660px); aspect-ratio:9/16; border-radius:10px; box-shadow:0 0 50px rgba(232,73,15,.2); background:#0b0b0b; }
+  .btns, .promos { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  button { background:#E8490F; color:#fff; border:0; border-radius:8px; padding:13px 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.sec { background:#222; }
+  button.promo { background:#1a1a1a; border:2px solid #333; padding:10px 22px; font-size:15px; }
+  button.promo.on { border-color:#E8490F; background:rgba(232,73,15,.15); }
+  button:disabled { opacity:.4; cursor:default; }
+  #status { font-size:14px; color:#888; min-height:20px; text-align:center; max-width:480px; line-height:1.5; }
+  a.dl { color:#E8490F; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="promos" id="promos"></div>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="btns">
+  <button id="gen">🎬 GENERAR VÍDEO</button>
+  <button class="sec" id="prev">Solo ver</button>
+</div>
+<div id="status">Elige un vídeo arriba y pulsa <b>Generar vídeo</b>. No cambies de pestaña ni bloquees la pantalla mientras graba.</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 1080, H = 1920;
+
+const COL = {
+  naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
+  hueso:'#F0EDE8', metal:'#b5b2ad', borde:'#222222', sep:'#1d1d1d', verde:'#27ae60'
+};
+const FONT = '"Segoe UI", Arial, sans-serif';
+const MONO = 'Consolas, "Courier New", monospace';
+const N = COL.naranja, M = COL.metal, B = '#fff', V = COL.verde;
+
+/* ---------- helpers ---------- */
+const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+const easeOut = x => 1 - Math.pow(1-x,3);
+function popE(x){ const c = 1.70158; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); }
+function up(tl, d, dur=0.55){ const x = clamp((tl-d)/dur, 0, 1); return { a:x, dy:40*(1-easeOut(x)) }; }
+function pop(tl, d, dur=0.5){ const x = clamp((tl-d)/dur, 0, 1); return { a:clamp(x*2,0,1), s: x===0 ? .6 : .6+.4*popE(x) }; }
+
+function setFont(size, weight='400', mono=false, ls=0){
+  ctx.font = `${weight} ${size}px ${mono?MONO:FONT}`;
+  ctx.letterSpacing = ls + 'px';
+}
+function txt(str, x, y, size, {w='400', col:c='#fff', align='center', mono=false, ls=0, a=1} = {}){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, w, mono, ls);
+  ctx.fillStyle = c; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function rich(segs, cx, y, size, weight='900', a=1, dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, weight);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tot = segs.reduce((s,seg)=> s + ctx.measureText(seg.t).width, 0);
+  let x = cx - tot/2;
+  for (const seg of segs){
+    ctx.fillStyle = seg.c || '#fff';
+    ctx.fillText(seg.t, x, y + dy);
+    x += ctx.measureText(seg.t).width;
+  }
+  ctx.restore();
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function card(x,y,w,h,a=1,dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  rrect(x, y+dy, w, h, 22);
+  ctx.fillStyle = COL.grafito; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function logoK(cx, y, size, a=1, s=1){
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.translate(cx,y); ctx.scale(s,s); ctx.translate(-cx,-y);
+  setFont(size,'900',false,6);
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  const w1 = ctx.measureText('K-').width, w2 = ctx.measureText('ONE').width;
+  let x = cx-(w1+w2)/2;
+  ctx.fillStyle='#fff'; ctx.fillText('K-',x,y);
+  ctx.fillStyle=N; ctx.fillText('ONE',x+w1,y);
+  ctx.restore();
+}
+
+/* ---------- renderers de escena ---------- */
+const R = {
+  hook(c, tl){
+    const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
+    ctx.fillStyle = `rgba(232,73,15,${0.12*fa})`; ctx.fillRect(0,0,W,H);
+    const p = pop(tl, 0.15);
+    ctx.save(); ctx.translate(W/2, 830); ctx.scale(p.s,p.s); ctx.translate(-W/2,-830);
+    rich(c.l1, W/2, 780, c.size||86, '900', p.a);
+    rich(c.l2, W/2, 886, c.size||86, '900', p.a);
+    ctx.restore();
+    const u = up(tl, 0.75);
+    rich(c.sub, W/2, 1070, 56, '800', u.a, u.dy);
+  },
+  logo(c, tl){
+    const p = pop(tl, 0);
+    logoK(W/2, 890, 96, p.a, p.s);
+    const u = up(tl, 0.4);
+    txt(c.tag, W/2, 1020+u.dy, 30, {col:N, w:'700', mono:true, ls:5, a:u.a});
+  },
+  list(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    txt(c.paso, W/2, 400+u0.dy, 30, {col:N, w:'700', mono:true, ls:6, a:u0.a});
+    rich(c.t1, W/2, 495, 56, '800', u1.a, u1.dy);
+    if (c.t2) rich(c.t2, W/2, 568, 56, '800', u1.a, u1.dy);
+    const cx0=96, cw=W-192;
+    let y = c.t2 ? 660 : 610;
+    c.rows.forEach((r,i)=>{
+      const ui = up(tl, 0.5+i*0.18, 0.45);
+      card(cx0, y, cw, 108, ui.a, ui.dy);
+      ctx.save(); ctx.globalAlpha=ui.a;
+      if (r[2] === 'check') txt('✓', cx0+44, y+54+ui.dy, 36, {col:V, w:'900', align:'left'});
+      txt(r[0], cx0+(r[2]==='check'?108:46), y+54+ui.dy, 35, {col:'#e6e3de', w:'600', align:'left'});
+      if (r[1]) txt(r[1], cx0+cw-46, y+54+ui.dy, 31, {col:N, w:'700', mono:true, align:'right'});
+      ctx.restore();
+      y += 126;
+    });
+    if (c.foot) txt(c.foot, W/2, y+64+up(tl,1.7).dy, 37, {col:M, a:up(tl,1.7).a});
+  },
+  // tarjeta grande con el código de referido y botones
+  codigo(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    txt(c.paso, W/2, 430+u0.dy, 30, {col:N, w:'700', mono:true, ls:6, a:u0.a});
+    rich(c.t1, W/2, 525, 56, '800', u1.a, u1.dy);
+    rich(c.t2, W/2, 598, 56, '800', u1.a, u1.dy);
+    const uc = up(tl, 0.6);
+    ctx.save(); ctx.globalAlpha = uc.a;
+    ctx.shadowColor='rgba(232,73,15,.4)'; ctx.shadowBlur=50;
+    rrect(140, 720+uc.dy, W-280, 240, 26);
+    ctx.fillStyle = COL.grafito; ctx.fill();
+    ctx.strokeStyle = N; ctx.lineWidth = 4; ctx.stroke();
+    ctx.shadowBlur = 0;
+    txt('TU CÓDIGO', W/2, 790+uc.dy, 27, {col:M, w:'700', mono:true, ls:5});
+    // código con efecto máquina de escribir
+    const code = 'RAFA-5239';
+    const nChars = Math.floor(clamp((tl-1.0)/0.9, 0, 1) * code.length);
+    const mostrado = code.slice(0, nChars) + (nChars < code.length && tl>1.0 ? '_' : '');
+    txt(mostrado || '_', W/2, 880+uc.dy, 74, {col:N, w:'900', mono:true, ls:6});
+    ctx.restore();
+    // botones copiar / whatsapp
+    const ub = up(tl, 2.1);
+    ctx.save(); ctx.globalAlpha = ub.a;
+    [['📋 COPIAR', W/2-230],['📲 WHATSAPP', W/2+230]].forEach(([t,x])=>{
+      rrect(x-190, 1020, 380, 100, 16);
+      ctx.fillStyle = COL.carbon; ctx.fill();
+      ctx.strokeStyle = '#333'; ctx.lineWidth=3; ctx.stroke();
+      txt(t, x, 1070, 32, {w:'700'});
+    });
+    ctx.restore();
+    txt(c.foot, W/2, 1230+up(tl,2.5).dy, 37, {col:M, a:up(tl,2.5).a});
+  },
+  // contador de dinero acumulándose
+  contador(c, tl){
+    const u0=up(tl,0), u1=up(tl,0.15);
+    rich(c.t1, W/2, 500, 66, '900', u1.a, u1.dy);
+    rich(c.t2, W/2, 585, 66, '900', u1.a, u1.dy);
+    // 3 amigos que se suman
+    const amigos = ['Amigo 1','Amigo 2','Amigo 3'];
+    amigos.forEach((a,i)=>{
+      const ua = up(tl, 0.7+i*0.55, 0.4);
+      const y = 720+i*130;
+      card(200, y, W-400, 110, ua.a, ua.dy);
+      ctx.save(); ctx.globalAlpha = ua.a;
+      txt('👤 '+a, 250, y+56+ua.dy, 35, {col:'#e6e3de', w:'600', align:'left'});
+      txt('+5€', W-250, y+56+ua.dy, 40, {col:V, w:'900', mono:true, align:'right'});
+      ctx.restore();
+    });
+    // total que crece: 0 → 15
+    const total = Math.round(clamp((tl-0.9)/1.9, 0, 1) * 15);
+    const ut = up(tl, 0.8);
+    ctx.save(); ctx.globalAlpha = ut.a;
+    ctx.shadowColor='rgba(39,174,96,.45)'; ctx.shadowBlur=60;
+    txt(`−${total}€`, W/2, 1290, 150, {col:V, w:'900'});
+    ctx.restore();
+    txt(c.foot, W/2, 1440+up(tl,1.4).dy, 38, {col:M, a:up(tl,1.4).a});
+  },
+  big(c, tl){
+    const p = pop(tl, 0.1);
+    ctx.save(); ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+    rich(c.l1, W/2, 810, 84, '900', p.a);
+    rich(c.l2, W/2, 915, 84, '900', p.a);
+    ctx.restore();
+    const u = up(tl, 0.7);
+    txt(c.sub, W/2, 1090+u.dy, 40, {col:M, a:u.a, w:'600'});
+  },
+  // comparación de precios con tachado
+  versus(c, tl){
+    const u0 = up(tl, 0);
+    ctx.save(); ctx.globalAlpha=u0.a;
+    setFont(52,'700'); ctx.textBaseline='middle'; ctx.textAlign='center';
+    ctx.fillStyle = '#666';
+    ctx.fillText(c.antes, W/2, 640);
+    const w = ctx.measureText(c.antes).width;
+    ctx.strokeStyle='#e74c3c'; ctx.lineWidth=6;
+    ctx.beginPath(); ctx.moveTo(W/2-w/2-14, 640); ctx.lineTo(W/2+w/2+14, 640); ctx.stroke();
+    ctx.restore();
+    const p = pop(tl, 0.4, 0.55);
+    ctx.save(); ctx.globalAlpha=p.a;
+    ctx.translate(W/2,880); ctx.scale(p.s,p.s); ctx.translate(-W/2,-880);
+    ctx.shadowColor='rgba(232,73,15,.55)'; ctx.shadowBlur=70;
+    txt(c.precio, W/2, 880, 200, {col:N, w:'900'});
+    ctx.restore();
+    txt(c.sub1, W/2, 1070+u0.dy, 40, {col:'#F0EDE8', w:'700', a:up(tl,0.9).a});
+    txt(c.sub2, W/2, 1140+u0.dy, 34, {col:M, a:up(tl,1.1).a});
+  },
+  cta(c, tl){
+    const u0 = up(tl, 0);
+    txt(c.lineup, W/2, 640+u0.dy, 38, {col:M, a:u0.a});
+    const p = pop(tl, 0.35, 0.55);
+    ctx.save(); ctx.globalAlpha=p.a;
+    ctx.translate(W/2,860); ctx.scale(p.s,p.s); ctx.translate(-W/2,-860);
+    ctx.shadowColor='rgba(232,73,15,.55)'; ctx.shadowBlur=70;
+    txt(c.price, W/2, 860, 165, {col:N, w:'900'});
+    ctx.restore();
+    txt(c.priceSub, W/2, 1030+u0.dy, 38, {col:M, a:up(tl,0.8).a});
+    const u2 = up(tl, 1.1), u3 = up(tl, 1.4);
+    logoK(W/2, 1200+u2.dy, 76, u2.a, 1);
+    rich([{t:'k-one',c:'#fff'},{t:'.fit',c:N},{t:'  ·  🔗 link en la bio',c:M}], W/2, 1310, 36, '700', u3.a, u3.dy);
+  },
+};
+
+/* ---------- configuración de los dos vídeos ---------- */
+const PROMOS = {
+  oferta: {
+    label: 'Oferta 1,99€', file: 'k-one-oferta-199',
+    scenes: [
+      { type:'hook', dur:2.8, size:80, l1:[{t:'Empezar a cuidarte',c:B}], l2:[{t:'cuesta ',c:B},{t:'menos que un café',c:N}], sub:[{t:'oferta de lanzamiento ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'OFERTA DE LANZAMIENTO' },
+      { type:'list', dur:5.6, paso:'ACCESO COMPLETO', t1:[{t:'Todo esto, ',c:B},{t:'sin recortes',c:N}],
+        rows:[['Entreno personalizado','','check'],['Nutrición 5×5 comidas','','check'],['Lista de la compra','','check'],['Vídeos de ejercicios','','check'],['Se adapta cada semana','','check']],
+        foot:'el mes entero, con todo dentro' },
+      { type:'versus', dur:4, antes:'Primer mes: 19,99€', precio:'1,99€',
+        sub1:'0,06€ al día. En serio.', sub2:'después 19,99€/mes · sin permanencia' },
+      { type:'big', dur:2.8, l1:[{t:'Sin permanencia.',c:B}], l2:[{t:'Sin letra ',c:B},{t:'pequeña',c:N},{t:'.',c:B}], sub:'cancelas con un clic desde tu perfil' },
+      { type:'cta', dur:3.6, lineup:'Pruébalo un mes entero por', price:'1,99€', priceSub:'oferta de lanzamiento · cancela cuando quieras' },
+    ],
+  },
+  referidos: {
+    label: 'Código referido', file: 'k-one-referidos',
+    scenes: [
+      { type:'hook', dur:2.8, size:82, l1:[{t:'Invita a un amigo',c:B}], l2:[{t:'y entrena ',c:B},{t:'más barato',c:N}], sub:[{t:'así funciona el código ',c:B},{t:'👇',c:N}] },
+      { type:'logo', dur:1.8, tag:'PROGRAMA DE REFERIDOS' },
+      { type:'codigo', dur:5, paso:'PASO 1', t1:[{t:'Tu código está',c:B}], t2:[{t:'en ',c:B},{t:'tu panel',c:N}],
+        foot:'cópialo o mándalo por WhatsApp con un toque' },
+      { type:'list', dur:4.6, paso:'PASO 2', t1:[{t:'Tu amigo lo usa',c:B}],
+        rows:[['Se registra con tu código','','check'],['Activa su plan','1,99€','check'],['Tú ganas','+5€','check']],
+        foot:'y él empieza con la misma oferta que tú' },
+      { type:'contador', dur:4.6, t1:[{t:'5€ ',c:V},{t:'por amigo',c:B}], t2:[{t:'hasta ',c:B},{t:'15€',c:V},{t:' de descuento',c:B}],
+        foot:'se descuenta solo en tu siguiente cuota' },
+      { type:'big', dur:2.6, l1:[{t:'Entrenar con amigos',c:B}], l2:[{t:'sale ',c:B},{t:'más barato',c:N}], sub:'y encima os pica la competencia sana' },
+      { type:'cta', dur:3.6, lineup:'Invita a 3 amigos y tu cuota baja', price:'−15€', priceSub:'tu código te espera en tu panel' },
+    ],
+  },
+};
+
+/* ---------- motor ---------- */
+let promoKey = 'oferta';
+function timeline(){
+  const sc = PROMOS[promoKey].scenes;
+  let t = 0;
+  return sc.map(s => { const o = { ...s, start: t }; t += s.dur; return o; });
+}
+function total(){ return PROMOS[promoKey].scenes.reduce((a,s)=>a+s.dur,0); }
+
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1; ctx.letterSpacing='0px'; ctx.shadowBlur=0;
+  ctx.fillStyle = COL.negro; ctx.fillRect(0,0,W,H);
+  const tl = timeline();
+  let cur = tl[0];
+  for (const s of tl) if (t >= s.start) cur = s;
+  const local = t - cur.start;
+  ctx.globalAlpha = clamp(local/0.3, 0, 1);
+  R[cur.type](cur, local);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = N;
+  ctx.fillRect(0, 0, W*(t/total()), 7);
+}
+
+/* ---------- UI selector ---------- */
+const promosDiv = document.getElementById('promos');
+Object.entries(PROMOS).forEach(([k,v])=>{
+  const b = document.createElement('button');
+  b.className = 'promo' + (k===promoKey?' on':'');
+  b.textContent = v.label;
+  b.onclick = ()=>{
+    promoKey = k;
+    document.querySelectorAll('.promo').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    draw(0.001);
+    status.textContent = `Vídeo: ${v.label} (${Math.round(total())}s). Pulsa 🎬 para generar.`;
+  };
+  promosDiv.appendChild(b);
+});
+
+/* ---------- reproducción / grabación ---------- */
+const status = document.getElementById('status');
+const btnGen = document.getElementById('gen');
+const btnPrev = document.getElementById('prev');
+let running = false;
+
+function play(record){
+  if (running) return; running = true;
+  btnGen.disabled = true; btnPrev.disabled = true;
+  window.__videoDone = 0;
+  const TOTAL = total();
+  const fileBase = PROMOS[promoKey].file;
+
+  let rec = null, chunks = [], mime = '', ext = '';
+  if (record){
+    const tipos = [
+      ['video/mp4;codecs=avc1.640028','mp4'],
+      ['video/mp4','mp4'],
+      ['video/webm;codecs=vp9','webm'],
+      ['video/webm','webm'],
+    ];
+    for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
+    if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
+    const stream = cv.captureStream(30);
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 14_000_000 });
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${fileBase}.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.__videoDone = blob.size;
+      const mb = (blob.size/1048576).toFixed(1);
+      status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="${fileBase}.${ext}">${fileBase}.${ext}</a> (${mb} MB, ${ext.toUpperCase()}). Envíalo por WhatsApp como <b>documento</b> para no perder calidad.`;
+    };
+    rec.start(250);
+    status.textContent = `⏺ Grabando ${PROMOS[promoKey].label} (${ext.toUpperCase()})… no cambies de pestaña durante ${Math.round(TOTAL)} s.`;
+  } else {
+    status.textContent = '▶ Reproduciendo (sin grabar)…';
+  }
+
+  const t0 = performance.now();
+  function loop(){
+    const t = (performance.now()-t0)/1000;
+    draw(Math.min(t, TOTAL));
+    if (t < TOTAL + 0.3){ requestAnimationFrame(loop); }
+    else {
+      if (rec) rec.stop();
+      else status.textContent = 'Listo. Pulsa 🎬 para generar el archivo.';
+      running = false; btnGen.disabled = btnPrev.disabled = false;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+btnGen.addEventListener('click', () => play(true));
+btnPrev.addEventListener('click', () => play(false));
+draw(0.001);
+</script>
+</body>
+</html>
