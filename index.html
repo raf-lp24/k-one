@@ -10776,6 +10776,12 @@
       userData.horaCompletado[hoy] = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       showToast('Entrenamiento de hoy marcado como completado. ¡Buen trabajo!');
       lanzarConfetti();
+      // Al 5º entreno: pedir opinión una sola vez (si aún no la dio ni se le pidió).
+      // Se espera a que pase el confetti para no pisar el momento de celebración.
+      if (userData.historialEntrenos.length >= 5 && !userData.testimonioCompletado && !userData.encuestaPedidaEntrenos) {
+        userData.encuestaPedidaEntrenos = true;
+        setTimeout(() => { try { mostrarEncuestaOpinion(); } catch (_) {} }, 2600);
+      }
     } else {
       userData.entrenosCompletados.splice(idx, 1);
       if (idxHist !== -1) userData.historialEntrenos.splice(idxHist, 1);
