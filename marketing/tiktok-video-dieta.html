@@ -18,7 +18,7 @@
 
 <canvas id="cv" width="1080" height="1920"></canvas>
 <div class="btns">
-  <button id="gen">🎬 GENERAR VÍDEO (28s)</button>
+  <button id="gen">🎬 GENERAR VÍDEO (31s)</button>
   <button class="sec" id="prev">Solo ver</button>
 </div>
 <div id="status">Pulsa <b>Generar vídeo</b>: se reproduce una vez y al acabar se descarga el archivo listo para WhatsApp/TikTok (1080×1920).</div>
@@ -27,7 +27,7 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const W = 1080, H = 1920;
-const TOTAL = 28;
+const TOTAL = 31.4;
 
 const COL = {
   naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
@@ -100,12 +100,13 @@ function logoK(cx, y, size, a=1, s=1){
    s2 2.6   logo "así funciona la nutrición"
    s3 4.4   tu semana día a día (tabs de días + comidas del día)
    s4 9.4   5 opciones por comida (rotan + selección)
-   s5 14.4  "¿la compra? un botón"
-   s6 17    lista de la compra apareciendo
-   s7 22.4  sumada y agrupada / descárgala
-   s8 25    CTA precio + cierre
+   s45 14.4 renovación del menú: tú eliges semana/mes/fijo
+   s5 18.8  "¿la compra? un botón"
+   s6 21.4  lista de la compra apareciendo
+   s7 26.4  sumada y agrupada / descárgala
+   s8 28.6  CTA precio + cierre
 --------------------------------- */
-const T = { s1:0, s2:2.6, s3:4.4, s4:9.4, s5:14.4, s6:17, s7:22.4, s8:25 };
+const T = { s1:0, s2:2.6, s3:4.4, s4:9.4, s45:14.4, s5:18.8, s6:21.4, s7:26.4, s8:28.6 };
 
 function s1(tl){ // HOOK
   const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
@@ -219,6 +220,38 @@ function s4(tl){ // 5 OPCIONES
   }
 }
 
+function s45(tl){ // RENOVACIÓN DEL MENÚ: TÚ ELIGES
+  const u0=up(tl,0), u1=up(tl,0.15);
+  txt('Y ADEMÁS…', W/2, 430+u0.dy, 30, {col:COL.naranja, w:'700', mono:true, ls:6, a:u0.a});
+  rich([{t:'Tú eliges',c:COL.naranja}], W/2, 525, 58, '800', u1.a, u1.dy);
+  txt('cada cuánto se renueva', W/2, 600+u1.dy, 58, {w:'800', a:u1.a});
+  // 3 opciones tipo píldora, cursor elige "Cada semana"
+  const OPTS = ['Cada semana', 'Cada mes', 'Mantener fijo'];
+  const cx0=170, ow=W-340, oh=118;
+  const selI = 0;
+  const selK = tl>=2.4 ? clamp((tl-2.4)/0.3,0,1) : 0;
+  OPTS.forEach((o,i)=>{
+    const ui = up(tl, 0.6+i*0.16, 0.45);
+    const y = 720+i*146;
+    const k = i===selI ? selK : 0;
+    ctx.save(); ctx.globalAlpha *= ui.a;
+    rrect(cx0, y+ui.dy, ow, oh, 59);
+    ctx.fillStyle = k>0 ? `rgba(232,73,15,${0.16*k})` : COL.grafito; ctx.fill();
+    ctx.strokeStyle = k>0 ? COL.naranja : '#333'; ctx.lineWidth=3; ctx.stroke();
+    txt(o, W/2, y+oh/2+ui.dy, 38, {col:k>0?'#fff':COL.metal, w:'700'});
+    if (k>0){ ctx.globalAlpha = k; txt('✓', cx0+ow-56, y+oh/2+ui.dy, 40, {col:COL.verde, w:'900', align:'right'}); }
+    ctx.restore();
+  });
+  // cursor pulsa "Cada semana"
+  if (tl>=1.5 && tl<3.2){
+    const tapK = (tl>2.3 && tl<2.6) ? Math.sin((tl-2.3)/0.3*Math.PI) : 0;
+    const ca = tl<1.8 ? (tl-1.5)/0.3 : (tl>2.9 ? clamp((3.2-tl)/0.3,0,1) : 1);
+    cursor(W/2+180, 720+oh/2, ca, tapK);
+  }
+  txt('Platos nuevos cada lunes, cada mes… o nunca.', W/2, 1240+up(tl,2.7).dy, 40, {col:COL.metal, a:up(tl,2.7).a, w:'600'});
+  txt('Lo cambias cuando quieras desde tu panel.', W/2, 1300+up(tl,2.9).dy, 36, {col:COL.metal, a:up(tl,2.9).a});
+}
+
 function s5(tl){ // ¿LA COMPRA? UN BOTÓN
   const p = pop(tl, 0.1);
   ctx.save(); ctx.translate(W/2,760); ctx.scale(p.s,p.s); ctx.translate(-W/2,-760);
@@ -313,7 +346,7 @@ function draw(t){
   const tl = t - start;
   const fade = clamp(tl/0.3, 0, 1);
   ctx.globalAlpha = fade;
-  ({s1,s2,s3,s4,s5,s6,s7,s8})[key](tl);
+  ({s1,s2,s3,s4,s45,s5,s6,s7,s8})[key](tl);
   ctx.globalAlpha = 1;
   ctx.fillStyle = COL.naranja;
   ctx.fillRect(0, 0, W*(t/TOTAL), 7);
@@ -354,7 +387,7 @@ function play(record){
       status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="k-one-dieta-lista.${ext}">k-one-dieta-lista.${ext}</a> (${mb} MB, ${ext.toUpperCase()}). Búscalo en Descargas y mándatelo por WhatsApp.`;
     };
     rec.start(250);
-    status.textContent = `⏺ Grabando (${ext.toUpperCase()})… no cambies de pestaña durante 28 s.`;
+    status.textContent = `⏺ Grabando (${ext.toUpperCase()})… no cambies de pestaña durante 31 s.`;
   } else {
     status.textContent = '▶ Reproduciendo (sin grabar)…';
   }
