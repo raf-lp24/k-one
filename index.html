@@ -2679,6 +2679,13 @@
   .nutri-dia:hover { border-color: var(--brasa); color: var(--blanco); }
   .nutri-dia.selected { background: var(--brasa); border-color: var(--brasa); color: var(--blanco-puro); }
   .nutri-dia.has-selection { border-bottom: 3px solid var(--brasa); }
+  .rotacion-opt {
+    background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
+    border-radius: 999px; padding: 7px 16px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all .2s;
+  }
+  .rotacion-opt:hover { border-color: var(--brasa); color: var(--blanco); }
+  .rotacion-opt.active { background: rgba(232,73,15,.15); border-color: var(--brasa); color: var(--blanco); }
   .btn-lista-compra {
     display: inline-flex;
     align-items: center;
@@ -6824,6 +6831,16 @@
               Descargar plan semanal
             </button>
           </div>
+          <!-- Renovación del menú: el cliente elige cada cuánto cambian los platos -->
+          <div id="rotacionMenuBox" style="margin-top:16px;background:var(--carbon);border:1px solid var(--humo);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:4px">RENOVACIÓN DEL MENÚ</div>
+            <div style="font-size:12px;color:var(--metal-claro);margin-bottom:10px">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
+              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
+              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
+            </div>
+          </div>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
@@ -8540,6 +8557,25 @@
     });
   }
 
+  // Periodo de rotación del menú de nutrición según la preferencia del cliente.
+  // Devuelve un entero que avanza con el tiempo (o constante si es fija) y que
+  // alimenta la rotación de platos en buildPlanFromData.
+  //  · 'semanal': nº de semanas desde epoch, alineado a lunes → cambia cada lunes.
+  //  · 'mensual': nº de meses absolutos (año*12+mes) → cambia al empezar el mes.
+  //  · 'fija' (u otro): 0 constante → el menú no cambia nunca.
+  function _periodoNutricion(pref) {
+    const p = pref || 'mensual';
+    const ahora = new Date();
+    if (p === 'semanal') {
+      const d = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const dow = (d.getDay() + 6) % 7; // 0 = lunes
+      d.setDate(d.getDate() - dow);
+      return Math.floor(d.getTime() / (7 * 86400000));
+    }
+    if (p === 'mensual') return ahora.getFullYear() * 12 + ahora.getMonth();
+    return 0; // fija
+  }
+
   function buildPlanFromData(u) {
     const soloDieta = (u.tipoPlan || '').includes('Solo nutrición');
     const deporte = u.deporte || 'Gimnasio / Fuerza';
@@ -9851,12 +9887,14 @@
     // ROTACIÓN POR DÍA: cada día de la semana muestra opciones diferentes.
     // Se genera un array de 7 variantes (L-D), cada una con 5 opciones rotadas distinto.
     // La rotación también varía por mes para renovar platos mensualmente.
-    const mesRotacion = new Date().getMonth() + 1;
+    // El "periodo" hace avanzar la rotación con el tiempo según lo que el cliente
+    // eligió en su panel (semanal/mensual/fija). Ver _periodoNutricion().
+    const periodoRot = _periodoNutricion(u.rotacionMenu);
     const nutricionPorDia = [];
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
         ...m,
-        opciones: rotar(m.opciones, semilla + i * 3 + mesRotacion * 5 + dia * 11).slice(0, 5)
+        opciones: rotar(m.opciones, semilla + i * 3 + periodoRot * 5 + dia * 11).slice(0, 5)
       })));
     }
     // El plan base guarda el día 0 (lunes) como referencia
@@ -9925,9 +9963,68 @@
     return partes.join(' ');
   }
 
+  // Si el cliente eligió rotación semanal/mensual y ha entrado en un periodo nuevo,
+  // regenera el plan para renovar los platos y le hace "rehacer" la semana. Guarda el
+  // periodo aplicado para no regenerar en cada carga. 'fija' no hace nada. Progreso de
+  // entrenos y perfil se conservan (viven en userData, que buildPlanFromData relee).
+  function _refrescarMenuNutricion() {
+    try {
+      const pref = userData.rotacionMenu || 'mensual';
+      if (pref === 'fija') return;
+      const actual = _periodoNutricion(pref);
+      if (userData.nutriPeriodo === actual) return;
+      const primeraVez = userData.nutriPeriodo === undefined;
+      userData.nutriPeriodo = actual;
+      generatedPlan = buildPlanFromData(userData);
+      // Solo "resetear la semana" cuando el menú cambia de verdad (no en la 1ª carga).
+      if (!primeraVez) {
+        userData.comidasSeleccionadas = [];
+        userData.comidasSemana = [];
+        userData.diasConfirmados = [false,false,false,false,false,false,false];
+      }
+      const user = getCurrentUser();
+      if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    } catch (e) { /* si falla, se muestra el plan guardado tal cual */ }
+  }
+
+  // Marca el botón activo del selector de renovación según la preferencia guardada.
+  function _reflejarRotacionMenu() {
+    const pref = userData.rotacionMenu || 'mensual';
+    document.querySelectorAll('.rotacion-opt').forEach(b => {
+      b.classList.toggle('active', b.dataset.rot === pref);
+    });
+  }
+
+  // El cliente cambia cada cuánto se renueva su menú. Se aplica al instante: se
+  // recalcula el periodo, se regenera el plan y se refresca la vista de nutrición.
+  function cambiarRotacionMenu(pref) {
+    if (!['semanal','mensual','fija'].includes(pref)) return;
+    const antes = userData.rotacionMenu || 'mensual';
+    userData.rotacionMenu = pref;
+    userData.nutriPeriodo = _periodoNutricion(pref);
+    generatedPlan = buildPlanFromData(userData);
+    // Si cambió la preferencia y el menú es distinto, se rehace la semana.
+    if (antes !== pref) {
+      userData.comidasSeleccionadas = [];
+      userData.comidasSemana = [];
+      userData.diasConfirmados = [false,false,false,false,false,false,false];
+      comidasSemana = [];
+      diasConfirmados = [false,false,false,false,false,false,false];
+    }
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    buildDashboard();
+    _reflejarRotacionMenu();
+    const txt = pref === 'semanal' ? 'Tu menú se renovará cada lunes.'
+      : pref === 'mensual' ? 'Tu menú se renovará cada mes.'
+      : 'Tu menú se mantendrá fijo.';
+    showToast(txt);
+  }
+
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) return;
+    _refrescarMenuNutricion();
 
     // Backfill de objetivos nutricionales: los planes generados antes de incorporar
     // kcalObj/protObj/tdee no los tienen guardados, así que el KPI "Kcal objetivo",
@@ -10117,6 +10214,7 @@
     actualizarIndicadoresDias();
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
     renderNutritionGrid(0);
+    _reflejarRotacionMenu();
   }
 
   function renderNutritionGrid(dia) {
