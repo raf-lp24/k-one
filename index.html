@@ -2686,6 +2686,12 @@
   }
   .rotacion-opt:hover { border-color: var(--brasa); color: var(--blanco); }
   .rotacion-opt.active { background: rgba(232,73,15,.15); border-color: var(--brasa); color: var(--blanco); }
+  .musculo-chip {
+    background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
+    border-radius: 999px; padding: 5px 14px; font-size: 12px; font-weight: 600;
+  }
+  .musculo-chip.principal { background: rgba(232,73,15,.15); border-color: var(--brasa); color: var(--blanco); }
+  .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
   .btn-lista-compra {
     display: inline-flex;
     align-items: center;
@@ -5260,6 +5266,19 @@
     <textarea class="encuesta-textarea" id="opPublicaTexto" placeholder="¿Qué te parece K-One? Cualquier cosa vale."></textarea>
     <button class="btn-primary" style="width:100%" onclick="enviarOpinionPublica()">Enviar opinión →</button>
     <button class="encuesta-skip" onclick="document.getElementById('modalOpinionPublica').classList.remove('visible')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
+<div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
+    <div class="modal-title" style="font-size:20px" id="infoEjercicioTitulo">Ejercicio</div>
+    <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin:14px 0 8px">MÚSCULOS TRABAJADOS</div>
+    <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:8px">CÓMO SE HACE</div>
+    <ol id="infoEjercicioPasos" style="margin:0 0 18px;padding-left:22px;color:var(--metal-claro);font-size:13.5px;line-height:1.65;display:flex;flex-direction:column;gap:8px"></ol>
+    <a id="infoEjercicioVideo" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:100%;display:block;text-align:center;text-decoration:none;box-sizing:border-box">▶ Ver vídeo de técnica</a>
+    <button class="encuesta-skip" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')">Cerrar</button>
   </div>
 </div>
 
@@ -8113,6 +8132,40 @@
     return `https://www.youtube.com/results?search_query=${encodeURIComponent(nombreEjercicio + ' técnica correcta')}`;
   }
 
+  // ===== FICHA DE EJERCICIO =====
+  // Instrucciones paso a paso en español + músculos trabajados. Datos del dataset
+  // MIT hasaneyldrm/exercises-dataset (solo datos; sin medios de GymVisual).
+  // Se cargan bajo demanda la primera vez que se abre una ficha (46 KB).
+  let _infoEjercicios = null, _infoEjerciciosKeys = null;
+  async function _cargarInfoEjercicios() {
+    if (_infoEjercicios) return;
+    try {
+      const r = await fetch('/data/ejercicios-info.json');
+      _infoEjercicios = r.ok ? await r.json() : {};
+    } catch (e) { _infoEjercicios = {}; }
+    // claves más largas primero para que "curl martillo" gane a "curl"
+    _infoEjerciciosKeys = Object.keys(_infoEjercicios).sort((a, b) => b.length - a.length);
+  }
+  async function abrirInfoEjercicio(nombre) {
+    await _cargarInfoEjercicios();
+    const n = normalizarEjercicio(nombre);
+    const key = (_infoEjerciciosKeys || []).find(k => n.includes(k));
+    const info = key ? _infoEjercicios[key] : null;
+    if (!info) {
+      // Sin ficha para este ejercicio: llevamos directamente al vídeo de técnica
+      window.open(getVideoUrl(nombre), '_blank', 'noopener');
+      return;
+    }
+    document.getElementById('infoEjercicioTitulo').textContent = nombre;
+    document.getElementById('infoEjercicioMusculos').innerHTML =
+      `<span class="musculo-chip principal">${info.m}</span>` +
+      (info.s || []).map(s => `<span class="musculo-chip">${s}</span>`).join('');
+    document.getElementById('infoEjercicioPasos').innerHTML =
+      (info.pasos || []).map(p => `<li>${p}</li>`).join('');
+    document.getElementById('infoEjercicioVideo').href = getVideoUrl(nombre);
+    document.getElementById('modalInfoEjercicio').classList.add('visible');
+  }
+
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
   // en una fila con el texto, un stepper de peso (kg, con botones +/-) que recuerda
   // el último valor guardado para ese ejercicio, y un mini-historial de registros previos.
@@ -8130,8 +8183,10 @@
     const pesoUltimoTexto = entry?.pesoAnterior != null ? `Anterior: ${entry.pesoAnterior} kg` : '';
 
     const videoUrl = getVideoUrl(nombre);
+    const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return `<div class="ejercicio-fila">
       <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
+      <button type="button" class="ejercicio-video-btn ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Cómo se hace: ${nombre}">i</button>
       <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="ejercicio-video-btn" title="Ver técnica: ${nombre}">▶</a>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
