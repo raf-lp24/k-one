@@ -6803,6 +6803,19 @@
           <div class="dash-greeting">// Tu alimentación</div>
           <h2 class="dash-title">Plan semanal</h1>
           <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
+          <!-- Renovación del menú: destacado para que todos sepan que pueden elegirlo -->
+          <div id="rotacionMenuBox" style="margin:14px 0;background:linear-gradient(135deg,rgba(232,73,15,.10),var(--carbon));border:1px solid var(--brasa);border-radius:12px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">TÚ ELIGES CÓMO SE RENUEVA TU DIETA</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
+              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
+              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
+            </div>
+          </div>
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">L</button>
@@ -6830,16 +6843,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Descargar plan semanal
             </button>
-          </div>
-          <!-- Renovación del menú: el cliente elige cada cuánto cambian los platos -->
-          <div id="rotacionMenuBox" style="margin-top:16px;background:var(--carbon);border:1px solid var(--humo);border-radius:10px;padding:14px 16px">
-            <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:4px">RENOVACIÓN DEL MENÚ</div>
-            <div style="font-size:12px;color:var(--metal-claro);margin-bottom:10px">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
-              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
-              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
-            </div>
           </div>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
