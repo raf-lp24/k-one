@@ -975,6 +975,40 @@
     justify-content: center;
   }
 
+  /* Foto de producto: el movil con la app real de K-ONE */
+  .app-photo-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.8);
+  }
+  .app-photo-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* Halo naranja sutil detras, en la linea de la marca */
+  .app-photo-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 40% at 50% 45%, rgba(232,73,15,0.18), transparent 70%);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .app-photo-caption {
+    margin-top: 16px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--metal-claro);
+  }
+
   .phone-frame-group {
     display: flex;
     flex-wrap: wrap;
@@ -5781,31 +5815,11 @@
         </div>
       </div>
       <div class="app-preview-visual">
-        <div class="phone-frame-group">
-          <div class="phone-frame" aria-hidden="true">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="mock-card">
-                <div class="mock-card-title">Hoy · Empuje</div>
-                <div class="mock-row"><span>Press banca</span><span>4×8 · 62.5 kg</span></div>
-                <div class="mock-row"><span>Press militar</span><span>3×10 · 32 kg</span></div>
-                <div class="mock-row"><span>Fondos lastrados</span><span>3×12 · 10 kg</span></div>
-                <div class="mock-row"><span>Elevaciones laterales</span><span>3×15 · 8 kg</span></div>
-              </div>
-            </div>
+        <div>
+          <div class="app-photo-wrap">
+            <img src="/img/landing/app-kone.jpg" alt="La app de K-ONE mostrando tu panel: ritmo cardíaco, distancia, calorías y la evolución de la semana" loading="lazy">
           </div>
-          <div class="phone-frame" aria-hidden="true">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="mock-card">
-                <div class="mock-card-title">Comida · Almuerzo</div>
-                <div class="mock-row"><span>Pollo a la plancha</span><span>180 g</span></div>
-                <div class="mock-row"><span>Arroz integral</span><span>90 g</span></div>
-                <div class="mock-row"><span>Aguacate</span><span>1/2 ud</span></div>
-                <div class="mock-macros"><span>P 48g</span><span>C 62g</span><span>G 18g</span></div>
-              </div>
-            </div>
-          </div>
+          <div class="app-photo-caption">// Tu panel, cada día</div>
         </div>
       </div>
     </div>
