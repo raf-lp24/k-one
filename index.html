@@ -2692,6 +2692,15 @@
   }
   .musculo-chip.principal { background: rgba(232,73,15,.15); border-color: var(--brasa); color: var(--blanco); }
   .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
+  .ej-foto { margin: 0; }
+  .ej-foto img {
+    width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+    border-radius: 10px; border: 1px solid var(--humo); background: var(--grafito);
+  }
+  .ej-foto figcaption {
+    font-size: 10px; color: var(--metal); text-align: center; margin-top: 5px;
+    font-family: 'DM Mono', monospace; letter-spacing: .5px;
+  }
   .btn-lista-compra {
     display: inline-flex;
     align-items: center;
@@ -5273,11 +5282,13 @@
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
     <div class="modal-title" style="font-size:20px" id="infoEjercicioTitulo">Ejercicio</div>
+    <div id="infoEjercicioFotos" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin:14px 0 8px">MÚSCULOS TRABAJADOS</div>
     <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:8px">CÓMO SE HACE</div>
     <ol id="infoEjercicioPasos" style="margin:0 0 18px;padding-left:22px;color:var(--metal-claro);font-size:13.5px;line-height:1.65;display:flex;flex-direction:column;gap:8px"></ol>
     <a id="infoEjercicioVideo" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:100%;display:block;text-align:center;text-decoration:none;box-sizing:border-box">▶ Ver vídeo de técnica</a>
+    <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0;line-height:1.5">Instrucciones: exercises-dataset (MIT) · Fotos: free-exercise-db (dominio público)</p>
     <button class="encuesta-skip" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')">Cerrar</button>
   </div>
 </div>
@@ -8157,11 +8168,22 @@
       return;
     }
     document.getElementById('infoEjercicioTitulo').textContent = nombre;
-    document.getElementById('infoEjercicioMusculos').innerHTML =
-      `<span class="musculo-chip principal">${info.m}</span>` +
+    // Fotos del movimiento (inicio / final). Dominio público (free-exercise-db).
+    const fotos = document.getElementById('infoEjercicioFotos');
+    const etiquetas = ['Posición inicial', 'Posición final'];
+    fotos.innerHTML = (info.img || []).map((src, i) =>
+      `<figure class="ej-foto"><img src="${src}" alt="${nombre} — ${etiquetas[i] || ''}" loading="lazy">
+       <figcaption>${etiquetas[i] || ''}</figcaption></figure>`).join('');
+    fotos.style.display = (info.img && info.img.length) ? 'grid' : 'none';
+    const musEl = document.getElementById('infoEjercicioMusculos');
+    musEl.innerHTML = (info.m ? `<span class="musculo-chip principal">${info.m}</span>` : '') +
       (info.s || []).map(s => `<span class="musculo-chip">${s}</span>`).join('');
-    document.getElementById('infoEjercicioPasos').innerHTML =
-      (info.pasos || []).map(p => `<li>${p}</li>`).join('');
+    musEl.previousElementSibling.style.display = info.m ? '' : 'none';
+    musEl.style.display = info.m ? 'flex' : 'none';
+    const pasosEl = document.getElementById('infoEjercicioPasos');
+    pasosEl.innerHTML = (info.pasos || []).map(p => `<li>${p}</li>`).join('');
+    pasosEl.previousElementSibling.style.display = (info.pasos && info.pasos.length) ? '' : 'none';
+    pasosEl.style.display = (info.pasos && info.pasos.length) ? 'flex' : 'none';
     document.getElementById('infoEjercicioVideo').href = getVideoUrl(nombre);
     document.getElementById('modalInfoEjercicio').classList.add('visible');
   }
