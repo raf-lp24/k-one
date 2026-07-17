@@ -6913,15 +6913,6 @@
                 <div class="today-hero-item-sub" id="todayHeroWorkoutSub">—</div>
               </div>
             </div>
-            <div class="today-hero-item" id="todayHeroMeal">
-              <div class="today-hero-item-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 4 0V3"/><path d="M8 10v11"/><path d="M17 3c-1.5 0-3 2-3 5s1 4 3 4v9"/></svg>
-              </div>
-              <div>
-                <div class="today-hero-item-title" id="todayHeroMealTitle">Tu comida de hoy</div>
-                <div class="today-hero-item-sub" id="todayHeroMealSub">—</div>
-              </div>
-            </div>
           </div>
           <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
             <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
@@ -7001,29 +6992,6 @@
           </div>
         </div>
 
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-card-label">Semana</div>
-            <div class="stat-card-value" id="statSemana">1</div>
-            <div class="stat-card-sub">de tu proceso</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Días entrenados</div>
-            <div class="stat-card-value" id="statDiasEntrenados">0</div>
-            <div class="stat-card-sub">esta semana</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Objetivo</div>
-            <div class="stat-card-value" id="statObjetivo" style="font-size:18px;padding-top:8px">—</div>
-            <div class="stat-card-sub">tu meta</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Deporte</div>
-            <div class="stat-card-value" id="statDeporte" style="font-size:18px;padding-top:8px">—</div>
-            <div class="stat-card-sub">tu disciplina</div>
-          </div>
-        </div>
-
         <div class="stats-row stats-row-3kpi" style="grid-template-columns:repeat(3,1fr);margin-bottom:2px">
           <div class="stat-card">
             <div class="stat-card-label">Peso actual</div>
@@ -7053,12 +7021,6 @@
             <div class="stat-card-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
           </div>
           <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
-        </div>
-
-        <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
-        <div id="trazabilidadPanel" style="display:none;background:rgba(232,73,15,0.06);border:1px solid rgba(232,73,15,0.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:8px">// POR QUÉ ESTE PLAN</div>
-          <ul id="trazabilidadList" style="margin:0;padding-left:16px;color:var(--ceniza);font-size:13px;line-height:1.9"></ul>
         </div>
 
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
@@ -7131,6 +7093,13 @@
           <h2 class="dash-title" id="semanaTitle">Semana 1</h1>
           <p class="dash-subtitle">Cada día tiene un propósito. Sigue el orden. Consulta también las próximas semanas de tu mes.</p>
         </div>
+
+        <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
+        <div id="trazabilidadPanel" style="display:none;background:rgba(232,73,15,0.06);border:1px solid rgba(232,73,15,0.2);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:8px">// POR QUÉ ESTE PLAN</div>
+          <ul id="trazabilidadList" style="margin:0;padding-left:16px;color:var(--ceniza);font-size:13px;line-height:1.9"></ul>
+        </div>
+
         <div class="week-tabs" id="weekTabs">
           <!-- generado por JS -->
         </div>
@@ -10665,8 +10634,6 @@
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
     document.getElementById('dashSubtitle').textContent = generatedPlan.bienvenida;
     document.getElementById('motivationText').textContent = `"${generatedPlan.mensaje_dia}"`;
-    document.getElementById('statObjetivo').textContent = userData.objetivo?.split(' ').slice(0,2).join(' ') || '—';
-    document.getElementById('statDeporte').textContent = userData.deporte?.split(' ')[0] || '—';
 
     // Progresión real (semana actual y día de hoy), no fijo en "Semana 1 · Día 1".
     // La semana se cuenta desde la fecha de registro del email (no depende del check-in).
@@ -10680,13 +10647,6 @@
     const _diasNombres = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
     const diaHoyNombre = generatedPlan.semana?.[getIndiceDiaHoy()]?.dia || _diasNombres[getIndiceDiaHoy()];
     document.getElementById('dashWeekDay').textContent = `// Semana ${progreso.semana} · ${diaHoyNombre}`;
-    document.getElementById('statSemana').textContent = progreso.semana;
-    const _hoyDe = new Date();
-    const _lunesDe = new Date(_hoyDe);
-    _lunesDe.setDate(_hoyDe.getDate() - ((_hoyDe.getDay() + 6) % 7));
-    _lunesDe.setHours(0,0,0,0);
-    const _entrenosSemanaActual = (userData.entrenosCompletados || []).filter(f => new Date(f) >= _lunesDe).length;
-    document.getElementById('statDiasEntrenados').textContent = _entrenosSemanaActual;
 
     // ── KPIs adicionales ──────────────────────────────────────────────────────
     // Peso actual
@@ -10843,6 +10803,8 @@
   function renderTodayHero() {
     const hero = document.getElementById('todayHero');
     if (!hero || !generatedPlan) return;
+    // Planes solo-nutrición no tienen entrenamiento: la tarjeta no aplica.
+    if (generatedPlan.soloDieta) { hero.style.display = 'none'; return; }
     const semana = (userData.progreso && userData.progreso.semana) || 1;
     const idx = getIndiceDiaHoy();
     const dia = generatedPlan.semana && generatedPlan.semana[idx];
@@ -10852,10 +10814,7 @@
     const wTitle = document.getElementById('todayHeroWorkoutTitle');
     const wSub = document.getElementById('todayHeroWorkoutSub');
     const btnLabel = document.getElementById('todayHeroBtnLabel');
-    if (generatedPlan.soloDieta) {
-      workoutRow.style.display = 'none';
-      btnLabel.textContent = 'Ver mi nutrición';
-    } else if (dia && dia.tipo === 'Descanso') {
+    if (dia && dia.tipo === 'Descanso') {
       workoutRow.style.display = '';
       wTitle.textContent = 'Día de descanso';
       wSub.textContent = ['Recuperación', dia.dia].filter(Boolean).join(' · ');
@@ -10866,20 +10825,6 @@
       wSub.textContent = [userData.deporte, userData.objetivo ? `Enfoque ${userData.objetivo}` : '']
         .filter(Boolean).join(' · ') || 'Entrenamiento del día';
       btnLabel.textContent = 'Empezar entrenamiento';
-    }
-
-    const mealRow = document.getElementById('todayHeroMeal');
-    const meals = generatedPlan.nutricion || [];
-    const m = meals[0];
-    const selIdx = (comidasSeleccionadas && comidasSeleccionadas[0]) || 0;
-    const opt = m && m.opciones && (m.opciones[selIdx] || m.opciones[0]);
-    if (opt) {
-      document.getElementById('todayHeroMealTitle').textContent = opt.nombre;
-      document.getElementById('todayHeroMealSub').textContent =
-        [m.momento, opt.kcal, opt.prot].filter(Boolean).join(' · ');
-      mealRow.style.display = '';
-    } else {
-      mealRow.style.display = 'none';
     }
 
     hero.style.display = '';
