@@ -979,7 +979,7 @@
   .app-photo-wrap {
     position: relative;
     width: 100%;
-    max-width: 460px;
+    max-width: 560px;
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 40px 80px -30px rgba(0,0,0,0.8);
@@ -1007,6 +1007,64 @@
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: var(--metal-claro);
+  }
+
+  /* Titular tipo "EL CONTROL TOTAL EN TU MANO" + filas de features con badge */
+  .app-copy-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--brasa);
+    margin-bottom: 22px;
+  }
+  .app-copy-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(46px, 5vw, 68px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    color: var(--blanco);
+    margin-bottom: 40px;
+  }
+  .app-copy-title em {
+    font-style: normal;
+    color: var(--brasa);
+  }
+  .app-features {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .feature-row {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .feature-badge {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(232,73,15,0.35);
+    background: rgba(232,73,15,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .feature-badge svg { width: 22px; height: 22px; stroke: var(--brasa); color: var(--brasa); }
+  .feature-text-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blanco);
+    margin-bottom: 7px;
+  }
+  .feature-text-desc {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--metal-claro);
+    font-weight: 300;
   }
 
   .phone-frame-group {
@@ -1517,11 +1575,18 @@
 
   .testimonial-card {
     background: var(--carbon);
-    padding: 40px 32px;
+    border: 1px solid var(--humo);
+    border-radius: 14px;
+    padding: 34px 30px;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    width: 380px;
+    width: 360px;
+    transition: border-color .25s, transform .25s;
+  }
+  .testimonial-card:hover {
+    border-color: rgba(232,73,15,0.55);
+    transform: translateY(-4px);
   }
 
   .testimonials-nav {
@@ -1562,11 +1627,11 @@
   }
 
   .testimonial-quote {
-    font-size: 14px;
+    font-size: 14.5px;
     color: var(--blanco);
     line-height: 1.7;
     font-weight: 300;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     flex-grow: 1;
   }
 
@@ -1574,33 +1639,37 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    border-top: 1px solid var(--humo);
+    padding-top: 18px;
   }
 
   .testimonial-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--acero);
+    background: linear-gradient(135deg, var(--brasa), #7a2408);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    color: var(--brasa);
+    font-size: 20px;
+    color: var(--blanco-puro);
     flex-shrink: 0;
   }
 
   .testimonial-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .testimonial-role {
     font-size: 11px;
-    color: var(--blanco);
+    color: var(--metal-claro);
     font-family: 'DM Mono', monospace;
-    margin-top: 2px;
+    margin-top: 3px;
+    letter-spacing: 0.3px;
   }
+  .testimonial-role b { color: var(--brasa); font-weight: 700; }
 
   .landing-cta-float {
     display: none;
@@ -5806,12 +5875,27 @@
   <section class="app-preview" id="app-preview">
     <div class="app-preview-grid">
       <div class="app-preview-text">
-        <div class="manifesto-tag">// Así es por dentro</div>
-        <h2 class="manifesto-title">Tu semana, en el móvil.</h2>
-        <div class="manifesto-body">
-          <p>Cada día abres la app y ves exactamente qué toca: ejercicios con el peso ajustado a tu progresión, y tus comidas calculadas para tus macros y lo que de verdad te gusta comer.</p>
-          <p>Y la evolución de tus cargas, semana a semana, para que el esfuerzo se vea también en números.</p>
-          <p>Cada domingo haces tu check-in y el plan de la semana siguiente se ajusta solo: si vienes fatigado, baja el volumen; si vas sobrado, aprieta. No entrenas a ciegas.</p>
+        <div class="app-copy-eyebrow">// Tu semana, en el móvil</div>
+        <h2 class="app-copy-title">El control <em>total</em> en tu mano.</h2>
+        <div class="app-features">
+          <div class="feature-row">
+            <div class="feature-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            </div>
+            <div>
+              <div class="feature-text-title">Seguimiento en tiempo real</div>
+              <p class="feature-text-desc">Ejercicios con el peso ajustado a tu progresión y comidas calculadas para tus macros. Cada día ves exactamente qué toca.</p>
+            </div>
+          </div>
+          <div class="feature-row">
+            <div class="feature-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4"/><path d="M3 5h4"/><path d="M6 17v4"/><path d="M4 19h4"/><path d="M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5z"/></svg>
+            </div>
+            <div>
+              <div class="feature-text-title">Motor de reglas inteligente</div>
+              <p class="feature-text-desc">Cada domingo haces tu check-in y el plan se ajusta solo: si vienes fatigado, baja el volumen; si vas sobrado, aprieta. No entrenas a ciegas.</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="app-preview-visual">
@@ -15422,7 +15506,8 @@
         const quoteHTML = t.texto
           ? `<p class="testimonial-quote">"${t.texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}"</p>`
           : '';
-        const roleText = [t.edad ? `${t.edad} años` : '', t.plan].filter(Boolean).join(' · ');
+        const planSafe = t.plan ? String(t.plan).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+        const roleText = [t.edad ? `${t.edad} años` : '', planSafe ? `<b>${planSafe}</b>` : ''].filter(Boolean).join(' · ');
         return `<div class="testimonial-card">
           <div class="testimonial-stars">${estrellas}</div>
           ${quoteHTML}
