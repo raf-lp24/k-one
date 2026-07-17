@@ -2949,25 +2949,33 @@
     gap: 10px;
   }
   .ejercicio-fila-texto { flex: 1; min-width: 0; }
+  /* Chip "Cómo se hace": va inline tras el nombre del ejercicio. Con etiqueta
+     visible porque el icono suelto pasaba desapercibido. */
   .ejercicio-info-btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: rgba(232,73,15,0.15);
-    border: none;
-    border-radius: 50%;
+    gap: 5px;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 4px 11px 4px 8px;
+    background: rgba(232,73,15,0.14);
+    border: 1px solid rgba(232,73,15,0.35);
+    border-radius: 999px;
     color: var(--brasa);
+    font-family: inherit;
     font-size: 11px;
-    text-decoration: none;
-    flex-shrink: 0;
-    transition: background 0.2s, transform 0.2s;
+    font-weight: 700;
+    letter-spacing: .2px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .2s, color .2s;
   }
-  .ejercicio-info-btn:hover { background: var(--brasa); color: #fff; transform: scale(1.1); }
-  /* En móvil el botón necesita área táctil cómoda (44px es el mínimo recomendado) */
+  .ejercicio-info-btn:hover { background: var(--brasa); color: #fff; }
+  .ejercicio-info-btn svg { flex-shrink: 0; }
+  /* En las comidas el botón va suelto en la barra inferior: solo icono */
+  .meal-option .ejercicio-info-btn { margin-left: 0; padding: 5px 9px; font-size: 10px; }
   @media (max-width: 768px) {
-    .ejercicio-info-btn { width: 36px; height: 36px; font-size: 14px; }
+    .ejercicio-info-btn { padding: 6px 12px 6px 9px; font-size: 11.5px; }
   }
 
   .ejercicio-fila-controls {
@@ -7872,8 +7880,13 @@
   // ===== TOUR DE BIENVENIDA (DÍA 1) =====
   const ONBOARDING_STEPS = [
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', title: 'Hoy', text: 'Aquí tienes tu entrenamiento de hoy explicado paso a paso. Cuando lo termines, márcalo como completado: eso es lo que empieza tu racha.' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>', title: '¿No sabes hacer un ejercicio?', text: 'Junto a cada ejercicio tienes el botón "Cómo se hace". Ábrelo y verás fotos de la posición inicial y final, qué músculos trabajas y las instrucciones paso a paso, además del vídeo de técnica. Si dudas, míralo: hacerlo bien importa más que el peso.' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9.5h4.5M17.5 9.5H22M2 14.5h4.5M17.5 14.5H22"/></svg>', title: 'Apunta tus pesos', text: 'En cada ejercicio hay un contador de kilos con botones + y −. Apunta lo que levantas: la app recuerda el peso anterior y te dibuja tu progresión. Es lo que convierte "ir al gimnasio" en progresar de verdad.' },
     { section: 'semana', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title: 'Plan semanal', text: 'Consulta toda tu semana de un vistazo, y las próximas semanas de tu plan, que se irán ajustando según tu progreso.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Nutrición', text: 'Elige tus comidas día a día (lunes a domingo). Para cada toma tienes 5 opciones. Confirma cada día y pasa al siguiente. Cuando completes los 7, podrás generar tu lista de la compra.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>', title: 'Tú eliges cómo se renueva tu dieta', text: 'Arriba del todo en Nutrición decides cada cuánto quieres platos nuevos: cada semana, cada mes o mantenerlos fijos. Al renovarse, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/><circle cx="19" cy="18" r="2"/></svg>', title: 'Pesa lo que comes', text: 'Cada ingrediente lleva su cantidad en gramos: no es capricho, es lo que hace que el plan funcione. Solo las especias y el limón van al gusto (no suman calorías). En "Ver macros" puedes abrir cualquier plato y ver de dónde sale cada caloría.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', title: 'Buscador de alimentos', text: '¿Cuánta proteína tiene un huevo? ¿Y 200g de arroz? En Nutrición tienes un buscador con los macros oficiales de la USDA: escribe el alimento, pon los gramos y lo tienes. Útil cuando comes fuera del plan.' },
     { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in semanal', text: 'Cada semana cuéntanos cómo te fue (días entrenados, energía, sensaciones) y ajustamos tu plan de la semana siguiente automáticamente.' },
     { section: 'progreso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>', title: 'Mi progreso', text: 'Aquí verás tu evolución: pesos, fotos e hitos conseguidos. Cuanto más registres, más útil será.' },
     { section: 'notas', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 H15 L19 7 V21 H5 Z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg>', title: 'Notas', text: 'Apunta sensaciones, pesos, ideas o cualquier cosa que quieras recordar. Solo tú las ves.' },
@@ -8320,6 +8333,28 @@
     return k ? _alimentos[k] : null;
   }
 
+  // Peso aproximado de las medidas que no van en gramos ("1 plátano", "2 huevos",
+  // "1 cda miel"). Sin esto la ficha marcaba como "al gusto" cosas que sí están medidas.
+  const _PESO_UNIDAD = [
+    [/pl[áa]tano/i, 120], [/huevos?\b/i, 55], [/claras?\b/i, 33], [/kiwis?\b/i, 75],
+    [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
+    [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
+    [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
+    [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200], [/pieza|unidad/i, 100]
+  ];
+  // "2 huevos" -> 110 · "1/2 plátano" -> 60 · "1 cda miel" -> 15
+  function _gramosDeUnidad(texto) {
+    const m = texto.trim().match(/^(\d+(?:[.,]\d+)?(?:\/\d+)?)\s+(.*)$/);
+    if (!m) return null;
+    let n;
+    if (m[1].includes('/')) { const [a, b] = m[1].split('/').map(Number); n = b ? a / b : null; }
+    else n = parseFloat(m[1].replace(',', '.'));
+    if (!n) return null;
+    const resto = m[2];
+    const hit = _PESO_UNIDAD.find(([re]) => re.test(resto));
+    return hit ? { gramos: Math.round(n * hit[1]), resto } : null;
+  }
+
   async function abrirInfoComida(mealIdx, optIdx) {
     if (!_alimentos) {
       try { const r = await fetch('/data/alimentos.json'); _alimentos = r.ok ? await r.json() : {}; }
@@ -8333,10 +8368,16 @@
     let kcalSuma = 0, sinCantidad = 0, sinDatos = 0;
     const filas = opt.ingredientes.split(',').map(txt => {
       const t = txt.trim();
+      let gramos = null, resto = null;
       const m = t.match(/^(\d+(?:[.,]\d+)?)\s*(g|gr|ml)\b\s*(.+)$/i);
-      if (!m) { sinCantidad++; return `<div class="alimento-fila"><span class="alimento-nombre">${t}</span><span class="alimento-macros"><span>al gusto</span></span></div>`; }
-      const gramos = parseFloat(m[1].replace(',', '.'));
-      const al = _buscarAlimento(m[3]);
+      if (m) { gramos = parseFloat(m[1].replace(',', '.')); resto = m[3]; }
+      else {
+        // "2 huevos", "1/2 plátano", "1 cda miel": se estima el peso de la unidad
+        const u = _gramosDeUnidad(t);
+        if (u) { gramos = u.gramos; resto = u.resto; }
+      }
+      if (gramos === null) { sinCantidad++; return `<div class="alimento-fila"><span class="alimento-nombre">${t}</span><span class="alimento-macros"><span>al gusto</span></span></div>`; }
+      const al = _buscarAlimento(resto);
       if (!al) { sinDatos++; return `<div class="alimento-fila"><span class="alimento-nombre">${t}</span><span class="alimento-macros"><span>—</span></span></div>`; }
       const f = gramos / 100;
       kcalSuma += al.kcal * f;
@@ -8356,14 +8397,26 @@
          <span class="alimento-macros"><b style="font-size:15px">${opt.kcal}</b></span>
        </div>`;
 
-    // Ser honestos: lo sumado aquí casi nunca es el total, porque el aceite y las
-    // especias van "al gusto" y no se pueden pesar.
+    // La nota tiene que decir la verdad: solo se afirma que "cuadra" si de verdad
+    // cuadra. Si no, se explica por qué (falta pesar algo, o es una estimación).
+    const kcalDec = parseInt(opt.kcal) || 0;
+    const suma = Math.round(kcalSuma);
+    const desvia = kcalDec ? Math.abs(suma - kcalDec) / kcalDec > 0.1 : true;
     const pendientes = [];
-    if (sinCantidad) pendientes.push(`${sinCantidad} ingrediente${sinCantidad > 1 ? 's' : ''} sin cantidad fija (al gusto)`);
-    if (sinDatos) pendientes.push(`${sinDatos} sin datos en la tabla`);
-    document.getElementById('infoComidaNota').innerHTML = pendientes.length
-      ? `Sumando solo los ingredientes pesados salen <b>${Math.round(kcalSuma)} kcal</b>. La diferencia hasta ${opt.kcal} son ${pendientes.join(' y ')}.`
-      : `Sumando los ingredientes salen <b>${Math.round(kcalSuma)} kcal</b>, que cuadra con las ${opt.kcal} del plato.`;
+    if (sinCantidad) pendientes.push(`${sinCantidad} ingrediente${sinCantidad > 1 ? 's van' : ' va'} al gusto (especias, limón… no suman apenas)`);
+    if (sinDatos) pendientes.push(`${sinDatos} no está${sinDatos > 1 ? 'n' : ''} en la tabla de alimentos`);
+
+    let nota;
+    if (!desvia && !pendientes.length) {
+      nota = `Sumando los ingredientes salen <b>${suma} kcal</b>: cuadra con las ${opt.kcal} del plato.`;
+    } else if (!desvia) {
+      nota = `Sumando los ingredientes salen <b>${suma} kcal</b>, que cuadra con las ${opt.kcal} del plato. ${pendientes.join(' y ')}.`;
+    } else {
+      nota = `Sumando los ingredientes salen <b>${suma} kcal</b> frente a las ${opt.kcal} del plato.`
+        + (pendientes.length ? ` ${pendientes.join(' y ')}.` : '')
+        + ` Las medidas caseras (una pieza de fruta, una cucharada) son aproximadas, así que fíate del total del plato.`;
+    }
+    document.getElementById('infoComidaNota').innerHTML = nota;
     document.getElementById('modalInfoComida').classList.add('visible');
   }
 
@@ -8385,10 +8438,16 @@
 
     // Un único botón "i": abre la ficha (fotos + músculos + pasos + vídeo dentro).
     const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    // El botón va DENTRO del texto para que quede pegado al ejercicio y no perdido
+    // en el borde derecho, y lleva etiqueta: un icono suelto no lo pulsaba nadie.
     return `<div class="ejercicio-fila">
       <div class="ejercicio-fila-head">
-        <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
-        <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Cómo se hace: ${nombre}" aria-label="Cómo se hace: ${nombre}">i</button>
+        <span class="ejercicio-fila-texto">· ${nombre} ${resto}
+          <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombre}" aria-label="Cómo se hace: ${nombre}">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Cómo se hace
+          </button>
+        </span>
       </div>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
@@ -9703,6 +9762,56 @@
     // ─────────────────────────────────────────────────────────────────────────
 
     // Ajusta gramos y ml en el texto de ingredientes al perfil calórico del usuario
+    // Cantidades por defecto: un plan que dice "AOVE" a secas no se puede seguir con
+    // rigor — el aceite son 884 kcal/100g y "un chorrito" puede ser 5g o 30g. Aquí se
+    // le pone medida a todo lo que aporta calorías, para que el cliente sepa cuánto es.
+    // Las especias y hierbas se dejan al gusto a propósito: no aportan nada.
+    const CANT_DEFECTO = {
+      // Grasas: lo que más desviaba
+      'aove': '10g', 'aceite de oliva': '10g', 'tahini': '10g', 'pesto de albahaca': '15g',
+      'sésamo': '5g', 'semillas de sésamo': '5g', 'semillas de lino': '5g',
+      'semillas de chía': '10g', 'semillas de calabaza': '10g', 'coco rallado': '10g',
+      'cacahuetes': '20g', 'croutons': '15g', 'crostones': '15g',
+      // Verduras y hortalizas
+      'tomate': '100g', 'tomate cherry': '80g', 'tomate rallado': '60g',
+      'tomate en rodajas': '80g', 'tomate frito casero': '50g', 'salsa de tomate': '50g',
+      'ensalada con tomate': '100g', 'espinacas': '60g', 'espinacas salteadas con ajo': '80g',
+      'pimiento': '80g', 'pimiento verde': '80g', 'cebolla': '60g', 'cebolla salteados': '60g',
+      'cebolleta': '30g', 'zanahoria': '60g', 'zanahoria rallada': '50g',
+      'zanahoria y pepino en bastones': '100g', 'zanahoria y judías verdes al vapor': '120g',
+      'calabacín': '100g', 'brócoli': '150g', 'pepino': '80g', 'pepino y limón': '80g',
+      'lechuga': '60g', 'lechuga romana': '60g', 'hojas de lechuga romana': '50g',
+      'ensalada verde': '80g', 'ensalada variada': '80g', 'rúcula': '30g',
+      'champiñones': '80g', 'judías verdes': '120g', 'judía verde': '120g',
+      'alcachofa': '100g', 'espárragos verdes': '100g', 'apio': '50g', 'puerro': '60g',
+      'patata': '150g', 'aguacate': '50g', 'edamame': '60g', 'tofu sedoso': '100g',
+      // Fruta
+      'frutos rojos': '80g', 'frutos rojos por encima': '60g', 'fresas laminadas': '80g',
+      'arándanos': '60g', 'kiwi': '75g',
+      // Lácteos y bebidas
+      'leche': '200ml', 'leche semidesnatada': '200ml', 'leche de avena': '200ml',
+      'leche avena': '200ml', 'leche vegetal': '200ml', 'leche coco light': '100ml',
+      'queso rallado': '15g', 'parmesano rallado': '10g', 'queso fresco': '50g',
+      'salsa de yogur': '30g', 'caldo casero': '200ml',
+      // Dulces y salsas (sí aportan)
+      'miel': '15g', 'sirope de arce': '15g', 'mermelada sin azúcar': '15g',
+      'mostaza': '5g', 'salsa soja': '10ml', 'salsa tamari': '10ml',
+      'salsa teriyaki': '15ml', 'salsa de lima': '10ml', 'soja': '10ml',
+      'fideos finos': '30g'
+      // A propósito SIN cantidad (0 kcal, van al gusto): canela, pimentón, cilantro,
+      // limón, lima, ajo, perejil, albahaca, orégano, romero, eneldo, cebollino,
+      // curry, cúrcuma, azafrán, guindilla, pimienta, sal, hierbas, especias, café,
+      // hielo, ralladura/zumo de limón.
+    };
+    const ponerCantidades = (texto) => texto.split(',').map(x => {
+      const t = x.trim();
+      if (!t) return t;
+      // Ya tiene cantidad (gramos, unidades o fracciones): no se toca
+      if (/^\d|^(un|una|medio|media)\b/i.test(t)) return t;
+      const def = CANT_DEFECTO[t.toLowerCase()];
+      return def ? `${def} ${t}` : t;
+    }).join(', ');
+
     const scaleIngredientes = (texto, factor) => {
       if (Math.abs(factor - 1) < 0.05) return texto;
       return texto.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
@@ -9721,7 +9830,7 @@
       const kcalScaled = Math.round(kcalN * escalaRacion + (carbsN * (escalaCarbs - 1) * 4 * escalaRacion));
       return {
         nombre,
-        ingredientes: scaleIngredientes(ingredientes, escalaRacion),
+        ingredientes: scaleIngredientes(ponerCantidades(ingredientes), escalaRacion),
         kcal:  `${kcalScaled} kcal`,
         prot:  `${sc(prot)}g prot`,
         carbs: `${carbsScaled}g carbs`,
@@ -10514,7 +10623,10 @@
             <span style="display:flex;align-items:center;gap:10px">
               <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
               <button type="button" class="ejercicio-info-btn" title="De dónde salen estos macros"
-                onclick="event.stopPropagation();abrirInfoComida(${mealIdx},${optIdx})">i</button>
+                onclick="event.stopPropagation();abrirInfoComida(${mealIdx},${optIdx})">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Ver macros
+              </button>
             </span>
           </div>
         </div>`;
