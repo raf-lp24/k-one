@@ -2697,6 +2697,21 @@
     width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
     border-radius: 10px; border: 1px solid var(--humo); background: var(--grafito);
   }
+  .alimento-fila {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .alimento-fila:last-child { border-bottom: none; }
+  .alimento-nombre { font-size: 13.5px; color: #e6e3de; font-weight: 600; flex: 1; min-width: 0; }
+  .alimento-macros {
+    display: flex; align-items: baseline; gap: 9px; flex-shrink: 0;
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal);
+  }
+  .alimento-macros b { color: var(--brasa); font-size: 14px; }
+  @media (max-width: 560px) {
+    .alimento-fila { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .alimento-macros { font-size: 10.5px; gap: 8px; }
+  }
   .ej-foto figcaption {
     font-size: 10px; color: var(--metal); text-align: center; margin-top: 5px;
     font-family: 'DM Mono', monospace; letter-spacing: .5px;
@@ -5288,6 +5303,26 @@
   </div>
 </div>
 
+<!-- MODAL BUSCADOR DE ALIMENTOS (macros oficiales USDA) -->
+<div class="modal-overlay" id="modalAlimentos" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="modal-box" style="max-width:560px;max-height:84vh;display:flex;flex-direction:column">
+    <div class="modal-title" style="font-size:20px">Buscador de alimentos</div>
+    <p class="modal-desc" style="margin-bottom:12px">Macros por 100 g según la base oficial de la USDA. Escribe para buscar y ajusta la cantidad.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="alimentoBuscar" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderAlimentos()"
+        style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
+        <input type="number" id="alimentoGramos" value="100" min="1" max="2000" step="10" oninput="renderAlimentos()"
+          style="width:58px;background:none;border:none;color:var(--blanco);font-size:14px;font-family:inherit;text-align:right">
+        <span style="font-size:12px;color:var(--metal)">g</span>
+      </div>
+    </div>
+    <div id="alimentosLista" style="overflow-y:auto;flex:1;min-height:120px"></div>
+    <p style="font-size:9.5px;color:#555;text-align:center;margin:10px 0 0">Datos: USDA FoodData Central (SR Legacy) · dominio público</p>
+    <button class="encuesta-skip" onclick="document.getElementById('modalAlimentos').classList.remove('visible')">Cerrar</button>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -6883,6 +6918,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Descargar plan semanal
             </button>
+            <button class="btn-recetario" onclick="abrirBuscadorAlimentos()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Buscador de alimentos
+            </button>
           </div>
         </div>
         <div class="nutri-resumen" id="nutriResumen">
@@ -7898,6 +7937,11 @@
   // ===== REGISTRO DE PESOS POR EJERCICIO =====
   // Normaliza un nombre de ejercicio (sin acentos, minúsculas) para usarlo
   // como clave estable y poder recordar el último peso usado.
+  // Minúsculas y sin tildes, para buscar y comparar textos escritos a mano.
+  function _normTexto(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  }
+
   function normalizarEjercicio(nombre) {
     return nombre
       .toLowerCase()
@@ -8196,6 +8240,61 @@
     pasosEl.style.display = (info.pasos && info.pasos.length) ? 'flex' : 'none';
     document.getElementById('infoEjercicioVideo').href = getVideoUrl(nombre);
     document.getElementById('modalInfoEjercicio').classList.add('visible');
+  }
+
+  // ===== BUSCADOR DE ALIMENTOS =====
+  // Macros por 100 g de la base oficial USDA (SR Legacy, dominio público).
+  // data/alimentos.json se carga bajo demanda (10 KB) la primera vez que se abre.
+  let _alimentos = null;
+  async function abrirBuscadorAlimentos() {
+    if (!_alimentos) {
+      try {
+        const r = await fetch('/data/alimentos.json');
+        _alimentos = r.ok ? await r.json() : {};
+      } catch (e) { _alimentos = {}; }
+    }
+    const input = document.getElementById('alimentoBuscar');
+    if (input) input.value = '';
+    renderAlimentos();
+    document.getElementById('modalAlimentos').classList.add('visible');
+    if (input && window.innerWidth > 768) setTimeout(() => input.focus(), 50);
+  }
+
+  function renderAlimentos() {
+    const cont = document.getElementById('alimentosLista');
+    if (!cont || !_alimentos) return;
+    const q = _normTexto(document.getElementById('alimentoBuscar')?.value || '');
+    const gramos = Math.max(1, parseInt(document.getElementById('alimentoGramos')?.value) || 100);
+    const f = gramos / 100;
+
+    // Un mismo alimento puede tener varias claves ("pollo" y "pechuga de pollo"):
+    // se agrupa por nombre visible para no mostrarlo repetido.
+    const vistos = new Set();
+    const items = Object.values(_alimentos)
+      .filter(a => { if (vistos.has(a.n)) return false; vistos.add(a.n); return true; })
+      .filter(a => !q || _normTexto(a.n).includes(q) || _normTexto(a.cat).includes(q))
+      .sort((a, b) => a.n.localeCompare(b.n, 'es'));
+
+    if (!items.length) {
+      cont.innerHTML = `<p style="color:var(--metal);text-align:center;padding:24px 0;font-size:13px">Sin resultados para “${(document.getElementById('alimentoBuscar')?.value || '').slice(0,30)}”.</p>`;
+      return;
+    }
+    // Agrupar por categoría
+    const porCat = {};
+    items.forEach(a => { (porCat[a.cat] = porCat[a.cat] || []).push(a); });
+    cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
+      <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${cat.toUpperCase()}</div>
+      ${arr.map(a => `
+        <div class="alimento-fila">
+          <span class="alimento-nombre">${a.n}</span>
+          <span class="alimento-macros">
+            <b>${Math.round(a.kcal * f)}</b> kcal
+            <span>P ${(a.p * f).toFixed(1)}</span>
+            <span>C ${(a.c * f).toFixed(1)}</span>
+            <span>G ${(a.g * f).toFixed(1)}</span>
+          </span>
+        </div>`).join('')}
+    `).join('');
   }
 
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
