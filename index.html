@@ -1433,7 +1433,7 @@
   .pricing-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 4px;
+    gap: 16px;
     margin-top: 64px;
     max-width: 1400px;
     margin-left: auto;
@@ -1442,11 +1442,18 @@
 
   .price-card {
     background: var(--carbon);
-    padding: 40px 24px;
+    border: 1px solid var(--humo);
+    border-radius: 14px;
+    padding: 40px 26px;
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 0;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .price-card:hover {
+    border-color: rgba(232,73,15,0.45);
+    transform: translateY(-4px);
   }
 
   .price-card .btn-primary {
@@ -1492,7 +1499,8 @@
 
   .price-card.featured {
     background: var(--grafito);
-    border-top: 2px solid var(--brasa);
+    border: 1px solid var(--brasa);
+    box-shadow: 0 20px 50px -25px rgba(232,73,15,0.5);
   }
 
   .price-badge {
@@ -1508,6 +1516,7 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     padding: 6px 14px;
+    border-radius: 999px;
   }
 
   .price-tag {
