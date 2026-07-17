@@ -5303,6 +5303,18 @@
   </div>
 </div>
 
+<!-- MODAL FICHA DE COMIDA (desglose de macros por ingrediente) -->
+<div class="modal-overlay" id="modalInfoComida" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="modal-box" style="max-width:520px;max-height:84vh;overflow-y:auto">
+    <div class="modal-title" style="font-size:19px" id="infoComidaTitulo">Comida</div>
+    <p class="modal-desc" style="margin-bottom:14px">De dónde salen los macros de este plato, ingrediente a ingrediente.</p>
+    <div id="infoComidaLista"></div>
+    <div id="infoComidaNota" style="font-size:11px;color:var(--metal);background:var(--carbon);border-left:2px solid var(--humo);border-radius:0 6px 6px 0;padding:9px 12px;margin-top:12px;line-height:1.5"></div>
+    <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0">Macros por alimento: USDA FoodData Central · dominio público</p>
+    <button class="encuesta-skip" onclick="document.getElementById('modalInfoComida').classList.remove('visible')">Cerrar</button>
+  </div>
+</div>
+
 <!-- MODAL BUSCADOR DE ALIMENTOS (macros oficiales USDA) -->
 <div class="modal-overlay" id="modalAlimentos" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:560px;max-height:84vh;display:flex;flex-direction:column">
@@ -8297,6 +8309,64 @@
     `).join('');
   }
 
+  // ===== FICHA DE COMIDA: desglose de macros por ingrediente =====
+  // Busca cada ingrediente con cantidad en gramos ("280g pollo") en la tabla USDA.
+  // Los que no llevan cantidad (AOVE, especias) no se pueden calcular y se marcan.
+  function _buscarAlimento(texto) {
+    if (!_alimentos) return null;
+    const t = _normTexto(texto.replace(/\(.*?\)/g, ''));
+    const claves = Object.keys(_alimentos).sort((a, b) => b.length - a.length);
+    const k = claves.find(c => t.includes(_normTexto(c)));
+    return k ? _alimentos[k] : null;
+  }
+
+  async function abrirInfoComida(mealIdx, optIdx) {
+    if (!_alimentos) {
+      try { const r = await fetch('/data/alimentos.json'); _alimentos = r.ok ? await r.json() : {}; }
+      catch (e) { _alimentos = {}; }
+    }
+    const meals = generatedPlan._nutricionActiva || generatedPlan.nutricion;
+    const opt = meals?.[mealIdx]?.opciones?.[optIdx];
+    if (!opt) return;
+
+    document.getElementById('infoComidaTitulo').textContent = opt.nombre;
+    let kcalSuma = 0, sinCantidad = 0, sinDatos = 0;
+    const filas = opt.ingredientes.split(',').map(txt => {
+      const t = txt.trim();
+      const m = t.match(/^(\d+(?:[.,]\d+)?)\s*(g|gr|ml)\b\s*(.+)$/i);
+      if (!m) { sinCantidad++; return `<div class="alimento-fila"><span class="alimento-nombre">${t}</span><span class="alimento-macros"><span>al gusto</span></span></div>`; }
+      const gramos = parseFloat(m[1].replace(',', '.'));
+      const al = _buscarAlimento(m[3]);
+      if (!al) { sinDatos++; return `<div class="alimento-fila"><span class="alimento-nombre">${t}</span><span class="alimento-macros"><span>—</span></span></div>`; }
+      const f = gramos / 100;
+      kcalSuma += al.kcal * f;
+      return `<div class="alimento-fila">
+        <span class="alimento-nombre">${t}</span>
+        <span class="alimento-macros">
+          <b>${Math.round(al.kcal * f)}</b> kcal
+          <span>P ${(al.p * f).toFixed(1)}</span>
+          <span>C ${(al.c * f).toFixed(1)}</span>
+          <span>G ${(al.g * f).toFixed(1)}</span>
+        </span></div>`;
+    }).join('');
+
+    document.getElementById('infoComidaLista').innerHTML = filas +
+      `<div class="alimento-fila" style="border-top:1px solid var(--humo);border-bottom:none;margin-top:6px;padding-top:11px">
+         <span class="alimento-nombre" style="color:var(--blanco)">Total del plato</span>
+         <span class="alimento-macros"><b style="font-size:15px">${opt.kcal}</b></span>
+       </div>`;
+
+    // Ser honestos: lo sumado aquí casi nunca es el total, porque el aceite y las
+    // especias van "al gusto" y no se pueden pesar.
+    const pendientes = [];
+    if (sinCantidad) pendientes.push(`${sinCantidad} ingrediente${sinCantidad > 1 ? 's' : ''} sin cantidad fija (al gusto)`);
+    if (sinDatos) pendientes.push(`${sinDatos} sin datos en la tabla`);
+    document.getElementById('infoComidaNota').innerHTML = pendientes.length
+      ? `Sumando solo los ingredientes pesados salen <b>${Math.round(kcalSuma)} kcal</b>. La diferencia hasta ${opt.kcal} son ${pendientes.join(' y ')}.`
+      : `Sumando los ingredientes salen <b>${Math.round(kcalSuma)} kcal</b>, que cuadra con las ${opt.kcal} del plato.`;
+    document.getElementById('modalInfoComida').classList.add('visible');
+  }
+
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
   // en una fila con el texto, un stepper de peso (kg, con botones +/-) que recuerda
   // el último valor guardado para ese ejercicio, y un mini-historial de registros previos.
@@ -10441,7 +10511,11 @@
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
             <span style="font-size:14px;color:var(--brasa);font-weight:600">${opt.kcal}</span>
-            <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
+            <span style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
+              <button type="button" class="ejercicio-info-btn" title="De dónde salen estos macros"
+                onclick="event.stopPropagation();abrirInfoComida(${mealIdx},${optIdx})">i</button>
+            </span>
           </div>
         </div>`;
       }).join('');
