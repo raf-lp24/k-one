@@ -2927,23 +2927,33 @@
   }
   .ejercicio-fila:last-child { border-bottom: none; }
 
-  .ejercicio-fila-texto { flex: 1; }
-  .ejercicio-video-btn {
+  /* Texto del ejercicio y su botón "i", en la misma línea */
+  .ejercicio-fila-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .ejercicio-fila-texto { flex: 1; min-width: 0; }
+  .ejercicio-info-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 28px;
     height: 28px;
     background: rgba(232,73,15,0.15);
+    border: none;
     border-radius: 50%;
     color: var(--brasa);
     font-size: 11px;
     text-decoration: none;
     flex-shrink: 0;
     transition: background 0.2s, transform 0.2s;
-    margin-right: 6px;
   }
-  .ejercicio-video-btn:hover { background: var(--brasa); color: #fff; transform: scale(1.1); }
+  .ejercicio-info-btn:hover { background: var(--brasa); color: #fff; transform: scale(1.1); }
+  /* En móvil el botón necesita área táctil cómoda (44px es el mínimo recomendado) */
+  @media (max-width: 768px) {
+    .ejercicio-info-btn { width: 36px; height: 36px; font-size: 14px; }
+  }
 
   .ejercicio-fila-controls {
     display: flex;
@@ -8204,12 +8214,13 @@
     const miniHistorial = renderMiniHistorialHTML(entry?.historial);
     const pesoUltimoTexto = entry?.pesoAnterior != null ? `Anterior: ${entry.pesoAnterior} kg` : '';
 
-    const videoUrl = getVideoUrl(nombre);
+    // Un único botón "i": abre la ficha (fotos + músculos + pasos + vídeo dentro).
     const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return `<div class="ejercicio-fila">
-      <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
-      <button type="button" class="ejercicio-video-btn ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Cómo se hace: ${nombre}">i</button>
-      <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="ejercicio-video-btn" title="Ver técnica: ${nombre}">▶</a>
+      <div class="ejercicio-fila-head">
+        <span class="ejercicio-fila-texto">· ${nombre} ${resto}</span>
+        <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Cómo se hace: ${nombre}" aria-label="Cómo se hace: ${nombre}">i</button>
+      </div>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
           <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
