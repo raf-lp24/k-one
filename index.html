@@ -3223,6 +3223,23 @@
     margin-top: 4px;
   }
 
+  /* Bloques del entreno numerados (01 / 02) estilo nuevo */
+  .entreno-bloque { margin-bottom: 22px; }
+  .entreno-bloque:last-child { margin-bottom: 0; }
+  .entreno-bloque-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .entreno-bloque-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--metal); }
+  .entreno-bloque-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: .5px;
+    text-transform: uppercase; color: var(--blanco); line-height: 1;
+  }
+  /* Badge de RPE objetivo por ejercicio (derivado del rango de repeticiones) */
+  .ejercicio-rpe { flex-shrink: 0; text-align: right; line-height: 1; }
+  .ejercicio-rpe .k {
+    display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--metal); margin-bottom: 2px;
+  }
+  .ejercicio-rpe .v { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--brasa); }
+
   .ejercicio-fila {
     display: flex;
     flex-direction: column;
@@ -8688,6 +8705,16 @@
     const miniHistorial = renderMiniHistorialHTML(entry?.historial);
     const pesoUltimoTexto = entry?.pesoAnterior != null ? `Anterior: ${entry.pesoAnterior} kg` : '';
 
+    // RPE objetivo derivado del rango de repeticiones (menos reps = más cerca de fuerza
+    // máxima = RPE algo menor; más reps = accesorio cerca del fallo = RPE mayor).
+    const repsMatch = resto.match(/[x×]\s*(\d+)/);
+    let rpeHTML = '';
+    if (repsMatch) {
+      const reps = parseInt(repsMatch[1], 10);
+      const rpe = reps <= 6 ? '8' : reps <= 10 ? '8.5' : reps <= 14 ? '9' : '9.5';
+      rpeHTML = `<div class="ejercicio-rpe"><span class="k">RPE</span><span class="v">${rpe}</span></div>`;
+    }
+
     // Un único botón "i": abre la ficha (fotos + músculos + pasos + vídeo dentro).
     const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     // El botón va DENTRO del texto para que quede pegado al ejercicio y no perdido
@@ -8700,6 +8727,7 @@
             Cómo se hace
           </button>
         </span>
+        ${rpeHTML}
       </div>
       <div class="ejercicio-fila-controls">
         <div class="peso-stepper" onclick="event.stopPropagation()">
@@ -8798,28 +8826,30 @@
       if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
       if (reps === null || /^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
       if (FUERZA_RE.test(e)) {
-        fuerza.push(e + ' · Al 75-80% de tu máximo');
+        fuerza.push(e);
       } else {
-        // Nota orientativa para el trabajo accesorio de muchas repeticiones
-        const nota = reps >= 15 ? ' · Peso ligero, control total' : '';
-        hipertrofia.push(e + nota);
+        hipertrofia.push(e);
       }
     });
-    const bloque = (titulo, lista) => lista.length
-      ? `<strong>${titulo}</strong><br>${lista.map(x => `· ${capitalizar(x)}`).join('<br>')}`
-      : '';
-    // Fuerza e hipertrofia llevan además un campo para registrar el peso usado,
-    // que recuerda el último valor guardado para ese ejercicio
-    const bloqueConPeso = (titulo, lista) => lista.length
-      ? `<strong>${titulo}</strong><div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`
-      : '';
+    // Los ejercicios con peso llevan campo para registrar la carga y badge de RPE;
+    // acondicionamiento y core van como lista simple.
+    const listaPeso = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`;
+    const listaSimple = lista => lista.map(x => `· ${capitalizar(x)}`).join('<br>');
     const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
     const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
     const tituloFuerza = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Bloque de fuerza';
     const tituloAccesorio = esCardio ? 'Trabajo complementario' : esFuncional ? 'Accesorios' : 'Bloque de hipertrofia';
     const tituloAcond = esCardio ? 'Sesión principal' : esFuncional ? 'WOD / Acondicionamiento' : 'Acondicionamiento';
-    const bloquePrincipalHTML = [bloqueConPeso(tituloFuerza, fuerza), bloqueConPeso(tituloAccesorio, hipertrofia), bloque(tituloAcond, acondicionamiento), bloque('Core', core)]
-      .filter(Boolean).join('<br><br>');
+    // Bloques numerados (01, 02, …) con el diseño nuevo
+    const bloques = [
+      fuerza.length ? { t: tituloFuerza, c: listaPeso(fuerza) } : null,
+      hipertrofia.length ? { t: tituloAccesorio, c: listaPeso(hipertrofia) } : null,
+      acondicionamiento.length ? { t: tituloAcond, c: listaSimple(acondicionamiento) } : null,
+      core.length ? { t: 'Core', c: listaSimple(core) } : null,
+    ].filter(Boolean);
+    const bloquePrincipalHTML = bloques.map((b, i) =>
+      `<div class="entreno-bloque"><div class="entreno-bloque-head"><span class="entreno-bloque-num">${String(i + 1).padStart(2, '0')}</span><span class="entreno-bloque-title">${b.t}</span></div>${b.c}</div>`
+    ).join('');
 
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
