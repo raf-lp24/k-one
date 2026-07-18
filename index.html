@@ -1180,6 +1180,51 @@
   .today-hero-btn svg { width: 18px; height: 18px; }
   .today-hero-btn:hover { background: #FF5A1A; transform: translateY(-2px); }
 
+  /* ===== HOY: layout dos columnas + header con peso + rail de métricas ===== */
+  .hoy-header-grid { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+  #section-hoy .dash-title { text-transform: uppercase; }
+  .hoy-pill-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 12px 0 10px; }
+  .pill-activo {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(232,73,15,0.10); border: 1px solid rgba(232,73,15,0.4);
+    color: var(--brasa); border-radius: 999px; padding: 6px 14px;
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .pill-activo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brasa); box-shadow: 0 0 8px var(--brasa); }
+  .hoy-semana { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; color: var(--metal); text-transform: uppercase; }
+  .hoy-peso { text-align: right; flex-shrink: 0; }
+  .hoy-peso .hp-l { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
+  .hoy-peso .hp-v { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 0.9; color: var(--blanco); }
+
+  .hoy-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; align-items: start; }
+  .hoy-rail { display: flex; flex-direction: column; gap: 14px; }
+  @media (max-width: 980px) {
+    .hoy-grid { grid-template-columns: 1fr; }
+    .hoy-rail { flex-direction: row; flex-wrap: wrap; }
+    .hoy-rail .rail-card { flex: 1; min-width: 46%; }
+  }
+
+  .rail-card {
+    background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 20px;
+  }
+  .rail-card-head {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal);
+  }
+  .rail-card-head svg { width: 17px; height: 17px; stroke: var(--metal); }
+  .rail-big { font-family: 'Bebas Neue', sans-serif; font-size: 46px; line-height: 0.9; color: var(--blanco); }
+  .rail-big.brasa { color: var(--brasa); }
+  .rail-bar { height: 7px; border-radius: 4px; background: var(--grafito); overflow: hidden; margin-top: 14px; }
+  .rail-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--brasa), #FF6A2B); transition: width .6s ease; }
+  .rail-sub { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--metal); margin-top: 12px; line-height: 1.6; }
+  .rail-blocks { display: flex; gap: 5px; margin-top: 14px; }
+  .rail-blocks i { flex: 1; height: 20px; border-radius: 4px; background: var(--grafito); }
+  .rail-blocks i.on { background: linear-gradient(180deg, #FF6A2B, var(--brasa)); }
+  .rail-macros { display: flex; gap: 8px; margin-top: 16px; }
+  .rail-macros > div { flex: 1; text-align: center; padding: 10px 4px; background: var(--grafito); border-radius: 9px; }
+  .rail-macros span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
+  .rail-macros b { font-family: 'Bebas Neue', sans-serif; font-size: 22px; font-weight: 400; color: var(--blanco); margin-top: 3px; display: block; }
+
   .phone-frame-group {
     display: flex;
     flex-wrap: wrap;
@@ -6993,14 +7038,29 @@
           </div>
           <div class="skeleton" style="height:120px"></div>
         </div>
-        <div class="dash-header">
+        <div class="dash-header hoy-header">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <div class="dash-greeting" id="dashWeekDay">// Semana 1 · Día 1</div>
             <span class="kone-save-badge" id="koneCloudBadge">☁ Guardado en la nube</span>
           </div>
-          <h2 class="dash-title" id="dashTitle">Bienvenido/a</h1>
-          <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
+          <div class="hoy-header-grid">
+            <div style="min-width:0">
+              <h2 class="dash-title" id="dashTitle">Bienvenido/a</h2>
+              <div class="hoy-pill-row">
+                <span class="pill-activo"><span class="dot"></span> Programa activo</span>
+                <span class="hoy-semana" id="hoyHeaderSemana">SEMANA 1</span>
+              </div>
+              <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
+            </div>
+            <div class="hoy-peso">
+              <div class="hp-l">Peso actual</div>
+              <div class="hp-v" id="statPesoActual">—</div>
+            </div>
+          </div>
         </div>
+
+        <div class="hoy-grid">
+        <div class="hoy-main">
 
         <!-- RESUMEN DEL DÍA: hero de la sesión con foto de gimnasio -->
         <div class="today-hero" id="todayHero" style="display:none">
@@ -7089,37 +7149,6 @@
           </div>
         </div>
 
-        <div class="stats-row stats-row-3kpi" style="grid-template-columns:repeat(3,1fr);margin-bottom:2px">
-          <div class="stat-card">
-            <div class="stat-card-label">Peso actual</div>
-            <div class="stat-card-value" id="statPesoActual" style="font-size:28px">—</div>
-            <div class="stat-card-sub">kg registrados</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Adherencia</div>
-            <div class="stat-card-value" id="statAdherencia" style="font-size:28px">—</div>
-            <div class="stat-card-sub" id="statAdherenciaSub">días esta semana</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Kcal objetivo</div>
-            <div class="stat-card-value" id="statKcal" style="font-size:28px">—</div>
-            <div class="stat-card-sub">kcal/día estimadas</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;margin-top:2px">
-          <div class="stat-card" style="flex:1;min-width:200px">
-            <div class="stat-card-label">Racha</div>
-            <div class="stat-card-value" id="rachaDias" style="color:var(--brasa)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 0</div>
-            <div class="stat-card-sub" id="rachaDiasLabel">días seguidos entrenando</div>
-          </div>
-          <div class="stat-card" style="flex:1;min-width:200px">
-            <div class="stat-card-label">Días restantes</div>
-            <div class="stat-card-value" id="diasRestantesPlan">—</div>
-            <div class="stat-card-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
-          </div>
-          <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
-        </div>
-
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
             <div class="motivation-label">// Entrenamiento de hoy</div>
@@ -7181,6 +7210,52 @@
             </div>
           </div>
         </div>
+
+        </div><!-- /hoy-main -->
+
+        <!-- RAIL DERECHO: tus métricas de un vistazo -->
+        <aside class="hoy-rail">
+          <div class="rail-card">
+            <div class="rail-card-head"><span>Adherencia</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="rail-big brasa" id="statAdherencia">—</div>
+            <div class="rail-bar"><i id="railAdherenciaBar" style="width:0%"></i></div>
+            <div class="rail-sub" id="statAdherenciaSub">días esta semana</div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rail-card-head"><span>Racha</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg>
+            </div>
+            <div class="rail-big" id="rachaDias">0</div>
+            <div class="rail-sub" id="rachaDiasLabel">días seguidos entrenando</div>
+            <div class="rail-blocks" id="rachaBlocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rail-card-head"><span>Kcal objetivo</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3 3 5 3 8a3 3 0 0 1-6 0c0-1 .5-2 1-3"/><path d="M12 22a6 6 0 0 0 6-6c0-2-1-4-2-5"/><path d="M12 22a6 6 0 0 1-6-6c0-2 1-4 2-5"/></svg>
+            </div>
+            <div class="rail-big" id="statKcal">—</div>
+            <div class="rail-macros" id="railMacros" style="display:none">
+              <div><span>Prot</span><b id="railProt">—</b></div>
+              <div><span>Carb</span><b id="railCarbs">—</b></div>
+              <div><span>Grasa</span><b id="railGrasa">—</b></div>
+            </div>
+            <div class="rail-sub">objetivo diario</div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rail-card-head"><span>Tu plan</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="rail-big" id="diasRestantesPlan">—</div>
+            <div class="rail-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
+            <button class="btn-ghost" style="width:100%;margin-top:14px;padding:10px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
+          </div>
+        </aside>
+        </div><!-- /hoy-grid -->
       </div>
 
       <!-- PLAN SEMANAL -->
@@ -10748,6 +10823,7 @@
         const _obj = buildPlanFromData(userData);
         generatedPlan.kcalObj = _obj.kcalObj;
         generatedPlan.protObj = _obj.protObj;
+        generatedPlan.carbsObj = _obj.carbsObj;
         generatedPlan.tdee = _obj.tdee;
       } catch (e) { /* perfil incompleto: se deja sin objetivos, los KPIs muestran — */ }
     }
@@ -10778,7 +10854,7 @@
     const statPesoEl = document.getElementById('statPesoActual');
     if (statPesoEl) statPesoEl.textContent = userData.peso ? `${userData.peso} kg` : '—';
 
-    // Adherencia: días completados esta semana vs días planificados
+    // Adherencia: días completados esta semana vs días planificados (rail derecho)
     const statAdherenciaEl = document.getElementById('statAdherencia');
     const statAdherenciaSubEl = document.getElementById('statAdherenciaSub');
     if (statAdherenciaEl) {
@@ -10792,9 +10868,35 @@
       }).length;
       const diasPlan = parseInt(userData.diasEntreno) || 3;
       const pct = diasPlan > 0 ? Math.min(100, Math.round((entrenosSemana / diasPlan) * 100)) : 0;
-      statAdherenciaEl.textContent = `${entrenosSemana}/${diasPlan}`;
-      if (statAdherenciaSubEl) statAdherenciaSubEl.textContent = `días (${pct}% adherencia)`;
+      statAdherenciaEl.innerHTML = `${pct}<span style="font-size:22px">%</span>`;
+      if (statAdherenciaSubEl) statAdherenciaSubEl.textContent =
+        pct >= 100 ? 'Semana completada. Enorme.' : `${entrenosSemana}/${diasPlan} días esta semana`;
+      const barEl = document.getElementById('railAdherenciaBar');
+      if (barEl) barEl.style.width = pct + '%';
+      // Bloques de la racha: un bloque por día entrenado esta semana (7 = L-D)
+      const bloques = document.querySelectorAll('#rachaBlocks i');
+      bloques.forEach((b, i) => b.classList.toggle('on', i < entrenosSemana));
     }
+
+    // Pill de cabecera: semana del programa
+    const semanaPill = document.getElementById('hoyHeaderSemana');
+    if (semanaPill) semanaPill.textContent = `SEMANA ${progreso.semana}`;
+
+    // Macros objetivo del rail (proteína/carbos del motor; grasa = resto de kcal)
+    (function(){
+      const box = document.getElementById('railMacros');
+      if (!box) return;
+      const k = generatedPlan.kcalObj, p = generatedPlan.protObj, c = generatedPlan.carbsObj;
+      if (k && p && c) {
+        const g = Math.round((k - p*4 - c*4) / 9);
+        if (g > 0) {
+          document.getElementById('railProt').innerHTML = p + '<span style="font-size:13px">g</span>';
+          document.getElementById('railCarbs').innerHTML = c + '<span style="font-size:13px">g</span>';
+          document.getElementById('railGrasa').innerHTML = g + '<span style="font-size:13px">g</span>';
+          box.style.display = '';
+        }
+      }
+    })();
 
     // Kcal objetivo
     const statKcalEl = document.getElementById('statKcal');
