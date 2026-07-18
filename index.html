@@ -3016,8 +3016,32 @@
     letter-spacing: 1px;
     color: var(--brasa);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
+
+  /* Resumen de macros del día con el diseño nuevo (tarjetas, números grandes) */
+  #nutriResumen .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  #nutriResumen .stat-card {
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 14px;
+    padding: 18px 18px 20px;
+    transition: border-color .25s;
+  }
+  #nutriResumen .stat-card:first-child { border-color: rgba(232,73,15,0.4); }
+  #nutriResumen .stat-card-label {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--metal); margin-bottom: 10px;
+  }
+  #nutriResumen .stat-card-value {
+    font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: .85; color: var(--blanco);
+  }
+  #nutriResumen .stat-card:first-child .stat-card-value { color: var(--brasa); }
+  #nutriResumen .stat-card-sub {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .5px;
+    text-transform: uppercase; color: var(--metal); margin-top: 8px;
+  }
+  @media (max-width: 640px) { #nutriResumen .stats-row { grid-template-columns: repeat(2, 1fr); } }
 
   /* PLAN SEMANAL */
   .week-tabs {
