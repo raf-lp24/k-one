@@ -2921,30 +2921,36 @@
   /* RESUMEN NUTRICIONAL DEL DÍA */
   .nutri-dias {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: stretch;
+    gap: 10px;
     margin-top: 24px;
     margin-bottom: 8px;
     flex-wrap: wrap;
   }
   .nutri-dia {
-    width: 44px; height: 44px;
-    background: var(--grafito);
+    flex: 1;
+    min-width: 62px;
+    padding: 14px 6px;
+    background: var(--carbon);
     border: 1px solid var(--humo);
-    border-radius: 8px;
-    color: var(--metal);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 12px;
+    color: var(--metal-claro);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .nutri-dia:hover { border-color: var(--brasa); color: var(--blanco); }
-  .nutri-dia.selected { background: var(--brasa); border-color: var(--brasa); color: var(--blanco-puro); }
-  .nutri-dia.has-selection { border-bottom: 3px solid var(--brasa); }
+  .nutri-dia:hover { border-color: var(--brasa); color: var(--blanco); transform: translateY(-2px); }
+  .nutri-dia.selected {
+    background: linear-gradient(180deg, rgba(232,73,15,0.16), var(--carbon));
+    border-color: var(--brasa);
+    color: var(--blanco-puro);
+  }
+  .nutri-dia.has-selection { box-shadow: inset 0 -3px 0 var(--brasa); }
   .rotacion-opt {
     background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
     border-radius: 999px; padding: 7px 16px; font-size: 12px; font-weight: 600;
@@ -3236,9 +3242,44 @@
   .ejercicio-rpe { flex-shrink: 0; text-align: right; line-height: 1; }
   .ejercicio-rpe .k {
     display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--metal); margin-bottom: 2px;
+    text-transform: uppercase; color: var(--metal); margin-bottom: 3px;
   }
-  .ejercicio-rpe .v { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--brasa); }
+  .ejercicio-rpe .v { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--brasa); }
+
+  /* Tarjeta de ejercicio con el diseño nuevo (miniatura + series/reps/peso) */
+  .ejercicio-card {
+    display: flex; gap: 16px; align-items: stretch;
+    background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .ejercicio-thumb {
+    flex-shrink: 0; width: 130px; min-height: 100px; border: 1px solid var(--humo); border-radius: 10px;
+    background: linear-gradient(135deg, #242320, #0e0e0c); cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ejercicio-thumb .play {
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(232,73,15,0.9);
+    display: flex; align-items: center; justify-content: center; transition: transform .2s;
+  }
+  .ejercicio-thumb:hover .play { transform: scale(1.08); }
+  .ejercicio-thumb .play svg { width: 15px; height: 15px; fill: #fff; margin-left: 2px; }
+  .ejercicio-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ejercicio-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .ejercicio-card-namewrap { min-width: 0; }
+  .ejercicio-nombre {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .5px;
+    text-transform: uppercase; line-height: 1; margin-bottom: 8px;
+  }
+  .ejercicio-card .ejercicio-info-btn { margin-left: 0; }
+  .ejercicio-metrics { display: flex; gap: 26px; align-items: flex-end; margin-top: auto; padding-top: 14px; flex-wrap: wrap; }
+  .em-k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
+  .em-v { font-size: 17px; font-weight: 600; }
+  .em-peso .ejercicio-fila-controls { justify-content: flex-start; gap: 12px; }
+  @media (max-width: 560px) {
+    .ejercicio-thumb { width: 84px; min-height: 84px; }
+    .ejercicio-metrics { gap: 16px; }
+    .ejercicio-nombre { font-size: 19px; }
+  }
 
   .ejercicio-fila {
     display: flex;
@@ -7182,13 +7223,13 @@
           </div>
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
-            <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">L</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(1)">M</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(2)">X</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(3)">J</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(4)">V</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(5)">S</button>
-            <button class="nutri-dia" onclick="seleccionarDiaNutri(6)">D</button>
+            <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">Lun</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(1)">Mar</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(2)">Mié</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(3)">Jue</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(4)">Vie</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(5)">Sáb</button>
+            <button class="nutri-dia" onclick="seleccionarDiaNutri(6)">Dom</button>
             <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
               Lista de la compra
@@ -8705,40 +8746,55 @@
     const miniHistorial = renderMiniHistorialHTML(entry?.historial);
     const pesoUltimoTexto = entry?.pesoAnterior != null ? `Anterior: ${entry.pesoAnterior} kg` : '';
 
+    // Series y reps por separado, para mostrarlos en columnas como en el diseño nuevo.
+    const srMatch = (match[2] || '').match(/(\d+)\s*[x×]\s*(\S+)/);
+    const series = srMatch ? srMatch[1] : '';
+    const reps = srMatch ? srMatch[2] : '';
     // RPE objetivo derivado del rango de repeticiones (menos reps = más cerca de fuerza
     // máxima = RPE algo menor; más reps = accesorio cerca del fallo = RPE mayor).
-    const repsMatch = resto.match(/[x×]\s*(\d+)/);
+    const repsNum = reps ? parseInt(reps, 10) : null;
     let rpeHTML = '';
-    if (repsMatch) {
-      const reps = parseInt(repsMatch[1], 10);
-      const rpe = reps <= 6 ? '8' : reps <= 10 ? '8.5' : reps <= 14 ? '9' : '9.5';
-      rpeHTML = `<div class="ejercicio-rpe"><span class="k">RPE</span><span class="v">${rpe}</span></div>`;
+    if (repsNum) {
+      const rpe = repsNum <= 6 ? '8' : repsNum <= 10 ? '8.5' : repsNum <= 14 ? '9' : '9.5';
+      rpeHTML = `<div class="ejercicio-rpe"><span class="k">RPE objetivo</span><span class="v">${rpe}</span></div>`;
     }
 
-    // Un único botón "i": abre la ficha (fotos + músculos + pasos + vídeo dentro).
     const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    // El botón va DENTRO del texto para que quede pegado al ejercicio y no perdido
-    // en el borde derecho, y lleva etiqueta: un icono suelto no lo pulsaba nadie.
-    return `<div class="ejercicio-fila">
-      <div class="ejercicio-fila-head">
-        <span class="ejercicio-fila-texto">· ${nombre} ${resto}
-          <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombre}" aria-label="Cómo se hace: ${nombre}">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            Cómo se hace
-          </button>
-        </span>
-        ${rpeHTML}
-      </div>
-      <div class="ejercicio-fila-controls">
-        <div class="peso-stepper" onclick="event.stopPropagation()">
-          <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
-          <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
-            data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
-          <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,1.5)" aria-label="Sumar 1,5 kg">+</button>
-          <span class="peso-unit">kg</span>
+    // Tarjeta de ejercicio: miniatura (abre la ficha "cómo se hace"), nombre, RPE,
+    // y series / reps / peso. El stepper de peso se conserva íntegro (registro real).
+    return `<div class="ejercicio-card">
+      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombre}">
+        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
+      </button>
+      <div class="ejercicio-card-body">
+        <div class="ejercicio-card-top">
+          <div class="ejercicio-card-namewrap">
+            <div class="ejercicio-nombre">${nombre}</div>
+            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombre}" aria-label="Cómo se hace: ${nombre}">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Cómo se hace
+            </button>
+          </div>
+          ${rpeHTML}
         </div>
-        <span class="peso-ultimo" data-ejercicio="${key}">${pesoUltimoTexto}</span>
-        <div class="peso-mini-historial" data-ejercicio="${key}">${miniHistorial}</div>
+        <div class="ejercicio-metrics">
+          <div class="em"><div class="em-k">Series</div><div class="em-v">${series || '—'}</div></div>
+          <div class="em"><div class="em-k">Reps</div><div class="em-v">${reps || '—'}</div></div>
+          <div class="em em-peso">
+            <div class="em-k">Peso (kg)</div>
+            <div class="ejercicio-fila-controls">
+              <div class="peso-stepper" onclick="event.stopPropagation()">
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
+                <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
+                  data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,1.5)" aria-label="Sumar 1,5 kg">+</button>
+                <span class="peso-unit">kg</span>
+              </div>
+              <span class="peso-ultimo" data-ejercicio="${key}">${pesoUltimoTexto}</span>
+              <div class="peso-mini-historial" data-ejercicio="${key}">${miniHistorial}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>`;
   }
