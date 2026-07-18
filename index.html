@@ -1225,6 +1225,39 @@
   .rail-macros span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
   .rail-macros b { font-family: 'Bebas Neue', sans-serif; font-size: 22px; font-weight: 400; color: var(--blanco); margin-top: 3px; display: block; }
 
+  /* Banner de sección con foto (Plan semanal, Nutrición) — mismo lenguaje que el hero de Hoy */
+  .section-banner {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--humo);
+    border-radius: 16px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+  }
+  .section-banner-photo {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center 35%; z-index: 0;
+  }
+  .section-banner::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.55) 45%, rgba(10,10,10,0.93) 100%);
+  }
+  .section-banner-brand {
+    position: absolute; top: 16px; right: 20px; z-index: 1; pointer-events: none;
+    font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px;
+    color: rgba(232,73,15,0.55); text-shadow: 0 0 16px rgba(232,73,15,0.4);
+  }
+  .section-banner-content { position: relative; z-index: 2; padding: 22px 24px; }
+  .section-banner .dash-title { color: var(--blanco-puro); text-transform: uppercase; margin-bottom: 6px; }
+  .section-banner .dash-subtitle { color: #cfccc6; max-width: 640px; }
+  /* En tema claro el banner sigue siendo foto oscura con texto blanco */
+  [data-theme="light"] .section-banner .dash-title { color: #FFF !important; }
+  [data-theme="light"] .section-banner .dash-subtitle { color: #cfccc6 !important; }
+  [data-theme="light"] .section-banner { background: #111 !important; border-color: #111 !important; }
+
   .phone-frame-group {
     display: flex;
     flex-wrap: wrap;
@@ -7260,10 +7293,14 @@
 
       <!-- PLAN SEMANAL -->
       <div class="dash-section" id="section-semana">
-        <div class="dash-header">
-          <div class="dash-greeting">// Tu plan</div>
-          <h2 class="dash-title" id="semanaTitle">Semana 1</h1>
-          <p class="dash-subtitle">Cada día tiene un propósito. Sigue el orden. Consulta también las próximas semanas de tu mes.</p>
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/crossfit.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 22%">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting">// Tu plan</div>
+            <h2 class="dash-title" id="semanaTitle">Semana 1</h2>
+            <p class="dash-subtitle">Cada día tiene un propósito. Sigue el orden. Consulta también las próximas semanas de tu mes.</p>
+          </div>
         </div>
 
         <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
@@ -7285,10 +7322,16 @@
 
       <!-- NUTRICIÓN -->
       <div class="dash-section" id="section-nutricion">
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/nutricion-banner.jpg" alt="" loading="lazy" aria-hidden="true">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting">// Tu alimentación</div>
+            <h2 class="dash-title">Nutrición</h2>
+            <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
+          </div>
+        </div>
         <div class="dash-header">
-          <div class="dash-greeting">// Tu alimentación</div>
-          <h2 class="dash-title">Plan semanal</h1>
-          <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
           <!-- Renovación del menú: destacado para que todos sepan que pueden elegirlo -->
           <div id="rotacionMenuBox" style="margin:14px 0;background:linear-gradient(135deg,rgba(232,73,15,.10),var(--carbon));border:1px solid var(--brasa);border-radius:12px;padding:16px 18px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
