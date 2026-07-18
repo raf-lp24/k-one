@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-ONE · Vídeo TikTok: presentación y cómo funciona (v2)</title>
+<style>
+  body { background:#000; color:#ccc; font-family:'Segoe UI',Arial,sans-serif; display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; margin:0; min-height:100vh; justify-content:center; }
+  canvas { height:min(72vh,720px); aspect-ratio:9/16; border-radius:10px; box-shadow:0 0 50px rgba(232,73,15,.2); background:#0b0b0b; }
+  .btns { display:flex; gap:10px; }
+  button { background:#E8490F; color:#fff; border:0; border-radius:8px; padding:13px 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.sec { background:#222; }
+  button:disabled { opacity:.4; cursor:default; }
+  #status { font-size:14px; color:#888; min-height:20px; text-align:center; max-width:460px; line-height:1.5; }
+  a.dl { color:#E8490F; font-weight:700; }
+</style>
+</head>
+<body>
+
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="btns">
+  <button id="gen">🎬 GENERAR VÍDEO (30s)</button>
+  <button class="sec" id="prev">Solo ver</button>
+</div>
+<div id="status">Pulsa <b>Generar vídeo</b>: se reproduce una vez y al acabar se descarga el archivo listo para TikTok (1080×1920). No cambies de pestaña mientras graba.</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 1080, H = 1920;
+const TOTAL = 30;
+
+const COL = {
+  naranja:'#E8490F', negro:'#0b0b0b', grafito:'#141414', carbon:'#1E1E1E',
+  hueso:'#F0EDE8', metal:'#b5b2ad', borde:'#222222', verde:'#27ae60'
+};
+const FONT = '"Segoe UI", Arial, sans-serif';
+const MONO = 'Consolas, "Courier New", monospace';
+const N = COL.naranja, M = COL.metal, B = '#fff', V = COL.verde;
+
+/* ---------- helpers ---------- */
+const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+const easeOut = x => 1 - Math.pow(1-x,3);
+function popE(x){ const c = 1.70158; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); }
+function up(tl, d, dur=0.55){ const x = clamp((tl-d)/dur, 0, 1); return { a:x, dy:40*(1-easeOut(x)) }; }
+function pop(tl, d, dur=0.5){ const x = clamp((tl-d)/dur, 0, 1); return { a:clamp(x*2,0,1), s: x===0 ? .6 : .6+.4*popE(x) }; }
+
+function setFont(size, weight='400', mono=false, ls=0){
+  ctx.font = `${weight} ${size}px ${mono?MONO:FONT}`;
+  ctx.letterSpacing = ls + 'px';
+}
+function txt(str, x, y, size, {w='400', col:c='#fff', align='center', mono=false, ls=0, a=1} = {}){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, w, mono, ls);
+  ctx.fillStyle = c; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function rich(segs, cx, y, size, weight='900', a=1, dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  setFont(size, weight);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tot = segs.reduce((s,seg)=> s + ctx.measureText(seg.t).width, 0);
+  let x = cx - tot/2;
+  for (const seg of segs){
+    ctx.fillStyle = seg.c || '#fff';
+    ctx.fillText(seg.t, x, y + dy);
+    x += ctx.measureText(seg.t).width;
+  }
+  ctx.restore();
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function card(x,y,w,h,a=1,dy=0){
+  ctx.save(); ctx.globalAlpha *= a;
+  rrect(x, y+dy, w, h, 22);
+  ctx.fillStyle = COL.grafito; ctx.fill();
+  ctx.strokeStyle = COL.borde; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function logoK(cx, y, size, a=1, s=1){
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.translate(cx,y); ctx.scale(s,s); ctx.translate(-cx,-y);
+  setFont(size,'900',false,6);
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  const w1 = ctx.measureText('K-').width, w2 = ctx.measureText('ONE').width;
+  let x = cx-(w1+w2)/2;
+  ctx.fillStyle='#fff'; ctx.fillText('K-',x,y);
+  ctx.fillStyle=N; ctx.fillText('ONE',x+w1,y);
+  ctx.restore();
+}
+
+/* ---------- timeline ----------
+   s1 0     hook: no es una app de fitness
+   s2 4     cómo funciona: 3 pasos
+   s3 10.5  entreno: bloques + RPE + cómo se hace
+   s4 16    dieta: 5x5, gramos, lista compra
+   s5 21.5  se adapta cada semana
+   s6 25.5  precio + CTA
+--------------------------------- */
+const T = { s1:0, s2:4, s3:10.5, s4:16, s5:21.5, s6:25.5 };
+
+function s1(tl){ // HOOK
+  const fa = tl<0.2 ? tl/0.2 : clamp(1-(tl-0.2)/0.25,0,1);
+  ctx.fillStyle = `rgba(232,73,15,${0.14*fa})`; ctx.fillRect(0,0,W,H);
+  logoK(W/2, 560, 110, pop(tl,0).a, pop(tl,0).s);
+  const u1 = up(tl, 0.6);
+  rich([{t:'NO',c:N},{t:' es una app',c:B}], W/2, 800, 76, '900', u1.a, u1.dy);
+  rich([{t:'de fitness.',c:B}], W/2, 900, 76, '900', up(tl,0.8).a, up(tl,0.8).dy);
+  const u2 = up(tl, 1.6);
+  txt('Es tu preparador de élite,', W/2, 1100+u2.dy, 52, {w:'700', a:u2.a});
+  rich([{t:'24/7',c:N},{t:' en tu bolsillo',c:B}], W/2, 1180, 52, '700', up(tl,1.9).a, up(tl,1.9).dy);
+  txt('Te enseño cómo funciona 👇', W/2, 1380+up(tl,2.6).dy, 42, {col:M, a:up(tl,2.6).a});
+}
+
+const PASOS = [
+  ['01','CUÉNTANOS QUIÉN ERES','nivel, objetivo, lesiones, horarios'],
+  ['02','RECIBES TU PLAN','entreno + dieta en segundos'],
+  ['03','CHECK-IN SEMANAL','y el plan se ajusta solo'],
+];
+function s2(tl){ // CÓMO FUNCIONA
+  txt('CÓMO FUNCIONA', W/2, 420+up(tl,0).dy, 32, {col:N, w:'700', mono:true, ls:6, a:up(tl,0).a});
+  rich([{t:'De cero a plan en ',c:B},{t:'2 minutos',c:N}], W/2, 520, 56, '900', up(tl,0.15).a, up(tl,0.15).dy);
+  const cx0=110, cw=W-220;
+  PASOS.forEach((p,i)=>{
+    const ui = up(tl, 0.5+i*1.1, 0.5);
+    const y = 660+i*260;
+    ctx.save(); ctx.globalAlpha = ui.a;
+    card(cx0, y, cw, 220, 1, ui.dy);
+    txt(p[0], cx0+95, y+110+ui.dy, 86, {w:'900', col:'rgba(232,73,15,.45)'});
+    txt(p[1], cx0+195, y+85+ui.dy, 42, {w:'900', align:'left'});
+    txt(p[2], cx0+195, y+148+ui.dy, 32, {col:M, align:'left'});
+    ctx.restore();
+  });
+  txt('Sin entrenador de 60€/mes. Sin plantillas genéricas.', W/2, 1520+up(tl,4.2).dy, 34, {col:M, a:up(tl,4.2).a});
+}
+
+function s3(tl){ // ENTRENO
+  txt('TU ENTRENO', W/2, 400+up(tl,0).dy, 32, {col:N, w:'700', mono:true, ls:6, a:up(tl,0).a});
+  rich([{t:'Programado ',c:B},{t:'de verdad',c:N}], W/2, 500, 60, '900', up(tl,0.15).a, up(tl,0.15).dy);
+  // mini tarjeta de ejercicio como la web
+  const u = up(tl, 0.5);
+  ctx.save(); ctx.globalAlpha = u.a;
+  card(90, 620+u.dy, W-180, 330);
+  txt('01', 150, 680+u.dy, 30, {col:'#777', mono:true, align:'left'});
+  txt('BLOQUE DE FUERZA', 210, 680+u.dy, 40, {w:'900', align:'left'});
+  // fila ejercicio
+  rrect(130, 730+u.dy, W-260, 180, 14); ctx.fillStyle='#101010'; ctx.fill();
+  // miniatura con play
+  rrect(160, 760+u.dy, 120, 120, 12); ctx.fillStyle='#1c1c1a'; ctx.fill();
+  ctx.beginPath(); ctx.arc(220, 820+u.dy, 30, 0, Math.PI*2); ctx.fillStyle=N; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(210,802+u.dy); ctx.lineTo(238,820+u.dy); ctx.lineTo(210,838+u.dy); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill();
+  txt('PRESS BANCA', 310, 790+u.dy, 40, {w:'900', align:'left'});
+  txt('4 × 8 · 62,5 kg', 310, 850+u.dy, 32, {col:M, mono:true, align:'left'});
+  txt('RPE', W-170, 775+u.dy, 22, {col:'#777', mono:true});
+  txt('8.5', W-170, 830+u.dy, 52, {col:N, w:'900'});
+  ctx.restore();
+  const CH = [
+    '✓ Bloques: fuerza · hipertrofia · core',
+    '✓ Ficha de cada ejercicio: fotos y músculos',
+    '✓ Apunta tus pesos y ve tu progresión',
+  ];
+  CH.forEach((c,i)=>{
+    const ui = up(tl, 1.2+i*0.4);
+    txt(c, W/2, 1080+i*90+ui.dy, 37, {col:'#e6e3de', w:'600', a:ui.a});
+  });
+  txt('Y si no sabes hacer uno: "Cómo se hace" 📖', W/2, 1430+up(tl,2.6).dy, 36, {col:M, a:up(tl,2.6).a});
+}
+
+function s4(tl){ // DIETA
+  txt('TU DIETA', W/2, 400+up(tl,0).dy, 32, {col:N, w:'700', mono:true, ls:6, a:up(tl,0).a});
+  rich([{t:'5 comidas × ',c:B},{t:'5 opciones',c:N}], W/2, 500, 60, '900', up(tl,0.15).a, up(tl,0.15).dy);
+  txt('Eliges lo que te apetece. Cada día.', W/2, 580+up(tl,0.3).dy, 38, {col:M, a:up(tl,0.3).a});
+  // mini card comida
+  const u = up(tl, 0.6);
+  ctx.save(); ctx.globalAlpha = u.a;
+  card(120, 680+u.dy, W-240, 290);
+  txt('ALMUERZO · ELEGIDA ✓', 170, 740+u.dy, 26, {col:N, mono:true, align:'left'});
+  txt('Pollo a la plancha con arroz', 170, 800+u.dy, 42, {w:'800', align:'left'});
+  txt('280g pollo · 130g arroz · 15g AOVE', 170, 860+u.dy, 30, {col:M, mono:true, align:'left'});
+  txt('620 kcal · 48g prot', 170, 915+u.dy, 30, {col:V, mono:true, align:'left'});
+  ctx.restore();
+  const CH = [
+    '✓ Cantidades en gramos: cero improvisar',
+    '✓ Lista de la compra automática 🛒',
+    '✓ Recetario con los pasos de cada plato',
+  ];
+  CH.forEach((c,i)=>{
+    const ui = up(tl, 1.3+i*0.4);
+    txt(c, W/2, 1090+i*90+ui.dy, 37, {col:'#e6e3de', w:'600', a:ui.a});
+  });
+  txt('Adaptada a tus alergias y tu objetivo', W/2, 1440+up(tl,2.7).dy, 36, {col:M, a:up(tl,2.7).a});
+}
+
+function s5(tl){ // SE ADAPTA
+  const p = pop(tl, 0.1);
+  ctx.save(); ctx.translate(W/2, 640); ctx.scale(p.s, p.s);
+  rich([{t:'Y cada semana',c:B}], 0, -55, 72, '900', p.a);
+  rich([{t:'se ajusta ',c:B},{t:'SOLO',c:N}], 0, 45, 72, '900', p.a);
+  ctx.restore();
+  const u1 = up(tl, 0.8);
+  card(130, 830+u1.dy, W-260, 150, u1.a);
+  txt('😮‍💨 ¿Vienes fatigado? → baja el volumen', W/2, 905+u1.dy, 37, {col:'#e6e3de', w:'600', a:u1.a});
+  const u2 = up(tl, 1.2);
+  card(130, 1010+u2.dy, W-260, 150, u2.a);
+  txt('🔥 ¿Vas sobrado? → aprieta más', W/2, 1085+u2.dy, 37, {col:'#e6e3de', w:'600', a:u2.a});
+  txt('No entrenas a ciegas. Nunca.', W/2, 1300+up(tl,1.8).dy, 44, {w:'700', a:up(tl,1.8).a});
+}
+
+function s6(tl){ // PRECIO + CTA
+  txt('¿Y CUÁNTO CUESTA?', W/2, 480+up(tl,0).dy, 34, {col:N, w:'700', mono:true, ls:6, a:up(tl,0).a});
+  const p = pop(tl, 0.4, 0.55);
+  ctx.save(); ctx.globalAlpha = p.a;
+  ctx.translate(W/2, 780); ctx.scale(p.s, p.s);
+  ctx.shadowColor='rgba(232,73,15,.6)'; ctx.shadowBlur=80;
+  txt('1,99€', 0, 0, 210, {col:N, w:'900'});
+  ctx.restore();
+  txt('el primer mes · cancela cuando quieras', W/2, 960+up(tl,0.9).dy, 38, {col:M, w:'600', a:up(tl,0.9).a});
+  logoK(W/2, 1160+up(tl,1.3).dy, 90, up(tl,1.3).a, 1);
+  rich([{t:'k-one',c:'#fff'},{t:'.fit',c:N}], W/2, 1280, 52, '900', up(tl,1.6).a, up(tl,1.6).dy);
+  txt('El enlace está en mi perfil 👆', W/2, 1400+up(tl,2).dy, 40, {col:M, a:up(tl,2).a});
+}
+
+/* ---------- draw ---------- */
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1; ctx.letterSpacing='0px'; ctx.shadowBlur=0;
+  ctx.fillStyle = COL.negro; ctx.fillRect(0,0,W,H);
+
+  let key='s1', start=0;
+  for (const [k,v] of Object.entries(T)) if (t>=v){ key=k; start=v; }
+  const tl = t - start;
+  ctx.globalAlpha = clamp(tl/0.3, 0, 1);
+  ({s1,s2,s3,s4,s5,s6})[key](tl);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = N;
+  ctx.fillRect(0, 0, W*(t/TOTAL), 7);
+}
+
+/* ---------- reproducción / grabación ---------- */
+const status = document.getElementById('status');
+const btnGen = document.getElementById('gen');
+const btnPrev = document.getElementById('prev');
+let running = false;
+
+function play(record){
+  if (running) return; running = true;
+  btnGen.disabled = true; btnPrev.disabled = true;
+  window.__videoDone = 0;
+
+  let rec = null, chunks = [], mime = '', ext = '';
+  if (record){
+    const tipos = [
+      ['video/mp4;codecs=avc1.640028','mp4'],
+      ['video/mp4','mp4'],
+      ['video/webm;codecs=vp9','webm'],
+      ['video/webm','webm'],
+    ];
+    for (const [m,e] of tipos) if (MediaRecorder.isTypeSupported(m)) { mime=m; ext=e; break; }
+    if (!mime){ status.textContent = 'Tu navegador no soporta grabación. Usa Chrome actualizado.'; running=false; btnGen.disabled=btnPrev.disabled=false; return; }
+    const stream = cv.captureStream(30);
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 14_000_000 });
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `k-one-presentacion-v2.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.__videoDone = blob.size;
+      const mb = (blob.size/1048576).toFixed(1);
+      status.innerHTML = `✅ Vídeo descargado: <a class="dl" href="${url}" download="k-one-presentacion-v2.${ext}">k-one-presentacion-v2.${ext}</a> (${mb} MB, ${ext.toUpperCase()}).`;
+    };
+    rec.start(250);
+    status.textContent = `⏺ Grabando (${ext.toUpperCase()})… no cambies de pestaña durante 30 s.`;
+  } else {
+    status.textContent = '▶ Reproduciendo (sin grabar)…';
+  }
+
+  const t0 = performance.now();
+  function loop(){
+    const t = (performance.now()-t0)/1000;
+    draw(Math.min(t, TOTAL));
+    if (t < TOTAL + 0.3){ requestAnimationFrame(loop); }
+    else {
+      if (rec) rec.stop();
+      else status.textContent = 'Listo. Pulsa 🎬 para generar el archivo.';
+      running = false; btnGen.disabled = btnPrev.disabled = false;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+btnGen.addEventListener('click', () => play(true));
+btnPrev.addEventListener('click', () => play(false));
+draw(0.001);
+</script>
+</body>
+</html>
