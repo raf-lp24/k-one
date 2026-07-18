@@ -1080,68 +1080,82 @@
   }
 
   /* TARJETA RESUMEN "TU ENTRENAMIENTO DE HOY" (área de clientes) */
+  /* Hero de la sesión de hoy con foto de gimnasio de fondo */
   .today-hero {
-    background: var(--carbon);
+    position: relative;
+    overflow: hidden;
     border: 1px solid var(--humo);
     border-radius: 16px;
-    padding: 26px 26px 24px;
+    min-height: 300px;
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
   }
+  .today-hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+  }
+  .today-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(10,10,10,0.25) 0%, rgba(10,10,10,0.55) 45%, rgba(10,10,10,0.95) 100%);
+    pointer-events: none;
+  }
+  .today-hero-brand {
+    position: absolute;
+    top: 15%;
+    right: 7%;
+    z-index: 1;
+    pointer-events: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 58px;
+    letter-spacing: 3px;
+    line-height: 0.9;
+    color: rgba(232,73,15,0.38);
+    text-shadow: 0 0 24px rgba(232,73,15,0.5);
+  }
+  .today-hero-brand small {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: rgba(240,237,232,0.32);
+    text-shadow: none;
+    margin-top: 3px;
+    text-align: center;
+  }
+  .today-hero-content { position: relative; z-index: 2; padding: 26px; }
   .today-hero-eyebrow {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--brasa);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
   .today-hero-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 34px;
+    font-size: 38px;
     letter-spacing: 0.5px;
-    line-height: 1;
-    margin-bottom: 22px;
-    color: var(--blanco);
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--blanco-puro);
+    margin-bottom: 8px;
   }
-  .today-hero-rows {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 22px;
-  }
-  .today-hero-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--grafito);
-    border: 1px solid var(--humo);
-    border-radius: 12px;
-    padding: 14px 16px;
-  }
-  .today-hero-item-icon {
-    flex-shrink: 0;
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
-    background: rgba(232,73,15,0.12);
-    border: 1px solid rgba(232,73,15,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .today-hero-item-icon svg { width: 21px; height: 21px; stroke: var(--brasa); color: var(--brasa); }
-  .today-hero-item-title {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: var(--blanco);
-    margin-bottom: 3px;
-    line-height: 1.25;
-  }
-  .today-hero-item-sub {
-    font-size: 12px;
+  .today-hero-sub {
+    font-size: 13.5px;
     color: var(--metal-claro);
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.3px;
+    margin-bottom: 22px;
   }
   .today-hero-btn {
     width: 100%;
@@ -1161,6 +1175,7 @@
     justify-content: center;
     gap: 10px;
     transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 12px 30px -12px rgba(232,73,15,0.6);
   }
   .today-hero-btn svg { width: 18px; height: 18px; }
   .today-hero-btn:hover { background: #FF5A1A; transform: translateY(-2px); }
@@ -6923,25 +6938,19 @@
           <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
         </div>
 
-        <!-- RESUMEN DEL DÍA: entrenamiento + comida de un vistazo -->
+        <!-- RESUMEN DEL DÍA: hero de la sesión con foto de gimnasio -->
         <div class="today-hero" id="todayHero" style="display:none">
-          <div class="today-hero-eyebrow" id="todayHeroEyebrow">// Semana 1 · Día 1</div>
-          <div class="today-hero-title">Tu entrenamiento de hoy</div>
-          <div class="today-hero-rows">
-            <div class="today-hero-item" id="todayHeroWorkout">
-              <div class="today-hero-item-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11"/><path d="M4 8.5L8.5 4"/><path d="M2.5 12l2-2 4 4-2 2z" transform="rotate(0)"/><path d="M15.5 20l2-2 4-4-2-2"/><path d="M3 10l-1 1 2 2 1-1"/><path d="M21 14l1-1-2-2-1 1"/></svg>
-              </div>
-              <div>
-                <div class="today-hero-item-title" id="todayHeroWorkoutTitle">Tu sesión de hoy</div>
-                <div class="today-hero-item-sub" id="todayHeroWorkoutSub">—</div>
-              </div>
-            </div>
+          <img class="today-hero-photo" src="/img/landing/gym-hero.jpg" alt="" loading="lazy" aria-hidden="true">
+          <div class="today-hero-brand" aria-hidden="true">K-ONE<small>Performance</small></div>
+          <div class="today-hero-content">
+            <div class="today-hero-eyebrow" id="todayHeroEyebrow">// Sesión de hoy</div>
+            <h2 class="today-hero-title" id="todayHeroWorkoutTitle">Tu sesión de hoy</h2>
+            <div class="today-hero-sub" id="todayHeroWorkoutSub">—</div>
+            <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
+              <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            </button>
           </div>
-          <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
-            <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-          </button>
         </div>
 
         <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
@@ -10832,19 +10841,16 @@
     const semana = (userData.progreso && userData.progreso.semana) || 1;
     const idx = getIndiceDiaHoy();
     const dia = generatedPlan.semana && generatedPlan.semana[idx];
-    document.getElementById('todayHeroEyebrow').textContent = `// Semana ${semana} · Día ${idx + 1}`;
+    document.getElementById('todayHeroEyebrow').textContent = `// Sesión de hoy · Semana ${semana} · Día ${idx + 1}`;
 
-    const workoutRow = document.getElementById('todayHeroWorkout');
     const wTitle = document.getElementById('todayHeroWorkoutTitle');
     const wSub = document.getElementById('todayHeroWorkoutSub');
     const btnLabel = document.getElementById('todayHeroBtnLabel');
     if (dia && dia.tipo === 'Descanso') {
-      workoutRow.style.display = '';
       wTitle.textContent = 'Día de descanso';
       wSub.textContent = ['Recuperación', dia.dia].filter(Boolean).join(' · ');
       btnLabel.textContent = 'Ver el detalle';
     } else {
-      workoutRow.style.display = '';
       wTitle.textContent = (dia && dia.resumen) ? dia.resumen : 'Tu sesión de hoy';
       wSub.textContent = [userData.deporte, userData.objetivo ? `Enfoque ${userData.objetivo}` : '']
         .filter(Boolean).join(' · ') || 'Entrenamiento del día';
