@@ -1155,8 +1155,24 @@
     color: var(--metal-claro);
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.3px;
-    margin-bottom: 22px;
+    margin-bottom: 16px;
   }
+  /* Etiquetas de músculos trabajados */
+  .today-hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .today-hero-tags:empty { display: none; }
+  .today-hero-tags span {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--blanco); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px; padding: 4px 12px; backdrop-filter: blur(4px);
+  }
+  /* Stats de la sesión: duración · intensidad · ejercicios */
+  .today-hero-stats { display: flex; gap: 34px; margin-bottom: 22px; }
+  .today-hero-stats > div { display: flex; flex-direction: column; }
+  .today-hero-stats .k {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--metal); margin-bottom: 5px;
+  }
+  .today-hero-stats .v { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1; color: var(--blanco-puro); }
   .today-hero-btn {
     width: 100%;
     background: var(--brasa);
@@ -7022,7 +7038,7 @@
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L4 14 H11 L10 22 L19 9 H12 Z"/></svg></span> Hoy
         </div>
         <div class="dash-nav-item" onclick="showSection('semana')" id="nav-semana">
-          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="16" y1="3" x2="16" y2="6"/></svg></span> Plan semanal
+          <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="16" y1="3" x2="16" y2="6"/></svg></span> Entrenamiento
         </div>
         <div class="dash-nav-item" onclick="showSection('nutricion')" id="nav-nutricion">
           <span class="dash-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg></span> Nutrición
@@ -7103,6 +7119,12 @@
             <div class="today-hero-eyebrow" id="todayHeroEyebrow">// Sesión de hoy</div>
             <h2 class="today-hero-title" id="todayHeroWorkoutTitle">Tu sesión de hoy</h2>
             <div class="today-hero-sub" id="todayHeroWorkoutSub">—</div>
+            <div class="today-hero-tags" id="todayHeroTags"></div>
+            <div class="today-hero-stats" id="todayHeroStats" style="display:none">
+              <div><span class="k">Duración</span><span class="v" id="thDuracion">—</span></div>
+              <div><span class="k">Intensidad</span><span class="v" id="thIntensidad">—</span></div>
+              <div><span class="k">Ejercicios</span><span class="v" id="thEjercicios">—</span></div>
+            </div>
             <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
               <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
@@ -7287,6 +7309,20 @@
             <div class="rail-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
             <button class="btn-ghost" style="width:100%;margin-top:14px;padding:10px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
           </div>
+
+          <!-- Código de referido: siempre visible para compartir -->
+          <div class="rail-card" id="railReferidos" style="display:none;background:linear-gradient(160deg,rgba(232,73,15,0.10),var(--carbon));border-color:rgba(232,73,15,0.4)">
+            <div class="rail-card-head"><span>Invita y gana</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div style="font-size:12.5px;color:var(--metal-claro);line-height:1.5;margin-bottom:14px"><b style="color:var(--blanco)">5€</b> por cada amigo que se una con tu código (máx. 15€ en tu cuota).</div>
+            <div style="display:flex;align-items:center;gap:8px;background:var(--negro);border:1px solid var(--humo);border-radius:9px;padding:11px 13px;margin-bottom:10px">
+              <span id="railCodigoReferido" style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--brasa);letter-spacing:1.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">---</span>
+              <button onclick="copiarCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;flex-shrink:0">Copiar</button>
+            </div>
+            <button onclick="compartirCodigoReferido()" style="width:100%;background:var(--brasa);color:#fff;border:none;border-radius:9px;padding:11px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Compartir por WhatsApp</button>
+            <div class="rail-sub" style="text-align:center"><span id="railRefPagados" style="color:var(--brasa);font-weight:700">0</span>/3 amigos · <span id="railRefDescuento">0€</span> ganados</div>
+          </div>
         </aside>
         </div><!-- /hoy-grid -->
       </div>
@@ -7297,7 +7333,7 @@
           <img class="section-banner-photo" src="/img/landing/crossfit.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 22%">
           <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
           <div class="section-banner-content">
-            <div class="dash-greeting">// Tu plan</div>
+            <div class="dash-greeting">// Tu entrenamiento</div>
             <h2 class="dash-title" id="semanaTitle">Semana 1</h2>
             <p class="dash-subtitle">Cada día tiene un propósito. Sigue el orden. Consulta también las próximas semanas de tu mes.</p>
           </div>
@@ -7440,10 +7476,14 @@
 
       <!-- CHECK-IN -->
       <div class="dash-section" id="section-checkin">
-        <div class="dash-header">
-          <div class="dash-greeting" id="checkinSemanaLabel">// Semana 1</div>
-          <h2 class="dash-title">¿Cómo fue?</h1>
-          <p class="dash-subtitle">Cinco minutos. Cuéntanos tu semana y adaptamos el plan.</p>
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/hero.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 35%">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting" id="checkinSemanaLabel">// Semana 1</div>
+            <h2 class="dash-title">¿Cómo fue?</h2>
+            <p class="dash-subtitle">Cinco minutos. Cuéntanos tu semana y adaptamos el plan.</p>
+          </div>
         </div>
 
         <div class="checkin-card" id="checkinForm">
@@ -7524,10 +7564,14 @@
 
       <!-- PROGRESO -->
       <div class="dash-section" id="section-progreso">
-        <div class="dash-header">
-          <div class="dash-greeting">// Tu historia</div>
-          <h2 class="dash-title">Tu progreso</h2>
-          <p class="dash-subtitle">Lo que no se registra, no se ve. Aquí está todo.</p>
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/running.jpg" alt="" loading="lazy" aria-hidden="true">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting">// Tu historia</div>
+            <h2 class="dash-title">Tu progreso</h2>
+            <p class="dash-subtitle">Lo que no se registra, no se ve. Aquí está todo.</p>
+          </div>
         </div>
 
         <div class="progress-section">
@@ -7563,10 +7607,14 @@
 
       <!-- NOTAS -->
       <div class="dash-section" id="section-notas">
-        <div class="dash-header">
-          <div class="dash-greeting">// Tu agenda</div>
-          <h2 class="dash-title">Notas</h2>
-          <p class="dash-subtitle">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/notas-banner.jpg" alt="" loading="lazy" aria-hidden="true">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting">// Tu agenda</div>
+            <h2 class="dash-title">Notas</h2>
+            <p class="dash-subtitle">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
+          </div>
         </div>
 
         <div class="notes-form">
@@ -7579,10 +7627,14 @@
 
       <!-- CONTACTO / SUGERENCIAS -->
       <div class="dash-section" id="section-contacto">
-        <div class="dash-header">
-          <div class="dash-greeting">// Comunicación directa</div>
-          <h2 class="dash-title">Contacto</h2>
-          <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
+        <div class="section-banner">
+          <img class="section-banner-photo" src="/img/landing/app-kone.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 40%">
+          <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
+          <div class="section-banner-content">
+            <div class="dash-greeting">// Comunicación directa</div>
+            <h2 class="dash-title">Contacto</h2>
+            <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
+          </div>
         </div>
 
         <!-- Motivos rápidos como botones -->
@@ -11083,18 +11135,80 @@
     const wTitle = document.getElementById('todayHeroWorkoutTitle');
     const wSub = document.getElementById('todayHeroWorkoutSub');
     const btnLabel = document.getElementById('todayHeroBtnLabel');
+    const tagsEl = document.getElementById('todayHeroTags');
+    const statsEl = document.getElementById('todayHeroStats');
     if (dia && dia.tipo === 'Descanso') {
       wTitle.textContent = 'Día de descanso';
       wSub.textContent = ['Recuperación', dia.dia].filter(Boolean).join(' · ');
       btnLabel.textContent = 'Ver el detalle';
+      if (tagsEl) tagsEl.innerHTML = '';
+      if (statsEl) statsEl.style.display = 'none';
     } else {
       wTitle.textContent = (dia && dia.resumen) ? dia.resumen : 'Tu sesión de hoy';
       wSub.textContent = [userData.deporte, userData.objetivo ? `Enfoque ${userData.objetivo}` : '']
         .filter(Boolean).join(' · ') || 'Entrenamiento del día';
       btnLabel.textContent = 'Empezar entrenamiento';
+      _rellenarStatsSesion(dia, tagsEl, statsEl);
     }
 
     hero.style.display = '';
+  }
+
+  // Deriva músculos, intensidad, duración y nº de ejercicios de la sesión de un día.
+  // Todo se calcula de los ejercicios reales (nada inventado); la duración es una estimación.
+  function _rellenarStatsSesion(dia, tagsEl, statsEl) {
+    if (!tagsEl || !statsEl) return;
+    const detalle = (dia && dia.detalle) || '';
+    const partes = detalle.split('·');
+    const txt = partes.length >= 2 ? partes.slice(1).join('·') : detalle;
+    const ejercicios = txt.split(',').map(e => e.trim()).filter(Boolean);
+    const conReps = ejercicios.filter(e => /\d+\s*[x×]\s*\d/.test(e));
+
+    // Músculos por palabra clave del ejercicio
+    const MUSC = [
+      [/peso muerto|hip thrust|puente|buenos d[íi]as/i, ['Glúteos','Isquios','Lumbar']],
+      [/sentadilla|prensa|zancada|extensi[óo]n de cu[áa]driceps|hack|step[- ]?up/i, ['Cuádriceps','Glúteos']],
+      [/femoral/i, ['Isquios']],
+      [/gemelo/i, ['Gemelos']],
+      [/press banca|press inclinado|aperturas|fondos|flexion|pullover|cruce/i, ['Pecho','Tríceps']],
+      [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales/i, ['Hombros']],
+      [/dominadas|jal[óo]n|remo|pull[- ]?up|muscle[- ]?up/i, ['Espalda','Bíceps']],
+      [/curl|b[íi]ceps|martillo|banco scott|barra z/i, ['Bíceps']],
+      [/tr[íi]ceps|patada|copa|franc[ée]s/i, ['Tríceps']],
+      [/plancha|abdomin|russian|elevaci[óo]n de piernas|rueda|dead bug|pallof|core/i, ['Core']],
+      [/lumbar|hiperextensi[óo]n/i, ['Lumbar']],
+    ];
+    const musculos = [];
+    ejercicios.forEach(e => {
+      for (const [re, ms] of MUSC) { if (re.test(e)) { ms.forEach(m => { if (!musculos.includes(m)) musculos.push(m); }); break; } }
+    });
+
+    // Si no reconocemos músculos (día de cardio/funcional) no mostramos la barra:
+    // los datos de reps/RPE ahí no aplican y saldrían raros.
+    if (musculos.length === 0 || conReps.length === 0) {
+      tagsEl.innerHTML = '';
+      statsEl.style.display = 'none';
+      return;
+    }
+
+    // Intensidad media = RPE medio derivado de las reps
+    let sumRpe = 0, cnt = 0;
+    conReps.forEach(e => {
+      const m = e.match(/[x×]\s*(\d+)/);
+      if (m) { const r = parseInt(m[1], 10); sumRpe += (r <= 6 ? 8 : r <= 10 ? 8.5 : r <= 14 ? 9 : 9.5); cnt++; }
+    });
+    const avg = cnt ? sumRpe / cnt : 0;
+    const intensidad = avg >= 8.7 ? 'Alta' : avg >= 8.2 ? 'Media-alta' : 'Media';
+
+    // Duración estimada: ~11 min por ejercicio (series + descansos), redondeada a 5, entre 30 y 80
+    const n = conReps.length;
+    const dur = Math.min(80, Math.max(30, Math.round(n * 11 / 5) * 5));
+
+    tagsEl.innerHTML = musculos.slice(0, 4).map(m => `<span>${m}</span>`).join('');
+    document.getElementById('thDuracion').textContent = dur + ' min';
+    document.getElementById('thIntensidad').textContent = intensidad;
+    document.getElementById('thEjercicios').textContent = n;
+    statsEl.style.display = '';
   }
 
   // Botón "Empezar entrenamiento": lleva al detalle del entreno de hoy (o a nutrición si es solo dieta).
@@ -12222,20 +12336,23 @@
     const descuentoEl = document.getElementById('refDescuento');
     if (!banner || !codigoEl) return;
 
+    // Tarjeta de referido del rail del inicio (siempre visible con código)
+    const railCard = document.getElementById('railReferidos');
+    const railCodigo = document.getElementById('railCodigoReferido');
+    const railPagados = document.getElementById('railRefPagados');
+    const railDescuento = document.getElementById('railRefDescuento');
+
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) return;
 
-      const user = getCurrentUser();
-      if (!user?.creado) return;
-      const diasDesdeRegistro = Math.floor((Date.now() - new Date(user.creado).getTime()) / 86400000);
-      if (diasDesdeRegistro > 30) { banner.style.display = 'none'; return; }
-
-      const tipoPlan = userData?.tipoPlan || '';
-      if (tipoPlan.includes('Solo nutrición')) { banner.style.display = 'none'; return; }
-
+      // Código + progreso: se piden siempre, para poder mostrar la tarjeta del rail
       const { data: profile } = await supa.from('profiles').select('codigo_referido, descuento_referidos').eq('id', session.user.id).maybeSingle();
-      if (profile?.codigo_referido) codigoEl.textContent = profile.codigo_referido;
+      const codigo = profile?.codigo_referido || null;
+      if (codigo) {
+        codigoEl.textContent = codigo;
+        if (railCodigo) railCodigo.textContent = codigo;
+      }
 
       const { data: refs } = await supa.from('referidos').select('estado').eq('referrer_id', session.user.id);
       const pagados = (refs || []).filter(r => r.estado === 'pagado').length;
@@ -12243,10 +12360,21 @@
 
       if (pagadosEl) pagadosEl.textContent = pagados;
       if (descuentoEl) descuentoEl.textContent = descuento + '€';
+      if (railPagados) railPagados.textContent = pagados;
+      if (railDescuento) railDescuento.textContent = descuento + '€';
 
-      if (pagados >= 3) { banner.style.display = 'none'; return; }
+      // La tarjeta del rail se ve siempre que haya código real (el código es útil para compartir en cualquier momento).
+      if (railCard) railCard.style.display = codigo ? '' : 'none';
 
-      banner.style.display = '';
+      // El banner grande (dismissable) mantiene su lógica de oferta de primer mes.
+      const user = getCurrentUser();
+      const diasDesdeRegistro = user?.creado ? Math.floor((Date.now() - new Date(user.creado).getTime()) / 86400000) : 999;
+      const tipoPlan = userData?.tipoPlan || '';
+      if (!codigo || diasDesdeRegistro > 30 || tipoPlan.includes('Solo nutrición') || pagados >= 3) {
+        banner.style.display = 'none';
+      } else {
+        banner.style.display = '';
+      }
     } catch (e) { console.warn('[referidos] Error cargando panel:', e.message); }
   }
 
