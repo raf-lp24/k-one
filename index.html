@@ -11184,18 +11184,22 @@
     const ocultar = () => { tagsEl.innerHTML = ''; statsEl.style.display = 'none'; };
 
     // ─── Clasificación de la modalidad del día ───
-    // La etiqueta del día (Cardio, WOD, Estaciones, Fuerza...) manda; el texto la confirma.
-    const esFuerzaCorredor = /fortalecimiento/i.test(etiqueta);
-    const esHyroxDia = /^(estaciones|simulacro|hyrox)$/i.test(etiqueta)
-      || /sled|farmer carry|wall ball|ski erg|sandbag|burpee broad/i.test(texto);
-    const esMetcon = !esHyroxDia && (/^(wod|h[íi]brido)$/i.test(etiqueta)
-      || /\bamrap\b|\bemom\b|for time|\brft\b|chipper|metcon|\bwod\b|tabata/i.test(texto));
-    const esCarrera = !esHyroxDia && !esMetcon && !esFuerzaCorredor && (
-        /^(cardio|intensidad|umbral|fondo|volumen)$/i.test(etiqueta)
-        || /\d+\s*-?\s*\d*\s*km|ritmo|zona 1|zona 2|rodaje|trote|tirada|fartlek|strides|easy run|run\/walk|recovery run/i.test(texto));
+    // La ETIQUETA del día manda (Empuje, Piernas, WOD, Estaciones, Cardio...). Así un día
+    // de fuerza con un finisher de burpees no se confunde con un metcon o con Hyrox.
+    // Solo si la etiqueta no es reconocible (o genérica) se infiere por el texto.
+    const et = etiqueta.toLowerCase();
+    let modalidad = '';
+    if (/fuerza|fortalecimiento|empuje|tracci[óo]n|piernas|hombros|pecho|espalda|torso|gl[úu]teo/.test(et)) modalidad = 'fuerza';
+    else if (/estaciones|simulacro|hyrox/.test(et)) modalidad = 'hyrox';
+    else if (/wod|h[íi]brido|metcon/.test(et)) modalidad = 'metcon';
+    else if (/cardio|intensidad|umbral|fondo|volumen|rodaje|tirada/.test(et)) modalidad = 'carrera';
+    else if (/sled|farmer carry|wall ball|ski erg|sandbag|burpee broad/i.test(texto)) modalidad = 'hyrox';
+    else if (/\bamrap\b|\bemom\b|for time|\brft\b|chipper|metcon|\bwod\b|tabata/i.test(texto)) modalidad = 'metcon';
+    else if (/\d+\s*-?\s*\d*\s*km|ritmo|zona 1|zona 2|rodaje|trote|tirada|fartlek|strides|easy run|run\/walk|recovery run/i.test(texto)) modalidad = 'carrera';
+    else modalidad = 'fuerza';
 
     // ─── CARRERA / CARDIO AERÓBICO ───
-    if (esCarrera) {
+    if (modalidad === 'carrera') {
       let tags, intensidad, dur;
       if (/fartlek/i.test(texto)) {
         tags = ['Fartlek', 'Ritmos']; intensidad = 'Media-alta'; dur = 45;
@@ -11221,7 +11225,7 @@
     }
 
     // ─── HYROX (estaciones / simulacro) ───
-    if (esHyroxDia) {
+    if (modalidad === 'hyrox') {
       const estaciones = [
         [/sled/i, 'Sled'], [/farmer carry/i, 'Farmer carry'], [/wall ball/i, 'Wall balls'],
         [/ski erg|ski/i, 'Ski erg'], [/\brow\b|rowing|remo/i, 'Remo'], [/sandbag/i, 'Sandbag'],
@@ -11237,7 +11241,7 @@
     }
 
     // ─── METCON / WOD / CIRCUITO HÍBRIDO ───
-    if (esMetcon) {
+    if (modalidad === 'metcon') {
       const tags = [];
       if (/\bamrap\b/i.test(texto)) tags.push('AMRAP');
       if (/\bemom\b/i.test(texto)) tags.push('EMOM');
