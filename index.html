@@ -11198,26 +11198,35 @@
     let modalidad = '';
     if (/fuerza|fortalecimiento|empuje|tracci[óo]n|piernas|hombros|pecho|espalda|torso|gl[úu]teo/.test(et)) modalidad = 'fuerza';
     else if (/estaciones|simulacro|hyrox/.test(et)) modalidad = 'hyrox';
-    else if (/wod|h[íi]brido|metcon/.test(et)) modalidad = 'metcon';
+    else if (/wod|h[íi]brido|metcon|combinado|circuito/.test(et)) modalidad = 'metcon';
     else if (/cardio|intensidad|umbral|fondo|volumen|rodaje|tirada/.test(et)) modalidad = 'carrera';
     else if (/sled|farmer carry|wall ball|ski erg|sandbag|burpee broad/i.test(texto)) modalidad = 'hyrox';
-    else if (/\bamrap\b|\bemom\b|for time|\brft\b|chipper|metcon|\bwod\b|tabata/i.test(texto)) modalidad = 'metcon';
+    // Los circuitos metabólicos van por rondas, no por series×reps: si se colaban
+    // en la rama de fuerza se quedaban sin barra (no hay "N×M" que contar).
+    else if (/\bamrap\b|\bemom\b|for time|\brft\b|chipper|metcon|\bwod\b|tabata|circuito|metab[óo]lico|acondicionamiento|\d+\s*rondas/i.test(texto)) modalidad = 'metcon';
     else if (/\d+\s*-?\s*\d*\s*km|ritmo|zona 1|zona 2|rodaje|trote|tirada|fartlek|strides|easy run|run\/walk|recovery run/i.test(texto)) modalidad = 'carrera';
     else modalidad = 'fuerza';
 
     // ─── CARRERA / CARDIO AERÓBICO ───
     if (modalidad === 'carrera') {
       let tags, intensidad, dur;
+      // El orden importa: run/walk va antes que umbral porque las sesiones de
+      // principiante se llaman "Run/walk progresivo" y la palabra "progresivo"
+      // las hacía pasar por trabajo de umbral (intensidad Media-alta), que es
+      // justo lo contrario de lo que son.
       if (/fartlek/i.test(texto)) {
         tags = ['Fartlek', 'Ritmos']; intensidad = 'Media-alta'; dur = 45;
-      } else if (/umbral|tempo|threshold|cruise|progression|progresivo/i.test(texto)) {
+      } else if (/run\/walk|corriendo\s*\/\s*\d+\s*min caminando|caminando\s*×/i.test(texto)) {
+        tags = ['Run/walk', 'Base']; intensidad = 'Suave'; dur = 35;
+      } else if (/umbral|tempo|threshold|cruise|progression run/i.test(texto)) {
+        // Ojo: "progresivo" a secas NO vale como señal de umbral — aparece en los
+        // calentamientos ("15 min progresivo") y en las tiradas largas con final
+        // progresivo, y colaba sesiones de VO2 y de fondo como trabajo de umbral.
         tags = ['Umbral', 'Tempo']; intensidad = 'Media-alta'; dur = 45;
       } else if (/vo2|intervalos|\bseries\b|yasso|\d+\s*[x×]\s*\d+\s*m\b/i.test(texto)) {
         tags = ['Series', 'VO2 máx']; intensidad = 'Alta'; dur = 50;
       } else if (/tirada larga|long run|volumen|tirada media|fondo/i.test(texto)) {
         tags = ['Fondo', 'Aeróbico']; intensidad = 'Media'; dur = 70;
-      } else if (/run\/walk/i.test(texto)) {
-        tags = ['Run/walk', 'Base']; intensidad = 'Suave'; dur = 35;
       } else {
         tags = ['Zona 2', 'Aeróbico']; intensidad = 'Suave'; dur = 45;
       }
@@ -11256,7 +11265,8 @@
       if (/chipper/i.test(texto)) tags.push('Chipper');
       if (/tabata/i.test(texto)) tags.push('Tabata');
       if (tags.length === 0) tags.push('Metcon');
-      if (/carrera|\bkm\b|\brow\b|remo|bici|assault/i.test(texto)) tags.push('Cardio');
+      // "remo" a secas no vale: el remo con mancuerna es fuerza, no cardio.
+      if (/carrera|\bkm\b|rowing|remo \d|bici|assault|comba|double.?under/i.test(texto)) tags.push('Cardio');
       tags.push('Full body');
       // Duración: usar el cap más largo del WOD (+20' de fuerza/calentamiento), o 40' por defecto
       const mins = [...texto.matchAll(/(\d+)\s*min/gi)].map(m => parseInt(m[1], 10)).filter(n => n >= 8 && n <= 40);
@@ -11266,7 +11276,9 @@
       const movs = cuerpo.split(/[,+]| y /i).map(s => s.trim()).filter(Boolean);
       let label = 'Ejercicios', valor = Math.max(2, Math.min(movs.length, 12));
       if (rondas) { label = 'Rondas'; valor = rondas[1]; }
-      pintarTags(tags); pintarStats(dur, 'Alta', label, valor);
+      // Un circuito marcado como "ligero" o "suave" no es intensidad Alta.
+      const intMetcon = /ligero|suave|t[ée]cnica|introductorio/i.test(texto) ? 'Media-alta' : 'Alta';
+      pintarTags(tags); pintarStats(dur, intMetcon, label, valor);
       return;
     }
 
