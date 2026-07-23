@@ -12513,10 +12513,12 @@
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) throw new Error('Tu sesión ha caducado. Vuelve a iniciar sesión.');
-      const res = await fetch('/api/claim-hito-reward', {
+      // Va dentro de update-subscription (el plan Hobby de Vercel sólo permite
+      // 12 funciones serverless y ya estaban las 12 ocupadas).
+      const res = await fetch('/api/update-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ nivel })
+        body: JSON.stringify({ accion: 'canjear-hito', nivel })
       });
       const data = await res.json();
       if (!res.ok) {

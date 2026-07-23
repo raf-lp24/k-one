@@ -2,8 +2,14 @@ const {
   getStripe, getSupabaseAdmin, getPriceId, getAuthUser,
   getActiveSubscriptionId, assertSubscriptionOwnership
 } = require('./_stripeHelpers');
+const { canjearNivelHitos } = require('./_hitosReward');
 
 // Cambia el precio de la suscripción activa con prorrateo.
+//
+// También atiende `accion: 'canjear-hito'`, que aplica el % de descuento de un
+// nivel de hitos a la próxima cuota. Va aquí, y no en su propio endpoint, porque
+// el plan Hobby de Vercel sólo admite 12 funciones serverless y ya estaban las 12
+// ocupadas; aplicar un cupón a la suscripción encaja además con este endpoint.
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -21,6 +27,12 @@ module.exports = async (req, res) => {
 
     const user = await getAuthUser(req, supabaseAdmin);
     if (!user) return res.status(401).json({ error: 'No autenticado' });
+
+    // ─── Canje de recompensa por nivel de hitos ───
+    if (req.body.accion === 'canjear-hito') {
+      const r = await canjearNivelHitos({ stripe, supabaseAdmin, user, nivel: req.body.nivel });
+      return res.status(r.status).json(r.body);
+    }
 
     const { tipoPlan, periodicidad } = req.body;
     if (!tipoPlan || !periodicidad) {
