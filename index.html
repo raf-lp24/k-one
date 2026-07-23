@@ -12282,7 +12282,10 @@
   function calcularHitos() {
     if (!userData.hitos) userData.hitos = {};
     const semanas = (userData.progreso && userData.progreso.semana) || 1;
-    const totalEntrenos = (userData.entrenosCompletados || []).length;
+    // OJO: entrenosCompletados se vacía en cada check-in semanal, así que no sirve
+    // para hitos acumulativos (10, 20, 50... nunca se alcanzaban). El registro
+    // persistente es historialEntrenos, que además es la fuente que valida el servidor.
+    const totalEntrenos = new Set(userData.historialEntrenos || []).size;
     const racha = calcularRachaDias();
     const fotosObj = (() => {
       if (!userData.fotosProgreso) return {};
@@ -12779,7 +12782,9 @@
       }
       if (!userData.historialEntrenos) userData.historialEntrenos = [];
       if (Array.isArray(userData.entrenosCompletados) && userData.entrenosCompletados.length) {
-        userData.historialEntrenos.push(...userData.entrenosCompletados);
+        // Sin duplicados: toggleEntrenoCompletado ya añade cada día al historial,
+        // así que volcarlos otra vez tal cual inflaba la cuenta total.
+        userData.historialEntrenos = [...new Set([...userData.historialEntrenos, ...userData.entrenosCompletados])];
       }
       userData.entrenosCompletados = [];
 
@@ -14690,6 +14695,12 @@
     if (gymBg) gymBg.style.display = 'none';
     if (saved) {
       userData = saved.userData || {};
+      // El check-in volcaba los entrenos de la semana en historialEntrenos sin
+      // comprobar duplicados, así que las cuentas salían infladas. Se normaliza
+      // al cargar para reparar los perfiles que ya arrastran repetidos.
+      if (Array.isArray(userData.historialEntrenos)) {
+        userData.historialEntrenos = [...new Set(userData.historialEntrenos)];
+      }
       generatedPlan = saved.plan || null;
       if (generatedPlan) {
         if (generatedPlan.nutricion && userData.noComida) {
