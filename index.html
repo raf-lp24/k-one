@@ -2877,6 +2877,52 @@
     overflow-y: auto;
   }
 
+  /* ============================================================
+     FONDO FOTOGRÁFICO DEL ÁREA DE CLIENTES  (solo modo oscuro)
+     Foto del gym fija a la ventana + velo oscuro. Las superficies
+     principales llevan un leve cristal (blur) para que la foto
+     respire por los bordes y huecos sin perder legibilidad.
+     En modo claro se desactiva (el claro sigue limpio en crema).
+     ============================================================ */
+  #dashboard { position: relative; z-index: 0; }
+  #dashboard::before, #dashboard::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+  }
+  #dashboard::before {
+    z-index: -2;
+    background: url("/img/landing/checkin-banner.jpg") center 42% / cover no-repeat;
+  }
+  #dashboard::after {
+    z-index: -1;
+    background:
+      radial-gradient(130% 100% at 50% 32%, rgba(10,10,10,0.40) 0%, rgba(10,10,10,0.72) 62%, rgba(10,10,10,0.86) 100%),
+      rgba(10,10,10,0.30);
+  }
+  /* Sidebar y tarjetas con cristal (solo modo oscuro) */
+  :root:not([data-theme="light"]) #dashboard .dash-sidebar {
+    background: rgba(16,15,14,0.72);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  :root:not([data-theme="light"]) #dashboard .dash-header {
+    background: linear-gradient(135deg, rgba(26,16,8,0.80) 0%, rgba(20,20,20,0.80) 100%) !important;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  :root:not([data-theme="light"]) #dashboard .rail-card,
+  :root:not([data-theme="light"]) #dashboard .stat-card,
+  :root:not([data-theme="light"]) #dashboard .motivation-card,
+  :root:not([data-theme="light"]) #dashboard .checkin-card,
+  :root:not([data-theme="light"]) #dashboard .checkin-summary,
+  :root:not([data-theme="light"]) #dashboard .nutri-resumen,
+  :root:not([data-theme="light"]) #dashboard .contacto-motivo,
+  :root:not([data-theme="light"]) #dashboard #todayPlan,
+  :root:not([data-theme="light"]) #dashboard #kcalDiarioBar,
+  :root:not([data-theme="light"]) #dashboard #bannerReferidos {
+    background: rgba(20,19,18,0.82) !important;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  [data-theme="light"] #dashboard::before,
+  [data-theme="light"] #dashboard::after { display: none; }
+
   .dash-mobile-bar {
     display: none;
     align-items: center;
