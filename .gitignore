@@ -5,3 +5,6 @@ node_modules/
 ~$*
 *.tmp
 ~WRL*.tmp
+
+# Vídeos exportados de marketing (se regeneran con los scripts)
+marketing/*.mp4
