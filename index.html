@@ -2828,6 +2828,12 @@
 
   .user-avatar.has-photo #userAvatarLetter { display: none; }
 
+  /* Anillo del avatar según nivel de hitos (Brasa en adelante) */
+  .user-avatar.nivel-brasa   { box-shadow: 0 0 0 2px var(--brasa); }
+  .user-avatar.nivel-fuego   { box-shadow: 0 0 0 2px var(--brasa), 0 0 12px rgba(232,73,15,0.55); }
+  .user-avatar.nivel-hierro  { box-shadow: 0 0 0 2px #b9c2cc, 0 0 12px rgba(232,73,15,0.45); }
+  .user-avatar.nivel-leyenda { box-shadow: 0 0 0 3px var(--brasa), 0 0 20px rgba(232,73,15,0.8); }
+
   .avatar-cam {
     position: absolute;
     bottom: -3px;
@@ -7584,6 +7590,7 @@
 
         <div class="progress-section">
           <div class="progress-title">Hitos conseguidos</div>
+          <div id="hitosNivel"></div>
           <div class="milestones" id="milestonesList"></div>
         </div>
 
@@ -12260,6 +12267,18 @@
   }
 
   // ===== PROGRESO: HITOS CONSEGUIDOS =====
+  // Kilos avanzados en la dirección del objetivo del usuario (perder → bajar,
+  // ganar músculo → subir). Para "mantenerse" no aplica y devuelve 0.
+  function _kilosHaciaObjetivo() {
+    const inicial = parseFloat(userData.peso);
+    const actual  = parseFloat(userData.pesoActual || userData.peso);
+    if (!inicial || !actual) return 0;
+    const obj = userData.objetivo || '';
+    if (obj.includes('Perder') || obj.includes('grasa')) return inicial - actual;
+    if (obj.includes('Ganar') || obj.includes('músculo')) return actual - inicial;
+    return 0;
+  }
+
   function calcularHitos() {
     if (!userData.hitos) userData.hitos = {};
     const semanas = (userData.progreso && userData.progreso.semana) || 1;
@@ -12335,6 +12354,69 @@
       { key: 'tres_amigos', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>', name: 'Tres amigos en K-ONE',
         desc: '3 amigos entrenando contigo. Te has ganado 15€ de descuento.',
         cumple: () => (userData.descuento_referidos || 0) >= 15 },
+
+      // ── FUERZA (registro de pesos por ejercicio) ──
+      { key: 'primer_peso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10"/><path d="M18 7v10"/><path d="M2 9v6"/><path d="M22 9v6"/><line x1="6" y1="12" x2="18" y2="12"/></svg>', name: 'Primer peso apuntado',
+        desc: 'Registraste tu primer peso en un ejercicio. Lo que no se apunta no progresa.',
+        cumple: () => Object.keys(userData.pesosEjercicios || {}).length >= 1 },
+      { key: 'progresion_peso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>', name: 'Progresión real',
+        desc: 'Subiste el peso de un ejercicio por encima de tu primer registro. Sobrecarga progresiva: así se construye.',
+        cumple: () => Object.values(userData.pesosEjercicios || {}).some(e => {
+          const h = e && e.historial; if (!h || h.length < 2) return false;
+          return Math.max(...h.map(x => x.peso)) > h[0].peso;
+        }) },
+      { key: 'diez_pct_fuerte', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5 L19.5 9.5"/><path d="M4.5 14.5 L9.5 19.5"/><path d="M3 21 L21 3"/><path d="M9 6 L18 15"/><path d="M6 9 L15 18"/></svg>', name: '+10% más fuerte',
+        desc: 'Hay un ejercicio en el que ya levantas un 10% más que el primer día. Los números no mienten.',
+        cumple: () => Object.values(userData.pesosEjercicios || {}).some(e => {
+          const h = e && e.historial; if (!h || h.length < 2 || !h[0].peso) return false;
+          return Math.max(...h.map(x => x.peso)) >= h[0].peso * 1.10;
+        }) },
+      { key: 'cinco_ejercicios_reg', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>', name: 'Cuaderno de hierro',
+        desc: 'Pesos registrados en 5 ejercicios distintos. Entrenas con datos, no con sensaciones.',
+        cumple: () => Object.keys(userData.pesosEjercicios || {}).length >= 5 },
+
+      // ── RACHA ──
+      { key: 'racha21', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', name: '21 días seguidos',
+        desc: 'Dicen que 21 días hacen un hábito. Lo tuyo ya no es fuerza de voluntad: es rutina.',
+        cumple: () => racha >= 21 },
+      { key: 'racha30', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/><circle cx="12" cy="15" r="2"/></svg>', name: 'Un mes sin fallar',
+        desc: '30 días seguidos. Ni un solo día en blanco. Esto ya es otra categoría.',
+        cumple: () => racha >= 30 },
+
+      // ── FOTOS ──
+      { key: 'fotos3', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>', name: 'La comparativa habla sola',
+        desc: '3 fotos mensuales guardadas. Ponlas en fila y mira lo que el espejo diario no te deja ver.',
+        cumple: () => Object.values(fotosObj).filter(Boolean).length >= 3 },
+      { key: 'fotos6', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/><line x1="12" y1="9" x2="12" y2="9.01"/></svg>', name: 'Medio año en imágenes',
+        desc: '6 fotos de progreso. La película completa de tu cambio, mes a mes.',
+        cumple: () => Object.values(fotosObj).filter(Boolean).length >= 6 },
+
+      // ── CUERPO (peso corporal hacia TU objetivo) ──
+      { key: 'kilo1', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>', name: 'Primer kilo conquistado',
+        desc: 'Un kilo en la dirección de tu objetivo. El primero es el que demuestra que el plan funciona.',
+        cumple: () => _kilosHaciaObjetivo() >= 1 },
+      { key: 'kilo5', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', name: 'Cinco kilos de camino',
+        desc: '5 kilos hacia tu objetivo. Esto ya se ve en la ropa, en las fotos y en la cara.',
+        cumple: () => _kilosHaciaObjetivo() >= 5 },
+
+      // ── CONSTANCIA MENTAL ──
+      { key: 'nota1', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', name: 'Primera nota',
+        desc: 'Escribiste tu primera nota. Lo que se escribe pesa más que lo que se piensa.',
+        cumple: () => (userData.notas || []).length >= 1 },
+      { key: 'notas10', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 H15 L19 7 V21 H5 Z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="7" x2="12" y2="7"/></svg>', name: 'Diario de guerra',
+        desc: '10 notas escritas. Tu cabeza también entrena, y tú lo estás documentando.',
+        cumple: () => (userData.notas || []).length >= 10 },
+
+      // ── VETERANÍA Y COMUNIDAD ──
+      { key: 'trescientos', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/><path d="M12 15v4"/></svg>', name: '300 sesiones',
+        desc: '300 entrenamientos. Esto es Esparta, pero de verdad y sin cámaras.',
+        cumple: () => totalEntrenos >= 300 },
+      { key: 'dos_anios', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/><path d="M12 5v3l2 1"/></svg>', name: 'Dos años',
+        desc: '104 semanas. Has visto a decenas empezar y dejarlo. Tú sigues aquí.',
+        cumple: () => semanas >= 105 },
+      { key: 'testimonio_dejado', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M9 10h6"/></svg>', name: 'Tu historia inspira',
+        desc: 'Dejaste tu testimonio. Alguien que duda hoy va a empezar mañana por leerte.',
+        cumple: () => !!userData.testimonio },
     ];
 
     let changed = false;
@@ -12347,10 +12429,107 @@
     return { defs, changed };
   }
 
+  // ===== NIVELES DE HITOS (recompensas) =====
+  // El % de descuento se canjea contra /api/claim-hito-reward: cupón percent_off
+  // de un solo uso sobre la SIGUIENTE cuota (escala con el plan del cliente).
+  // El servidor lleva el registro de niveles ya canjeados (metadata de Stripe).
+  const NIVELES_HITOS = [
+    { key: 'chispa',  nombre: 'Chispa',  min: 5,  premio: 'Insignia en tu perfil' },
+    { key: 'brasa',   nombre: 'Brasa',   min: 10, premio: 'Anillo de fuego en tu avatar' },
+    { key: 'fuego',   nombre: 'Fuego',   min: 15, premio: '10% de descuento en tu próxima cuota', pct: 10 },
+    { key: 'hierro',  nombre: 'Hierro',  min: 22, premio: '20% de descuento en tu próxima cuota', pct: 20 },
+    { key: 'leyenda', nombre: 'Leyenda', min: 30, premio: 'Título Leyenda K-ONE' },
+  ];
+
+  function renderNivelHitos(defs) {
+    const cont = document.getElementById('hitosNivel');
+    if (!cont) return;
+    const n = Object.keys(userData.hitos || {}).length;
+    const total = defs.length;
+    let actual = null;
+    NIVELES_HITOS.forEach(nv => { if (n >= nv.min) actual = nv; });
+    const siguiente = NIVELES_HITOS.find(nv => n < nv.min) || null;
+    const canjeados = userData.hitosNivelesCanjeados || {};
+
+    const base = actual ? actual.min : 0;
+    const pctBar = siguiente ? Math.min(100, Math.round(((n - base) / (siguiente.min - base)) * 100)) : 100;
+
+    const chips = NIVELES_HITOS.map(nv => {
+      const done = n >= nv.min;
+      return `<span title="${nv.premio}" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;border-radius:999px;padding:4px 11px;border:1px solid ${done ? 'var(--brasa)' : 'var(--humo)'};color:${done ? 'var(--brasa)' : 'var(--metal)'};${done ? 'background:rgba(232,73,15,0.10);' : ''}">${nv.nombre} · ${nv.min}</span>`;
+    }).join('');
+
+    const botones = NIVELES_HITOS.filter(nv => nv.pct && n >= nv.min).map(nv => {
+      if (canjeados[nv.key]) {
+        return `<span style="font-size:12px;color:var(--brasa)">✓ ${nv.pct}% de tu cuota ya canjeado (nivel ${nv.nombre})</span>`;
+      }
+      return `<button class="btn-primary" style="font-size:12px;padding:9px 16px" onclick="reclamarNivelHito('${nv.key}', this)">Canjear ${nv.pct}% de mi próxima cuota</button>`;
+    }).join('<br>');
+
+    cont.innerHTML = `
+      <div style="border:1px solid var(--humo);border-radius:14px;padding:18px 20px;margin-bottom:16px;background:linear-gradient(135deg, rgba(232,73,15,0.10), var(--carbon))">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--metal);margin-bottom:4px">Nivel actual</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;letter-spacing:1px;color:var(--blanco-puro)">${actual ? actual.nombre : 'Novato'} <span style="font-size:18px;color:var(--metal)">· ${n}/${total} hitos</span></div>
+          </div>
+          <div style="text-align:right;font-size:12px;color:var(--metal)">
+            ${siguiente
+              ? `Siguiente nivel: <b style="color:var(--blanco)">${siguiente.nombre}</b> a los ${siguiente.min} hitos<br>${siguiente.premio}`
+              : `<span style="color:var(--brasa)">Nivel máximo alcanzado</span>`}
+          </div>
+        </div>
+        <div style="height:7px;border-radius:999px;background:rgba(255,255,255,0.07);margin:14px 0 12px;overflow:hidden"><div style="height:100%;width:${pctBar}%;background:var(--brasa)"></div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
+        ${botones ? `<div style="margin-top:14px">${botones}</div>` : ''}
+      </div>`;
+
+    // Anillo del avatar según nivel (Brasa en adelante)
+    const av = document.querySelector('.user-avatar');
+    if (av) {
+      av.classList.remove('nivel-brasa', 'nivel-fuego', 'nivel-hierro', 'nivel-leyenda');
+      if (actual && actual.key !== 'chispa') av.classList.add('nivel-' + actual.key);
+    }
+  }
+
+  async function reclamarNivelHito(nivel, btn) {
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Canjeando…';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) throw new Error('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+      const res = await fetch('/api/claim-hito-reward', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ nivel })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // Si el servidor dice que ya está canjeado, reflejarlo en la interfaz
+        if (res.status === 409) {
+          if (!userData.hitosNivelesCanjeados) userData.hitosNivelesCanjeados = {};
+          userData.hitosNivelesCanjeados[nivel] = true;
+          guardarProgresoUsuario();
+          renderHitos();
+        }
+        throw new Error(data.error || 'No se pudo canjear la recompensa');
+      }
+      if (!userData.hitosNivelesCanjeados) userData.hitosNivelesCanjeados = {};
+      userData.hitosNivelesCanjeados[nivel] = new Date().toISOString();
+      guardarProgresoUsuario();
+      showToast(`¡Hecho! ${data.pct}% de descuento aplicado a tu próxima cuota.`, 6000);
+      renderHitos();
+    } catch (e) {
+      showToast(e.message, 5000);
+      btn.disabled = false; btn.textContent = original;
+    }
+  }
+
   function renderHitos() {
     const list = document.getElementById('milestonesList');
     if (!list) return;
     const { defs, changed } = calcularHitos();
+    renderNivelHitos(defs);
     let proximoAsignado = false;
     let proximoIdx = -1;
     const items = defs.map((d, i) => {
