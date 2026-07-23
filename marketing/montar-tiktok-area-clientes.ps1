@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 #  K-ONE · Montaje TikTok — "Así funciona el área de clientes"
 #
 #  Coge una grabación de pantalla vertical del móvil y la convierte en un vídeo
@@ -35,14 +35,19 @@ $txtDir = Join-Path $env:TEMP "kone-tiktok-txt"
 New-Item -ItemType Directory -Force -Path $txtDir | Out-Null
 $enc = New-Object System.Text.UTF8Encoding($false)
 $textos = [ordered]@{
-  'marca' = 'K-ONE'
-  'sub'   = 'ASÍ FUNCIONA POR DENTRO'
-  'c1'    = 'Tu sesión de hoy, nada más entrar'
-  'c2'    = 'Adherencia, racha, calorías y tu código'
-  'c3'    = 'Tu objetivo y tu peso, siempre a la vista'
-  'c4'    = 'Toda tu semana, día a día'
-  'c5'    = 'Cada ejercicio: series, reps, peso y RPE'
-  'c6'    = 'Y cómo se hace, paso a paso'
+  'marca'  = 'K-ONE'
+  'sub'    = 'ESTO NO ES OTRA APP DE GIMNASIO'
+  # Gancho de apertura (primeros 3 s): frase corta, tensión y promesa concreta
+  'hook1'  = 'Pagas 60 € al mes'
+  'hook2'  = 'por un plan genérico'
+  'hook3'  = 'Mira lo que hace este'
+  'c1'     = 'Abres la app y ya sabes qué toca hoy'
+  'c2'     = 'Tu adherencia, tu racha y tus calorías'
+  'c3'     = 'Tu objetivo y tu peso, siempre delante'
+  'c4'     = 'La semana entera, día a día'
+  'c5'     = 'Series, repeticiones, peso y esfuerzo'
+  'c6'     = 'Y cómo se hace cada ejercicio, paso a paso'
+  'cierre' = 'Tu plan por 1,99 € el primer mes'
 }
 foreach ($k in $textos.Keys) { [System.IO.File]::WriteAllText("$txtDir\$k.txt", $textos[$k], $enc) }
 
@@ -65,24 +70,35 @@ $f += "[base]drawbox=x=$($VX-2):y=$($VY-2):w=$($VW+4):h=$($VH+4):color=${EMBER}@
 # Cabecera
 $f += "[fr]drawtext=fontfile='$FIMP':textfile='$T/marca.txt':x=(w-tw)/2:y=96:fontsize=88:fontcolor=white:alpha=0.96[h1]"
 $f += "[h1]drawbox=x=(iw-150)/2:y=196:w=150:h=4:color=${EMBER}@0.95:t=fill[h2]"
-$f += "[h2]drawtext=fontfile='$FBAH':textfile='$T/sub.txt':x=(w-tw)/2:y=218:fontsize=34:fontcolor=0xCFCCC6[h3]"
+$f += "[h2]drawtext=fontfile='$FBAH':textfile='$T/sub.txt':x=(w-tw)/2:y=218:fontsize=32:fontcolor=0xCFCCC6[h3]"
+
+# --- GANCHO (0-3,2 s): tapa la pantalla y obliga a leer antes de soltar el producto ---
+$f += "[h3]drawbox=x=0:y=0:w=1080:h=1920:color=black@0.82:t=fill:enable='between(t,0,3.2)'[gk0]"
+$f += "[gk0]drawtext=fontfile='$FIMP':textfile='$T/hook1.txt':x=(w-tw)/2:y=740:fontsize=96:fontcolor=white:enable='between(t,0,3.2)'[gk1]"
+$f += "[gk1]drawtext=fontfile='$FIMP':textfile='$T/hook2.txt':x=(w-tw)/2:y=850:fontsize=96:fontcolor=0x8F877E:enable='between(t,0,3.2)'[gk2]"
+$f += "[gk2]drawtext=fontfile='$FIMP':textfile='$T/hook3.txt':x=(w-tw)/2:y=1010:fontsize=104:fontcolor=${EMBER}:enable='between(t,1.1,3.2)'[gk3]"
 
 # Rótulos inferiores — tiempos verificados fotograma a fotograma
 $cap = @(
-  @{f='c1'; a=0.0;  b=9.0},    # hero: sesión de hoy, mensaje, marcar completado
+  @{f='c1'; a=3.2;  b=9.0},    # hero: sesión de hoy, mensaje, marcar completado
   @{f='c2'; a=9.0;  b=14.0},   # rail: adherencia, racha, kcal, plan, referido
   @{f='c3'; a=14.0; b=19.0},   # cabecera: objetivo y peso actual
   @{f='c4'; a=19.0; b=23.0},   # menú + semana completa
   @{f='c5'; a=23.0; b=30.0},   # bloques de entreno con RPE y pesos
   @{f='c6'; a=30.0; b=$Dur}    # ficha del ejercicio
 )
-$prev='h3'; $i=0
+$prev='gk3'; $i=0
 foreach ($c in $cap) {
   $i++; $lbl="cap$i"
   $f += "[$prev]drawtext=fontfile='$FBAH':textfile='$T/$($c.f).txt':x=(w-tw)/2:y=1700:fontsize=46:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=22:enable='between(t,$($c.a),$($c.b))'[$lbl]"
   $prev=$lbl
 }
-$f += "[$prev]drawbox=x=0:y=1906:w='1080*t/$Dur':h=8:color=${EMBER}@0.95:t=fill[vout]"
+# Cierre: llamada a la acción sobre la propia grabación (últimos 3 s)
+$f += "[$prev]drawbox=x=0:y=1150:w=1080:h=250:color=black@0.80:t=fill:enable='gte(t,$($Dur-3))'[cta0]"
+$f += "[cta0]drawtext=fontfile='$FIMP':textfile='$T/cierre.txt':x=(w-tw)/2:y=1215:fontsize=64:fontcolor=white:enable='gte(t,$($Dur-3))'[cta1]"
+$f += "[cta1]drawtext=fontfile='$FBAH':text='k-one.fit':x=(w-tw)/2:y=1305:fontsize=52:fontcolor=${EMBER}:enable='gte(t,$($Dur-3))'[cta2]"
+
+$f += "[cta2]drawbox=x=0:y=1906:w='1080*t/$Dur':h=8:color=${EMBER}@0.95:t=fill[vout]"
 
 & $ff -y -hide_banner -v error -i $Src `
   -filter_complex ($f -join ";") -map "[vout]" -an `
