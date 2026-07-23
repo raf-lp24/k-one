@@ -1,13 +1,17 @@
 const { getStripe, getSupabaseAdmin, getAuthUser, getActiveSubscriptionId } = require('./_stripeHelpers');
+const { contarHitosVerificados } = require('./_hitos');
 
 // Recompensas por niveles de hitos: % de descuento en la SIGUIENTE cuota
 // (cupón percent_off de un solo uso → escala solo con el plan del cliente,
 // sea mensual, trimestral o anual). Una sola vez por nivel y por cliente;
 // el registro de niveles ya cobrados vive en la metadata del customer de
 // Stripe (server-side, el cliente no puede tocarla).
+//
+// `semanasMin` es un refuerzo: aunque los hitos ya se recalculan acotados por
+// la antigüedad real, ningún premio se entrega antes de ese tiempo de cuenta.
 const NIVELES_PREMIO = {
-  fuego:  { min: 15, pct: 10 },
-  hierro: { min: 22, pct: 20 },
+  fuego:  { min: 15, pct: 10, semanasMin: 4 },
+  hierro: { min: 22, pct: 20, semanasMin: 12 },
 };
 
 // Crea (si no existe) y devuelve el cupón reutilizable de un nivel.
@@ -41,16 +45,32 @@ module.exports = async (req, res) => {
     const premio = NIVELES_PREMIO[nivel];
     if (!premio) return res.status(400).json({ error: 'Nivel no válido' });
 
-    // Nº de hitos según los datos guardados del usuario (misma fuente que la web)
+    // Los hitos se RECALCULAN aquí; nunca se usa el mapa `hitos` del cliente.
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('userdata')
       .eq('id', user.id)
       .maybeSingle();
     const userdata = profile?.userdata || {};
-    const numHitos = Object.keys(userdata.hitos || {}).length;
-    if (numHitos < premio.min) {
-      return res.status(400).json({ error: `Este nivel se desbloquea con ${premio.min} hitos (llevas ${numHitos})` });
+
+    // Referidos pagados: de la tabla que escribe el webhook, no del navegador.
+    const { count: referidosPagados } = await supabaseAdmin
+      .from('referidos')
+      .select('id', { count: 'exact', head: true })
+      .eq('referrer_id', user.id)
+      .eq('estado', 'pagado');
+
+    const verif = contarHitosVerificados(userdata, user.created_at, referidosPagados || 0);
+
+    if (verif.semanas < premio.semanasMin) {
+      return res.status(400).json({
+        error: `Este nivel necesita al menos ${premio.semanasMin} semanas de cuenta (llevas ${verif.semanas})`
+      });
+    }
+    if (verif.total < premio.min) {
+      return res.status(400).json({
+        error: `Este nivel se desbloquea con ${premio.min} hitos verificados (llevas ${verif.total})`
+      });
     }
 
     // Suscripción activa del usuario
@@ -93,8 +113,8 @@ module.exports = async (req, res) => {
       metadata: { ...customer.metadata, kone_hitos_niveles: [...reclamados, nivel].join(',') },
     });
 
-    console.log(`[claim-hito-reward] ${user.id} canjeó nivel ${nivel} (${premio.pct}% en próxima cuota)`);
-    return res.status(200).json({ ok: true, pct: premio.pct });
+    console.log(`[claim-hito-reward] ${user.id} canjeó nivel ${nivel} (${premio.pct}% en próxima cuota) — ${verif.total} hitos verificados, ${verif.semanas} semanas`);
+    return res.status(200).json({ ok: true, pct: premio.pct, hitosVerificados: verif.total });
 
   } catch (err) {
     console.error('[claim-hito-reward] error:', err);
