@@ -7123,7 +7123,7 @@
             <div class="today-hero-stats" id="todayHeroStats" style="display:none">
               <div><span class="k">Duración</span><span class="v" id="thDuracion">—</span></div>
               <div><span class="k">Intensidad</span><span class="v" id="thIntensidad">—</span></div>
-              <div><span class="k">Ejercicios</span><span class="v" id="thEjercicios">—</span></div>
+              <div><span class="k" id="thStat3Label">Ejercicios</span><span class="v" id="thEjercicios">—</span></div>
             </div>
             <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
               <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
@@ -11158,38 +11158,128 @@
   // Todo se calcula de los ejercicios reales (nada inventado); la duración es una estimación.
   function _rellenarStatsSesion(dia, tagsEl, statsEl) {
     if (!tagsEl || !statsEl) return;
-    const detalle = (dia && dia.detalle) || '';
-    const partes = detalle.split('·');
-    const txt = partes.length >= 2 ? partes.slice(1).join('·') : detalle;
-    const ejercicios = txt.split(',').map(e => e.trim()).filter(Boolean);
-    const conReps = ejercicios.filter(e => /\d+\s*[x×]\s*\d/.test(e));
+    const detalle  = (dia && dia.detalle) || '';
+    const etiqueta = (dia && dia.etiqueta) || '';
+    const resumen  = (dia && dia.resumen) || '';
+    const texto = (resumen + ' ' + detalle).toLowerCase();
 
-    // Músculos por palabra clave del ejercicio
+    // Ejercicios (para conteo y análisis de fuerza)
+    const partes = detalle.split('·');
+    const cuerpo = partes.length >= 2 ? partes.slice(1).join('·') : detalle;
+    const items  = cuerpo.split(',').map(e => e.trim()).filter(Boolean);
+    const conReps = items.filter(e => /\d+\s*[x×]\s*\d/.test(e));
+
+    // Helpers para pintar (o esconder) la barra
+    const pintarTags = (arr) => {
+      const u = []; arr.filter(Boolean).forEach(t => { if (!u.includes(t)) u.push(t); });
+      tagsEl.innerHTML = u.slice(0, 4).map(t => `<span>${t}</span>`).join('');
+    };
+    const pintarStats = (dur, intensidad, label, valor) => {
+      document.getElementById('thDuracion').textContent = dur + ' min';
+      document.getElementById('thIntensidad').textContent = intensidad;
+      const l = document.getElementById('thStat3Label'); if (l) l.textContent = label;
+      document.getElementById('thEjercicios').textContent = valor;
+      statsEl.style.display = '';
+    };
+    const ocultar = () => { tagsEl.innerHTML = ''; statsEl.style.display = 'none'; };
+
+    // ─── Clasificación de la modalidad del día ───
+    // La etiqueta del día (Cardio, WOD, Estaciones, Fuerza...) manda; el texto la confirma.
+    const esFuerzaCorredor = /fortalecimiento/i.test(etiqueta);
+    const esHyroxDia = /^(estaciones|simulacro|hyrox)$/i.test(etiqueta)
+      || /sled|farmer carry|wall ball|ski erg|sandbag|burpee broad/i.test(texto);
+    const esMetcon = !esHyroxDia && (/^(wod|h[íi]brido)$/i.test(etiqueta)
+      || /\bamrap\b|\bemom\b|for time|\brft\b|chipper|metcon|\bwod\b|tabata/i.test(texto));
+    const esCarrera = !esHyroxDia && !esMetcon && !esFuerzaCorredor && (
+        /^(cardio|intensidad|umbral|fondo|volumen)$/i.test(etiqueta)
+        || /\d+\s*-?\s*\d*\s*km|ritmo|zona 1|zona 2|rodaje|trote|tirada|fartlek|strides|easy run|run\/walk|recovery run/i.test(texto));
+
+    // ─── CARRERA / CARDIO AERÓBICO ───
+    if (esCarrera) {
+      let tags, intensidad, dur;
+      if (/fartlek/i.test(texto)) {
+        tags = ['Fartlek', 'Ritmos']; intensidad = 'Media-alta'; dur = 45;
+      } else if (/umbral|tempo|threshold|cruise|progression|progresivo/i.test(texto)) {
+        tags = ['Umbral', 'Tempo']; intensidad = 'Media-alta'; dur = 45;
+      } else if (/vo2|intervalos|\bseries\b|yasso|\d+\s*[x×]\s*\d+\s*m\b/i.test(texto)) {
+        tags = ['Series', 'VO2 máx']; intensidad = 'Alta'; dur = 50;
+      } else if (/tirada larga|long run|volumen|tirada media|fondo/i.test(texto)) {
+        tags = ['Fondo', 'Aeróbico']; intensidad = 'Media'; dur = 70;
+      } else if (/run\/walk/i.test(texto)) {
+        tags = ['Run/walk', 'Base']; intensidad = 'Suave'; dur = 35;
+      } else {
+        tags = ['Zona 2', 'Aeróbico']; intensidad = 'Suave'; dur = 45;
+      }
+      // 3er dato: nº de series si las hay, si no la distancia
+      const ser = texto.match(/(\d+)\s*[x×]\s*\d+\s*(?:m|min|km)/);
+      const km  = texto.match(/(\d+)(?:\s*-\s*(\d+))?\s*km/);
+      let label = 'Enfoque', valor = 'Continuo';
+      if (ser) { label = 'Series'; valor = ser[1]; }
+      else if (km) { label = 'Distancia'; valor = (km[2] || km[1]) + ' km'; }
+      pintarTags(tags); pintarStats(dur, intensidad, label, valor);
+      return;
+    }
+
+    // ─── HYROX (estaciones / simulacro) ───
+    if (esHyroxDia) {
+      const estaciones = [
+        [/sled/i, 'Sled'], [/farmer carry/i, 'Farmer carry'], [/wall ball/i, 'Wall balls'],
+        [/ski erg|ski/i, 'Ski erg'], [/\brow\b|rowing|remo/i, 'Remo'], [/sandbag/i, 'Sandbag'],
+        [/burpee/i, 'Burpees'], [/lunge|zancada/i, 'Lunges'], [/carrera|running|\bkm\b/i, 'Running'],
+      ];
+      const tags = [];
+      estaciones.forEach(([re, n]) => { if (re.test(texto)) tags.push(n); });
+      const simulacro = /simulacro/i.test(etiqueta) || /simulacro/i.test(texto);
+      pintarTags(tags.length ? tags : ['Hyrox', 'Estaciones']);
+      pintarStats(simulacro ? 60 : 55, simulacro ? 'Alta' : 'Media-alta',
+        'Estaciones', tags.length || items.length);
+      return;
+    }
+
+    // ─── METCON / WOD / CIRCUITO HÍBRIDO ───
+    if (esMetcon) {
+      const tags = [];
+      if (/\bamrap\b/i.test(texto)) tags.push('AMRAP');
+      if (/\bemom\b/i.test(texto)) tags.push('EMOM');
+      if (/for time|\brft\b/i.test(texto)) tags.push('For Time');
+      if (/chipper/i.test(texto)) tags.push('Chipper');
+      if (/tabata/i.test(texto)) tags.push('Tabata');
+      if (tags.length === 0) tags.push('Metcon');
+      if (/carrera|\bkm\b|\brow\b|remo|bici|assault/i.test(texto)) tags.push('Cardio');
+      tags.push('Full body');
+      // Duración: usar el cap más largo del WOD (+20' de fuerza/calentamiento), o 40' por defecto
+      const mins = [...texto.matchAll(/(\d+)\s*min/gi)].map(m => parseInt(m[1], 10)).filter(n => n >= 8 && n <= 40);
+      const dur = mins.length ? Math.min(70, Math.max(...mins) + 20) : 40;
+      // 3er dato: rondas si se indican, si no nº de movimientos (separados por coma o +)
+      const rondas = texto.match(/(\d+)\s*(?:rft|rondas|rounds)/i);
+      const movs = cuerpo.split(/[,+]| y /i).map(s => s.trim()).filter(Boolean);
+      let label = 'Ejercicios', valor = Math.max(2, Math.min(movs.length, 12));
+      if (rondas) { label = 'Rondas'; valor = rondas[1]; }
+      pintarTags(tags); pintarStats(dur, 'Alta', label, valor);
+      return;
+    }
+
+    // ─── FUERZA / GIMNASIO (por defecto) ───
     const MUSC = [
-      [/peso muerto|hip thrust|puente|buenos d[íi]as/i, ['Glúteos','Isquios','Lumbar']],
-      [/sentadilla|prensa|zancada|extensi[óo]n de cu[áa]driceps|hack|step[- ]?up/i, ['Cuádriceps','Glúteos']],
-      [/femoral/i, ['Isquios']],
+      [/peso muerto|hip thrust|puente|buenos d[íi]as|rdl/i, ['Glúteos','Isquios','Lumbar']],
+      [/sentadilla|prensa|zancada|extensi[óo]n de cu[áa]driceps|hack|step[- ]?up|b[úu]lgara|pistol/i, ['Cuádriceps','Glúteos']],
+      [/femoral|nordic/i, ['Isquios']],
       [/gemelo/i, ['Gemelos']],
-      [/press banca|press inclinado|aperturas|fondos|flexion|pullover|cruce/i, ['Pecho','Tríceps']],
-      [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales/i, ['Hombros']],
+      [/press banca|press inclinado|aperturas|fondos|flexion|pullover|cruce|dips/i, ['Pecho','Tríceps']],
+      [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales|push press|face pull/i, ['Hombros']],
       [/dominadas|jal[óo]n|remo|pull[- ]?up|muscle[- ]?up/i, ['Espalda','Bíceps']],
       [/curl|b[íi]ceps|martillo|banco scott|barra z/i, ['Bíceps']],
       [/tr[íi]ceps|patada|copa|franc[ée]s/i, ['Tríceps']],
-      [/plancha|abdomin|russian|elevaci[óo]n de piernas|rueda|dead bug|pallof|core/i, ['Core']],
+      [/plancha|abdomin|russian|elevaci[óo]n de piernas|rueda|dead bug|pallof|core|hollow|toes[- ]?to[- ]?bar/i, ['Core']],
       [/lumbar|hiperextensi[óo]n/i, ['Lumbar']],
     ];
     const musculos = [];
-    ejercicios.forEach(e => {
+    items.forEach(e => {
       for (const [re, ms] of MUSC) { if (re.test(e)) { ms.forEach(m => { if (!musculos.includes(m)) musculos.push(m); }); break; } }
     });
 
-    // Si no reconocemos músculos (día de cardio/funcional) no mostramos la barra:
-    // los datos de reps/RPE ahí no aplican y saldrían raros.
-    if (musculos.length === 0 || conReps.length === 0) {
-      tagsEl.innerHTML = '';
-      statsEl.style.display = 'none';
-      return;
-    }
+    // Sin músculos ni reps reconocibles (movilidad, día suelto...) → no forzamos la barra
+    if (musculos.length === 0 || conReps.length === 0) { ocultar(); return; }
 
     // Intensidad media = RPE medio derivado de las reps
     let sumRpe = 0, cnt = 0;
@@ -11204,11 +11294,8 @@
     const n = conReps.length;
     const dur = Math.min(80, Math.max(30, Math.round(n * 11 / 5) * 5));
 
-    tagsEl.innerHTML = musculos.slice(0, 4).map(m => `<span>${m}</span>`).join('');
-    document.getElementById('thDuracion').textContent = dur + ' min';
-    document.getElementById('thIntensidad').textContent = intensidad;
-    document.getElementById('thEjercicios').textContent = n;
-    statsEl.style.display = '';
+    pintarTags(musculos);
+    pintarStats(dur, intensidad, 'Ejercicios', n);
   }
 
   // Botón "Empezar entrenamiento": lleva al detalle del entreno de hoy (o a nutrición si es solo dieta).
