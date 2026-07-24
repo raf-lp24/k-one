@@ -5,7 +5,7 @@
 # Mantiene solo entrenamiento: sesión de hoy, semana, bloques con RPE, técnica.
 param(
   [string]$Src = "C:\Users\Usuario\Downloads\WhatsApp Video 2026-07-24 at 00.57.50.mp4",
-  [string]$Out = "C:\Users\Usuario\Desktop\Rafa Personl\Proyetos\Fragua\marketing\tiktok-hibrido-ads.mp4"
+  [string]$Out = "C:\Users\Usuario\Desktop\Rafa Personl\Proyetos\Fragua\marketing\tiktok-hibrido-ads-v2.mp4"
 )
 $ErrorActionPreference='Stop'
 $ff=(Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages" -Recurse -Filter ffmpeg.exe -EA SilentlyContinue|Select-Object -First 1).FullName
@@ -15,9 +15,9 @@ $enc=New-Object System.Text.UTF8Encoding($false)
 $textos=[ordered]@{
   'marca' ='K-ONE'
   'sub'   ='PLAN HÍBRIDO · FUERZA + RESISTENCIA'
-  'hook1' ='Corres y pierdes fuerza.'
-  'hook2' ='Levantas y pierdes fondo.'
-  'hook3' ='Fuerza y fondo, sin pisarse'
+  'hook1' ='Fuerza y resistencia'
+  'hook2' ='en el mismo plan,'
+  'hook3' ='sin que se pisen'
   'c4'    ='Tu semana: fuerza y cardio repartidos'
   'c5'    ='Series, repeticiones, peso y RPE'
   'c6'    ='Y cómo se hace cada ejercicio, paso a paso'
