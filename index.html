@@ -3630,7 +3630,7 @@
   /* MINIATURAS DE LAS OPCIONES, SIEMPRE VISIBLES (sin expandir) */
   .meal-preview-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2px;
     padding: 2px;
   }
@@ -3644,6 +3644,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
   }
 
   .meal-preview-pill:hover { background: var(--acero); }
@@ -3680,12 +3681,12 @@
   }
 
   @media (max-width: 900px) {
-    .meal-preview-row { grid-template-columns: repeat(2, 1fr); }
+    .meal-preview-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   .meal-options {
     display: none;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2px;
     padding: 2px;
   }
@@ -3693,8 +3694,13 @@
   .meal-block.expanded .meal-options { display: grid; }
 
   @media (max-width: 900px) {
-    .meal-options { grid-template-columns: repeat(2, 1fr); }
+    .meal-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .meal-block-why { display: none; }
+  }
+  /* En móvil estrecho, cada opción a ancho completo: con tanto detalle
+     (ingredientes + barras de macros + kcal) en 2 columnas se cortaba. */
+  @media (max-width: 600px) {
+    .meal-options { grid-template-columns: 1fr; }
   }
 
   .meal-option {
@@ -3705,6 +3711,7 @@
     border: 2px solid transparent;
     border-radius: 10px;
     position: relative;
+    min-width: 0;
   }
 
   .meal-option:hover { background: var(--acero); transform: translateY(-1px); }
@@ -11362,7 +11369,7 @@
             <div class="macro-bar-row"><span class="macro-bar-label">Carbs</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(carbsNum/maxMacro*100)}%;background:#f0a500"></div></div><span class="macro-bar-val">${carbsNum}g</span></div>
             <div class="macro-bar-row"><span class="macro-bar-label">Grasa</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(grasaNum/maxMacro*100)}%;background:#27ae60"></div></div><span class="macro-bar-val">${grasaNum}g</span></div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
             <span style="font-size:14px;color:var(--brasa);font-weight:600">${opt.kcal}</span>
             <span style="display:flex;align-items:center;gap:10px">
               <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
