@@ -5354,11 +5354,19 @@
     <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()">✕</button>
     <div class="modal-title" id="paywallTitulo">Tu mes de prueba ha terminado</div>
     <p class="modal-desc" id="paywallDesc">Has disfrutado de K-One por 1,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
-    <!-- Modo "primer mes": oferta de 1,99€ (sin elegir plan todavía) -->
+    <!-- Modo "primer mes": oferta de 1,99€. El cliente elige aquí mismo a qué
+         plan pasará al terminar los 30 días, para que no haya sorpresas. -->
     <div id="paywallOfertaBox" style="display:none">
       <div class="price-amount" style="margin-bottom:4px"><span>1,99€</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
+      <div id="pwOfertaDespuesWrap" style="margin:14px 0">
+        <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿Y DESPUÉS DEL PRIMER MES?</p>
+        <div class="radio-group" id="pw-ofertaDespues" style="margin-bottom:8px">
+          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-ofertaDespues'); actualizarAvisoOferta();">12,99€ al mes</div>
+          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-ofertaDespues'); actualizarAvisoOferta();">29,99€ cada 3 meses</div>
+        </div>
+      </div>
       <div style="background:#1a1206;border:1px solid #d4a500;border-radius:8px;padding:12px 14px;margin-bottom:12px">
-        <p style="margin:0;font-size:12px;color:#ffd700;line-height:1.5;font-weight:500">Al terminar los 30 días, tu suscripción pasa automáticamente al plan que elegiste. Puedes cambiar de plan (el cambio se aplica en el siguiente período) o cancelar en cualquier momento desde tu perfil.</p>
+        <p style="margin:0;font-size:12px;color:#ffd700;line-height:1.5;font-weight:500" id="pwOfertaAviso"></p>
       </div>
     </div>
     <!-- Aviso de mes gratis por código promocional. Se muestra solo si el
@@ -14286,7 +14294,10 @@
       // ¿Se cancelará al final del período? (oferta 1,99€ o cancelación). Para avisar antes de que expire.
       cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 1,99€.
-      tieneSub: !!sub || esBeta || esTest,
+      // OJO: se exige que la fila tenga "status". create-checkout-session crea la fila
+      // con el stripe_customer_id ANTES de pagar, así que con !!sub bastaba con empezar
+      // un pago y volver atrás para perder la oferta de 1,99€ sin haber pagado nada.
+      tieneSub: !!(sub && sub.status) || esBeta || esTest,
       isBeta: esBeta
     });
     // Restaurar datos del perfil desde Supabase a localStorage.
@@ -15095,8 +15106,9 @@
     const btn = document.getElementById('paywallBtn');
     if (primerMes) {
       if (titulo) titulo.textContent = 'Tu plan está listo';
-      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 1,99€. Después 12,99€/mes. Sin permanencia, cancela cuando quieras.';
+      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 1,99€. Tú eliges cómo sigue después. Sin permanencia, cancela cuando quieras.';
       if (btn) btn.textContent = 'Empezar por 1,99€ →';
+      actualizarAvisoOferta();
     } else {
       if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
       if (desc) desc.textContent = _paywallVoluntario
@@ -15155,6 +15167,34 @@
     } catch (e) { /* sin promo: el paywall se queda como estaba */ }
   }
 
+  // ¿A qué plan pasa el cliente al terminar el mes de 1,99€? Lo elige él en el
+  // propio paywall. "Solo nutrición" no tiene trimestral: se oculta el selector.
+  function _ofertaEsSoloNutricion() {
+    const user = getCurrentUser();
+    const tp = (user && getUserData(user.email)?.userData?.tipoPlan) || userData.tipoPlan || '';
+    return tp.includes('Solo nutrición');
+  }
+
+  function periodicidadTrasOferta() {
+    if (_ofertaEsSoloNutricion()) return 'mensual';
+    return document.querySelector('#pw-ofertaDespues .selected')?.dataset?.valor || 'mensual';
+  }
+
+  function actualizarAvisoOferta() {
+    const aviso = document.getElementById('pwOfertaAviso');
+    const wrap  = document.getElementById('pwOfertaDespuesWrap');
+    if (!aviso) return;
+    if (_ofertaEsSoloNutricion()) {
+      if (wrap) wrap.style.display = 'none';
+      aviso.textContent = `Al terminar los 30 días, tu plan "Solo nutrición" se renueva automáticamente a ${KONE_PRICES.nutricion}/mes. Puedes cambiar de plan o cancelar cuando quieras desde tu perfil.`;
+      return;
+    }
+    if (wrap) wrap.style.display = '';
+    const trimestral = periodicidadTrasOferta() === 'trimestral';
+    const precio = trimestral ? `${KONE_PRICES.trimestral} cada 3 meses` : `${KONE_PRICES.completo} al mes`;
+    aviso.textContent = `Al terminar los 30 días, tu suscripción se renueva automáticamente a ${precio}. Puedes cambiar de plan (se aplica en el siguiente período) o cancelar cuando quieras desde tu perfil.`;
+  }
+
   // Despacha el pago del paywall según el modo: primer mes (1,99€) o plan elegido.
   function pagarDesdePaywall() {
     const user = getCurrentUser();
@@ -15189,8 +15229,13 @@
   async function confirmarPagoSuscripcion(oferta, tipoPlanOverride) {
     const user = getCurrentUser();
     if (!user) return;
-    const periodicidad = oferta ? '' : valorPeriodicidad('pw-periodicidad');
-    const tipoPlan = oferta ? '' : (tipoPlanOverride || getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '');
+    // En la oferta también se manda tipoPlan y periodicidad: el webhook los usa para
+    // programar a qué plan pasa el cliente al acabar el mes de 1,99€. Si se enviaban
+    // vacíos, TODO EL MUNDO pasaba al plan completo mensual — incluida la gente de
+    // "Solo nutrición", a la que se le habría cobrado 12,99€ en vez de 7,99€.
+    const tipoPlanUsuario = tipoPlanOverride || getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '';
+    const periodicidad = oferta ? periodicidadTrasOferta() : valorPeriodicidad('pw-periodicidad');
+    const tipoPlan = tipoPlanUsuario;
     const boton = document.getElementById('paywallBtn');
     const textoBoton = boton ? boton.textContent : '';
     const { data: { session } } = await supa.auth.getSession();
@@ -15208,7 +15253,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
       if (!data.url) throw new Error('No se recibió URL de pago');
-      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 1.99 : 19.99 });
+      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 1.99 : 12.99 });
       window.location.href = data.url;
     } catch (e) {
       showToast('No se pudo iniciar el pago: ' + e.message, 5000);

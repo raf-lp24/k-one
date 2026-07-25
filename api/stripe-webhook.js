@@ -104,13 +104,17 @@ module.exports = async (req, res) => {
         const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
-        // Oferta 1,99€: al terminar el primer mes, pasa al plan que eligió el usuario.
-        // Plan completo → 19,99€/mes. Solo nutrición → 9,99€/mes.
+        // Oferta 1,99€: al terminar el primer mes pasa al plan que eligió el cliente
+        // en el paywall (tipoPlan + periodicidad viajan en el metadata de la sesión).
+        // Solo nutrición → 7,99€/mes. Completo → 12,99€/mes o 29,99€/trimestre.
         if (session.metadata?.oferta === 'si') {
-          const esNutricion = (session.metadata?.tipoPlan || '').includes('Solo nutrición');
+          const esNutricion  = (session.metadata?.tipoPlan || '').includes('Solo nutrición');
+          const esTrimestral = (session.metadata?.periodicidad || '') === 'trimestral';
           const siguientePriceId = esNutricion
             ? process.env.STRIPE_PRICE_NUTRICION_MENSUAL
-            : process.env.STRIPE_PRICE_COMPLETO_MENSUAL;
+            : (esTrimestral
+                ? (process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL || process.env.STRIPE_PRICE_COMPLETO_MENSUAL)
+                : process.env.STRIPE_PRICE_COMPLETO_MENSUAL);
           if (siguientePriceId) {
             try {
               await stripe.subscriptionSchedules.create({
