@@ -5243,8 +5243,11 @@
     <div class="auth-error" id="err-pass2">Las contraseñas no coinciden</div>
 
     <div class="auth-field" style="margin-bottom:12px">
-      <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TE HA INVITADO ALGUIEN? <span style="color:var(--metal-claro)">(opcional)</span></div>
-      <input type="text" id="reg-codigoInvitacion" placeholder="Código de invitación (ej: RAFA-5239)" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off">
+      <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TIENES UN CÓDIGO? <span style="color:var(--metal-claro)">(opcional)</span></div>
+      <input type="text" id="reg-codigoInvitacion" placeholder="Código de invitación o promoción" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
+        oninput="comprobarCodigoRegistro()">
+      <div id="reg-codigoInfo" style="display:none;font-size:12px;margin-top:7px;line-height:1.5"></div>
+      <div style="font-size:11px;color:var(--metal);margin-top:6px;line-height:1.5">Código de un amigo que te invitó, o un código de promoción de nuestras redes.</div>
     </div>
 
     <label class="auth-check">
@@ -14340,6 +14343,57 @@
     if (checkEl) checkEl.classList.toggle('visible', estado === 'valid');
   }
 
+  // ===== CÓDIGOS EN EL REGISTRO (invitación de un amigo o promoción) =====
+  // Comprueba el código mientras se escribe y dice qué es, para que el cliente
+  // sepa antes de crear la cuenta si su código sirve y qué le da.
+  let _codigoRegTimer = null;
+  let _codigoRegPromo = null;   // { tipo, valor, descripcion } si es promoción válida
+  function comprobarCodigoRegistro() {
+    const input = document.getElementById('reg-codigoInvitacion');
+    const info  = document.getElementById('reg-codigoInfo');
+    if (!input || !info) return;
+    const cod = (input.value || '').trim().toUpperCase();
+    _codigoRegPromo = null;
+    clearTimeout(_codigoRegTimer);
+    if (cod.length < 3) { info.style.display = 'none'; return; }
+
+    info.style.display = '';
+    info.style.color = 'var(--metal)';
+    info.textContent = 'Comprobando…';
+
+    _codigoRegTimer = setTimeout(async () => {
+      try {
+        // 1) ¿Es un código de promoción?
+        const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: cod });
+        if (promo && promo.valido) {
+          _codigoRegPromo = { tipo: promo.tipo, valor: promo.valor };
+          const texto = promo.tipo === 'mes_gratis'
+            ? `✓ Código válido — tu primer mes es gratis`
+            : `✓ Código válido — ${promo.valor}% de descuento en tu primera cuota`;
+          info.style.color = 'var(--brasa)';
+          info.textContent = texto;
+          return;
+        }
+        // 2) ¿Es el código de invitación de un amigo?
+        const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: cod });
+        if (referrerId) {
+          info.style.color = 'var(--brasa)';
+          info.textContent = '✓ Código de invitación válido';
+          return;
+        }
+        // 3) Ni una cosa ni la otra
+        info.style.color = 'var(--metal-claro)';
+        info.textContent = promo && promo.motivo === 'agotado'
+          ? 'Este código ya se ha agotado'
+          : (promo && promo.motivo === 'caducado'
+              ? 'Este código ha caducado'
+              : 'No reconocemos este código (puedes crear la cuenta igual)');
+      } catch (e) {
+        info.style.display = 'none';
+      }
+    }, 450);
+  }
+
   function validarCampoReg(campo) {
     const val = (document.getElementById('reg-' + campo) || {}).value || '';
     switch (campo) {
@@ -14450,22 +14504,34 @@
     notificarAdmin('bienvenida', { email, nombre });
     if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'email' });
 
-    // Guardar código de invitación si lo introdujo
+    // Guardar el código que introdujo: puede ser una PROMOCIÓN (mes gratis,
+    // descuento) o la INVITACIÓN de un amigo. Se comprueba en ese orden.
     const codigoInvitacion = (document.getElementById('reg-codigoInvitacion')?.value || '').trim().toUpperCase();
     if (codigoInvitacion && data.user?.id) {
       try {
-        // La RLS de profiles impide leer la fila de otro usuario, así que se busca
-        // al referrer con una función SECURITY DEFINER que solo devuelve su id.
-        const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigoInvitacion });
-        if (referrerId && referrerId !== data.user.id) {
-          await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
-          await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
-        } else if (referrerId === data.user.id) {
-          showToast('No puedes usar tu propio código de invitación', 4000);
+        // 1) ¿Código de promoción? Se guarda en el perfil; el servidor lo vuelve
+        //    a validar al crear el pago (el navegador no decide descuentos).
+        const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: codigoInvitacion });
+        if (promo && promo.valido) {
+          await supa.from('profiles').update({ codigo_promo: codigoInvitacion }).eq('id', data.user.id);
+          showToast(promo.tipo === 'mes_gratis'
+            ? '¡Código aplicado! Tu primer mes será gratis.'
+            : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 5000);
         } else {
-          showToast('Código de invitación no válido — se ha ignorado', 4000);
+          // 2) Si no es promoción, se prueba como invitación de un amigo.
+          //    La RLS de profiles impide leer la fila de otro usuario, así que se
+          //    busca al referrer con una función SECURITY DEFINER que solo da su id.
+          const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigoInvitacion });
+          if (referrerId && referrerId !== data.user.id) {
+            await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
+            await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
+          } else if (referrerId === data.user.id) {
+            showToast('No puedes usar tu propio código de invitación', 4000);
+          } else {
+            showToast('El código no es válido — se ha ignorado', 4000);
+          }
         }
-      } catch (e) { console.warn('[registro] Error procesando código de invitación:', e.message); }
+      } catch (e) { console.warn('[registro] Error procesando el código:', e.message); }
     }
 
     // Limpiar campos

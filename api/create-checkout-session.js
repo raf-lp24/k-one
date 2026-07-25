@@ -1,4 +1,5 @@
 const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
+const { resolverBeneficioPromo } = require('./_promo');
 
 // Crea una sesión de Stripe Checkout (suscripción) para el plan/periodicidad
 // elegidos por el usuario logueado y devuelve la URL a la que redirigir.
@@ -59,17 +60,20 @@ module.exports = async (req, res) => {
         .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: 'user_id' });
     }
 
+    // SEGURIDAD: la oferta de primer mes (1,99€) y las promociones de bienvenida
+    // solo valen para quien NUNCA ha tenido una suscripción. No basta con el flag
+    // del cliente (sería manipulable): se verifica el historial real de Stripe.
+    // Un customer recién creado no tiene historial, así que se salta la llamada.
+    let tieneHistorial = false;
+    if (!customerEraNuevo) {
+      const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
+      tieneHistorial = prev.data.length > 0;
+    }
+
     let priceId;
     if (usarOferta) {
-      // SEGURIDAD: la oferta de primer mes (1,99€) solo es válida para quien NUNCA ha
-      // tenido una suscripción. No basta con el flag del cliente (sería manipulable):
-      // se verifica el historial de Stripe del cliente. Un customer recién creado no
-      // tiene historial, así que se salta la llamada.
-      if (!customerEraNuevo) {
-        const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
-        if (prev.data.length > 0) {
-          return res.status(400).json({ error: 'La oferta de primer mes ya no está disponible para esta cuenta.' });
-        }
+      if (tieneHistorial) {
+        return res.status(400).json({ error: 'La oferta de primer mes ya no está disponible para esta cuenta.' });
       }
       priceId = ofertaPriceId;
     } else {
@@ -86,7 +90,19 @@ module.exports = async (req, res) => {
     const origin = process.env.APP_URL;
     if (!origin) return res.status(500).json({ error: 'APP_URL no configurada' });
 
-    const session = await stripe.checkout.sessions.create({
+    // Código promocional (mes gratis o % de descuento). Se valida y se canjea
+    // aquí, en el servidor: el navegador solo pudo guardar el código en el perfil.
+    const promo = await resolverBeneficioPromo({
+      supabaseAdmin, stripe, userId: user.id, tieneHistorial
+    });
+
+    // El metadata de la sesión NO se copia a la suscripción. Se propaga aquí para
+    // que los eventos customer.subscription.* del webhook (renovación, descuento de
+    // referidos) puedan identificar al usuario de Supabase directamente.
+    const subscriptionData = { metadata: { supabase_user_id: user.id } };
+    if (promo && promo.trialDays) subscriptionData.trial_period_days = promo.trialDays;
+
+    const params = {
       mode: 'subscription',
       customer: customerId,
       client_reference_id: user.id,
@@ -98,15 +114,14 @@ module.exports = async (req, res) => {
         supabase_user_id: user.id,
         tipoPlan:    tipoPlan    || '',
         periodicidad: periodicidad || '',
-        oferta: usarOferta ? 'si' : 'no'
+        oferta: usarOferta ? 'si' : 'no',
+        codigo_promo: promo ? promo.codigo : ''
       },
-      // El metadata de la sesión NO se copia a la suscripción. Se propaga aquí para
-      // que los eventos customer.subscription.* del webhook (renovación, descuento de
-      // referidos) puedan identificar al usuario de Supabase directamente.
-      subscription_data: {
-        metadata: { supabase_user_id: user.id }
-      }
-    });
+      subscription_data: subscriptionData
+    };
+    if (promo && promo.couponId) params.discounts = [{ coupon: promo.couponId }];
+
+    const session = await stripe.checkout.sessions.create(params);
 
     return res.status(200).json({ url: session.url });
 
