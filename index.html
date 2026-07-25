@@ -73,7 +73,7 @@
         {
           "@type": "Offer",
           "name": "Plan mensual completo",
-          "price": "19.99",
+          "price": "12.99",
           "priceCurrency": "EUR",
           "availability": "https://schema.org/InStock",
           "url": "https://k-one.fit/"
@@ -81,7 +81,7 @@
         {
           "@type": "Offer",
           "name": "Solo nutrición",
-          "price": "9.99",
+          "price": "7.99",
           "priceCurrency": "EUR",
           "availability": "https://schema.org/InStock",
           "url": "https://k-one.fit/"
@@ -107,7 +107,7 @@
         {
           "@type": "Question",
           "name": "¿Qué pasa después del mes de prueba a 1,99€?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste (completo 19,99€/mes o solo nutrición 9,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio se aplica en el siguiente período de facturación." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste (completo 12,99€/mes o solo nutrición 7,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio se aplica en el siguiente período de facturación." }
         },
         {
           "@type": "Question",
@@ -127,7 +127,7 @@
         {
           "@type": "Question",
           "name": "¿Puedo contratar solo nutrición sin entrenamiento?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Existe el plan 'Solo nutrición' por 9,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Existe el plan 'Solo nutrición' por 7,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento." }
         },
         {
           "@type": "Question",
@@ -5379,10 +5379,9 @@
       <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px" id="pw-periodicidadLabel">FACTURACIÓN</p>
       <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
         <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
-        <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Trimestral</div>
         <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Anual</div>
       </div>
-      <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">19,99€</span><span style="font-size:14px;color:var(--metal)" id="paywallPeriodo">/mes</span></div>
+      <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">12,99€</span><span style="font-size:14px;color:var(--metal)" id="paywallPeriodo">/mes</span></div>
       <p class="field-hint" id="paywallDetalle" style="margin-bottom:8px"></p>
     </div>
     <button class="btn-primary" id="paywallBtn" style="width:100%;padding:14px;margin-top:16px" onclick="pagarDesdePaywall()">Continuar con K-One →</button>
@@ -5492,10 +5491,10 @@
             <select id="adminFiltroPrecio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Precio: todos</option>
               <option value="Oferta 1,99">Oferta 1,99€</option>
-              <option value="Mensual 19,99">Mensual 19,99€</option>
-              <option value="Trimestral 44,99">Trimestral 44,99€</option>
-              <option value="Anual 149,99">Anual 149,99€</option>
-              <option value="Nutrición 9,99">Nutrición 9,99€</option>
+              <option value="Mensual 12,99">Mensual 12,99€</option>
+              <option value="Anual 119,99">Anual 119,99€</option>
+              <option value="Nutrición 7,99">Nutrición 7,99€</option>
+              <option value="antiguo">Precios antiguos</option>
               <option value="premium">Premium gratuito</option>
               <option value="sinpago">Sin pago</option>
             </select>
@@ -5735,7 +5734,6 @@
         <label>¿Con qué periodicidad quieres pagar?</label>
         <div class="radio-group" id="cp-periodicidad">
           <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
-          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
           <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Anual</div>
         </div>
         <span class="field-hint" id="cpPrecioInfo"></span>
@@ -6078,7 +6076,7 @@
       <span class="nutrition-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/><line x1="7" y1="14" x2="8" y2="16"/><line x1="12" y1="14.5" x2="12" y2="17"/><line x1="17" y1="14" x2="16" y2="16"/></svg></span>
       <div class="nutrition-callout-text">
         <div class="nutrition-callout-title">¿Solo buscas nutrición?</div>
-        <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 9,99€/mes.</p>
+        <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 7,99€/mes.</p>
       </div>
       <button class="btn-ghost" onclick="goTo('bienvenida')">Ver plan de nutrición →</button>
       <div class="nutrition-callout-demo">
@@ -6274,7 +6272,7 @@
     <div class="faq-grid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes de prueba a 1,99€?</summary>
-        <p class="faq-a">Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 19,99€/mes o solo nutrición 9,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
+        <p class="faq-a">Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 12,99€/mes o solo nutrición 7,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
@@ -6294,7 +6292,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
-        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 9,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
+        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 7,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Con qué frecuencia se actualiza el plan?</summary>
@@ -6325,7 +6323,7 @@
         <div class="price-badge">Oferta del mes</div>
         <div class="price-tag">// Empieza aquí</div>
         <div class="price-amount" data-kp="oferta">1,99€</div>
-        <div class="price-period" data-kp-period="oferta">30 días · Después 19,99€/mes</div>
+        <div class="price-period" data-kp-period="oferta">30 días · Después 12,99€/mes</div>
         <p class="price-desc">Acceso completo. Al terminar, pasa al plan que elijas. Cambio de plan en el siguiente período. Cancela cuando quieras.</p>
         <ul class="price-features">
           <li>Plan de entreno personalizado</li>
@@ -6338,7 +6336,7 @@
       </div>
       <div class="price-card">
         <div class="price-tag">// Mensual</div>
-        <div class="price-amount" data-kp="completo">19,99€</div>
+        <div class="price-amount" data-kp="completo">12,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">Sin compromiso. Cancela el día que quieras desde tu perfil, sin llamadas.</p>
         <ul class="price-features">
@@ -6352,34 +6350,22 @@
       </div>
       <div class="price-card featured">
         <div class="price-badge">Más popular</div>
-        <div class="price-tag">// Trimestral</div>
-        <div class="price-amount" data-kp="trimestral">44,99€</div>
-        <div class="price-period" data-kp-period="trimestral">Cada 3 meses · 15€/mes · Ahorras 15€</div>
-        <p class="price-desc">Un trimestre es donde empieza el cambio real. Precio fijo garantizado.</p>
-        <ul class="price-features">
-          <li>Todo lo del plan mensual</li>
-          <li>Precio bloqueado durante 3 meses</li>
-          <li>Ahorro de 15€ frente al mensual</li>
-          <li>Ideal para ver resultados reales</li>
-        </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card">
         <div class="price-tag">// Anual</div>
-        <div class="price-amount" data-kp="anual">149,99€</div>
-        <div class="price-period">Al año · 12,49€/mes · Ahorras 90€</div>
-        <p class="price-desc">Para quien se toma en serio el proceso. El precio más bajo de todos los planes.</p>
+        <div class="price-amount" data-kp="anual">119,99€</div>
+        <div class="price-period">Al año · 9,99€/mes · Ahorras 36€</div>
+        <p class="price-desc">Menos de 10€ al mes. Para quien se toma en serio el proceso: el precio más bajo de todos los planes.</p>
         <ul class="price-features">
           <li>Todo lo del plan mensual</li>
-          <li>Precio más bajo (−44% vs mensual)</li>
-          <li>Ahorro de 90€ al año</li>
+          <li>Precio más bajo (−23% vs mensual)</li>
+          <li>Ahorro de 36€ al año</li>
+          <li>Precio bloqueado todo el año</li>
           <li>Acceso prioritario a novedades</li>
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
       <div class="price-card">
         <div class="price-tag">// Solo nutrición</div>
-        <div class="price-amount" data-kp="nutricion">9,99€</div>
+        <div class="price-amount" data-kp="nutricion">7,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">Solo alimentación. Sin entrenamiento. Para quien ya entrena con su entrenador.</p>
         <ul class="price-features">
@@ -6602,7 +6588,7 @@
       <h3>3.2. Registro</h3>
       <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud.</p>
       <h3>3.3. Precios, pago y prueba</h3>
-      <p>El primer mes tiene un precio promocional de 1,99€ para todos los planes. Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario: plan completo (19,99€/mes) o solo nutrición (9,99€/mes). El usuario puede cambiar de plan desde su perfil; el cambio se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). El usuario puede cancelar en cualquier momento, sin permanencia. Los precios incluyen los impuestos aplicables.</p>
+      <p>El primer mes tiene un precio promocional de 1,99€ para todos los planes. Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario: plan completo (12,99€/mes) o solo nutrición (7,99€/mes). El usuario puede cambiar de plan desde su perfil; el cambio se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). El usuario puede cancelar en cualquier momento, sin permanencia. Los precios incluyen los impuestos aplicables.</p>
       <h3>3.4. Cancelación y política de reembolso</h3>
       <p>Puedes cancelar tu suscripción en cualquier momento desde tu perfil, sin permanencia, sin llamadas y sin formularios. La cancelación detiene futuras renovaciones y el acceso se mantiene activo hasta el final del período ya facturado.</p>
       <p>Las cuotas abonadas no son reembolsables. Al tratarse de un servicio digital de acceso inmediato (plan personalizado generado al instante), el usuario reconoce que el servicio se presta desde el momento de la activación. Conforme al artículo 103.m) del Real Decreto Legislativo 1/2007, el derecho de desistimiento no es aplicable a contenidos digitales cuya ejecución haya comenzado con el consentimiento expreso del consumidor. No obstante, si consideras que ha habido un error en el cobro, contacta con nosotros en <a href="mailto:k.one.fit26@gmail.com" style="color:var(--brasa)">k.one.fit26@gmail.com</a> y lo revisaremos.</p>
@@ -12939,10 +12925,9 @@
   // Cambiar aquí actualiza automáticamente paywall, modales y tarjetas de precio.
   const KONE_PRICES = {
     oferta:     '1,99€',
-    completo:   '19,99€',
-    trimestral: '44,99€',
-    anual:      '149,99€',
-    nutricion:  '9,99€',
+    completo:   '12,99€',
+    anual:      '119,99€',   // 9,99€/mes — ahorra ~36€ frente al mensual
+    nutricion:  '7,99€',
   };
 
   // Primer mes desde el registro (DIAS_PRUEBA): oferta siempre, sea cual sea el plan.
@@ -12951,8 +12936,7 @@
   const PRECIOS = {
     'Plan completo: entrenamiento + nutrición': {
       mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` },
-      trimestral: { precio: KONE_PRICES.trimestral, periodo: 'trimestre', dias: 90,  detalle: `El plan completo trimestral cuesta ${KONE_PRICES.trimestral} cada 3 meses (≈15€/mes) a partir de tu próximo cobro.` },
-      anual:      { precio: KONE_PRICES.anual,      periodo: 'año',       dias: 365, detalle: `El plan completo anual cuesta ${KONE_PRICES.anual}/año (≈12,49€/mes) a partir de tu próximo cobro.` }
+      anual:      { precio: KONE_PRICES.anual,      periodo: 'año',       dias: 365, detalle: `El plan completo anual cuesta ${KONE_PRICES.anual}/año (≈9,99€/mes) a partir de tu próximo cobro.` }
     },
     'Solo nutrición, sin entrenamiento': {
       mensual:    { precio: KONE_PRICES.nutricion,  periodo: 'mes',       dias: 30,  detalle: `El plan "Solo nutrición" cuesta ${KONE_PRICES.nutricion}/mes a partir de tu próximo cobro.` }
@@ -12972,8 +12956,6 @@
     });
     const ofertaPeriod = document.querySelector('[data-kp-period="oferta"]');
     if (ofertaPeriod) ofertaPeriod.textContent = `30 días · Después ${KONE_PRICES.completo}/mes`;
-    const trimPeriod = document.querySelector('[data-kp-period="trimestral"]');
-    if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 15€/mes · Ahorras 15€`;
     const paywallDesc = document.getElementById('paywallDesc');
     if (paywallDesc) paywallDesc.textContent = `Has disfrutado de K-One por ${KONE_PRICES.oferta} durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.`;
     const ofertaSpan = document.querySelector('#paywallOfertaBox .price-amount span');
@@ -13007,13 +12989,14 @@
     } catch (e) { /* JSON-LD malformado: no rompemos la app por esto */ }
   }
 
-  // Convierte el texto de un radio de periodicidad ("Mensual"/"Trimestral"/"Anual") en su clave.
+  // Convierte el texto de un radio de periodicidad ("Mensual"/"Anual") en su clave.
   function valorPeriodicidad(groupId) {
     const texto = document.querySelector(`#${groupId} .selected`)?.textContent?.trim() || 'Mensual';
     return texto.toLowerCase();
   }
 
-  // Oculta "Trimestral" y "Anual" cuando el plan elegido es "Solo nutrición" (solo tiene tarifa mensual).
+  // Oculta "Anual" cuando el plan elegido es "Solo nutrición" (solo tiene tarifa mensual).
+  // Se mantiene 'trimestral' en la lista por si quedara el radio en algún sitio.
   function actualizarOpcionesPeriodicidad(tipoPlan, periodicidadGroupId) {
     const esSoloNutricion = (tipoPlan || '').includes('Solo nutrición');
     ['trimestral', 'anual'].forEach(valor => {
@@ -13544,7 +13527,7 @@
     let msgPago = '';
     if (enOferta) {
       // Sigue en el primer mes a 1,99€: no se cambia la facturación, solo el plan.
-      msgPago = ' Sigues en tu primer mes a 1,99€. Al renovar pasarás automáticamente a 19,99€/mes (o al plan que elijas).';
+      msgPago = ' Sigues en tu primer mes a 1,99€. Al renovar pasarás automáticamente a 12,99€/mes (o al plan que elijas).';
     } else if (planCambia || periodCambia) {
       // proration_behavior 'create_prorations' NO cobra al instante: la diferencia
       // (a favor o en contra) se prorratea y aparece en la próxima factura.
@@ -15105,7 +15088,7 @@
     const btn = document.getElementById('paywallBtn');
     if (primerMes) {
       if (titulo) titulo.textContent = 'Tu plan está listo';
-      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 1,99€. Después 19,99€/mes. Sin permanencia, cancela cuando quieras.';
+      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 1,99€. Después 12,99€/mes. Sin permanencia, cancela cuando quieras.';
       if (btn) btn.textContent = 'Empezar por 1,99€ →';
     } else {
       if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
