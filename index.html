@@ -5361,6 +5361,14 @@
         <p style="margin:0;font-size:12px;color:#ffd700;line-height:1.5;font-weight:500">Al terminar los 30 días, tu suscripción pasa automáticamente al plan que elegiste. Puedes cambiar de plan (el cambio se aplica en el siguiente período) o cancelar en cualquier momento desde tu perfil.</p>
       </div>
     </div>
+    <!-- Aviso de mes gratis por código promocional. Se muestra solo si el
+         cliente tiene un código válido, y deja claro que después se cobra. -->
+    <div id="paywallPromoBox" style="display:none">
+      <div style="background:linear-gradient(135deg,rgba(232,73,15,.14),var(--carbon));border:1px solid var(--brasa);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+        <p style="margin:0 0 6px;font-size:13px;color:var(--brasa);font-weight:700;letter-spacing:.5px">TU PRIMER MES ES GRATIS</p>
+        <p style="margin:0;font-size:12px;color:var(--metal-claro);line-height:1.55">Has usado el código <strong id="paywallPromoCodigo" style="color:var(--blanco)"></strong>. Hoy <strong style="color:var(--blanco)">no se te cobra nada</strong>. Pasados los 30 días, tu suscripción se renueva automáticamente al precio del plan que elijas abajo. Puedes cancelar cuando quieras desde tu perfil, también durante el mes gratis.</p>
+      </div>
+    </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
     <div id="paywallPlanChooser">
       <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
@@ -14367,11 +14375,14 @@
         const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: cod });
         if (promo && promo.valido) {
           _codigoRegPromo = { tipo: promo.tipo, valor: promo.valor };
-          const texto = promo.tipo === 'mes_gratis'
-            ? `✓ Código válido — tu primer mes es gratis`
-            : `✓ Código válido — ${promo.valor}% de descuento en tu primera cuota`;
           info.style.color = 'var(--brasa)';
-          info.textContent = texto;
+          // Se avisa desde el principio de que después se renueva: nadie debe
+          // llevarse la sorpresa de un cobro que no esperaba.
+          info.innerHTML = promo.tipo === 'mes_gratis'
+            ? `✓ Código válido — <strong>tu primer mes es gratis</strong>` +
+              `<div style="color:var(--metal);margin-top:3px">Pasados los 30 días se renueva al precio de tu plan. Cancela cuando quieras.</div>`
+            : `✓ Código válido — <strong>${promo.valor}% de descuento</strong> en tu primera cuota` +
+              `<div style="color:var(--metal);margin-top:3px">Las siguientes cuotas van al precio normal de tu plan.</div>`;
           return;
         }
         // 2) ¿Es el código de invitación de un amigo?
@@ -14515,8 +14526,8 @@
         if (promo && promo.valido) {
           await supa.from('profiles').update({ codigo_promo: codigoInvitacion }).eq('id', data.user.id);
           showToast(promo.tipo === 'mes_gratis'
-            ? '¡Código aplicado! Tu primer mes será gratis.'
-            : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 5000);
+            ? '¡Código aplicado! Tu primer mes es gratis. Después se renueva al precio de tu plan; cancela cuando quieras.'
+            : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 7000);
         } else {
           // 2) Si no es promoción, se prueba como invitación de un amigo.
           //    La RLS de profiles impide leer la fila de otro usuario, así que se
@@ -15111,12 +15122,55 @@
       preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
       actualizarPrecioPaywall();
     }
+    // Oculto por defecto; se muestra si el cliente trae un código de mes gratis.
+    const promoBox = document.getElementById('paywallPromoBox');
+    if (promoBox) promoBox.style.display = 'none';
+    if (primerMes) _comprobarPromoPaywall();
   }
+  // ===== MES GRATIS POR CÓDIGO: aviso claro en el paywall =====
+  // Si el cliente trae un código de mes gratis, se le enseña el selector de plan
+  // (el mes gratis se aplica sobre el plan que elija) y un aviso de que, pasados
+  // los 30 días, la suscripción se renueva y se le cobra. Sin sorpresas.
+  let _paywallPromoMesGratis = false;
+
+  async function _comprobarPromoPaywall() {
+    _paywallPromoMesGratis = false;
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      const { data: prof } = await supa.from('profiles')
+        .select('codigo_promo').eq('id', session.user.id).maybeSingle();
+      const cod = (prof?.codigo_promo || '').trim().toUpperCase();
+      if (!cod) return;
+      const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: cod });
+      if (!promo || !promo.valido || promo.tipo !== 'mes_gratis') return;
+
+      _paywallPromoMesGratis = true;
+      const box = document.getElementById('paywallPromoBox');
+      const codEl = document.getElementById('paywallPromoCodigo');
+      if (codEl) codEl.textContent = cod;
+      if (box) box.style.display = 'block';
+      // Con mes gratis manda el selector de plan, no la oferta de 1,99€.
+      const oferta = document.getElementById('paywallOfertaBox');
+      const chooser = document.getElementById('paywallPlanChooser');
+      if (oferta) oferta.style.display = 'none';
+      if (chooser) chooser.style.display = 'block';
+      const titulo = document.getElementById('paywallTitulo');
+      const desc = document.getElementById('paywallDesc');
+      const btn = document.getElementById('paywallBtn');
+      if (titulo) titulo.textContent = 'Tu primer mes es gratis';
+      if (desc) desc.textContent = 'Elige el plan que quieres. No se te cobra nada hoy: los primeros 30 días son gratis y después se renueva al precio del plan elegido.';
+      if (btn) btn.textContent = 'Empezar mi mes gratis →';
+      actualizarPrecioPaywall();
+    } catch (e) { /* sin promo: el paywall se queda como estaba */ }
+  }
+
   // Despacha el pago del paywall según el modo: primer mes (1,99€) o plan elegido.
   function pagarDesdePaywall() {
     const user = getCurrentUser();
     const primerMes = !(user && user.tieneSub);
-    if (primerMes) confirmarPagoSuscripcion(true);
+    // Con mes gratis se cobra el plan elegido (con 30 días de prueba), no la oferta.
+    if (primerMes && !_paywallPromoMesGratis) confirmarPagoSuscripcion(true);
     else confirmarPagoSuscripcion(false, tipoPlanDesdePaywall());
   }
   function tipoPlanDesdePaywall() {
