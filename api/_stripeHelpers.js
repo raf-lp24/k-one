@@ -17,9 +17,9 @@ function getSupabaseAdmin() {
 // Mapea tipo de plan + periodicidad al Price ID de Stripe (variable de entorno en Vercel).
 const PRICE_ENV_MAP = {
   'Plan completo: entrenamiento + nutrición': {
-    // Solo tarifa mensual: los planes trimestral y anual se retiraron en julio
-    // de 2026 al simplificar los precios.
-    mensual: 'STRIPE_PRICE_COMPLETO_MENSUAL'
+    // Mensual y trimestral. El plan anual se retiró en julio de 2026.
+    mensual:    'STRIPE_PRICE_COMPLETO_MENSUAL',
+    trimestral: 'STRIPE_PRICE_COMPLETO_TRIMESTRAL'
   },
   'Solo nutrición, sin entrenamiento': {
     mensual: 'STRIPE_PRICE_NUTRICION_MENSUAL'

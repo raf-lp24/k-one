@@ -5376,7 +5376,11 @@
         <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Entrenamiento + nutrición</div>
         <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Solo nutrición</div>
       </div>
-      <!-- Sin selector de facturación: solo hay tarifa mensual. -->
+      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px" id="pw-periodicidadLabel">FACTURACIÓN</p>
+      <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
+        <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
+        <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Trimestral</div>
+      </div>
       <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">12,99€</span><span style="font-size:14px;color:var(--metal)" id="paywallPeriodo">/mes</span></div>
       <p class="field-hint" id="paywallDetalle" style="margin-bottom:8px"></p>
     </div>
@@ -5488,6 +5492,7 @@
               <option value="">Precio: todos</option>
               <option value="Oferta 1,99">Oferta 1,99€</option>
               <option value="Mensual 12,99">Mensual 12,99€</option>
+              <option value="Trimestral 29,99">Trimestral 29,99€</option>
               <option value="Nutrición 7,99">Nutrición 7,99€</option>
               <option value="antiguo">Precios antiguos</option>
               <option value="premium">Premium gratuito</option>
@@ -5723,11 +5728,14 @@
     </div>
 
     <div id="cpStep2" style="display:none">
-      <div class="modal-title">Confirma tu cambio</div>
-      <p class="modal-desc">Tu entrenamiento, nutrición y plan semanal se recalcularán según las preferencias que has elegido en el paso anterior.</p>
-      <!-- Sin selector de periodicidad: solo hay tarifa mensual. -->
+      <div class="modal-title">Confirma tu periodicidad de pago</div>
+      <p class="modal-desc">Esto es lo único que afecta a tu facturación. Tu entrenamiento, nutrición y plan semanal se recalcularán según las preferencias que has elegido en el paso anterior.</p>
       <div class="field">
-        <label>Tu facturación</label>
+        <label>¿Con qué periodicidad quieres pagar?</label>
+        <div class="radio-group" id="cp-periodicidad">
+          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
+          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
+        </div>
         <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
       <div style="display:flex;gap:12px;margin-top:24px">
@@ -6326,9 +6334,8 @@
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
-      <div class="price-card featured">
-        <div class="price-badge">Más popular</div>
-        <div class="price-tag">// Plan completo</div>
+      <div class="price-card">
+        <div class="price-tag">// Mensual</div>
         <div class="price-amount" data-kp="completo">12,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
         <p class="price-desc">Entrenamiento y nutrición, todo incluido. Sin compromiso: cancela el día que quieras desde tu perfil, sin llamadas.</p>
@@ -6338,6 +6345,20 @@
           <li>Check-in semanal y ajuste de plan</li>
           <li>Seguimiento de progreso y cargas</li>
           <li>Todos los deportes disponibles</li>
+        </ul>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Más popular</div>
+        <div class="price-tag">// Trimestral</div>
+        <div class="price-amount" data-kp="trimestral">29,99€</div>
+        <div class="price-period" data-kp-period="trimestral">Cada 3 meses · 9,99€/mes · Ahorras 9€</div>
+        <p class="price-desc">Menos de 10€ al mes. Un trimestre es donde empieza el cambio real: tiempo suficiente para que el plan se ajuste a ti y notes la diferencia.</p>
+        <ul class="price-features">
+          <li>Todo lo del plan mensual</li>
+          <li>Precio más bajo (−23% vs mensual)</li>
+          <li>Ahorro de 9€ cada trimestre</li>
+          <li>Precio bloqueado 3 meses</li>
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
@@ -12904,12 +12925,13 @@
   // Solo tarifas mensuales: una decisión, sin compromiso. El plan anual se
   // retiró en julio 2026 (nadie paga un año por adelantado a una marca nueva);
   // se recuperará más adelante como oferta de retención.
-  // Solo tarifas mensuales: una decisión y sin compromiso. El plan anual se
-  // retiró en julio 2026 (nadie paga un año por adelantado a una marca nueva);
-  // se recuperará más adelante como oferta de retención.
+  // Mensual + trimestral. El plan anual se retiró en julio de 2026: pedir un año
+  // por adelantado a una marca nueva era una barrera demasiado alta. El trimestre
+  // da el mismo gancho (menos de 10€/mes) con un compromiso mucho más asumible.
   const KONE_PRICES = {
     oferta:     '1,99€',
     completo:   '12,99€',
+    trimestral: '29,99€',   // 9,99€/mes — ahorra ~9€ frente al mensual
     nutricion:  '7,99€',
   };
 
@@ -12918,7 +12940,8 @@
   // Esta regla aplica tanto al paywall (fin de mes de prueba) como al cambio de plan desde "Hoy".
   const PRECIOS = {
     'Plan completo: entrenamiento + nutrición': {
-      mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` }
+      mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` },
+      trimestral: { precio: KONE_PRICES.trimestral, periodo: 'trimestre', dias: 90,  detalle: `El plan completo trimestral cuesta ${KONE_PRICES.trimestral} cada 3 meses (≈9,99€/mes) a partir de tu próximo cobro.` }
     },
     'Solo nutrición, sin entrenamiento': {
       mensual:    { precio: KONE_PRICES.nutricion,  periodo: 'mes',       dias: 30,  detalle: `El plan "Solo nutrición" cuesta ${KONE_PRICES.nutricion}/mes a partir de tu próximo cobro.` }
@@ -12938,6 +12961,8 @@
     });
     const ofertaPeriod = document.querySelector('[data-kp-period="oferta"]');
     if (ofertaPeriod) ofertaPeriod.textContent = `30 días · Después ${KONE_PRICES.completo}/mes`;
+    const trimPeriod = document.querySelector('[data-kp-period="trimestral"]');
+    if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 9,99€/mes · Ahorras 9€`;
     const paywallDesc = document.getElementById('paywallDesc');
     if (paywallDesc) paywallDesc.textContent = `Has disfrutado de K-One por ${KONE_PRICES.oferta} durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.`;
     const ofertaSpan = document.querySelector('#paywallOfertaBox .price-amount span');
@@ -15144,9 +15169,13 @@
   }
 
   function actualizarPrecioPaywall() {
-    // Solo hay tarifa mensual, así que no hay periodicidad que elegir.
     const tipoPlan = tipoPlanDesdePaywall();
-    const opcion = preciosPlan(tipoPlan).mensual;
+    // "Solo nutrición" no tiene trimestral: se oculta la opción y el rótulo.
+    actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
+    const label = document.getElementById('pw-periodicidadLabel');
+    if (label) label.style.display = tipoPlan.includes('Solo') ? 'none' : '';
+    const periodicidad = valorPeriodicidad('pw-periodicidad');
+    const opcion = preciosPlan(tipoPlan)[periodicidad] || preciosPlan(tipoPlan).mensual;
     const precioEl = document.getElementById('paywallPrecio');
     const periodoEl = document.getElementById('paywallPeriodo');
     const detalleEl = document.getElementById('paywallDetalle');

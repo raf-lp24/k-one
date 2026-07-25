@@ -15,15 +15,16 @@ function buildMrrMap() {
   const m = {};
   const add = (id, eur) => { if (id) m[id] = eur; };
   add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    12.99);
+  add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 29.99 / 3);
   add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,    7.99);
   add(process.env.STRIPE_PRICE_OFERTA_MES,           1.99);
   // Planes retirados y precios antiguos: siguen mapeados para que el MRR sea
   // correcto si quedara alguna suscripción anterior a julio de 2026.
-  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL,          119.99 / 12);
-  add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL_OLD,     19.99);
-  add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL,      44.99 / 3);
-  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL_OLD,      149.99 / 12);
-  add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL_OLD,     9.99);
+  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL,             119.99 / 12);
+  add(process.env.STRIPE_PRICE_COMPLETO_MENSUAL_OLD,        19.99);
+  add(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL_OLD,     44.99 / 3);
+  add(process.env.STRIPE_PRICE_COMPLETO_ANUAL_OLD,         149.99 / 12);
+  add(process.env.STRIPE_PRICE_NUTRICION_MENSUAL_OLD,        9.99);
   return m;
 }
 const MRR_MAP = buildMrrMap();
@@ -133,14 +134,15 @@ module.exports = async (req, res) => {
     const PRICE_LABELS = {};
     const addLabel = (id, label) => { if (id) PRICE_LABELS[id] = label; };
     addLabel(process.env.STRIPE_PRICE_COMPLETO_MENSUAL,    'Mensual 12,99€');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL, 'Trimestral 29,99€');
     addLabel(process.env.STRIPE_PRICE_NUTRICION_MENSUAL,   'Nutrición 7,99€');
     addLabel(process.env.STRIPE_PRICE_OFERTA_MES,          'Oferta 1,99€');
     // Planes retirados y precios antiguos (por si queda alguna suscripción vieja)
-    addLabel(process.env.STRIPE_PRICE_COMPLETO_ANUAL,        'Anual 119,99€ (retirado)');
-    addLabel(process.env.STRIPE_PRICE_COMPLETO_MENSUAL_OLD,  'Mensual 19,99€ (antiguo)');
-    addLabel(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL,   'Trimestral 44,99€ (retirado)');
-    addLabel(process.env.STRIPE_PRICE_COMPLETO_ANUAL_OLD,    'Anual 149,99€ (antiguo)');
-    addLabel(process.env.STRIPE_PRICE_NUTRICION_MENSUAL_OLD, 'Nutrición 9,99€ (antiguo)');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_ANUAL,          'Anual 119,99€ (retirado)');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_MENSUAL_OLD,    'Mensual 19,99€ (antiguo)');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_TRIMESTRAL_OLD, 'Trimestral 44,99€ (antiguo)');
+    addLabel(process.env.STRIPE_PRICE_COMPLETO_ANUAL_OLD,      'Anual 149,99€ (antiguo)');
+    addLabel(process.env.STRIPE_PRICE_NUTRICION_MENSUAL_OLD,   'Nutrición 9,99€ (antiguo)');
 
     const ahora   = new Date();
     const hace1d  = new Date(ahora.getTime() - 1  * 86400000);
