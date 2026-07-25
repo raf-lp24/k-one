@@ -5376,11 +5376,7 @@
         <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Entrenamiento + nutrición</div>
         <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Solo nutrición</div>
       </div>
-      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px" id="pw-periodicidadLabel">FACTURACIÓN</p>
-      <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
-        <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
-        <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Anual</div>
-      </div>
+      <!-- Sin selector de facturación: solo hay tarifa mensual. -->
       <div class="price-amount" style="margin-bottom:4px"><span id="paywallPrecio">12,99€</span><span style="font-size:14px;color:var(--metal)" id="paywallPeriodo">/mes</span></div>
       <p class="field-hint" id="paywallDetalle" style="margin-bottom:8px"></p>
     </div>
@@ -5492,7 +5488,6 @@
               <option value="">Precio: todos</option>
               <option value="Oferta 1,99">Oferta 1,99€</option>
               <option value="Mensual 12,99">Mensual 12,99€</option>
-              <option value="Anual 119,99">Anual 119,99€</option>
               <option value="Nutrición 7,99">Nutrición 7,99€</option>
               <option value="antiguo">Precios antiguos</option>
               <option value="premium">Premium gratuito</option>
@@ -5728,14 +5723,11 @@
     </div>
 
     <div id="cpStep2" style="display:none">
-      <div class="modal-title">Confirma tu periodicidad de pago</div>
-      <p class="modal-desc">Esto es lo único que afecta a tu facturación. Tu entrenamiento, nutrición y plan semanal se recalcularán según las preferencias que has elegido en el paso anterior.</p>
+      <div class="modal-title">Confirma tu cambio</div>
+      <p class="modal-desc">Tu entrenamiento, nutrición y plan semanal se recalcularán según las preferencias que has elegido en el paso anterior.</p>
+      <!-- Sin selector de periodicidad: solo hay tarifa mensual. -->
       <div class="field">
-        <label>¿Con qué periodicidad quieres pagar?</label>
-        <div class="radio-group" id="cp-periodicidad">
-          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
-          <div class="radio-opt" data-valor="anual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Anual</div>
-        </div>
+        <label>Tu facturación</label>
         <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
       <div style="display:flex;gap:12px;margin-top:24px">
@@ -6334,32 +6326,18 @@
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
-      <div class="price-card">
-        <div class="price-tag">// Mensual</div>
+      <div class="price-card featured">
+        <div class="price-badge">Más popular</div>
+        <div class="price-tag">// Plan completo</div>
         <div class="price-amount" data-kp="completo">12,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
-        <p class="price-desc">Sin compromiso. Cancela el día que quieras desde tu perfil, sin llamadas.</p>
+        <p class="price-desc">Entrenamiento y nutrición, todo incluido. Sin compromiso: cancela el día que quieras desde tu perfil, sin llamadas.</p>
         <ul class="price-features">
           <li>Plan de entreno personalizado</li>
           <li>Plan de nutrición con 5 opciones/comida</li>
           <li>Check-in semanal y ajuste de plan</li>
           <li>Seguimiento de progreso y cargas</li>
           <li>Todos los deportes disponibles</li>
-        </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
-      </div>
-      <div class="price-card featured">
-        <div class="price-badge">Más popular</div>
-        <div class="price-tag">// Anual</div>
-        <div class="price-amount" data-kp="anual">119,99€</div>
-        <div class="price-period">Al año · 9,99€/mes · Ahorras 36€</div>
-        <p class="price-desc">Menos de 10€ al mes. Para quien se toma en serio el proceso: el precio más bajo de todos los planes.</p>
-        <ul class="price-features">
-          <li>Todo lo del plan mensual</li>
-          <li>Precio más bajo (−23% vs mensual)</li>
-          <li>Ahorro de 36€ al año</li>
-          <li>Precio bloqueado todo el año</li>
-          <li>Acceso prioritario a novedades</li>
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
@@ -12923,10 +12901,15 @@
   // ===== REGLA DE PRECIOS =====
   // Fuente única de verdad para todos los precios mostrados en la app.
   // Cambiar aquí actualiza automáticamente paywall, modales y tarjetas de precio.
+  // Solo tarifas mensuales: una decisión, sin compromiso. El plan anual se
+  // retiró en julio 2026 (nadie paga un año por adelantado a una marca nueva);
+  // se recuperará más adelante como oferta de retención.
+  // Solo tarifas mensuales: una decisión y sin compromiso. El plan anual se
+  // retiró en julio 2026 (nadie paga un año por adelantado a una marca nueva);
+  // se recuperará más adelante como oferta de retención.
   const KONE_PRICES = {
     oferta:     '1,99€',
     completo:   '12,99€',
-    anual:      '119,99€',   // 9,99€/mes — ahorra ~36€ frente al mensual
     nutricion:  '7,99€',
   };
 
@@ -12935,8 +12918,7 @@
   // Esta regla aplica tanto al paywall (fin de mes de prueba) como al cambio de plan desde "Hoy".
   const PRECIOS = {
     'Plan completo: entrenamiento + nutrición': {
-      mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` },
-      anual:      { precio: KONE_PRICES.anual,      periodo: 'año',       dias: 365, detalle: `El plan completo anual cuesta ${KONE_PRICES.anual}/año (≈9,99€/mes) a partir de tu próximo cobro.` }
+      mensual:    { precio: KONE_PRICES.completo,   periodo: 'mes',       dias: 30,  detalle: `El plan completo cuesta ${KONE_PRICES.completo}/mes a partir de tu próximo cobro.` }
     },
     'Solo nutrición, sin entrenamiento': {
       mensual:    { precio: KONE_PRICES.nutricion,  periodo: 'mes',       dias: 30,  detalle: `El plan "Solo nutrición" cuesta ${KONE_PRICES.nutricion}/mes a partir de tu próximo cobro.` }
@@ -15162,12 +15144,9 @@
   }
 
   function actualizarPrecioPaywall() {
+    // Solo hay tarifa mensual, así que no hay periodicidad que elegir.
     const tipoPlan = tipoPlanDesdePaywall();
-    actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
-    const label = document.getElementById('pw-periodicidadLabel');
-    if (label) label.style.display = tipoPlan.includes('Solo') ? 'none' : '';
-    const periodicidad = valorPeriodicidad('pw-periodicidad');
-    const opcion = preciosPlan(tipoPlan)[periodicidad] || preciosPlan(tipoPlan).mensual;
+    const opcion = preciosPlan(tipoPlan).mensual;
     const precioEl = document.getElementById('paywallPrecio');
     const periodoEl = document.getElementById('paywallPeriodo');
     const detalleEl = document.getElementById('paywallDetalle');
