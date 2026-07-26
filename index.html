@@ -10175,19 +10175,48 @@
       notasSalud.push('Nos indicaste una alergia o intolerancia alimentaria. Tu plan de comidas ya tiene en cuenta esta información y evita los ingredientes problemáticos. Ante cualquier duda, consulta con un profesional.');
     }
 
-    // Ajuste de intensidad según el último check-in (progreso.ajuste: -1 baja, 0 igual, +1 sube)
-    if (!soloDieta && progreso.ajuste) {
-      const delta = progreso.ajuste > 0 ? 1 : -1;
+    // ── PERIODIZACIÓN: mesociclos de 4 semanas ──────────────────────────────
+    // 3 semanas de carga progresiva + 1 de descarga REAL (antes la descarga era
+    // solo una nota pidiéndole al cliente que bajara el peso él mismo).
+    //   Semana 1 del ciclo: base
+    //   Semana 2: +1 serie (más volumen)
+    //   Semana 3: pico — mismo volumen que la 2, pero buscando más carga
+    //   Semana 4: descarga — una serie menos que la base
+    // Al delta del ciclo se le suma el del check-in (progreso.ajuste) y se aplica
+    // UNA sola vez, para que no se acumulen y las series no se disparen.
+    const semanaActual = (u.progreso && u.progreso.semana) || 1;
+    const semanaCiclo = ((Math.max(1, semanaActual) - 1) % 4) + 1;
+    const bloqueMeso  = Math.floor((Math.max(1, semanaActual) - 1) / 4);  // 0,1,2… un bloque cada 4 semanas
+    const esDescarga  = semanaCiclo === 4;
+    const deltaCiclo  = [0, 1, 1, -1][semanaCiclo - 1];
+    const deltaCheck  = progreso.ajuste > 0 ? 1 : (progreso.ajuste < 0 ? -1 : 0);
+    let deltaSeries   = deltaCiclo + deltaCheck;
+    if (deltaSeries < -1) deltaSeries = -1;   // nunca recortar más de una serie
+    if (deltaSeries >  2) deltaSeries =  2;   // ni añadir más de dos
+
+    if (!soloDieta && deltaSeries !== 0) {
       const ajustarSeries = (texto) => texto.replace(/(\d+)×(\d+)/g, (m, series, reps) => {
-        let s = parseInt(series, 10) + delta;
+        let s = parseInt(series, 10) + deltaSeries;
         if (s < 2) s = 2;
         if (s > 6) s = 6;
         return `${s}×${reps}`;
       });
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: ajustarSeries(d.detalle) } : d);
-      notasSalud.push(delta < 0
-        ? 'Según tu último check-in, esta semana bajamos un poco el volumen para que puedas recuperar bien. Escucha al cuerpo, no la tabla.'
-        : 'Según tu último check-in, vienes con buen ritmo: esta semana subimos ligeramente el reto.');
+    }
+
+    if (!soloDieta) {
+      if (esDescarga) {
+        notasSalud.push('Semana de descarga (toca cada 4). Ya te hemos quitado volumen del plan: haz las series con algo menos de peso y céntrate en la técnica. Recuperar también es entrenar — así llegas más fuerte al siguiente bloque.');
+      } else if (semanaCiclo === 3) {
+        notasSalud.push('Semana pico del bloque: mismo volumen que la pasada, pero intenta superar la carga o el ritmo que anotaste. Es la semana de buscar tu récord.');
+      } else if (semanaCiclo === 2) {
+        notasSalud.push('Segunda semana del bloque: subimos el volumen respecto a la anterior. Si la técnica se rompe, baja el peso antes que las repeticiones.');
+      }
+      if (deltaCheck < 0) {
+        notasSalud.push('Además, por tu último check-in hemos aflojado un poco. Escucha al cuerpo, no la tabla.');
+      } else if (deltaCheck > 0 && !esDescarga) {
+        notasSalud.push('Además, tu último check-in vino bien: sumamos algo de reto.');
+      }
     }
 
     // Variantes de ejercicio elegidas en el feedback de la sesión anterior
@@ -10209,11 +10238,6 @@
       }
     }
 
-    // Nota de deload cada 4 semanas
-    const semanaActual = (u.progreso && u.progreso.semana) || 1;
-    if (!soloDieta && semanaActual > 0 && semanaActual % 4 === 0) {
-      notasSalud.push('Esta semana es semana de descarga (cada 4 semanas). Reduce el peso un 20-30% y haz las mismas series con más énfasis en la técnica. Es parte del plan: la recuperación también entrena.');
-    }
 
     // VARIEDAD DE EJERCICIOS por usuario: intercambia algunos accesorios por equivalentes
     // (mismo músculo, distinto material) según la semilla, para que dos perfiles iguales
@@ -10234,8 +10258,12 @@
       semana = semana.map(d => {
         if (!d.detalle) return d;
         let detalle = d.detalle;
+        // La elección rota por BLOQUE de 4 semanas, no por semana: así el mismo
+        // cliente deja de ver siempre los mismos accesorios (antes la semilla era
+        // fija y no cambiaban nunca), pero mantiene el ejercicio durante todo el
+        // mesociclo, que es lo que permite progresar la carga y comparar registros.
         poolsEjercicio.forEach(([regex, opciones], i) => {
-          const elegido = opciones[(semilla + i) % opciones.length];
+          const elegido = opciones[(semilla + i + bloqueMeso) % opciones.length];
           detalle = detalle.replace(regex, elegido);
         });
         return { ...d, detalle };
