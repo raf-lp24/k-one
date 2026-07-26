@@ -126,13 +126,18 @@ module.exports = async (req, res) => {
                     end_date: subscription.current_period_end,
                   },
                   {
+                    // Última fase SIN end_date ni iterations: así se renueva de forma
+                    // indefinida. Ojo: no poner `iterations: null` — Stripe lo serializa
+                    // como entero vacío y rechaza la llamada, y entonces el cliente se
+                    // quedaría pagando 1,99€ para siempre sin que nadie se diera cuenta.
                     items: [{ price: siguientePriceId, quantity: 1 }],
-                    iterations: null,
                   }
                 ],
               });
+              console.log(`[stripe-webhook] Schedule creado: tras el mes de oferta pasa a ${siguientePriceId}`);
             } catch (schedErr) {
-              console.error('[stripe-webhook] Error creando schedule oferta→completo:', schedErr.message);
+              // Si esto falla, el cliente seguiría al precio de la oferta indefinidamente.
+              console.error('[stripe-webhook] FALLO creando el schedule oferta→plan. El cliente se quedará a 1,99€ hasta que se corrija a mano:', schedErr.message);
             }
           }
         }
