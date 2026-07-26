@@ -15169,6 +15169,13 @@
       const btn = document.getElementById('paywallBtn');
       if (titulo) titulo.textContent = 'Tu primer mes es gratis';
       if (desc) desc.textContent = 'Elige el plan que quieres. No se te cobra nada hoy: los primeros 30 días son gratis y después se renueva al precio del plan elegido.';
+      // Preseleccionar lo que eligió en el cuestionario. Sin esto el selector salía
+      // por defecto en "Entrenamiento + nutrición", así que un cliente de "Solo
+      // nutrición" que no se fijara acabaría pagando 12,99€ en vez de 7,99€.
+      const emailPromo = (getCurrentUser() || {}).email || '';
+      const tpPromo = getUserData(emailPromo)?.userData?.tipoPlan || userData.tipoPlan || '';
+      preseleccionarRadio('pw-tipoPlan', tpPromo.includes('Solo nutrición') ? 'Solo nutrición' : 'Entrenamiento + nutrición');
+      actualizarOpcionesPeriodicidad(tpPromo, 'pw-periodicidad');
       if (btn) btn.textContent = 'Empezar mi mes gratis →';
       actualizarPrecioPaywall();
     } catch (e) { /* sin promo: el paywall se queda como estaba */ }
