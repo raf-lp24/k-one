@@ -5358,6 +5358,13 @@
          plan pasará al terminar los 30 días, para que no haya sorpresas. -->
     <div id="paywallOfertaBox" style="display:none">
       <div class="price-amount" style="margin-bottom:4px"><span>1,99€</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
+      <div style="margin:14px 0 0">
+        <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
+        <div class="radio-group" id="pw-ofertaTipo" style="margin-bottom:8px">
+          <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-ofertaTipo'); actualizarAvisoOferta();">Entrenamiento + nutrición</div>
+          <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-ofertaTipo'); actualizarAvisoOferta();">Solo nutrición</div>
+        </div>
+      </div>
       <div id="pwOfertaDespuesWrap" style="margin:14px 0">
         <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿Y DESPUÉS DEL PRIMER MES?</p>
         <div class="radio-group" id="pw-ofertaDespues" style="margin-bottom:8px">
@@ -12930,9 +12937,6 @@
   // ===== REGLA DE PRECIOS =====
   // Fuente única de verdad para todos los precios mostrados en la app.
   // Cambiar aquí actualiza automáticamente paywall, modales y tarjetas de precio.
-  // Solo tarifas mensuales: una decisión, sin compromiso. El plan anual se
-  // retiró en julio 2026 (nadie paga un año por adelantado a una marca nueva);
-  // se recuperará más adelante como oferta de retención.
   // Mensual + trimestral. El plan anual se retiró en julio de 2026: pedir un año
   // por adelantado a una marca nueva era una barrera demasiado alta. El trimestre
   // da el mismo gancho (menos de 10€/mes) con un compromiso mucho más asumible.
@@ -15108,6 +15112,9 @@
       if (titulo) titulo.textContent = 'Tu plan está listo';
       if (desc) desc.textContent = 'Actívalo ahora: tu primer mes completo por solo 1,99€. Tú eliges cómo sigue después. Sin permanencia, cancela cuando quieras.';
       if (btn) btn.textContent = 'Empezar por 1,99€ →';
+      // Se preselecciona lo que eligió en el cuestionario, pero puede cambiarlo aquí.
+      const tpActual = getUserData(user?.email || '')?.userData?.tipoPlan || userData.tipoPlan || '';
+      preseleccionarRadio('pw-ofertaTipo', tpActual.includes('Solo nutrición') ? 'Solo nutrición' : 'Entrenamiento + nutrición');
       actualizarAvisoOferta();
     } else {
       if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
@@ -15169,10 +15176,17 @@
 
   // ¿A qué plan pasa el cliente al terminar el mes de 1,99€? Lo elige él en el
   // propio paywall. "Solo nutrición" no tiene trimestral: se oculta el selector.
-  function _ofertaEsSoloNutricion() {
+  // Qué incluye el plan según el selector de la oferta. Si por lo que sea no
+  // existiera el selector, se respeta lo que eligió en el cuestionario.
+  function tipoPlanTrasOferta() {
+    const v = document.querySelector('#pw-ofertaTipo .selected')?.dataset?.valor;
+    if (v) return v === 'nutricion' ? 'Solo nutrición, sin entrenamiento' : 'Plan completo: entrenamiento + nutrición';
     const user = getCurrentUser();
-    const tp = (user && getUserData(user.email)?.userData?.tipoPlan) || userData.tipoPlan || '';
-    return tp.includes('Solo nutrición');
+    return (user && getUserData(user.email)?.userData?.tipoPlan) || userData.tipoPlan || 'Plan completo: entrenamiento + nutrición';
+  }
+
+  function _ofertaEsSoloNutricion() {
+    return tipoPlanTrasOferta().includes('Solo nutrición');
   }
 
   function periodicidadTrasOferta() {
@@ -15195,13 +15209,34 @@
     aviso.textContent = `Al terminar los 30 días, tu suscripción se renueva automáticamente a ${precio}. Puedes cambiar de plan (se aplica en el siguiente período) o cancelar cuando quieras desde tu perfil.`;
   }
 
+  // Si en la pantalla de la oferta cambia lo que incluye su plan (por ejemplo pasa
+  // a "Solo nutrición"), se guarda y se regenera el plan: así no paga por nutrición
+  // y le sigue apareciendo el entrenamiento.
+  function _aplicarTipoPlanDeLaOferta() {
+    const elegido = tipoPlanTrasOferta();
+    if (!elegido || elegido === userData.tipoPlan) return;
+    userData.tipoPlan = elegido;
+    try {
+      generatedPlan = buildPlanFromData(userData);
+      buildDashboard();
+      const user = getCurrentUser();
+      if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    } catch (e) {
+      console.error('[oferta] Error recalculando el plan al cambiar de tipo:', e);
+    }
+  }
+
   // Despacha el pago del paywall según el modo: primer mes (1,99€) o plan elegido.
   function pagarDesdePaywall() {
     const user = getCurrentUser();
     const primerMes = !(user && user.tieneSub);
     // Con mes gratis se cobra el plan elegido (con 30 días de prueba), no la oferta.
-    if (primerMes && !_paywallPromoMesGratis) confirmarPagoSuscripcion(true);
-    else confirmarPagoSuscripcion(false, tipoPlanDesdePaywall());
+    if (primerMes && !_paywallPromoMesGratis) {
+      _aplicarTipoPlanDeLaOferta();
+      confirmarPagoSuscripcion(true);
+    } else {
+      confirmarPagoSuscripcion(false, tipoPlanDesdePaywall());
+    }
   }
   function tipoPlanDesdePaywall() {
     const v = document.querySelector('#pw-tipoPlan .selected')?.dataset?.valor || 'completo';
@@ -15233,9 +15268,10 @@
     // programar a qué plan pasa el cliente al acabar el mes de 1,99€. Si se enviaban
     // vacíos, TODO EL MUNDO pasaba al plan completo mensual — incluida la gente de
     // "Solo nutrición", a la que se le habría cobrado 12,99€ en vez de 7,99€.
-    const tipoPlanUsuario = tipoPlanOverride || getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '';
     const periodicidad = oferta ? periodicidadTrasOferta() : valorPeriodicidad('pw-periodicidad');
-    const tipoPlan = tipoPlanUsuario;
+    const tipoPlan = oferta
+      ? tipoPlanTrasOferta()
+      : (tipoPlanOverride || getUserData(user.email)?.userData?.tipoPlan || userData.tipoPlan || '');
     const boton = document.getElementById('paywallBtn');
     const textoBoton = boton ? boton.textContent : '';
     const { data: { session } } = await supa.auth.getSession();
