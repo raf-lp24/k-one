@@ -9586,14 +9586,29 @@
 
       const lugarR  = u.lugar || 'Gimnasio';
       const rSinMat = lugarR.includes('sin material') || lugarR.includes('aire libre');
+      // Rotación del ejercicio pliométrico "de firma" del bloque avanzado, por
+      // mesociclo (bloqueMeso). Antes era fijo (siempre el mismo salto) y la
+      // versión "sin material" pedía "saltos al cajón", que necesita un cajón —
+      // contradicción con no tener material. Ahora rota entre saltos verticales,
+      // horizontales y laterales, todos sin ningún equipo en la variante sinMat.
+      const plioVariantesAv = rSinMat
+        ? ['broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
+           'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
+           'squat jumps 3×8 (salto vertical con carga corporal)',
+           'single-leg hop lateral 3×8/lado']
+        : ['box jumps 3×6',
+           'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
+           'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
+           'squat jumps 3×8 con mancuernas ligeras'];
+      const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells con banda 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
           : 'Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, lateral band walks 3×12/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s'
         : esAvanzado
           ? rSinMat
-            ? 'Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, saltos al cajón 3×6, single-leg hop lateral 3×8/lado, copenhagen plank 3×15s/lado, A-skips 3×20m'
-            : 'Fuerza + pliometría · Peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, box jumps 3×6, single-leg hop 3×8/lado, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12'
+            ? `Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, ${plioAv}, copenhagen plank 3×15s/lado, A-skips 3×20m`
+            : `Fuerza + pliometría · Peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, ${plioAv}, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
             ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells con banda 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
             : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15';
