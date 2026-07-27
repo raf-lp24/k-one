@@ -29,7 +29,10 @@ if (-not $ff) {
 }
 if (-not $ff) { throw "No encuentro ffmpeg. Instalalo con:  winget install --id Gyan.FFmpeg -e" }
 
-$W = 1080; $H = 1920
+# Sin marco de telefono: el video es solo el contenido de pantalla a sangre
+# completa (la web ya pone el marco alrededor). Mismo ratio que la pantalla
+# interna (PW:PH mas abajo), escalado x1.25 para que se vea nitido.
+$W = 800; $H = 1612
 $frameDir = Join-Path $env:TEMP "kone-frames-hero"
 if (Test-Path $frameDir) { Remove-Item "$frameDir\*.png" -Force -EA SilentlyContinue } else { New-Item -ItemType Directory -Force -Path $frameDir | Out-Null }
 
@@ -301,93 +304,57 @@ function Draw-Hitos($g,$off){
 # =============================================================================
 #  ESCENAS
 # =============================================================================
+# Sin logo, sin subtitulo, sin caption ni marco de telefono "dibujados": la
+# propia web ya pone ese marco (border, sombra, fondo) y la etiqueta "Area de
+# cliente real" alrededor del <video> (ver .hero-demo-inner / .hero-demo-label
+# en index.html). Si el video ademas dibuja su propio marco y su propio logo,
+# en el hueco pequeno del hero de escritorio (min(25vw,280px)) queda un marco
+# dentro de otro marco y unas cartelas de texto negras que no encajan. Por eso
+# aqui se renderiza solo el contenido de pantalla, a sangre completa, como si
+# fuera una grabacion de pantalla real.
 $SC = @(
-  @{tipo='hook';       n=60},
-  @{tipo='entreno';    n=180; cap='Tu plan se adapta a tu deporte y a tu nivel'; scroll=460},
-  @{tipo='progreso';   n=110; cap='Tu constancia, siempre a la vista';           scroll=0},
-  @{tipo='kcalmacros'; n=110; cap='Calorias y macros ajustados a tu objetivo';   scroll=0},
-  @{tipo='nutri';      n=150; cap='5 opciones por comida, cada dia';             scroll=340},
-  @{tipo='hitos';      n=150; cap='Hitos que se convierten en descuentos';       scroll=260},
-  @{tipo='cta';        n=90}
+  @{tipo='entreno';    n=200; scroll=460},
+  @{tipo='progreso';   n=120; scroll=0},
+  @{tipo='kcalmacros'; n=120; scroll=0},
+  @{tipo='nutri';      n=170; scroll=340},
+  @{tipo='hitos';      n=170; scroll=260}
 )
 $total = 0; foreach($s in $SC){ $total += $s.n }
 $durSeg = [math]::Round($total / $Fps, 2)
 
 Write-Host "Generando $total fotogramas ($durSeg s)…"
 
-$PX = [int](($W - $PW)/2)
-$PY = 330
-
 $idx = 0
 foreach($s in $SC){
   for($k=0; $k -lt $s.n; $k++){
     $idx++
+    $scr = New-Object System.Drawing.Bitmap($PW,$PH)
+    $sg = [System.Drawing.Graphics]::FromImage($scr)
+    $sg.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $sg.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
+    $sg.Clear($cCarbon)
+    # el scroll arranca tras un 12% de la escena (tiempo para leer el titulo)
+    # y avanza suavizado hasta el final
+    $pr = $k / [double]$s.n
+    $e  = [Math]::Max(0.0, [Math]::Min(1.0, ($pr - 0.12) / 0.88))
+    $e  = $e * $e * (3 - 2 * $e)
+    $off = [int]($e * $s.scroll)
+    switch($s.tipo){
+      'entreno'    { Draw-Entreno $sg $off }
+      'nutri'      { Draw-Nutricion $sg $off }
+      'hitos'      { Draw-Hitos $sg $off }
+      'progreso'   { Draw-Progreso $sg $off }
+      'kcalmacros' { Draw-KcalMacros $sg $off }
+    }
+    $sg.Dispose()
+
     $bmp = New-Object System.Drawing.Bitmap($W,$H)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-    $g.Clear($cNegro)
-
-    $gp = RoundPath -260 900 1600 1200 600
-    $pgb = New-Object System.Drawing.Drawing2D.PathGradientBrush $gp
-    $pgb.CenterColor = [System.Drawing.Color]::FromArgb(46,22,10)
-    $pgb.SurroundColors = @($cNegro)
-    $g.FillPath($pgb,$gp); $pgb.Dispose(); $gp.Dispose()
-
-    if($s.tipo -eq 'hook' -or $s.tipo -eq 'cta'){
-      TxtC $g 'K-ONE' $fMarca $bBlanco ($W/2) 780
-      $g.FillRectangle($bBrasa,[int](($W-150)/2),882,150,4)
-      if($s.tipo -eq 'hook'){
-        $p = $k / [double]$s.n
-        if($p -gt 0.15){ TxtC $g 'Tu plan, tu progreso' $fTitulo $bBlanco ($W/2) 940 }
-        if($p -gt 0.4){ TxtC $g 'en un solo sitio' $fTitulo $bBrasa ($W/2) 1050 }
-      } else {
-        TxtC $g 'Empieza tu plan hoy' $fTitulo $bBlanco ($W/2) 940
-        $pen2 = New-Object System.Drawing.Pen $cBrasa,3
-        StrokeRound $g $pen2 ([int](($W-420)/2)) 1080 420 96 16
-        $pen2.Dispose()
-        TxtC $g 'k-one.fit' $fCap $bBrasa ($W/2) 1105
-      }
-    } else {
-      TxtC $g 'K-ONE' $fMarca $bBlanco ($W/2) 96
-      $g.FillRectangle($bBrasa,[int](($W-150)/2),196,150,4)
-      TxtC $g 'TU AREA DE CLIENTE' $fSub $bMetalCl ($W/2) 216
-
-      $scr = New-Object System.Drawing.Bitmap($PW,$PH)
-      $sg = [System.Drawing.Graphics]::FromImage($scr)
-      $sg.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-      $sg.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-      $sg.Clear($cCarbon)
-      $pr = $k / [double]$s.n
-      $e  = [Math]::Max(0.0, [Math]::Min(1.0, ($pr - 0.22) / 0.78))
-      $e  = $e * $e * (3 - 2 * $e)
-      $off = [int]($e * $s.scroll)
-      switch($s.tipo){
-        'entreno'    { Draw-Entreno $sg $off }
-        'nutri'      { Draw-Nutricion $sg $off }
-        'hitos'      { Draw-Hitos $sg $off }
-        'progreso'   { Draw-Progreso $sg $off }
-        'kcalmacros' { Draw-KcalMacros $sg $off }
-      }
-      $sg.Dispose()
-
-      $clip = RoundPath $PX $PY $PW $PH 26
-      $g.SetClip($clip)
-      $g.DrawImage($scr,$PX,$PY,$PW,$PH)
-      $g.ResetClip(); $clip.Dispose(); $scr.Dispose()
-      StrokeRound $g $pBrasa $PX $PY $PW $PH 26
-
-      if($s.cap){
-        $cy = $PY + $PH + 42
-        $cw = (Wid $g $s.cap $fCap) + 56
-        $bBox = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(150,0,0,0))
-        FillRound $g $bBox ([int](($W-$cw)/2)) $cy $cw 74 14
-        $bBox.Dispose()
-        TxtC $g $s.cap $fCap $bBlanco ($W/2) ($cy+14)
-      }
-    }
-
-    $g.FillRectangle($bBrasa,0,1906,[int]($W * $idx / $total),8)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $g.DrawImage($scr,0,0,$W,$H)
+    $scr.Dispose()
 
     $g.Dispose()
     $bmp.Save((Join-Path $frameDir ('f{0:D5}.png' -f $idx)),[System.Drawing.Imaging.ImageFormat]::Png)
