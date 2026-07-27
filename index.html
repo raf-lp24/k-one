@@ -7001,6 +7001,24 @@
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">Híbrido</div>
             </div>
           </div>
+          <!-- Marca reciente de carrera: con ella se calculan los ritmos reales de
+               entrenamiento (VDOT) en vez de decir solo "ritmo umbral" o "zona 2". -->
+          <div class="field" id="campoMarca">
+            <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <select id="marcaDistancia" onchange="previsualizarRitmos()" style="flex:1;min-width:130px">
+                <option value="">Distancia</option>
+                <option value="5000">5 km</option>
+                <option value="10000">10 km</option>
+                <option value="21097">Media maratón</option>
+                <option value="42195">Maratón</option>
+              </select>
+              <input type="text" id="marcaTiempo" placeholder="Tiempo (ej: 48:30)" oninput="previsualizarRitmos()"
+                     inputmode="numeric" autocomplete="off" style="flex:1;min-width:130px">
+            </div>
+            <span class="field-hint">Si nos lo das, calculamos tus ritmos exactos de cada sesión (rodaje, umbral, series) en min/km. Si no, usamos referencias por sensación.</span>
+            <div id="previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
+          </div>
           <div class="field">
             <label>¿Cuántos días a la semana puedes entrenar? <span class="optional">Obligatorio</span></label>
             <div class="radio-group" id="diasEntreno">
@@ -8271,6 +8289,9 @@
       tiempoSesion: getRadio('tiempoSesion'),
       nivel: getRadio('nivel'),
       lugar: getRadio('lugar'),
+      // Marca reciente para calcular los ritmos de entrenamiento (opcional)
+      marcaDistancia: document.getElementById('marcaDistancia')?.value || '',
+      marcaTiempo: document.getElementById('marcaTiempo')?.value || '',
     };
   }
 
@@ -10173,6 +10194,23 @@
     }
     if (alergiaSalud.includes('Otra')) {
       notasSalud.push('Nos indicaste una alergia o intolerancia alimentaria. Tu plan de comidas ya tiene en cuenta esta información y evita los ingredientes problemáticos. Ante cualquier duda, consulta con un profesional.');
+    }
+
+    // ── RITMOS REALES a partir de la marca del cliente ──────────────────────
+    // Si nos dio un tiempo de carrera, las referencias por sensación ("a ritmo
+    // umbral", "zona 2") pasan a llevar su ritmo concreto en min/km.
+    const ritmos = calcularRitmos(u.marcaDistancia, u.marcaTiempo);
+    if (!soloDieta && ritmos && semana.length) {
+      // Cada ritmo se anota UNA sola vez por sesión (sin la bandera /g). Si no,
+      // frases como "a zona 2 … ritmo conversacional" repetían el mismo dato dos
+      // veces y quedaban ilegibles.
+      const conRitmo = (texto) => texto
+        .replace(/ritmo umbral/i,     `ritmo umbral (${ritmos.umbral}/km)`)
+        .replace(/ritmo marat[óo]n/i, `ritmo maratón (${ritmos.maraton}/km)`)
+        .replace(/ritmo 5K/i,         `ritmo 5K (${ritmos.intervalos}/km)`)
+        .replace(/(zona 1-2|zona 2|ritmo conversacional)/i, `$1 (${ritmos.facil}/km)`);
+      semana = semana.map(d => d.detalle ? { ...d, detalle: conRitmo(d.detalle) } : d);
+      notasSalud.push(`Tus ritmos están calculados a partir de tu marca (VDOT ${ritmos.vdot}): rodaje ${ritmos.facil}/km · umbral ${ritmos.umbral}/km · series ${ritmos.intervalos}/km. Si mejoras tu marca, actualízala y el plan se recalcula.`);
     }
 
     // ── PERIODIZACIÓN: mesociclos de 4 semanas ──────────────────────────────
@@ -12960,6 +12998,88 @@
     opts.forEach(o => o.classList.remove('selected'));
     const target = [...opts].find(o => o.textContent.trim() === (valor || '').trim());
     if (target) target.classList.add('selected');
+  }
+
+  // ===== RITMOS DE ENTRENAMIENTO (VDOT) =====
+  // Calcula los ritmos reales de cada sesión a partir de una marca del cliente.
+  //
+  // Usa las ecuaciones de Daniels-Gilbert, que son fórmulas científicas publicadas.
+  // Implementación tomada de github.com/mattncott/running-calculations (MIT).
+  // A propósito NO se copian las tablas del libro "Daniels' Running Formula":
+  // hay repos que las transcriben, pero su licencia MIT solo cubre el código del
+  // repo, no el copyright del libro. Con las ecuaciones se obtiene lo mismo.
+
+  // "48:30" o "1:32:10" o "48" (minutos) -> segundos
+  function _segundosDesdeMarca(txt) {
+    const partes = String(txt || '').trim().split(':').map(p => parseInt(p, 10));
+    if (!partes.length || partes.some(isNaN)) return 0;
+    if (partes.length === 1) return partes[0] * 60;              // solo minutos
+    if (partes.length === 2) return partes[0] * 60 + partes[1];  // mm:ss
+    return partes[0] * 3600 + partes[1] * 60 + partes[2];        // h:mm:ss
+  }
+
+  // % del VO2max que se sostiene durante una carrera de t minutos (Daniels-Gilbert)
+  function _pctVO2max(minutos) {
+    return 0.8 + 0.1894393 * Math.exp(-0.012778 * minutos) + 0.2989558 * Math.exp(-0.1932605 * minutos);
+  }
+
+  // VDOT a partir de una marca: distancia en metros, tiempo en segundos
+  function _vdotDesdeMarca(metros, segundos) {
+    if (!metros || !segundos) return 0;
+    const minutos = segundos / 60;
+    const v = metros / minutos;                                   // velocidad en m/min
+    const vo2 = -4.6 + 0.182258 * v + 0.000104 * v * v;
+    const vdot = vo2 / _pctVO2max(minutos);
+    return (isFinite(vdot) && vdot > 0) ? vdot : 0;
+  }
+
+  // Inversa de la ecuación de VO2: dado un consumo, ¿a qué velocidad se corre?
+  // 0.000104·v² + 0.182258·v − (4.6 + VO2) = 0  →  se resuelve la cuadrática.
+  function _velocidadDesdeVO2(vo2) {
+    const a = 0.000104, b = 0.182258, c = -(4.6 + vo2);
+    const disc = b * b - 4 * a * c;
+    if (disc < 0) return 0;
+    return (-b + Math.sqrt(disc)) / (2 * a);   // m/min
+  }
+
+  function _ritmoPorKm(vo2) {
+    const v = _velocidadDesdeVO2(vo2);         // m/min
+    if (!v) return '';
+    const segKm = 60000 / v;
+    const m = Math.floor(segKm / 60), s = Math.round(segKm % 60);
+    return s === 60 ? `${m + 1}:00` : `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  // Ritmos por zona. Los porcentajes de VO2max de cada zona son fisiología
+  // estándar (no son tablas de nadie): fácil 59-74%, maratón 75-84%,
+  // umbral 83-88%, intervalos 95-100%, repeticiones 105-110%.
+  function calcularRitmos(marcaDistancia, marcaTiempo) {
+    const metros = parseInt(marcaDistancia, 10) || 0;
+    const seg = _segundosDesdeMarca(marcaTiempo);
+    const vdot = _vdotDesdeMarca(metros, seg);
+    if (!vdot) return null;
+    return {
+      vdot: Math.round(vdot * 10) / 10,
+      facil:       `${_ritmoPorKm(vdot * 0.70)}-${_ritmoPorKm(vdot * 0.62)}`,
+      maraton:     _ritmoPorKm(vdot * 0.80),
+      umbral:      _ritmoPorKm(vdot * 0.86),
+      intervalos:  _ritmoPorKm(vdot * 0.975),
+      repeticiones:_ritmoPorKm(vdot * 1.07)
+    };
+  }
+
+  // Vista previa en el cuestionario, para que el cliente vea el valor al momento.
+  function previsualizarRitmos() {
+    const box = document.getElementById('previewRitmos');
+    if (!box) return;
+    const r = calcularRitmos(
+      document.getElementById('marcaDistancia')?.value,
+      document.getElementById('marcaTiempo')?.value
+    );
+    if (!r) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.innerHTML = `<strong style="color:var(--brasa)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
+      `Rodaje suave <strong>${r.facil}/km</strong> · Umbral <strong>${r.umbral}/km</strong> · Series <strong>${r.intervalos}/km</strong>`;
   }
 
   // ===== REGLA DE PRECIOS =====
