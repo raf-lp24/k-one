@@ -9529,6 +9529,11 @@
     const enfermedad = u.enfermedad || 'No';
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
+    // Semana y bloque del mesociclo. Se declaran aquí arriba porque los planes por
+    // deporte (más abajo) ya los necesitan para rotar sus contenidos por bloque.
+    const semanaActual = progreso.semana || 1;
+    const semanaCiclo  = ((Math.max(1, semanaActual) - 1) % 4) + 1;   // 1,2,3,4
+    const bloqueMeso   = Math.floor((Math.max(1, semanaActual) - 1) / 4); // 0,1,2…
     const notasSalud = [];
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
@@ -9859,10 +9864,47 @@
       const cfAireLib = lugarCF.includes('aire libre');
       const cf = cfAireLib; // alias corto
 
+      // Catálogo de WODs de referencia. Los benchmarks ("Las Chicas" y los Hero
+      // WOD) son de dominio público y están publicados en todas partes; la lista
+      // estructurada se tomó de github.com/luciana-lab/crossfit-benchmark-project
+      // (MIT) y aquí se ha traducido, pasado a kg y clasificada por nivel: los
+      // originales llevan cargas de élite (peso muerto de 184 kg, muscle-ups)
+      // que no se le pueden mandar a cualquiera.
+      // Rota por bloque de 4 semanas, igual que los accesorios de gimnasio: cada
+      // mesociclo trae un benchmark distinto y el cliente puede compararse consigo
+      // mismo cuando le vuelva a tocar.
+      const BENCHMARKS = {
+        principiante: [
+          { n: 'Cindy (escalada)', d: 'AMRAP 15 min: 3 ring rows, 6 flexiones (rodillas ok), 9 sentadillas aéreas. Anota rondas' },
+          { n: 'Angie (escalada)', d: 'For time (cap 25 min): 50 ring rows, 50 flexiones (rodillas ok), 100 abdominales, 50 sentadillas aéreas' },
+          { n: 'Karen (escalada)', d: 'For time (cap 15 min): 100 wall balls (6/4 kg). Ritmo: series de 10 con 5s de pausa' },
+          { n: 'Chelsea (escalada)', d: 'EMOM 20 min: 3 ring rows + 6 flexiones + 9 sentadillas aéreas. Si no llegas al minuto, para y descansa' }
+        ],
+        intermedio: [
+          { n: 'Fran (escalada)', d: '21-15-9 For time: thrusters (20/15 kg) + ring rows. Objetivo: sub-8 min' },
+          { n: 'Helen', d: '3 RFT: 400 m carrera, 15 KB swings (16/12 kg), 12 ring rows. Cronometra' },
+          { n: 'Grace (escalada)', d: 'For time (cap 12 min): 30 clean & jerk (40/30 kg). Series de 3-5 reps' },
+          { n: 'Karen', d: 'For time (cap 12 min): 150 wall balls (9/6 kg). Parte en series de 15' },
+          { n: 'Cindy', d: 'AMRAP 20 min: 5 dominadas (banda ok), 10 flexiones, 15 sentadillas aéreas. Anota rondas' }
+        ],
+        avanzado: [
+          { n: 'Fran', d: '21-15-9 For time: thrusters (43/30 kg) + pull-ups. Objetivo: sub-5 min' },
+          { n: 'Diane', d: '21-15-9 For time: peso muerto (102/70 kg) + handstand push-ups' },
+          { n: 'DT (Hero WOD)', d: '5 RFT: 12 peso muerto, 9 hang power clean, 6 push jerk (70/47 kg). Misma barra' },
+          { n: 'Helen', d: '3 RFT: 400 m carrera, 21 KB swings (24/16 kg), 12 pull-ups. Objetivo: sub-12 min' },
+          { n: 'Isabel', d: 'For time: 30 snatches (61/43 kg). Técnica antes que prisa' },
+          { n: 'Nate (Hero WOD)', d: 'AMRAP 20 min: 2 muscle-ups, 4 handstand push-ups, 8 KB swings (32/24 kg)' },
+          { n: 'The Seven (Hero WOD)', d: '7 rondas For time: 7 HSPU, 7 thrusters (61/43 kg), 7 knees-to-elbows, 7 peso muerto (111/75 kg), 7 burpees, 7 KB swings (32/24 kg), 7 pull-ups' }
+        ]
+      };
+      const _lista = esPrincipiante ? BENCHMARKS.principiante : (esAvanzado ? BENCHMARKS.avanzado : BENCHMARKS.intermedio);
+      const _bench = _lista[bloqueMeso % _lista.length];
+      const benchWod = `WOD "${_bench.n}" · ${_bench.d}`;
+
       if (esPrincipiante) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fundamentos · Squat + AMRAP",
-           detalle:`Strength · Sentadilla goblet 4×10 (técnica: pecho arriba, rodillas sobre pies) + peso muerto KB 4×10 (bisagra de cadera, espalda neutra). WOD "Cindy Scaled" AMRAP 15 min: 3 ring rows o remo bajo mesa, 6 flexiones (rodillas ok), 9 sentadillas aéreas. Anota rondas`,
+           detalle:`Strength · Sentadilla goblet 4×10 (técnica: pecho arriba, rodillas sobre pies) + peso muerto KB 4×10 (bisagra de cadera, espalda neutra). ${benchWod}`,
            etiqueta:"WOD"},
           {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Monostructural · Cardio técnico" : "Recuperación",
@@ -9887,8 +9929,8 @@
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Strength + Sprint Metcon",
            detalle: cf
-             ? `Strength · Sentadilla ${esAvanzado ? '5×3 al 80%' : '5×5 al 70-75%'}. WOD "Helen${esAvanzado ? '' : ' Scaled'}": 3 RFT: 400m carrera, ${esAvanzado ? '21 KB swings (24/16kg), 12 pull-ups' : '15 KB swings (16/12kg), 12 ring rows'}. Cronometra`
-             : `Strength · ${esAvanzado ? 'Sentadilla trasera 5×3 al 80-85% + power clean 4×3' : 'Sentadilla trasera 5×5 al 70-75%'}. WOD "Helen${esAvanzado ? '' : ' Scaled'}": 3 RFT: 400m carrera, ${esAvanzado ? '21 KB swings (24/16kg), 12 pull-ups' : '15 KB swings (16/12kg), 12 ring rows'}. Cronometra`,
+             ? `Strength · Sentadilla ${esAvanzado ? '5×3 al 80%' : '5×5 al 70-75%'}. ${benchWod}`
+             : `Strength · ${esAvanzado ? 'Sentadilla trasera 5×3 al 80-85% + power clean 4×3' : 'Sentadilla trasera 5×5 al 70-75%'}. ${benchWod}`,
            etiqueta:"WOD"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
@@ -10240,9 +10282,7 @@
     //   Semana 4: descarga — una serie menos que la base
     // Al delta del ciclo se le suma el del check-in (progreso.ajuste) y se aplica
     // UNA sola vez, para que no se acumulen y las series no se disparen.
-    const semanaActual = (u.progreso && u.progreso.semana) || 1;
-    const semanaCiclo = ((Math.max(1, semanaActual) - 1) % 4) + 1;
-    const bloqueMeso  = Math.floor((Math.max(1, semanaActual) - 1) / 4);  // 0,1,2… un bloque cada 4 semanas
+    // (semanaActual, semanaCiclo y bloqueMeso se declaran al principio de la función)
     const esDescarga  = semanaCiclo === 4;
     const deltaCiclo  = [0, 1, 1, -1][semanaCiclo - 1];
     const deltaCheck  = progreso.ajuste > 0 ? 1 : (progreso.ajuste < 0 ? -1 : 0);
