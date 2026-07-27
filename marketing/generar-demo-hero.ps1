@@ -114,7 +114,7 @@ function Pill($g,$s,$font,$x,$y,$colBorde,$colTexto){
 $ejercicios = @(
   @{n='PRESS BANCA';       s='4'; r='8';  rpe='8'},
   @{n='REMO CON MANCUERNA';s='3'; r='10'; rpe='8'},
-  @{n='PRESS MILITAR';     s='3'; r='10'; rpe='8.5'},
+  @{n='PRESS MILITAR';     s='3'; r='10'; rpe='8.5'; peso='22'; anterior='20'},
   @{n='JALON AL PECHO';    s='3'; r='12'; rpe='8'}
 )
 $comidas = @(
@@ -159,7 +159,8 @@ function Draw-Entreno($g,$off){
   $y += 54
   foreach($e in $ejercicios){
     if($y -gt $PH){ break }
-    FillRound $g $bGrafito 26 $y 588 132 12
+    $hCard = if($e.anterior){ 172 } else { 132 }
+    FillRound $g $bGrafito 26 $y 588 $hCard 12
     $cxp = 66; $cyp = $y + 44
     $g.FillEllipse($bBrasa,($cxp-22),($cyp-22),44,44)
     $tri=New-Object System.Drawing.Drawing2D.GraphicsPath
@@ -175,8 +176,64 @@ function Draw-Entreno($g,$off){
     Txt $g $e.s $fBodyB $bBlanco 104 ($y+84)
     Txt $g 'REPS' $fMonoS $bMetal 300 ($y+62)
     Txt $g $e.r $fBodyB $bBlanco 300 ($y+84)
-    $y += 144
+    if($e.anterior){
+      Txt $g 'CARGA (KG)' $fMonoS $bMetal 450 ($y+62)
+      FillRound $g $bCarbon 450 ($y+80) 110 34 8
+      TxtC $g $e.peso $fSmall $bBlanco 505 ($y+85)
+      Txt $g ('Anterior: ' + $e.anterior + ' kg') $fMonoS $bBrasa 104 ($y+134)
+    }
+    $y += $hCard + 12
   }
+}
+
+function Draw-Progreso($g,$off){
+  $y = 30 - $off
+  Txt $g '// ESTA SEMANA' $fMonoS $bBrasa 30 $y
+  $y += 34
+  Txt $g 'TU CONSTANCIA' $fAppTit $bBlanco 28 $y
+  $y += 70
+  FillRound $g $bGrafito 26 $y 284 250 14
+  Txt $g 'ADHERENCIA' $fMonoS $bMetal 46 ($y+30)
+  Txt $g '75%' $fTitulo $bBrasa 46 ($y+66)
+  FillRound $g $bCarbon 46 ($y+178) 224 14 7
+  FillRound $g $bBrasa 46 ($y+178) 168 14 7
+  Txt $g '3/4 dias esta semana' $fTiny $bMetalCl 46 ($y+206)
+
+  FillRound $g $bGrafito 332 $y 284 250 14
+  Txt $g 'RACHA' $fMonoS $bMetal 352 ($y+30)
+  Txt $g '12' $fTitulo $bBlanco 352 ($y+66)
+  Txt $g 'dias seguidos' $fTiny $bMetalCl 352 ($y+178)
+  Txt $g 'entrenando' $fTiny $bMetalCl 352 ($y+202)
+  $y += 290
+
+  FillRound $g $bGrafito 26 $y 588 96 14
+  StrokeRound $g $pBrasa 26 $y 588 96 14
+  Txt $g 'INVITA Y GANA' $fMonoS $bBrasa 46 ($y+18)
+  Txt $g '5€ por cada amigo que se una (max. 15€)' $fSmall $bBlanco 46 ($y+50)
+}
+
+function Draw-KcalMacros($g,$off){
+  $y = 30 - $off
+  Txt $g '// TU OBJETIVO DIARIO' $fMonoS $bBrasa 30 $y
+  $y += 34
+  Txt $g 'CALORIAS Y MACROS' $fAppTit $bBlanco 28 $y
+  $y += 66
+  FillRound $g $bGrafito 26 $y 588 130 14
+  Txt $g 'KCAL OBJETIVO' $fMonoS $bMetal 46 ($y+26)
+  Txt $g '2450' $fTitulo $bBrasa 46 ($y+50)
+  $y += 156
+  $macros = @(@{l='PROT';v='170g'},@{l='CARB';v='230g'},@{l='GRASA';v='75g'})
+  $mx = 26
+  foreach($m in $macros){
+    FillRound $g $bGrafito $mx $y 184 110 12
+    TxtC $g $m.l $fMonoS $bMetal ($mx+92) ($y+22)
+    TxtC $g $m.v $fBodyB $bBlanco ($mx+92) ($y+56)
+    $mx += 200
+  }
+  $y += 140
+  FillRound $g $bGrafito 26 $y 588 96 14
+  Txt $g 'TU PLAN' $fMonoS $bMetal 46 ($y+18)
+  Txt $g 'Semana 3 de tu programa actual' $fSmallB $bBlanco 46 ($y+50)
 }
 
 function Draw-Nutricion($g,$off){
@@ -245,11 +302,13 @@ function Draw-Hitos($g,$off){
 #  ESCENAS
 # =============================================================================
 $SC = @(
-  @{tipo='hook';    n=60},
-  @{tipo='entreno'; n=180; cap='Tu plan se adapta a tu deporte y a tu nivel'; scroll=420},
-  @{tipo='nutri';   n=150; cap='5 opciones por comida, cada dia';            scroll=340},
-  @{tipo='hitos';   n=150; cap='Hitos que se convierten en descuentos';      scroll=260},
-  @{tipo='cta';     n=90}
+  @{tipo='hook';       n=60},
+  @{tipo='entreno';    n=180; cap='Tu plan se adapta a tu deporte y a tu nivel'; scroll=460},
+  @{tipo='progreso';   n=110; cap='Tu constancia, siempre a la vista';           scroll=0},
+  @{tipo='kcalmacros'; n=110; cap='Calorias y macros ajustados a tu objetivo';   scroll=0},
+  @{tipo='nutri';      n=150; cap='5 opciones por comida, cada dia';             scroll=340},
+  @{tipo='hitos';      n=150; cap='Hitos que se convierten en descuentos';       scroll=260},
+  @{tipo='cta';        n=90}
 )
 $total = 0; foreach($s in $SC){ $total += $s.n }
 $durSeg = [math]::Round($total / $Fps, 2)
@@ -304,9 +363,11 @@ foreach($s in $SC){
       $e  = $e * $e * (3 - 2 * $e)
       $off = [int]($e * $s.scroll)
       switch($s.tipo){
-        'entreno' { Draw-Entreno $sg $off }
-        'nutri'   { Draw-Nutricion $sg $off }
-        'hitos'   { Draw-Hitos $sg $off }
+        'entreno'    { Draw-Entreno $sg $off }
+        'nutri'      { Draw-Nutricion $sg $off }
+        'hitos'      { Draw-Hitos $sg $off }
+        'progreso'   { Draw-Progreso $sg $off }
+        'kcalmacros' { Draw-KcalMacros $sg $off }
       }
       $sg.Dispose()
 
