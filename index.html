@@ -9125,6 +9125,25 @@
 
   }
 
+  // Divide por comas ignorando las que caen dentro de un paréntesis.
+  function splitRespetandoParentesis(texto) {
+    const partes = [];
+    let actual = '';
+    let profundidad = 0;
+    for (const ch of texto) {
+      if (ch === '(') profundidad++;
+      else if (ch === ')') profundidad = Math.max(0, profundidad - 1);
+      if (ch === ',' && profundidad === 0) {
+        partes.push(actual);
+        actual = '';
+      } else {
+        actual += ch;
+      }
+    }
+    if (actual) partes.push(actual);
+    return partes;
+  }
+
   function formatearSesion(day) {
     if (!day || day.tipo === 'Descanso' || !day.detalle) return '';
     const extras = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
@@ -9132,7 +9151,12 @@
 
     const partes = day.detalle.split('·');
     const ejerciciosTexto = partes.length >= 2 ? partes.slice(1).join('·') : day.detalle;
-    const ejercicios = ejerciciosTexto.split(',').map(e => e.trim()).filter(Boolean);
+    // Split por comas que NO estén dentro de un paréntesis: una nota como
+    // "press francés (codos fijos, no los abras)" tiene una coma de verdad
+    // dentro del inciso, y un split ingenuo la parte en dos "ejercicios"
+    // sueltos ("no los abras)" acababa siendo su propia tarjeta con RPE y
+    // peso, sin ningún sentido).
+    const ejercicios = splitRespetandoParentesis(ejerciciosTexto).map(e => e.trim()).filter(Boolean);
 
     // En todos los días de entrenamiento (gimnasio, cardio, WOD, Hyrox, combinados...)
     // separamos los ejercicios/tramos en bloque de fuerza (levantamientos compuestos
@@ -9142,6 +9166,14 @@
     const FUERZA_RE = /sentadilla|peso muerto|press (de )?banca|press militar|dominadas|remo (con )?barra|zancada|prensa|thruster/i;
     const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
     ejercicios.forEach(e => {
+      // Los días "Simulacro"/"Elige entre" de Hyrox escriben un párrafo largo
+      // con una lista de estaciones dentro de un único paréntesis (que ahora
+      // no se rompe por las comas). Si ese párrafo contiene de casualidad un
+      // "número×número" en medio (ej. "sled push 2×12.5m"), se detectaba como
+      // si TODO el párrafo fuera el nombre de un ejercicio con peso, cortado
+      // justo antes de esa cifra. Un párrafo así nunca es un solo ejercicio.
+      const pareceParrafo = e.split(' ').length > 15 || /elige entre|simulacro/i.test(e);
+      if (pareceParrafo) { acondicionamiento.push(e); return; }
       const m = e.match(/×\s*(\d+)\s*(\D*)/);
       const reps = m ? parseInt(m[1], 10) : null;
       const unidad = m ? m[2].trim() : '';
@@ -9186,9 +9218,22 @@
       `<div class="entreno-bloque"><div class="entreno-bloque-head"><span class="entreno-bloque-num">${String(i + 1).padStart(2, '0')}</span><span class="entreno-bloque-title">${b.t}</span></div>${b.c}</div>`
     ).join('');
 
+    // Después de entrenar: la recomendación de proteína/creatina ya existe
+    // (generatedPlan.notasDeporte), pero vivía solo en la sección Nutrición
+    // dentro de un acordeón colapsado — un cliente que solo mira "Hoy" nunca
+    // la veía. Se repite aquí, corta y en el sitio donde de verdad hace falta:
+    // justo debajo del entreno que acaba de terminar.
+    const deporteActual = (userData?.deporte || 'Gimnasio / Fuerza');
+    const esRunnerHoy = deporteActual.includes('Running');
+    const postEntrenoTxt = esRunnerHoy
+      ? 'Después de entrenar: hidratos + proteína en los 60 min siguientes (por ejemplo, plátano con leche o yogur) — repone glucógeno y ayuda a recuperar.'
+      : 'Después de entrenar: proteína (whey o comida con 25-30g) + 5g de creatina monohidrato en agua o batido — es el combo con más evidencia para recuperar y ganar fuerza.';
+    const postEntrenoHTML = `<br><br><div style="background:rgba(39,174,96,0.06);border-left:3px solid #27ae60;padding:12px 16px;font-size:13px;line-height:1.6;color:var(--metal-claro)">${postEntrenoTxt}</div>`;
+
     return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
-      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
+      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}` +
+      postEntrenoHTML;
   }
 
   // ===== MENSAJES DEL DÍA (60 frases, rotación diaria determinista) =====
