@@ -68,8 +68,11 @@ function contarHitosVerificados(userdata, createdAt, referidosPagados) {
   // más entrenos que días transcurridos desde el alta.
   const fechas = fechasEntrenoValidas(u, altaMs);
   const diasDesdeAlta = Math.max(1, Math.floor((Date.now() - altaMs) / DIA_MS) + 1);
-  const listaEntrenos = Array.isArray(u.entrenosCompletados) ? u.entrenosCompletados.length : 0;
-  const totalEntrenos = Math.min(Math.max(fechas.size, 0) || listaEntrenos, diasDesdeAlta);
+  // OJO: nunca usar userData.entrenosCompletados como fallback aquí — es un array
+  // que escribe el navegador sin pasar por el servidor, y un cliente podría
+  // rellenarlo a mano para fabricar hitos falsos. Solo cuentan las fechas
+  // verificadas de historialEntrenos, aunque sean 0.
+  const totalEntrenos = Math.min(fechas.size, diasDesdeAlta);
   const racha = Math.min(rachaDesdeFechas(fechas), diasDesdeAlta);
 
   // Fotos: como mucho una por mes transcurrido (+1 de margen).

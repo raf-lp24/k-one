@@ -136,8 +136,27 @@ module.exports = async (req, res) => {
               });
               console.log(`[stripe-webhook] Schedule creado: tras el mes de oferta pasa a ${siguientePriceId}`);
             } catch (schedErr) {
-              // Si esto falla, el cliente seguiría al precio de la oferta indefinidamente.
+              // Si esto falla, el cliente seguiría al precio de la oferta indefinidamente
+              // y antes solo quedaba constancia en los logs de Vercel, que nadie mira a
+              // diario. Avisamos por email al admin para que lo corrija a mano en Stripe.
               console.error('[stripe-webhook] FALLO creando el schedule oferta→plan. El cliente se quedará a 1,99€ hasta que se corrija a mano:', schedErr.message);
+              try {
+                const { enviarEmail, ADMIN_EMAIL } = require('./notify');
+                const apiKey = process.env.RESEND_API_KEY;
+                if (apiKey) {
+                  await enviarEmail(apiKey, {
+                    from: 'K-ONE <equipo@k-one.fit>',
+                    to: ADMIN_EMAIL,
+                    subject: '⚠️ Fallo al programar el cambio de plan tras la oferta 1,99€',
+                    html: `<p>No se pudo crear el subscriptionSchedule para el customer <b>${session.customer}</b> (subscription <b>${subscription.id}</b>).</p>
+                           <p>Este cliente se quedará pagando 1,99€/mes de forma indefinida hasta que se corrija manualmente en el dashboard de Stripe.</p>
+                           <p>Plan al que debía pasar: <b>${siguientePriceId}</b></p>
+                           <p>Error: <code>${(schedErr.message || '').replace(/</g,'&lt;')}</code></p>`,
+                  });
+                }
+              } catch (mailErr) {
+                console.error('[stripe-webhook] además falló el aviso por email:', mailErr.message);
+              }
             }
           }
         }

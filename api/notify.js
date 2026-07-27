@@ -457,6 +457,16 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
+  return handlePost(req, res);
+};
+
+// Reutilizables por otras funciones (p.ej. stripe-webhook.js para avisos al
+// admin) vía require('./notify'). Esto es solo un import de módulo — no crea
+// una función serverless nueva, así que no cuenta para el límite de Vercel.
+module.exports.enviarEmail = enviarEmail;
+module.exports.ADMIN_EMAIL = ADMIN_EMAIL;
+
+async function handlePost(req, res) {
 
   const origin = req.headers.origin || req.headers.referer || '';
   const appUrl = process.env.APP_URL || 'https://k-one.fit';

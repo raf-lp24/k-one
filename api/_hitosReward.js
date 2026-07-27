@@ -4,8 +4,8 @@ const { contarHitosVerificados } = require('./_hitos');
 // Recompensas por niveles de hitos: % de descuento en la SIGUIENTE cuota
 // (cupón percent_off de un solo uso → escala con el plan del cliente, sea
 // mensual, trimestral o anual). Una sola vez por nivel y por cliente; el
-// registro de niveles cobrados vive en la metadata del customer de Stripe,
-// que el navegador no puede tocar.
+// cerrojo que impide el doble canje vive en la tabla hitos_canjes de
+// Supabase (clave primaria user_id+nivel), que el navegador no puede tocar.
 //
 // `semanasMin` es un refuerzo: aunque los hitos ya se recalculan acotados por
 // la antigüedad real de la cuenta, ningún premio se entrega antes de ese tiempo.
@@ -75,11 +75,19 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
     return { status: 404, body: { error: 'No se encontró una suscripción activa' } };
   }
 
-  // ¿Ya cobró este nivel? (metadata del customer de Stripe = fuente de verdad)
-  const customer = await stripe.customers.retrieve(sub.stripe_customer_id);
-  const reclamados = (customer.metadata?.kone_hitos_niveles || '').split(',').filter(Boolean);
-  if (reclamados.includes(nivel)) {
-    return { status: 409, body: { error: 'Ya has canjeado la recompensa de este nivel' } };
+  // Cerrojo atómico contra doble canje: la clave primaria (user_id, nivel) de
+  // hitos_canjes solo deja ganar a la primera petición. Si dos peticiones
+  // casi simultáneas (doble clic, dos pestañas) llegan aquí, la segunda choca
+  // contra la clave duplicada (código 23505) y se rechaza — a diferencia de
+  // leer primero customer.metadata, que tiene una ventana de carrera real.
+  const { error: lockError } = await supabaseAdmin
+    .from('hitos_canjes')
+    .insert({ user_id: user.id, nivel });
+  if (lockError) {
+    if (lockError.code === '23505') {
+      return { status: 409, body: { error: 'Ya has canjeado la recompensa de este nivel' } };
+    }
+    throw lockError;
   }
 
   // Aplicar el cupón a la suscripción (descuenta la próxima factura).
@@ -96,10 +104,17 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
     }
   }
 
-  // Registrar el nivel como cobrado
-  await stripe.customers.update(sub.stripe_customer_id, {
-    metadata: { ...customer.metadata, kone_hitos_niveles: [...reclamados, nivel].join(',') },
-  });
+  // Registrar el nivel también en Stripe (solo visibilidad en el dashboard;
+  // hitos_canjes es la fuente de verdad que impide el doble canje).
+  try {
+    const customer = await stripe.customers.retrieve(sub.stripe_customer_id);
+    const reclamados = (customer.metadata?.kone_hitos_niveles || '').split(',').filter(Boolean);
+    await stripe.customers.update(sub.stripe_customer_id, {
+      metadata: { ...customer.metadata, kone_hitos_niveles: [...new Set([...reclamados, nivel])].join(',') },
+    });
+  } catch (e) {
+    console.error('[canjear-hito] no se pudo anotar metadata en Stripe (no crítico):', e.message);
+  }
 
   console.log(`[canjear-hito] ${user.id} canjeó nivel ${nivel} (${premio.pct}% en próxima cuota) — ${verif.total} hitos verificados, ${verif.semanas} semanas`);
   return { status: 200, body: { ok: true, pct: premio.pct, hitosVerificados: verif.total } };
