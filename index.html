@@ -9221,19 +9221,20 @@
     // Después de entrenar: la recomendación de proteína/creatina ya existe
     // (generatedPlan.notasDeporte), pero vivía solo en la sección Nutrición
     // dentro de un acordeón colapsado — un cliente que solo mira "Hoy" nunca
-    // la veía. Se repite aquí, corta y en el sitio donde de verdad hace falta:
-    // justo debajo del entreno que acaba de terminar.
+    // la veía. Se repite aquí, corta. Va ARRIBA del todo (antes del
+    // calentamiento) y no abajo: si el entreno tiene muchos ejercicios, un
+    // aviso al final de la página se queda sin ver.
     const deporteActual = (userData?.deporte || 'Gimnasio / Fuerza');
     const esRunnerHoy = deporteActual.includes('Running');
     const postEntrenoTxt = esRunnerHoy
       ? 'Después de entrenar: hidratos + proteína en los 60 min siguientes (por ejemplo, plátano con leche o yogur) — repone glucógeno y ayuda a recuperar.'
       : 'Después de entrenar: proteína (whey o comida con 25-30g) + 5g de creatina monohidrato en agua o batido — es el combo con más evidencia para recuperar y ganar fuerza.';
-    const postEntrenoHTML = `<br><br><div style="background:rgba(39,174,96,0.06);border-left:3px solid #27ae60;padding:12px 16px;font-size:13px;line-height:1.6;color:var(--metal-claro)">${postEntrenoTxt}</div>`;
+    const postEntrenoHTML = `<div style="background:rgba(39,174,96,0.06);border-left:3px solid #27ae60;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--metal-claro)">${postEntrenoTxt}</div>`;
 
-    return `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
+    return postEntrenoHTML +
+      `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
-      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}` +
-      postEntrenoHTML;
+      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
   }
 
   // ===== MENSAJES DEL DÍA (60 frases, rotación diaria determinista) =====
