@@ -846,42 +846,6 @@
   #landing { position: relative; z-index: 1; }
   #formulario, #login, #registro, #bienvenida, #dashboard { position: relative; z-index: 2; }
 
-  /* MANIFESTO */
-  .manifesto {
-    padding: 120px 40px;
-    max-width: 760px;
-    margin: 0 auto;
-    border-top: 1px solid var(--humo);
-  }
-
-  .manifesto-left {}
-
-  .manifesto-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--brasa);
-    margin-bottom: 20px;
-  }
-
-  .manifesto-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    line-height: 1;
-    letter-spacing: 1px;
-    margin-bottom: 24px;
-  }
-
-  .manifesto-body {
-    color: var(--metal-claro);
-    font-size: 16px;
-    line-height: 1.8;
-    font-weight: 400;
-  }
-
-  .manifesto-body p + p { margin-top: 16px; }
-
   /* ===== CIFRAS REALES: sección grande, separada del manifiesto ===== */
   .big-stats {
     position: relative;
@@ -4541,7 +4505,6 @@
     .section-title { font-size: 40px; }
     .section-note { max-width: 100%; text-align: left; }
     footer { flex-direction: column; align-items: flex-start; gap: 12px; text-align: left; }
-    .manifesto { padding: 80px 24px; }
     .app-preview-grid { grid-template-columns: 1fr; gap: 40px; }
     .app-preview-visual { order: -1; }
     .steps { grid-template-columns: 1fr 1fr; }
@@ -4589,7 +4552,7 @@
     #todayPlan, #feedbackPanel, .checkin-card { padding: 20px !important; }
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
-    .manifesto, .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
+    .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
   }
 
   @media (max-width: 480px) {
@@ -6098,17 +6061,6 @@
       </video>
     </div>
   </div>
-
-  <section class="manifesto" id="manifesto">
-    <div class="manifesto-left">
-      <div class="manifesto-tag">// Por qué K-One</div>
-      <h2 class="manifesto-title">Tu preparador de élite, 24/7.</h2>
-      <div class="manifesto-body">
-        <p>La mayoría de apps te dan un plan y te dejan solo. K-One replica la lógica de un preparador de élite las 24 horas: aprende de cómo evolucionas, ajusta cargas, calorías y descanso en tiempo real, y te acompaña cada semana. Entrenamiento, nutrición y mentalidad trabajando juntos.</p>
-        <p>No prometemos resultados en 30 días. Prometemos un proceso honesto y progresivo. La disciplina no se compra, se construye — aquí tienes las herramientas.</p>
-      </div>
-    </div>
-  </section>
 
   <section class="big-stats" id="cifras">
     <div class="big-stats-glow" aria-hidden="true"></div>
