@@ -1,0 +1,89 @@
+<!--
+  K-ONE · Supabase Auth · plantilla "Invite user"
+  Pegar en: Supabase Dashboard -> Authentication -> Email Templates -> Invite user (vista "Source"/HTML)
+  {{ .ConfirmationURL }} lo rellena Supabase solo -- no tocar ese token.
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Te han invitado a K-ONE</title>
+</head>
+<body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#141414;border:1px solid #2A2A2A;border-radius:14px;overflow:hidden;">
+
+          <tr>
+            <td background="https://k-one.fit/img/landing/gym-hero.jpg" bgcolor="#0A0A0A"
+                style="background-image:url('https://k-one.fit/img/landing/gym-hero.jpg');background-size:cover;background-position:center 30%;background-repeat:no-repeat;">
+              <!--[if gte mso 9]>
+              <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:560px;height:180px;">
+                <v:fill type="frame" src="https://k-one.fit/img/landing/gym-hero.jpg" color="#0A0A0A" />
+                <v:textbox inset="0,0,0,0">
+              <![endif]-->
+              <div style="background:linear-gradient(180deg, rgba(10,10,10,0.35) 0%, rgba(10,10,10,0.75) 65%, #141414 100%); padding:44px 32px 28px; text-align:center;">
+                <div style="display:inline-block;padding:8px 20px;background:#E8490F;border-radius:6px;">
+                  <span style="font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:24px;letter-spacing:3px;color:#ffffff;">K-ONE</span>
+                </div>
+              </div>
+              <!--[if gte mso 9]>
+                </v:textbox>
+              </v:rect>
+              <![endif]-->
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:36px 36px 8px;">
+              <p style="margin:0 0 8px;font-family:'DM Mono',Consolas,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#E8490F;">// Te esperamos</p>
+              <h1 style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:800;color:#F0EDE8;letter-spacing:.3px;">Te han invitado a K-ONE</h1>
+              <p style="margin:0 0 28px;font-size:15px;line-height:1.7;color:#B5B2AD;">
+                Entrenamiento, nutrición y mentalidad, todo adaptado a ti y ajustado cada semana. Pulsa el botón para crear tu cuenta y activarla.
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+                <tr>
+                  <td align="center" style="border-radius:8px;background:#E8490F;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank"
+                       style="display:inline-block;padding:16px 40px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;letter-spacing:.5px;color:#ffffff;text-decoration:none;border-radius:8px;">
+                      ACEPTAR INVITACIÓN
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#5A5A5A;text-align:center;">
+                Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#E8490F;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:8px 36px 32px;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#5A5A5A;text-align:center;">
+                Si no esperabas esta invitación, puedes ignorar este email con tranquilidad.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 28px;border-top:1px solid #2A2A2A;text-align:center;">
+              <p style="margin:0;color:#5A5A5A;font-size:13px;">Equipo K-<span style="color:#E8490F;font-weight:600;">ONE</span></p>
+              <p style="margin:8px 0 0;font-size:10px;">
+                <a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none;">k.one.fit26@gmail.com</a>
+                <span style="color:#444;"> · </span>
+                <a href="https://k-one.fit" style="color:#666;text-decoration:none;">k-one.fit</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
