@@ -5703,6 +5703,23 @@
             <div class="radio-opt" onclick="selectRadio(this,'cp-deporte')">Híbrido</div>
           </div>
         </div>
+        <!-- Marca reciente: recalcula los ritmos de las sesiones de carrera -->
+        <div class="field">
+          <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <select id="cp-marcaDistancia" onchange="previsualizarRitmosCambioPlan()" style="flex:1;min-width:130px">
+              <option value="">Distancia</option>
+              <option value="5000">5 km</option>
+              <option value="10000">10 km</option>
+              <option value="21097">Media maratón</option>
+              <option value="42195">Maratón</option>
+            </select>
+            <input type="text" id="cp-marcaTiempo" placeholder="Tiempo (ej: 48:30)" oninput="previsualizarRitmosCambioPlan()"
+                   inputmode="numeric" autocomplete="off" style="flex:1;min-width:130px">
+          </div>
+          <span class="field-hint">Si has mejorado tu marca, actualízala aquí y recalculamos tus ritmos de rodaje, umbral y series.</span>
+          <div id="cp-previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
+        </div>
         <div class="field">
           <label>¿Cuántos días a la semana puedes entrenar?</label>
           <div class="radio-group" id="cp-diasEntreno">
@@ -10206,6 +10223,7 @@
       // veces y quedaban ilegibles.
       const conRitmo = (texto) => texto
         .replace(/ritmo umbral/i,     `ritmo umbral (${ritmos.umbral}/km)`)
+        .replace(/ritmo tempo/i,      `ritmo tempo (${ritmos.umbral}/km)`)
         .replace(/ritmo marat[óo]n/i, `ritmo maratón (${ritmos.maraton}/km)`)
         .replace(/ritmo 5K/i,         `ritmo 5K (${ritmos.intervalos}/km)`)
         .replace(/(zona 1-2|zona 2|ritmo conversacional)/i, `$1 (${ritmos.facil}/km)`);
@@ -13068,6 +13086,20 @@
     };
   }
 
+  // Vista previa dentro del modal de "cambiar plan" (mismos cálculos).
+  function previsualizarRitmosCambioPlan() {
+    const box = document.getElementById('cp-previewRitmos');
+    if (!box) return;
+    const r = calcularRitmos(
+      document.getElementById('cp-marcaDistancia')?.value,
+      document.getElementById('cp-marcaTiempo')?.value
+    );
+    if (!r) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.innerHTML = `<strong style="color:var(--brasa)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
+      `Rodaje suave <strong>${r.facil}/km</strong> · Umbral <strong>${r.umbral}/km</strong> · Series <strong>${r.intervalos}/km</strong>`;
+  }
+
   // Vista previa en el cuestionario, para que el cliente vea el valor al momento.
   function previsualizarRitmos() {
     const box = document.getElementById('previewRitmos');
@@ -13546,6 +13578,12 @@
     }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     preseleccionarRadio('cp-deporte', userData.deporte);
+    // Marca de carrera guardada (si la dio), para poder actualizarla al mejorar
+    const cpMd = document.getElementById('cp-marcaDistancia');
+    const cpMt = document.getElementById('cp-marcaTiempo');
+    if (cpMd) cpMd.value = userData.marcaDistancia || '';
+    if (cpMt) cpMt.value = userData.marcaTiempo || '';
+    previsualizarRitmosCambioPlan();
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
     preseleccionarRadio('cp-tiempoSesion', userData.tiempoSesion);
     preseleccionarRadio('cp-nivel', userData.nivel);
@@ -13660,6 +13698,10 @@
 
     const _entrenoHaCambiado = nuevoDeporte !== userData.deporte ||
       nuevosDias !== userData.diasEntreno || nuevoNivel !== userData.nivel || nuevoLugar !== userData.lugar;
+
+    // Marca de carrera: si la actualiza, los ritmos se recalculan al regenerar el plan
+    userData.marcaDistancia = document.getElementById('cp-marcaDistancia')?.value || '';
+    userData.marcaTiempo    = document.getElementById('cp-marcaTiempo')?.value || '';
 
     userData.tipoPlan = nuevoTipoPlan;
     userData.periodicidad = nuevaPeriodicidad;
