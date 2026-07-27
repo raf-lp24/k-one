@@ -10838,6 +10838,35 @@
       ];
     }
 
+    // Variantes por deporte: además del objetivo (perder grasa/ganar músculo/
+    // equilibrio), corredores y atletas de Hyrox/CrossFit tienen una necesidad
+    // real que las recetas genéricas no cubren — carbohidratos de digestión
+    // rápida y bajos en fibra/grasa antes y después del esfuerzo (para no ir
+    // pesado a la sesión y para reponer glucógeno rápido después). Se añaden
+    // como opciones EXTRA (no sustituyen nada) en los momentos donde tiene
+    // sentido, marcadas en el nombre para que se entienda cuándo tomarlas.
+    const nutriMomento = m => nutricion.find(x => x.momento === m);
+    if (esRunner) {
+      const desayuno = nutriMomento('Desayuno');
+      if (desayuno) desayuno.opciones.push(
+        op('Tostadas con miel y plátano (antes de tirada larga o series)', '2 rebanadas de pan blanco, 20g miel, 1 plátano', '330 kcal', '6g prot', '73g carbs', '3g grasa', 'Sin cocción · 3 min')
+      );
+      const merienda = nutriMomento('Merienda');
+      if (merienda) merienda.opciones.push(
+        op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min')
+      );
+    }
+    if (esHyrox || esCrossfit || esCombinacion) {
+      const comida = nutriMomento('Comida');
+      if (comida) comida.opciones.push(
+        op('Arroz blanco con pollo y miel (90 min antes del WOD)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min')
+      );
+      const merienda2 = nutriMomento('Merienda');
+      if (merienda2) merienda2.opciones.push(
+        op('Batido de proteína con plátano y avena (recuperación post-WOD)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min')
+      );
+    }
+
     // Adaptar nutrición a alergias/intolerancias (gluten, lactosa, frutos secos)
     if (sinGluten || sinLactosa || sinFrutosSecos) {
       const reemplazosNutricion = [];
