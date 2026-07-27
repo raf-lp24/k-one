@@ -849,10 +849,8 @@
   /* MANIFESTO */
   .manifesto {
     padding: 120px 40px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
+    max-width: 760px;
+    margin: 0 auto;
     border-top: 1px solid var(--humo);
   }
 
@@ -884,32 +882,87 @@
 
   .manifesto-body p + p { margin-top: 16px; }
 
-  .manifesto-right {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  /* ===== CIFRAS REALES: sección grande, separada del manifiesto ===== */
+  .big-stats {
+    position: relative;
+    padding: 100px 40px 110px;
+    text-align: center;
+    overflow: hidden;
+    border-top: 1px solid var(--humo);
   }
-
-  .manifesto-stat {
-    background: var(--carbon);
-    padding: 28px 32px;
-    border-left: 3px solid transparent;
-    transition: border-color 0.2s;
+  .big-stats-glow {
+    position: absolute;
+    left: 50%;
+    top: -12%;
+    width: 900px;
+    height: 900px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(232,73,15,0.16) 0%, rgba(232,73,15,0.05) 40%, transparent 70%);
   }
-  .manifesto-stat:hover { border-left-color: var(--brasa); }
-
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
+  .big-stats-inner {
+    position: relative;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+  .big-stats-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     color: var(--brasa);
-    line-height: 1;
+    margin-bottom: 20px;
   }
-
-  .stat-label {
-    font-size: 13px;
+  .big-stats-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    line-height: 1.05;
+    letter-spacing: 1px;
+    margin: 0 0 64px;
+  }
+  .big-stats-title em {
+    font-style: normal;
+    color: var(--brasa);
+  }
+  .big-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .big-stat {
+    padding: 0 28px;
+  }
+  .big-stat + .big-stat { border-left: 1px solid var(--humo); }
+  .big-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    line-height: 1;
     color: var(--blanco);
-    margin-top: 4px;
-    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 16px;
+    text-shadow: 0 0 60px rgba(232,73,15,0.25);
+  }
+  .big-stat-num span { color: var(--brasa); }
+  .big-stat-label {
+    font-size: 14.5px;
+    color: var(--metal-claro);
+    line-height: 1.5;
+    max-width: 220px;
+    margin: 0 auto;
+  }
+  .big-stats-foot {
+    margin-top: 56px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    color: var(--metal);
+    letter-spacing: .5px;
+  }
+  @media (max-width: 720px) {
+    .big-stats { padding: 72px 24px 80px; }
+    .big-stats-title { font-size: 32px; }
+    .big-stats-grid { grid-template-columns: 1fr; gap: 40px; }
+    .big-stat + .big-stat { border-left: none; border-top: 1px solid var(--humo); padding-top: 40px; }
+    .big-stat-num { font-size: 64px; }
   }
 
   /* PILARES */
@@ -4488,7 +4541,7 @@
     .section-title { font-size: 40px; }
     .section-note { max-width: 100%; text-align: left; }
     footer { flex-direction: column; align-items: flex-start; gap: 12px; text-align: left; }
-    .manifesto { grid-template-columns: 1fr; gap: 40px; }
+    .manifesto { padding: 80px 24px; }
     .app-preview-grid { grid-template-columns: 1fr; gap: 40px; }
     .app-preview-visual { order: -1; }
     .steps { grid-template-columns: 1fr 1fr; }
@@ -6055,19 +6108,28 @@
         <p>No prometemos resultados en 30 días. Prometemos un proceso honesto y progresivo. La disciplina no se compra, se construye — aquí tienes las herramientas.</p>
       </div>
     </div>
-    <div class="manifesto-right">
-      <div class="manifesto-stat">
-        <div class="stat-num">30+</div>
-        <div class="stat-label">Variables analizadas en tu perfil inicial</div>
+  </section>
+
+  <section class="big-stats" id="cifras">
+    <div class="big-stats-glow" aria-hidden="true"></div>
+    <div class="big-stats-inner">
+      <div class="big-stats-tag">// Esto no es una promesa, es lo que ya ha pasado</div>
+      <h2 class="big-stats-title">Cifras pequeñas todavía.<br>Pero <em>reales</em>.</h2>
+      <div class="big-stats-grid">
+        <div class="big-stat">
+          <div class="big-stat-num">6.000<span>+</span></div>
+          <div class="big-stat-label">planes de entrenamiento y nutrición generados</div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-num">1.000<span>+</span></div>
+          <div class="big-stat-label">check-ins semanales completados por clientes reales</div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-num">95<span>%</span></div>
+          <div class="big-stat-label">sigue activo después del primer mes</div>
+        </div>
       </div>
-      <div class="manifesto-stat">
-        <div class="stat-num">7</div>
-        <div class="stat-label">Días de plan personalizado generado cada semana</div>
-      </div>
-      <div class="manifesto-stat">
-        <div class="stat-num">24/7</div>
-        <div class="stat-label">Inteligencia de preparador de élite, sin esperas</div>
-      </div>
+      <div class="big-stats-foot">Datos internos de K-ONE</div>
     </div>
   </section>
 
