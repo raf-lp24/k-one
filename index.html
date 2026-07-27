@@ -9226,9 +9226,17 @@
     // aviso al final de la página se queda sin ver.
     const deporteActual = (userData?.deporte || 'Gimnasio / Fuerza');
     const esRunnerHoy = deporteActual.includes('Running');
+    // La proteína TOTAL del día sí depende del objetivo (volumen/déficit/
+    // recomposición) — eso ya lo calcula protObj, personalizado. Pero la
+    // dosis de UNA toma que maximiza la síntesis proteica no depende de si
+    // estás en déficit o superávit, depende del peso corporal (~0,3-0,4 g/kg).
+    // Antes era un "25-30g" fijo para todo el mundo, tuvieras 55 o 100 kg.
+    const pesoActualKg = parseFloat(userData?.peso) || 75;
+    const protMin = Math.round(pesoActualKg * 0.3);
+    const protMax = Math.round(pesoActualKg * 0.4);
     const postEntrenoTxt = esRunnerHoy
       ? 'Después de entrenar: hidratos + proteína en los 60 min siguientes (por ejemplo, plátano con leche o yogur) — repone glucógeno y ayuda a recuperar.'
-      : 'Después de entrenar: 25-30g de proteína + 5g de creatina monohidrato en agua o batido — es el combo con más evidencia para recuperar y ganar fuerza.';
+      : `Después de entrenar: ${protMin}-${protMax}g de proteína (según tu peso) + 5g de creatina monohidrato en agua o batido — es el combo con más evidencia para recuperar y ganar fuerza.`;
     const postEntrenoHTML = `<div style="background:rgba(39,174,96,0.06);border-left:3px solid #27ae60;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--metal-claro)">${postEntrenoTxt}</div>`;
 
     return postEntrenoHTML +
