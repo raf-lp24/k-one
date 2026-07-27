@@ -9620,6 +9620,12 @@
     const semanaActual = progreso.semana || 1;
     const semanaCiclo  = ((Math.max(1, semanaActual) - 1) % 4) + 1;   // 1,2,3,4
     const bloqueMeso   = Math.floor((Math.max(1, semanaActual) - 1) / 4); // 0,1,2…
+    // Progresión de %1RM por mesociclo (CrossFit): antes el % de los levantamientos
+    // de fuerza era fijo toda la temporada. Ahora sube en las semanas 2-3 del bloque
+    // y descarga en la 4, igual que ya progresan las series de fuerza de gimnasio.
+    const _deltaPct1RM = [0, 3, 5, -8][semanaCiclo - 1];
+    const pct1RM = base => Math.max(50, Math.min(92, base + _deltaPct1RM));
+    const pctRango1RM = (lo, hi) => `${pct1RM(lo)}-${pct1RM(hi)}%`;
     const notasSalud = [];
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
@@ -9666,9 +9672,21 @@
     // SEMANA según días disponibles y deporte (numDias se declara arriba, a nivel de función)
     if (esRunner) {
       // ── RUNNING ── programación 80/20 real con variedad de sesiones
-      const durBase  = sesionCorta ? '20-25 min' : esAvanzado ? '50-60 min' : '35-45 min';
-      const durMedio = sesionCorta ? '25-30 min' : esAvanzado ? '55-65 min' : '40-50 min';
-      const durLarga = esAvanzado  ? '80-100 min' : '55-70 min';
+      // Regla del 10%: el volumen sube ~10%/semana dentro del bloque de 4 semanas
+      // y descarga la 4ª (mismo patrón de mesociclo que ya usa el resto del plan).
+      // Antes el texto de la tirada larga PROMETÍA "sube 10%/semana, descarga cada
+      // 3ª" pero los minutos mostrados eran fijos toda la temporada — no cuadraba
+      // ni con lo que el propio texto decía ni con el resto del programa (deload
+      // cada 4ª semana, no cada 3ª).
+      const _multVolumenRun = [1.0, 1.10, 1.21, 0.70][semanaCiclo - 1];
+      const _escalarDur = (lo, hi, mult) => {
+        const loS = Math.max(15, Math.round(lo * mult / 5) * 5);
+        const hiS = Math.max(loS + 5, Math.round(hi * mult / 5) * 5);
+        return `${loS}-${hiS} min`;
+      };
+      const durBase  = _escalarDur(...(sesionCorta ? [20,25] : esAvanzado ? [50,60] : [35,45]), _multVolumenRun);
+      const durMedio = _escalarDur(...(sesionCorta ? [25,30] : esAvanzado ? [55,65] : [40,50]), _multVolumenRun);
+      const durLarga = _escalarDur(...(esAvanzado  ? [80,100] : [55,70]), _multVolumenRun);
 
       const lugarR  = u.lugar || 'Gimnasio';
       const rSinMat = lugarR.includes('sin material') || lugarR.includes('aire libre');
@@ -9739,7 +9757,7 @@
            etiqueta: numDias >= 3 ? "Umbral" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Tirada larga · Negative split" : "Descanso activo",
-           detalle: numDias >= 5 ? `Tirada larga con calidad · ${durLarga}. Primera mitad a zona 2 suave. Segunda mitad: progresivo hasta ritmo maratón (últimos 20 min más rápido que los primeros). Hidratación cada 20 min. Subir distancia 10%/semana, cada 3ª semana bajar 30% (semana de descarga)` : "",
+           detalle: numDias >= 5 ? `Tirada larga con calidad · ${durLarga}. Primera mitad a zona 2 suave. Segunda mitad: progresivo hasta ritmo maratón (últimos 20 min más rápido que los primeros). Hidratación cada 20 min. ${semanaCiclo === 4 ? 'Semana de descarga: volumen reducido a propósito, no fuerces el ritmo.' : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.'}` : "",
            etiqueta: numDias >= 5 ? "Volumen" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -9761,7 +9779,7 @@
            etiqueta: numDias >= 3 ? "Fondo" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Tirada larga" : "Descanso activo",
-           detalle: numDias >= 5 ? `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). Aumentar distancia 10% cada semana. Cada 3ª semana, descarga: baja un 30%. Si tienes evento, últimas 2 semanas taper al 60%. Post: foam rolling + estiramientos` : "",
+           detalle: numDias >= 5 ? `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). ${semanaCiclo === 4 ? 'Semana de descarga: volumen reducido a propósito, no fuerces el ritmo.' : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.'} Post: foam rolling + estiramientos` : "",
            etiqueta: numDias >= 5 ? "Volumen" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -9774,6 +9792,18 @@
       const combAireLib = lugarComb.includes('aire libre');
       const sm = combSinMat;
       const v = ganarMusculo ? '4' : '3';
+      // Alternancia de énfasis por bloque de mesociclo: en entrenamiento concurrente
+      // (fuerza + resistencia a la vez) exigir el máximo de ambas cualidades cada
+      // semana genera más interferencia entre adaptaciones. Alternar un bloque de
+      // 4 semanas con más énfasis en fuerza y el siguiente en motor/acondicionamiento
+      // (en vez de las dos a tope siempre) es como programan los híbridos de verdad.
+      const enfasisFuerza = bloqueMeso % 2 === 0;
+      const vv = enfasisFuerza ? String(Number(v) + 1) : v;
+      if (esAvanzado) {
+        notasSalud.push(enfasisFuerza
+          ? 'Este bloque de 4 semanas prioriza fuerza: una serie más en los días de fuerza, metcons algo más cortos. El motor se mantiene, no se busca su máximo, para poder cargar más peso.'
+          : 'Este bloque de 4 semanas prioriza motor/acondicionamiento: metcons más largos, fuerza en mantenimiento. Alternar así evita que ambas cualidades se frenen entre sí.');
+      }
 
       if (esPrincipiante) {
         semana = [
@@ -9827,28 +9857,28 @@
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior + carries",
            detalle: sm
-             ? `Push/Pull · Flexiones ${v}×15, flexiones con pies elevados ${v}×12, dominadas australianas ${v}×12, dips en sillas ${v}×12, archer push-ups 3×8/lado, plancha lateral ${v}×30s/lado. Loaded carry: suitcase carry con mochila pesada 4×30m/lado`
-             : `Push/Pull · Press banca ${v}×6, remo barra ${v}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
+             ? `Push/Pull · Flexiones ${vv}×15, flexiones con pies elevados ${vv}×12, dominadas australianas ${v}×12, dips en sillas ${v}×12, archer push-ups 3×8/lado, plancha lateral ${v}×30s/lado. Loaded carry: suitcase carry con mochila pesada 4×30m/lado`
+             : `Push/Pull · Press banca ${vv}×6, remo barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Cardio calidad · Series + zona 2",
-           detalle:`${sesionCorta ? '25 min total' : '40-45 min total'}: 15 min zona 2 calentamiento + ${sesionCorta ? '5×400m con 90s rec' : '4×800m con 2 min rec a ritmo umbral (RPE 7-8)'}. Cronometra cada rep. Enfriamiento: 10 min zona 1 + 4 strides de 80m`,
+           detalle:`${sesionCorta ? '25 min total' : (enfasisFuerza ? '35-40 min total' : '45-50 min total')}: 15 min zona 2 calentamiento + ${sesionCorta ? '5×400m con 90s rec' : (enfasisFuerza ? '4×800m con 2 min rec a ritmo umbral (RPE 7-8)' : '6×800m con 90s rec a ritmo umbral (RPE 7-8)')}. Cronometra cada rep. Enfriamiento: 10 min zona 1 + 4 strides de 80m`,
            etiqueta:"Intensidad"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle: "Recovery run opcional: 20 min zona 1 muy suave, o descanso total", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior + pliometría",
            detalle: sm
-             ? `Piernas · Sentadilla búlgara ${v}×8/pierna, hip thrust a una pierna ${v}×10/lado, nordic curl asistido 3×6, box jumps 3×6, sentadilla con salto 3×8, copenhagen plank 3×15s/lado, plancha ${v}×45s`
-             : `Piernas · Sentadilla ${v}×5, peso muerto rumano ${v}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, sled push 4×20m`,
+             ? `Piernas · Sentadilla búlgara ${vv}×8/pierna, hip thrust a una pierna ${vv}×10/lado, nordic curl asistido 3×6, box jumps 3×6, sentadilla con salto 3×8, copenhagen plank 3×15s/lado, plancha ${v}×45s`
+             : `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, sled push 4×20m`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Complejo + EMOM",
            detalle: sm
-             ? `EMOM 24 min (6 rondas de 4 min): min1: 15 sentadillas con salto · min2: 12 flexiones explosivas + 12 mountain climbers · min3: 10 burpees · min4: descanso. Post: 3 rondas sin descanso de 10 V-ups + 20 russian twists + 15s hollow hold`
-             : `Complejo con barra "The Bear" 5 rondas: power clean + front squat + push press + back squat + behind-neck press × 5 reps ininterrumpidas. Sube peso cada ronda. Post: EMOM 12 min: min1: 12 KB swings · min2: 8 burpees · min3: 500m remo o 200m carrera`,
+             ? `EMOM ${enfasisFuerza ? 20 : 28} min (${enfasisFuerza ? 5 : 7} rondas de 4 min): min1: 15 sentadillas con salto · min2: 12 flexiones explosivas + 12 mountain climbers · min3: 10 burpees · min4: descanso. Post: 3 rondas sin descanso de 10 V-ups + 20 russian twists + 15s hollow hold`
+             : `Complejo con barra "The Bear" ${enfasisFuerza ? 4 : 6} rondas: power clean + front squat + push press + back squat + behind-neck press × 5 reps ininterrumpidas. Sube peso cada ronda. Post: EMOM ${enfasisFuerza ? 10 : 15} min: min1: 12 KB swings · min2: 8 burpees · min3: 500m remo o 200m carrera`,
            etiqueta:"Híbrido"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Sesión larga · Híbrido aeróbico" : "Descanso",
            detalle: numDias >= 5 ? (sm
-             ? `Sesión larga 45-60 min: 15 min carrera zona 2 + circuito 4 rondas (12 sentadillas, 10 flexiones, 8 burpees, 15 hip thrusts) + 15 min carrera zona 2. Cardio-fuerza-cardio sandwich. Anota tiempos`
-             : `Sesión larga 50-60 min: 2km carrera zona 2 + complejo DB 3 rondas (8 RDL + 8 clean + 8 thruster + 8 lunges) + 1000m remo + 3 rondas (farmer carry 40m + 15 wall balls + 10 box jumps) + 1km carrera. Anota tiempo total`) : "",
+             ? `Sesión larga ${enfasisFuerza ? '40-50' : '55-70'} min: ${enfasisFuerza ? 12 : 18} min carrera zona 2 + circuito 4 rondas (12 sentadillas, 10 flexiones, 8 burpees, 15 hip thrusts) + ${enfasisFuerza ? 12 : 18} min carrera zona 2. Cardio-fuerza-cardio sandwich. Anota tiempos`
+             : `Sesión larga ${enfasisFuerza ? '45-55' : '60-75'} min: ${enfasisFuerza ? '1.5' : '2.5'}km carrera zona 2 + complejo DB 3 rondas (8 RDL + 8 clean + 8 thruster + 8 lunges) + 1000m remo + 3 rondas (farmer carry 40m + 15 wall balls + 10 box jumps) + 1km carrera. Anota tiempo total`) : "",
            etiqueta: numDias >= 5 ? "Híbrido" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -9948,7 +9978,11 @@
            etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
           {dia:"Jueves", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Running fondo · Zona 2" : "Movilidad",
-           detalle: numDias >= 4 ? `Tirada media · 6-9km zona 2 suave. Trabaja cadencia y postura de carrera bajo fatiga. Al acabar: 4 strides de 60m. Aumentar distancia 10%/semana, cada 3ª semana descarga -30%` : "",
+           detalle: numDias >= 4 ? (() => {
+             const _m = [1.0, 1.10, 1.21, 0.70][semanaCiclo - 1];
+             const _km = (lo, hi) => `${Math.max(3, Math.round(lo * _m))}-${Math.round(hi * _m)}km`;
+             return `Tirada media · ${_km(6,9)} zona 2 suave. Trabaja cadencia y postura de carrera bajo fatiga. Al acabar: 4 strides de 60m. ${semanaCiclo === 4 ? 'Semana de descarga: volumen reducido a propósito.' : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª descarga.'}`;
+           })() : "",
            etiqueta: numDias >= 4 ? "Cardio" : "Descanso"},
           {dia:"Viernes", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad: cadera (90/90 rotación), tobillo, hombros. Foam rolling: quads, IT band, gemelos, dorsales", etiqueta:"Descanso"},
           {dia:"Sábado", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
@@ -10030,15 +10064,15 @@
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Strength + Sprint Metcon",
            detalle: cf
-             ? `Strength · Sentadilla ${esAvanzado ? '5×3 al 80%' : '5×5 al 70-75%'}. ${benchWod}`
-             : `Strength · ${esAvanzado ? 'Sentadilla trasera 5×3 al 80-85% + power clean 4×3' : 'Sentadilla trasera 5×5 al 70-75%'}. ${benchWod}`,
+             ? `Strength · Sentadilla ${esAvanzado ? `5×3 al ${pct1RM(80)}%` : `5×5 al ${pctRango1RM(70,75)}`}. ${benchWod}`
+             : `Strength · ${esAvanzado ? `Sentadilla trasera 5×3 al ${pctRango1RM(80,85)} + power clean 4×3` : `Sentadilla trasera 5×5 al ${pctRango1RM(70,75)}`}. ${benchWod}`,
            etiqueta:"WOD"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Weightlifting + AMRAP largo" : "Movilidad",
            detalle: numDias >= 2 ? (cf
              ? `Skill · ${esAvanzado ? 'Hang clean 4×3 + push jerk 4×3' : 'Hang clean con KB o mancuerna 4×6 + push press 4×8'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 dumbbell clean & press, 10 sit-ups, 12 box jumps o step-ups'}. Anota rondas`
-             : `Skill · ${esAvanzado ? 'Clean & jerk 4×3 al 70% + snatch técnica 4×2' : 'Power clean técnica 5×3 (barra vacía o ligero)'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 power clean (40/30kg), 10 sit-ups, 12 box jumps'}. Anota rondas`) : "",
+             : `Skill · ${esAvanzado ? `Clean & jerk 4×3 al ${pct1RM(70)}% + snatch técnica 4×2` : 'Power clean técnica 5×3 (barra vacía o ligero)'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 power clean (40/30kg), 10 sit-ups, 12 box jumps'}. Anota rondas`) : "",
            etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
@@ -10059,12 +10093,12 @@
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Squat Strength + Sprint WOD",
            detalle: cf
              ? `Strength · ${rx ? 'Sentadilla overhead 4×3 + front squat 4×4' : 'Sentadilla aérea 5×8 + sentadilla goblet 4×10'}. WOD "Fran${rx ? '' : ' Scaled'}" 21-15-9 For Time: ${rx ? 'thrusters (43/30kg) + pull-ups' : 'thrusters con mancuernas (10/7kg) + ring rows o flexiones'}. Cronometra. Objetivo: sub-8 min`
-             : `Strength · ${rx ? 'Back squat 5×3 al 82% + front squat 4×4 al 70%' : 'Back squat 5×5 al 70-75%'}. WOD "Fran${rx ? '' : ' Scaled'}" 21-15-9 For Time: ${rx ? 'thrusters (43/30kg) + pull-ups' : 'thrusters (20/15kg) + ring rows'}. Cronometra. Objetivo: sub-8 min`,
+             : `Strength · ${rx ? `Back squat 5×3 al ${pct1RM(82)}% + front squat 4×4 al ${pct1RM(70)}%` : `Back squat 5×5 al ${pctRango1RM(70,75)}`}. WOD "Fran${rx ? '' : ' Scaled'}" 21-15-9 For Time: ${rx ? 'thrusters (43/30kg) + pull-ups' : 'thrusters (20/15kg) + ring rows'}. Cronometra. Objetivo: sub-8 min`,
            etiqueta:"WOD"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Weightlifting + AMRAP mixto",
            detalle: cf
              ? `Skill · ${rx ? 'Hang snatch 4×2 + hang clean & jerk 4×2' : 'Hang clean con KB 4×6 + push press mancuernas 4×8'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '6 dumbbell snatches (alternando), 8 burpees, 12 sit-ups'}. Anota rondas`
-             : `Skill · ${rx ? 'Power snatch 4×2 al 70% + clean & jerk 4×2 al 70%' : 'Power clean 5×3 ligero (técnica)'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '5 power cleans (40/30kg), 8 burpees, 10 sit-ups'}. Anota rondas`,
+             : `Skill · ${rx ? `Power snatch 4×2 al ${pct1RM(70)}% + clean & jerk 4×2 al ${pct1RM(70)}%` : 'Power clean 5×3 ligero (técnica)'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '5 power cleans (40/30kg), 8 burpees, 10 sit-ups'}. Anota rondas`,
            etiqueta:"WOD"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · Movilidad",
            detalle:`Recuperación · 20 min zona 2 suave + movilidad de cadera, hombros y tobillos 15 min`, etiqueta:"Descanso"},
