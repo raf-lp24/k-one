@@ -10846,25 +10846,42 @@
     // como opciones EXTRA (no sustituyen nada) en los momentos donde tiene
     // sentido, marcadas en el nombre para que se entienda cuándo tomarlas.
     const nutriMomento = m => nutricion.find(x => x.momento === m);
+    // 3 variantes de cada una (antes solo había 1) para que no se repita siempre
+    // el mismo plato en los días duros. fuelingPreCarrera/fuelingPostCarrera y
+    // fuelingPreWod/fuelingPostWod se reutilizan más abajo para forzarlas
+    // específicamente en el día real de tirada larga / WOD (no solo "disponibles"
+    // cualquier día, como antes).
+    const fuelingPreCarrera = [
+      op('Tostadas con miel y plátano (antes de tirada larga o series)', '2 rebanadas de pan blanco, 20g miel, 1 plátano', '330 kcal', '6g prot', '73g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Arroz con leche ligero y canela (antes de tirada larga o series)', '200g arroz blanco cocido, 200ml leche semidesnatada, canela, 10g miel', '350 kcal', '9g prot', '70g carbs', '3g grasa', 'Fácil · 10 min'),
+      op('Tortitas de plátano sin grasa (antes de tirada larga o series)', '1 plátano maduro, 2 claras, 40g harina de avena, canela', '320 kcal', '15g prot', '58g carbs', '3g grasa', 'Fácil · 8 min')
+    ];
+    const fuelingPostCarrera = [
+      op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min'),
+      op('Tosta de mermelada y queso batido (recarga tras tirada larga)', '2 tostadas pan blanco, 20g mermelada, 150g queso batido 0%', '290 kcal', '16g prot', '48g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min')
+    ];
+    const fuelingPreWod = [
+      op('Arroz blanco con pollo y miel (90 min antes del WOD)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
+      op('Tortitas de arroz con pavo y miel (90 min antes del WOD)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Boniato asado con huevo y jamón cocido (90 min antes del WOD)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min')
+    ];
+    const fuelingPostWod = [
+      op('Batido de proteína con plátano y avena (recuperación post-WOD)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
+      op('Queso batido con miel y tortitas de arroz (recuperación post-WOD)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
+      op('Skyr con plátano y canela (recuperación post-WOD)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
+    ];
     if (esRunner) {
       const desayuno = nutriMomento('Desayuno');
-      if (desayuno) desayuno.opciones.push(
-        op('Tostadas con miel y plátano (antes de tirada larga o series)', '2 rebanadas de pan blanco, 20g miel, 1 plátano', '330 kcal', '6g prot', '73g carbs', '3g grasa', 'Sin cocción · 3 min')
-      );
+      if (desayuno) desayuno.opciones.push(...fuelingPreCarrera);
       const merienda = nutriMomento('Merienda');
-      if (merienda) merienda.opciones.push(
-        op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min')
-      );
+      if (merienda) merienda.opciones.push(...fuelingPostCarrera);
     }
     if (esHyrox || esCrossfit || esCombinacion) {
       const comida = nutriMomento('Comida');
-      if (comida) comida.opciones.push(
-        op('Arroz blanco con pollo y miel (90 min antes del WOD)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min')
-      );
+      if (comida) comida.opciones.push(...fuelingPreWod);
       const merienda2 = nutriMomento('Merienda');
-      if (merienda2) merienda2.opciones.push(
-        op('Batido de proteína con plátano y avena (recuperación post-WOD)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min')
-      );
+      if (merienda2) merienda2.opciones.push(...fuelingPostWod);
     }
 
     // Adaptar nutrición a alergias/intolerancias (gluten, lactosa, frutos secos)
@@ -11013,12 +11030,46 @@
         opciones: rotar(m.opciones, semilla + i * 3 + periodoRot * 5 + dia * 11).slice(0, 5)
       })));
     }
+
+    // FUELING DEL DÍA REAL: antes, las recetas de "antes/después de tirada larga
+    // o WOD" quedaban sueltas en el pool y solo aparecían si la rotación las
+    // sacaba, cualquier día, entrenara eso o no ese día en concreto. Ahora se
+    // fuerzan como primera opción justo el día de la semana que SÍ tiene una
+    // tirada larga/series o un WOD — el resto de días siguen con la rotación
+    // normal, sin forzar nada.
+    if (!soloDieta && semana.length === 7) {
+      const diaEsDuroCorredor = d => ['Intensidad', 'Umbral', 'Volumen'].includes(d.etiqueta) || /tirada larga|umbral|vo2|interval|series|fartlek/i.test(d.resumen || '');
+      const diaEsWod = d => d.etiqueta === 'WOD' || /wod|metcon|amrap|emom|complejo|circuito|simulacro|chipper/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
+      semana.forEach((d, i) => {
+        const dm = nutricionPorDia[i];
+        if (esRunner && diaEsDuroCorredor(d)) {
+          const desayunoD = dm.find(m => m.momento === 'Desayuno');
+          const meriendaD = dm.find(m => m.momento === 'Merienda');
+          if (desayunoD) desayunoD.opciones = [fuelingPreCarrera[(semilla + i) % fuelingPreCarrera.length], ...desayunoD.opciones].slice(0, 5);
+          if (meriendaD) meriendaD.opciones = [fuelingPostCarrera[(semilla + i) % fuelingPostCarrera.length], ...meriendaD.opciones].slice(0, 5);
+        }
+        if ((esHyrox || esCrossfit || esCombinacion) && diaEsWod(d)) {
+          const comidaD = dm.find(m => m.momento === 'Comida');
+          const meriendaD2 = dm.find(m => m.momento === 'Merienda');
+          if (comidaD) comidaD.opciones = [fuelingPreWod[(semilla + i) % fuelingPreWod.length], ...comidaD.opciones].slice(0, 5);
+          if (meriendaD2) meriendaD2.opciones = [fuelingPostWod[(semilla + i) % fuelingPostWod.length], ...meriendaD2.opciones].slice(0, 5);
+        }
+      });
+    }
+
     // El plan base guarda el día 0 (lunes) como referencia
     nutricion = nutricionPorDia[0];
 
     // NOTAS ESPECÍFICAS POR DEPORTE (hidratación, suplementación, calentamiento)
+    // OJO: "deporte" cae a 'Gimnasio / Fuerza' por defecto (arriba) cuando no hay
+    // valor -- eso pasa siempre en "Solo nutrición", que no pregunta el deporte.
+    // Sin este caso aparte, un cliente de solo dieta veía "bebe entre series" o
+    // "post-WOD", que no tienen sentido si no tiene plan de entreno.
     const notasDeporte = [];
-    if (esRunner) {
+    if (soloDieta) {
+      notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
+      notasDeporte.push('Suplementación: si entrenas fuerza por tu cuenta, la creatina monohidrato (5g/día, todos los días) es el suplemento con más evidencia científica. Si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
+    } else if (esRunner) {
       notasDeporte.push('Hidratación: bebe 5-7 ml/kg de peso 2-4h antes de correr. Durante sesiones de +60 min, 150-250 ml cada 20 min con electrolitos.');
       notasDeporte.push('Tus carbohidratos están ajustados al alza para mantener el glucógeno muscular. Los días de tirada larga (>10 km), prioriza la comida rica en hidratos 3h antes.');
       notasDeporte.push('Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
