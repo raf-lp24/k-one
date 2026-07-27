@@ -3376,6 +3376,11 @@
   .em-k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
   .em-v { font-size: 17px; font-weight: 600; }
   .em-peso .ejercicio-fila-controls { justify-content: flex-start; gap: 12px; }
+  .ejercicio-link {
+    cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px;
+    text-decoration-color: var(--metal); color: inherit;
+  }
+  .ejercicio-link:hover, .ejercicio-link:focus-visible { color: var(--brasa); text-decoration-color: var(--brasa); outline: none; }
   @media (max-width: 560px) {
     /* En móvil la miniatura va pequeña y cuadrada: estirada a lo alto parecía un vídeo vertical */
     .ejercicio-thumb { width: 64px; height: 64px; border-radius: 9px; }
@@ -9151,7 +9156,20 @@
     // Los ejercicios con peso llevan campo para registrar la carga y badge de RPE;
     // acondicionamiento y core van como lista simple.
     const listaPeso = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`;
-    const listaSimple = lista => lista.map(x => `· ${capitalizar(x)}`).join('<br>');
+    // Los tramos de acondicionamiento/core (running, drills, plancha...) no tenían
+    // forma de abrir la ficha "cómo se hace": era texto plano. Se extrae el nombre
+    // (lo que va antes de la primera cifra/paréntesis) y se hace clicable con el
+    // mismo abrirInfoEjercicio() que usan las tarjetas de fuerza — si no hay ficha
+    // propia, ya cae solo al buscador de YouTube, igual que en esas tarjetas.
+    const listaSimple = lista => lista.map(x => {
+      const textoCap = capitalizar(x);
+      const m = textoCap.match(/^([^0-9(]+?)(\s*\(?\d.*)?$/);
+      const nombre = m ? m[1].trim().replace(/[·,]+$/, '').trim() : '';
+      if (!nombre) return `· ${textoCap}`;
+      const resto = (m[2] || '').trim();
+      const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `· <span class="ejercicio-link" role="button" tabindex="0" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();abrirInfoEjercicio('${nombreJs}')}">${nombre}</span>${resto ? ' ' + resto : ''}`;
+    }).join('<br>');
     const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
     const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
     const tituloFuerza = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Bloque de fuerza';
