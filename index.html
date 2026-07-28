@@ -1153,6 +1153,42 @@
     margin-top: 3px;
     text-align: center;
   }
+  /* Cuenta atrás del evento — esquina opuesta a la marca de agua "K-ONE Performance"
+     (top:15%;right:7%) para que no choquen. */
+  .today-hero-countdown {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(10,10,10,0.55);
+    border: 1px solid rgba(232,73,15,0.5);
+    border-radius: 10px;
+    padding: 8px 14px;
+    backdrop-filter: blur(4px);
+    max-width: 130px;
+  }
+  .today-hero-countdown-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--brasa);
+  }
+  .today-hero-countdown-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--metal-claro);
+    text-align: center;
+    margin-top: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 110px;
+  }
   .today-hero-content { position: relative; z-index: 2; padding: 26px; }
   .today-hero-eyebrow {
     font-family: 'DM Mono', monospace;
@@ -5757,6 +5793,13 @@
           <span class="field-hint">Si has mejorado tu marca, actualízala aquí y recalculamos tus ritmos de rodaje, umbral y series.</span>
           <div id="cp-previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
         </div>
+        <!-- Evento/competición: añadir o actualizar la fecha activa la cuenta atrás del panel -->
+        <div class="field">
+          <label>¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
+          <input type="text" id="cp-evento" placeholder="Hyrox Madrid, maratón de Valencia, competición de CrossFit...">
+          <input type="date" id="cp-eventoFecha" style="margin-top:8px;max-width:220px">
+          <span class="field-hint">Si nos das la fecha, te mostramos la cuenta atrás en tu panel.</span>
+        </div>
         <div class="field">
           <label>¿Cuántos días a la semana puedes entrenar?</label>
           <div class="radio-group" id="cp-diasEntreno">
@@ -7013,7 +7056,12 @@
           </div>
           <div class="field">
             <label>¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
-            <input type="text" id="evento" placeholder="Hyrox Madrid en marzo, maratón en mayo...">
+            <input type="text" id="evento" placeholder="Hyrox Madrid, maratón de Valencia, competición de CrossFit...">
+            <!-- Fecha real (no solo texto libre): con ella se puede mostrar una
+                 cuenta atrás de verdad en el panel, en vez de solo citarlo en el
+                 mensaje de bienvenida. -->
+            <input type="date" id="eventoFecha" style="margin-top:8px;max-width:220px">
+            <span class="field-hint">Si nos das la fecha, te mostramos la cuenta atrás en tu panel.</span>
           </div>
           <div class="field">
             <label>¿En cuánto tiempo te gustaría ver resultados? <span class="required">Obligatorio</span></label>
@@ -7226,6 +7274,11 @@
         <div class="today-hero" id="todayHero" style="display:none">
           <img class="today-hero-photo" src="/img/landing/gym-hero.jpg" alt="" loading="lazy" aria-hidden="true">
           <div class="today-hero-brand" aria-hidden="true">K-ONE<small>Performance</small></div>
+          <!-- Cuenta atrás del evento/competición (solo si el cliente dio una fecha) -->
+          <div class="today-hero-countdown" id="todayHeroCountdown" style="display:none">
+            <span class="today-hero-countdown-num" id="todayHeroCountdownNum">—</span>
+            <span class="today-hero-countdown-label" id="todayHeroCountdownLabel">—</span>
+          </div>
           <div class="today-hero-content">
             <div class="today-hero-eyebrow" id="todayHeroEyebrow">// Sesión de hoy</div>
             <h2 class="today-hero-title" id="todayHeroWorkoutTitle">Tu sesión de hoy</h2>
@@ -8334,6 +8387,7 @@
       objetivo: getRadio('objetivo'),
       enfoqueMacros: getRadio('enfoqueMacros'),
       evento: document.getElementById('evento')?.value || '',
+      eventoFecha: document.getElementById('eventoFecha')?.value || '',
       plazo: getRadio('plazo'),
       antecedentes: document.getElementById('antecedentes')?.value || '',
       deporte: getRadio('deporte'),
@@ -9625,6 +9679,18 @@
     const esCrossfit = deporte.includes('CrossFit');
     const esCombinacion = deporte.includes('Híbrido');
     const tieneEvento = u.evento && u.evento.trim().length > 0;
+    // Días hasta el evento (cuenta atrás real en el panel). Se calcula contra la
+    // medianoche de hoy, así que el propio día del evento cuenta como "0 días",
+    // no "-1" por las horas ya pasadas. Si la fecha es inválida o ya pasó, no se
+    // expone (null): un contador en negativo no le sirve a nadie.
+    const diasParaEvento = (() => {
+      if (!u.eventoFecha) return null;
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      const fecha = new Date(u.eventoFecha + 'T00:00:00');
+      if (isNaN(fecha.getTime())) return null;
+      const dias = Math.round((fecha.getTime() - hoy.getTime()) / 86400000);
+      return dias >= 0 ? dias : null;
+    })();
     const tiempoSesion = u.tiempoSesion || '45-60 min';
     const sesionCorta = tiempoSesion.includes('30-45');
     const sesionLarga = tiempoSesion.includes('90') || tiempoSesion.includes('Más');
@@ -11592,7 +11658,7 @@
       });
     }
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee };
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
   // Pone en mayúscula la primera palabra alfabética de un ingrediente,
@@ -11943,6 +12009,19 @@
         .filter(Boolean).join(' · ') || 'Entrenamiento del día';
       btnLabel.textContent = 'Empezar entrenamiento';
       _rellenarStatsSesion(dia, tagsEl, statsEl);
+    }
+
+    // Cuenta atrás del evento (si dio nombre y fecha, y no ha pasado ya)
+    const cdBox = document.getElementById('todayHeroCountdown');
+    const dp = generatedPlan.diasParaEvento;
+    if (cdBox && dp !== null && dp !== undefined && generatedPlan.evento) {
+      document.getElementById('todayHeroCountdownNum').textContent = dp === 0 ? '¡HOY!' : String(dp);
+      document.getElementById('todayHeroCountdownLabel').textContent = dp === 0
+        ? generatedPlan.evento
+        : `${dp === 1 ? 'día' : 'días'} · ${generatedPlan.evento}`;
+      cdBox.style.display = '';
+    } else if (cdBox) {
+      cdBox.style.display = 'none';
     }
 
     hero.style.display = '';
@@ -14217,6 +14296,10 @@
     if (cpMd) cpMd.value = userData.marcaDistancia || '';
     if (cpMt) cpMt.value = userData.marcaTiempo || '';
     previsualizarRitmosCambioPlan();
+    const cpEv = document.getElementById('cp-evento');
+    const cpEvF = document.getElementById('cp-eventoFecha');
+    if (cpEv) cpEv.value = userData.evento || '';
+    if (cpEvF) cpEvF.value = userData.eventoFecha || '';
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
     preseleccionarRadio('cp-tiempoSesion', userData.tiempoSesion);
     preseleccionarRadio('cp-nivel', userData.nivel);
@@ -14335,6 +14418,10 @@
     // Marca de carrera: si la actualiza, los ritmos se recalculan al regenerar el plan
     userData.marcaDistancia = document.getElementById('cp-marcaDistancia')?.value || '';
     userData.marcaTiempo    = document.getElementById('cp-marcaTiempo')?.value || '';
+
+    // Evento/competición: la cuenta atrás del panel se recalcula al regenerar el plan
+    userData.evento      = document.getElementById('cp-evento')?.value || '';
+    userData.eventoFecha = document.getElementById('cp-eventoFecha')?.value || '';
 
     userData.tipoPlan = nuevoTipoPlan;
     userData.periodicidad = nuevaPeriodicidad;
