@@ -8720,7 +8720,7 @@
     'fondos en paralelas': 'https://www.youtube.com/results?search_query=fondos+en+paralelas+técnica',
     'elevaciones laterales': 'https://www.youtube.com/results?search_query=elevaciones+laterales+técnica',
     'elevaciones laterales tumbado': 'https://www.youtube.com/results?search_query=elevaciones+laterales+tumbado+suelo+técnica',
-    'combo lateral a frontal': 'https://www.youtube.com/results?search_query=elevación+lateral+frontal+combo+hombros',
+    'combo lateral-frontal': 'https://www.youtube.com/results?search_query=elevación+lateral+frontal+combo+hombros',
     'face pull': 'https://www.youtube.com/results?search_query=face+pull+polea+técnica',
     'aperturas': 'https://www.youtube.com/results?search_query=aperturas+pecho+mancuernas',
     'aperturas en polea': 'https://www.youtube.com/results?search_query=aperturas+polea+cruce+cables',
@@ -10693,7 +10693,19 @@
         // El " mancuernas" del final entra en el patrón a propósito: si no, al
         // cambiar el nombre del ejercicio quedaba colgando ("combo lateral a
         // frontal con peso ligero (precisión alta) mancuernas 3×15").
-        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral a frontal con peso ligero (precisión alta)']],
+        //
+        // "combo lateral a frontal con peso ligero (precisión alta)" (9 palabras)
+        // sumado a la nota técnica del día ("... 4×15 (sin impulso, aguanta 1s
+        // arriba, no bajes del todo para mantener tensión)", 12 palabras más)
+        // superaba las 15 palabras que formatearSesion usa para distinguir "un
+        // ejercicio con nota" de "un párrafo de varias estaciones" (criterio real,
+        // no arbitrario: así separa un WOD de Hyrox de un simple accesorio). El
+        // resultado: perdía la tarjeta de peso/RPE y cambiar a texto plano sin
+        // seguimiento — comprobado generando el día de hombros, se veían menos
+        // ejercicios con tarjeta de los que había de verdad. Acortado el nombre
+        // (mismo ejercicio, sin perder claridad) en vez de tocar esa heurística
+        // general, que clasifica bien el resto de días de Hyrox/CrossFit/running.
+        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral-frontal']],
         [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco (aguanta 1s arriba)']],
       ];
       semana = semana.map(d => {
