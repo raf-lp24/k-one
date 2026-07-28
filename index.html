@@ -9557,7 +9557,17 @@
         if (aun) return null;
         return { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
       }).filter(Boolean);
-      return { ...meal, opciones: procesadas.length >= 1 ? procesadas : meal.opciones };
+      // Si NADA se pudo salvar, antes se devolvían las opciones originales — es
+      // decir, el cliente veía exactamente el alimento que había dicho que no
+      // come. Ahora se devuelve una receta neutra generada a partir de lo que sí
+      // acepta, y si tampoco hay, se avisa en lugar de servir lo rechazado.
+      if (procesadas.length >= 1) return { ...meal, opciones: procesadas };
+      return { ...meal, opciones: [{
+        nombre: 'Comida libre (ajústala a tus gustos)',
+        ingredientes: 'Elige una fuente de proteína, una de hidratos y verdura, evitando: ' + tokensOriginales.join(', '),
+        kcal: '—', prot: '—', carbs: '—', grasa: '—',
+        prep: 'A tu elección'
+      }] };
     });
   }
 
@@ -10323,42 +10333,107 @@
     };
 
     let mapaLesion = [];
+    // El ejercicio de sustitución tiene que existir donde entrena el cliente: no
+    // sirve mandar "prensa de piernas" a quien entrena en el salón. `eq` elige la
+    // versión de gimnasio, la de casa con material o la de peso corporal.
+    const _sinMat = (u.lugar || '').includes('sin material');
+    const _enCasa = (u.lugar || '').includes('casa');
+    const eq = (gimnasio, conMaterial, sinMaterial) =>
+      _sinMat ? sinMaterial : (_enCasa ? conMaterial : gimnasio);
     if (!soloDieta) {
     if (lesion.includes('Rodilla')) {
+      // Las reglas van de la frase MÁS larga a la más corta y consumen el material
+      // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
+      // ("Press inclinado en máquina (rango controlado) mancuernas 4×10").
       mapaLesion = [
-        [/Sentadilla goblet/gi, 'Step-ups controlados (sin salto)'],
-        [/zancadas/gi, 'elevaciones de cadera (hip thrust)'],
-        [/box jumps o step ups/gi, 'step ups controlados, sin salto'],
-        [/box jumps/gi, 'step ups controlados, sin salto'],
-        [/sentadillas? con salto/gi, 'sentadillas sin salto, rango parcial'],
-        [/Sentadilla trasera con barra/gi, 'Prensa de piernas (rango controlado, sin dolor)'],
-        [/Sentadilla sumo/gi, 'Step-ups controlados o prensa (rango sin dolor)'],
-        [/Sentadilla búlgara/gi, 'Step-ups controlados (sin salto)'],
-        [/Sentadilla(?! aérea| sumo| búlgara| a)/g, 'Step-ups controlados o prensa (rango sin dolor)'],
+        [/[Ss]entadilla goblet( con mancuerna)?/g, 'Step-ups controlados (sin salto)'],
+        [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'elevaciones de cadera (hip thrust)'],
+        [/[Bb]ox jumps? o step[- ]ups?/g, 'step ups controlados, sin salto'],
+        [/[Bb]ox jump over|[Bb]ox jumps?/g, 'step ups controlados, sin salto'],
+        [/[Ss]entadillas? con salto/g, 'sentadillas sin salto, rango parcial'],
+        [/[Ss]entadilla trasera( con barra)?/g, eq('Prensa de piernas (rango controlado, sin dolor)', 'Sentadilla goblet a banco (rango controlado, sin dolor)', 'Sentadilla a banco (rango controlado, sin dolor)')],
+        [/[Ss]entadilla sumo( con mancuerna)?/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
+        [/[Ss]entadilla búlgara( en silla| con mancuernas)?/g, 'Step-ups controlados (sin salto)'],
+        [/[Pp]istol squat( progresión)?/g, 'step-up controlado a banco bajo'],
+        [/split squat \(zancada estática\)/g, 'step-up controlado a banco bajo'],
+        [/[Ss]entadilla(?! aérea| sumo| búlgara| a)/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
+        // Movimientos de WOD que cargan mucho la rodilla en flexión profunda o impacto.
+        // El material que va detrás entra en el patrón: si no, queda colgando
+        // ("press de hombro con mancuernas (sin sentadilla) con mancuernas").
+        [/[Tt]hrusters?( con mancuernas| mancuernas)?/g, 'press de hombro con mancuernas (sin sentadilla)'],
+        [/[Ww]all balls?( con balón)?/g, 'press de hombro con balón (sin sentadilla)'],
+        [/[Dd]ouble[- ]unders?/g, 'remo o bici (bajo impacto)'],
+        [/[Bb]urpees?( box jump over)?/g, 'flexión + paso al frente (sin salto)'],
+        [/[Aa]ir squats?/g, 'sentadillas parciales sin dolor'],
       ];
-      notasSalud.push('Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
+      notasSalud.push('Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos e impacto) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
     } else if (lesion.includes('Espalda')) {
       mapaLesion = [
-        [/[Pp]eso muerto rumano/g, 'Hip thrust'],
-        [/[Pp]eso muerto/g, 'Hip thrust'],
+        [/[Pp]eso muerto rumano( con mancuernas)?/g, 'Hip thrust'],
+        [/[Pp]eso muerto( con mancuernas| convencional)?/g, 'Hip thrust'],
+        [/\bdeadlifts?\b/gi, 'hip thrust'],
         [/[Rr]ussian twist/g, 'Plancha frontal'],
-        [/[Rr]emo barra/g, 'Remo en máquina con apoyo de pecho'],
+        [/[Rr]emo barra( inclinado)?/g, eq('Remo en máquina con apoyo de pecho', 'Remo con mancuerna apoyado en banco', 'Remo bajo mesa')],
+        [/[Gg]ood mornings?/g, 'Hip thrust'],
+        // Levantamientos olímpicos: la barra desde el suelo a alta velocidad es el
+        // gesto que más comprime la lumbar, no tiene sentido mandarlo con lesión.
+        [/[Pp]ower snatch(es)?|\bsnatch(es)?\b/gi, 'press de hombro con mancuernas'],
+        [/[Cc]lean & jerk|[Hh]ang clean|[Pp]ower clean|\bcleans?\b/g, 'hip thrust con barra'],
+        [/[Kk]ettlebell swings?|\bKB swings?\b/g, 'hip thrust con mancuerna'],
+        [/[Hh]iperextensiones?/g, 'plancha frontal'],
       ];
-      notasSalud.push('Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, remo con barra inclinado) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
+      notasSalud.push('Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
     } else if (lesion.includes('Hombro')) {
       mapaLesion = [
-        [/[Pp]ress militar/g, 'Elevaciones frontales con mancuernas (ligero)'],
-        [/[Pp]ress de banca/g, 'Press en máquina (rango controlado, sin dolor)'],
-        [/[Pp]ress inclinado/g, 'Press en máquina inclinado (rango controlado)'],
-        [/[Ff]ondos/g, 'Press en máquina con agarre cerrado'],
+        [/[Pp]ress militar( con barra| con mancuernas| mancuernas)?( \(ligero\))?/g, eq('Elevaciones frontales con mancuernas (ligero)', 'Elevaciones frontales con mancuernas (ligero)', 'Elevaciones frontales sin peso (solo rango, muy controlado)')],
+        [/[Pp]ress (de )?banca/g, eq('Press en máquina (rango controlado, sin dolor)', 'Press con mancuernas (rango controlado, sin dolor)', 'Flexiones (rango controlado, sin dolor)')],
+        // Una sola regla con el material opcional dentro: con dos reglas (una
+        // específica y otra genérica) la segunda volvía a coincidir con el texto
+        // que acababa de escribir la primera y salía duplicado
+        // ("Press inclinado en máquina (rango controlado) en máquina (rango controlado)").
+        [/[Pp]ress inclinado( (?:con mancuernas|mancuernas|en multipower|en máquina))?/g, eq('Press inclinado en máquina (rango controlado)', 'Press inclinado con mancuernas (rango controlado)', 'Flexiones con pies elevados (rango controlado)')],
+        [/[Ff]ondos( en (?:banco|sillas?|paralelas))?/g, eq('Press cerrado en máquina (codos pegados)', 'Press cerrado con mancuernas (codos pegados)', 'Flexiones diamante (rango corto)')],
+        // Las dominadas llevan el hombro a rango completo bajo carga: es justo lo
+        // que la nota de abajo dice que se ha adaptado, así que hay que cambiarlas
+        // de verdad (antes la nota lo prometía y el plan las seguía mandando).
+        [/([Pp]ush press|[Pp]ress sobre cabeza|[Oo]verhead press)( con mancuernas| mancuernas| con barra)?( \(ligero\))?/g, 'Remo al mentón con mancuernas (rango corto, sin dolor)'],
+        [/[Tt]hrusters?( con mancuernas| mancuernas)?/g, 'front squat'],
+        [/[Oo]verhead carry|[Oo]verhead squat/g, 'farmer carry'],
+        // Cubre también lo que emite el ajuste de material de más arriba
+        // ("dominadas asistidas con banda elástica", "dominadas (o remo australiano...)").
+        [/[Dd]ominadas asistidas con banda elástica/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica, agarre neutro', 'Remo bajo mesa, agarre neutro')],
+        [/[Dd]ominadas \(o remo australiano bajo mesa\)/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica, agarre neutro', 'Remo bajo mesa, agarre neutro')],
+        [/[Dd]ominadas( asistidas)?( o jalón| en barra puerta| lastradas)?( \(asistidas si necesitas\)| \(con silla si necesitas\)| \(banda ok\))?/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica, agarre neutro', 'Remo bajo mesa, agarre neutro')],
+        [/[Bb]ar muscle-ups?|[Mm]uscle-ups?/g, 'remo australiano'],
+        [/[Pp]ull-ups?/g, 'remo australiano'],
+        [/[Tt]oes-to-bar/g, 'elevaciones de piernas tumbado'],
+        [/[Hh]andstand push-ups?|[Hh]andstand( hold)?/g, 'flexiones con pies elevados'],
+        [/[Cc]lean & jerk|[Pp]ush jerk|[Ss]plit jerk|\bjerks?\b/g, 'clean sin pasar por encima de la cabeza'],
+        [/[Pp]ower snatch(es)?|\bsnatch(es)?\b/gi, 'clean sin pasar por encima de la cabeza'],
+        [/[Ww]all balls?( con balón)?/g, 'goblet squat'],
+        [/[Ee]levaciones laterales/g, 'Elevaciones laterales por debajo del hombro (rango corto)'],
+        [/[Ff]lexiones pique \(pike push-ups\)|[Ff]lexiones pique/g, 'flexiones normales'],
       ];
-      notasSalud.push('Hemos adaptado los ejercicios que exigen empuje vertical o rango completo de hombro (press militar, press de banca, fondos) por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
+      notasSalud.push('Hemos adaptado los ejercicios que exigen empuje vertical o rango completo de hombro (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza) por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
     } else if (lesion.includes('Otra')) {
       notasSalud.push('Nos indicaste que tienes una lesión. No hemos podido adaptar ejercicios concretos porque no la especificaste — si algún ejercicio te genera dolor, usa "¿Cómo va el entreno?" para cambiarlo por una variante más segura.');
     }
 
-    if (mapaLesion.length) {
-      semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
+    // OJO: el mapa de lesión NO se aplica aquí. Se aplica más abajo, después de la
+    // rotación de accesorios (poolsEjercicio), porque los dos sistemas reescriben
+    // el mismo texto y al hacerlo en este orden se pisaban: la rotación cogía el
+    // "elevaciones frontales" que acababa de poner la adaptación de hombro y lo
+    // convertía en "elevaciones frontales con disco (aguanta 1s arriba) con
+    // mancuernas (ligero)". La lesión tiene que ser la última palabra.
+
+    // CrossFit/Hyrox en casa: los WOD se programan con barra olímpica y cargas en
+    // kg porque es el material estándar del box. No se traducen automáticamente
+    // (un "Fran" sin barra ya no es un Fran), así que se dice claramente cómo
+    // escalarlo en vez de dejar al cliente con un entreno que no puede hacer.
+    if (!soloDieta && (esCrossfit || esHyrox) && (u.lugar || '').includes('casa')) {
+      notasSalud.push((u.lugar || '').includes('sin material')
+        ? 'Entrenas en casa sin material y los WOD están escritos con barra y cargas de box. Escálalos así: los levantamientos con barra pásalos a su versión de peso corporal o con mochila cargada (sentadilla, zancada, hip thrust), las dominadas a remo bajo mesa, y en lugar de remo/bici usa carrera, comba o burpees. Mantén el formato (rondas, tiempo y descansos): es lo que da el estímulo.'
+        : 'Entrenas en casa con material y los WOD están escritos con barra olímpica. Si no tienes barra, sustituye cada movimiento por su versión con mancuerna o kettlebell (clean y snatch a una mano, thruster con mancuernas, swing con kettlebell) usando un peso que te deje completar las series sin parar. Mantén el formato de rondas y tiempos.');
     }
 
     // Notas por enfermedad y medicación: avisar y ajustar el tono, nunca "recetar"
@@ -10483,7 +10558,10 @@
         [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
         [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza (codos pegados)', 'copa de tríceps con mancuerna (codos cerrados junto a la cabeza)']],
         [/press francés/gi, ['press francés', 'copa de tríceps con mancuerna (codos cerrados, no los abras)']],
-        [/elevaciones laterales/gi, ['elevaciones laterales', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral a frontal con peso ligero (precisión alta)']],
+        // El " mancuernas" del final entra en el patrón a propósito: si no, al
+        // cambiar el nombre del ejercicio quedaba colgando ("combo lateral a
+        // frontal con peso ligero (precisión alta) mancuernas 3×15").
+        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral a frontal con peso ligero (precisión alta)']],
         [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco (aguanta 1s arriba)']],
       ];
       semana = semana.map(d => {
@@ -10499,6 +10577,124 @@
         });
         return { ...d, detalle };
       });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // MATERIAL DISPONIBLE: traducir máquinas de gimnasio a lo que hay en casa.
+    //
+    // Hasta ahora "En casa con material" compartía rutina con "Gimnasio", así que
+    // a alguien que entrena en el salón se le mandaba prensa de piernas, jalón en
+    // polea, cruces de polea, press en multipower, femoral en máquina o curl en
+    // banco scott: ejercicios que no puede hacer. Y en "sin material" era peor,
+    // porque los mapas de lesión de más arriba METEN máquinas (una lesión de
+    // rodilla convertía "Sentadilla" en "prensa" incluso en un plan de peso
+    // corporal).
+    //
+    // Va al final a propósito: así limpia también lo que hayan introducido el
+    // mapa de lesión y la rotación de accesorios, y se hace antes de construir
+    // "entrenamiento de hoy", que se formatea a partir de `semana`.
+    // ─────────────────────────────────────────────────────────────────────────
+    if (!soloDieta && (u.lugar || '').includes('casa')) {
+      // Conserva la mayúscula inicial del texto original: los ejercicios que
+      // abren un bloque van capitalizados y los del medio, en minúscula.
+      const igualCaja = (rep) => (m) => /^[A-ZÁÉÍÓÚÑ]/.test(m)
+        ? rep.charAt(0).toUpperCase() + rep.slice(1)
+        : rep.charAt(0).toLowerCase() + rep.slice(1);
+      const r = (patron, rep) => [patron, igualCaja(rep)];
+
+      const mapaConMaterial = [
+        // Piernas
+        r(/prensa de piernas/gi, 'sentadilla goblet con mancuerna'),
+        r(/gemelos en prensa o máquina/gi, 'gemelos en escalón con mancuerna'),
+        r(/gemelos en máquina/gi, 'gemelos en escalón con mancuerna'),
+        r(/femoral tumbado en máquina/gi, 'peso muerto rumano con mancuernas'),
+        r(/extensión de cuádriceps en máquina/gi, 'sentadilla búlgara con mancuernas'),
+        r(/\bprensa\b/gi, 'sentadilla goblet con mancuerna'),
+        // Empuje
+        r(/press inclinado en multipower/gi, 'press inclinado con mancuernas'),
+        r(/press inclinado en máquina/gi, 'press inclinado con mancuernas'),
+        r(/press en máquina inclinado/gi, 'press inclinado con mancuernas'),
+        r(/press en máquina con agarre cerrado/gi, 'press cerrado con mancuernas'),
+        r(/press en máquina/gi, 'press con mancuernas'),
+        r(/aperturas en polea/gi, 'aperturas con mancuernas en banco'),
+        r(/cruces? (de |en )?polea( desde arriba)?/gi, 'aperturas con mancuernas en banco'),
+        r(/extensión (de )?tríceps en polea/gi, 'extensión de tríceps sobre la cabeza con mancuerna'),
+        // Tracción
+        r(/remo en máquina con apoyo de pecho/gi, 'remo con mancuerna apoyado en banco'),
+        r(/remo en máquina o polea baja/gi, 'remo con mancuerna a una mano'),
+        r(/remo (en )?polea baja/gi, 'remo con mancuerna a una mano'),
+        r(/remo en máquina/gi, 'remo con mancuerna apoyado en banco'),
+        r(/remo barra/gi, 'remo con mancuernas'),
+        r(/dominadas asistidas o jalón/gi, 'dominadas asistidas con banda elástica'),
+        r(/dominadas o jalón/gi, 'dominadas (o remo australiano bajo mesa)'),
+        r(/jalón (en |con )?polea o remo australiano/gi, 'remo australiano bajo mesa'),
+        r(/jalón (al pecho )?(en |con )?polea/gi, 'jalón con banda elástica anclada arriba'),
+        r(/jalón al pecho con agarre neutro/gi, 'jalón con banda elástica, agarre neutro'),
+        // Bíceps y tríceps
+        r(/curl bíceps en banco scott alterno/gi, 'curl bíceps concentrado con mancuerna, alterno'),
+        r(/curl bíceps en banco scott/gi, 'curl bíceps concentrado con mancuerna'),
+        r(/curl bíceps con barra z/gi, 'curl bíceps con mancuernas'),
+        r(/curl martillo con cuerda en polea/gi, 'curl martillo con mancuernas'),
+        r(/curl en polea baja con soga \(aprieta en el pico\)/gi, 'curl martillo con mancuernas'),
+        r(/curl en polea alta \(tensión constante\)/gi, 'curl bíceps con banda elástica'),
+        r(/curl en polea( alta| baja)?/gi, 'curl bíceps con banda elástica'),
+        // Core y varios
+        r(/elevación de piernas en barra o banco/gi, 'elevación de piernas tumbado en suelo'),
+        r(/face pull(?! con banda)/gi, 'face pull con banda elástica'),
+        // Red final para lo que no esté contemplado arriba
+        r(/\ben polea\b/gi, 'con banda elástica'),
+        r(/\ben multipower\b/gi, 'con mancuernas'),
+        r(/\ben (la )?máquina\b/gi, 'con mancuernas'),
+      ];
+
+      // "Sin material" es peso corporal: no valen ni mancuernas ni bandas, así que
+      // se traduce a la versión con el propio cuerpo o con muebles de casa.
+      const mapaSinMaterial = [
+        r(/prensa de piernas/gi, 'sentadilla a una pierna asistida en silla'),
+        r(/\bprensa\b/gi, 'sentadilla profunda controlada'),
+        r(/gemelos en (prensa o )?máquina/gi, 'gemelos en escalón'),
+        r(/femoral tumbado en máquina/gi, 'curl nórdico asistido'),
+        r(/press inclinado en (multipower|máquina)/gi, 'flexiones con pies elevados'),
+        r(/press en máquina inclinado/gi, 'flexiones con pies elevados'),
+        r(/press en máquina con agarre cerrado/gi, 'flexiones diamante'),
+        r(/press en máquina/gi, 'flexiones'),
+        r(/elevaciones frontales con mancuernas \(ligero\)/gi, 'elevaciones frontales sin peso (solo rango, muy controlado)'),
+        r(/aperturas en polea/gi, 'aperturas en suelo (deslizando toallas)'),
+        r(/cruces? (de |en )?polea( desde arriba)?/gi, 'aperturas en suelo (deslizando toallas)'),
+        r(/extensión (de )?tríceps en polea/gi, 'fondos en silla'),
+        r(/remo en máquina( con apoyo de pecho| o polea baja)?/gi, 'remo bajo mesa'),
+        r(/remo (en )?polea baja/gi, 'remo bajo mesa'),
+        r(/remo barra/gi, 'remo bajo mesa'),
+        r(/dominadas asistidas o jalón/gi, 'remo bajo mesa'),
+        r(/dominadas o jalón/gi, 'remo bajo mesa'),
+        r(/jalón (en |con )?polea( o remo australiano)?/gi, 'remo bajo mesa'),
+        r(/jalón al pecho con agarre neutro/gi, 'remo bajo mesa, agarre neutro'),
+        r(/curl bíceps en banco scott( alterno)?/gi, 'remo supino bajo mesa'),
+        r(/curl bíceps con barra z/gi, 'remo supino bajo mesa'),
+        r(/curl (martillo con cuerda|en polea)( alta| baja)?[^,]*/gi, 'remo supino bajo mesa'),
+        r(/elevación de piernas en barra o banco/gi, 'elevación de piernas tumbado en suelo'),
+        r(/face pull con banda( elástica)?/gi, 'retracción escapular tumbado boca abajo'),
+        r(/face pull/gi, 'retracción escapular tumbado boca abajo'),
+        r(/\ben polea\b/gi, 'con el propio peso'),
+        r(/\ben multipower\b/gi, 'con el propio peso'),
+        r(/\ben (la )?máquina\b/gi, 'con el propio peso'),
+        r(/con mancuernas?/gi, 'con el propio peso'),
+      ];
+
+      const mapaMaterial = (u.lugar || '').includes('sin material') ? mapaSinMaterial : mapaConMaterial;
+      semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaMaterial) } : d);
+    }
+
+    // ADAPTACIÓN POR LESIÓN — va al final, después de rotar accesorios y de ajustar
+    // el material, para que tenga la última palabra sobre qué hace el cliente.
+    //
+    // El orden importa en los dos sentidos: si la lesión se aplicara antes del
+    // ajuste de material, este volvía a meter movimientos prohibidos (traducía
+    // "femoral en máquina" a "peso muerto rumano con mancuernas" justo para quien
+    // tiene la espalda lesionada). Por eso los ejercicios de sustitución de las
+    // lesiones ya se eligen según el material disponible, más arriba.
+    if (mapaLesion.length) {
+      semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
     }
 
     // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
