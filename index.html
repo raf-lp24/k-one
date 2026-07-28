@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>K-ONE — Un paso cada vez</title>
+<!-- El <title> es lo que Google enseña como titular del resultado y lo que más
+     pesa en el posicionamiento de la página. "K-ONE — Un paso cada vez" no
+     contenía ninguna palabra que alguien vaya a buscar, así que la marca y el
+     lema se mantienen pero acompañados de lo que la web hace. -->
+<title>K-ONE — Plan de entrenamiento y nutrición personalizado</title>
 <meta name="description" content="K-ONE genera tu plan de entrenamiento y nutrición personalizado y lo adapta cada semana según tu progreso. Gimnasio, running, Hyrox, CrossFit o solo nutrición. Empieza por 1,99€.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='22' fill='%23F0EDE8'>K-<tspan fill='%23E8490F'>1</tspan></text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='32' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='60' fill='%23F0EDE8'>K-<tspan fill='%23E8490F'>1</tspan></text></svg>">
@@ -2440,6 +2444,18 @@
     letter-spacing: 0;
     text-transform: none;
     margin-left: 6px;
+  }
+
+  /* Los campos obligatorios llevaban la etiqueta "Obligatorio" pintada con la
+     clase .optional, en gris apagado: de un vistazo el distintivo se lee como
+     "opcional" y dice justo lo contrario. Ahora se distinguen. */
+  .field .required {
+    font-size: 10px;
+    color: var(--brasa);
+    letter-spacing: 0;
+    text-transform: none;
+    margin-left: 6px;
+    font-weight: 600;
   }
 
   .field-hint {
@@ -6808,7 +6824,7 @@
         </div>
         <div class="form-grid full" style="gap:20px">
           <div class="field">
-            <label>¿Tienes alguna enfermedad diagnosticada? <span class="optional">Obligatorio</span></label>
+            <label>¿Tienes alguna enfermedad diagnosticada? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="enfermedad">
               <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">No</div>
               <div class="radio-opt" onclick="selectRadioConditional(this,'enfermedad')">Diabetes</div>
@@ -6822,7 +6838,7 @@
             <input type="text" id="enfermedadOtra" placeholder="Cuéntanos qué enfermedad para adaptar el plan">
           </div>
           <div class="field">
-            <label>¿Tienes alguna lesión activa ahora mismo? <span class="optional">Obligatorio</span></label>
+            <label>¿Tienes alguna lesión activa ahora mismo? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="lesion">
               <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">No</div>
               <div class="radio-opt" onclick="selectRadioConditional(this,'lesion')">Rodilla</div>
@@ -6837,7 +6853,7 @@
             <input type="text" id="lesionDetalle" placeholder="¿Desde cuándo? ¿Tienes diagnóstico médico?">
           </div>
           <div class="field">
-            <label>¿Tienes alguna alergia alimentaria? <span class="optional">Obligatorio</span></label>
+            <label>¿Tienes alguna alergia alimentaria? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="alergia">
               <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">No</div>
               <div class="radio-opt" onclick="selectRadioConditional(this,'alergia')">Gluten</div>
@@ -6923,7 +6939,7 @@
         </div>
         <div class="form-grid full" style="gap:20px">
           <div class="field">
-            <label>¿Qué tipo de dieta sigues? <span class="optional">Obligatorio</span></label>
+            <label>¿Qué tipo de dieta sigues? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="dieta">
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Como de todo</div>
               <div class="radio-opt" onclick="selectRadio(this,'dieta')">Vegetariano/a</div>
@@ -6936,7 +6952,7 @@
             <input type="text" id="noComida" placeholder="Pescado, vísceras, legumbres... lo que sea" aria-label="Alimentos que no te gustan">
           </div>
           <div class="field">
-            <label>¿Cuántas veces comes al día? <span class="optional">Obligatorio</span></label>
+            <label>¿Cuántas veces comes al día? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="comidas">
               <div class="radio-opt" onclick="selectRadio(this,'comidas')">2 veces</div>
               <div class="radio-opt" onclick="selectRadio(this,'comidas')">3 veces</div>
@@ -6945,7 +6961,7 @@
             </div>
           </div>
           <div class="field">
-            <label>¿Cocinas en casa o comes fuera? <span class="optional">Obligatorio</span></label>
+            <label>¿Cocinas en casa o comes fuera? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="cocina">
               <div class="radio-opt" onclick="selectRadio(this,'cocina')">Casi siempre en casa</div>
               <div class="radio-opt" onclick="selectRadio(this,'cocina')">Mitad y mitad</div>
@@ -6968,14 +6984,14 @@
         </div>
         <div class="form-grid full" style="gap:20px">
           <div class="field">
-            <label>¿Qué tipo de plan quieres? <span class="optional">Obligatorio</span></label>
+            <label>¿Qué tipo de plan quieres? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="tipoPlan">
               <div class="radio-opt" onclick="selectRadio(this,'tipoPlan')">Plan completo: entrenamiento + nutrición</div>
               <div class="radio-opt" onclick="selectRadio(this,'tipoPlan')">Solo nutrición, sin entrenamiento</div>
             </div>
           </div>
           <div class="field">
-            <label>¿Cuál es tu objetivo principal? <span class="optional">Obligatorio</span></label>
+            <label>¿Cuál es tu objetivo principal? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="objetivo">
               <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Perder grasa</div>
               <div class="radio-opt" onclick="selectRadio(this,'objetivo'); preseleccionarEnfoque(this.textContent.trim());">Ganar músculo</div>
@@ -7000,7 +7016,7 @@
             <input type="text" id="evento" placeholder="Hyrox Madrid en marzo, maratón en mayo...">
           </div>
           <div class="field">
-            <label>¿En cuánto tiempo te gustaría ver resultados? <span class="optional">Obligatorio</span></label>
+            <label>¿En cuánto tiempo te gustaría ver resultados? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="plazo">
               <div class="radio-opt" onclick="selectRadio(this,'plazo')">1-2 meses</div>
               <div class="radio-opt" onclick="selectRadio(this,'plazo')">3-6 meses</div>
@@ -7028,7 +7044,7 @@
         </div>
         <div class="form-grid full" style="gap:20px">
           <div class="field">
-            <label>¿Qué deporte quieres practicar? <span class="optional">Obligatorio</span></label>
+            <label>¿Qué deporte quieres practicar? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="deporte">
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">Gimnasio / Fuerza</div>
               <div class="radio-opt" onclick="selectRadio(this,'deporte')">Running</div>
@@ -7056,7 +7072,7 @@
             <div id="previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
           </div>
           <div class="field">
-            <label>¿Cuántos días a la semana puedes entrenar? <span class="optional">Obligatorio</span></label>
+            <label>¿Cuántos días a la semana puedes entrenar? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="diasEntreno">
               <div class="radio-opt" onclick="selectRadio(this,'diasEntreno')">2 días</div>
               <div class="radio-opt" onclick="selectRadio(this,'diasEntreno')">3 días</div>
@@ -7065,7 +7081,7 @@
             </div>
           </div>
           <div class="field">
-            <label>¿Cuánto tiempo por sesión? <span class="optional">Obligatorio</span></label>
+            <label>¿Cuánto tiempo por sesión? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="tiempoSesion">
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">30-45 min</div>
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">45-60 min</div>
@@ -7074,7 +7090,7 @@
             </div>
           </div>
           <div class="field">
-            <label>¿Cuál es tu nivel actual? <span class="optional">Obligatorio</span></label>
+            <label>¿Cuál es tu nivel actual? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="nivel">
               <div class="radio-opt" onclick="selectRadio(this,'nivel')" data-hint="Menos de 3 meses con rutina estructurada, o nunca he entrenado con método">Principiante, empiezo desde cero</div>
               <div class="radio-opt" onclick="selectRadio(this,'nivel')" data-hint="3+ meses yendo con regularidad (aunque te notes novato/a — elige esta si ya llevas meses en el gym)">Llevo algo de tiempo</div>
@@ -7090,7 +7106,7 @@
             </div>
           </div>
           <div class="field">
-            <label>¿Dónde entrenas? <span class="optional">Obligatorio</span></label>
+            <label>¿Dónde entrenas? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="lugar">
               <div class="radio-opt" onclick="selectRadio(this,'lugar')">Gimnasio</div>
               <div class="radio-opt" onclick="selectRadio(this,'lugar')">En casa con material</div>
@@ -10449,6 +10465,16 @@
 
     if (medicacion) {
       notasSalud.push(`Nos indicaste que tomas medicación (${medicacion}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
+    }
+
+    // El cuestionario pregunta por operaciones ("menisco, hernia discal...") y
+    // hasta ahora ese dato no se usaba en ninguna parte: se pedía un dato de salud
+    // (categoría especial del RGPD, como dice la propia política de privacidad) y
+    // se guardaba sin que cambiara nada del plan. Ahora al menos se reconoce y se
+    // avisa, igual que con la medicación.
+    const operacion = (u.operacion || '').trim();
+    if (operacion) {
+      notasSalud.push(`Nos indicaste que te han operado (${operacion}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
     }
     } // fin if (!soloDieta) — adaptaciones de entrenamiento por lesión/enfermedad/medicación
 
