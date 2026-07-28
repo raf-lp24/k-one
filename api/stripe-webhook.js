@@ -18,13 +18,20 @@ async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
   const periodEnd = item?.current_period_end   ?? subscription.current_period_end;
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
 
+  // Sin este guard, si Stripe no manda el periodo (cambió de sitio entre versiones
+  // de la API), `new Date(undefined * 1000).toISOString()` lanza RangeError y tumba
+  // el webhook entero con un 500, en vez de guardar la fila sin la fecha.
+  if (!periodEnd) {
+    console.warn(`[stripe-webhook] suscripción ${subscription.id} sin current_period_end; se guarda sin fecha de renovación`);
+  }
+
   const row = {
     stripe_customer_id:     subscription.customer,
     stripe_subscription_id: subscription.id,
     plan:                   item?.price?.id || null,
     status:                 subscription.status,
     current_period_start:   periodStart ? new Date(periodStart * 1000).toISOString() : null,
-    current_period_end:     new Date(periodEnd * 1000).toISOString(),
+    current_period_end:     periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     cancel_at_period_end:   !!subscription.cancel_at_period_end
   };
 
@@ -98,6 +105,21 @@ module.exports = async (req, res) => {
       console.warn('[stripe-webhook] webhook_events insert error (no bloqueante):', dupErr.message);
     }
 
+    // Si el procesamiento falla, hay que BORRAR la marca de idempotencia antes de
+    // devolver el 500. Si no, Stripe reintenta el evento, se choca con la fila que
+    // ya existe, recibe un 200 "duplicate" y el evento se pierde para siempre: un
+    // fallo pasajero de Supabase o de Stripe dejaba a un cliente que acaba de
+    // pagar sin su fila en `subscriptions` (sin acceso) y sin forma de recuperarlo.
+    const soltarMarcaIdempotencia = async () => {
+      if (dupErr) return; // no se llegó a insertar, no hay nada que soltar
+      try {
+        await supabaseAdmin.from('webhook_events').delete().eq('event_id', event.id);
+      } catch (e) {
+        console.error('[stripe-webhook] no se pudo soltar la marca de idempotencia:', e.message);
+      }
+    };
+
+    try {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
@@ -285,6 +307,10 @@ module.exports = async (req, res) => {
       }
       default:
         break;
+    }
+    } catch (procErr) {
+      await soltarMarcaIdempotencia();
+      throw procErr;
     }
 
     return res.status(200).json({ received: true });

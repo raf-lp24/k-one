@@ -93,15 +93,24 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
   // Aplicar el cupón a la suscripción (descuenta la próxima factura).
   // `discounts` es el parámetro nuevo (descuentos múltiples); en versiones de
   // API anteriores sólo existe `coupon`. Se intenta el nuevo y se cae al clásico.
-  const coupon = await ensureCoupon(stripe, premio.pct);
+  // Si algo falla al aplicar el cupón hay que SOLTAR el cerrojo: si no, el nivel
+  // queda marcado como canjeado sin que el cliente haya recibido el descuento, y
+  // no puede volver a intentarlo nunca (el 409 se lo impide para siempre).
   try {
-    await stripe.subscriptions.update(subId, { discounts: [{ coupon: coupon.id }] });
-  } catch (e) {
-    if (e && /unknown parameter|discounts/i.test(e.message || '')) {
-      await stripe.subscriptions.update(subId, { coupon: coupon.id });
-    } else {
-      throw e;
+    const coupon = await ensureCoupon(stripe, premio.pct);
+    try {
+      await stripe.subscriptions.update(subId, { discounts: [{ coupon: coupon.id }] });
+    } catch (e) {
+      if (e && /unknown parameter|discounts/i.test(e.message || '')) {
+        await stripe.subscriptions.update(subId, { coupon: coupon.id });
+      } else {
+        throw e;
+      }
     }
+  } catch (e) {
+    await supabaseAdmin.from('hitos_canjes').delete().eq('user_id', user.id).eq('nivel', nivel);
+    console.error(`[canjear-hito] fallo aplicando el cupón a ${user.id} (nivel ${nivel}), cerrojo liberado:`, e.message);
+    throw e;
   }
 
   // Registrar el nivel también en Stripe (solo visibilidad en el dashboard;

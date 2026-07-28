@@ -8,14 +8,20 @@ const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
 
-function enviarEmail(apiKey, { from, to, subject, html }) {
+// OJO con `reply_to`: 14 de las llamadas de este fichero lo pasaban y la función
+// no lo recogía, así que se descartaba en silencio. Resultado: las respuestas de
+// los clientes a cualquier email de K-ONE iban a equipo@k-one.fit (el remitente
+// técnico) en vez de al buzón que se lee de verdad, y se perdían.
+function enviarEmail(apiKey, { from, to, subject, html, reply_to }) {
+  const payload = { from, to: Array.isArray(to) ? to : [to], subject, html };
+  if (reply_to) payload.reply_to = reply_to;
   return fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ from, to: Array.isArray(to) ? to : [to], subject, html })
+    body: JSON.stringify(payload)
   });
 }
 
