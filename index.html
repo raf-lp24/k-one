@@ -10499,12 +10499,15 @@
       // Cada ritmo se anota UNA sola vez por sesión (sin la bandera /g). Si no,
       // frases como "a zona 2 … ritmo conversacional" repetían el mismo dato dos
       // veces y quedaban ilegibles.
+      // Se conserva el texto ORIGINAL que hizo match ($&) en vez de reescribirlo en
+      // minúscula: "Ritmo 5K" abre frase en el texto fuente, y con un reemplazo fijo
+      // se colaba como "ritmo 5K (4:33/km)..." con minúscula a mitad de la oración.
       const conRitmo = (texto) => texto
-        .replace(/ritmo umbral/i,     `ritmo umbral (${ritmos.umbral}/km)`)
-        .replace(/ritmo tempo/i,      `ritmo tempo (${ritmos.umbral}/km)`)
-        .replace(/ritmo marat[óo]n/i, `ritmo maratón (${ritmos.maraton}/km)`)
-        .replace(/ritmo 5K/i,         `ritmo 5K (${ritmos.intervalos}/km)`)
-        .replace(/(zona 1-2|zona 2|ritmo conversacional)/i, `$1 (${ritmos.facil}/km)`);
+        .replace(/ritmo umbral/i,     (m) => `${m} (${ritmos.umbral}/km)`)
+        .replace(/ritmo tempo/i,      (m) => `${m} (${ritmos.umbral}/km)`)
+        .replace(/ritmo marat[óo]n/i, (m) => `${m} (${ritmos.maraton}/km)`)
+        .replace(/ritmo 5K/i,         (m) => `${m} (${ritmos.intervalos}/km)`)
+        .replace(/(zona 1-2|zona 2|ritmo conversacional)/i, (m) => `${m} (${ritmos.facil}/km)`);
       semana = semana.map(d => d.detalle ? { ...d, detalle: conRitmo(d.detalle) } : d);
       notasSalud.push(`Tus ritmos están calculados a partir de tu marca (VDOT ${ritmos.vdot}): rodaje ${ritmos.facil}/km · umbral ${ritmos.umbral}/km · series ${ritmos.intervalos}/km. Si mejoras tu marca, actualízala y el plan se recalcula.`);
     }
@@ -11169,7 +11172,6 @@
     // pesado a la sesión y para reponer glucógeno rápido después). Se añaden
     // como opciones EXTRA (no sustituyen nada) en los momentos donde tiene
     // sentido, marcadas en el nombre para que se entienda cuándo tomarlas.
-    const nutriMomento = m => nutricion.find(x => x.momento === m);
     // 3 variantes de cada una (antes solo había 1) para que no se repita siempre
     // el mismo plato en los días duros. fuelingPreCarrera/fuelingPostCarrera y
     // fuelingPreWod/fuelingPostWod se reutilizan más abajo para forzarlas
@@ -11197,18 +11199,15 @@
       op('Queso batido con miel y tortitas de arroz (recuperación post-WOD)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
       op('Skyr con plátano y canela (recuperación post-WOD)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
     ];
-    if (esRunner) {
-      const desayuno = nutriMomento('Desayuno');
-      if (desayuno) desayuno.opciones.push(...fuelingPreCarrera);
-      const merienda = nutriMomento('Merienda');
-      if (merienda) merienda.opciones.push(...fuelingPostCarrera);
-    }
-    if (esHyrox || esCrossfit || esCombinacion) {
-      const comida = nutriMomento('Comida');
-      if (comida) comida.opciones.push(...fuelingPreWod);
-      const merienda2 = nutriMomento('Merienda');
-      if (merienda2) merienda2.opciones.push(...fuelingPostWod);
-    }
+    // OJO: estas 4 listas NO se añaden aquí al pool general de Desayuno/Comida/
+    // Merienda. Antes sí se añadían (con `nutriMomento(...).opciones.push(...)`),
+    // así que entraban en la rotación normal y podían tocarle a CUALQUIER día —
+    // comprobado generando planes reales: un lunes de "Easy run" suave, o incluso
+    // un jueves de descanso total (solo estiramientos), podían mostrar "Batido de
+    // plátano, miel y sal (recarga tras tirada larga)" sin que ese día hubiera
+    // tirada larga ninguna. Estas recetas solo tienen sentido el día concreto que
+    // toca tirada larga/series o WOD, así que solo se insertan ahí — ver más abajo
+    // "FUELING DEL DÍA REAL", que las fuerza como primera opción justo esos días.
 
     // OJO: el filtro de alergias/intolerancias NO va aquí. Antes sí estaba, y por
     // eso se colaban alérgenos: los "platos extra por deporte" de más abajo se
