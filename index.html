@@ -10953,22 +10953,24 @@
     // fuelingPreWod/fuelingPostWod se reutilizan más abajo para forzarlas
     // específicamente en el día real de tirada larga / WOD (no solo "disponibles"
     // cualquier día, como antes).
-    const fuelingPreCarrera = [
+    // `let` y no `const`: el filtro de alérgenos de más abajo las reasigna para
+    // quitar de estas listas los platos que no se pueden hacer seguros.
+    let fuelingPreCarrera = [
       op('Tostadas con miel y plátano (antes de tirada larga o series)', '2 rebanadas de pan blanco, 20g miel, 1 plátano', '330 kcal', '6g prot', '73g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Arroz con leche ligero y canela (antes de tirada larga o series)', '200g arroz blanco cocido, 200ml leche semidesnatada, canela, 10g miel', '350 kcal', '9g prot', '70g carbs', '3g grasa', 'Fácil · 10 min'),
       op('Tortitas de plátano sin grasa (antes de tirada larga o series)', '1 plátano maduro, 2 claras, 40g harina de avena, canela', '320 kcal', '15g prot', '58g carbs', '3g grasa', 'Fácil · 8 min')
     ];
-    const fuelingPostCarrera = [
+    let fuelingPostCarrera = [
       op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min'),
       op('Tosta de mermelada y queso batido (recarga tras tirada larga)', '2 tostadas pan blanco, 20g mermelada, 150g queso batido 0%', '290 kcal', '16g prot', '48g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min')
     ];
-    const fuelingPreWod = [
+    let fuelingPreWod = [
       op('Arroz blanco con pollo y miel (90 min antes del WOD)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
       op('Tortitas de arroz con pavo y miel (90 min antes del WOD)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Boniato asado con huevo y jamón cocido (90 min antes del WOD)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min')
     ];
-    const fuelingPostWod = [
+    let fuelingPostWod = [
       op('Batido de proteína con plátano y avena (recuperación post-WOD)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
       op('Queso batido con miel y tortitas de arroz (recuperación post-WOD)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
       op('Skyr con plátano y canela (recuperación post-WOD)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
@@ -10986,54 +10988,12 @@
       if (merienda2) merienda2.opciones.push(...fuelingPostWod);
     }
 
-    // Adaptar nutrición a alergias/intolerancias (gluten, lactosa, frutos secos)
-    if (sinGluten || sinLactosa || sinFrutosSecos) {
-      const reemplazosNutricion = [];
-      if (sinGluten) {
-        reemplazosNutricion.push(
-          [/avena/gi, 'avena certificada sin gluten'],
-          [/pasta integral/gi, 'pasta sin gluten'],
-          [/\bpasta\b/gi, 'pasta sin gluten'],
-          [/fideos( finos)?/gi, 'fideos de arroz'],
-          [/(\d+) rebanadas? (de )?(pan )?centeno/gi, '$1 rebanada(s) de pan sin gluten'],
-          [/(\d+) tostadas? (de )?(pan )?centeno/gi, '$1 tostada(s) de pan sin gluten'],
-          [/tostadas? de centeno/gi, 'tostadas de pan sin gluten'],
-          [/pan centeno/gi, 'pan sin gluten'],
-          [/granola( sin azúcar)?/gi, 'granola sin gluten'],
-          [/muesli( sin azúcar)?/gi, 'muesli sin gluten'],
-          [/galletas avena/gi, 'galletas de arroz'],
-          [/crepes de trigo sarraceno/gi, 'crepes de harina de arroz'],
-          [/lasaña de lentejas y berenjena/gi, 'pastel de lentejas y berenjena (sin placas de pasta)']
-        );
-      }
-      if (sinLactosa) {
-        reemplazosNutricion.push(
-          [/yogur griego/gi, 'yogur de coco (sin lactosa)'],
-          [/kéfir/gi, 'kéfir sin lactosa'],
-          [/requesón/gi, 'queso fresco sin lactosa'],
-          [/queso cottage/gi, 'queso cottage sin lactosa'],
-          [/\bqueso\b(?!\s+(?:fresco|cottage)\s+sin\s+lactosa)/gi, 'queso sin lactosa'],
-          [/\bleche\b(?! de avena| de coco| vegetal| desnatada)/gi, 'leche sin lactosa']
-        );
-      }
-      if (sinFrutosSecos) {
-        reemplazosNutricion.push(
-          [/crema de cacahuete|mantequilla de almendra/gi, 'crema de semillas de girasol'],
-          [/cacahuete/gi, 'semillas de girasol'],
-          [/(nueces|almendras|avellanas) o (nueces|almendras|avellanas)/gi, 'semillas de calabaza y pipas'],
-          [/nueces|almendras|avellanas/gi, 'semillas de calabaza'],
-          [/frutos secos/gi, 'semillas']
-        );
-      }
-      nutricion.forEach(meal => {
-        meal.opciones.forEach(opt => {
-          reemplazosNutricion.forEach(([regex, reemplazo]) => {
-            opt.nombre = opt.nombre.replace(regex, reemplazo);
-            opt.ingredientes = opt.ingredientes.replace(regex, reemplazo);
-          });
-        });
-      });
-    }
+    // OJO: el filtro de alergias/intolerancias NO va aquí. Antes sí estaba, y por
+    // eso se colaban alérgenos: los "platos extra por deporte" de más abajo se
+    // añadían DESPUÉS del filtro y nunca se revisaban (un celíaco veía "bocadillo
+    // de pavo", un intolerante a la lactosa "batido con 250ml leche" y un alérgico
+    // a los frutos secos "cottage con nueces"). Ahora se aplica al final, cuando el
+    // menú ya está completo. Ver "RESTRICCIONES POR ALERGIA" más abajo.
 
     // PLATOS EXTRA POR DEPORTE — se añaden al pool de opciones para más variedad y especificidad
     if (esRunner || esHyrox) {
@@ -11094,6 +11054,197 @@
       });
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // RESTRICCIONES POR ALERGIA / INTOLERANCIA (gluten, lactosa, frutos secos)
+    //
+    // Va AQUÍ, al final, y no antes de los "platos extra por deporte": si se
+    // aplica antes, todo lo que se añade después entra sin revisar. Eso es lo que
+    // pasaba y por eso se colaban alérgenos en el menú.
+    //
+    // Dos pasos:
+    //   1. Sustituir el ingrediente por una versión segura (mantiene la variedad).
+    //   2. Red de seguridad: si tras sustituir AÚN queda rastro del alérgeno, el
+    //      plato se cae del menú. Con alergias no se puede fallar "hacia abierto":
+    //      antes bastaba con que una receta usara una palabra no contemplada para
+    //      que llegara al cliente tal cual.
+    // ─────────────────────────────────────────────────────────────────────────
+    if (sinGluten || sinLactosa || sinFrutosSecos) {
+      const reemplazos = [];
+      // Las reglas van de lo MÁS específico a lo más genérico, y las genéricas
+      // llevan el lookahead `(?![^,]*sin gluten)` / `(?![^,]*sin lactosa)`: así no
+      // vuelven a marcar un ingrediente que una regla anterior ya dejó seguro
+      // (sin eso salían cosas como "3 tostas sin gluten de pan sin gluten").
+      if (sinGluten) {
+        reemplazos.push(
+          [/galletas (de )?avena/gi, 'tortitas de arroz'],
+          // La bebida de avena solo es sin gluten si está certificada.
+          [/leche (de )?avena/gi, 'leche de avena certificada sin gluten'],
+          [/harina de avena/gi, 'harina de avena certificada sin gluten'],
+          [/\bavena\b(?![^,]*sin gluten)/gi, 'avena certificada sin gluten'],
+          [/pasta integral/gi, 'pasta sin gluten'],
+          [/fideos( finos)?/gi, 'fideos de arroz'],
+          [/\b(cuscús|couscous|bulgur)\b/gi, 'quinoa'],
+          [/\bseitán\b/gi, 'tofu firme'],
+          [/salsa de soja/gi, 'salsa de soja sin gluten (tamari)'],
+          [/harina de trigo/gi, 'harina de arroz'],
+          [/crepes de trigo sarraceno/gi, 'crepes de harina de arroz'],
+          [/lasaña de lentejas y berenjena/gi, 'pastel de lentejas y berenjena (sin placas de pasta)'],
+          [/tortillas? (integrales?|de trigo)/gi, 'tortilla de maíz'],
+          [/wrap integral/gi, 'wrap de maíz'],
+          // Panes wassa son de centeno: no hay versión sin gluten, se cambia el plato.
+          [/panes? wassa/gi, 'tortitas de arroz'],
+          // Formas compuestas de pan, antes de la genérica, para que el resultado
+          // se lea bien y no quede el calificativo con gluten suelto detrás.
+          [/(tostas?|tostadas?|rebanadas?) (de )?pan (centeno|integrales?|multicereal|blanco|de trigo)/gi, '$1 de pan sin gluten'],
+          [/(tostas?|tostadas?|rebanadas?) (centeno|integrales?|multicereal|espelta|blanco)/gi, '$1 de pan sin gluten'],
+          [/(tostas?|tostadas?|rebanadas?) de pan\b(?![^,]*sin gluten)/gi, '$1 de pan sin gluten'],
+          [/panecillos? integral(es)?( pequeños?)?/gi, 'panecillo sin gluten'],
+          [/pan (centeno|integral|multicereal|blanco|de trigo|de espelta)/gi, 'pan sin gluten'],
+          [/barra de pan/gi, 'pan sin gluten'],
+          // Red final: cualquier forma de pan/bollería que siga suelta se marca.
+          [/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|granola|muesli|barritas?)\b(?![^,]*sin gluten)(?!\s+de\s+(?:arroz|maíz))/gi, '$1 sin gluten']
+        );
+      }
+      if (sinLactosa) {
+        reemplazos.push(
+          [/yogur griego/gi, 'yogur de coco (sin lactosa)'],
+          [/\byogur(t)?\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
+          [/\bkéfir\b(?![^,]*sin lactosa)/gi, 'kéfir sin lactosa'],
+          [/\brequesón\b/gi, 'queso fresco sin lactosa'],
+          [/\bskyr\b/gi, 'skyr sin lactosa'],
+          // El pesto lleva parmesano (y piñones): se cambia por la alternativa.
+          [/pesto( de albahaca)?( vegano)?/gi, 'albahaca fresca picada con AOVE'],
+          [/\b(parmesano|mozzarella|feta|ricotta|burrata)\b/gi, 'queso $1 sin lactosa'],
+          // El adjetivo va antes del "sin lactosa": "queso tierno sin lactosa",
+          // no "queso sin lactosa tierno".
+          [/\bqueso (tierno|fresco|batido|cottage|curado|semicurado|rallado|azul|de cabra|de untar|crema|manchego)/gi, 'queso $1 sin lactosa'],
+          [/\bcottage\b(?![^,]*sin lactosa)/gi, 'queso cottage sin lactosa'],
+          [/\b(quesos?)\b(?![^,]*sin lactosa)/gi, '$1 sin lactosa'],
+          [/\b(proteína )?whey\b/gi, 'proteína aislada de suero (sin lactosa)'],
+          [/\bnata\b/gi, 'nata de coco'],
+          [/\bmantequilla\b(?! de)/gi, 'AOVE'],
+          [/\bleche (entera|semidesnatada|desnatada)/gi, 'leche $1 sin lactosa'],
+          [/\bleche\b(?! de (?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,]*sin lactosa)/gi, 'leche sin lactosa']
+        );
+      }
+      if (sinFrutosSecos) {
+        reemplazos.push(
+          [/crema de cacahuete|crema cacahuete|mantequilla de almendra/gi, 'crema de semillas de girasol'],
+          [/leche de almendras?/gi, 'bebida de arroz'],
+          [/pesto de albahaca|\bpesto\b/gi, 'albahaca fresca picada con AOVE'],
+          [/\bcacahuetes?\b/gi, 'semillas de girasol'],
+          [/(nueces|almendras|avellanas|pistachos|anacardos) o (nueces|almendras|avellanas|pistachos|anacardos)/gi, 'semillas de calabaza y pipas'],
+          [/\b(nueces|nuez|almendras?|avellanas?|pistachos?|anacardos?|piñones?|macadamia|pecanas?)\b/gi, 'semillas de calabaza'],
+          [/frutos secos/gi, 'semillas'],
+          [/\b(semillas de calabaza)(,? y? ?\1)+/gi, '$1']
+        );
+      }
+
+      // Neutraliza las formas YA seguras antes de buscar rastros de alérgeno, para
+      // que "leche sin lactosa" o "avena certificada sin gluten" no cuenten como
+      // violación (si no, la red de seguridad tiraría justo lo que acaba de arreglar).
+      const neutralizar = (txt) => txt
+        .replace(/avena certificada sin gluten/gi, '·')
+        .replace(/harina de (arroz|maíz|garbanzos?|almendra)/gi, '·')
+        .replace(/(tortitas?|fideos|galletas|tortilla|wrap|pan|tostas?|tostadas?) de (arroz|maíz)/gi, '·')
+        .replace(/[\wáéíóúñ]+(\s+[\wáéíóúñ]+)*?\s+sin gluten/gi, '·')
+        .replace(/salsa de soja sin gluten \(tamari\)/gi, '·')
+        .replace(/yogur de coco[^,]*/gi, '·')
+        .replace(/nata de coco/gi, '·')
+        .replace(/proteína aislada de suero \(sin lactosa\)/gi, '·')
+        .replace(/[\wáéíóúñ]+(\s+[\wáéíóúñ]+)*?\s+sin lactosa/gi, '·')
+        .replace(/(leche|bebida) (de (avena|coco|arroz|soja)|vegetal)/gi, '·')
+        .replace(/semillas de (calabaza|girasol|lino|chía|sésamo)/gi, '·')
+        .replace(/\bpipas\b/gi, '·');
+
+      const rastros = [];
+      if (sinGluten) rastros.push(/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|fideos|avena|trigo|cebada|centeno|espelta|cuscús|couscous|bulgur|seitán|galletas?|bocadillo|wrap|granola|muesli|harina|lasaña|croquetas?|rebozad\w*|empanad\w*|pizza|pita|bagel|barritas?|multicereal|wassa|cerveza)\b/i);
+      if (sinLactosa) rastros.push(/\b(leche|quesos?|yogur(t)?|requesón|cottage|nata|mantequilla|kéfir|skyr|whey|cuajada|parmesano|mozzarella|feta|ricotta|burrata|bechamel|helado|pesto)\b/i);
+      if (sinFrutosSecos) rastros.push(/\b(nuez|nueces|almendras?|anacardos?|avellanas?|pistachos?|cacahuetes?|piñones?|macadamia|pecanas?|praliné|turrón|mazapán|frutos secos|pesto)\b/i);
+
+      // Cada plato se procesa UNA sola vez: los objetos se comparten entre el pool
+      // de nutrición y las listas de fueling, y aplicar las sustituciones dos veces
+      // encadenaría textos absurdos ("avena certificada sin gluten certificada...").
+      const yaProcesados = new Set();
+      const adaptar = (opt) => {
+        if (!opt || yaProcesados.has(opt)) return;
+        yaProcesados.add(opt);
+        reemplazos.forEach(([re, rep]) => {
+          opt.nombre = opt.nombre.replace(re, rep);
+          opt.ingredientes = opt.ingredientes.replace(re, rep);
+        });
+        // Las sustituciones pueden dejar el nombre empezando en minúscula
+        // ("yogur de coco (sin lactosa) con granola..."). Se recapitaliza.
+        opt.nombre = opt.nombre.charAt(0).toUpperCase() + opt.nombre.slice(1);
+      };
+      nutricion.forEach(m => m.opciones.forEach(adaptar));
+      [fuelingPreCarrera, fuelingPostCarrera, fuelingPreWod, fuelingPostWod].forEach(a => a.forEach(adaptar));
+
+      const esSeguro = (opt) => {
+        const t = neutralizar(opt.nombre + ' ' + opt.ingredientes);
+        return !rastros.some(re => re.test(t));
+      };
+
+      // Si un momento se queda sin platos seguros, se rellena con recetas que no
+      // llevan gluten, lácteos ni frutos secos por naturaleza (nunca se devuelve
+      // el pool original: eso serviría el alérgeno).
+      const platosSeguros = (momento) => {
+        const veg = esVegetariano;
+        const pool = {
+          'Desayuno': [
+            op('Tortilla de tres huevos con espinacas y tomate', '3 huevos, 100g espinacas, 150g tomate, 10g AOVE', '320 kcal', '22g prot', '10g carbs', '22g grasa', 'Fácil · 8 min'),
+            op('Huevos revueltos con boniato y aguacate', '3 huevos, 150g boniato asado, 1/2 aguacate', '430 kcal', '22g prot', '32g carbs', '24g grasa', 'Fácil · 15 min'),
+            op('Bowl de fruta con semillas y miel', '1 plátano, 150g frutos rojos, 20g semillas de girasol, 15g miel', '330 kcal', '8g prot', '58g carbs', '10g grasa', 'Sin cocción · 3 min'),
+            veg
+              ? op('Revuelto de tofu con tomate y aguacate', '200g tofu firme, 150g tomate, 1/2 aguacate, cúrcuma, AOVE', '390 kcal', '24g prot', '14g carbs', '28g grasa', 'Fácil · 10 min')
+              : op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min')
+          ],
+          'Media mañana': [
+            op('Manzana con semillas de girasol', '1 manzana, 20g semillas de girasol', '190 kcal', '5g prot', '26g carbs', '9g grasa', 'Sin cocción · 1 min'),
+            op('Tortitas de arroz con aguacate y tomate', '3 tortitas de arroz, 1/2 aguacate, 100g tomate, sal', '250 kcal', '5g prot', '30g carbs', '13g grasa', 'Sin cocción · 3 min'),
+            veg
+              ? op('Hummus con crudités de zanahoria', '80g hummus, 150g zanahoria en bastones', '220 kcal', '7g prot', '22g carbs', '12g grasa', 'Sin cocción · 3 min')
+              : op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min')
+          ],
+          'Comida': [
+            veg
+              ? op('Lentejas guisadas con verduras y arroz', '200g lentejas cocidas, 80g arroz, zanahoria, pimiento, AOVE', '480 kcal', '22g prot', '68g carbs', '12g grasa', 'Fácil · 25 min')
+              : op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g verduras al vapor, 15g AOVE', '540 kcal', '48g prot', '52g carbs', '15g grasa', 'Fácil · 20 min'),
+            veg
+              ? op('Garbanzos con espinacas y quinoa', '200g garbanzos cocidos, 150g espinacas, 80g quinoa, AOVE, pimentón', '490 kcal', '22g prot', '62g carbs', '14g grasa', 'Fácil · 20 min')
+              : op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '540 kcal', '40g prot', '42g carbs', '24g grasa', 'Medio · 25 min'),
+            op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '470 kcal', '20g prot', '40g carbs', '26g grasa', 'Medio · 25 min')
+          ],
+          'Merienda': [
+            op('Plátano con semillas de calabaza', '1 plátano, 20g semillas de calabaza', '220 kcal', '7g prot', '28g carbs', '10g grasa', 'Sin cocción · 1 min'),
+            veg
+              ? op('Batido de plátano con bebida de arroz', '1 plátano, 250ml bebida de arroz, canela, 10g semillas de lino', '260 kcal', '5g prot', '48g carbs', '6g grasa', 'Fácil · 3 min')
+              : op('Pavo en lonchas con tomate y aguacate', '100g pavo en lonchas, 150g tomate, 1/2 aguacate', '270 kcal', '24g prot', '10g carbs', '16g grasa', 'Sin cocción · 3 min'),
+            op('Bol de frutos rojos con semillas de girasol', '200g frutos rojos, 20g semillas de girasol, canela', '210 kcal', '6g prot', '24g carbs', '10g grasa', 'Sin cocción · 2 min')
+          ],
+          'Cena': [
+            veg
+              ? op('Revuelto de tofu con verduras y arroz', '200g tofu firme, 200g verduras salteadas, 60g arroz, AOVE', '440 kcal', '26g prot', '44g carbs', '18g grasa', 'Fácil · 20 min')
+              : op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '420 kcal', '38g prot', '38g carbs', '12g grasa', 'Fácil · 25 min'),
+            veg
+              ? op('Crema de verduras con huevos cocidos', '400ml crema de calabacín y puerro, 2 huevos cocidos, AOVE', '330 kcal', '18g prot', '22g carbs', '20g grasa', 'Fácil · 20 min')
+              : op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
+            op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min')
+          ]
+        };
+        return pool[momento] || pool['Comida'];
+      };
+
+      nutricion = nutricion.map(m => {
+        const seguras = m.opciones.filter(esSeguro);
+        return { ...m, opciones: seguras.length ? seguras : platosSeguros(m.momento) };
+      });
+      fuelingPreCarrera  = fuelingPreCarrera.filter(esSeguro);
+      fuelingPostCarrera = fuelingPostCarrera.filter(esSeguro);
+      fuelingPreWod      = fuelingPreWod.filter(esSeguro);
+      fuelingPostWod     = fuelingPostWod.filter(esSeguro);
+    }
+
     // FILTRO VEGETARIANO/VEGANO: eliminar opciones con ingredientes animales.
     // La opción "Vegano" ya no se ofrece en el formulario, pero mantenemos el
     // filtro para cuentas antiguas que la tuvieran guardada. Los fallbacks nunca
@@ -11144,17 +11295,21 @@
       const diaEsWod = d => d.etiqueta === 'WOD' || /wod|metcon|amrap|emom|complejo|circuito|simulacro|chipper/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
       semana.forEach((d, i) => {
         const dm = nutricionPorDia[i];
+        // El filtro de alérgenos puede haber vaciado alguna de estas listas; sin el
+        // guard, `lista[x % 0]` daba NaN y se colaba un `undefined` como primera
+        // opción del día (tarjeta de comida en blanco en el panel).
+        const forzar = (comidas, momento, lista) => {
+          if (!lista.length) return;
+          const m = comidas.find(x => x.momento === momento);
+          if (m) m.opciones = [lista[(semilla + i) % lista.length], ...m.opciones].slice(0, 5);
+        };
         if (esRunner && diaEsDuroCorredor(d)) {
-          const desayunoD = dm.find(m => m.momento === 'Desayuno');
-          const meriendaD = dm.find(m => m.momento === 'Merienda');
-          if (desayunoD) desayunoD.opciones = [fuelingPreCarrera[(semilla + i) % fuelingPreCarrera.length], ...desayunoD.opciones].slice(0, 5);
-          if (meriendaD) meriendaD.opciones = [fuelingPostCarrera[(semilla + i) % fuelingPostCarrera.length], ...meriendaD.opciones].slice(0, 5);
+          forzar(dm, 'Desayuno', fuelingPreCarrera);
+          forzar(dm, 'Merienda', fuelingPostCarrera);
         }
         if ((esHyrox || esCrossfit || esCombinacion) && diaEsWod(d)) {
-          const comidaD = dm.find(m => m.momento === 'Comida');
-          const meriendaD2 = dm.find(m => m.momento === 'Merienda');
-          if (comidaD) comidaD.opciones = [fuelingPreWod[(semilla + i) % fuelingPreWod.length], ...comidaD.opciones].slice(0, 5);
-          if (meriendaD2) meriendaD2.opciones = [fuelingPostWod[(semilla + i) % fuelingPostWod.length], ...meriendaD2.opciones].slice(0, 5);
+          forzar(dm, 'Comida', fuelingPreWod);
+          forzar(dm, 'Merienda', fuelingPostWod);
         }
       });
     }
