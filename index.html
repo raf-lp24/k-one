@@ -1199,6 +1199,15 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     word-break: break-word;
+    /* El min-width:0 del contenedor (arriba) no basta: como ítem flex, este
+       span sigue teniendo min-width:auto por defecto y se niega a encogerse
+       por debajo de su ancho de una sola línea sin cortes -- así que nunca
+       llegaba a tener un ancho definido donde el line-clamp pudiera partir la
+       segunda línea, y el texto se veía truncado en una sola línea igualmente.
+       flex-shrink+min-width:0 aquí, en el propio hijo, es lo que de verdad lo
+       arregla. */
+    flex-shrink: 1;
+    min-width: 0;
     line-height: 1.35;
   }
   .today-hero-content { position: relative; z-index: 2; padding: 26px; }
