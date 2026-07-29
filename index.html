@@ -9215,7 +9215,11 @@
     // delante de la cifra y se perdía la miniatura/vídeo. Se reconocen por
     // palabra clave y se les da un nombre limpio para buscar.
     if (/interválico/i.test(textoCap)) {
-      nombre = 'Intervalos cardio';
+      // "Intervalos cardio" no es un ejercicio real y no hay vídeo que buscar
+      // para eso: no salía nada útil al pulsar "Cómo se hace". "Sprints" sí
+      // tiene vídeo curado y es la forma más accesible de hacerlo (no necesitas
+      // ni bici ni remo), así que es lo que se sugiere por defecto.
+      nombre = 'Sprints';
       resto = textoCap.trim();
     } else if (/circuito al final/i.test(textoCap)) {
       nombre = 'Circuito metabólico';
@@ -10326,7 +10330,7 @@
       // "con material" y "Gimnasio" comparten la misma lógica de pesos libres/máquinas
 
       const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : '';
-      const finisher4 = perdidaGrasa ? ', 15 min interválico al finalizar: 1 min fuerte / 1 min suave × 7 rondas' : '';
+      const finisher4 = perdidaGrasa ? ', 15 min interválico al finalizar (corre, pedalea o rema): 1 min fuerte / 1 min suave × 7 rondas' : '';
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -10579,7 +10583,15 @@
         // distinguir "un ejercicio" de "un párrafo" — perdía la tarjeta de peso/RPE
         // (comprobado generando el día real).
         [/[Pp]ress militar( con barra| con mancuernas| mancuernas)?( \(ligero\))?/g, eq('Elevaciones frontales ligeras', 'Elevaciones frontales ligeras', 'Elevaciones frontales sin peso (solo rango, muy controlado)')],
-        [/[Pp]ress (de )?banca/g, eq('Press en máquina (rango controlado, sin dolor)', 'Press con mancuernas (rango controlado, sin dolor)', 'Flexiones (rango controlado, sin dolor)')],
+        // "( o mancuernas)?" consume el sufijo que deja la plantilla del día
+        // ("Press de banca o mancuernas 3×10..."): sin esto quedaba colgando
+        // ("Press en máquina (rango controlado, sin dolor) o mancuernas 3×10"),
+        // y esas palabras de más bastaban para perder la tarjeta de peso.
+        // Acortado ("rango controlado, sin dolor" → nada, o solo "sin dolor"):
+        // este reemplazo se combina con varias plantillas de día distintas, cada
+        // una con su propia nota, y con el texto largo se pasaba de las 15
+        // palabras en más de una — se perdía la tarjeta de peso.
+        [/[Pp]ress (de )?banca( o mancuernas)?/g, eq('Press en máquina', 'Press con mancuernas', 'Flexiones (sin dolor)')],
         // Una sola regla con el material opcional dentro: con dos reglas (una
         // específica y otra genérica) la segunda volvía a coincidir con el texto
         // que acababa de escribir la primera y salía duplicado
@@ -10604,7 +10616,11 @@
         [/[Cc]lean & jerk|[Pp]ush jerk|[Ss]plit jerk|\bjerks?\b/g, 'clean sin pasar por encima de la cabeza'],
         [/[Pp]ower snatch(es)?|\bsnatch(es)?\b/gi, 'clean sin pasar por encima de la cabeza'],
         [/[Ww]all balls?( con balón)?/g, 'goblet squat'],
-        [/[Ee]levaciones laterales/g, 'Elevaciones laterales por debajo del hombro (rango corto)'],
+        // "( con mancuernas)?" consume el sufijo que puede haber dejado la
+        // rotación de accesorios (poolsEjercicio, más arriba) si tocó la
+        // variante "elevaciones laterales CON MANCUERNAS" antes de que la
+        // lesión reescribiera el nombre — mismo problema que con press banca.
+        [/[Ee]levaciones laterales( con mancuernas)?/g, 'Elevaciones laterales por debajo del hombro (rango corto)'],
         [/[Ff]lexiones pique \(pike push-ups\)|[Ff]lexiones pique/g, 'flexiones normales'],
       ];
       notasSalud.push('Hemos adaptado los ejercicios que exigen empuje vertical o rango completo de hombro (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza) por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
@@ -10762,8 +10778,13 @@
         [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga (aprieta en el pico)']],
         [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea', 'curl en polea alta (tensión constante)']],
         [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
-        [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza (codos pegados)', 'copa de tríceps con mancuerna (codos cerrados junto a la cabeza)']],
-        [/press francés/gi, ['press francés', 'copa de tríceps con mancuerna (codos cerrados, no los abras)']],
+        // "copa de tríceps con mancuerna" iba con su propia nota entre paréntesis
+        // ("codos cerrados..."), y el día ya trae detrás su propia nota casi
+        // idéntica ("codos fijos cerca de la cabeza, no los abras") -- las dos
+        // notas juntas pasaban de las 15 palabras y la tarjeta se perdía, aparte
+        // de leerse repetido. Quitada la nota del nombre: la del día ya lo dice.
+        [/extensión de tríceps en polea/gi, ['extensión de tríceps en polea', 'extensión de tríceps con cuerda', 'extensión de tríceps sobre cabeza (codos pegados)', 'copa de tríceps con mancuerna']],
+        [/press francés/gi, ['press francés', 'copa de tríceps con mancuerna']],
         // El " mancuernas" del final entra en el patrón a propósito: si no, al
         // cambiar el nombre del ejercicio quedaba colgando ("combo lateral a
         // frontal con peso ligero (precisión alta) mancuernas 3×15").
