@@ -9209,19 +9209,13 @@
   function renderEjercicioSimple(texto, capitalizar) {
     const textoCap = capitalizar(texto);
     let nombre, resto;
-    // Los remates cardiovasculares (finisher3/finisher4, arriba en el generador)
-    // empiezan por un número ("15 min interválico...", "circuito al final: ...")
-    // así que la extracción genérica de más abajo no encuentra ningún nombre
-    // delante de la cifra y se perdía la miniatura/vídeo. Se reconocen por
-    // palabra clave y se les da un nombre limpio para buscar.
-    if (/interválico/i.test(textoCap)) {
-      // "Intervalos cardio" no es un ejercicio real y no hay vídeo que buscar
-      // para eso: no salía nada útil al pulsar "Cómo se hace". "Sprints" sí
-      // tiene vídeo curado y es la forma más accesible de hacerlo (no necesitas
-      // ni bici ni remo), así que es lo que se sugiere por defecto.
-      nombre = 'Sprints';
-      resto = textoCap.trim();
-    } else if (/circuito al final/i.test(textoCap)) {
+    // El remate interválico (finisher4, arriba en el generador) ya empieza por
+    // un nombre de ejercicio real y rotado ("Sprints 15 min...", "Remo 15
+    // min..."), así que la extracción genérica de más abajo lo coge solo. El
+    // de "circuito al final" (finisher3) no tiene un nombre limpio delante de
+    // la cifra -- es un mini-circuito de 3 movimientos, no un solo ejercicio
+    // -- así que ese sí necesita un nombre puesto a mano para el vídeo.
+    if (/circuito al final/i.test(textoCap)) {
       nombre = 'Circuito metabólico';
       resto = textoCap.replace(/^,?\s*circuito al final:\s*/i, '').trim();
     } else {
@@ -10330,7 +10324,20 @@
       // "con material" y "Gimnasio" comparten la misma lógica de pesos libres/máquinas
 
       const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : '';
-      const finisher4 = perdidaGrasa ? ', 15 min interválico al finalizar (corre, pedalea o rema): 1 min fuerte / 1 min suave × 7 rondas' : '';
+      // El remate interválico rota entre lo que de verdad hay en un gimnasio
+      // normal (mismo patrón que la rotación de accesorios: semilla+bloqueMeso).
+      // Antes siempre decía "corre, pedalea o rema" en el texto pero la tarjeta
+      // solo mostraba "Sprints" fijo — no realista para quien no vaya a salir a
+      // correr cada vez que le toque este bloque de 4 semanas.
+      const modalidadesInterval = [
+        { nombre: 'Sprints', accion: 'corriendo — cinta o al aire libre, con algo de inclinación si puedes' },
+        { nombre: 'Assault bike', accion: 'en la bici de aire (brazos y piernas a la vez)' },
+        { nombre: 'Remo', accion: 'en el remoergómetro' },
+        { nombre: 'Burpees', accion: 'burpees seguidos al máximo, sin parar' },
+        { nombre: 'Comba', accion: 'saltando a la comba' },
+      ];
+      const modInterval = modalidadesInterval[(semilla + bloqueMeso) % modalidadesInterval.length];
+      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : '';
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -10775,7 +10782,11 @@
       const poolsEjercicio = [
         [/press inclinado mancuernas/gi, ['press inclinado mancuernas', 'press inclinado en multipower', 'press inclinado en máquina']],
         [/cruces en polea/gi, ['cruces en polea', 'aperturas en polea', 'cruces de polea desde arriba']],
-        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga (aprieta en el pico)']],
+        // Mismo problema que "copa de tríceps": esta variante llevaba su propia
+        // nota "(aprieta en el pico)" y el día ya trae detrás una nota casi
+        // idéntica ("aprieta en el pico de contracción") en más de una plantilla
+        // -- las dos juntas pasaban de las 15 palabras y se leían repetidas.
+        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga']],
         [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea', 'curl en polea alta (tensión constante)']],
         [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
         // "copa de tríceps con mancuerna" iba con su propia nota entre paréntesis
@@ -10880,7 +10891,7 @@
         r(/curl bíceps en banco scott/gi, 'curl bíceps concentrado con mancuerna'),
         r(/curl bíceps con barra z/gi, 'curl bíceps con mancuernas'),
         r(/curl martillo con cuerda en polea/gi, 'curl martillo con mancuernas'),
-        r(/curl en polea baja con soga \(aprieta en el pico\)/gi, 'curl martillo con mancuernas'),
+        r(/curl en polea baja con soga/gi, 'curl martillo con mancuernas'),
         r(/curl en polea alta \(tensión constante\)/gi, 'curl bíceps con banda elástica'),
         r(/curl en polea( alta| baja)?/gi, 'curl bíceps con banda elástica'),
         // Core y varios
