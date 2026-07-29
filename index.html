@@ -6118,13 +6118,13 @@
         <span>Ver demo</span>
       </button>
     </div>
-    <div class="hero-demo" aria-hidden="true">
+    <div class="hero-demo" role="button" tabindex="0" aria-label="Ver el recorrido completo por el área de cliente, con explicación de cada sección" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';m.querySelector('video').play()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="cursor:pointer;pointer-events:auto">
       <div class="hero-demo-inner">
         <video autoplay muted loop playsinline preload="metadata" poster="/og-image.png">
           <source src="/demo.mp4" type="video/mp4">
         </video>
       </div>
-      <div class="hero-demo-label">Área de cliente real</div>
+      <div class="hero-demo-label">Área de cliente real · toca para ver más</div>
     </div>
     <div class="hero-content">
       <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
@@ -6173,12 +6173,15 @@
     </div>
   </section>
 
-  <!-- Modal vídeo móvil -->
+  <!-- Modal vídeo del recorrido completo (Hoy, Entrenamiento, Nutrición, Check-in,
+       Progreso, Notas, Contacto), con texto superpuesto explicando cada sección.
+       Se abre desde el hero tanto en móvil (botón "Ver demo") como en escritorio
+       (clic en el vídeo ambiente de fondo). -->
   <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
     <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
       <button onclick="this.closest('#heroVideoModal').style.display='none';this.closest('#heroVideoModal').querySelector('video').pause()" style="position:absolute;top:-44px;right:0;background:var(--brasa);border:none;color:#fff;font-size:14px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center">✕</button>
       <video controls playsinline preload="none" poster="/og-image.png" style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
-        <source src="/demo.mp4" type="video/mp4">
+        <source src="/demo-completo.mp4" type="video/mp4">
       </video>
     </div>
   </div>
