@@ -753,6 +753,7 @@
     pointer-events: none;
   }
   .hero-demo-inner {
+    position: relative;
     background: #111;
     border-radius: 16px;
     padding: 5px;
@@ -761,6 +762,28 @@
     max-height: 65vh;
     overflow: hidden;
   }
+  /* El texto "toca para ver más" bajo el vídeo pasaba desapercibido en
+     escritorio (nadie prueba a hacer clic en un vídeo de fondo por
+     defecto). Un botón de play superpuesto, igual que el de móvil, dice
+     "esto es interactivo" sin depender de que alguien lea la etiqueta. */
+  .hero-demo-playbtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(232,73,15,0.18);
+    border: 2px solid rgba(232,73,15,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+  .hero-demo-playbtn svg { width: 20px; height: 20px; margin-left: 3px; }
   .hero-demo video {
     width: 100%;
     max-height: 62vh;
@@ -6123,8 +6146,11 @@
         <video autoplay muted loop playsinline preload="metadata" poster="/og-image.png">
           <source src="/demo.mp4" type="video/mp4">
         </video>
+        <div class="hero-demo-playbtn" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
       </div>
-      <div class="hero-demo-label">Área de cliente real · toca para ver más</div>
+      <div class="hero-demo-label">Área de cliente real · toca para ver el recorrido completo</div>
     </div>
     <div class="hero-content">
       <div class="hero-eyebrow">// Entrenamiento · Nutrición · Mentalidad</div>
