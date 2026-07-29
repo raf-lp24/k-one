@@ -10423,7 +10423,14 @@
              detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volA}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, elevación de gemelos 4×15${finisher4}`,
              etiqueta:"Piernas"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core",
-             detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6 (baja hasta "L" a 90°, no necesitas tocar los hombros), elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba, no bajes del todo para mantener tensión), pájaros 3×15 (aprieta omóplatos, control excéntrico), face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
+             // La nota de "elevaciones laterales" se acortó de 13 a 9 palabras (misma
+             // idea técnica: sin impulso, controla la bajada). Con la nota larga
+             // original, CUALQUIERA de las 3 variantes que rota poolsEjercicio más
+             // abajo (17-24 palabras solo el nombre) superaba las 15 palabras que
+             // formatearSesion usa para separar "un ejercicio" de "un párrafo", y
+             // perdía la tarjeta de peso — no solo la variante "combo" que se arregló
+             // antes: las otras dos NUNCA se habían comprobado y estaban igual de rotas.
+             detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6 (baja hasta "L" a 90°, no necesitas tocar los hombros), elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), pájaros 3×15 (aprieta omóplatos, control excéntrico), face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
              etiqueta:"Hombros"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios y core") : "Descanso",
@@ -10712,7 +10719,11 @@
         // ejercicios con tarjeta de los que había de verdad. Acortado el nombre
         // (mismo ejercicio, sin perder claridad) en vez de tocar esa heurística
         // general, que clasifica bien el resto de días de Hyrox/CrossFit/running.
-        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado en el suelo (sin tocar el suelo abajo)', 'combo lateral-frontal']],
+        // Las 3 variantes se comprobaron una a una contra la nota del día (arriba):
+        // "elevaciones laterales con mancuernas" (10 palabras con la nota), "elevaciones
+        // laterales tumbado (sin tocar el suelo)" (13) y "combo lateral-frontal" (8) —
+        // las tres por debajo de las 15 que formatearSesion usa como límite.
+        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado (sin tocar el suelo)', 'combo lateral-frontal']],
         [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco (aguanta 1s arriba)']],
       ];
       semana = semana.map(d => {
