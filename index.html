@@ -6178,9 +6178,12 @@
        Se abre desde el hero tanto en móvil (botón "Ver demo") como en escritorio
        (clic en el vídeo ambiente de fondo). -->
   <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:20px" onclick="this.style.display='none'">
-    <div style="position:relative;width:100%;max-width:360px" onclick="event.stopPropagation()">
+    <div style="position:relative;max-height:85vh" onclick="event.stopPropagation()">
       <button onclick="this.closest('#heroVideoModal').style.display='none';this.closest('#heroVideoModal').querySelector('video').pause()" style="position:absolute;top:-44px;right:0;background:var(--brasa);border:none;color:#fff;font-size:14px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center">✕</button>
-      <video controls playsinline preload="none" poster="/og-image.png" style="width:100%;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
+      <!-- Vídeo vertical: se limita por altura (85vh) y el ancho sale solo de su
+           proporción real, en vez de forzar un ancho fijo — así no se ve enorme
+           en pantallas de escritorio altas ni desbordado en móvil. -->
+      <video controls playsinline preload="none" poster="/og-image.png" style="display:block;height:85vh;max-height:85vh;width:auto;max-width:90vw;border-radius:14px;border:2px solid rgba(232,73,15,0.3)">
         <source src="/demo-completo.mp4" type="video/mp4">
       </video>
     </div>
