@@ -3485,6 +3485,20 @@
     text-decoration-color: var(--metal); color: inherit;
   }
   .ejercicio-link:hover, .ejercicio-link:focus-visible { color: var(--brasa); text-decoration-color: var(--brasa); outline: none; }
+  /* Fila de Core/Acondicionamiento: antes todo era texto en línea separado por
+     <br>, así que no había dónde meter una explicación sin que se apelotonara
+     con la siguiente. Ahora cada movimiento es su propio bloque. */
+  .ejercicio-fila-simple {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .ejercicio-fila-simple:last-child { border-bottom: none; }
+  .ejercicio-explicacion {
+    margin-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--metal-claro);
+  }
   @media (max-width: 560px) {
     /* En móvil la miniatura va pequeña y cuadrada: estirada a lo alto parecía un vídeo vertical */
     .ejercicio-thumb { width: 64px; height: 64px; border-radius: 9px; }
@@ -9265,6 +9279,34 @@
     return partes;
   }
 
+  // Explicaciones cortas para lo que se muestra como texto simple (Core y
+  // Acondicionamiento) en vez de tarjeta con peso: a diferencia de los
+  // ejercicios con peso, que tienen "Cómo se hace" con fotos y pasos, esto
+  // solo llevaba un enlace que abre esa misma ficha (o un buscador de YouTube
+  // si no hay ficha) — sin nada visible hasta hacer clic. Cubre lo que
+  // realmente aparece en Core (siempre los mismos 3-4 movimientos) y los
+  // remates cardiovasculares que añade el motor cuando el objetivo es perder
+  // grasa. No es exhaustivo a propósito: mejor no explicar nada a explicar
+  // mal un movimiento de running/Hyrox en lenguaje libre.
+  const EXPLICACION_MOVIMIENTO = [
+    [/plancha lateral/i, 'Apóyate en el antebrazo y el lateral del pie, cuerpo en línea recta de la cabeza a los pies, cadera arriba sin caer. Aguanta el tiempo indicado sin perder la alineación.'],
+    [/\bplancha\b/i, 'Apoya antebrazos y puntas de los pies en el suelo, cuerpo en línea recta de la cabeza a los talones, abdomen y glúteo apretados. Aguanta el tiempo sin que la cadera suba ni caiga.'],
+    [/rueda abdominal/i, 'De rodillas, sujeta la rueda con ambas manos y rueda hacia delante estirando el cuerpo todo lo que controles sin arquear la zona lumbar. Vuelve a la posición inicial con el abdomen, no con impulso.'],
+    [/russian twist/i, 'Sentado, tronco algo inclinado atrás y pies elevados (apóyalos en el suelo si eres principiante), rota el torso llevando las manos de un lado a otro.'],
+    [/dead bug/i, 'Tumbado boca arriba, brazos arriba y rodillas a 90°. Baja un brazo y la pierna contraria a la vez sin que la zona lumbar se despegue del suelo, y vuelve.'],
+    [/hollow (hold|body)/i, 'Tumbado boca arriba, eleva piernas y hombros del suelo formando una "U" con el cuerpo, zona lumbar pegada al suelo. Aguanta la posición sin que la espalda se arquee.'],
+    [/superman hold/i, 'Boca abajo, eleva a la vez brazos, pecho y piernas del suelo y aguanta la posición con la zona lumbar activa, sin rebotar.'],
+    [/interválico/i, 'Alterna 1 minuto a ritmo alto (te cuesta hablar) con 1 minuto suave para recuperar, tantas rondas como indique. Vale corriendo, en bici o remo — lo que tengas a mano.'],
+    [/circuito al final/i, 'Encadena los ejercicios indicados sin descansar entre ellos y completa las rondas que se piden a ritmo constante: es un remate corto para terminar con el pulso alto.'],
+    [/\btabata\b/i, '20 segundos al máximo esfuerzo + 10 segundos de descanso, repitiendo las rondas indicadas y alternando los ejercicios que se piden.'],
+    [/\bamrap\b/i, 'Todas las rondas que consigas completar del bloque de ejercicios en el tiempo indicado, a ritmo sostenible. Anota cuántas rondas completas haces.'],
+    [/\bemom\b/i, 'Al empezar cada minuto haces el trabajo que toca ese minuto y descansas lo que sobre, hasta completar el total de minutos.'],
+  ];
+  function explicacionMovimiento(texto) {
+    const encontrada = EXPLICACION_MOVIMIENTO.find(([re]) => re.test(texto));
+    return encontrada ? encontrada[1] : '';
+  }
+
   function formatearSesion(day) {
     if (!day || day.tipo === 'Descanso' || !day.detalle) return '';
     const extras = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
@@ -9295,6 +9337,13 @@
       // justo antes de esa cifra. Un párrafo así nunca es un solo ejercicio.
       const pareceParrafo = e.split(' ').length > 15 || /elige entre|simulacro/i.test(e);
       if (pareceParrafo) { acondicionamiento.push(e); return; }
+      // Los remates cardiovasculares (finisher3/finisher4, más arriba) van pegados
+      // al último ejercicio con una coma, así que llegan aquí como un fragmento
+      // más. Antes cualquiera de estos ("15 min interválico al finalizar...")
+      // acababa en Bloque de hipertrofia como si fuera un ejercicio con peso, con
+      // el texto entero de nombre y "7 rondas" como si fueran las reps —
+      // comprobado generando un día real con objetivo "Perder grasa".
+      if (/interválico|circuito al final|\btabata\b|\bamrap\b|\bemom\b/i.test(e)) { acondicionamiento.push(e); return; }
       const m = e.match(/×\s*(\d+)\s*(\D*)/);
       const reps = m ? parseInt(m[1], 10) : null;
       const unidad = m ? m[2].trim() : '';
@@ -9318,11 +9367,16 @@
       const textoCap = capitalizar(x);
       const m = textoCap.match(/^([^0-9(]+?)(\s*\(?\d.*)?$/);
       const nombre = m ? m[1].trim().replace(/[·,]+$/, '').trim() : '';
-      if (!nombre) return `· ${textoCap}`;
+      // La explicación se busca en el texto COMPLETO del fragmento (no solo en
+      // "nombre"): el remate cardiovascular, por ejemplo, no tiene un nombre
+      // limpio delante de la cifra ("15 min interválico al finalizar: ...").
+      const explicacion = explicacionMovimiento(x);
+      const explicacionHTML = explicacion ? `<div class="ejercicio-explicacion">${explicacion}</div>` : '';
+      if (!nombre) return `<div class="ejercicio-fila-simple">· ${textoCap}${explicacionHTML}</div>`;
       const resto = (m[2] || '').trim();
       const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      return `· <span class="ejercicio-link" role="button" tabindex="0" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();abrirInfoEjercicio('${nombreJs}')}">${nombre}</span>${resto ? ' ' + resto : ''}`;
-    }).join('<br>');
+      return `<div class="ejercicio-fila-simple">· <span class="ejercicio-link" role="button" tabindex="0" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();abrirInfoEjercicio('${nombreJs}')}">${nombre}</span>${resto ? ' ' + resto : ''}${explicacionHTML}</div>`;
+    }).join('');
     const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
     const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
     const tituloFuerza = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Bloque de fuerza';
@@ -10723,7 +10777,7 @@
         // "elevaciones laterales con mancuernas" (10 palabras con la nota), "elevaciones
         // laterales tumbado (sin tocar el suelo)" (13) y "combo lateral-frontal" (8) —
         // las tres por debajo de las 15 que formatearSesion usa como límite.
-        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales tumbado (sin tocar el suelo)', 'combo lateral-frontal']],
+        [/elevaciones laterales( con mancuernas| mancuernas)?/gi, ['elevaciones laterales con mancuernas', 'elevaciones laterales', 'combo lateral-frontal']],
         [/elevaciones frontales(?! con disco)/gi, ['elevaciones frontales', 'elevaciones frontales con disco (aguanta 1s arriba)']],
       ];
       semana = semana.map(d => {
