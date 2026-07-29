@@ -8046,6 +8046,8 @@
     document.getElementById(group)?.classList.remove('error');
     if (group === 'deporte') updateLugarOptions(el.textContent.trim(), 'lugar');
     if (group === 'cp-deporte') updateLugarOptions(el.textContent.trim(), 'cp-lugar');
+    if (group === 'tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'deporte');
+    if (group === 'cp-tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'cp-deporte');
     if (['deporte','diasEntreno','nivel','lugar'].includes(group)) actualizarRutinaPreview();
   }
 
@@ -8101,6 +8103,24 @@
     document.getElementById('rpDesc').textContent  = desc;
     const notaEl = document.getElementById('rpNota');
     if (notaEl) { notaEl.textContent = nota; notaEl.style.display = nota ? 'block' : 'none'; }
+  }
+
+  // Hyrox y CrossFit, de momento, solo se venden como "Solo nutrición": el
+  // plan completo (entrenamiento + nutrición) solo está disponible para
+  // Gimnasio/Fuerza, Running e Híbrido. Reescribe las opciones de deporte
+  // según el tipo de plan ya elegido (el tipo de plan se pregunta ANTES que
+  // el deporte en el formulario, así que cuando el usuario llega a esta
+  // pregunta ya sabemos si hay que ocultar Hyrox/CrossFit).
+  function updateDeporteOptionsPorPlan(tipoPlan, grupoId) {
+    const container = document.getElementById(grupoId);
+    if (!container) return;
+    const currentSel = container.querySelector('.radio-opt.selected')?.textContent.trim() || '';
+    const esCompleto = !(tipoPlan || '').includes('Solo nutrición');
+    const todas = ['Gimnasio / Fuerza', 'Running', 'Hyrox', 'CrossFit', 'Híbrido'];
+    const opciones = esCompleto ? todas.filter(op => op !== 'Hyrox' && op !== 'CrossFit') : todas;
+    container.innerHTML = opciones.map(op =>
+      `<div class="radio-opt${op === currentSel ? ' selected' : ''}" onclick="selectRadio(this,'${grupoId}')">${op}</div>`
+    ).join('');
   }
 
   function updateLugarOptions(deporte, grupoId) {
@@ -14484,6 +14504,7 @@
       if (sl) sl.value = userData.peso ? parseFloat(userData.peso) : 70;
     }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
+    updateDeporteOptionsPorPlan(tipoPlanActual, 'cp-deporte');
     preseleccionarRadio('cp-deporte', userData.deporte);
     // Marca de carrera guardada (si la dio), para poder actualizarla al mejorar
     const cpMd = document.getElementById('cp-marcaDistancia');
