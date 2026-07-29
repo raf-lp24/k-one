@@ -10545,22 +10545,47 @@
       mapaLesion = [
         [/[Ss]entadilla goblet( con mancuerna)?/g, 'Step-ups controlados (sin salto)'],
         [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'elevaciones de cadera (hip thrust)'],
+        // "Burpees box jump over" tiene que ir ANTES que la regla suelta de "box
+        // jump over" (justo debajo): si no, esa regla mataba a traición el
+        // "box jump over" de en medio de la frase de burpees primero, y para
+        // cuando le tocaba a la regla de burpees ya no quedaba "box jump over"
+        // contiguo que hacer coincidir -- se quedaban las DOS sustituciones
+        // pegadas ("flexión + paso al frente (sin salto) step ups controlados
+        // (sin salto)"), como si fueran dos ejercicios en vez de uno.
+        [/[Bb]urpees?( box jump over| broad jumps| over bar)?/g, 'flexión + paso al frente (sin salto)'],
         [/[Bb]ox jumps? o step[- ]ups?/g, 'step ups controlados (sin salto)'],
         [/[Bb]ox jump over|[Bb]ox jumps?/g, 'step ups controlados (sin salto)'],
-        [/[Ss]entadillas? con salto/g, 'sentadillas sin salto (rango parcial)'],
         [/[Ss]entadilla trasera( con barra)?/g, eq('Prensa de piernas (rango controlado, sin dolor)', 'Sentadilla goblet a banco (rango controlado, sin dolor)', 'Sentadilla a banco (rango controlado, sin dolor)')],
         [/[Ss]entadilla sumo( con mancuerna)?/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
         [/[Ss]entadilla búlgara( en silla| con mancuernas)?/g, 'Step-ups controlados (sin salto)'],
         [/[Pp]istol squat( progresión)?/g, 'step-up controlado a banco bajo'],
         [/split squat \(zancada estática\)/g, 'step-up controlado a banco bajo'],
-        [/[Ss]entadilla(?! aérea| sumo| búlgara| a)/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
+        // El "\b" antes del lookahead negativo es necesario para que el motor
+        // de regex no intente "colar" el match quitando la "s" opcional: sin
+        // él, cuando "sentadillas aéreas" no pasaba el lookahead con la "s"
+        // puesta, el motor probaba sin ella -- y lo que queda justo después de
+        // "sentadilla" es "s aéreas" (sin espacio ahí), que SÍ supera el
+        // lookahead " aérea" (no coincide), así que aceptaba ese match corto y
+        // dejaba "...(rango sin dolor)s aéreas" colgando. El "\b" bloquea esa
+        // vía de escape: entre "sentadilla" y una "s" que sigue pegada no hay
+        // límite de palabra, así que obliga a incluir esa "s" en el match
+        // antes de comprobar el lookahead.
+        [/[Ss]entadillas?\b(?! aérea| sumo| búlgara| a)/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
+        // "Sentadillas con salto" y "sentadillas aéreas" van DESPUÉS de la
+        // genérica de arriba a propósito, no antes: sus reemplazos ("sentadillas
+        // sin salto...", "sentadillas parciales...") empiezan también por
+        // "sentadillas", así que si fueran antes, la genérica los volvía a
+        // morder en la misma pasada y salía un doble sustituido pegado
+        // ("Step-ups controlados (rango sin dolor)s parciales sin dolor").
+        // Puestas aquí, la genérica ya no vuelve a tocar el texto.
+        [/[Ss]entadillas? con salto/g, 'sentadillas sin salto (rango parcial)'],
+        [/[Ss]entadillas? aéreas?/g, 'sentadillas parciales sin dolor'],
         // Movimientos de WOD que cargan mucho la rodilla en flexión profunda o impacto.
         // El material que va detrás entra en el patrón: si no, queda colgando
         // ("press de hombro con mancuernas (sin sentadilla) con mancuernas").
         [/[Tt]hrusters?( con mancuernas| mancuernas)?/g, 'press de hombro con mancuernas (sin sentadilla)'],
         [/[Ww]all balls?( con balón)?/g, 'press de hombro con balón (sin sentadilla)'],
         [/[Dd]ouble[- ]unders?/g, 'remo o bici (bajo impacto)'],
-        [/[Bb]urpees?( box jump over)?/g, 'flexión + paso al frente (sin salto)'],
         [/[Aa]ir squats?/g, 'sentadillas parciales sin dolor'],
       ];
       notasSalud.push('Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos e impacto) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
@@ -10615,7 +10640,12 @@
         // ("dominadas asistidas con banda elástica", "dominadas (o remo australiano...)").
         [/[Dd]ominadas asistidas con banda elástica/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica (agarre neutro)', 'Remo bajo mesa (agarre neutro)')],
         [/[Dd]ominadas \(o remo australiano bajo mesa\)/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica (agarre neutro)', 'Remo bajo mesa (agarre neutro)')],
-        [/[Dd]ominadas( asistidas)?( o jalón| en barra puerta| lastradas)?( \(asistidas si necesitas\)| \(con silla si necesitas\)| \(banda ok\))?/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica (agarre neutro)', 'Remo bajo mesa (agarre neutro)')],
+        // "(?! australianas)" es necesario: "dominadas australianas" (remo
+        // invertido en mesa) YA es la versión segura para hombro -- sin este
+        // lookahead, esta regla genérica mordía solo "Dominadas" y dejaba
+        // " australianas en mesa" colgando detrás del reemplazo
+        // ("Jalón al pecho con agarre neutro australianas en mesa").
+        [/[Dd]ominadas(?! australianas)( asistidas)?( o jalón| en barra puerta| lastradas)?( \(asistidas si necesitas\)| \(con silla si necesitas\)| \(banda ok\))?/g, eq('Jalón al pecho con agarre neutro', 'Jalón con banda elástica (agarre neutro)', 'Remo bajo mesa (agarre neutro)')],
         [/[Bb]ar muscle-ups?|[Mm]uscle-ups?/g, 'remo australiano'],
         [/[Pp]ull-ups?/g, 'remo australiano'],
         [/[Tt]oes-to-bar/g, 'elevaciones de piernas tumbado'],
@@ -10786,7 +10816,11 @@
         // nota "(aprieta en el pico)" y el día ya trae detrás una nota casi
         // idéntica ("aprieta en el pico de contracción") en más de una plantilla
         // -- las dos juntas pasaban de las 15 palabras y se leían repetidas.
-        [/curl bíceps(?! polea)/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga']],
+        // "( alterno)?" consume el sufijo que deja la plantilla "Upper A · Empuje
+        // + tirón" ("curl bíceps alterno 3×12..."): sin esto quedaba colgando
+        // ("curl en polea baja con soga alterno 3×12...", 16 palabras con la
+        // nota del día -- se perdía la tarjeta de peso).
+        [/curl bíceps(?! polea)( alterno)?/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga']],
         [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea', 'curl en polea alta (tensión constante)']],
         [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
         // "copa de tríceps con mancuerna" iba con su propia nota entre paréntesis
