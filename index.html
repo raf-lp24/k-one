@@ -1623,6 +1623,20 @@
     margin-bottom: 10px;
   }
 
+  .sport-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--brasa);
+    border: 1px solid var(--brasa);
+    border-radius: 20px;
+    padding: 2px 8px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
   .sport-desc {
     font-size: 14px;
     color: var(--metal-claro);
@@ -6195,7 +6209,7 @@
   <section class="sports" id="sports">
     <div class="section-header">
       <h2 class="section-title">Tu deporte, tu plan</h2>
-      <p class="section-note">Da igual si haces gimnasio, running, CrossFit, Hyrox o híbrido. El plan se construye para ti.</p>
+      <p class="section-note">Gimnasio, running e híbrido: entrenamiento y nutrición, todo generado para ti. CrossFit e Hyrox: de momento solo plan de nutrición, para acompañar el entreno que ya haces en tu box.</p>
     </div>
     <div class="hybrid-callout">
       <span class="hybrid-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 H7 L17 17 H21"/><path d="M3 17 H7 L17 7 H21"/><path d="M18 4 L21 7 L18 10"/><path d="M18 14 L21 17 L18 20"/></svg></span>
@@ -6220,14 +6234,14 @@
       <div class="sport-card">
         <img class="sport-photo" src="/img/landing/hyrox.jpg" alt="" loading="lazy" aria-hidden="true">
         <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M26 4 L10 27 H23 L20 44 L38 20 H25 Z"/></svg></span>
-        <div class="sport-name">Hyrox</div>
-        <p class="sport-desc">Preparación específica para las 8 estaciones. Fuerza funcional y resistencia combinadas.</p>
+        <div class="sport-name">Hyrox <span class="sport-badge">Solo nutrición</span></div>
+        <p class="sport-desc">Ya entrenas en tu box: te damos la nutrición ajustada a tu carga de fuerza funcional y resistencia.</p>
       </div>
       <div class="sport-card">
         <img class="sport-photo" src="/img/landing/crossfit.jpg" alt="" loading="lazy" aria-hidden="true">
         <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 C26 14 34 16 34 26 a10 10 0 0 1 -20 0 C14 20 18 18 19 14 C22 18 24 18 24 5 Z"/></svg></span>
-        <div class="sport-name">CrossFit</div>
-        <p class="sport-desc">Alta intensidad, movimientos funcionales. Mejora tu acondicionamiento general.</p>
+        <div class="sport-name">CrossFit <span class="sport-badge">Solo nutrición</span></div>
+        <p class="sport-desc">Ya entrenas en tu box: te damos la nutrición ajustada a los WODs de alta intensidad.</p>
       </div>
     </div>
     <div class="nutrition-callout">
@@ -6488,7 +6502,7 @@
           <li>Plan de nutrición con 5 opciones/comida</li>
           <li>Check-in semanal y ajuste de plan</li>
           <li>Seguimiento de progreso y cargas</li>
-          <li>Todos los deportes disponibles</li>
+          <li>Gimnasio, running e híbrido</li>
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
@@ -6502,7 +6516,7 @@
           <li>Plan de nutrición con 5 opciones/comida</li>
           <li>Check-in semanal y ajuste de plan</li>
           <li>Seguimiento de progreso y cargas</li>
-          <li>Todos los deportes disponibles</li>
+          <li>Gimnasio, running e híbrido</li>
         </ul>
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
       </div>
@@ -6524,7 +6538,7 @@
         <div class="price-tag">// Solo nutrición</div>
         <div class="price-amount" data-kp="nutricion">7,99€</div>
         <div class="price-period">Al mes · Cancela cuando quieras</div>
-        <p class="price-desc">Solo alimentación. Sin entrenamiento. Para quien ya entrena con su entrenador.</p>
+        <p class="price-desc">Solo alimentación. Sin entrenamiento. Para quien ya entrena con su entrenador, box o club — incluido CrossFit e Hyrox.</p>
         <ul class="price-features">
           <li>Plan nutricional 100% personalizado</li>
           <li>5 opciones por comida, 5 tomas</li>
