@@ -1586,7 +1586,7 @@
 
   .sports-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2px;
     margin-top: 64px;
   }
@@ -1636,7 +1636,7 @@
     display: block;
   }
   .sport-icon svg { width: 40px; height: 40px; stroke: var(--brasa); color: var(--brasa); display: block; }
-  .nutrition-callout-icon svg, .hybrid-callout-icon svg { width: 34px; height: 34px; stroke: var(--brasa); }
+  .hybrid-callout-icon svg { width: 34px; height: 34px; stroke: var(--brasa); }
   .dash-nav-icon svg { width: 18px; height: 18px; stroke: currentColor; vertical-align: middle; }
 
   .sport-name {
@@ -1665,47 +1665,6 @@
     color: var(--metal-claro);
     line-height: 1.6;
     font-weight: 300;
-  }
-
-  /* NUTRICIÓN: bloque separado de las opciones de deporte */
-  .nutrition-callout {
-    margin-top: 24px;
-    background: var(--carbon);
-    border: 1px solid var(--humo);
-    padding: 32px 40px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-  .nutrition-callout-icon { font-size: 36px; flex-shrink: 0; }
-  .nutrition-callout-text { flex: 1; min-width: 240px; }
-  .nutrition-callout-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .nutrition-callout-desc {
-    font-size: 14px;
-    color: var(--metal-claro);
-    line-height: 1.6;
-    font-weight: 300;
-  }
-
-  .nutrition-callout-demo {
-    flex-basis: 100%;
-    margin-top: 8px;
-    padding-top: 24px;
-    border-top: 1px solid var(--humo);
-  }
-  .nutrition-callout-demo-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--brasa);
-    margin-bottom: 12px;
   }
 
   /* HIBRIDACIÓN: aviso de que las disciplinas se pueden combinar */
@@ -4695,7 +4654,6 @@
   @media (max-width: 480px) {
     .steps { grid-template-columns: 1fr; }
     .sports-grid { grid-template-columns: 1fr; }
-    .nutrition-callout { padding: 24px; text-align: center; justify-content: center; }
 
     /* Dos móviles uno junto al otro en pantallas pequeñas */
     .phone-frame-group { gap: 8px; }
@@ -6278,43 +6236,11 @@
         <div class="sport-name">CrossFit <span class="sport-badge">Solo nutrición</span></div>
         <p class="sport-desc">Ya entrenas en tu box: te damos la nutrición ajustada a los WODs de alta intensidad.</p>
       </div>
-    </div>
-    <div class="nutrition-callout">
-      <span class="nutrition-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/><line x1="7" y1="14" x2="8" y2="16"/><line x1="12" y1="14.5" x2="12" y2="17"/><line x1="17" y1="14" x2="16" y2="16"/></svg></span>
-      <div class="nutrition-callout-text">
-        <div class="nutrition-callout-title">¿Solo buscas nutrición?</div>
-        <p class="nutrition-callout-desc">Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 7,99€/mes.</p>
-      </div>
-      <button class="btn-ghost" onclick="goTo('bienvenida')">Ver plan de nutrición →</button>
-      <div class="nutrition-callout-demo">
-        <div class="nutrition-callout-demo-label">// Cada comida, a tu manera — elige entre 5 opciones</div>
-        <div class="meal-preview-row">
-          <div class="meal-preview-pill selected">
-            <div class="meal-preview-num">Opción 1</div>
-            <div class="meal-preview-name">Bowl de pollo, arroz y verduras al vapor</div>
-            <div class="meal-preview-kcal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 520 kcal</div>
-          </div>
-          <div class="meal-preview-pill">
-            <div class="meal-preview-num">Opción 2</div>
-            <div class="meal-preview-name">Salmón al horno con boniato y brócoli</div>
-            <div class="meal-preview-kcal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 540 kcal</div>
-          </div>
-          <div class="meal-preview-pill">
-            <div class="meal-preview-num">Opción 3</div>
-            <div class="meal-preview-name">Tortilla de claras con avena y frutos rojos</div>
-            <div class="meal-preview-kcal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 480 kcal</div>
-          </div>
-          <div class="meal-preview-pill">
-            <div class="meal-preview-num">Opción 4</div>
-            <div class="meal-preview-name">Tofu salteado con quinoa y verduras</div>
-            <div class="meal-preview-kcal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 510 kcal</div>
-          </div>
-          <div class="meal-preview-pill">
-            <div class="meal-preview-num">Opción 5</div>
-            <div class="meal-preview-name">Wrap integral de pavo, aguacate y tomate</div>
-            <div class="meal-preview-kcal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> 490 kcal</div>
-          </div>
-        </div>
+      <div class="sport-card">
+        <img class="sport-photo" src="/img/landing/nutricion-banner.jpg" alt="" loading="lazy" aria-hidden="true" width="1200" height="800">
+        <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/><line x1="7" y1="14" x2="8" y2="16"/><line x1="12" y1="14.5" x2="12" y2="17"/><line x1="17" y1="14" x2="16" y2="16"/></svg></span>
+        <div class="sport-name">Solo nutrición</div>
+        <p class="sport-desc">¿Ya entrenas por tu cuenta? Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 7,99€/mes.</p>
       </div>
     </div>
   </section>
