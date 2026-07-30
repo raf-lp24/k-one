@@ -3512,6 +3512,46 @@
     font-size: 13px;
     color: var(--metal-claro);
   }
+
+  /* Ejercicios que el cliente añade por su cuenta a un día: misma tarjeta
+     (ejercicio-card / ejercicio-card-simple) que el resto, con una "×" propia
+     para quitarlos y un botón al final del bloque para añadir uno nuevo. */
+  .ejercicio-extra-wrap { position: relative; }
+  .ejercicio-extra-quitar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--negro);
+    border: 1px solid var(--humo);
+    color: var(--metal-claro);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ejercicio-extra-quitar:hover { border-color: var(--brasa); color: var(--brasa); }
+  .btn-anadir-ejercicio {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    background: transparent;
+    border: 1px dashed var(--humo);
+    border-radius: 10px;
+    color: var(--metal-claro);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-anadir-ejercicio:hover { border-color: var(--brasa); color: var(--brasa); }
+
   @media (max-width: 560px) {
     /* En móvil la miniatura va pequeña y cuadrada: estirada a lo alto parecía un vídeo vertical */
     .ejercicio-thumb { width: 64px; height: 64px; border-radius: 9px; }
@@ -5917,6 +5957,34 @@
         <button class="btn-primary" style="flex:2;padding:14px" onclick="guardarCambioPlan()">Confirmar y recalcular →</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- AÑADIR EJERCICIO PROPIO: el cliente mete el nombre y, si quiere, series/reps
+     (con eso lleva registro de peso igual que el resto). Sin series/reps se
+     guarda como referencia libre, sin stepper de peso. Se repite cada semana en
+     ese día hasta que el cliente lo quite. -->
+<div class="modal-overlay" id="modalAnadirEjercicio">
+  <div class="modal-box" style="max-width:420px">
+    <button class="modal-close" onclick="cerrarAnadirEjercicio()">✕</button>
+    <div class="modal-title" style="font-size:20px">Añadir ejercicio</div>
+    <p class="modal-desc">Se repetirá cada semana este día hasta que lo quites.</p>
+    <div class="auth-field">
+      <label>Nombre del ejercicio</label>
+      <input type="text" id="extraEjNombre" placeholder="Curl concentrado, estiramientos de cadera..." list="extraEjSugerencias" maxlength="60">
+      <datalist id="extraEjSugerencias"></datalist>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div class="auth-field" style="flex:1">
+        <label>Series <span class="optional">Opcional</span></label>
+        <input type="number" id="extraEjSeries" min="1" max="20" placeholder="3">
+      </div>
+      <div class="auth-field" style="flex:1">
+        <label>Reps <span class="optional">Opcional</span></label>
+        <input type="text" id="extraEjReps" maxlength="10" placeholder="12">
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;padding:14px;margin-top:8px" onclick="guardarAnadirEjercicio()">Añadir</button>
   </div>
 </div>
 
@@ -9216,6 +9284,96 @@
     </div>`;
   }
 
+  // ===== EJERCICIOS AÑADIDOS POR EL CLIENTE =====
+  // Guardados en userData.ejerciciosExtra[díaDeLaSemana] = ["Nombre 3×12", "Otro nombre", ...]
+  // — por nombre de día (Lunes, Martes...), no por semana, así que si alguien lo
+  // añade una vez se repite cada semana en ese día hasta que lo quite. Viven en
+  // userData (no en generatedPlan), así que sobreviven a "Cambiar plan" y a la
+  // regeneración semanal automática.
+  // Si el texto trae "×N" se renderiza con renderEjercicioConPeso (registro de
+  // peso real, igual que el resto del plan); si no, con renderEjercicioSimple
+  // (referencia libre, sin stepper de peso) — se reutilizan las mismas tarjetas
+  // que ya usa todo el plan, en vez de inventar un diseño aparte.
+  function renderExtraEjercicios(day) {
+    const diaNombre = day.dia;
+    if (!diaNombre) return '';
+    const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const extras = (userData.ejerciciosExtra && userData.ejerciciosExtra[diaNombre]) || [];
+    const cards = extras.map((texto, idx) => {
+      const tieneReps = /×\s*\d/.test(texto);
+      const cardHTML = tieneReps ? renderEjercicioConPeso(texto, capitalizar) : renderEjercicioSimple(texto, capitalizar);
+      return `<div class="ejercicio-extra-wrap">
+        ${cardHTML}
+        <button type="button" class="ejercicio-extra-quitar" onclick="event.stopPropagation();quitarEjercicioExtra('${diaNombre}',${idx})" aria-label="Quitar este ejercicio">✕</button>
+      </div>`;
+    }).join('');
+    return `<div class="entreno-bloque">
+      <div class="entreno-bloque-head"><span class="entreno-bloque-num">+</span><span class="entreno-bloque-title">Tus ejercicios</span></div>
+      <div class="ejercicios-peso-list">${cards}</div>
+      <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirEjercicio('${diaNombre}')">+ Añadir ejercicio</button>
+    </div>`;
+  }
+
+  let _extraEjercicioDia = null;
+
+  function abrirAnadirEjercicio(diaNombre) {
+    _extraEjercicioDia = diaNombre;
+    const datalist = document.getElementById('extraEjSugerencias');
+    if (datalist && !datalist.childElementCount) {
+      const nombres = Object.keys(VIDEOS_EJERCICIOS).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+      datalist.innerHTML = [...new Set(nombres)].map(n => `<option value="${n}">`).join('');
+    }
+    document.getElementById('extraEjNombre').value = '';
+    document.getElementById('extraEjSeries').value = '';
+    document.getElementById('extraEjReps').value = '';
+    document.getElementById('modalAnadirEjercicio').classList.add('visible');
+  }
+
+  function cerrarAnadirEjercicio() {
+    document.getElementById('modalAnadirEjercicio').classList.remove('visible');
+    _extraEjercicioDia = null;
+  }
+
+  function guardarAnadirEjercicio() {
+    const nombre = document.getElementById('extraEjNombre').value.trim();
+    if (!nombre) { showToast('Ponle un nombre al ejercicio.'); return; }
+    const series = document.getElementById('extraEjSeries').value.trim();
+    const reps = document.getElementById('extraEjReps').value.trim();
+    const texto = (series && reps) ? `${nombre} ${series}×${reps}` : nombre;
+
+    if (!userData.ejerciciosExtra) userData.ejerciciosExtra = {};
+    if (!userData.ejerciciosExtra[_extraEjercicioDia]) userData.ejerciciosExtra[_extraEjercicioDia] = [];
+    userData.ejerciciosExtra[_extraEjercicioDia].push(texto);
+
+    cerrarAnadirEjercicio();
+    refrescarVistasEjercicios();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+
+  function quitarEjercicioExtra(diaNombre, idx) {
+    if (!userData.ejerciciosExtra || !userData.ejerciciosExtra[diaNombre]) return;
+    userData.ejerciciosExtra[diaNombre].splice(idx, 1);
+    refrescarVistasEjercicios();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+
+  // Refresca "Hoy" y "Tu entrenamiento" tras añadir/quitar un ejercicio propio.
+  // Se comprueba que cada contenedor exista en vez de asumir cuál está visible.
+  function refrescarVistasEjercicios() {
+    if (generatedPlan) {
+      regenerarEntrenamientoHoy(generatedPlan);
+      const todayContent = document.getElementById('todayContent');
+      const diaHoyPlan = generatedPlan.semana?.[getIndiceDiaHoy()];
+      if (todayContent && !generatedPlan.soloDieta && diaHoyPlan && diaHoyPlan.tipo !== 'Descanso') {
+        todayContent.innerHTML = generatedPlan.entrenamiento_hoy;
+      }
+    }
+    const activeTab = document.querySelector('.week-tab.active');
+    if (activeTab) renderSemanaTab(parseInt(activeTab.dataset.semana, 10));
+  }
+
   // Botones +/- del stepper: ajustan el valor del input y guardan al instante
   function ajustarPeso(btn, delta) {
     const input = btn.parentElement.querySelector('.peso-input');
@@ -9362,7 +9520,7 @@
     ].filter(Boolean);
     const bloquePrincipalHTML = bloques.map((b, i) =>
       `<div class="entreno-bloque"><div class="entreno-bloque-head"><span class="entreno-bloque-num">${String(i + 1).padStart(2, '0')}</span><span class="entreno-bloque-title">${b.t}</span></div>${b.c}</div>`
-    ).join('');
+    ).join('') + renderExtraEjercicios(day);
 
     // Después de entrenar: la recomendación de proteína/creatina ya existe
     // (generatedPlan.notasDeporte), pero vivía solo en la sección Nutrición
