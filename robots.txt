@@ -3,4 +3,32 @@ Allow: /
 Disallow: /api/
 Disallow: /marketing/
 
+# Rastreadores de motores de IA generativa (ChatGPT, Claude, Perplexity, Google
+# AI Overviews) explícitos como permitidos: ya lo estaban por la regla general
+# de arriba, pero se listan aparte para dejar constancia clara de que K-ONE
+# quiere aparecer citado en respuestas de IA, no solo en buscadores clásicos.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
 Sitemap: https://k-one.fit/sitemap.xml

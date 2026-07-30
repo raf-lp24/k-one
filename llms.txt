@@ -1,0 +1,26 @@
+# K-ONE
+
+> K-ONE genera planes de entrenamiento y nutrición personalizados mediante un motor de reglas (periodización real, déficit/superávit calórico, progresión de cargas) — no es una IA generativa que inventa contenido, es un sistema con criterio fijo y trazable. El plan se adapta cada semana según un check-in de progreso del usuario.
+
+## Qué ofrece
+
+- Plan de entrenamiento personalizado (rutinas con progresión de cargas, adaptadas a deporte, nivel, lesiones y tiempo disponible) para Gimnasio/Fuerza, Running e Híbrido.
+- Plan de nutrición personalizado (5 comidas al día, 5 opciones por comida, macros calculados, lista de la compra automática, recetario con 200+ recetas) para los 5 deportes soportados, incluidos Hyrox y CrossFit.
+- Para Hyrox y CrossFit solo se ofrece el plan de nutrición (sin entrenamiento generado): pensado para quien ya entrena en su box y quiere que la alimentación acompañe esa carga.
+- Check-in semanal: el usuario cuenta cómo le fue (energía, descanso, adherencia) y el plan de la semana siguiente se ajusta.
+- Seguimiento de progreso: registro de pesos por ejercicio, fotos mensuales, hitos y racha.
+
+## Precios (EUR, impuestos incluidos)
+
+- Primer mes: 1,99 € (acceso completo, cualquier plan).
+- Plan completo (entrenamiento + nutrición): 12,99 €/mes, o 29,99 € cada 3 meses (≈9,99 €/mes).
+- Solo nutrición (sin entrenamiento): 7,99 €/mes.
+- Sin permanencia; cancelación desde el perfil en cualquier momento.
+
+## Enlaces
+
+- Web: https://k-one.fit/
+- Preguntas frecuentes: https://k-one.fit/#faq
+- Precios: https://k-one.fit/#pricing
+- Cómo funciona: https://k-one.fit/#how
+- Contacto: k.one.fit26@gmail.com
