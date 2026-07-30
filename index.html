@@ -10914,7 +10914,11 @@
     }
 
     if (medicacion) {
-      notasSalud.push(`Nos indicaste que tomas medicación (${medicacion}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
+      // medicacion/operacion son texto libre del cuestionario y esta nota se
+      // pinta con innerHTML en "Hoy": sin escapar, un cliente podía meter
+      // HTML/JS en su propia medicación y ejecutarlo en su propio dashboard
+      // (mismo patrón de XSS almacenado que el de "Añadir ejercicio").
+      notasSalud.push(`Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
     }
 
     // El cuestionario pregunta por operaciones ("menisco, hernia discal...") y
@@ -10924,7 +10928,7 @@
     // avisa, igual que con la medicación.
     const operacion = (u.operacion || '').trim();
     if (operacion) {
-      notasSalud.push(`Nos indicaste que te han operado (${operacion}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
+      notasSalud.push(`Nos indicaste que te han operado (${_esc(operacion)}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
     }
     } // fin if (!soloDieta) — adaptaciones de entrenamiento por lesión/enfermedad/medicación
 
@@ -12298,7 +12302,12 @@
         if (p.ajuste > 0)  razones.push('Subimos ligeramente la intensidad: tu energía y físico reportados fueron buenos');
         if (p.ajuste < 0)  razones.push('Bajamos el volumen para que puedas recuperar bien esta semana');
         if (p.ajuste === 0 && diasSemAnt > 0) razones.push('Mantenemos el nivel: buen equilibrio entre esfuerzo y recuperación');
-        if (p.ultimaNota) razones.push(`Tu nota del check-in: "${p.ultimaNota.slice(0,80)}${p.ultimaNota.length > 80 ? '…' : ''}"`);
+        // p.ultimaNota es texto libre que escribe el propio cliente en el
+        // check-in semanal, y esta lista se pinta con innerHTML más abajo —
+        // sin escapar, un comentario con HTML/JS se ejecutaba en su propio
+        // dashboard cada vez que abriera "Por qué este plan" (XSS almacenado,
+        // mismo patrón que el de "Añadir ejercicio" arreglado antes).
+        if (p.ultimaNota) razones.push(`Tu nota del check-in: "${_esc(p.ultimaNota.slice(0,80))}${p.ultimaNota.length > 80 ? '…' : ''}"`);
       }
 
       if (!soloDietaPanel && userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
@@ -17338,9 +17347,15 @@
     const mailto = document.getElementById('jcMailto');
     if (mailto) mailto.href = 'mailto:' + (c.email || '');
 
+    // "val" puede ser texto libre que escribió el cliente en el cuestionario
+    // (lesionDetalle, alergiaOtra, medicación...) y esto se pinta con
+    // innerHTML en el panel de admin: sin escapar, un cliente podía meter
+    // HTML/JS en esos campos y ejecutarlo en la sesión del ADMIN en cuanto
+    // abriera su ficha — más grave que un XSS contra su propia cuenta, aquí
+    // compromete la cuenta que puede dar premium o borrar clientes.
     const row = (label, val, color) => `
       <div class="jc-row">
-        <div><div class="jc-label">${label}</div><div class="jc-val" style="${color?'color:'+color:''}">${val || '—'}</div></div>
+        <div><div class="jc-label">${_esc(label)}</div><div class="jc-val" style="${color?'color:'+color:''}">${val ? _esc(String(val)) : '—'}</div></div>
       </div>`;
 
     const estadoColor = c.enOferta ? '#f0a500' : c.estado==='past_due' ? '#e74c3c' :
