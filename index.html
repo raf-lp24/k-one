@@ -4299,6 +4299,22 @@
     margin-bottom: 20px;
   }
 
+  /* INFORME SEMANAL: grid de stats reutiliza .stats-row/.stat-card (mismo
+     look que "Hoy"); esto es solo la lista de récords de la semana. */
+  .informe-records { margin-top: 16px; }
+  .informe-record {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--humo);
+    font-size: 14px;
+  }
+  .informe-record:last-child { border-bottom: none; }
+  .informe-record-nombre { color: var(--blanco); font-weight: 500; }
+  .informe-record-cambio { font-family: 'DM Mono', monospace; font-size: 13px; color: #27ae60; }
+  .informe-vacio { font-size: 14px; color: var(--metal-claro); padding: 8px 0; }
+
   .photos-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -7855,6 +7871,12 @@
             <h2 class="dash-title">Tu progreso</h2>
             <p class="dash-subtitle">Lo que no se registra, no se ve. Aquí está todo.</p>
           </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Tu informe semanal</div>
+          <p class="field-hint" style="margin-bottom:16px">Lo que ha pasado esta semana, en números — se recalcula solo con tus datos, nadie lo escribe a mano.</p>
+          <div id="informeSemanal"></div>
         </div>
 
         <div class="progress-section">
@@ -13884,8 +13906,92 @@
   }
 
   function renderProgresoSection() {
+    renderInformeSemanal();
     renderFotosProgreso();
     renderHitos();
+  }
+
+  // ===== INFORME SEMANAL =====
+  // Resumen de "cómo ha ido la semana", calculado del todo a partir de datos
+  // que ya se registran solos (adherencia, cargas, racha) — nada que el
+  // cliente tenga que rellenar a mano, y nada que se pueda inventar el motor:
+  // si no hay datos de una categoría, esa tarjeta directamente no aparece.
+  function renderInformeSemanal() {
+    const cont = document.getElementById('informeSemanal');
+    if (!cont) return;
+
+    const hoy = new Date();
+    const inicioSemana = new Date(hoy); inicioSemana.setDate(hoy.getDate() - 6); inicioSemana.setHours(0,0,0,0);
+
+    // Adherencia: entrenos completados en los últimos 7 días vs objetivo del plan.
+    const historial = userData.historialEntrenos || [];
+    const entrenosSemana = historial.filter(f => {
+      const d = new Date(f);
+      return !isNaN(d) && d >= inicioSemana && d <= hoy;
+    }).length;
+    const objetivoDias = parseInt((userData.diasEntreno || '3').match(/\d+/)?.[0], 10) || 3;
+
+    // Récords de carga: ejercicios cuyo último registro de peso (dentro de los
+    // últimos 7 días) es mayor que el registro inmediatamente anterior.
+    const records = [];
+    const pesos = userData.pesosEjercicios || {};
+    Object.values(pesos).forEach(entry => {
+      const hist = (entry.historial || []).filter(h => !isNaN(new Date(h.fecha)));
+      if (hist.length < 2) return;
+      const ordenado = [...hist].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      const ultimo = ordenado[ordenado.length - 1];
+      const anterior = ordenado[ordenado.length - 2];
+      const fechaUltimo = new Date(ultimo.fecha);
+      if (fechaUltimo < inicioSemana) return; // el último cambio no es de esta semana
+      if (ultimo.peso > anterior.peso) {
+        records.push({ nombre: entry.nombre || 'Ejercicio', antes: anterior.peso, ahora: ultimo.peso });
+      }
+    });
+    records.sort((a, b) => (b.ahora - b.antes) - (a.ahora - a.antes));
+
+    const racha = userData.progreso?.rachaActual || 0;
+    const semana = userData.progreso?.semana || 1;
+
+    const statsHTML = `
+      <div class="stats-row" style="margin-bottom:0">
+        <div class="stat-card">
+          <div class="stat-card-label">Entrenos esta semana</div>
+          <div class="stat-card-value">${entrenosSemana}<span style="font-size:16px;color:var(--metal)">/${objetivoDias}</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Racha actual</div>
+          <div class="stat-card-value">${racha}<span style="font-size:16px;color:var(--metal)"> días</span></div>
+        </div>
+      </div>`;
+
+    const recordsHTML = records.length
+      ? `<div class="informe-records">${records.slice(0, 5).map(r => `
+          <div class="informe-record">
+            <span class="informe-record-nombre">${_esc(r.nombre)}</span>
+            <span class="informe-record-cambio">${_esc(String(r.antes))} → ${_esc(String(r.ahora))} kg</span>
+          </div>`).join('')}</div>`
+      : `<p class="informe-vacio">Todavía no hay subidas de peso registradas esta semana. En cuanto anotes una carga mayor que la anterior, aparece aquí.</p>`;
+
+    // Mensaje corto según cómo va la semana — mismo tono que el resto de la app.
+    let mensaje;
+    if (entrenosSemana === 0) {
+      mensaje = 'Esta semana todavía no hay ningún entreno registrado. Empieza por uno.';
+    } else if (entrenosSemana >= objetivoDias && records.length > 0) {
+      mensaje = `Semana completa y con progresión real en ${records.length} ejercicio${records.length > 1 ? 's' : ''}. Así se construye.`;
+    } else if (entrenosSemana >= objetivoDias) {
+      mensaje = 'Semana completa según tu objetivo de días. La carga se mantiene — la siguiente subida está cerca.';
+    } else {
+      mensaje = `Vas ${entrenosSemana} de ${objetivoDias} días esta semana. Todavía estás a tiempo.`;
+    }
+
+    cont.innerHTML = `
+      ${statsHTML}
+      <div class="motivation-card" style="margin-top:14px;margin-bottom:0">
+        <div class="motivation-label">Semana ${semana} · Récords de carga</div>
+        <p class="motivation-text" style="margin-bottom:0">${_esc(mensaje)}</p>
+      </div>
+      ${recordsHTML}
+    `;
   }
 
   // ===== NOTAS / AGENDA =====
