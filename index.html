@@ -160,12 +160,20 @@
 <link rel="preconnect" href="https://js.stripe.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
 <script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
-<!-- Google Analytics -->
+<!-- Google Analytics: NO se carga aquí a ciegas. Antes se ejecutaba en cuanto
+     cargaba la página, sin esperar a que el usuario aceptara o rechazara
+     cookies — el banner de abajo era solo informativo, aceptar o no daba
+     igual. Eso incumple el consentimiento previo que exige la LSSI/RGPD para
+     cookies no esenciales (analítica). Ahora solo se carga si ya hay
+     consentimiento guardado de una visita anterior (cargarGAsiConsentido, más
+     abajo) o en cuanto el usuario pulsa "Aceptar" en el banner. -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   var GA_MEASUREMENT_ID = 'G-E3F6NJ4TH6';
-  if (GA_MEASUREMENT_ID.indexOf('XXXX') === -1) {
+  function cargarGA() {
+    if (GA_MEASUREMENT_ID.indexOf('XXXX') !== -1 || window._gaCargado) return;
+    window._gaCargado = true;
     var gaScript = document.createElement('script');
     gaScript.async = true;
     gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
@@ -173,6 +181,7 @@
     gtag('js', new Date());
     gtag('config', GA_MEASUREMENT_ID);
   }
+  try { if (localStorage.getItem('kone_cookies_ok') === '1') cargarGA(); } catch(e) {}
 </script>
 <style>
   :root {
@@ -6701,7 +6710,8 @@
 <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
   <p style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica se usan de forma anónima. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" style="color:var(--brasa);text-decoration:none">Más información</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0">
-    <button onclick="aceptarCookies()" style="padding:8px 20px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Entendido</button>
+    <button onclick="rechazarCookies()" style="padding:8px 20px;background:transparent;color:#B5B2AD;border:1px solid #2A2A2A;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Solo necesarias</button>
+    <button onclick="aceptarCookies()" style="padding:8px 20px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
   </div>
 </div>
 
@@ -18648,13 +18658,23 @@
   }
 
   // ===== BANNER DE COOKIES =====
+  // "kone_cookies_ok": '1' = aceptó analítica, '0' = solo necesarias. Antes
+  // solo existía "Entendido" y ni siquiera hacía falta pulsarlo para que GA
+  // ya estuviera corriendo — ahora GA solo arranca aquí, tras un consentimiento
+  // real, o en la carga de página si ya se había aceptado antes (ver <head>).
   function aceptarCookies() {
     try { localStorage.setItem('kone_cookies_ok', '1'); } catch(e) {}
+    cargarGA();
+    const b = document.getElementById('cookieBanner');
+    if (b) b.style.display = 'none';
+  }
+  function rechazarCookies() {
+    try { localStorage.setItem('kone_cookies_ok', '0'); } catch(e) {}
     const b = document.getElementById('cookieBanner');
     if (b) b.style.display = 'none';
   }
   function mostrarCookieBanner() {
-    try { if (localStorage.getItem('kone_cookies_ok')) return; } catch(e) {}
+    try { if (localStorage.getItem('kone_cookies_ok') !== null) return; } catch(e) {}
     const b = document.getElementById('cookieBanner');
     if (b) b.style.display = 'flex';
   }
