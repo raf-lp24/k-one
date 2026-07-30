@@ -9210,7 +9210,7 @@
   function renderEjercicioConPeso(texto, capitalizar) {
     const textoCap = capitalizar(texto);
     const match = textoCap.match(/^(.+?)(\s*\d+\s*[x×]\s*\S+)(.*)$/i);
-    if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${textoCap}</span></div>`;
+    if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${_esc(textoCap)}</span></div>`;
 
     const nombre = match[1].trim();
     const resto = (match[2] + match[3]).trim();
@@ -9233,18 +9233,31 @@
       rpeHTML = `<div class="ejercicio-rpe"><span class="k">RPE objetivo</span><span class="v">${rpe}</span></div>`;
     }
 
-    const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    // El nombre casi siempre viene del propio plan (confiable), pero desde que
+    // existen los "ejercicios añadidos por el cliente" puede ser texto
+    // cualquiera escrito por un usuario. Sin escapar, un nombre tipo
+    // `"><img src=x onerror=...>` rompía el atributo onclick e inyectaba HTML
+    // — confirmado generando la tarjeta con ese texto antes de este arreglo.
+    // nombreJs va dentro de un atributo HTML Y de una cadena JS a la vez, así
+    // que necesita las DOS capas de escapado, en este orden (JS primero).
+    const nombreSafe = _esc(nombre);
+    const nombreJs = _esc(nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    // `key` sigue siendo el valor SIN escapar para las búsquedas en
+    // userData.pesosEjercicios de arriba; `keyAttr` es solo para volcarlo en
+    // atributos HTML (el navegador lo decodifica solo al leerlo de vuelta con
+    // .dataset, así que el guardado/lectura de peso no se ve afectado).
+    const keyAttr = _esc(key);
     // Tarjeta de ejercicio: miniatura (abre la ficha "cómo se hace"), nombre, RPE,
     // y series / reps / peso. El stepper de peso se conserva íntegro (registro real).
     return `<div class="ejercicio-card">
-      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombre}">
+      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
         <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
       </button>
       <div class="ejercicio-card-body">
         <div class="ejercicio-card-top">
           <div class="ejercicio-card-namewrap">
-            <div class="ejercicio-nombre">${nombre}</div>
-            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombre}" aria-label="Cómo se hace: ${nombre}">
+            <div class="ejercicio-nombre">${nombreSafe}</div>
+            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               Cómo se hace
             </button>
@@ -9252,20 +9265,20 @@
           ${rpeHTML}
         </div>
         <div class="ejercicio-metrics">
-          <div class="em"><div class="em-k">Series</div><div class="em-v">${series || '—'}</div></div>
-          <div class="em"><div class="em-k">Reps</div><div class="em-v">${reps || '—'}</div></div>
+          <div class="em"><div class="em-k">Series</div><div class="em-v">${_esc(series) || '—'}</div></div>
+          <div class="em"><div class="em-k">Reps</div><div class="em-v">${_esc(reps) || '—'}</div></div>
           <div class="em em-peso">
             <div class="em-k">Peso (kg)</div>
             <div class="ejercicio-fila-controls">
               <div class="peso-stepper" onclick="event.stopPropagation()">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
                 <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
-                  data-ejercicio="${key}" data-nombre="${nombre}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
+                  data-ejercicio="${keyAttr}" data-nombre="${nombreSafe}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,1.5)" aria-label="Sumar 1,5 kg">+</button>
                 <span class="peso-unit">kg</span>
               </div>
-              <span class="peso-ultimo" data-ejercicio="${key}">${pesoUltimoTexto}</span>
-              <div class="peso-mini-historial" data-ejercicio="${key}">${miniHistorial}</div>
+              <span class="peso-ultimo" data-ejercicio="${keyAttr}">${_esc(pesoUltimoTexto)}</span>
+              <div class="peso-mini-historial" data-ejercicio="${keyAttr}">${miniHistorial}</div>
             </div>
           </div>
         </div>
@@ -9297,24 +9310,27 @@
       nombre = match ? match[1].trim().replace(/[·,]+$/, '').trim() : '';
       resto = match ? (match[2] || '').trim() : '';
     }
-    if (!nombre) return `<div class="ejercicio-fila-simple">· ${textoCap}</div>`;
+    if (!nombre) return `<div class="ejercicio-fila-simple">· ${_esc(textoCap)}</div>`;
 
-    const nombreJs = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    // Mismo motivo que en renderEjercicioConPeso: nombre puede venir de un
+    // ejercicio añadido por el cliente, texto libre sin garantías.
+    const nombreSafe = _esc(nombre);
+    const nombreJs = _esc(nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     return `<div class="ejercicio-card ejercicio-card-simple">
-      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombre}">
+      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
         <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
       </button>
       <div class="ejercicio-card-body">
         <div class="ejercicio-card-top">
           <div class="ejercicio-card-namewrap">
-            <div class="ejercicio-nombre">${nombre}</div>
-            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombre}" aria-label="Cómo se hace: ${nombre}">
+            <div class="ejercicio-nombre">${nombreSafe}</div>
+            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               Cómo se hace
             </button>
           </div>
         </div>
-        ${resto ? `<div class="ejercicio-card-detalle">${resto}</div>` : ''}
+        ${resto ? `<div class="ejercicio-card-detalle">${_esc(resto)}</div>` : ''}
       </div>
     </div>`;
   }
