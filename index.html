@@ -2505,7 +2505,11 @@
     font-weight: 500;
   }
 
-  .field .optional {
+  /* Antes solo existía dentro de .field: en cualquier otro formulario (los
+     modales usan .auth-field) la etiqueta "Opcional" heredaba las mayúsculas
+     y el letter-spacing del label y se leía pegada a él, como una sola
+     palabra ("SERIES OPCIONAL") en vez de una marca aparte. */
+  .field .optional, .auth-field .optional {
     font-size: 10px;
     color: var(--metal);
     letter-spacing: 0;
@@ -4895,6 +4899,32 @@
 
   .auth-field input:focus { border-color: var(--brasa); outline: none; }
   .auth-field input.error { border-color: #e8150f; }
+
+  /* Sugerencias de nombre de ejercicio: un <datalist> nativo abre el
+     desplegable del sistema (blanco, sin poder tocar el estilo) encima de un
+     modal oscuro. Con esta lista propia el desplegable respeta el tema. */
+  .sugerencias-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 20;
+  }
+  .sugerencias-dropdown.visible { display: block; }
+  .sugerencia-item {
+    padding: 11px 16px;
+    font-size: 14px;
+    color: var(--blanco);
+    cursor: pointer;
+  }
+  .sugerencia-item:hover, .sugerencia-item.activa { background: var(--grafito); color: var(--brasa); }
   .auth-field input.valid { border-color: #27ae60; }
 
   .auth-error {
@@ -5969,10 +5999,11 @@
     <button class="modal-close" onclick="cerrarAnadirEjercicio()">✕</button>
     <div class="modal-title" style="font-size:20px">Añadir ejercicio</div>
     <p class="modal-desc">Se repetirá cada semana este día hasta que lo quites.</p>
-    <div class="auth-field">
+    <div class="auth-field" style="position:relative">
       <label>Nombre del ejercicio</label>
-      <input type="text" id="extraEjNombre" placeholder="Curl concentrado, estiramientos de cadera..." list="extraEjSugerencias" maxlength="60">
-      <datalist id="extraEjSugerencias"></datalist>
+      <input type="text" id="extraEjNombre" placeholder="Curl concentrado, estiramientos de cadera..." autocomplete="off"
+        oninput="filtrarSugerenciasEjercicio(this.value)" onblur="setTimeout(ocultarSugerenciasEjercicio,150)">
+      <div id="extraEjSugerencias" class="sugerencias-dropdown"></div>
     </div>
     <div style="display:flex;gap:12px">
       <div class="auth-field" style="flex:1">
@@ -9316,21 +9347,54 @@
 
   let _extraEjercicioDia = null;
 
+  // Nombres únicos de ejercicios ya conocidos (los que tienen vídeo), con
+  // mayúscula inicial — se calcula una sola vez y se reutiliza en cada
+  // apertura del modal.
+  let _nombresEjerciciosSugeridos = null;
+  function nombresEjerciciosSugeridos() {
+    if (!_nombresEjerciciosSugeridos) {
+      const nombres = Object.keys(VIDEOS_EJERCICIOS).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+      _nombresEjerciciosSugeridos = [...new Set(nombres)];
+    }
+    return _nombresEjerciciosSugeridos;
+  }
+
+  function filtrarSugerenciasEjercicio(valor) {
+    const box = document.getElementById('extraEjSugerencias');
+    if (!box) return;
+    const q = valor.trim().toLowerCase();
+    if (!q) { box.classList.remove('visible'); box.innerHTML = ''; return; }
+    const coincidencias = nombresEjerciciosSugeridos().filter(n => n.toLowerCase().includes(q)).slice(0, 8);
+    if (!coincidencias.length) { box.classList.remove('visible'); box.innerHTML = ''; return; }
+    box.innerHTML = coincidencias.map(n => {
+      const nJs = n.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `<div class="sugerencia-item" onmousedown="elegirSugerenciaEjercicio('${nJs}')">${n}</div>`;
+    }).join('');
+    box.classList.add('visible');
+  }
+
+  function elegirSugerenciaEjercicio(nombre) {
+    document.getElementById('extraEjNombre').value = nombre;
+    ocultarSugerenciasEjercicio();
+  }
+
+  function ocultarSugerenciasEjercicio() {
+    const box = document.getElementById('extraEjSugerencias');
+    if (box) { box.classList.remove('visible'); box.innerHTML = ''; }
+  }
+
   function abrirAnadirEjercicio(diaNombre) {
     _extraEjercicioDia = diaNombre;
-    const datalist = document.getElementById('extraEjSugerencias');
-    if (datalist && !datalist.childElementCount) {
-      const nombres = Object.keys(VIDEOS_EJERCICIOS).map(k => k.charAt(0).toUpperCase() + k.slice(1));
-      datalist.innerHTML = [...new Set(nombres)].map(n => `<option value="${n}">`).join('');
-    }
     document.getElementById('extraEjNombre').value = '';
     document.getElementById('extraEjSeries').value = '';
     document.getElementById('extraEjReps').value = '';
+    ocultarSugerenciasEjercicio();
     document.getElementById('modalAnadirEjercicio').classList.add('visible');
   }
 
   function cerrarAnadirEjercicio() {
     document.getElementById('modalAnadirEjercicio').classList.remove('visible');
+    ocultarSugerenciasEjercicio();
     _extraEjercicioDia = null;
   }
 
