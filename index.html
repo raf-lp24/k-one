@@ -9310,12 +9310,14 @@
     const ejercicios = splitRespetandoParentesis(ejerciciosTexto).map(e => e.trim()).filter(Boolean);
 
     // En todos los días de entrenamiento (gimnasio, cardio, WOD, Hyrox, combinados...)
-    // separamos los ejercicios/tramos en bloque de fuerza (levantamientos compuestos
-    // pesados), hipertrofia (ejercicios de aislamiento/accesorio), acondicionamiento
+    // separamos los ejercicios/tramos en ejercicios con peso (fuerza e hipertrofia
+    // juntos: separarlos por el nombre del movimiento clasificaba mal — "sentadilla
+    // búlgara" y "prensa" a 10-12 reps caían en "fuerza" solo por el nombre, mientras
+    // "hip thrust" a 10 reps caía en "hipertrofia" solo por no estar en la lista de
+    // palabras — así que se unifican en un solo bloque), acondicionamiento
     // (movimientos o tramos por distancia/tiempo, y cardio en general) y core, igual
     // que mostraba antes el detalle de "Hoy".
-    const FUERZA_RE = /sentadilla|peso muerto|press (de )?banca|press militar|dominadas|remo (con )?barra|zancada|prensa|thruster/i;
-    const fuerza = [], hipertrofia = [], acondicionamiento = [], core = [];
+    const principal = [], acondicionamiento = [], core = [];
     ejercicios.forEach(e => {
       // Los días "Simulacro"/"Elige entre" de Hyrox escriben un párrafo largo
       // con una lista de estaciones dentro de un único paréntesis (que ahora
@@ -9337,11 +9339,7 @@
       const unidad = m ? m[2].trim() : '';
       if (/plancha|russian twist|abdomin/i.test(e)) { core.push(e); return; }
       if (reps === null || /^(m|km|seg|s\b|min)/.test(unidad)) { acondicionamiento.push(e); return; }
-      if (FUERZA_RE.test(e)) {
-        fuerza.push(e);
-      } else {
-        hipertrofia.push(e);
-      }
+      principal.push(e);
     });
     // Los ejercicios con peso llevan campo para registrar la carga y badge de RPE;
     // acondicionamiento y core van como lista simple.
@@ -9354,13 +9352,11 @@
     const listaSimple = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioSimple(x, capitalizar)).join('')}</div>`;
     const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
     const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
-    const tituloFuerza = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Bloque de fuerza';
-    const tituloAccesorio = esCardio ? 'Trabajo complementario' : esFuncional ? 'Accesorios' : 'Bloque de hipertrofia';
+    const tituloPrincipal = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Ejercicios';
     const tituloAcond = esCardio ? 'Sesión principal' : esFuncional ? 'WOD / Acondicionamiento' : 'Acondicionamiento';
     // Bloques numerados (01, 02, …) con el diseño nuevo
     const bloques = [
-      fuerza.length ? { t: tituloFuerza, c: listaPeso(fuerza) } : null,
-      hipertrofia.length ? { t: tituloAccesorio, c: listaPeso(hipertrofia) } : null,
+      principal.length ? { t: tituloPrincipal, c: listaPeso(principal) } : null,
       acondicionamiento.length ? { t: tituloAcond, c: listaSimple(acondicionamiento) } : null,
       core.length ? { t: 'Core', c: listaSimple(core) } : null,
     ].filter(Boolean);
