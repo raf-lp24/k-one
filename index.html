@@ -6008,7 +6008,11 @@
     <div style="display:flex;gap:12px">
       <div class="auth-field" style="flex:1">
         <label>Series <span class="optional">Opcional</span></label>
-        <input type="number" id="extraEjSeries" min="1" max="20" placeholder="3">
+        <div class="peso-stepper" style="width:100%;height:53px">
+          <button type="button" class="peso-btn" style="height:100%" onclick="ajustarSeriesExtra(-1)" aria-label="Restar una serie">−</button>
+          <input type="number" class="peso-input" style="flex:1;width:auto;height:100%;font-size:15px" id="extraEjSeries" min="1" max="20" step="1" inputmode="numeric" placeholder="3">
+          <button type="button" class="peso-btn" style="height:100%" onclick="ajustarSeriesExtra(1)" aria-label="Sumar una serie">+</button>
+        </div>
       </div>
       <div class="auth-field" style="flex:1">
         <label>Reps <span class="optional">Opcional</span></label>
@@ -9381,6 +9385,17 @@
   function ocultarSugerenciasEjercicio() {
     const box = document.getElementById('extraEjSugerencias');
     if (box) { box.classList.remove('visible'); box.innerHTML = ''; }
+  }
+
+  // Series con el mismo stepper −/+ que ya usa el registro de peso, en vez de
+  // las flechas nativas del input number (grises, minúsculas, no pegan con
+  // el resto de controles de la web).
+  function ajustarSeriesExtra(delta) {
+    const input = document.getElementById('extraEjSeries');
+    const min = parseInt(input.min, 10) || 1;
+    const max = parseInt(input.max, 10) || 20;
+    const actual = parseInt(input.value, 10) || 0;
+    input.value = Math.max(min, Math.min(max, actual + delta));
   }
 
   function abrirAnadirEjercicio(diaNombre) {
