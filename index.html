@@ -15751,10 +15751,11 @@
       // ¿Se cancelará al final del período? (oferta 1,99€ o cancelación). Para avisar antes de que expire.
       cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 1,99€.
-      // OJO: se exige que la fila tenga "status". create-checkout-session crea la fila
-      // con el stripe_customer_id ANTES de pagar, así que con !!sub bastaba con empezar
-      // un pago y volver atrás para perder la oferta de 1,99€ sin haber pagado nada.
-      tieneSub: !!(sub && sub.status) || esBeta || esTest,
+      // OJO: no basta con !!sub.status. create-checkout-session crea la fila con el
+      // stripe_customer_id ANTES de pagar, y la columna "status" en la BD tiene
+      // default 'none' (string no vacío, por tanto truthy) — así que empezar un pago
+      // y volver atrás sin pagar seguía haciendo perder la oferta de 1,99€.
+      tieneSub: !!(sub && sub.status && sub.status !== 'none') || esBeta || esTest,
       isBeta: esBeta
     });
     // Restaurar datos del perfil desde Supabase a localStorage.
