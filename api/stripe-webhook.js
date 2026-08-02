@@ -186,7 +186,10 @@ module.exports = async (req, res) => {
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
 
         // REFERIDOS: si este usuario fue referido, acreditar 5€ al referrer (max 15€)
-        if (userId) {
+        // PAUSADO (2026-08): ver el mismo aviso en index.html (cargarReferidos). Se
+        // deja de acreditar el descuento mientras el mes gratis está abierto a todo
+        // el mundo; para reactivar, quitar el "if (false &&" de aquí.
+        if (false && userId) {
           try {
             const { data: ref } = await supabaseAdmin.from('referidos')
               .select('id, referrer_id')

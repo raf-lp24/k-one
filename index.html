@@ -14025,7 +14025,13 @@
   }
 
   // ===== SISTEMA DE REFERIDOS =====
+  // PAUSADO (2026-08): mientras el mes gratis (GRATIS1MES) está abierto a todo el
+  // mundo, no tiene sentido la recompensa de 5€/amigo — se retoma con la mecánica
+  // nueva (amigo entra con mes gratis, tú cobras al confirmarse su renovación)
+  // cuando se retire el código público. Para reactivar esta versión: quitar el
+  // "return" de aquí abajo y en api/stripe-webhook.js (buscar el mismo aviso).
   async function cargarReferidos() {
+    return; // eslint-disable-line no-unreachable
     const banner = document.getElementById('bannerReferidos');
     const codigoEl = document.getElementById('codigoReferido');
     const pagadosEl = document.getElementById('refPagados');
