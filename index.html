@@ -5828,6 +5828,7 @@
         <input id="emailFiltroDesde" type="date" onchange="renderAdminEmails()" title="Desde esta fecha" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
         <input id="emailFiltroHasta" type="date" onchange="renderAdminEmails()" title="Hasta esta fecha" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
         <button onclick="limpiarFiltrosEmail()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;color:#888;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'DM Mono',monospace">Limpiar</button>
+        <button onclick="eliminarEmailsFiltrados()" title="Elimina todos los emails que coinciden con los filtros de arriba (útil para vaciar de golpe los digests acumulados)" style="background:none;border:1px solid #e74c3c40;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'DM Mono',monospace">Eliminar filtrados</button>
       </div>
       <div id="adminEmailsList" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -17801,9 +17802,12 @@
                   <span>Destino: ${_esc(e.destinatario)}</span>
                   <span>${_fmtFecha(e.created_at)} ${fmtHora(e.created_at)}</span>
                 </div>
-                ${esGestionado
-                  ? '<span style="font-size:10px;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>'
-                  : '<button onclick="event.stopPropagation();marcarEmailGestionado(\'' + String(gestionadoId).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:\'DM Mono\',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar como visto</button>'}
+                <div style="display:flex;align-items:center;gap:8px">
+                  ${esGestionado
+                    ? '<span style="font-size:10px;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>'
+                    : '<button onclick="event.stopPropagation();marcarEmailGestionado(\'' + String(gestionadoId).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:\'DM Mono\',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar como visto</button>'}
+                  ${e.id ? '<button onclick="event.stopPropagation();eliminarEmail(\'' + String(e.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #2a2a2a;border-radius:8px;color:#888;font-size:11px;padding:7px 12px;cursor:pointer;font-family:\'DM Mono\',monospace;transition:all .15s" onmouseenter="this.style.borderColor=\'#e74c3c\';this.style.color=\'#e74c3c\'" onmouseleave="this.style.borderColor=\'#2a2a2a\';this.style.color=\'#888\'"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Eliminar</button>' : ''}
+                </div>
               </div>
             </div>
           </div>
@@ -17867,6 +17871,75 @@
       btn.disabled = false;
       btn.textContent = 'Marcar como visto';
     }
+  }
+
+  async function eliminarEmail(emailId, btn) {
+    if (!confirm('¿Eliminar este email del historial?')) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'eliminar_email', id: emailId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      _adminEmailLog = _adminEmailLog.filter(x => String(x.id) !== String(emailId));
+      renderAdminEmails();
+      showToast('Email eliminado');
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Eliminar'; }
+    }
+  }
+
+  // Borra de golpe todos los emails que cumplen los filtros activos (tipo, texto,
+  // fechas, estado) — pensado para vaciar de una vez la acumulación de digests
+  // diarios en vez de eliminarlos uno a uno.
+  async function eliminarEmailsFiltrados() {
+    const q      = (document.getElementById('emailFiltroTexto')?.value || '').trim().toLowerCase();
+    const tipoF  = document.getElementById('emailFiltroTipo')?.value || '';
+    const estadoF = document.getElementById('emailFiltroEstado')?.value || '';
+    const desde  = document.getElementById('emailFiltroDesde')?.value || '';
+    const hasta  = document.getElementById('emailFiltroHasta')?.value || '';
+    const desdeTs = desde ? new Date(desde + 'T00:00:00').getTime() : null;
+    const hastaTs = hasta ? new Date(hasta + 'T23:59:59').getTime() : null;
+    const parseDatos = (e) => { try { return typeof e.datos === 'string' ? JSON.parse(e.datos) : (e.datos || {}); } catch (x) { return {}; } };
+    const filtrados = _adminEmailLog.filter(e => {
+      const d = parseDatos(e);
+      if (tipoF && e.tipo !== tipoF) return false;
+      if (estadoF === 'gestionado' && !d.gestionado) return false;
+      if (estadoF === 'pendiente' && d.gestionado) return false;
+      if (desdeTs || hastaTs) {
+        const ts = e.created_at ? new Date(e.created_at).getTime() : 0;
+        if (desdeTs && ts < desdeTs) return false;
+        if (hastaTs && ts > hastaTs) return false;
+      }
+      if (q) {
+        const cuerpo = d.resumen || d.mensaje || d.texto || '';
+        const heno = [e.destinatario, e.asunto, e.tipo, _emailTipoLabel[e.tipo] || '', cuerpo].join(' ').toLowerCase();
+        if (!heno.includes(q)) return false;
+      }
+      return true;
+    });
+    const ids = filtrados.map(e => e.id).filter(Boolean);
+    if (!ids.length) { showToast('No hay emails que coincidan con los filtros'); return; }
+    if (!confirm(`¿Eliminar ${ids.length} email(s) que coinciden con los filtros actuales? Esta acción no se puede deshacer.`)) return;
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'eliminar_emails_masivo', ids })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const idsSet = new Set(ids.map(String));
+      _adminEmailLog = _adminEmailLog.filter(x => !idsSet.has(String(x.id)));
+      renderAdminEmails();
+      showToast(`${ids.length} email(s) eliminados`);
+    } catch (e) { showToast('Error: ' + e.message, 4000); }
   }
 
   async function borrarCliente(userId, nombre, email, btn) {

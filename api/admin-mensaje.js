@@ -24,6 +24,15 @@ module.exports = async (req, res) => {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
       if (e) { console.error('[admin-mensaje] eliminar error:', e.message); return res.status(500).json({ error: 'Error eliminando mensaje' }); }
+    } else if (accion === 'eliminar_email') {
+      if (!id) return res.status(400).json({ error: 'id requerido' });
+      const { error: e } = await supabaseAdmin.from('email_log').delete().eq('id', id);
+      if (e) { console.error('[admin-mensaje] eliminar_email error:', e.message); return res.status(500).json({ error: 'Error eliminando email' }); }
+    } else if (accion === 'eliminar_emails_masivo') {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
+      if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
+      const { error: e } = await supabaseAdmin.from('email_log').delete().in('id', ids);
+      if (e) { console.error('[admin-mensaje] eliminar_emails_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando emails' }); }
     } else if (accion === 'email_gestionado') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { data: row } = await supabaseAdmin.from('email_log').select('datos').eq('id', id).single();
