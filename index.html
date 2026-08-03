@@ -9890,6 +9890,36 @@
     [/claras de huevo/gi, 'tofu sedoso batido'],
   ];
 
+  // Sinónimos de ingrediente para expandir una alergia de texto libre ("Otra") a
+  // sus variantes. A propósito NO reutiliza FAMILIAS_ALIMENTOS entero para esto:
+  // esa lista mezcla nombres de PLATO ("tortilla", "revuelto") que también existen
+  // sin el alérgeno (tortilla de maíz, revuelto de tofu) — expandirla a ciegas
+  // metería falsos positivos. Aquí solo entran sinónimos de INGREDIENTE reales,
+  // así que alguien que escribe "huevo" también queda cubierto para "claras".
+  const SINONIMOS_ALERGENO = {
+    'huevo': ['huevo', 'huevos', 'clara', 'claras'],
+    'leche': FAMILIAS_ALIMENTOS['lácteos'],
+    'lacteos': FAMILIAS_ALIMENTOS['lácteos'],
+    'lactosa': FAMILIAS_ALIMENTOS['lácteos'],
+    'marisco': FAMILIAS_ALIMENTOS['marisco'],
+    'pescado': FAMILIAS_ALIMENTOS['pescado'],
+    'frutos secos': FAMILIAS_ALIMENTOS['frutos secos'],
+    'gluten': FAMILIAS_ALIMENTOS['gluten'],
+    'cerdo': FAMILIAS_ALIMENTOS['cerdo'],
+    'legumbres': FAMILIAS_ALIMENTOS['legumbres'],
+    'soja': ['soja', 'edamame'],
+  };
+  function _expandirAlergenoLibre(texto) {
+    const tokens = (texto || '').split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+    const extra = new Set();
+    tokens.forEach(t => {
+      Object.entries(SINONIMOS_ALERGENO).forEach(([clave, miembros]) => {
+        if (t === clave || miembros.some(m => m === t)) miembros.forEach(m => extra.add(m));
+      });
+    });
+    return [texto, ...extra].filter(Boolean).join(', ');
+  }
+
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
@@ -11988,7 +12018,7 @@
     // recibir esa receta igualmente mientras la app afirmaba lo contrario.
     // Reutiliza filtrarNoComida (sustitución + red de seguridad que descarta
     // el plato si el rastro sigue ahí) juntando ambos textos.
-    const alergiaLibre = (u.alergia === 'Otra' && u.alergiaOtra) ? u.alergiaOtra : '';
+    const alergiaLibre = (u.alergia === 'Otra' && u.alergiaOtra) ? _expandirAlergenoLibre(u.alergiaOtra) : '';
     nutricion = filtrarNoComida(nutricion, [u.noComida, alergiaLibre].filter(Boolean).join(', '));
 
     // ROTACIÓN POR DÍA: cada día de la semana muestra opciones diferentes.
