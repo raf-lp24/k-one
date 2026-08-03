@@ -5611,11 +5611,15 @@
       </div>
     </div>
     <!-- Aviso de mes gratis por código promocional. Se muestra solo si el
-         cliente tiene un código válido, y deja claro que después se cobra. -->
+         cliente tiene un código válido, y deja claro que después se cobra.
+         A propósito NO repite "tu primer mes es gratis" ni "no se cobra nada
+         hoy": eso ya lo dice el título/descripción del modal justo encima;
+         aquí solo van los detalles concretos (qué código, cuándo y a qué
+         precio se renueva) para no duplicar el mismo mensaje dos veces. -->
     <div id="paywallPromoBox" style="display:none">
-      <div style="background:linear-gradient(135deg,rgba(232,73,15,.14),var(--carbon));border:1px solid var(--brasa);border-radius:10px;padding:14px 16px;margin-bottom:14px">
-        <p style="margin:0 0 6px;font-size:13px;color:var(--brasa);font-weight:700;letter-spacing:.5px">TU PRIMER MES ES GRATIS</p>
-        <p style="margin:0;font-size:12px;color:var(--metal-claro);line-height:1.55">Has usado el código <strong id="paywallPromoCodigo" style="color:var(--blanco)"></strong>. Hoy <strong style="color:var(--blanco)">no se te cobra nada</strong>. Pasados los 30 días, tu suscripción se renueva automáticamente al precio del plan que elijas abajo. Puedes cancelar cuando quieras desde tu perfil, también durante el mes gratis.</p>
+      <div style="display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,rgba(232,73,15,.14),var(--carbon));border:1px solid var(--brasa);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <p style="margin:0;font-size:12.5px;color:var(--metal-claro);line-height:1.55">Código <strong id="paywallPromoCodigo" style="color:var(--brasa)"></strong> aplicado. Pasados los 30 días se renueva automáticamente al precio del plan que elijas abajo — puedes cancelar cuando quieras desde tu perfil, también durante el mes gratis.</p>
       </div>
     </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
@@ -16687,7 +16691,7 @@
       const desc = document.getElementById('paywallDesc');
       const btn = document.getElementById('paywallBtn');
       if (titulo) titulo.textContent = 'Tu primer mes es gratis';
-      if (desc) desc.textContent = 'Elige el plan que quieres. No se te cobra nada hoy: los primeros 30 días son gratis y después se renueva al precio del plan elegido.';
+      if (desc) desc.textContent = 'Elige el plan que quieres. Los detalles del mes gratis están justo debajo.';
       // Preseleccionar lo que eligió en el cuestionario. Sin esto el selector salía
       // por defecto en "Entrenamiento + nutrición", así que un cliente de "Solo
       // nutrición" que no se fijara acabaría pagando 7,99€ en vez de 4,99€.
