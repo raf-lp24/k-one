@@ -11981,8 +11981,15 @@
       });
     }
 
-    // FILTRAR ALIMENTOS NO DESEADOS
-    nutricion = filtrarNoComida(nutricion, u.noComida);
+    // FILTRAR ALIMENTOS NO DESEADOS + ALERGIA "OTRA" (texto libre)
+    // OJO: cuando la alergia es "Otra", u.alergiaOtra NO pasaba por ningún
+    // filtro real — solo se usaba para el texto de "Filtrando alérgenos..." y
+    // el motivo del plan, así que un alérgico al marisco/huevo/etc. podía
+    // recibir esa receta igualmente mientras la app afirmaba lo contrario.
+    // Reutiliza filtrarNoComida (sustitución + red de seguridad que descarta
+    // el plato si el rastro sigue ahí) juntando ambos textos.
+    const alergiaLibre = (u.alergia === 'Otra' && u.alergiaOtra) ? u.alergiaOtra : '';
+    nutricion = filtrarNoComida(nutricion, [u.noComida, alergiaLibre].filter(Boolean).join(', '));
 
     // ROTACIÓN POR DÍA: cada día de la semana muestra opciones diferentes.
     // Se genera un array de 7 variantes (L-D), cada una con 5 opciones rotadas distinto.
