@@ -13761,7 +13761,11 @@
       { key: 'testimonio_dejado', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M9 10h6"/></svg>', name: 'Tu historia inspira',
         desc: 'Dejaste tu testimonio. Alguien que duda hoy va a empezar mañana por leerte.',
         cumple: () => !!userData.testimonio },
-    ];
+    // PAUSADO (2026-08): mientras el incentivo de referidos esté pausado (ver
+    // cargarReferidos en este mismo fichero), estos dos hitos son inalcanzables
+    // de verdad — el webhook ya no acredita descuento_referidos. Mostrarlos
+    // "bloqueados" prometería un descuento que ya no se concede.
+    ].filter(d => !['primer_amigo', 'tres_amigos'].includes(d.key));
 
     let changed = false;
     defs.forEach(d => {
