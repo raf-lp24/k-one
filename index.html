@@ -1611,6 +1611,10 @@
     gap: 2px;
     margin-top: 64px;
   }
+  /* 5 tarjetas es un número impar de columnas posibles: sin esto, "Solo
+     nutrición" queda sola en su fila con un hueco vacío al lado. Al ocupar
+     toda la fila se ve como una tarjeta de cierre, no como un hueco roto. */
+  .sports-grid .sport-card:last-child { grid-column: 1 / -1; min-height: 260px; }
 
   .sport-card {
     background: var(--carbon);
