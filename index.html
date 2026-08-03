@@ -6788,7 +6788,7 @@
       <h3>2.2. Qué datos tratamos</h3>
       <ul>
         <li><strong>Datos identificativos y de contacto:</strong> nombre y correo electrónico.</li>
-        <li><strong>Datos de perfil físico y de actividad:</strong> edad, sexo, peso, altura, complexión, objetivo, deporte, nivel, disponibilidad y hábitos (trabajo, sueño, estrés, alimentación).</li>
+        <li><strong>Datos de perfil físico y de actividad:</strong> edad, sexo, peso, altura, objetivo, deporte, nivel, disponibilidad y hábitos (trabajo, sueño, estrés, alimentación).</li>
         <li><strong>Categorías especiales de datos (datos de salud — art. 9 RGPD):</strong> enfermedades, lesiones, operaciones, alergias y medicación que declares para adaptar tu plan. Estos datos solo se tratan con tu <strong>consentimiento explícito</strong>.</li>
         <li><strong>Datos de uso:</strong> entrenamientos marcados, check-ins, pesos registrados y progreso.</li>
       </ul>
@@ -6966,16 +6966,6 @@
               <span class="stepper-unit">cm</span>
               <button class="stepper-btn" onclick="stepVal('altura',1)">+</button>
             </div>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:32px">
-          <label>¿Cómo describirías tu complexión actual?</label>
-          <div class="radio-group" id="complexion">
-            <div class="radio-opt" onclick="selectRadio(this,'complexion')">Muy delgado/a</div>
-            <div class="radio-opt" onclick="selectRadio(this,'complexion')">Delgado/a</div>
-            <div class="radio-opt" onclick="selectRadio(this,'complexion')">Normal</div>
-            <div class="radio-opt" onclick="selectRadio(this,'complexion')">Con algo de sobrepeso</div>
-            <div class="radio-opt" onclick="selectRadio(this,'complexion')">Con sobrepeso</div>
           </div>
         </div>
         <div class="bmr-panel" id="bmrPanel">
@@ -7194,19 +7184,6 @@
                  mensaje de bienvenida. -->
             <input type="date" id="eventoFecha" style="margin-top:8px;max-width:220px">
             <span class="field-hint">Si nos das la fecha, te mostramos la cuenta atrás en tu panel.</span>
-          </div>
-          <div class="field">
-            <label>¿En cuánto tiempo te gustaría ver resultados? <span class="required">Obligatorio</span></label>
-            <div class="radio-group" id="plazo">
-              <div class="radio-opt" onclick="selectRadio(this,'plazo')">1-2 meses</div>
-              <div class="radio-opt" onclick="selectRadio(this,'plazo')">3-6 meses</div>
-              <div class="radio-opt" onclick="selectRadio(this,'plazo')">6-12 meses</div>
-              <div class="radio-opt" onclick="selectRadio(this,'plazo')">Sin prisa, proceso largo</div>
-            </div>
-          </div>
-          <div class="field">
-            <label>¿Has intentado esto antes? ¿Qué pasó? <span class="optional">Opcional</span></label>
-            <textarea id="antecedentes" placeholder="Si lo has intentado antes y sabes qué falló, cuéntanos. Ayuda mucho."></textarea>
           </div>
         </div>
         <div class="form-nav">
@@ -8336,8 +8313,7 @@
       { type: 'input', id: 'edad' },
       { type: 'select', id: 'sexo' },
       { type: 'input', id: 'peso' },
-      { type: 'input', id: 'altura' },
-      { type: 'radio', id: 'complexion' }
+      { type: 'input', id: 'altura' }
     ],
     1: [
       { type: 'radio', id: 'enfermedad' },
@@ -8352,8 +8328,7 @@
     ],
     4: [
       { type: 'radio', id: 'tipoPlan' },
-      { type: 'radio', id: 'objetivo' },
-      { type: 'radio', id: 'plazo' }
+      { type: 'radio', id: 'objetivo' }
     ],
     5: [
       { type: 'radio', id: 'deporte' },
@@ -8526,7 +8501,6 @@
       sexo: document.getElementById('sexo')?.value || '',
       peso: document.getElementById('peso')?.value || '',
       altura: document.getElementById('altura')?.value || '',
-      complexion: getRadio('complexion'),
       enfermedad: getRadio('enfermedad'),
       enfermedadOtra: document.getElementById('enfermedadOtra')?.value || '',
       lesion: getRadio('lesion'),
@@ -8548,8 +8522,6 @@
       enfoqueMacros: getRadio('enfoqueMacros'),
       evento: document.getElementById('evento')?.value || '',
       eventoFecha: document.getElementById('eventoFecha')?.value || '',
-      plazo: getRadio('plazo'),
-      antecedentes: document.getElementById('antecedentes')?.value || '',
       deporte: getRadio('deporte'),
       diasEntreno: getRadio('diasEntreno'),
       tiempoSesion: getRadio('tiempoSesion'),
@@ -16110,12 +16082,12 @@
     if (!getUserData(TEST_EMAIL)?.plan) {
       const testUserData = {
         edad: '30', sexo: 'Hombre', peso: '80', altura: '178',
-        complexion: 'Normal', enfermedad: 'No', lesion: 'No', alergia: 'No',
+        enfermedad: 'No', lesion: 'No', alergia: 'No',
         operacion: '', medicacion: '',
         trabajo: 'Oficina', jornada: 'Sentado todo el día',
         estres: 'Medio', sueno: '7-8 horas',
         dieta: 'Como de todo', noComida: '', comidas: '3 veces', cocina: 'Casi siempre en casa',
-        objetivo: 'Ganar músculo', evento: '', plazo: '3-6 meses', antecedentes: '',
+        objetivo: 'Ganar músculo', evento: '',
         deporte: 'Gimnasio / Fuerza', diasEntreno: '3 días', tiempoSesion: '60-90 min',
         nivel: 'Llevo algo de tiempo', lugar: 'Gimnasio',
         onboardingCompletado: true,
