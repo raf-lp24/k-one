@@ -15921,7 +15921,11 @@
             fill.style.width = pct; fill.style.background = col;
           }
         }
-        _setFieldState('reg-pass', val.length === 0 ? 'none' : val.length >= 6 ? 'valid' : 'error');
+        // El check verde tiene que exigir lo mismo que registrar() al enviar
+        // (8+ caracteres y al menos un dígito) — antes solo pedía 6 caracteres,
+        // así que contraseñas como "abcdefgh" se marcaban válidas al escribir y
+        // el envío las rechazaba igualmente, confundiendo justo en el registro.
+        _setFieldState('reg-pass', val.length === 0 ? 'none' : (val.length >= 8 && /\d/.test(val)) ? 'valid' : 'error');
         const v2 = (document.getElementById('reg-pass2') || {}).value || '';
         if (v2) validarCampoReg('pass2');
         break;
