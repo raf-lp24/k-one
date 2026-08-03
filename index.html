@@ -5648,16 +5648,16 @@
   <div style="max-width:1400px;margin:0 auto;padding:0 24px 40px">
 
     <!-- Cabecera fija -->
-    <div style="position:sticky;top:0;z-index:10;background:#08080a;padding:20px 0 16px;border-bottom:1px solid #1a1a1a;margin-bottom:24px">
+    <div style="position:sticky;top:0;z-index:10;background:#08080a;padding:20px 0 16px;border-bottom:1px solid #1a1a1a;margin-bottom:24px;box-shadow:0 1px 0 rgba(232,73,15,.25)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:14px">
-          <div style="width:42px;height:42px;background:linear-gradient(135deg,#E8490F,#ff6b2b);border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="logo" style="font-size:21px;letter-spacing:3px;user-select:none">K-<span>ONE</span></div>
+          <div style="width:1px;align-self:stretch;background:#2a2a2a"></div>
           <div>
-            <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px">Jarvis</div>
-            <div id="adminTimestamp" style="font-size:11px;color:#999;font-family:'DM Mono',monospace"></div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:2px;color:#fff;line-height:1">JARVIS</div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--brasa);font-family:'Inter',sans-serif;text-transform:uppercase;margin-top:3px">Centro de control</div>
           </div>
+          <div id="adminTimestamp" style="font-size:11px;color:#999;font-family:'DM Mono',monospace;margin-left:6px"></div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button onclick="mostrarFormAltaCliente()" style="background:#27ae60;border:none;border-radius:8px;padding:8px 14px;font-size:12px;color:#fff;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">+ Añadir cliente</button>
@@ -5678,6 +5678,20 @@
 
     <!-- TAB: Dashboard -->
     <div class="jarvis-panel" id="jarvisPanel-dashboard">
+      <!-- Estado operativo: los interruptores de negocio que se tocan desde fuera
+           del panel (Stripe, Supabase) y que se olvidan con el tiempo. Son valores
+           fijos del código actual, no una comprobación en vivo — por eso el aviso. -->
+      <div style="background:#151515;border:1px solid #2a2a2a;border-left:3px solid var(--brasa);border-radius:10px;padding:14px 16px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--brasa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px">ESTADO OPERATIVO</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:12.5px;color:var(--metal-claro)">
+          <div><strong style="color:#fff">Oferta primer mes:</strong> 1,99€, cualquier plan</div>
+          <div><strong style="color:#fff">Código mes gratis:</strong> GRATIS1MES (revisar activo en Supabase)</div>
+          <div><strong style="color:#fff">Incentivo referidos:</strong> pausado (5€/amigo, en espera de nueva mecánica)</div>
+        </div>
+      </div>
       <div id="adminAccion" style="margin-bottom:24px"></div>
       <div id="adminMetricsBiz" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
@@ -5763,7 +5777,7 @@
     <div class="jarvis-panel" id="jarvisPanel-buzon" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3498db,#2980b9);display:flex;align-items:center;justify-content:center">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           </div>
           <div>
@@ -5771,7 +5785,7 @@
             <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Contactos de clientes</div>
           </div>
         </div>
-        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#3498db15;color:#3498db;font-family:'DM Mono',monospace;font-weight:600"></span>
+        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
@@ -5780,7 +5794,7 @@
     <div class="jarvis-panel" id="jarvisPanel-leads" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#27ae60,#229954);display:flex;align-items:center;justify-content:center">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
           <div>
@@ -5788,7 +5802,7 @@
             <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Emails que pidieron información</div>
           </div>
         </div>
-        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#27ae6015;color:#27ae60;font-family:'DM Mono',monospace;font-weight:600"></span>
+        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px"></div>
     </div>
