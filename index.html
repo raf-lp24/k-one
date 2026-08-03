@@ -25,6 +25,14 @@
 <meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Primer mes 1,99€.">
 <meta name="twitter:image" content="https://k-one.fit/og-image.png">
 <meta name="theme-color" content="#0a0a0a">
+<!-- Sin esto, "Añadir a pantalla de inicio" en iOS abría Safari con la barra
+     de direcciones visible en vez de a pantalla completa como una app real:
+     iOS no lee el "display":"standalone" del manifest.json para esto, hace
+     falta esta etiqueta aparte. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="K-ONE">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
 <script type="application/ld+json">
 {
