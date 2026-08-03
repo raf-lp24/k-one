@@ -1614,7 +1614,19 @@
   /* 5 tarjetas es un número impar de columnas posibles: sin esto, "Solo
      nutrición" queda sola en su fila con un hueco vacío al lado. Al ocupar
      toda la fila se ve como una tarjeta de cierre, no como un hueco roto. */
-  .sports-grid .sport-card:last-child { grid-column: 1 / -1; min-height: 260px; }
+  /* La tarjeta ancha necesita su propia maqueta: por dentro seguía siendo la
+     misma tarjeta estrecha estirada, con el texto pegado a la izquierda y un
+     hueco vacío enorme a la derecha. Centrada y con el párrafo acotado se lee
+     como un cierre de sección a propósito, no como una tarjeta desajustada. */
+  .sports-grid .sport-card:last-child {
+    grid-column: 1 / -1;
+    min-height: 220px;
+    align-items: center;
+    text-align: center;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .sports-grid .sport-card:last-child .sport-desc { max-width: 520px; }
 
   .sport-card {
     background: var(--carbon);
