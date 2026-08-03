@@ -15736,6 +15736,10 @@
   async function syncProfileFromSupabase(authUser) {
     _supaUserId = authUser.id;
     _registrarUltimaConexion(authUser.id);
+    // Reintenta un código de promoción/invitación que se quedó pendiente porque
+    // en el registro todavía no había sesión (email sin confirmar). Es un no-op
+    // barato si no hay nada pendiente.
+    _aplicarCodigoPendiente(authUser.id, authUser.email);
     // Solo columnas que existen seguro. NO incluir aquí columnas opcionales:
     // si una columna no existe en la BD, PostgREST devuelve error y profile queda
     // null, lo que borraría la restauración del perfil (y reaparecería el
@@ -15948,6 +15952,44 @@
     }
   }
 
+  // Aplica un código de promoción/invitación guardado en localStorage por
+  // registrar() cuando todavía no había sesión. Verifica con .select() que el
+  // UPDATE afectó a alguna fila de verdad (una RLS que bloquea en silencio no
+  // cuenta como éxito) antes de dar el código por aplicado y borrarlo.
+  async function _aplicarCodigoPendiente(userId, email) {
+    let codigo = '';
+    try { codigo = localStorage.getItem('kone_codigo_pendiente') || ''; } catch (e) {}
+    if (!codigo || !userId) return;
+    try {
+      const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: codigo });
+      if (promo && promo.valido) {
+        const { data: filas, error } = await supa.from('profiles')
+          .update({ codigo_promo: codigo }).eq('id', userId).select('id');
+        if (error || !filas || !filas.length) return; // sin sesión todavía: se reintenta más tarde
+        try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
+        showToast(promo.tipo === 'mes_gratis'
+          ? '¡Código aplicado! Tu primer mes es gratis. Después se renueva al precio de tu plan; cancela cuando quieras.'
+          : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 7000);
+        return;
+      }
+      // No es promoción: se prueba como invitación de un amigo. La RLS de
+      // profiles impide leer la fila de otro usuario, así que se busca al
+      // referrer con una función SECURITY DEFINER que solo da su id.
+      const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigo });
+      if (referrerId && referrerId !== userId) {
+        const { data: filas, error } = await supa.from('profiles')
+          .update({ referido_por: codigo }).eq('id', userId).select('id');
+        if (error || !filas || !filas.length) return; // sin sesión todavía: se reintenta más tarde
+        await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: userId, referido_email: email || '', estado: 'pendiente' });
+        try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
+      } else {
+        // Código inválido o es el suyo propio: no tiene sentido reintentarlo.
+        if (referrerId === userId) showToast('No puedes usar tu propio código de invitación', 4000);
+        try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
+      }
+    } catch (e) { console.warn('[registro] Error aplicando código pendiente:', e.message); }
+  }
+
   // ===== REGISTRO =====
   async function registrar() {
     let ok = true;
@@ -16012,33 +16054,19 @@
     if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'email' });
 
     // Guardar el código que introdujo: puede ser una PROMOCIÓN (mes gratis,
-    // descuento) o la INVITACIÓN de un amigo. Se comprueba en ese orden.
+    // descuento) o la INVITACIÓN de un amigo.
+    // OJO: si el proyecto exige confirmar el email (es el caso: ver el evento
+    // SIGNED_IN con access_token en el hash, más abajo), en este punto todavía
+    // NO hay sesión activa — auth.signUp() devuelve el user pero data.session es
+    // null. El UPDATE a profiles lo bloquea la RLS (auth.uid() = id) en SILENCIO
+    // (0 filas afectadas, sin error), así que el código se perdía sin más. Se
+    // guarda en localStorage y _aplicarCodigoPendiente() lo reintenta en cuanto
+    // haya una sesión real (aquí mismo si ya la hay, o al confirmar el email /
+    // iniciar sesión más tarde, vía syncProfileFromSupabase).
     const codigoInvitacion = (document.getElementById('reg-codigoInvitacion')?.value || '').trim().toUpperCase();
-    if (codigoInvitacion && data.user?.id) {
-      try {
-        // 1) ¿Código de promoción? Se guarda en el perfil; el servidor lo vuelve
-        //    a validar al crear el pago (el navegador no decide descuentos).
-        const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: codigoInvitacion });
-        if (promo && promo.valido) {
-          await supa.from('profiles').update({ codigo_promo: codigoInvitacion }).eq('id', data.user.id);
-          showToast(promo.tipo === 'mes_gratis'
-            ? '¡Código aplicado! Tu primer mes es gratis. Después se renueva al precio de tu plan; cancela cuando quieras.'
-            : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 7000);
-        } else {
-          // 2) Si no es promoción, se prueba como invitación de un amigo.
-          //    La RLS de profiles impide leer la fila de otro usuario, así que se
-          //    busca al referrer con una función SECURITY DEFINER que solo da su id.
-          const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigoInvitacion });
-          if (referrerId && referrerId !== data.user.id) {
-            await supa.from('profiles').update({ referido_por: codigoInvitacion }).eq('id', data.user.id);
-            await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: data.user.id, referido_email: email, estado: 'pendiente' });
-          } else if (referrerId === data.user.id) {
-            showToast('No puedes usar tu propio código de invitación', 4000);
-          } else {
-            showToast('El código no es válido — se ha ignorado', 4000);
-          }
-        }
-      } catch (e) { console.warn('[registro] Error procesando el código:', e.message); }
+    if (codigoInvitacion) {
+      try { localStorage.setItem('kone_codigo_pendiente', codigoInvitacion); } catch (e) {}
+      if (data.user?.id) await _aplicarCodigoPendiente(data.user.id, email);
     }
 
     // Limpiar campos
