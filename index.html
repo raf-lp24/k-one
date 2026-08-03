@@ -1605,28 +1605,18 @@
     border-top: 1px solid var(--humo);
   }
 
+  /* 5 tarjetas fijas: con auto-fit, el número de columnas depende del ancho
+     disponible y puede caer en 2, 3 o 4 — deja siempre una huérfana con un
+     hueco vacío al lado (probado: a 1280px de viewport SÍ encajaban las 5 en
+     una fila sola, así que "resolverlo" forzando la última a ocupar toda la
+     fila la empeoraba justo ahí). Con columnas fijas nunca hay huérfana: en
+     escritorio son siempre 5 en una fila, en móvil 1 por fila. */
   .sports-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 2px;
     margin-top: 64px;
   }
-  /* 5 tarjetas es un número impar de columnas posibles: sin esto, "Solo
-     nutrición" queda sola en su fila con un hueco vacío al lado. Al ocupar
-     toda la fila se ve como una tarjeta de cierre, no como un hueco roto. */
-  /* La tarjeta ancha necesita su propia maqueta: por dentro seguía siendo la
-     misma tarjeta estrecha estirada, con el texto pegado a la izquierda y un
-     hueco vacío enorme a la derecha. Centrada y con el párrafo acotado se lee
-     como un cierre de sección a propósito, no como una tarjeta desajustada. */
-  .sports-grid .sport-card:last-child {
-    grid-column: 1 / -1;
-    min-height: 220px;
-    align-items: center;
-    text-align: center;
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-  .sports-grid .sport-card:last-child .sport-desc { max-width: 520px; }
 
   .sport-card {
     background: var(--carbon);
@@ -4699,6 +4689,12 @@
   }
 
   /* RESPONSIVE básico */
+  /* Por debajo de esto, 5 columnas fijas dejarían cada tarjeta por debajo de
+     ~190px (título + badge "SOLO" no caben bien) — se pasa a 1 columna antes
+     de llegar ahí, en vez de esperar al breakpoint general de 768px. */
+  @media (max-width: 1024px) {
+    .sports-grid { grid-template-columns: 1fr; }
+  }
   @media (max-width: 768px) {
     .gym-bg-deco { display: none !important; }
     .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -4708,7 +4704,9 @@
     .app-preview-grid { grid-template-columns: 1fr; gap: 40px; }
     .app-preview-visual { order: -1; }
     .steps { grid-template-columns: 1fr 1fr; }
-    .sports-grid { grid-template-columns: 1fr 1fr; }
+    /* 1 columna, no 2: con 5 tarjetas, 2 columnas siempre deja una huérfana
+       sola en su fila con un hueco vacío al lado. */
+    .sports-grid { grid-template-columns: 1fr; }
     .pricing-cards { grid-template-columns: 1fr; }
     .testimonial-card { width: 280px; padding: 32px 24px; }
     .testimonials-nav { width: 36px; height: 36px; font-size: 18px; }
