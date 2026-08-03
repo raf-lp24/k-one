@@ -712,7 +712,12 @@
   /* El trazo del SVG está pensado para un viewBox de 24: a 13px quedaba en
      ~1px real y se perdía dentro del círculo. A 18px + stroke-width más
      grueso se ve con claridad. */
-  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg { width: 18px; height: 18px; stroke-width: 2.4; }
+  /* flex-shrink:0 es imprescindible: el SVG es hijo directo de un contenedor
+     flex (.trust-icon) y sin esto el motor lo comprimía en su eje principal
+     muy por debajo de los 18px indicados (comprobado: se quedaba en ~3px de
+     ancho real) — por eso los iconos no se veían, no era solo que fueran
+     pequeños. */
+  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg { width: 18px; height: 18px; stroke-width: 2.4; flex-shrink: 0; }
 
   .hero-price {
     display: inline-flex;
