@@ -699,9 +699,9 @@
     padding: 7px 16px 7px 7px;
   }
   .hero-trust .trust-icon, .trust-bar .trust-icon {
-    width: 24px;
-    height: 24px;
-    background: rgba(232,73,15,0.14);
+    width: 28px;
+    height: 28px;
+    background: rgba(232,73,15,0.16);
     border-radius: 50%;
     color: var(--brasa);
     flex-shrink: 0;
@@ -709,7 +709,10 @@
     align-items: center;
     justify-content: center;
   }
-  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg { width: 13px; height: 13px; }
+  /* El trazo del SVG está pensado para un viewBox de 24: a 13px quedaba en
+     ~1px real y se perdía dentro del círculo. A 18px + stroke-width más
+     grueso se ve con claridad. */
+  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg { width: 18px; height: 18px; stroke-width: 2.4; }
 
   .hero-price {
     display: inline-flex;
