@@ -41,12 +41,22 @@ module.exports = async (req, res) => {
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
-      const { data: sub } = await supabaseAdmin.from('subscriptions').select('stripe_subscription_id').eq('user_id', userId).maybeSingle();
+      const { data: sub } = await supabaseAdmin.from('subscriptions').select('stripe_subscription_id, stripe_customer_id').eq('user_id', userId).maybeSingle();
       if (sub?.stripe_subscription_id) {
         try {
           const { getStripe } = require('./_stripeHelpers');
           await getStripe().subscriptions.cancel(sub.stripe_subscription_id);
         } catch (stripeErr) { console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message); }
+      }
+      // Cancelar la suscripción NO borra el Customer de Stripe: el email se
+      // quedaba "colgado" ahí para siempre, así que un cliente borrado desde
+      // Jarvis podía toparse luego con un Customer huérfano en Stripe si
+      // volvía a registrarse. Se borra también aquí.
+      if (sub?.stripe_customer_id) {
+        try {
+          const { getStripe } = require('./_stripeHelpers');
+          await getStripe().customers.del(sub.stripe_customer_id);
+        } catch (stripeErr) { console.warn('[admin-mensaje] stripe customer delete error:', stripeErr.message); }
       }
       await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
       await supabaseAdmin.from('profiles').delete().eq('id', userId);
