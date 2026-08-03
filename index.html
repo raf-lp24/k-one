@@ -698,26 +698,32 @@
     border-radius: 999px;
     padding: 7px 16px 7px 7px;
   }
+  /* Centrado ABSOLUTO a propósito, no flex: con el SVG como hijo flex directo
+     de este círculo, justify-content/align-items lo centraban mal en la
+     práctica (comprobado: 0,5px de hueco a un lado y 9,5px al otro, pegado a
+     la izquierda) — es la segunda rareza de flex+SVG en este mismo bloque.
+     position:absolute + translate(-50%,-50%) no depende de ese cálculo. */
   .hero-trust .trust-icon, .trust-bar .trust-icon {
+    position: relative;
     width: 28px;
     height: 28px;
     background: rgba(232,73,15,0.16);
     border-radius: 50%;
     color: var(--brasa);
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   /* El trazo del SVG está pensado para un viewBox de 24: a 13px quedaba en
      ~1px real y se perdía dentro del círculo. A 18px + stroke-width más
      grueso se ve con claridad. */
-  /* flex-shrink:0 es imprescindible: el SVG es hijo directo de un contenedor
-     flex (.trust-icon) y sin esto el motor lo comprimía en su eje principal
-     muy por debajo de los 18px indicados (comprobado: se quedaba en ~3px de
-     ancho real) — por eso los iconos no se veían, no era solo que fueran
-     pequeños. */
-  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg { width: 18px; height: 18px; stroke-width: 2.4; flex-shrink: 0; }
+  .hero-trust .trust-icon svg, .trust-bar .trust-icon svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.4;
+  }
 
   .hero-price {
     display: inline-flex;
