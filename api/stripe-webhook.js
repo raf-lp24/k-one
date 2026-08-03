@@ -128,7 +128,7 @@ module.exports = async (req, res) => {
 
         // Oferta 1,99€: al terminar el primer mes pasa al plan que eligió el cliente
         // en el paywall (tipoPlan + periodicidad viajan en el metadata de la sesión).
-        // Solo nutrición → 7,99€/mes. Completo → 12,99€/mes o 29,99€/trimestre.
+        // Solo nutrición → 4,99€/mes. Completo → 7,99€/mes o 14,99€/trimestre.
         if (session.metadata?.oferta === 'si') {
           const esNutricion  = (session.metadata?.tipoPlan || '').includes('Solo nutrición');
           const esTrimestral = (session.metadata?.periodicidad || '') === 'trimestral';
