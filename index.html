@@ -15814,6 +15814,16 @@
           savedAt: profile.saved_at || new Date().toISOString()
         });
       }
+    } else if (!error) {
+      // Perfil confirmado sin datos en Supabase (cuenta recién creada). Si en
+      // este navegador quedaba caché de una cuenta anterior con el MISMO email
+      // (borrada y registrada de nuevo — k1_data_<email> no está atado al id
+      // de Supabase, solo al texto del correo), había que descartarla: si no,
+      // un cliente que borra su cuenta y se vuelve a registrar revivía su
+      // cuestionario/plan viejo sin haber hecho nada. Solo se borra cuando la
+      // lectura de Supabase no dio error, para no perder datos reales por un
+      // fallo de red pasajero.
+      try { localStorage.removeItem(`k1_data_${authUser.email}`); } catch (e) {}
     }
     // Si profiles.nombre está vacío, rellenarlo desde user_metadata
     const nombreFinal = profile?.nombre || authUser.user_metadata?.nombre || '';
