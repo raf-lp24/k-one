@@ -9897,7 +9897,12 @@
   // metería falsos positivos. Aquí solo entran sinónimos de INGREDIENTE reales,
   // así que alguien que escribe "huevo" también queda cubierto para "claras".
   const SINONIMOS_ALERGENO = {
-    'huevo': ['huevo', 'huevos', 'clara', 'claras'],
+    // "huevos" (plural) NO va aquí a propósito: coincide letra por letra con el
+    // nombre de la familia 'huevos' de FAMILIAS_ALIMENTOS, y filtrarNoComida trata
+    // una coincidencia EXACTA de nombre de familia como "toda la familia" —
+    // arrastraría 'tortilla' y 'revuelto', que existen sin huevo. La red de
+    // seguridad de abajo cubre esto igualmente si algún día se añade por error.
+    'huevo': ['huevo', 'clara', 'claras'],
     'leche': FAMILIAS_ALIMENTOS['lácteos'],
     'lacteos': FAMILIAS_ALIMENTOS['lácteos'],
     'lactosa': FAMILIAS_ALIMENTOS['lácteos'],
@@ -9917,6 +9922,11 @@
         if (t === clave || miembros.some(m => m === t)) miembros.forEach(m => extra.add(m));
       });
     });
+    // Red de seguridad: nunca emitir un token que coincida LITERALMENTE con el
+    // nombre de una familia de FAMILIAS_ALIMENTOS — eso dispara su expansión
+    // completa dentro de filtrarNoComida (pensada para cuando el cliente escribe
+    // el nombre de la familia él mismo) y puede arrastrar palabras de plato.
+    Object.keys(FAMILIAS_ALIMENTOS).forEach(clave => extra.delete(clave));
     return [texto, ...extra].filter(Boolean).join(', ');
   }
 
