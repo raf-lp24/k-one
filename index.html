@@ -4345,19 +4345,21 @@
   }
 
   /* INFORME SEMANAL: grid de stats reutiliza .stats-row/.stat-card (mismo
-     look que "Hoy"); esto es solo la lista de récords de la semana. */
-  .informe-records { margin-top: 16px; }
+     look que "Hoy"); esto es solo la lista de récords de la semana.
+     Chips en línea en vez de una fila entera por ejercicio: con varios
+     récords en la misma semana, una lista vertical se hacía muy larga. */
+  .informe-records { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
   .informe-record {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--humo);
-    font-size: 14px;
+    gap: 7px;
+    padding: 7px 12px;
+    border: 1px solid var(--humo);
+    border-radius: 999px;
+    font-size: 13px;
   }
-  .informe-record:last-child { border-bottom: none; }
   .informe-record-nombre { color: var(--blanco); font-weight: 500; }
-  .informe-record-cambio { font-family: 'DM Mono', monospace; font-size: 13px; color: #27ae60; }
+  .informe-record-cambio { font-family: 'DM Mono', monospace; font-size: 12px; color: #27ae60; }
   .informe-vacio { font-size: 14px; color: var(--metal-claro); padding: 8px 0; }
 
   .photos-grid {
