@@ -3255,6 +3255,13 @@
     font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal);
   }
   .alimento-macros b { color: var(--brasa); font-size: 14px; }
+  .alimento-fila-click { cursor: pointer; border-radius: 8px; transition: background .15s; }
+  .alimento-fila-click:hover { background: rgba(232,73,15,0.08); }
+  .comida-extra-badge {
+    font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .5px;
+    color: var(--brasa); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
+    text-transform: uppercase; margin-left: 6px; vertical-align: middle;
+  }
   @media (max-width: 560px) {
     .alimento-fila { flex-direction: column; align-items: flex-start; gap: 4px; }
     .alimento-macros { font-size: 10.5px; gap: 8px; }
@@ -3926,6 +3933,10 @@
   }
 
   .meal-block.expanded .meal-options { display: grid; }
+  /* El botón de añadir comida vive dentro de la misma grid de 4 columnas que
+     las opciones — sin esto quedaba metido en una celda estrecha junto a la
+     última opción en vez de ocupar toda la fila como un botón de cierre. */
+  .meal-options .btn-anadir-ejercicio { grid-column: 1 / -1; }
 
   @media (max-width: 900px) {
     .meal-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -6229,6 +6240,26 @@
     <div id="alimentosLista" style="overflow-y:auto;flex:1;min-height:120px"></div>
     <p style="font-size:9.5px;color:#555;text-align:center;margin:10px 0 0">Datos: USDA FoodData Central (SR Legacy) · dominio público</p>
     <button class="encuesta-skip" onclick="document.getElementById('modalAlimentos').classList.remove('visible')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL AÑADIR TU COMIDA (opción propia, macros reales de la tabla USDA) -->
+<div class="modal-overlay" id="modalAnadirComida" onclick="if(event.target===this)cerrarAnadirComida()">
+  <div class="modal-box" style="max-width:560px;max-height:84vh;display:flex;flex-direction:column">
+    <button class="modal-close" onclick="cerrarAnadirComida()">✕</button>
+    <div class="modal-title" style="font-size:20px">Añade tu comida</div>
+    <p class="modal-desc" style="margin-bottom:12px">Busca el alimento, ajusta la cantidad y tócalo para añadirlo como una opción más de esta toma. Los macros salen de la tabla oficial de la USDA, igual que el resto del plan.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="comidaExtraBuscar" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderComidaExtraLista()"
+        style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
+        <input type="number" id="comidaExtraGramos" value="100" min="1" max="2000" step="10" oninput="renderComidaExtraLista()"
+          style="width:58px;background:none;border:none;color:var(--blanco);font-size:14px;font-family:inherit;text-align:right">
+        <span style="font-size:12px;color:var(--metal)">g</span>
+      </div>
+    </div>
+    <div id="comidaExtraLista" style="overflow-y:auto;flex:1;min-height:120px"></div>
+    <p style="font-size:9.5px;color:#555;text-align:center;margin:10px 0 0">Datos: USDA FoodData Central (SR Legacy) · dominio público</p>
   </div>
 </div>
 
@@ -9210,6 +9241,119 @@
           </span>
         </div>`).join('')}
     `).join('');
+  }
+
+  // ===== AÑADIR TU COMIDA: opción propia con macros reales de la tabla USDA =====
+  // Reutiliza la misma tabla /data/alimentos.json que el buscador de arriba —
+  // así los macros de lo que añade el cliente son datos reales, no una
+  // estimación de la IA (que podría desajustar el cálculo de calorías del día).
+  function renderComidaExtraLista() {
+    const cont = document.getElementById('comidaExtraLista');
+    if (!cont || !_alimentos) return;
+    const q = _normTexto(document.getElementById('comidaExtraBuscar')?.value || '');
+    const gramos = Math.max(1, parseInt(document.getElementById('comidaExtraGramos')?.value) || 100);
+    const f = gramos / 100;
+
+    const vistos = new Set();
+    const items = Object.entries(_alimentos)
+      .filter(([, a]) => { if (vistos.has(a.n)) return false; vistos.add(a.n); return true; })
+      .filter(([, a]) => !q || _normTexto(a.n).includes(q) || _normTexto(a.cat).includes(q))
+      .sort((a, b) => a[1].n.localeCompare(b[1].n, 'es'));
+
+    if (!items.length) {
+      cont.innerHTML = `<p style="color:var(--metal);text-align:center;padding:24px 0;font-size:13px">Sin resultados para "${_esc((document.getElementById('comidaExtraBuscar')?.value || '').slice(0,30))}".</p>`;
+      return;
+    }
+    const porCat = {};
+    items.forEach(([k, a]) => { (porCat[a.cat] = porCat[a.cat] || []).push([k, a]); });
+    cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
+      <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${_esc(cat.toUpperCase())}</div>
+      ${arr.map(([k, a]) => `
+        <div class="alimento-fila alimento-fila-click" onclick="agregarComidaExtra('${_esc(k).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">
+          <span class="alimento-nombre">${_esc(a.n)}</span>
+          <span class="alimento-macros">
+            <b>${Math.round(a.kcal * f)}</b> kcal
+            <span>P ${(a.p * f).toFixed(1)}</span>
+            <span>C ${(a.c * f).toFixed(1)}</span>
+            <span>G ${(a.g * f).toFixed(1)}</span>
+          </span>
+        </div>`).join('')}
+    `).join('');
+  }
+
+  let _comidaExtraMealIdx = null;
+
+  async function abrirAnadirComida(mealIdx) {
+    _comidaExtraMealIdx = mealIdx;
+    if (!_alimentos) {
+      try { const r = await fetch('/data/alimentos.json'); _alimentos = r.ok ? await r.json() : {}; }
+      catch (e) { _alimentos = {}; }
+    }
+    const buscar = document.getElementById('comidaExtraBuscar');
+    const gramosInput = document.getElementById('comidaExtraGramos');
+    if (buscar) buscar.value = '';
+    if (gramosInput) gramosInput.value = '100';
+    renderComidaExtraLista();
+    document.getElementById('modalAnadirComida').classList.add('visible');
+    if (buscar && window.innerWidth > 768) setTimeout(() => buscar.focus(), 50);
+  }
+
+  function cerrarAnadirComida() {
+    document.getElementById('modalAnadirComida').classList.remove('visible');
+    _comidaExtraMealIdx = null;
+  }
+
+  // El texto de "ingredientes" usa la CLAVE de búsqueda (p.ej. "pechuga de
+  // pollo"), no el nombre bonito de la ficha (p.ej. "Pollo, pechuga"): ese
+  // nombre lleva coma, y el desglose de "Ver macros" separa ingredientes por
+  // comas — con el nombre bonito ahí, "300g Pollo, pechuga" se partía en dos
+  // trozos rotos. La clave además es justo lo que _buscarAlimento() sabe
+  // encontrar, así el desglose sale exacto sin ningún caso especial.
+  function agregarComidaExtra(key) {
+    const a = _alimentos && _alimentos[key];
+    if (!a || _comidaExtraMealIdx === null) return;
+    const gramos = Math.max(1, parseInt(document.getElementById('comidaExtraGramos')?.value) || 100);
+    const f = gramos / 100;
+    const opcion = {
+      custom: true,
+      nombre: a.n,
+      ingredientes: `${gramos}g ${key}`,
+      kcal: Math.round(a.kcal * f),
+      prot: Math.round(a.p * f),
+      carbs: Math.round(a.c * f),
+      grasa: Math.round(a.g * f),
+      prep: 'Tu elección'
+    };
+
+    if (!userData.comidasExtra) userData.comidasExtra = {};
+    if (!userData.comidasExtra[diaNutriActual]) userData.comidasExtra[diaNutriActual] = {};
+    if (!userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx]) userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx] = [];
+    userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx].push(opcion);
+
+    cerrarAnadirComida();
+    renderNutritionGrid(diaNutriActual);
+    showToast('Añadido — ya puedes elegirlo como opción de esta toma.');
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+
+  function quitarComidaExtra(dia, mealIdx, extraIdx) {
+    const lista = userData.comidasExtra?.[dia]?.[mealIdx];
+    if (!lista) return;
+    lista.splice(extraIdx, 1);
+    // Quitar una opción puede desplazar los índices de las que van detrás: por
+    // seguridad se vuelve a la primera opción de esa toma en vez de arriesgarse
+    // a dejar la selección del día apuntando a un plato distinto del elegido.
+    if (dia === diaNutriActual) {
+      comidasSeleccionadas[mealIdx] = 0;
+      comidasSemana[dia] = [...comidasSeleccionadas];
+      userData.comidasSeleccionadas = comidasSeleccionadas;
+    } else if (comidasSemana[dia]) {
+      comidasSemana[dia][mealIdx] = 0;
+    }
+    renderNutritionGrid(dia);
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
 
   // ===== FICHA DE COMIDA: desglose de macros por ingrediente =====
@@ -12773,6 +12917,20 @@
     }
   }
 
+  // Mete las comidas propias del cliente (userData.comidasExtra) en el array
+  // de opciones de cada toma de ese día. Idempotente: quita primero cualquier
+  // "custom" que ya estuviera (meal.opciones vive dentro de generatedPlan, que
+  // no se reconstruye en cada llamada), así nunca se duplican ni se pierden.
+  // La usan tanto la pantalla de Nutrición (un día) como la lista de la
+  // compra (los 7 días), para que una comida añadida cuente en ambas.
+  function _inyectarComidasExtraDia(dia, meals) {
+    meals.forEach((meal, mealIdx) => {
+      const extras = userData.comidasExtra?.[dia]?.[mealIdx] || [];
+      meal.opciones = meal.opciones.filter(o => !o.custom);
+      extras.forEach((extra, i) => meal.opciones.push({ ...extra, _extraIdx: i }));
+    });
+  }
+
   function renderNutritionGrid(dia) {
     const nutritionGrid = document.getElementById('nutritionGrid');
     if (!nutritionGrid) return;
@@ -12780,6 +12938,7 @@
     nutritionGrid.innerHTML = '';
     const meals = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
     generatedPlan._nutricionActiva = meals;
+    _inyectarComidasExtraDia(dia, meals);
     meals.forEach((meal, mealIdx) => {
       const previewHTML = meal.opciones.map((opt, optIdx) => `
         <div class="meal-preview-pill ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="event.stopPropagation(); selectMealOptionPreview(${mealIdx}, ${optIdx})">
@@ -12798,7 +12957,8 @@
 
         return `
         <div class="meal-option ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="selectMealOption(this, ${mealIdx}, ${optIdx})">
-          <div class="meal-opt-num">Opción ${optIdx + 1}</div>
+          ${opt.custom ? `<button type="button" class="ejercicio-extra-quitar" onclick="event.stopPropagation();quitarComidaExtra(${dia},${mealIdx},${opt._extraIdx})" aria-label="Quitar esta comida">✕</button>` : ''}
+          <div class="meal-opt-num">${opt.custom ? '<span class="comida-extra-badge">Tu comida</span>' : `Opción ${optIdx + 1}`}</div>
           <div class="meal-opt-name">${opt.nombre}</div>
           <div class="meal-opt-ingredients" style="margin-bottom:10px;font-size:13px;color:var(--metal-claro);line-height:1.6">${ingredTexto}</div>
           <div class="meal-opt-macros-visual">
@@ -12834,7 +12994,10 @@
             </div>
           </div>
           <div class="meal-preview-row" id="mealPreview${mealIdx}">${previewHTML}</div>
-          <div class="meal-options" id="mealOptions${mealIdx}">${optionsHTML}</div>
+          <div class="meal-options" id="mealOptions${mealIdx}">
+            ${optionsHTML}
+            <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirComida(${mealIdx})">+ Añadir tu comida</button>
+          </div>
         </div>`;
     });
     actualizarResumenNutricional();
@@ -15119,7 +15282,10 @@
     const optionsBlock = document.getElementById('mealOptions' + mealIdx);
     optionsBlock?.querySelectorAll('.meal-option').forEach((o, i) => o.classList.toggle('selected', i === optIdx));
 
-    const nombre = generatedPlan.nutricion[mealIdx]?.opciones[optIdx]?.nombre;
+    // OJO: generatedPlan.nutricion es la plantilla base, no el día activo — para
+    // comidas propias (solo existen en el día en que se añadieron) tenía que
+    // leerse de _nutricionActiva, que sí es el array del día que se está viendo.
+    const nombre = (generatedPlan._nutricionActiva || generatedPlan.nutricion)[mealIdx]?.opciones[optIdx]?.nombre;
     aplicarSeleccionComida(mealIdx, optIdx, nombre);
   }
 
@@ -15368,6 +15534,7 @@
 
     for (let dia = 0; dia < 7; dia++) {
       const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      _inyectarComidasExtraDia(dia, _nutriDia);
       _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
@@ -15639,6 +15806,7 @@
     const ingredientes = {};
     for (let dia = 0; dia < 7; dia++) {
       const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      _inyectarComidasExtraDia(dia, _nutriDia);
       _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
