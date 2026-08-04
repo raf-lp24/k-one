@@ -4379,7 +4379,10 @@
     color: #27ae60;
     position: relative;
   }
-  .informe-record-flecha svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  /* Sin width/height explícitos aquí, el SVG (sin atributos propios, solo
+     viewBox) rellenaba el círculo entero a 24x24 sin margen — la flecha
+     tocaba el borde. 14px dentro de un círculo de 24px deja aire alrededor. */
+  .informe-record-flecha svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; }
   .informe-record-nombre { color: var(--blanco); font-weight: 600; }
   .informe-record-cambio { font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--metal-claro); }
   .informe-record-cambio strong { color: #27ae60; font-weight: 700; }
