@@ -7324,7 +7324,37 @@
           <h2 class="form-block-title">Tu entrenamiento</h2>
           <p class="form-block-desc">El último bloque. Con esto ya tenemos todo lo que necesitamos.</p>
         </div>
-        <div class="form-grid full" style="gap:20px">
+        <!-- "Solo nutrición" no genera rutina, pero SÍ necesita saber tu actividad
+             real para calcular bien el gasto calórico (TDEE) -- antes se asumía
+             "actividad ligera" fijo para todo el mundo con este plan, sin
+             preguntar, así que a alguien que entrena fuerte por su cuenta
+             (gimnasio, running, CrossFit/Hyrox en su box) le podíamos calcular
+             menos calorías de las que realmente gasta. -->
+        <div class="form-grid full" id="bloqueSoloNutricion" style="gap:20px;display:none">
+          <div class="field">
+            <label>¿Entrenas por tu cuenta (aparte de con nosotros)? <span class="required">Obligatorio</span></label>
+            <div class="radio-group" id="deporteSolo">
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">No entreno, llevo una vida sedentaria</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Gimnasio / Fuerza</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Running</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Hyrox</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">CrossFit</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Híbrido</div>
+            </div>
+            <span class="field-hint">No generamos rutina para este plan, pero la proteína, los carbohidratos y la hidratación que necesitas no son iguales si eres sedentario, vas al gimnasio, corres o haces CrossFit/Hyrox.</span>
+          </div>
+          <div class="field">
+            <label>¿Con qué frecuencia? <span class="required">Obligatorio</span></label>
+            <div class="radio-group" id="actividadSolo">
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="Trabajo de oficina o similar, sin entrenar de forma regular">No entreno / muy poca actividad</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="1-2 sesiones semanales">Ligero (1-2 días/semana)</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="3-4 sesiones semanales">Moderado (3-4 días/semana)</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="5+ sesiones semanales, o deporte muy exigente">Intenso (5+ días/semana)</div>
+            </div>
+            <span class="field-hint">Con esto calculamos bien tus calorías objetivo — sin este dato, tu plan de nutrición podría quedarse corto o pasado.</span>
+          </div>
+        </div>
+        <div class="form-grid full" id="bloqueEntrenoCompleto" style="gap:20px">
           <div class="field">
             <label>¿Qué deporte quieres practicar? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="deporte">
@@ -8455,6 +8485,9 @@
       { type: 'radio', id: 'tipoPlan' },
       { type: 'radio', id: 'objetivo' }
     ],
+    // "Solo nutrición" no rellena deporte/nivel/etc — en su lugar solo necesita
+    // decir cuánto entrena por su cuenta, para calcular bien el TDEE. Se resuelve
+    // en validateBlock() en vez de aquí porque depende de qué tipoPlan se eligió.
     5: [
       { type: 'radio', id: 'deporte' },
       { type: 'radio', id: 'diasEntreno' },
@@ -8463,6 +8496,10 @@
       { type: 'radio', id: 'lugar' }
     ]
   };
+  const requiredFieldsBlock5SoloDieta = [
+    { type: 'radio', id: 'deporteSolo' },
+    { type: 'radio', id: 'actividadSolo' }
+  ];
 
   // Quita la marca de error en cuanto el usuario rellena un campo de texto/select
   Object.values(requiredFieldsByBlock).flat().forEach(f => {
@@ -8472,7 +8509,9 @@
   });
 
   function validateBlock(blockIndex) {
-    const fields = requiredFieldsByBlock[blockIndex] || [];
+    const fields = (blockIndex === 5 && esSoloDieta())
+      ? requiredFieldsBlock5SoloDieta
+      : (requiredFieldsByBlock[blockIndex] || []);
     let firstInvalid = null;
 
     fields.forEach(f => {
@@ -8524,11 +8563,27 @@
       if (i === currentBlock) item.classList.add('active');
       else if (i < currentBlock) item.classList.add('done');
     });
+
+    toggleBloqueEntreno();
   }
 
-  // El plan "Solo nutrición" se salta el bloque de Entrenamiento por completo
+  // El plan "Solo nutrición" no rellena deporte/nivel/lugar (no genera rutina),
+  // pero sí necesita decir cuánta actividad hace por su cuenta para el TDEE.
   function esSoloDieta() {
     return (document.querySelector('#tipoPlan .selected')?.textContent || '').includes('Solo nutrición');
+  }
+
+  // Alterna qué mitad del bloque 6 se ve según el tipo de plan elegido en el
+  // bloque 5. Se llama desde updateProgress() porque esa función ya se ejecuta
+  // en todos los caminos de navegación (siguiente, atrás, salto de paso, botón
+  // atrás del navegador) — así no hay que duplicar la llamada en cada uno.
+  function toggleBloqueEntreno() {
+    const completo = document.getElementById('bloqueEntrenoCompleto');
+    const solo = document.getElementById('bloqueSoloNutricion');
+    if (!completo || !solo) return;
+    const soloDieta = esSoloDieta();
+    completo.style.display = soloDieta ? 'none' : '';
+    solo.style.display = soloDieta ? '' : 'none';
   }
 
   // Inicia (o reinicia) el formulario y deja un punto en el historial para que
@@ -8581,10 +8636,6 @@
 
   function nextBlock() {
     if (!validateBlock(currentBlock)) return;
-    if (currentBlock === 4 && esSoloDieta()) {
-      generatePlan();
-      return;
-    }
     if (currentBlock < totalBlocks - 1) {
       document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.remove('active');
       currentBlock++;
@@ -8647,11 +8698,21 @@
       enfoqueMacros: getRadio('enfoqueMacros'),
       evento: document.getElementById('evento')?.value || '',
       eventoFecha: document.getElementById('eventoFecha')?.value || '',
-      deporte: getRadio('deporte'),
+      // "Solo nutrición" no rellena el bloque de deporte/nivel/lugar (no genera
+      // rutina), así que aquí "deporte" sale de su propia pregunta reducida
+      // (deporteSolo) — así el resto del motor (proteína, carbohidratos,
+      // hidratación, esRunner/esCrossfit/esHyrox...) funciona igual sin tener
+      // que duplicar esa lógica para el camino "solo dieta".
+      deporte: esSoloDieta()
+        ? (getRadio('deporteSolo').startsWith('No entreno') ? 'No especificado' : getRadio('deporteSolo'))
+        : getRadio('deporte'),
       diasEntreno: getRadio('diasEntreno'),
       tiempoSesion: getRadio('tiempoSesion'),
       nivel: getRadio('nivel'),
       lugar: getRadio('lugar'),
+      // Frecuencia/intensidad de quien elige "Solo nutrición" — se usa para el
+      // factor de actividad del TDEE (antes era 1.375 fijo para todo el mundo).
+      actividadSolo: getRadio('actividadSolo'),
       // Marca reciente para calcular los ritmos de entrenamiento (opcional)
       marcaDistancia: document.getElementById('marcaDistancia')?.value || '',
       marcaTiempo: document.getElementById('marcaTiempo')?.value || '',
@@ -11542,8 +11603,20 @@
       ? (10 * pesoKg + 6.25 * altCm - 5 * edadAnn - 161)
       : (10 * pesoKg + 6.25 * altCm - 5 * edadAnn + 5);
 
-    // Factor de actividad según deporte, nivel e intensidad semanal
-    const factorAct = soloDieta ? 1.375
+    // Factor de actividad según deporte, nivel e intensidad semanal. En "Solo
+    // nutrición" no hay deporte/nivel que mirar (el cliente no genera rutina con
+    // nosotros), así que antes se asumía "actividad ligera" fijo para todos —
+    // un cliente que entrena fuerte por su cuenta (o hace CrossFit/Hyrox en su
+    // box, que solo se vende como Solo nutrición) se quedaba con un TDEE
+    // infravalorado. Ahora se usa lo que responde en "¿Entrenas por tu cuenta?"
+    // — misma escala clásica de Mifflin-St Jeor (1.2 sedentario, 1.9 muy activo).
+    const actividadSoloLower = (u.actividadSolo || '').toLowerCase();
+    const factorActSolo = actividadSoloLower.includes('intenso') ? 1.725
+      : actividadSoloLower.includes('moderado') ? 1.55
+      : actividadSoloLower.includes('ligero') ? 1.375
+      : actividadSoloLower.includes('no entreno') ? 1.2
+      : 1.375; // sin responder (dato antiguo o cuestionario incompleto): fallback conservador, igual que antes
+    const factorAct = soloDieta ? factorActSolo
       : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 5) ? 1.9
       : ((esHyrox || esCrossfit || esRunner) && numDias >= 4)   ? 1.725
       : (numDias >= 4)  ? 1.65
