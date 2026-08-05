@@ -7928,23 +7928,30 @@
           </div>
           <div class="checkin-questions">
             <div class="checkin-q">
-              <label>Días entrenados esta semana</label>
-              <div class="rating-scale" id="rating-dias">
-                <button class="rating-btn" onclick="selectRating(this,'dias')">0</button>
-                <button class="rating-btn" onclick="selectRating(this,'dias')">1</button>
-                <button class="rating-btn" onclick="selectRating(this,'dias')">2</button>
-                <button class="rating-btn" onclick="selectRating(this,'dias')">3</button>
-                <button class="rating-btn" onclick="selectRating(this,'dias')">4</button>
-                <button class="rating-btn" onclick="selectRating(this,'dias')">5+</button>
-              </div>
+              <label>Tu peso actual (kg)</label>
+              <input type="number" id="checkinPeso" step="0.1" min="20" max="400" placeholder="Ej: 78.5" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
+              <span class="field-hint" style="display:block;margin-top:6px">Opcional. Es el dato que usamos para ajustar tus calorías si llevas varias semanas sin moverte hacia tu objetivo — sin esto no podemos saber si tu plan está funcionando de verdad.</span>
             </div>
-            <div class="checkin-q">
-              <label>Sensación física en los entrenos</label>
-              <div class="rating-scale" id="rating-fisico">
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">Fatal</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">Flojo</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">Bien</button>
-                <button class="rating-btn" onclick="selectRating(this,'fisico')">Bestia</button>
+            <div id="checkinEntrenoWrap">
+              <div class="checkin-q">
+                <label>Días entrenados esta semana</label>
+                <div class="rating-scale" id="rating-dias">
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">0</button>
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">1</button>
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">2</button>
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">3</button>
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">4</button>
+                  <button class="rating-btn" onclick="selectRating(this,'dias')">5+</button>
+                </div>
+              </div>
+              <div class="checkin-q">
+                <label>Sensación física en los entrenos</label>
+                <div class="rating-scale" id="rating-fisico">
+                  <button class="rating-btn" onclick="selectRating(this,'fisico')">Fatal</button>
+                  <button class="rating-btn" onclick="selectRating(this,'fisico')">Flojo</button>
+                  <button class="rating-btn" onclick="selectRating(this,'fisico')">Bien</button>
+                  <button class="rating-btn" onclick="selectRating(this,'fisico')">Bestia</button>
+                </div>
               </div>
             </div>
             <div class="checkin-q">
@@ -8791,6 +8798,12 @@
   function generatePlan() {
     if (!validateBlock(currentBlock)) return;
     userData = collectFormData();
+    // Primer punto del historial de peso: sin esto, el check-in semanal no
+    // tiene contra qué comparar y nunca podría detectar un estancamiento.
+    const pesoInicial = parseFloat(userData.peso);
+    if (!isNaN(pesoInicial)) {
+      userData.historialPeso = [{ fecha: new Date().toISOString(), peso: pesoInicial, semana: 1 }];
+    }
 
     const loadingSteps = buildLoadingTexts(userData);
 
@@ -11302,6 +11315,38 @@
     if (sinLactosa) {
       notasSalud.push('Tu plan de comidas sustituye los lácteos con lactosa por versiones sin lactosa o vegetales.');
     }
+
+    // El estrés y el sueño se preguntan en el cuestionario ("Tu vida") pero no
+    // se usaban en ningún sitio del plan. No tocamos aquí la carga de
+    // entrenamiento (eso ya lo regula el check-in semanal, con datos reales de
+    // esta semana en vez de una respuesta fija del día del alta) — pero sí hay
+    // parte nutricional real: el estrés crónico y dormir poco alteran el
+    // apetito y la saciedad (cortisol, grelina/leptina), así que en déficit
+    // conviene saberlo.
+    const estres = (u.estres || '').toLowerCase();
+    if (perdidaGrasa && (estres.includes('alto') || estres.includes('muy alto'))) {
+      notasSalud.push('Nos indicaste un nivel de estrés alto: el cortisol elevado aumenta el apetito y las ganas de picar entre horas. Prioriza la saciedad (proteína y verdura en cada comida) antes que recortar más calorías si notas que te cuesta mantener el déficit.');
+    }
+    const sueno = (u.sueno || '').toLowerCase();
+    if (sueno.includes('menos de 6h')) {
+      notasSalud.push('Nos indicaste que duermes menos de 6 horas: dormir poco descontrola las hormonas del hambre (más grelina, menos leptina) y hace más difícil seguir cualquier plan de nutrición. Si puedes, prioriza el descanso — es tan importante como la comida.');
+    }
+
+    // Vegetarianos: el plan cubre proteína en cantidad de sobra (tofu, tempeh,
+    // legumbre, huevo, lácteos, proteína vegetal en polvo), pero hay 3
+    // nutrientes que de verdad escasean más en dietas sin carne ni pescado y
+    // que ningún plan de comidas por sí solo garantiza sin analítica de por medio.
+    const esVegetarianoNota = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
+    if (esVegetarianoNota) {
+      notasSalud.push('Al no comer carne ni pescado, presta atención a vitamina B12, hierro y omega-3 — son los tres nutrientes que más cuesta cubrir solo con comida en una dieta vegetariana. Si tu analítica lo indica, tu médico puede recomendarte suplementación.');
+    } else {
+      // Nota educativa, no una restricción impuesta: el cliente elige libremente
+      // entre las opciones de cada comida, así que no podemos "prohibir" nada,
+      // pero sí avisar — jamón, bacon, chorizo, salchichas... son carne
+      // procesada, y la OMS la clasifica en el grupo de mayor evidencia de
+      // vínculo con cáncer colorrectal si se toma a diario (no ocasionalmente).
+      notasSalud.push('Verás jamón, bacon, chorizo u otro embutido entre las opciones de varias comidas — están para dar variedad, pero como cualquier carne procesada, mejor no elegirlas todos los días. Un par de veces por semana como mucho es la recomendación general.');
+    }
     if (sinFrutosSecos) {
       notasSalud.push('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
     }
@@ -11623,7 +11668,19 @@
       : (numDias >= 3)  ? 1.55
       : 1.375;
 
-    const tdee = Math.round(bmr * factorAct);
+    // NEAT por actividad laboral (jornada): el cuestionario lo pide diciendo
+    // literalmente "para calcular el gasto calórico de tus días de descanso",
+    // pero antes se guardaba y no se usaba en ningún sitio del cálculo. El
+    // factor de actividad de arriba ya asume una jornada de oficina típica, así
+    // que solo se suma para trabajos más activos que eso (no se resta a los
+    // sedentarios, para no penalizar dos veces lo que el factor ya asume).
+    const jornada = (u.jornada || '').toLowerCase();
+    const factorNeat = jornada.includes('trabajo físico intenso') ? 1.12
+      : jornada.includes('de pie casi todo el día') ? 1.06
+      : jornada.includes('mezcla de pie y sentado') ? 1.03
+      : 1;
+
+    const tdee = Math.round(bmr * factorAct * factorNeat);
 
     // Objetivo calórico según meta
     let kcalObj;
@@ -11633,6 +11690,13 @@
       kcalObj = tdee + 350;
     } else {
       kcalObj = tdee; // equilibrio = TDEE real calculado, no valor fijo
+    }
+
+    // Recalibración por tendencia real de peso (evaluarYAjustarCalorias, en el
+    // check-in semanal): antes kcalObj se calculaba una vez en el cuestionario
+    // y no se volvía a tocar aunque el cliente llevara semanas estancado.
+    if (u.ajusteCalorico) {
+      kcalObj = Math.max(esMujer ? 1200 : 1500, kcalObj + u.ajusteCalorico);
     }
 
     // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso
@@ -12811,6 +12875,13 @@
 
     // Tarjeta resumen del día (entreno + comida de un vistazo)
     renderTodayHero();
+
+    // BUG encontrado en revisión: esta función estaba definida pero nunca se
+    // llamaba desde ningún sitio. Sin ella no se pintaban ni el objetivo real
+    // de kcal/proteína en Nutrición, ni las notas de adaptación (alergias,
+    // vegetariano, embutido, estrés/sueño...), ni se mostraba/ocultaba
+    // correctamente el check-in semanal según el tipo de plan.
+    buildDashboardNutricionExtra();
   }
 
   // Rellena la tarjeta "Tu entrenamiento de hoy" con los datos reales del plan.
@@ -13148,21 +13219,25 @@
     }
 
     // Plan "solo nutrición": mantener "Hoy" (resumen/motivación) y Nutrición visibles,
-    // pero ocultar el entrenamiento semanal ("Planning") y el check-in semanal, que no
-    // aplican sin entrenamiento.
+    // y ocultar el entrenamiento semanal ("Planning"), que no aplica sin rutina.
+    // El check-in semanal SÍ se mantiene visible -- es el único sitio donde se
+    // registra el peso real y se recalibran las calorías si el cliente se
+    // estanca (ver evaluarYAjustarCalorias). Antes se ocultaba entero "porque
+    // no aplica sin entrenamiento", y con eso el cliente de solo nutrición no
+    // tenía ninguna forma de que su plan se enterara de si estaba funcionando.
     const esSoloDietaPlan = !!generatedPlan.soloDieta;
-    ['nav-semana', 'nav-checkin'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = esSoloDietaPlan ? 'none' : '';
-    });
+    const navSemana = document.getElementById('nav-semana');
+    if (navSemana) navSemana.style.display = esSoloDietaPlan ? 'none' : '';
+    const entrenoWrap = document.getElementById('checkinEntrenoWrap');
+    if (entrenoWrap) entrenoWrap.style.display = esSoloDietaPlan ? 'none' : '';
     const navHoy = document.getElementById('nav-hoy');
     if (navHoy) navHoy.style.display = '';
     const nutriCambiarPlan = document.getElementById('nutriCambiarPlan');
     if (nutriCambiarPlan) nutriCambiarPlan.style.display = esSoloDietaPlan ? '' : 'none';
     if (esSoloDietaPlan) {
-      // Si la sección activa era una de entrenamiento que ahora se oculta, volver a "Hoy".
+      // Si la sección activa era la de entrenamiento semanal, que ahora se oculta, volver a "Hoy".
       const seccionActiva = document.querySelector('.dash-section.active')?.id;
-      if (seccionActiva === 'section-semana' || seccionActiva === 'section-checkin') {
+      if (seccionActiva === 'section-semana') {
         document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('section-hoy').classList.add('active');
@@ -14515,8 +14590,68 @@
   }
 
   // ===== SUBMIT CHECK-IN =====
+  // ===== RECALIBRACIÓN DE CALORÍAS POR TENDENCIA DE PESO =====
+  // kcalObj se calculaba una sola vez en el cuestionario inicial y nunca se
+  // revisaba: un cliente en déficit que se estanca a la semana 4 se quedaba
+  // con el mismo objetivo calórico para siempre. Ahora, si el check-in trae
+  // peso, se compara la tendencia de las últimas 3 semanas contra lo que se
+  // espera según el objetivo (bajar en déficit, subir en superávit, estable
+  // en mantenimiento) y se ajusta userData.ajusteCalorico en consecuencia.
+  // Ajuste moderado (150 kcal) y no en cada check-in: hace falta tendencia de
+  // 3 semanas, no un solo pesaje (agua, digestión, ciclo... meten ruido).
+  function evaluarYAjustarCalorias(pesoActual) {
+    if (!pesoActual || isNaN(pesoActual)) return null;
+    if (!userData.historialPeso) userData.historialPeso = [];
+    userData.historialPeso.push({ fecha: new Date().toISOString(), peso: pesoActual, semana: getSemanaActual() });
+    if (userData.historialPeso.length > 26) userData.historialPeso = userData.historialPeso.slice(-26);
+
+    const hist = userData.historialPeso;
+    if (hist.length < 3) return null;
+
+    const ultimos3 = hist.slice(-3);
+    const semanas = Math.max(1, ultimos3.length - 1);
+    const cambioSemanal = (ultimos3[ultimos3.length - 1].peso - ultimos3[0].peso) / semanas;
+    const cambioPct = (cambioSemanal / ultimos3[0].peso) * 100;
+
+    const objetivo = userData.objetivo || '';
+    const perdidaGrasa = objetivo.includes('Perder') || objetivo.includes('grasa');
+    const ganarMusculo = objetivo.includes('músculo') || objetivo.includes('Ganar');
+
+    const actual = userData.ajusteCalorico || 0;
+    const PASO = 150, TOPE = 450;
+    let nuevoAjuste = actual, mensaje = null;
+
+    if (perdidaGrasa) {
+      if (cambioPct > -0.15) {
+        nuevoAjuste = Math.max(actual - PASO, -TOPE);
+        mensaje = `Llevas ${semanas} semanas prácticamente sin bajar de peso. Hemos reducido tus calorías objetivo en ${PASO} kcal/día para reactivar la pérdida.`;
+      } else if (cambioPct < -1.0) {
+        nuevoAjuste = Math.min(actual + PASO, TOPE);
+        mensaje = `Estás perdiendo peso muy rápido (más del 1% de tu peso a la semana), lo que suele significar perder también masa muscular. Hemos subido tus calorías objetivo en ${PASO} kcal/día.`;
+      }
+    } else if (ganarMusculo) {
+      if (cambioPct < 0.1) {
+        nuevoAjuste = Math.min(actual + PASO, TOPE);
+        mensaje = `Llevas ${semanas} semanas sin ganar peso. Hemos subido tus calorías objetivo en ${PASO} kcal/día para asegurar el superávit.`;
+      } else if (cambioPct > 0.7) {
+        nuevoAjuste = Math.max(actual - PASO, -TOPE);
+        mensaje = `Estás ganando peso muy rápido (más del 0.7% de tu peso a la semana), lo que suele significar ganar más grasa que músculo. Hemos bajado tus calorías objetivo en ${PASO} kcal/día.`;
+      }
+    } else if (Math.abs(cambioPct) > 0.3) {
+      nuevoAjuste = Math.max(-TOPE, Math.min(TOPE, actual - Math.sign(cambioPct) * PASO));
+      mensaje = `Tu peso se está moviendo más de lo esperado para un objetivo de mantenimiento. Hemos ${cambioPct > 0 ? 'bajado' : 'subido'} tus calorías objetivo en ${PASO} kcal/día para estabilizarlo.`;
+    }
+
+    if (nuevoAjuste !== actual) {
+      userData.ajusteCalorico = nuevoAjuste;
+      return mensaje;
+    }
+    return null;
+  }
+
   function submitCheckin() {
     const nota = document.getElementById('checkinNota').value;
+    const pesoCheckin = parseFloat(document.getElementById('checkinPeso')?.value);
     const dias = document.querySelector('#rating-dias .selected')?.textContent || '0';
     const fisico = document.querySelector('#rating-fisico .selected')?.textContent || 'Regular';
     const energia = document.querySelector('#rating-energia .selected')?.textContent || '3';
@@ -14528,6 +14663,12 @@
     responseText.textContent = 'Procesando tu semana...';
 
     setTimeout(() => {
+      // "Solo nutrición" no rellena días/físico (esas preguntas están ocultas,
+      // ver checkinEntrenoWrap) -- usarlas igualmente aquí significaba que
+      // "dias" quedaba siempre en 0 y el check-in le decía a todo el mundo
+      // "esta semana no salió", entrenara o no, porque no tiene entreno que
+      // entrenar. Con plan de entreno real, todo sigue exactamente igual.
+      const esSoloDietaCheckin = !!generatedPlan?.soloDieta;
       const numDias = parseInt(dias) || 0;
       const energiaNum = parseInt(energia) || 3;
       const menteOk = mente.includes('Bien') || mente.includes('bien');
@@ -14535,7 +14676,11 @@
 
       let respuesta = '';
 
-      if (numDias === 0) {
+      if (esSoloDietaCheckin) {
+        respuesta = !isNaN(pesoCheckin)
+          ? `Peso registrado: ${pesoCheckin} kg. Gracias por seguir apuntándolo — es lo que nos permite saber si tu plan de nutrición está funcionando de verdad, no solo suponerlo.`
+          : `Check-in registrado. La próxima vez, si nos dices tu peso, podemos afinar mejor tus calorías objetivo según cómo esté yendo de verdad.`;
+      } else if (numDias === 0) {
         respuesta = `Esta semana no salió. Pasa. Lo que no pasa es que dejes de volver. El check-in de hoy ya es un paso. La semana que viene, un día. Solo uno. El resto viene solo.`;
       } else if (numDias >= 4 && fisicoOk && menteOk) {
         respuesta = `${dias} días. Sin exagerar: eso es constancia real. No todo el mundo llega aquí. La semana que viene el plan sube un poco. Has demostrado que puedes con lo que hay, ahora vemos hasta dónde llegas.`;
@@ -14554,9 +14699,12 @@
       }
 
       // ===== EL CHECK-IN MODIFICA EL PLAN REAL DE LA SEMANA QUE VIENE =====
+      // (volumen de entreno -- no aplica a "solo nutrición", que no tiene rutina)
       const fisicoMal = fisico.includes('Cansado') || fisico.includes('cansado') || fisico.includes('Fatal') || fisico.includes('fatal') || fisico.includes('mal');
       let ajuste = 0;
-      if (numDias === 0 || fisicoMal || energiaNum <= 2) {
+      if (esSoloDietaCheckin) {
+        // sin cambios de volumen para solo nutrición
+      } else if (numDias === 0 || fisicoMal || energiaNum <= 2) {
         ajuste = -1;
       } else if (numDias >= 4 && fisicoOk && menteOk && energiaNum >= 4) {
         ajuste = 1;
@@ -14573,6 +14721,9 @@
       if (nota && nota.trim()) {
         userData.progreso.ultimaNota = nota.trim();
       }
+      const mensajeCalorias = evaluarYAjustarCalorias(pesoCheckin);
+      if (mensajeCalorias) respuesta += ` ${mensajeCalorias}`;
+
       if (!userData.historialEntrenos) userData.historialEntrenos = [];
       if (Array.isArray(userData.entrenosCompletados) && userData.entrenosCompletados.length) {
         // Sin duplicados: toggleEntrenoCompletado ya añade cada día al historial,
@@ -14600,18 +14751,24 @@
 
       // ===== PANTALLA DE CIERRE: resumen de la semana =====
       document.getElementById('checkinSummaryStats').innerHTML = `
-        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${dias}</div><div class="checkin-summary-stat-label">Días entrenados</div></div>
-        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${fisico}</div><div class="checkin-summary-stat-label">Físico</div></div>
+        ${!isNaN(pesoCheckin) ? `<div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${pesoCheckin}kg</div><div class="checkin-summary-stat-label">Peso</div></div>` : ''}
+        ${!esSoloDietaCheckin ? `<div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${dias}</div><div class="checkin-summary-stat-label">Días entrenados</div></div>
+        <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${fisico}</div><div class="checkin-summary-stat-label">Físico</div></div>` : ''}
         <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${energia}/5</div><div class="checkin-summary-stat-label">Energía</div></div>
         <div class="checkin-summary-stat"><div class="checkin-summary-stat-value">${mente}</div><div class="checkin-summary-stat-label">Cabeza</div></div>
       `;
       const adjustEl = document.getElementById('checkinSummaryAdjust');
-      if (ajuste < 0) {
-        adjustEl.textContent = 'Tu plan de la semana que viene baja un poco el volumen, para que puedas recuperar bien.';
-      } else if (ajuste > 0) {
-        adjustEl.textContent = 'Tu plan de la semana que viene sube ligeramente el reto: vienes con buen ritmo.';
+      if (esSoloDietaCheckin) {
+        adjustEl.textContent = mensajeCalorias || 'Seguimos registrando tu peso semana a semana para saber si hay que ajustar tus calorías.';
       } else {
-        adjustEl.textContent = 'Tu plan de la semana que viene se mantiene en el mismo nivel.';
+        if (ajuste < 0) {
+          adjustEl.textContent = 'Tu plan de la semana que viene baja un poco el volumen, para que puedas recuperar bien.';
+        } else if (ajuste > 0) {
+          adjustEl.textContent = 'Tu plan de la semana que viene sube ligeramente el reto: vienes con buen ritmo.';
+        } else {
+          adjustEl.textContent = 'Tu plan de la semana que viene se mantiene en el mismo nivel.';
+        }
+        if (mensajeCalorias) adjustEl.textContent += ' ' + mensajeCalorias;
       }
       document.getElementById('checkinSummarySemana').textContent = `Resumen de la semana ${getSemanaActual()}`;
       document.getElementById('checkinForm').style.display = 'none';
