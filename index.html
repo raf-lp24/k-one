@@ -11182,6 +11182,11 @@
         // ("press de hombro con mancuernas (sin sentadilla) con mancuernas").
         [/[Tt]hrusters?( con mancuernas| mancuernas)?/g, 'press de hombro con mancuernas (sin sentadilla)'],
         [/[Ww]all balls?( con balón)?/g, 'press de hombro con balón (sin sentadilla)'],
+        // La nota técnica que la plantilla de Hyrox deja DETRÁS del wall ball
+        // ("4-6kg, técnica de front squat + lanzamiento") sobrevivía al cambio y
+        // acababa diciéndole a alguien con la rodilla lesionada que hiciera un
+        // front squat, justo debajo del ejercicio que se llama "(sin sentadilla)".
+        [/técnica de front squat \+ lanzamiento/gi, 'empuja desde los hombros, sin bajar a sentadilla'],
         [/[Dd]ouble[- ]unders?/g, 'remo o bici (bajo impacto)'],
         [/[Aa]ir squats?/g, 'sentadillas parciales sin dolor'],
       ];
@@ -11306,6 +11311,38 @@
     const operacion = (u.operacion || '').trim();
     if (operacion) {
       notasSalud.push(`Nos indicaste que te han operado (${_esc(operacion)}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
+    }
+
+    // NIVEL AVANZADO EN GIMNASIO: hasta ahora "Llevo algo de tiempo" y "Avanzado"
+    // recibían un plan de gimnasio LITERALMENTE idéntico (comprobado comparando
+    // el plan generado carácter a carácter). Running, Hyrox y CrossFit sí usan
+    // esAvanzado para diferenciar, pero las plantillas de gimnasio no lo miraban
+    // en ningún sitio.
+    //
+    // La diferencia no se hace subiendo series (el plan ya está en ~107 series
+    // semanales, dentro del rango productivo, y subir más no aporta): a partir de
+    // cierto nivel lo que cambia el estímulo es la PROXIMIDAD AL FALLO y las
+    // técnicas de intensidad, no el volumen bruto. Se rota una técnica distinta
+    // por bloque de 4 semanas para que el estímulo no se estanque.
+    //
+    // OJO: va como nota de coaching y NO metiendo texto en el nombre del
+    // ejercicio, a propósito. formatearSesion distingue "ejercicio con nota" de
+    // "párrafo" por un límite de 15 palabras, y alargar los nombres hace que se
+    // pierda la tarjeta de registro de peso (ya documentado más arriba).
+    if (!soloDieta && esAvanzado && esGimnasio) {
+      if (semanaCiclo === 4) {
+        // En descarga NO se aplican técnicas de intensidad: la semana 4 existe
+        // justo para recuperar y disipar fatiga acumulada del mesociclo.
+        notasSalud.push('Semana de descarga: baja las cargas un 10-15% y quédate a 3-4 repeticiones del fallo. Esta semana no se busca estímulo, se busca llegar fresco al siguiente bloque — nada de técnicas de intensidad ni series al fallo.');
+      } else {
+        const tecnicasAvanzadas = [
+          'Como tienes nivel avanzado, lleva las series efectivas a 1-2 repeticiones del fallo (RIR 1-2) en los básicos, y al fallo real solo en el último ejercicio de aislamiento de cada sesión.',
+          'Técnica de este bloque — series descendentes: en la ÚLTIMA serie del último ejercicio de aislamiento, al llegar al fallo baja el peso un 30% y sigue sin descanso hasta fallar otra vez. Solo en ese ejercicio, no en los básicos.',
+          'Técnica de este bloque — rest-pause: en la última serie de un ejercicio de aislamiento, llega al fallo, descansa 15 segundos y saca 3-5 repeticiones más. Repite una vez. No lo apliques en sentadilla, peso muerto ni press de banca pesados.',
+          'Técnica de este bloque — excéntricas controladas: en la primera serie de cada básico, baja el peso en 3-4 segundos manteniendo la tensión. Bajas algo de carga, pero el tiempo bajo tensión sube y es donde más margen de mejora te queda.'
+        ];
+        notasSalud.push(tecnicasAvanzadas[bloqueMeso % tecnicasAvanzadas.length]);
+      }
     }
     } // fin if (!soloDieta) — adaptaciones de entrenamiento por lesión/enfermedad/medicación
 
