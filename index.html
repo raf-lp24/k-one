@@ -11705,19 +11705,25 @@
       : (0.407 * pesoKg + 0.267 * altCm - 19.2);
     const lbmProtMax = Math.round(lbm * 2.4);
 
-    // Proteína por deporte: runners necesitan menos, CrossFit/Hyrox más
+    // Proteína por deporte: runners necesitan menos, CrossFit/Hyrox/Híbrido más.
+    // Híbrido estaba antes fuera de este reparto (caía al tramo por defecto de
+    // gimnasio, igual que alguien que solo hace fuerza) a pesar de que sus
+    // propias plantillas de entreno ya mezclan días de cardio (zona 2) con días
+    // de fuerza y Metcon -- mismo perfil de exigencia que CrossFit/Hyrox, así
+    // que se agrupa con ellos.
+    const esMixto = esCrossfit || esHyrox || esCombinacion;
     const protMultiplier = perdidaGrasa
-      ? (esRunner ? 2.0 : (esCrossfit || esHyrox) ? 2.3 : 2.2)
+      ? (esRunner ? 2.0 : esMixto ? 2.3 : 2.2)
       : ganarMusculo
-      ? (esRunner ? 1.8 : (esCrossfit || esHyrox) ? 2.2 : 2.0)
-      : (esRunner ? 1.4 : (esCrossfit || esHyrox) ? 1.8 : 1.6);
+      ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
+      : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6);
     const protObj = Math.round(
       perdidaGrasa ? Math.min(Math.max(pesoKg * protMultiplier, 100), lbmProtMax) :
       Math.round(pesoKg * protMultiplier)
     );
 
-    // Carbohidratos por deporte: runners y Hyrox necesitan más glucógeno
-    const carbsAltos = esRunner || esHyrox || esCrossfit;
+    // Carbohidratos por deporte: runners, Hyrox, CrossFit e Híbrido necesitan más glucógeno
+    const carbsAltos = esRunner || esMixto;
     const carbsMultiplier = carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
       : (perdidaGrasa ? 2.0 : ganarMusculo ? 4.0 : 3.0);
