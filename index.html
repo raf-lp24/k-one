@@ -9894,6 +9894,19 @@
       `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
   }
 
+  // El resumen del día ("Easy run · Zona 2", "Fartlek o series · Calidad"...)
+  // hasta ahora era texto fijo: el nombre de la sesión (fartlek, tirada larga,
+  // series, threshold...) no enganchaba con ninguna ficha porque formatearSesion
+  // descarta justo ese título antes de trocear el resto en ejercicios. Se
+  // reutiliza el mismo botón/patrón de escape que renderEjercicioSimple para
+  // que también abra la ficha (o el vídeo, si no hay ficha) al tocarlo.
+  function resumenTappable(resumen) {
+    if (!resumen) return '';
+    const safe = _esc(resumen);
+    const js = _esc(resumen.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
+  }
+
   // ===== MENSAJES DEL DÍA (60 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
@@ -11505,7 +11518,7 @@
     // con el mismo formato y nivel de detalle que se usa en "Plan semanal"
     const diaHoy = semana[getIndiceDiaHoy()];
     if (!soloDieta && semana.length > 0 && diaHoy.tipo === 'Entrenamiento') {
-      entrenamiento_hoy = `<strong>${diaHoy.dia} — ${diaHoy.resumen}</strong><br><br>${formatearSesion(diaHoy)}`;
+      entrenamiento_hoy = `<strong>${diaHoy.dia} — ${resumenTappable(diaHoy.resumen)}</strong><br><br>${formatearSesion(diaHoy)}`;
     }
 
     if (!soloDieta && notasSalud.length) {
@@ -16626,7 +16639,7 @@
       plan.entrenamiento_hoy = notaHTML;
       return;
     }
-    plan.entrenamiento_hoy = notaHTML + `<strong>${diaHoy.dia} — ${diaHoy.resumen}</strong><br><br>${formatearSesion(diaHoy)}`;
+    plan.entrenamiento_hoy = notaHTML + `<strong>${diaHoy.dia} — ${resumenTappable(diaHoy.resumen)}</strong><br><br>${formatearSesion(diaHoy)}`;
   }
 
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
