@@ -7873,7 +7873,13 @@
               <div class="stat-card-value" id="resumenGrasa">0</div>
               <div class="stat-card-sub">gramos</div>
             </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Fibra</div>
+              <div class="stat-card-value" id="resumenFibra">—</div>
+              <div class="stat-card-sub">gramos</div>
+            </div>
           </div>
+          <div id="avisoFibra" style="display:none;margin-top:12px;font-size:12.5px;line-height:1.6;padding:10px 14px;border-radius:8px"></div>
         </div>
         <div id="nutricionNotas"></div>
         <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
@@ -11059,20 +11065,20 @@
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
              detalle: sesionCorta
-               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo)${finisher3}`
-               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo)${finisher3}`,
+               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo), plancha 3×45s${finisher3}`
+               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
              detalle: sesionCorta
-               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada)${finisher3}`
-               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento)${finisher3}`,
+               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada), elevación de piernas 3×12${finisher3}`
+               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
              etiqueta:"Tracción"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
              detalle: sesionCorta
                ? `Cuádriceps, isquios, glúteos · Sentadilla 5×6, hip thrust 4×10, peso muerto rumano 3×10, femoral tumbado 3×12${finisher3}`
-               : `Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
+               : `Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano 3×10, prensa 3×12, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
              etiqueta:"Piernas"},
             {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -11081,7 +11087,15 @@
           // Intermedio/Avanzado + 4-5 días → Split clásico diferenciado por objetivo
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps",
-             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
+             // Aquí había un CUARTO movimiento de empuje seguido (fondos), después
+             // de press banca + press inclinado + cruces y antes de DOS aislamientos
+             // de tríceps. Con el día de hombros del viernes (press militar +
+             // laterales + pájaros + face pull), el deltoides anterior acababa
+             // acumulando ~29 series semanales contando el trabajo indirecto —
+             // por encima del rango donde el volumen extra sigue aportando algo.
+             // Quitar los fondos reduce ese solapamiento sin tocar el estímulo
+             // real del pectoral, que ya lo cubren los dos press y el cruce.
+             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
              detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
@@ -16165,6 +16179,39 @@
     showToast('Lista descargada');
   }
 
+  // ===== FIBRA: se CALCULA de los ingredientes, no se anota receta a receta =====
+  // Las ~200 recetas del plan no llevan campo de fibra y anotarlas a mano sería
+  // inmantenible (y quedaría desfasado en cuanto se añada una receta nueva). En
+  // vez de eso se reutiliza la misma tabla /data/alimentos.json (que ahora tiene
+  // fibra por 100g de la USDA) y el mismo emparejamiento por texto que ya usa el
+  // desglose de macros: "150g garbanzos, 80g espinacas" -> 11.4 + 1.8 g de fibra.
+  // Cobertura medida sobre los ingredientes reales del plan: ~95%, así que la
+  // cifra se muestra como aproximada a propósito.
+  let _clavesFibra = null;
+  function _fibraDeIngredientes(texto) {
+    if (!_alimentos) return null;
+    if (!_clavesFibra) {
+      _clavesFibra = Object.keys(_alimentos)
+        .sort((a, b) => b.length - a.length)
+        .map(k => [k, _normTexto(k)]);
+    }
+    let total = 0;
+    (texto || '').split(',').forEach(parte => {
+      const t = parte.trim();
+      if (!t) return;
+      const m = t.match(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/i);
+      if (!m) return;
+      const gramos = parseFloat(m[1].replace(',', '.'));
+      if (!gramos) return;
+      const n = _normTexto(t);
+      const hit = _clavesFibra.find(([, kn]) => n.includes(kn));
+      if (!hit) return;
+      const a = _alimentos[hit[0]];
+      if (a && typeof a.f === 'number') total += a.f * gramos / 100;
+    });
+    return total;
+  }
+
   // ===== RESUMEN NUTRICIONAL DEL DÍA (suma según opciones elegidas) =====
   function actualizarResumenNutricional() {
     const nutriActiva = generatedPlan?._nutricionActiva || generatedPlan?.nutricion;
@@ -16190,6 +16237,55 @@
       };
       sub('resumenKcal', `kcal · obj. ${generatedPlan.kcalObj}`);
       sub('resumenProt', `g · obj. ${generatedPlan.protObj}g`);
+    }
+
+    // La tabla de alimentos se carga bajo demanda (10 KB). Si aún no está, se
+    // pide y se vuelve a entrar aquí; si la petición falla queda {} (objeto
+    // truthy), así que no se puede quedar en bucle.
+    if (!_alimentos) {
+      fetch('/data/alimentos.json')
+        .then(r => r.ok ? r.json() : {})
+        .then(j => { _alimentos = j; _clavesFibra = null; actualizarResumenNutricional(); })
+        .catch(() => { _alimentos = {}; });
+      return;
+    }
+    let fibra = 0;
+    nutriActiva.forEach((meal, mealIdx) => {
+      const opt = meal.opciones[comidasSeleccionadas[mealIdx]] || meal.opciones[0];
+      fibra += _fibraDeIngredientes(opt.ingredientes) || 0;
+    });
+    fibra = Math.round(fibra);
+    // Objetivo de fibra: 14 g por cada 1000 kcal (referencia habitual en guías
+    // dietéticas), con suelo de 25 g/día y TECHO de 38 g. El techo no es
+    // decorativo: sin él, un superávit de 3300 kcal pedía 46 g/día, que está por
+    // encima de lo que recomienda ninguna guía y, subiendo de golpe, es la receta
+    // para hinchazón y gases — justo lo que hace que la gente abandone el plan.
+    const objFibra = Math.min(38, Math.max(25, Math.round(14 * (generatedPlan?.kcalObj || 2000) / 1000)));
+    set('resumenFibra', fibra);
+    const subF = document.getElementById('resumenFibra')?.closest('.stat-card')?.querySelector('.stat-card-sub');
+    if (subF) subF.textContent = `g aprox. · obj. ${objFibra}g`;
+
+    const aviso = document.getElementById('avisoFibra');
+    if (aviso) {
+      if (fibra >= objFibra) {
+        aviso.style.display = '';
+        aviso.style.background = 'rgba(39,174,96,0.08)';
+        aviso.style.borderLeft = '3px solid #27ae60';
+        aviso.style.color = 'var(--metal-claro)';
+        aviso.textContent = `Fibra cubierta (${fibra}g de ${objFibra}g). Bien: la fibra es lo que más sacia y lo que mejor te va a hacer llevar el plan sin pasar hambre.`;
+      } else if (fibra >= objFibra * 0.7) {
+        aviso.style.display = '';
+        aviso.style.background = 'rgba(255,255,255,0.04)';
+        aviso.style.borderLeft = '3px solid var(--metal)';
+        aviso.style.color = 'var(--metal-claro)';
+        aviso.textContent = `Fibra: ${fibra}g de ${objFibra}g. Vas cerca. Cambiar el arroz o la pasta por su versión integral, o añadir una pieza de fruta, ya te deja dentro.`;
+      } else {
+        aviso.style.display = '';
+        aviso.style.background = 'rgba(232,73,15,0.08)';
+        aviso.style.borderLeft = '3px solid var(--brasa)';
+        aviso.style.color = 'var(--blanco)';
+        aviso.textContent = `Fibra baja hoy: ${fibra}g de ${objFibra}g. Con las opciones que has elegido te quedas corto. Las legumbres (garbanzos, lentejas), la avena, las verduras y la fruta con piel son lo que más sube esta cifra — y es lo que más te va a saciar.`;
+      }
     }
   }
 
