@@ -16774,6 +16774,18 @@
       return;
     }
 
+    // Supabase, para no revelar si un email ya está registrado, responde al
+    // signUp() de una cuenta YA CONFIRMADA con un falso "éxito": sin error, sin
+    // sesión, y `identities` vacío -- y no manda ningún correo. Sin esta
+    // comprobación caíamos en la rama de abajo y mostrábamos "revisa tu correo"
+    // sobre un email que Supabase nunca llegó a enviar.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      document.getElementById('err-email').textContent = 'Este email ya está registrado. Inicia sesión.';
+      document.getElementById('err-email').classList.add('visible');
+      document.getElementById('reg-email').classList.add('error');
+      return;
+    }
+
     // Email de bienvenida al nuevo cliente
     notificarAdmin('bienvenida', { email, nombre });
     if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'email' });
