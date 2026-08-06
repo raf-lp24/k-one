@@ -15886,14 +15886,20 @@
       });
     }
 
+    // Auditado contra las listas reales de la compra generadas con los 314
+    // alimentos actuales: bastantes de los añadidos en sesiones anteriores
+    // (chorizo, rodaballo, caseína, cerezas, granada, coles de Bruselas...)
+    // no encajaban en ninguna categoría y caían todos en "Otros" — no es un
+    // fallo de seguridad como el de alergias, pero sí hace la lista de la
+    // compra menos útil (todo mezclado con las especias en el mismo cajón).
     const categorias = {
-      'Proteínas': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas|proteína/,
-      'Lácteos': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage/,
-      'Cereales e hidratos': /\bpan\b|arroz|avena|tostada|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|tortilla integral|wasa|fajita|wrap|harina/,
-      'Frutas': /plátano|platano|manzana|pera|kiwi|naranja|fresas|arándanos|arandanos|frutos rojos|melocotón|melocoton|fruta/,
-      'Verduras y hortalizas': /brócoli|brocoli|espinac|tomate|lechuga|pepino|pimiento|cebolla|champiñon|champinon|calabacín|calabacin|zanahoria|espárrago|esparrago|rúcula|rucula|judías|judias|berenjena|aguacate|alcachofa|maíz|maiz/,
-      'Legumbres': /garbanz|lenteja|edamame|alubia|fabe/,
-      'Frutos secos y semillas': /nueces|almendras|cacahuete|semillas|pipas|avellanas|lino|chía|chia/,
+      'Proteínas': /pollo|pechuga|pavo|ternera|solomillo|salmón|salmon|merluza|atún|atun|gambas|huevo|claras|tofu|tempeh|seitán|seitan|jamón|jamon|lonchas|proteína|chorizo|caseína|caseina|whey|barrita proteica|lomo embuchado|rodaballo|lenguado|dorada\b|bacalao|sardina|caballa|trucha|rape\b|lubina|anchoa|boquer|calamar|sepia|pulpo|mejill|almeja|berberech|bogavante|cigala|vieira|langostino|surimi|morcilla|butifarra|panceta|bacon|costillas|chuleta|entrecot|chuletón|chuleton|conejo|codorniz|pez espada|gallo\b/,
+      'Lácteos': /yogur|leche|queso|requesón|requeson|kéfir|kefir|cottage|skyr|parmesano|mozzarella|nata\b/,
+      'Cereales e hidratos': /\bpan\b|panes\b|arroz|avena|tostada?s?\b|tostas?\b|centeno|pasta|quinoa|patata|boniato|cuscús|cuscus|tortita|tortilla|wasa|fajita|wrap|harina|bulgur|granola|muesli|panecillo|crostones|croutons|ñoquis|noquis|fideos|maíz dulce|yuca/,
+      'Frutas': /plátano|platano|manzana|pera|kiwi|naranja|fresas|arándanos|arandanos|frutos rojos|melocotón|melocoton|fruta|cerezas?\b|granada|lima\b|mandarina|mango|papaya|caqui|nectarina|higos?\b|dátiles?|datiles?|uvas?\b|sandía|sandia|melón|melon|piña|pomelo/,
+      'Verduras y hortalizas': /brócoli|brocoli|espinac|tomate|lechuga|ensalada (verde|variada)|pepino|pimiento|cebolla|champiñon|champinon|calabacín|calabacin|zanahoria|espárrago|esparrago|rúcula|rucula|judías|judias|judía verde|berenjena|aguacate|alcachofa|maíz|maiz|coles? de bruselas|puerro|setas|col lombarda|col rizada|kale|coliflor|rábano|rabano|remolacha|apio\b|endivia|escarola|canónigos|canonigos|repollo|nabo|chirivía|chirivia|calabaza|guacamole|gazpacho|crema (de )?calabac/,
+      'Legumbres': /garbanz|lenteja|edamame|alubia|fabe|habas?\b|guisantes|soja texturizada|\bsoja\b|hummus/,
+      'Frutos secos y semillas': /nueces|almendras|cacahuete|semillas|pipas|avellanas|lino|chía|chia|pistacho|anacardo|piñon|pinon|macadamia|castañas?|castanas?|coco rallado|sésamo|sesamo|tahini/,
       'Otros': /.*/
     };
 
