@@ -18814,10 +18814,19 @@
   }
 
   // ===== NOTIFICACIÓN AL ADMIN POR EMAIL =====
-  function notificarAdmin(tipo, datos) {
+  async function notificarAdmin(tipo, datos) {
+    // /api/notify exige sesión para 'bienvenida'/'opinion'/'renovacion' (tiposProtegidos),
+    // pero esta función nunca mandaba el token: esas peticiones siempre devolvían 401
+    // y, al ser fetch().catch(()=>{}), el fallo era invisible (fetch no rechaza por
+    // status HTTP). Resultado real: el email de bienvenida nunca llegaba a nadie.
+    const headers = { 'Content-Type': 'application/json' };
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+    } catch (e) {}
     fetch('/api/notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ tipo, datos })
     }).catch(() => {});
   }
