@@ -50,6 +50,8 @@ module.exports = async (req, res) => {
     } else if (accion === 'borrar_cliente') {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
+      const { data: perfilBorrar } = await supabaseAdmin.from('profiles').select('email').eq('id', userId).maybeSingle();
+      const emailBorrar = perfilBorrar?.email || null;
       const { data: sub } = await supabaseAdmin.from('subscriptions').select('stripe_subscription_id, stripe_customer_id').eq('user_id', userId).maybeSingle();
       // Avisos de limpieza incompleta en Stripe: antes se tragaban en silencio
       // (solo console.warn, invisible salvo mirando los logs de Vercel). Si el
@@ -92,6 +94,26 @@ module.exports = async (req, res) => {
         console.error('[admin-mensaje] borrar_cliente auth error:', authErr);
         return res.status(500).json({ error: 'Error eliminando usuario' });
       }
+
+      // Rastro fuera de las tablas con FK a auth.users (esas se limpian solas por
+      // "on delete cascade": profiles, subscriptions, referidos, canjes_promo,
+      // hitos_canjes). Estas otras guardan el dato por user_id/email sin FK, así
+      // que sobrevivían al borrado y el cliente podía "reaparecer" (mensajes
+      // antiguos en el panel, emails de retención contando el historial, una
+      // invitación premium todavía activa para ese email).
+      // OJO: supabase-js no lanza en errores de query, devuelve {error} -- por
+      // eso se comprueba explícitamente en vez de fiarse de un try/catch.
+      const { error: eMsj } = await supabaseAdmin.from('mensajes_cliente').delete().eq('user_id', userId);
+      if (eMsj) avisos.push(`No se pudieron borrar los mensajes del cliente: ${eMsj.message}`);
+      if (emailBorrar) {
+        const { error: eLog } = await supabaseAdmin.from('email_log').delete().eq('destinatario', emailBorrar);
+        if (eLog) avisos.push(`No se pudo borrar el historial de emails: ${eLog.message}`);
+        const { error: eInv } = await supabaseAdmin.from('invitaciones_premium').delete().eq('email', emailBorrar);
+        if (eInv) avisos.push(`No se pudo borrar la invitación premium: ${eInv.message}`);
+        const { error: eLead } = await supabaseAdmin.from('leads').delete().eq('email', emailBorrar);
+        if (eLead) avisos.push(`No se pudo borrar el lead: ${eLead.message}`);
+      }
+
       if (avisos.length) {
         return res.status(200).json({ ok: true, avisos });
       }
