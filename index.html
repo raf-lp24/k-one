@@ -511,39 +511,70 @@
   .btn-primary:hover { background: var(--brasa-oscura); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(232,73,15,0.25); }
   .btn-primary:active { transform: translateY(0); box-shadow: none; }
 
+  /* Jarvis: mismo patrón que .dash-sidebar/.dash-nav-item del panel de cliente
+     (sidebar fija + item con borde izq. en brasa al activarse), en vez del
+     panel de admin genérico de pestañas arriba que tenía antes. */
+  .jarvis-sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 224px;
+    background: var(--carbon); border-right: 1px solid var(--humo);
+    padding: 20px 14px; display: flex; flex-direction: column;
+    overflow-y: auto; z-index: 20;
+  }
+  .jarvis-main { margin-left: 224px; padding: 28px 36px 48px; max-width: 1400px; }
+
   .jarvis-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
     background: transparent;
     border: none;
-    color: #666;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    padding: 8px 16px;
+    border-left: 3px solid transparent;
+    color: var(--metal);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .3px;
+    padding: 10px 12px;
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.2s;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
+    margin-bottom: 2px;
   }
-  .jarvis-tab:hover { color: #fff; background: #151515; }
-  .jarvis-tab-active { color: #fff !important; background: #E8490F !important; }
+  .jarvis-tab:hover { color: var(--blanco); background: var(--negro); }
+  .jarvis-tab-active { color: var(--blanco) !important; background: rgba(232,73,15,.12) !important; border-left-color: var(--brasa) !important; }
 
   .jarvis-filtro {
-    background: #1a1a1a; color: var(--metal); border: 1px solid #2a2a2a;
+    background: var(--negro); color: var(--metal); border: 1px solid var(--humo);
     padding: 5px 11px; border-radius: 6px; font-size: 11px; cursor: pointer;
     font-family: 'DM Mono', monospace; letter-spacing: .3px; transition: all .15s;
   }
   .jarvis-filtro:hover { border-color: var(--brasa); color: var(--blanco); }
-  .jarvis-filtro-active { border-color: var(--brasa) !important; color: var(--blanco) !important; background: #1e0c06 !important; }
+  .jarvis-filtro-active { border-color: var(--brasa) !important; color: var(--blanco) !important; background: rgba(232,73,15,.12) !important; }
   #adminBuscador:focus { border-color: var(--brasa); }
   #modalJarvisCliente { display: none; }
   #modalJarvisCliente.visible { display: flex; }
-  .jc-row { background:#161616; border:1px solid #222; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .jc-row { background:var(--negro); border:1px solid var(--humo); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
   .jc-label { font-size:10px; color:var(--metal); text-transform:uppercase; letter-spacing:.5px; font-family:'DM Mono',monospace; margin-bottom:3px; }
   .jc-val { font-size:13px; color:var(--blanco); font-weight:500; }
 
+  @media (max-width: 900px) {
+    .jarvis-sidebar {
+      position: static; width: 100%; height: auto;
+      flex-direction: row; align-items: center; overflow-x: auto;
+      padding: 12px 14px; gap: 8px;
+    }
+    .jarvis-sidebar .jarvis-sidebar-brand { flex-shrink: 0; }
+    .jarvis-sidebar .jarvis-sidebar-nav { flex-direction: row !important; flex: 1; overflow-x: auto; }
+    .jarvis-sidebar .jarvis-sidebar-actions { flex-shrink: 0; }
+    .jarvis-tab { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .jarvis-tab-active { border-left-color: transparent !important; border-bottom-color: var(--brasa) !important; }
+    .jarvis-main { margin-left: 0; padding: 20px 14px 32px; }
+  }
+
   @media (max-width: 768px) {
-    #modalAdmin > div { padding: 0 12px 24px !important; max-width: 100% !important; }
     #modalAdmin .jarvis-tab { font-size: 11px; padding: 6px 10px; }
     #modalAdmin [style*="grid-template-columns: repeat(auto-fit"] { grid-template-columns: 1fr 1fr !important; }
     #modalAdmin [style*="grid-template-columns:repeat(auto-fit"] { grid-template-columns: 1fr 1fr !important; }
@@ -5732,37 +5763,34 @@
 </div>
 
 <!-- PANEL DE ADMIN — JARVIS -->
-<div id="modalAdmin" style="display:none;position:fixed;inset:0;z-index:10000;background:#08080a;overflow-y:auto">
-  <div style="max-width:1400px;margin:0 auto;padding:0 24px 40px">
+<div id="modalAdmin" style="display:none;position:fixed;inset:0;z-index:10000;background:var(--negro);overflow-y:auto">
 
-    <!-- Cabecera fija -->
-    <div style="position:sticky;top:0;z-index:10;background:#08080a;padding:20px 0 16px;border-bottom:1px solid #1a1a1a;margin-bottom:24px;box-shadow:0 1px 0 rgba(232,73,15,.25)">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:16px">
-          <div class="logo" style="font-size:21px;letter-spacing:3px;user-select:none">K-<span>ONE</span></div>
-          <div style="width:1px;align-self:stretch;background:#2a2a2a"></div>
-          <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:2px;color:#fff;line-height:1">JARVIS</div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--brasa);font-family:'Inter',sans-serif;text-transform:uppercase;margin-top:3px">Centro de control</div>
-          </div>
-          <div id="adminTimestamp" style="font-size:11px;color:#999;font-family:'DM Mono',monospace;margin-left:6px"></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button onclick="mostrarFormAltaCliente()" style="background:#27ae60;border:none;border-radius:8px;padding:8px 14px;font-size:12px;color:#fff;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">+ Añadir cliente</button>
-          <button onclick="exportarAdminCSV()" style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px;font-size:12px;color:#888;cursor:pointer;font-family:'DM Mono',monospace">CSV</button>
-          <button onclick="abrirPanelAdmin()" style="background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px;font-size:12px;color:#888;cursor:pointer;font-family:'DM Mono',monospace">Actualizar</button>
-          <button onclick="cerrarPanelAdmin()" style="background:#E8490F;border:none;border-radius:8px;padding:8px 16px;font-size:12px;color:#fff;cursor:pointer;font-weight:600">Cerrar</button>
-        </div>
-      </div>
-      <!-- Tabs de navegación -->
-      <div style="display:flex;gap:4px;margin-top:16px;overflow-x:auto" id="jarvisTabs">
-        <button class="jarvis-tab jarvis-tab-active" onclick="jarvisTab('dashboard')">Dashboard</button>
-        <button class="jarvis-tab" onclick="jarvisTab('clientes')">Clientes</button>
-        <button class="jarvis-tab" onclick="jarvisTab('buzon')">Buzón <span id="jarvisBuzonBadge" style="background:#E8490F;color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:4px;display:none">0</span></button>
-        <button class="jarvis-tab" onclick="jarvisTab('leads')">Leads</button>
-        <button class="jarvis-tab" onclick="jarvisTab('emails')">Emails</button>
-      </div>
+  <!-- Sidebar: mismo patrón que .dash-sidebar del panel de cliente -->
+  <div class="jarvis-sidebar">
+    <div class="jarvis-sidebar-brand" style="margin-bottom:20px">
+      <div class="logo" style="font-size:20px;letter-spacing:3px;user-select:none;margin-bottom:10px">K-<span>ONE</span></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:23px;letter-spacing:2px;color:var(--blanco);line-height:1">JARVIS</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--brasa);font-family:'Inter',sans-serif;text-transform:uppercase;margin-top:4px">Centro de control</div>
+      <div id="adminTimestamp" style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace;margin-top:8px"></div>
     </div>
+
+    <div class="jarvis-sidebar-nav" style="flex:1;display:flex;flex-direction:column" id="jarvisTabs">
+      <button class="jarvis-tab jarvis-tab-active" onclick="jarvisTab('dashboard')">Dashboard</button>
+      <button class="jarvis-tab" onclick="jarvisTab('clientes')">Clientes</button>
+      <button class="jarvis-tab" onclick="jarvisTab('buzon')">Buzón <span id="jarvisBuzonBadge" style="background:var(--brasa);color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:6px;display:none">0</span></button>
+      <button class="jarvis-tab" onclick="jarvisTab('leads')">Leads</button>
+      <button class="jarvis-tab" onclick="jarvisTab('emails')">Emails</button>
+    </div>
+
+    <div class="jarvis-sidebar-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--humo)">
+      <button onclick="mostrarFormAltaCliente()" style="background:#27ae60;border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#fff;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">+ Añadir cliente</button>
+      <button onclick="exportarAdminCSV()" class="btn-ghost" style="padding:9px 14px;font-size:11px;letter-spacing:.5px;text-transform:none;text-align:center">Exportar CSV</button>
+      <button onclick="abrirPanelAdmin()" class="btn-ghost" style="padding:9px 14px;font-size:11px;letter-spacing:.5px;text-transform:none;text-align:center">Actualizar datos</button>
+      <button onclick="cerrarPanelAdmin()" style="background:var(--brasa);border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#fff;cursor:pointer;font-weight:600">Cerrar Jarvis</button>
+    </div>
+  </div>
+
+  <div class="jarvis-main">
 
     <!-- TAB: Dashboard -->
     <div class="jarvis-panel" id="jarvisPanel-dashboard">
