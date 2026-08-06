@@ -13778,7 +13778,9 @@
         rows.push([ejercicio, sem, peso]);
       });
     });
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    // Mismo guard anti-inyección de fórmulas que exportarAdminCSV(): el nombre
+    // del ejercicio puede venir de "Añadir ejercicio" (texto libre del cliente).
+    const csv = rows.map(r => r.map(_csvSafe).join(',')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -18205,6 +18207,20 @@
   }
 
   // Exportar CSV con los datos filtrados/ordenados actuales
+  //
+  // Nombre, objetivo, deporte... son texto libre que escribió el propio
+  // cliente en el cuestionario. Sin la protección de abajo, alguien podía
+  // registrarse con un nombre como "=cmd|'/c calc'!A1" o "=HYPERLINK(...)":
+  // el CSV en sí queda bien formado (comillas y escapado correctos), pero
+  // Excel/Google Sheets interpretan una celda que EMPIEZA por =, +, -, @,
+  // tab o retorno de carro como una fórmula al abrir el archivo — ejecutable
+  // en el ordenador de quien abra el CSV desde Jarvis. Es la misma clase de
+  // fallo (inyección de fórmulas CSV) que ya se corrigió para el HTML con _esc().
+  function _csvSafe(v) {
+    let s = String(v == null ? '' : v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
   function exportarAdminCSV() {
     if (!_adminDatos) return;
     const cols = ['Nombre','Email','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
@@ -18218,7 +18234,7 @@
       c.ultimaConexion ? new Date(c.ultimaConexion).toLocaleString('es-ES') : 'Nunca',
       c.lesion ? 'Sí' : 'No',
       c.alertaRazon || ''
-    ].map(v => '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"').join(',');
+    ].map(_csvSafe).join(',');
 
     const csv = [cols.join(','), ..._adminDatos.clientes.map(fila)].join('\r\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
