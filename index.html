@@ -16707,6 +16707,20 @@
 
     const nombre = document.getElementById('reg-nombre').value.trim();
     const email = document.getElementById('reg-email').value.trim().toLowerCase();
+
+    // Limpieza defensiva: si este navegador tenía una sesión (propia o de
+    // admin en Jarvis) o datos cacheados de una cuenta anterior con este
+    // mismo email (de una prueba de hace tiempo, o de una cuenta borrada
+    // desde Jarvis -- el borrado del servidor nunca puede tocar el
+    // localStorage de OTRO ordenador), un registro nuevo no debe arrastrar
+    // nada de eso. userData/generatedPlan/comidas* ya se resetean al entrar
+    // al formulario (enterFormulario), pero k1_current_user y el caché
+    // k1_data_<email> viven fuera de ese ciclo y podían sobrevivir entre
+    // pruebas en la misma pestaña sin recargar la página.
+    try {
+      clearCurrentUser();
+      localStorage.removeItem(`k1_data_${email}`);
+    } catch (e) {}
     const pass = document.getElementById('reg-pass').value;
     const pass2 = document.getElementById('reg-pass2').value;
     const terminos = document.getElementById('reg-terminos').checked;
@@ -18654,7 +18668,14 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      showToast('Cliente eliminado correctamente');
+      if (data.avisos && data.avisos.length) {
+        // El cliente se borró de K-ONE, pero algo en Stripe no se pudo limpiar
+        // del todo (ver comentario en admin-mensaje.js) -- avisar de verdad,
+        // no una notificación que desaparece sola en 4 segundos.
+        window.alert('Cliente eliminado, pero con avisos que requieren revisión manual en Stripe:\n\n' + data.avisos.join('\n\n'));
+      } else {
+        showToast('Cliente eliminado correctamente');
+      }
       cerrarDetalleCliente();
       abrirPanelAdmin();
     } catch (e) {

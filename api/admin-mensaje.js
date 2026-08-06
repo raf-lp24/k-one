@@ -51,11 +51,26 @@ module.exports = async (req, res) => {
       if (!userId) return res.status(400).json({ error: 'userId requerido' });
       if (userId === admin.id) return res.status(400).json({ error: 'No puedes borrar tu propia cuenta' });
       const { data: sub } = await supabaseAdmin.from('subscriptions').select('stripe_subscription_id, stripe_customer_id').eq('user_id', userId).maybeSingle();
+      // Avisos de limpieza incompleta en Stripe: antes se tragaban en silencio
+      // (solo console.warn, invisible salvo mirando los logs de Vercel). Si el
+      // Customer de Stripe no se llega a borrar, se queda con su historial de
+      // suscripción real -- inofensivo mientras nadie lo reutilice, pero si
+      // alguna vez se busca ese Customer por email en vez de por
+      // supabase_user_id (o Stripe cambia de comportamiento), un cliente que
+      // se registre de nuevo con el mismo email podría heredar ese historial y
+      // perder la elegibilidad para la oferta/código de bienvenida sin que
+      // nadie entienda por qué. Se avisa al admin en la propia respuesta para
+      // que sepa que tiene que borrar el Customer a mano en el dashboard de
+      // Stripe si esto ocurre.
+      const avisos = [];
       if (sub?.stripe_subscription_id) {
         try {
           const { getStripe } = require('./_stripeHelpers');
           await getStripe().subscriptions.cancel(sub.stripe_subscription_id);
-        } catch (stripeErr) { console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message); }
+        } catch (stripeErr) {
+          console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message);
+          avisos.push(`No se pudo cancelar la suscripción de Stripe (${sub.stripe_subscription_id}): ${stripeErr.message}`);
+        }
       }
       // Cancelar la suscripción NO borra el Customer de Stripe: el email se
       // quedaba "colgado" ahí para siempre, así que un cliente borrado desde
@@ -65,7 +80,10 @@ module.exports = async (req, res) => {
         try {
           const { getStripe } = require('./_stripeHelpers');
           await getStripe().customers.del(sub.stripe_customer_id);
-        } catch (stripeErr) { console.warn('[admin-mensaje] stripe customer delete error:', stripeErr.message); }
+        } catch (stripeErr) {
+          console.warn('[admin-mensaje] stripe customer delete error:', stripeErr.message);
+          avisos.push(`No se pudo borrar el Customer de Stripe (${sub.stripe_customer_id}): ${stripeErr.message}. Bórralo a mano en el dashboard de Stripe.`);
+        }
       }
       await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
       await supabaseAdmin.from('profiles').delete().eq('id', userId);
@@ -73,6 +91,9 @@ module.exports = async (req, res) => {
       if (authErr) {
         console.error('[admin-mensaje] borrar_cliente auth error:', authErr);
         return res.status(500).json({ error: 'Error eliminando usuario' });
+      }
+      if (avisos.length) {
+        return res.status(200).json({ ok: true, avisos });
       }
     } else {
       return res.status(400).json({ error: 'Acción no válida' });
