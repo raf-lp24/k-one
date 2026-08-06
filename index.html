@@ -6130,6 +6130,18 @@
             <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa sin material</div>
           </div>
         </div>
+        <div class="field">
+          <label>Cardio final de tus sesiones de fuerza <span class="optional">Opcional</span></label>
+          <div class="radio-group" id="cp-cardioFinisher">
+            <div class="radio-opt selected" onclick="selectRadio(this,'cp-cardioFinisher')">Automático (rota cada bloque)</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Sprints</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Assault bike</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Remo</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Burpees</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Comba</div>
+          </div>
+          <span class="field-hint">Solo aplica si entrenas Gimnasio/Fuerza con objetivo perder grasa: elige el que puedas hacer según lo que tenga tu gimnasio, o deja "Automático" para que vaya rotando.</span>
+        </div>
       </div>
     </div>
     <button class="btn-primary" style="width:100%;padding:14px;margin-top:24px" onclick="irPasoPrecioCambioPlan()">Continuar →</button>
@@ -10976,7 +10988,10 @@
         { nombre: 'Burpees', accion: 'burpees seguidos al máximo, sin parar' },
         { nombre: 'Comba', accion: 'saltando a la comba' },
       ];
-      const modInterval = modalidadesInterval[(semilla + bloqueMeso) % modalidadesInterval.length];
+      // Si el cliente ha elegido una modalidad concreta (según lo que tenga su
+      // gimnasio) desde "Cambiar plan", se respeta esa en vez de rotar sola.
+      const prefFinisher = modalidadesInterval.find(m => m.nombre === u.preferenciaCardioFinisher);
+      const modInterval = prefFinisher || modalidadesInterval[(semilla + bloqueMeso) % modalidadesInterval.length];
       const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : '';
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
@@ -15486,6 +15501,7 @@
     preseleccionarRadio('cp-nivel', userData.nivel);
     updateLugarOptions(userData.deporte || 'Gimnasio / Fuerza', 'cp-lugar');
     preseleccionarRadio('cp-lugar', userData.lugar);
+    preseleccionarRadio('cp-cardioFinisher', userData.preferenciaCardioFinisher || 'Automático (rota cada bloque)');
     actualizarPrecioCambioPlan();
     document.getElementById('cpStep1').style.display = '';
     document.getElementById('cpStep2').style.display = 'none';
@@ -15538,6 +15554,7 @@
     const nuevoTiempo = getRadio('cp-tiempoSesion');
     const nuevoNivel = getRadio('cp-nivel');
     const nuevoLugar = getRadio('cp-lugar');
+    const nuevoCardioFinisher = getRadio('cp-cardioFinisher');
 
     const esSoloNutriNuevo = nuevoTipoPlan.includes('Solo');
     const falloBase = !nuevoTipoPlan || !nuevoObjetivo;
@@ -15613,6 +15630,7 @@
     userData.tiempoSesion = nuevoTiempo;
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
+    userData.preferenciaCardioFinisher = nuevoCardioFinisher || 'Automático (rota cada bloque)';
 
     const _diasEntrenados = userData.progreso ? (userData.progreso.diasEntrenados || 0) : 0;
     userData.progreso = { semana: getSemanaActual(), diasEntrenados: _diasEntrenados, ajuste: 0 };
