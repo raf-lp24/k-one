@@ -10067,18 +10067,27 @@
     return MENSAJES_DIA[dayOfYear % MENSAJES_DIA.length];
   }
 
+  // OJO: estas listas se auditaron contra los 314 alimentos reales de
+  // alimentos.json y tenían huecos serios sin actualizar desde que se amplió esa
+  // base — el más grave, "seitán" (que es gluten puro, hecho de gluten de trigo)
+  // no estaba en la familia 'gluten', así que alguien celíaco que escribiera
+  // "gluten" en el campo libre de alergia podía recibir seitán igualmente. Mismo
+  // problema con pescados/mariscos añadidos después (lenguado, rodaballo, vieira,
+  // bogavante, berberechos...) y con el cerdo en piezas nuevas (solomillo,
+  // chuletas, costillas, morcilla, butifarra) que no llevan la palabra "jamón"
+  // ni "bacon" y por eso no calificaban como cerdo.
   const FAMILIAS_ALIMENTOS = {
-    'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones'],
-    'marisco': ['gambas','langostinos','mejillones','almejas','calamares','pulpo','sepia','vieiras','cangrejo','langosta','cigalas'],
-    'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas'],
-    'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon'],
-    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco'],
-    'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones'],
+    'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones','rodaballo','lenguado','gallo'],
+    'marisco': ['gambas','langostinos','mejillon','mejillón','mejillones','almejas','calamar','calamares','pulpo','sepia','vieira','vieiras','cangrejo','langosta','cigalas','bogavante','berberechos','surimi'],
+    'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas','chuletón'],
+    'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon','cerdo','morcilla','butifarra'],
+    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr'],
+    'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones','macadamia'],
     'legumbres': ['garbanzos','lentejas','judías','judias','alubias','habas','guisantes','edamame','soja'],
     'verduras': ['brócoli','brocoli','espinacas','espinaca','lechuga','rúcula','rucula','calabacín','calabacin','berenjena','pimiento','pepino','tomate','cebolla','zanahoria','espárrago','esparrago','alcachofa','champiñón','champiñon','setas','apio','puerro','col','repollo','coliflor','calabaza'],
     'frutas': ['plátano','platano','manzana','pera','naranja','mandarina','fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','kiwi','piña','sandía','sandia','melón','melon','mango','uva','uvas','cereza','cerezas','higo','higos','melocotón','melocoton','ciruela'],
     'huevos': ['huevo','huevos','tortilla','revuelto','claras'],
-    'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','cereales','harina','fideos','cuscús','cuscus'],
+    'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','cereales','harina','fideos','cuscús','cuscus','seitán','seitan','granola','muesli','bulgur'],
   };
 
   const SUSTITUCIONES_NOCOMIDA = {
