@@ -13698,9 +13698,26 @@
       });
     });
     html += '</body></html>';
-    const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
-    else showToast('Permite las ventanas emergentes para imprimir');
+    // Mismo bug y mismo arreglo que descargarPlanPDF(): window.open('', '_blank')
+    // saca de la PWA en móvil y no hay forma de volver sin relanzar el icono.
+    // Iframe oculto en el DOM actual en vez de ventana nueva.
+    let frame = document.getElementById('pdfPrintFrame');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = 'pdfPrintFrame';
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+      document.body.appendChild(frame);
+    }
+    const doc = frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    const imprimir = () => {
+      try { frame.contentWindow.focus(); frame.contentWindow.print(); }
+      catch (e) { console.error('Error imprimiendo dieta:', e); showToast('No se pudo abrir el diálogo de impresión. Inténtalo de nuevo.'); }
+    };
+    if (frame.contentDocument.readyState === 'complete') imprimir();
+    else frame.onload = imprimir;
   }
 
   function actualizarKcalDiario() {
@@ -16123,10 +16140,39 @@
       <p style="font-size:10px;color:#888">Generado en k-one.fit · K-ONE · R. López Pinto</p></div>`;
     html += `</body></html>`;
 
-    const w = window.open('', '_blank');
-    w.document.write(html);
-    w.document.close();
-    setTimeout(() => { w.print(); }, 500);
+    // BUG REPORTADO: en móvil, tras descargar el PDF ya no se podía volver a la
+    // web -- había que salir y volver a entrar. Causa: window.open(url,'_blank')
+    // abre una pestaña/ventana nueva de verdad, y como K-ONE es una PWA
+    // instalable (manifest.json: display "standalone"), en iOS/Android eso
+    // saca al usuario de la PWA y lo manda al navegador del sistema -- no hay
+    // "atrás" que lo devuelva porque ya no está en la misma app, tiene que
+    // relanzar el icono a mano. En escritorio no se notaba porque ahí sí es
+    // una pestaña normal del mismo navegador.
+    //
+    // Arreglo: usar un <iframe> oculto en el DOM actual en vez de una ventana
+    // nueva. print() dentro del iframe abre el diálogo nativo de impresión/
+    // compartir del sistema (donde ya está "Guardar como PDF"), pero nunca se
+    // navega fuera de la pestaña ni de la PWA -- se queda todo en la misma app.
+    let frame = document.getElementById('pdfPrintFrame');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = 'pdfPrintFrame';
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+      document.body.appendChild(frame);
+    }
+    const doc = frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    const imprimir = () => {
+      try { frame.contentWindow.focus(); frame.contentWindow.print(); }
+      catch (e) { console.error('Error imprimiendo PDF:', e); showToast('No se pudo abrir el diálogo de impresión. Inténtalo de nuevo.'); }
+    };
+    // Esperar a que el iframe termine de cargar el HTML recién escrito antes de
+    // imprimir -- en móvil, print() disparado demasiado pronto puede abrir el
+    // diálogo con la página todavía en blanco.
+    if (frame.contentDocument.readyState === 'complete') imprimir();
+    else frame.onload = imprimir;
     showToast('PDF listo — usa "Guardar como PDF" en el diálogo de impresión');
   }
 
