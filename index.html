@@ -11921,6 +11921,34 @@
       });
     };
 
+    // Clasificación aproximada por palabras clave de qué ingrediente de la
+    // receta es "la fuente de proteína" o "la fuente de carbohidrato", para
+    // poder escalar SU gramaje junto con la corrección de prot/carbs de más
+    // abajo (si no, la etiqueta decía "35g prot" pero el ingrediente seguía
+    // poniendo "220g salmón" sin relación real con esa cifra). Es una
+    // heurística por nombre, no una base de datos nutricional por
+    // ingrediente -- cubre las fuentes más comunes del recetario, no
+    // pretende ser exacta al gramo en casos raros o platos con varias
+    // fuentes de proteína a la vez.
+    const INGREDIENTE_PROTEINA = /pechuga|pollo|pavo|ternera|solomillo|salmón|salmon|atún|atun|merluza|bacalao|dorada|lubina|sardina|caballa|trucha|rape|gambas|langostinos|calamar|pulpo|sepia|huevo|clara|queso batido|queso fresco|queso cottage|requesón|requeson|yogur griego|skyr|proteína en polvo|proteina en polvo|scoop de proteína|scoop proteína|tofu|seitán|seitan|garbanzos|lentejas|jamón cocido|jamon cocido|lomo embuchado/i;
+    const INGREDIENTE_CARBOHIDRATO = /\barroz\b|pasta\b|macarrones|espaguetis|fideos|\bpan\b|tostadas?\b|\btosta\b|patata|boniato|\bavena\b|quinoa|cuscús|cuscus|tortitas? de (arroz|maíz|maiz)|\bbulgur\b|granola|muesli/i;
+    const escalarIngredientesPorMacro = (texto, corrProt, corrCarbs) => {
+      if (Math.abs(corrProt - 1) < 0.03 && Math.abs(corrCarbs - 1) < 0.03) return texto;
+      return texto.split(',').map(x => {
+        const t = x.trim();
+        if (!t) return t;
+        const factor = INGREDIENTE_PROTEINA.test(t) ? corrProt
+          : INGREDIENTE_CARBOHIDRATO.test(t) ? corrCarbs
+          : 1;
+        if (factor === 1) return t;
+        return t.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
+          const raw = parseFloat(num.replace(',', '.')) * factor;
+          const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
+          return `${Math.max(5, rounded)}${unit}`;
+        });
+      }).join(', ');
+    };
+
     // op() construye cada opción escalando kcal/macros e ingredientes al perfil del usuario
     const op = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
       const sc = str => { const n = parseFloat(str); return isNaN(n) ? 0 : Math.round(n * escalaRacion); };
@@ -12636,11 +12664,12 @@
     // pool aparte (fuelingPreCarrera/PostWod/etc.) y si la corrección se
     // aplicaba antes, se quedaban fuera y el día seguía descuadrado. Se
     // corrigen los 7 días (no solo el de referencia) para que la rotación
-    // semanal no vuelva a desviar el objetivo ningún día. Solo se ajustan las
-    // etiquetas de macros (prot/carbs); kcal ya era preciso (verificado: 0-7%
-    // de margen) y no se toca. Los gramos de ingredientes tampoco se tocan
-    // aquí -- reatribuirlos por macro exigiría saber qué ingrediente de cada
-    // receta aporta cada nutriente, que es un cambio mucho mayor.
+    // semanal no vuelva a desviar el objetivo ningún día. Se ajustan las
+    // etiquetas de macros (prot/carbs) Y el gramaje de los ingredientes que
+    // se identifican como su fuente principal (ver escalarIngredientesPorMacro
+    // más arriba), para que "35g prot" y "220g salmón" en el mismo plato
+    // sigan contando la misma historia. kcal ya era preciso (verificado:
+    // 0-7% de margen) y no se toca.
     {
       // Referencia = MEDIA de los 7 días, no solo el día 0: si el día de
       // referencia caía en una rotación "ligera" (menos entreno/menos
@@ -12673,6 +12702,7 @@
               const c = parseInt(o.carbs) || 0;
               o.prot = `${Math.max(0, Math.round(p * corrProt))}g prot`;
               o.carbs = `${Math.max(0, Math.round(c * corrCarbs))}g carbs`;
+              o.ingredientes = escalarIngredientesPorMacro(o.ingredientes, corrProt, corrCarbs);
             });
           });
         });
