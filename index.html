@@ -11825,11 +11825,20 @@
     // de fuerza y Metcon -- mismo perfil de exigencia que CrossFit/Hyrox, así
     // que se agrupa con ellos.
     const esMixto = esCrossfit || esHyrox || esCombinacion;
-    const protMultiplier = perdidaGrasa
+    // Enfoque nutricional elegido por el cliente en el cuestionario/"Cambiar
+    // plan" (Equilibrado/Alto en proteína/Bajo en carbohidratos/Flexible): se
+    // guardaba y se mostraba en el dashboard, pero nunca se leía aquí -- daba
+    // exactamente la misma dieta a alguien que elegía "Bajo en carbohidratos"
+    // que a alguien con "Equilibrado". "Equilibrado" y "Flexible" no tocan
+    // nada (comportamiento de siempre).
+    const enfoqueTxt = (u.enfoqueMacros || '').toLowerCase();
+    const enfoqueAltoProt  = enfoqueTxt.includes('alto en prote');
+    const enfoqueBajoCarbo = enfoqueTxt.includes('bajo en carbohidratos');
+    const protMultiplier = (perdidaGrasa
       ? (esRunner ? 2.0 : esMixto ? 2.3 : 2.2)
       : ganarMusculo
       ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
-      : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6);
+      : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6)) * (enfoqueAltoProt ? 1.15 : 1);
     const protObjSinTope = pesoKg * protMultiplier;
     const protObj = Math.round(
       perdidaGrasa
@@ -11839,9 +11848,9 @@
 
     // Carbohidratos por deporte: runners, Hyrox, CrossFit e Híbrido necesitan más glucógeno
     const carbsAltos = esRunner || esMixto;
-    const carbsMultiplier = carbsAltos
+    const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
-      : (perdidaGrasa ? 2.0 : ganarMusculo ? 4.0 : 3.0);
+      : (perdidaGrasa ? 2.0 : ganarMusculo ? 4.0 : 3.0)) * (enfoqueBajoCarbo ? 0.65 : 1);
     const carbsObj = Math.round(pesoKg * carbsMultiplier);
 
     // Factor de escala: ajusta kcal/macros del plan base al objetivo personal
@@ -12611,6 +12620,63 @@
           forzar(dm, 'Merienda', fuelingPostWod);
         }
       });
+    }
+
+    // CALIBRAR PROTEÍNA Y CARBOHIDRATOS AL OBJETIVO REAL (protObj/carbsObj)
+    // Hasta ahora, cada receta escalaba su proteína y carbohidratos con
+    // escalaRacion -- el mismo ratio pensado para CALORÍAS (kcalObj/kcal de la
+    // plantilla base), sin relación con protObj/carbsObj (calculados aparte
+    // por peso/objetivo/deporte). Medido en real: la proteína del día podía
+    // salir hasta un 77% por encima del objetivo mostrado en el dashboard, sin
+    // ninguna relación con lo que el cliente necesitaba de verdad. Se corrige
+    // con un factor calculado sobre lo que el motor YA generó para este
+    // usuario concreto (no una constante inventada, así vale para cualquier
+    // deporte/plantilla sin calibrar las 253 recetas a mano). Va DESPUÉS del
+    // "fueling del día real" de arriba a propósito: esas recetas vienen de un
+    // pool aparte (fuelingPreCarrera/PostWod/etc.) y si la corrección se
+    // aplicaba antes, se quedaban fuera y el día seguía descuadrado. Se
+    // corrigen los 7 días (no solo el de referencia) para que la rotación
+    // semanal no vuelva a desviar el objetivo ningún día. Solo se ajustan las
+    // etiquetas de macros (prot/carbs); kcal ya era preciso (verificado: 0-7%
+    // de margen) y no se toca. Los gramos de ingredientes tampoco se tocan
+    // aquí -- reatribuirlos por macro exigiría saber qué ingrediente de cada
+    // receta aporta cada nutriente, que es un cambio mucho mayor.
+    {
+      // Referencia = MEDIA de los 7 días, no solo el día 0: si el día de
+      // referencia caía en una rotación "ligera" (menos entreno/menos
+      // comida ese día en concreto), el factor de corrección salía mal
+      // calibrado y arrastraba a toda la semana muy por debajo del
+      // objetivo (detectado probando con semilla fija: la media real llegó
+      // a quedar en 49g de 154g objetivo). Promediar entre los 7 días evita
+      // que un solo día atípico descalibre la semana completa.
+      const _clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+      const _sumarMacroDia = (dia, campo) => dia.reduce((acc, m) => acc + (parseInt(m.opciones[0]?.[campo]) || 0), 0);
+      const refProtSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'prot'), 0) / nutricionPorDia.length;
+      const refCarbsSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'carbs'), 0) / nutricionPorDia.length;
+      const corrProt = refProtSemana > 0 ? _clamp(protObj / refProtSemana, 0.5, 2.0) : 1;
+      const corrCarbs = refCarbsSemana > 0 ? _clamp(carbsObj / refCarbsSemana, 0.45, 1.6) : 1;
+      if (Math.abs(corrProt - 1) > 0.03 || Math.abs(corrCarbs - 1) > 0.03) {
+        // rotar() reordena el mismo array con .slice(), no clona las recetas:
+        // una misma opción (mismo objeto) puede aparecer en varios días de la
+        // semana. Sin este Set, se multiplicaba por corrProt/corrCarbs una vez
+        // POR CADA aparición -- con una receta repetida 5-6 veces en la
+        // semana, el factor se aplicaba 5-6 veces seguidas (compuesto) y los
+        // gramos de proteína se hundían a una fracción absurda (detectado con
+        // semilla fija: 220g de salmón mostrando 9g de proteína).
+        const _yaCorregidas = new Set();
+        nutricionPorDia.forEach(dia => {
+          dia.forEach(m => {
+            (m.opciones || []).forEach(o => {
+              if (_yaCorregidas.has(o)) return;
+              _yaCorregidas.add(o);
+              const p = parseInt(o.prot) || 0;
+              const c = parseInt(o.carbs) || 0;
+              o.prot = `${Math.max(0, Math.round(p * corrProt))}g prot`;
+              o.carbs = `${Math.max(0, Math.round(c * corrCarbs))}g carbs`;
+            });
+          });
+        });
+      }
     }
 
     // El plan base guarda el día 0 (lunes) como referencia
