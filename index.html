@@ -6306,6 +6306,7 @@
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
+    <button class="modal-close" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')">✕</button>
     <div class="modal-title" style="font-size:20px" id="infoEjercicioTitulo">Ejercicio</div>
     <div id="infoEjercicioFotos" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin:14px 0 8px">MÚSCULOS TRABAJADOS</div>
