@@ -11802,11 +11802,20 @@
       kcalObj = Math.max(esMujer ? 1200 : 1500, kcalObj + u.ajusteCalorico);
     }
 
-    // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso
+    // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso.
+    // OJO: lbm*2.4 sale por debajo de peso*protMultiplier (2.0-2.3 g/kg) para
+    // prácticamente cualquier persona, tenga o no sobrepeso -- con un IMC normal
+    // el tope "de seguridad" ganaba siempre, así que el reparto por deporte de
+    // abajo (runner/mixto/gimnasio) nunca llegaba a notarse en pérdida de grasa:
+    // daba el mismo gramaje a un runner que a alguien de CrossFit con el mismo
+    // peso. Se limita el tope a IMC ≥ 25 (sobrepeso), que es para lo que se
+    // pensó -- con IMC normal se respeta el multiplicador tal cual.
     const lbm = esMujer
       ? (0.252 * pesoKg + 0.473 * altCm - 48.3)
       : (0.407 * pesoKg + 0.267 * altCm - 19.2);
     const lbmProtMax = Math.round(lbm * 2.4);
+    const bmi = pesoKg / Math.pow(altCm / 100, 2);
+    const conSobrepeso = bmi >= 25;
 
     // Proteína por deporte: runners necesitan menos, CrossFit/Hyrox/Híbrido más.
     // Híbrido estaba antes fuera de este reparto (caía al tramo por defecto de
@@ -11820,9 +11829,11 @@
       : ganarMusculo
       ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
       : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6);
+    const protObjSinTope = pesoKg * protMultiplier;
     const protObj = Math.round(
-      perdidaGrasa ? Math.min(Math.max(pesoKg * protMultiplier, 100), lbmProtMax) :
-      Math.round(pesoKg * protMultiplier)
+      perdidaGrasa
+        ? (conSobrepeso ? Math.min(Math.max(protObjSinTope, 100), lbmProtMax) : Math.max(protObjSinTope, 100))
+        : protObjSinTope
     );
 
     // Carbohidratos por deporte: runners, Hyrox, CrossFit e Híbrido necesitan más glucógeno
