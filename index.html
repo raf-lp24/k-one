@@ -934,27 +934,22 @@
     pointer-events: none;
     overflow: hidden;
   }
-  .gym-bg-deco svg {
+  .gym-bg-photo {
     position: absolute;
-    stroke: var(--brasa);
-    fill: none;
-    stroke-width: 1.5;
-    opacity: 0.09;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    filter: brightness(0.35) saturate(0.85);
+    opacity: 0.55;
   }
-  .gym-bg-deco .bg-d1 { top: 5%; left: 2%; width: 280px; transform: rotate(-20deg); }
-  .gym-bg-deco .bg-d2 { top: 18%; right: 5%; width: 240px; transform: rotate(15deg); }
-  .gym-bg-deco .bg-d3 { top: 35%; left: 8%; width: 200px; transform: rotate(-8deg); }
-  .gym-bg-deco .bg-d4 { top: 48%; right: 12%; width: 160px; transform: rotate(25deg); }
-  .gym-bg-deco .bg-d5 { top: 10%; left: 40%; width: 120px; transform: rotate(-30deg); }
-  .gym-bg-deco .bg-d6 { top: 28%; left: 55%; width: 180px; transform: rotate(12deg); }
-  .gym-bg-deco .bg-d7 { top: 62%; right: 3%; width: 220px; transform: rotate(-18deg); }
-  .gym-bg-deco .bg-d8 { top: 55%; left: 2%; width: 200px; transform: rotate(8deg); }
-  .gym-bg-deco .bg-d9 { top: 75%; right: 15%; width: 140px; transform: rotate(-25deg); }
-  .gym-bg-deco .bg-d10 { top: 85%; left: 10%; width: 180px; transform: rotate(30deg); }
-  .gym-bg-deco .bg-d11 { top: 42%; left: 35%; width: 150px; transform: rotate(-12deg); }
-  .gym-bg-deco .bg-d12 { top: 92%; right: 30%; width: 200px; transform: rotate(5deg); }
-  .gym-bg-deco .bg-d13 { top: 68%; left: 45%; width: 130px; transform: rotate(18deg); }
-  .gym-bg-deco .bg-d14 { top: 15%; left: 70%; width: 160px; transform: rotate(-22deg); }
+  .gym-bg-deco::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10,10,10,0.65) 0%, rgba(10,10,10,0.35) 45%, rgba(10,10,10,0.85) 100%);
+  }
   #landing { position: relative; z-index: 1; }
   #formulario, #login, #registro, #bienvenida, #dashboard { position: relative; z-index: 2; }
 
@@ -6325,34 +6320,7 @@
 <!-- ==================== LANDING ==================== -->
 <!-- Decoración gym fondo -->
 <div class="gym-bg-deco" aria-hidden="true">
-  <!-- Barra olímpica -->
-  <svg class="bg-d1" viewBox="0 0 400 220"><line x1="40" y1="110" x2="360" y2="110" stroke-width="4"/><rect x="4" y="70" width="22" height="80" rx="3"/><rect x="30" y="50" width="26" height="120" rx="3"/><rect x="374" y="70" width="22" height="80" rx="3"/><rect x="344" y="50" width="26" height="120" rx="3"/></svg>
-  <!-- Mancuerna -->
-  <svg class="bg-d2" viewBox="0 0 200 80"><rect x="10" y="15" width="18" height="50" rx="4"/><rect x="172" y="15" width="18" height="50" rx="4"/><line x1="28" y1="40" x2="172" y2="40" stroke-width="5"/><rect x="28" y="22" width="14" height="36" rx="3"/><rect x="158" y="22" width="14" height="36" rx="3"/></svg>
-  <!-- Kettlebell -->
-  <svg class="bg-d3" viewBox="0 0 100 130"><path d="M35 45 Q35 20 50 15 Q65 20 65 45"/><circle cx="50" cy="75" r="35"/><circle cx="50" cy="75" r="8"/></svg>
-  <!-- Disco de peso -->
-  <svg class="bg-d4" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle cx="60" cy="60" r="35"/><circle cx="60" cy="60" r="12"/></svg>
-  <!-- Cuerda de saltar -->
-  <svg class="bg-d5" viewBox="0 0 100 140"><path d="M20 130 Q20 10 50 10 Q80 10 80 130" stroke-width="2"/><rect x="14" y="125" width="12" height="15" rx="3"/><rect x="74" y="125" width="12" height="15" rx="3"/></svg>
-  <!-- Banco de press -->
-  <svg class="bg-d6" viewBox="0 0 200 100"><rect x="30" y="20" width="140" height="15" rx="4"/><line x1="50" y1="35" x2="50" y2="90" stroke-width="3"/><line x1="150" y1="35" x2="150" y2="90" stroke-width="3"/><line x1="35" y1="90" x2="65" y2="90" stroke-width="3"/><line x1="135" y1="90" x2="165" y2="90" stroke-width="3"/><rect x="70" y="30" width="60" height="8" rx="2"/></svg>
-  <!-- Barra olímpica 2 -->
-  <svg class="bg-d7" viewBox="0 0 400 220"><line x1="40" y1="110" x2="360" y2="110" stroke-width="4"/><rect x="4" y="70" width="22" height="80" rx="3"/><rect x="30" y="50" width="26" height="120" rx="3"/><rect x="374" y="70" width="22" height="80" rx="3"/><rect x="344" y="50" width="26" height="120" rx="3"/></svg>
-  <!-- Mancuerna 2 -->
-  <svg class="bg-d8" viewBox="0 0 200 80"><rect x="10" y="15" width="18" height="50" rx="4"/><rect x="172" y="15" width="18" height="50" rx="4"/><line x1="28" y1="40" x2="172" y2="40" stroke-width="5"/><rect x="28" y="22" width="14" height="36" rx="3"/><rect x="158" y="22" width="14" height="36" rx="3"/></svg>
-  <!-- Polea / agarre jalón -->
-  <svg class="bg-d9" viewBox="0 0 100 160"><line x1="50" y1="10" x2="50" y2="90" stroke-width="3"/><circle cx="50" cy="10" r="8"/><rect x="30" y="90" width="40" height="12" rx="3"/><line x1="35" y1="102" x2="35" y2="130" stroke-width="2"/><line x1="65" y1="102" x2="65" y2="130" stroke-width="2"/><rect x="25" y="130" width="20" height="8" rx="2"/><rect x="55" y="130" width="20" height="8" rx="2"/></svg>
-  <!-- Disco de peso 2 -->
-  <svg class="bg-d10" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle cx="60" cy="60" r="35"/><circle cx="60" cy="60" r="12"/></svg>
-  <!-- Kettlebell 2 -->
-  <svg class="bg-d11" viewBox="0 0 100 130"><path d="M35 45 Q35 20 50 15 Q65 20 65 45"/><circle cx="50" cy="75" r="35"/><circle cx="50" cy="75" r="8"/></svg>
-  <!-- Barra 3 -->
-  <svg class="bg-d12" viewBox="0 0 400 220"><line x1="40" y1="110" x2="360" y2="110" stroke-width="4"/><rect x="4" y="70" width="22" height="80" rx="3"/><rect x="30" y="50" width="26" height="120" rx="3"/><rect x="374" y="70" width="22" height="80" rx="3"/><rect x="344" y="50" width="26" height="120" rx="3"/></svg>
-  <!-- Cuerda 2 -->
-  <svg class="bg-d13" viewBox="0 0 100 140"><path d="M20 130 Q20 10 50 10 Q80 10 80 130" stroke-width="2"/><rect x="14" y="125" width="12" height="15" rx="3"/><rect x="74" y="125" width="12" height="15" rx="3"/></svg>
-  <!-- Disco 3 -->
-  <svg class="bg-d14" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle cx="60" cy="60" r="35"/><circle cx="60" cy="60" r="12"/></svg>
+  <img class="gym-bg-photo" src="/img/landing/gym-hero.jpg" alt="" loading="eager">
 </div>
 
 <div class="screen" id="landing">
