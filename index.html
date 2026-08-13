@@ -8975,6 +8975,12 @@
   // Esta tabla cubre los movimientos más comunes de los planes (fuerza,
   // funcional, WOD) con 2 alternativas equivalentes cada uno, para que el
   // cliente pueda cambiarlo él mismo al momento desde la ficha "Cómo se hace".
+  // `cardio: true` marca movimientos de acondicionamiento/WOD sin progresión de
+  // carga real (no llevan stepper de peso) -- estos rotan cada SEMANA. Los
+  // levantamientos de fuerza (`cardio: false`, o sin marcar) sí tienen stepper
+  // de peso con historial, así que rotan cada BLOQUE (4 semanas): cambiar de
+  // ejercicio cada semana rompería la referencia de "peso anterior" justo
+  // cuando más sirve, que es viendo la progresión de un mismo movimiento.
   const ALTERNATIVAS_EJERCICIO = [
     [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet']],
     [/sentadilla goblet/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
@@ -8994,20 +9000,72 @@
     [/curl b[ií]ceps?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
     [/press franc[eé]s|extensi[oó]n de tr[ií]ceps/i, ['Fondos en banco', 'Press cerrado']],
     [/elevaciones laterales/i, ['Elevaciones en polea', 'Press Arnold']],
-    [/burpees?/i, ['Mountain climbers', 'Escaladores + flexión']],
-    [/box jumps?( over)?/i, ['Step-ups explosivos', 'Saltos a la comba']],
-    [/wall balls?/i, ['Thrusters con mancuernas', 'Sentadilla + press de hombro']],
-    [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro']],
-    [/kettlebell swings?|\bKB swings?\b/i, ['Hip thrust con mancuerna', 'Peso muerto rumano con kettlebell']],
-    [/russian twist/i, ['Plancha lateral', 'Rueda abdominal']],
-    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal']],
-    [/mountain climbers?/i, ['Burpees', 'Escaladores']],
-    [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing']],
-    [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano']],
+    // ── Cardio / acondicionamiento: rotan cada semana, con más variedad de
+    // intensidad (desde andar hasta pliometría) para no repetir siempre lo mismo.
+    [/burpees?/i, ['Mountain climbers', 'Cinta con inclinación a paso rápido', 'Remo o bici suave 5 min'], true],
+    [/box jumps?( over)?/i, ['Step-ups explosivos', 'Cinta con inclinación a paso rápido', 'Comba (saltos simples)'], true],
+    [/\bdouble[- ]unders?\b|\bcomba\b|salto(s)? a la comba/i, ['Cinta con inclinación a paso rápido', 'Bici estática suave', 'Remo suave 5 min'], true],
+    [/wall balls?/i, ['Thrusters con mancuernas', 'Sentadilla + press de hombro'], true],
+    [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro'], true],
+    [/kettlebell swings?|\bKB swings?\b/i, ['Hip thrust con mancuerna', 'Peso muerto rumano con kettlebell'], true],
+    [/russian twist/i, ['Plancha lateral', 'Rueda abdominal'], true],
+    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal'], true],
+    [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores'], true],
+    [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
+    [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano'], true],
   ];
   const alternativasParaEjercicio = nombre => {
     const entry = ALTERNATIVAS_EJERCICIO.find(([re]) => re.test(nombre));
     return entry ? entry[1].filter(alt => alt.toLowerCase() !== nombre.toLowerCase()) : [];
+  };
+  // Hash estable simple (mismo algoritmo que la semilla de usuario, más abajo en
+  // buildPlanFromData) para decidir de forma determinista y reproducible qué
+  // alternativa "toca" en una semana/bloque dado -- mismo usuario y misma semana
+  // siempre da la misma elección (no cambia solo con refrescar la página), pero
+  // usuarios distintos con el mismo perfil no ven exactamente lo mismo.
+  const _hashRotacion = texto => {
+    let h = 0;
+    for (let i = 0; i < texto.length; i++) h = (Math.imul(h, 31) + texto.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  };
+  // Construye la tabla de rotación AUTOMÁTICA de esta semana: para cada
+  // ejercicio con alternativas conocidas, decide con el hash si esta
+  // semana/bloque toca el original o una de las alternativas. Se aplica DESPUÉS
+  // de las sustituciones por lesión/material (mismo motivo que ellas: si fuera
+  // antes, la regex de lesión ya no encontraría el nombre original y perdería
+  // la protección). Las sustituciones manuales del cliente (ejerciciosSustituidos)
+  // siempre tienen la última palabra sobre esto -- se aplican después, en
+  // formatearSesion, y pisan lo que decida la rotación automática.
+  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso) => {
+    return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio]) => {
+      const cicloClave = cardio ? semanaActual : bloqueMeso;
+      const opciones = alternativas.length + 1; // +1 = mantener el original
+      const idx = _hashRotacion(regex.source + semilla + cicloClave) % opciones;
+      return idx === 0 ? null : [regex, alternativas[idx - 1]];
+    }).filter(Boolean);
+  };
+  // Aplica la tabla de rotación en DOS pasadas en vez de encadenar los
+  // .replace() uno tras otro (como hace aplicarReemplazos con mapaLesion):
+  // encadenados, el texto que deja una regla ("remo con mancuerna") podía
+  // volver a coincidir con la regex de OTRA regla más abajo en la tabla y
+  // sustituirse una segunda vez en cascada -- algo que mapaLesion evita a
+  // mano ordenando con cuidado un único mapa fijo, pero aquí la tabla la
+  // arma el hash en tiempo real y no se puede garantizar ese orden. Primera
+  // pasada: cada coincidencia se cambia por un marcador inerte (no es texto
+  // de ningún ejercicio, así que ninguna otra regla de la tabla lo toca).
+  // Segunda pasada: los marcadores se cambian por el texto final con un
+  // simple split/join, sin regex, así que no hay una tercera vuelta posible.
+  const _aplicarRotacionAutomatica = (texto, tabla) => {
+    if (!tabla.length || !texto) return texto;
+    let out = texto;
+    // Marcador "@@ROTn@@": texto ASCII normal (no caracteres de control) que
+    // nunca aparece en una plantilla de entrenamiento real, así que ninguna
+    // otra regla de la tabla puede coincidir con él por casualidad -- usar solo
+    // espacios y el número de la regla ("descanso 3 min" ya tiene un "3" suelto)
+    // podía chocar con el marcador de otra regla.
+    tabla.forEach(([regex], i) => { out = out.replace(regex, `@@ROT${i}@@`); });
+    tabla.forEach(([, reemplazo], i) => { out = out.split(`@@ROT${i}@@`).join(reemplazo); });
+    return out;
   };
   const _escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -11817,6 +11875,21 @@
     // lesiones ya se eligen según el material disponible, más arriba.
     if (mapaLesion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
+    }
+
+    // ROTACIÓN AUTOMÁTICA DE EJERCICIOS — antes el plan repetía exactamente los
+    // mismos ejercicios semana tras semana (solo cambiaban series/%1RM); un
+    // cliente que entrenara meses veía siempre "sentadilla trasera" o "comba"
+    // en el mismo hueco. Ahora, para los movimientos con alternativas conocidas
+    // (ALTERNATIVAS_EJERCICIO, arriba), se decide de forma determinista por
+    // usuario qué toca esta semana/bloque: cardio/WOD cambia cada semana, los
+    // levantamientos con seguimiento de peso cambian cada bloque de 4 semanas
+    // (para no romper la referencia de progresión). Va DESPUÉS de lesión/material
+    // a propósito, mismo motivo que ellos: si fuera antes, esas reglas dejarían
+    // de encontrar el nombre original y perderían la protección.
+    const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso);
+    if (mapaRotacion.length) {
+      semana = semana.map(d => d.detalle ? { ...d, detalle: _aplicarRotacionAutomatica(d.detalle, mapaRotacion) } : d);
     }
 
     // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
