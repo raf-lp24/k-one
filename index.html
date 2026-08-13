@@ -7886,13 +7886,7 @@
               <div class="stat-card-value" id="resumenGrasa">0</div>
               <div class="stat-card-sub">gramos</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-card-label">Fibra</div>
-              <div class="stat-card-value" id="resumenFibra">—</div>
-              <div class="stat-card-sub">gramos</div>
-            </div>
           </div>
-          <div id="avisoFibra" style="display:none;margin-top:12px;font-size:12.5px;line-height:1.6;padding:10px 14px;border-radius:8px"></div>
         </div>
         <div id="nutricionNotas"></div>
         <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
@@ -16764,39 +16758,6 @@
     showToast('Lista descargada');
   }
 
-  // ===== FIBRA: se CALCULA de los ingredientes, no se anota receta a receta =====
-  // Las ~200 recetas del plan no llevan campo de fibra y anotarlas a mano sería
-  // inmantenible (y quedaría desfasado en cuanto se añada una receta nueva). En
-  // vez de eso se reutiliza la misma tabla /data/alimentos.json (que ahora tiene
-  // fibra por 100g de la USDA) y el mismo emparejamiento por texto que ya usa el
-  // desglose de macros: "150g garbanzos, 80g espinacas" -> 11.4 + 1.8 g de fibra.
-  // Cobertura medida sobre los ingredientes reales del plan: ~95%, así que la
-  // cifra se muestra como aproximada a propósito.
-  let _clavesFibra = null;
-  function _fibraDeIngredientes(texto) {
-    if (!_alimentos) return null;
-    if (!_clavesFibra) {
-      _clavesFibra = Object.keys(_alimentos)
-        .sort((a, b) => b.length - a.length)
-        .map(k => [k, _normTexto(k)]);
-    }
-    let total = 0;
-    (texto || '').split(',').forEach(parte => {
-      const t = parte.trim();
-      if (!t) return;
-      const m = t.match(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/i);
-      if (!m) return;
-      const gramos = parseFloat(m[1].replace(',', '.'));
-      if (!gramos) return;
-      const n = _normTexto(t);
-      const hit = _clavesFibra.find(([, kn]) => n.includes(kn));
-      if (!hit) return;
-      const a = _alimentos[hit[0]];
-      if (a && typeof a.f === 'number') total += a.f * gramos / 100;
-    });
-    return total;
-  }
-
   // ===== RESUMEN NUTRICIONAL DEL DÍA (suma según opciones elegidas) =====
   function actualizarResumenNutricional() {
     const nutriActiva = generatedPlan?._nutricionActiva || generatedPlan?.nutricion;
@@ -16822,55 +16783,6 @@
       };
       sub('resumenKcal', `kcal · obj. ${generatedPlan.kcalObj}`);
       sub('resumenProt', `g · obj. ${generatedPlan.protObj}g`);
-    }
-
-    // La tabla de alimentos se carga bajo demanda (10 KB). Si aún no está, se
-    // pide y se vuelve a entrar aquí; si la petición falla queda {} (objeto
-    // truthy), así que no se puede quedar en bucle.
-    if (!_alimentos) {
-      fetch('/data/alimentos.json')
-        .then(r => r.ok ? r.json() : {})
-        .then(j => { _alimentos = j; _clavesFibra = null; actualizarResumenNutricional(); })
-        .catch(() => { _alimentos = {}; });
-      return;
-    }
-    let fibra = 0;
-    nutriActiva.forEach((meal, mealIdx) => {
-      const opt = meal.opciones[comidasSeleccionadas[mealIdx]] || meal.opciones[0];
-      fibra += _fibraDeIngredientes(opt.ingredientes) || 0;
-    });
-    fibra = Math.round(fibra);
-    // Objetivo de fibra: 14 g por cada 1000 kcal (referencia habitual en guías
-    // dietéticas), con suelo de 25 g/día y TECHO de 38 g. El techo no es
-    // decorativo: sin él, un superávit de 3300 kcal pedía 46 g/día, que está por
-    // encima de lo que recomienda ninguna guía y, subiendo de golpe, es la receta
-    // para hinchazón y gases — justo lo que hace que la gente abandone el plan.
-    const objFibra = Math.min(38, Math.max(25, Math.round(14 * (generatedPlan?.kcalObj || 2000) / 1000)));
-    set('resumenFibra', fibra);
-    const subF = document.getElementById('resumenFibra')?.closest('.stat-card')?.querySelector('.stat-card-sub');
-    if (subF) subF.textContent = `g aprox. · obj. ${objFibra}g`;
-
-    const aviso = document.getElementById('avisoFibra');
-    if (aviso) {
-      if (fibra >= objFibra) {
-        aviso.style.display = '';
-        aviso.style.background = 'rgba(39,174,96,0.08)';
-        aviso.style.borderLeft = '3px solid #27ae60';
-        aviso.style.color = 'var(--metal-claro)';
-        aviso.textContent = `Fibra cubierta (${fibra}g de ${objFibra}g). Bien: la fibra es lo que más sacia y lo que mejor te va a hacer llevar el plan sin pasar hambre.`;
-      } else if (fibra >= objFibra * 0.7) {
-        aviso.style.display = '';
-        aviso.style.background = 'rgba(255,255,255,0.04)';
-        aviso.style.borderLeft = '3px solid var(--metal)';
-        aviso.style.color = 'var(--metal-claro)';
-        aviso.textContent = `Fibra: ${fibra}g de ${objFibra}g. Vas cerca. Cambiar el arroz o la pasta por su versión integral, o añadir una pieza de fruta, ya te deja dentro.`;
-      } else {
-        aviso.style.display = '';
-        aviso.style.background = 'rgba(232,73,15,0.08)';
-        aviso.style.borderLeft = '3px solid var(--brasa)';
-        aviso.style.color = 'var(--blanco)';
-        aviso.textContent = `Fibra baja hoy: ${fibra}g de ${objFibra}g. Con las opciones que has elegido te quedas corto. Las legumbres (garbanzos, lentejas), la avena, las verduras y la fruta con piel son lo que más sube esta cifra — y es lo que más te va a saciar.`;
-      }
     }
   }
 
