@@ -12857,6 +12857,20 @@
       }));
     };
     nutricion = ajustarPorFrecuenciaComidas(nutricion, u.comidas);
+
+    // VARIEDAD REAL DE VERDURA/FRUTA: antes no se comprobaba nada — un plan podía
+    // ser nutricionalmente "correcto" en macros y aun así ser ciego a micronutrientes
+    // si el pool de recetas de este usuario (tras todos los filtros de arriba) se
+    // apoyaba siempre en las mismas 2-3 verduras. Se cuenta cuántos vegetales/frutas
+    // DISTINTOS aparecen de verdad en las recetas que le van a tocar a este cliente
+    // (no una lista genérica): si son pocos, se avisa con lo que falta.
+    const VEGETALES_FRUTAS_REF = ['tomate', 'espinacas', 'pimiento', 'cebolla', 'zanahoria', 'calabacín',
+      'brócoli', 'pepino', 'lechuga', 'rúcula', 'champiñones', 'judías verdes', 'alcachofa', 'espárragos',
+      'apio', 'puerro', 'patata', 'boniato', 'aguacate', 'plátano', 'frutos rojos', 'fresas', 'arándanos',
+      'kiwi', 'manzana', 'pera', 'naranja', 'mandarina', 'melocotón', 'cerezas', 'granada', 'coles de bruselas',
+      'calabaza', 'col', 'berenjena', 'edamame', 'setas'];
+    const _textoTotalMenu = nutricion.map(m => m.opciones.map(o => o.ingredientes).join(', ')).join(', ').toLowerCase();
+    const variedadVegetalCount = VEGETALES_FRUTAS_REF.filter(v => _textoTotalMenu.includes(v)).length;
     // Los platos de "fueling" (antes/después de tirada larga o WOD, más abajo)
     // vienen de un pool aparte y nunca pasaban por este filtro -- alguien con
     // alergia a huevo (vía "Otra") podía recibir "2 claras" en unas tortitas
@@ -13015,6 +13029,19 @@
     if (!soloDieta) {
       notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
       notasDeporte.push('Vuelta a la calma: 5 min de estiramientos estáticos (30s por grupo muscular) al terminar. Los músculos que más has trabajado hoy son los que más necesitan estirarse.');
+      // Frecuencia de core: antes dependía por completo de si la plantilla de ese
+      // día concreto incluía o no plancha/rueda abdominal, sin ningún mínimo
+      // garantizado. Se cuenta de verdad sobre la semana YA generada de este
+      // usuario (semana, con lesión/material/rotación ya aplicados) y, si se
+      // queda corta del mínimo recomendado (2x/semana), se avisa con un extra
+      // concreto en vez de dejarlo a lo que trajera la plantilla por azar.
+      const _coreRegex = /plancha|dead bug|rueda abdominal|russian twist|elevaci[oó]n de piernas|abdomin/i;
+      const diasConCore = semana.filter(d => d.detalle && _coreRegex.test(d.detalle)).length;
+      if (diasConCore < 2) {
+        notasDeporte.push(`Core: tu plan de esta semana trae trabajo de core en ${diasConCore} día${diasConCore === 1 ? '' : 's'}. Lo recomendable son al menos 2x/semana — añade 3×30-45s de plancha + 3×12/lado de dead bug al final de dos de tus sesiones.`);
+      } else {
+        notasDeporte.push(`Core: tu plan ya trae trabajo de core en ${diasConCore} días esta semana — dentro del mínimo recomendado de 2x/semana.`);
+      }
     }
     // Nota sobre alcohol: aplica a cualquier objetivo/deporte, así que va fuera
     // de los bloques por deporte de arriba. El alcohol no solo aporta calorías
@@ -13022,6 +13049,23 @@
     // después y empeora la calidad del sueño, justo cuando más se necesita
     // para recuperar.
     notasDeporte.push('Alcohol: si bebes, que sea la excepción y no la norma. Además de sumar calorías vacías, reduce la síntesis de proteína muscular hasta 24h y empeora la calidad del sueño — justo lo que más necesitas para recuperar.');
+    // Omega-3 y vitamina D: antes solo aparecían atados a casos concretos (runner
+    // que entrena en interior). Se añaden como nota general porque aplican a
+    // cualquier perfil, no solo a corredores.
+    if (!esVegetariano) {
+      notasDeporte.push('Omega-3: si no comes pescado azul (salmón, sardina, caballa) al menos 2 veces por semana, un suplemento de omega-3 (1-2g/día de EPA+DHA) cubre ese hueco — es de los pocos suplementos con evidencia real fuera del rendimiento deportivo.');
+    } else {
+      notasDeporte.push('Omega-3: en dieta vegetariana/vegana cuesta más llegar a los niveles de EPA/DHA que da el pescado azul. Las semillas de lino/chía y las nueces aportan ALA, pero la conversión a EPA/DHA es limitada — un suplemento de omega-3 de origen algal es la opción más fiable si no comes pescado.');
+    }
+    notasDeporte.push('Vitamina D: la sintetizas con la exposición solar directa a la piel, así que en meses de poco sol o si pasas la mayor parte del día en interior es habitual estar por debajo — un análisis de sangre lo confirma, y si hace falta, un suplemento de vitamina D3 es barato y efectivo.');
+    // Variedad de verdura/fruta: nota calculada de verdad sobre el pool de
+    // recetas de ESTE usuario (variedadVegetalCount, calculado más arriba justo
+    // tras cerrar el filtrado de nutrición), no un texto genérico igual para todos.
+    if (variedadVegetalCount < 10) {
+      notasDeporte.push(`Variedad de verdura/fruta: con tus filtros actuales, tu plan se apoya en ${variedadVegetalCount} vegetales/frutas distintos. Para cubrir mejor el espectro de micronutrientes, intenta variar más allá de lo que ya te proponemos: añade una pieza de fruta de temporada o una verdura distinta en las comidas que prepares tú.`);
+    } else {
+      notasDeporte.push(`Variedad de verdura/fruta: tu plan ya se mueve entre ${variedadVegetalCount} vegetales/frutas distintos — buen rango para cubrir micronutrientes sin depender siempre de los mismos.`);
+    }
 
     // NORMALIZACIÓN CALÓRICA: ajusta las kcal de cada opción para que el total
     // diario promedio (eligiendo la opción 0 de cada comida) se acerque al objetivo.
@@ -13282,6 +13326,20 @@
       }
       if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
         razones.push(`Nutrición filtrada por tu ${userData.alergia === 'Otra' ? 'alergia personalizada' : userData.alergia.toLowerCase()}`);
+      }
+
+      // Sugerencia de graduación de nivel con criterio objetivo: antes el único
+      // camino de "Llevo algo de tiempo" a "Avanzado" era que el cliente
+      // reeditara el cuestionario por su cuenta, sin ningún criterio de por
+      // medio. Se exige un mínimo de entrenos reales completados (36 ≈ 3
+      // meses a 3 días/semana) Y que el último ajuste semanal no haya sido a
+      // la baja (si se le está bajando volumen por fatiga, no es buen momento
+      // para sugerir subir la exigencia).
+      if (!soloDietaPanel && userData.nivel && userData.nivel.includes('Llevo')) {
+        const entrenosCompletados = (userData.historialEntrenos || []).length;
+        if (entrenosCompletados >= 36 && (p.ajuste || 0) >= 0) {
+          razones.push(`Llevas ${entrenosCompletados} entrenos completados con buena progresión — si los pesos y la técnica ya no te suponen reto, prueba a marcarte como "Avanzado" en tu perfil para desbloquear más volumen y técnicas de intensidad`);
+        }
       }
 
       lista.innerHTML = razones.map(r => `<li>${r}</li>`).join('');
