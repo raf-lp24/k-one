@@ -6311,6 +6311,7 @@
     <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:8px">CÓMO SE HACE</div>
     <ol id="infoEjercicioPasos" style="margin:0 0 18px;padding-left:22px;color:var(--metal-claro);font-size:13.5px;line-height:1.65;display:flex;flex-direction:column;gap:8px"></ol>
+    <div id="infoEjercicioSustituir" style="display:none"></div>
     <a id="infoEjercicioVideo" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:100%;display:block;text-align:center;text-decoration:none;box-sizing:border-box">▶ Ver vídeo de técnica</a>
     <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0;line-height:1.5">Instrucciones: exercises-dataset (MIT) · Fotos: free-exercise-db (dominio público)</p>
     <button class="encuesta-skip" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')">Cerrar</button>
@@ -8972,6 +8973,66 @@
 
   // Construye el bloque "Calentamiento / Bloque principal / Vuelta a la calma" a partir de
   // un día de `semana` (mismo dato para "Hoy" y para "Plan semanal" → mismo contenido).
+  // ===== SUSTITUCIÓN DE EJERCICIOS A GUSTO DEL CLIENTE =====
+  // Antes solo se sustituía un ejercicio automáticamente por lesión o falta de
+  // material (mapaLesion / mapaConMaterial más abajo, decididos por el perfil).
+  // Para "no me gusta este ejercicio, dame otro" no había nada — el flujo era
+  // escribir por el chat "¿Cómo va el entreno?" y esperar respuesta manual.
+  // Esta tabla cubre los movimientos más comunes de los planes (fuerza,
+  // funcional, WOD) con 2 alternativas equivalentes cada uno, para que el
+  // cliente pueda cambiarlo él mismo al momento desde la ficha "Cómo se hace".
+  const ALTERNATIVAS_EJERCICIO = [
+    [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet']],
+    [/sentadilla goblet/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
+    [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
+    [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
+    [/peso muerto rumano/i, ['Hip thrust', 'Buenos días (good mornings)']],
+    [/peso muerto( convencional)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra']],
+    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas']],
+    [/press inclinado/i, ['Press banca plano', 'Press con mancuernas']],
+    [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold']],
+    [/dominadas|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja']],
+    [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna']],
+    [/remo con mancuerna/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
+    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
+    [/hip thrust/i, ['Peso muerto rumano', 'Puente de glúteo']],
+    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas']],
+    [/curl b[ií]ceps?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
+    [/press franc[eé]s|extensi[oó]n de tr[ií]ceps/i, ['Fondos en banco', 'Press cerrado']],
+    [/elevaciones laterales/i, ['Elevaciones en polea', 'Press Arnold']],
+    [/burpees?/i, ['Mountain climbers', 'Escaladores + flexión']],
+    [/box jumps?( over)?/i, ['Step-ups explosivos', 'Saltos a la comba']],
+    [/wall balls?/i, ['Thrusters con mancuernas', 'Sentadilla + press de hombro']],
+    [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro']],
+    [/kettlebell swings?|\bKB swings?\b/i, ['Hip thrust con mancuerna', 'Peso muerto rumano con kettlebell']],
+    [/russian twist/i, ['Plancha lateral', 'Rueda abdominal']],
+    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal']],
+    [/mountain climbers?/i, ['Burpees', 'Escaladores']],
+    [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing']],
+    [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano']],
+  ];
+  const alternativasParaEjercicio = nombre => {
+    const entry = ALTERNATIVAS_EJERCICIO.find(([re]) => re.test(nombre));
+    return entry ? entry[1].filter(alt => alt.toLowerCase() !== nombre.toLowerCase()) : [];
+  };
+  const _escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // Aplica las sustituciones que el cliente eligió para un día concreto (guardadas
+  // en userData.ejerciciosSustituidos[díaDeLaSemana]) sobre el texto crudo del
+  // plan, ANTES de que formatearSesion lo trocee en tarjetas. Si la semana
+  // siguiente el motor regenera ese día con otro ejercicio, el nombre guardado
+  // deja de encontrar coincidencia y sencillamente no sustituye nada — no hace
+  // falta limpiarlo a mano, caduca solo.
+  const _aplicarSustitucionesDia = (detalle, diaNombre) => {
+    const mapa = userData?.ejerciciosSustituidos?.[diaNombre];
+    if (!mapa || !detalle) return detalle;
+    let out = detalle;
+    Object.entries(mapa).forEach(([original, nuevo]) => {
+      out = out.replace(new RegExp(_escapeRegExp(original), 'gi'), nuevo);
+    });
+    return out;
+  };
+
   // ===== REGISTRO DE PESOS POR EJERCICIO =====
   // Normaliza un nombre de ejercicio (sin acentos, minúsculas) para usarlo
   // como clave estable y poder recordar el último peso usado.
@@ -9249,7 +9310,7 @@
     // claves más largas primero para que "curl martillo" gane a "curl"
     _infoEjerciciosKeys = Object.keys(_infoEjercicios).sort((a, b) => b.length - a.length);
   }
-  async function abrirInfoEjercicio(nombre) {
+  async function abrirInfoEjercicio(nombre, diaNombre) {
     await _cargarInfoEjercicios();
     const n = normalizarEjercicio(nombre);
     const key = (_infoEjerciciosKeys || []).find(k => n.includes(k));
@@ -9259,6 +9320,7 @@
       window.open(getVideoUrl(nombre), '_blank', 'noopener');
       return;
     }
+    _renderSustitucionEjercicioUI(nombre, diaNombre);
     document.getElementById('infoEjercicioTitulo').textContent = nombre;
     // Fotos del movimiento (inicio / final). Dominio público (free-exercise-db).
     const fotos = document.getElementById('infoEjercicioFotos');
@@ -9549,7 +9611,7 @@
   // Convierte un texto de ejercicio ("Press banca 4×8 · Al 75-80% de tu máximo")
   // en una fila con el texto, un stepper de peso (kg, con botones +/-) que recuerda
   // el último valor guardado para ese ejercicio, y un mini-historial de registros previos.
-  function renderEjercicioConPeso(texto, capitalizar) {
+  function renderEjercicioConPeso(texto, capitalizar, diaNombre) {
     const textoCap = capitalizar(texto);
     const match = textoCap.match(/^(.+?)(\s*\d+\s*[x×]\s*\S+)(.*)$/i);
     if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${_esc(textoCap)}</span></div>`;
@@ -9589,17 +9651,18 @@
     // atributos HTML (el navegador lo decodifica solo al leerlo de vuelta con
     // .dataset, así que el guardado/lectura de peso no se ve afectado).
     const keyAttr = _esc(key);
+    const diaJs = _esc((diaNombre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     // Tarjeta de ejercicio: miniatura (abre la ficha "cómo se hace"), nombre, RPE,
     // y series / reps / peso. El stepper de peso se conserva íntegro (registro real).
     return `<div class="ejercicio-card">
-      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
+      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
         <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
       </button>
       <div class="ejercicio-card-body">
         <div class="ejercicio-card-top">
           <div class="ejercicio-card-namewrap">
             <div class="ejercicio-nombre">${nombreSafe}</div>
-            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
+            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               Cómo se hace
             </button>
@@ -9635,7 +9698,7 @@
   // con una frase explicándolo escrita a mano; mejor apoyarse en la ficha real
   // (fotos + instrucciones, o vídeo si no hay ficha) que ya usan los demás
   // ejercicios — es más claro que cualquier párrafo que se pueda escribir aquí.
-  function renderEjercicioSimple(texto, capitalizar) {
+  function renderEjercicioSimple(texto, capitalizar, diaNombre) {
     const textoCap = capitalizar(texto);
     let nombre, resto;
     // El remate interválico (finisher4, arriba en el generador) ya empieza por
@@ -9658,15 +9721,16 @@
     // ejercicio añadido por el cliente, texto libre sin garantías.
     const nombreSafe = _esc(nombre);
     const nombreJs = _esc(nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    const diaJs = _esc((diaNombre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     return `<div class="ejercicio-card ejercicio-card-simple">
-      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
+      <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
         <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
       </button>
       <div class="ejercicio-card-body">
         <div class="ejercicio-card-top">
           <div class="ejercicio-card-namewrap">
             <div class="ejercicio-nombre">${nombreSafe}</div>
-            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
+            <button type="button" class="ejercicio-info-btn" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')" title="Ver fotos, músculos e instrucciones de: ${nombreSafe}" aria-label="Cómo se hace: ${nombreSafe}">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               Cómo se hace
             </button>
@@ -9796,6 +9860,67 @@
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
 
+  // ===== SUSTITUIR UN EJERCICIO DEL PLAN POR OTRO EQUIVALENTE =====
+  // Se guarda en userData.ejerciciosSustituidos[díaDeLaSemana][nombreOriginal] = nombreNuevo.
+  // Solo afecta a ESE día de la semana (si el motor regenera el plan con otro
+  // ejercicio ahí la próxima semana, el nombre guardado deja de coincidir con
+  // nada y no sustituye — no hace falta limpiarlo a mano).
+  function aplicarSustitucionEjercicio(diaNombre, original, nuevo) {
+    if (!diaNombre || !original || !nuevo) return;
+    userData.ejerciciosSustituidos = userData.ejerciciosSustituidos || {};
+    userData.ejerciciosSustituidos[diaNombre] = userData.ejerciciosSustituidos[diaNombre] || {};
+    userData.ejerciciosSustituidos[diaNombre][original] = nuevo;
+    document.getElementById('modalInfoEjercicio')?.classList.remove('visible');
+    refrescarVistasEjercicios();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    showToast(`Cambiado "${original}" por "${nuevo}" este día.`);
+  }
+
+  function quitarSustitucionEjercicio(diaNombre, original) {
+    if (userData.ejerciciosSustituidos?.[diaNombre]) {
+      delete userData.ejerciciosSustituidos[diaNombre][original];
+    }
+    document.getElementById('modalInfoEjercicio')?.classList.remove('visible');
+    refrescarVistasEjercicios();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    showToast(`Restaurado "${original}".`);
+  }
+
+  // Encuentra si el nombre mostrado actualmente es el resultado de una
+  // sustitución ya aplicada ese día, y devuelve el nombre original si es así.
+  const _sustitucionActivaPara = (diaNombre, nombreActual) => {
+    const mapa = userData?.ejerciciosSustituidos?.[diaNombre];
+    if (!mapa) return null;
+    const entry = Object.entries(mapa).find(([, nuevo]) => nuevo.toLowerCase() === nombreActual.toLowerCase());
+    return entry ? entry[0] : null;
+  };
+
+  function _renderSustitucionEjercicioUI(nombre, diaNombre) {
+    const cont = document.getElementById('infoEjercicioSustituir');
+    if (!cont) return;
+    const jsEsc = s => _esc(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    if (!diaNombre) { cont.innerHTML = ''; cont.style.display = 'none'; return; }
+    const btnStyle = 'background:var(--carbon);border:1px solid var(--humo);color:var(--blanco);font-size:12.5px;padding:8px 14px;border-radius:20px;cursor:pointer';
+    const labelStyle = 'font-size:11px;color:var(--metal);font-family:\'DM Mono\',monospace;letter-spacing:1px;margin-bottom:8px';
+    const wrapStyle = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px';
+    const original = _sustitucionActivaPara(diaNombre, nombre);
+    if (original) {
+      cont.style.display = '';
+      cont.innerHTML = `<div style="${labelStyle}">HAS CAMBIADO "${_esc(original).toUpperCase()}" POR ESTE EJERCICIO</div>
+        <div style="${wrapStyle}"><button type="button" style="${btnStyle}" onclick="quitarSustitucionEjercicio('${jsEsc(diaNombre)}','${jsEsc(original)}')">↺ Volver a "${_esc(original)}"</button></div>`;
+      return;
+    }
+    const alternativas = alternativasParaEjercicio(nombre);
+    if (!alternativas.length) { cont.innerHTML = ''; cont.style.display = 'none'; return; }
+    cont.style.display = '';
+    cont.innerHTML = `<div style="${labelStyle}">¿NO TE GUSTA ESTE EJERCICIO? CÁMBIALO POR</div>
+      <div style="${wrapStyle}">${alternativas.map(alt =>
+        `<button type="button" style="${btnStyle}" onclick="aplicarSustitucionEjercicio('${jsEsc(diaNombre)}','${jsEsc(nombre)}','${jsEsc(alt)}')">${_esc(alt)}</button>`
+      ).join('')}</div>`;
+  }
+
   // Refresca "Hoy" y "Tu entrenamiento" tras añadir/quitar un ejercicio propio.
   // Se comprueba que cada contenedor exista en vez de asumir cuál está visible.
   function refrescarVistasEjercicios() {
@@ -9894,9 +10019,11 @@
     if (!day || day.tipo === 'Descanso' || !day.detalle) return '';
     const extras = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
     const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const diaNombre = day.dia;
+    const detalleConSustituciones = _aplicarSustitucionesDia(day.detalle, diaNombre);
 
-    const partes = day.detalle.split('·');
-    const ejerciciosTexto = partes.length >= 2 ? partes.slice(1).join('·') : day.detalle;
+    const partes = detalleConSustituciones.split('·');
+    const ejerciciosTexto = partes.length >= 2 ? partes.slice(1).join('·') : detalleConSustituciones;
     // Split por comas que NO estén dentro de un paréntesis: una nota como
     // "press francés (codos fijos, no los abras)" tiene una coma de verdad
     // dentro del inciso, y un split ingenuo la parte en dos "ejercicios"
@@ -9938,13 +10065,13 @@
     });
     // Los ejercicios con peso llevan campo para registrar la carga y badge de RPE;
     // acondicionamiento y core van como lista simple.
-    const listaPeso = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar)).join('')}</div>`;
+    const listaPeso = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioConPeso(x, capitalizar, diaNombre)).join('')}</div>`;
     // Acondicionamiento y core usan la MISMA tarjeta que fuerza/hipertrofia
     // (miniatura + "Cómo se hace" con fotos/vídeo), solo que sin RPE ni stepper
     // de peso — cardio, circuitos y core no se miden en kg. Antes era una frase
     // explicando el movimiento escrita a mano; la ficha real (o el vídeo, si no
     // hay ficha para ese movimiento) es más clara que cualquier párrafo.
-    const listaSimple = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioSimple(x, capitalizar)).join('')}</div>`;
+    const listaSimple = lista => `<div class="ejercicios-peso-list">${lista.map(x => renderEjercicioSimple(x, capitalizar, diaNombre)).join('')}</div>`;
     const esCardio = /cardio|run|walk|carrera|interval|fartlek|tempo|progresivo/i.test(day.split || day.resumen || '');
     const esFuncional = /wod|hyrox|crossfit|funcional|amrap|emom/i.test(day.split || day.resumen || '');
     const tituloPrincipal = esCardio ? 'Fortalecimiento' : esFuncional ? 'Trabajo de fuerza' : 'Ejercicios';
@@ -13652,7 +13779,7 @@
       items: [
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M21 3H3v18h18V3z"/></svg>', label: 'Marca completado', desc: 'Cuando termines, pulsa el botón verde para registrarlo y subir tu racha' },
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>', label: 'Vídeos de apoyo', desc: 'Si no conoces un ejercicio, pulsa el botón de vídeo para ver cómo se ejecuta' },
-        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>', label: 'Cambiar ejercicios', desc: 'Pulsa "¿Cómo va el entreno?" para sustituir ejercicios que no te gusten por alternativas' },
+        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>', label: 'Cambiar ejercicios', desc: 'Toca "Cómo se hace" en un ejercicio: si tiene alternativas, aparecen ahí mismo para cambiarlo al instante. Para cualquier otro caso, escríbenos por "¿Cómo va el entreno?"' },
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg>', label: 'Racha de entrenos', desc: 'Cada día que entrenas sube tu racha. ¡Intenta no romperla!' }
       ]
     },
