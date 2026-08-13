@@ -12580,6 +12580,46 @@
     const alergiaLibre = (u.alergia === 'Otra' && u.alergiaOtra) ? _expandirAlergenoLibre(u.alergiaOtra) : '';
     const textoFiltro = [u.noComida, alergiaLibre].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
+
+    // AJUSTE POR "¿CUÁNTAS VECES COMES AL DÍA?" (u.comidas)
+    // Antes se recogía este dato en el formulario y no se usaba en ningún sitio:
+    // el plan siempre salía en 5 tomas, aunque el cliente dijera que come 2 veces
+    // al día. Ahora se consolidan las tomas según la frecuencia real, repartiendo
+    // el peso calórico de las tomas que se quitan entre las que quedan (no se
+    // inventan calorías: el mismo objetivo diario cabe en menos tomas más grandes).
+    const PESO_TOMA = { 'Desayuno': 0.25, 'Media mañana': 0.10, 'Comida': 0.30, 'Merienda': 0.10, 'Cena': 0.25 };
+    const TOMAS_POR_FRECUENCIA = {
+      '2 veces': ['Comida', 'Cena'],
+      '3 veces': ['Desayuno', 'Comida', 'Cena'],
+      '4-5 veces': ['Desayuno', 'Media mañana', 'Comida', 'Merienda', 'Cena'],
+      'Pico continuamente': ['Desayuno', 'Media mañana', 'Comida', 'Merienda', 'Cena'],
+    };
+    const escalarOpcion = (o, factor) => {
+      if (Math.abs(factor - 1) < 0.03) return o;
+      const num = str => parseFloat(str) || 0;
+      return {
+        ...o,
+        ingredientes: scaleIngredientes(o.ingredientes, factor),
+        kcal: `${Math.round(num(o.kcal) * factor)} kcal`,
+        prot: `${Math.round(num(o.prot) * factor)}g prot`,
+        carbs: `${Math.round(num(o.carbs) * factor)}g carbs`,
+        grasa: `${Math.round(num(o.grasa) * factor)}g grasa`,
+      };
+    };
+    const ajustarPorFrecuenciaComidas = (tomas, frecuencia) => {
+      const activos = TOMAS_POR_FRECUENCIA[frecuencia] || TOMAS_POR_FRECUENCIA['4-5 veces'];
+      const filtradas = tomas.filter(m => activos.includes(m.momento));
+      const pesoActivo = activos.reduce((s, mo) => s + (PESO_TOMA[mo] || 0), 0) || 1;
+      const factor = pesoActivo < 0.99 ? 1 / pesoActivo : 1;
+      return filtradas.map(m => ({
+        ...m,
+        porque: frecuencia === 'Pico continuamente'
+          ? `${m.porque} — si prefieres picar, reparte esta ración en 2 tomas más pequeñas a lo largo del día`
+          : m.porque,
+        opciones: m.opciones.map(o => escalarOpcion(o, factor)),
+      }));
+    };
+    nutricion = ajustarPorFrecuenciaComidas(nutricion, u.comidas);
     // Los platos de "fueling" (antes/después de tirada larga o WOD, más abajo)
     // vienen de un pool aparte y nunca pasaban por este filtro -- alguien con
     // alergia a huevo (vía "Otra") podía recibir "2 claras" en unas tortitas
