@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>K-ONE — Tests de regresión</title>
+<style>
+  body { background:#0a0a0a; color:#eee; font-family:'DM Mono',monospace,monospace; padding:24px; max-width:920px; margin:0 auto; }
+  h1 { font-family:sans-serif; color:#E8490F; }
+  p.sub { color:#999; margin-top:-8px; }
+  #resumen { font-size:18px; margin:20px 0; padding:14px 18px; border-radius:8px; }
+  .ok-global { background:#0d1f14; border:1px solid #1e3a28; color:#4caf50; }
+  .fail-global { background:#2a0f0f; border:1px solid #4a1f1f; color:#e74c3c; }
+  .grupo { margin-bottom:26px; }
+  .grupo h2 { font-family:sans-serif; font-size:15px; color:#F0EDE8; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+  .test { padding:8px 12px; margin:4px 0; border-radius:6px; font-size:12.5px; display:flex; gap:10px; align-items:flex-start; }
+  .test.pass { background:#0d1f14; }
+  .test.fail { background:#2a0f0f; }
+  .badge { flex-shrink:0; font-weight:700; }
+  .test.pass .badge { color:#4caf50; }
+  .test.fail .badge { color:#e74c3c; }
+  .detail { color:#aaa; margin-top:3px; white-space:pre-wrap; }
+  button { background:#E8490F; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-family:inherit; font-size:13px; }
+  #estado { color:#999; margin:12px 0; }
+  iframe { display:none; }
+</style>
+</head>
+<body>
+  <h1>K-ONE — Tests de regresión</h1>
+  <p class="sub">Corre en el navegador contra la app real (index.html), sin Node ni build. Abrir con el servidor local (`npx serve .`) y cargar esta página.</p>
+  <button onclick="location.reload()">Volver a correr</button>
+  <div id="estado">Cargando index.html en un iframe oculto...</div>
+  <div id="resumen"></div>
+  <div id="resultados"></div>
+
+  <iframe id="app" src="index.html"></iframe>
+
+<script>
+const resultados = [];
+function test(grupo, nombre, pass, detalle) {
+  resultados.push({ grupo, nombre, pass: !!pass, detalle: detalle || '' });
+}
+
+function render() {
+  const grupos = {};
+  resultados.forEach(r => { (grupos[r.grupo] = grupos[r.grupo] || []).push(r); });
+  const total = resultados.length;
+  const ok = resultados.filter(r => r.pass).length;
+  const resumen = document.getElementById('resumen');
+  resumen.className = ok === total ? 'ok-global' : 'fail-global';
+  resumen.textContent = `${ok} / ${total} tests pasados` + (ok === total ? ' — todo verde' : ` — ${total - ok} fallando`);
+  const cont = document.getElementById('resultados');
+  cont.innerHTML = Object.entries(grupos).map(([g, tests]) => `
+    <div class="grupo">
+      <h2>${g} (${tests.filter(t=>t.pass).length}/${tests.length})</h2>
+      ${tests.map(t => `
+        <div class="test ${t.pass ? 'pass' : 'fail'}">
+          <span class="badge">${t.pass ? '✓' : '✗'}</span>
+          <div>
+            <div>${t.nombre}</div>
+            ${t.detalle ? `<div class="detail">${t.detalle}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// Copia deliberada de FAMILIAS_ALIMENTOS (index.html) como dato de referencia
+// INDEPENDIENTE: si algún día un cambio en el motor deja de filtrar una de
+// estas palabras, este test lo detecta comparando contra esta lista fija, no
+// contra la lista interna de la propia app (que podría haberse roto a la vez).
+const FAMILIAS_REF = {
+  'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','caballa','trucha','rape','anchoa','boquerón','rodaballo','lenguado'],
+  'marisco': ['gambas','langostinos','mejillón','almejas','calamar','pulpo','sepia','vieira','cangrejo','langosta','cigalas','bogavante','berberechos'],
+  'lácteos': ['leche','yogur','queso','requesón','kéfir','nata','mantequilla','cottage','skyr'],
+  'frutos secos': ['nueces','almendras','avellanas','cacahuete','pistachos','anacardos','piñones','macadamia'],
+  'legumbres': ['garbanzos','lentejas','judías','alubias','habas','guisantes','edamame','soja'],
+  'huevos': ['huevo','huevos','tortilla','claras'],
+  'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','harina','fideos','cuscús','seitán','granola','muesli','bulgur'],
+};
+
+function perfilBase(extra) {
+  return Object.assign({
+    tipoPlan: 'Plan completo: entrenamiento + nutrición',
+    nivel: 'Llevo algo de tiempo',
+    tiempoSesion: '45-60 min',
+    lugar: 'Gimnasio',
+    edad: 30,
+    peso: 70,
+    altura: 175,
+    sexo: 'Hombre',
+    objetivo: 'Perder grasa',
+    deporte: 'Gimnasio / Fuerza',
+    diasEntreno: '4 días',
+    enfoqueMacros: 'Equilibrado',
+  }, extra || {});
+}
+
+// Devuelve un ítem de texto POR RECETA (no todo junto): así una excepción seg
+// ura en un plato no puede tapar una fuga real en otro plato distinto que
+// comparta la misma palabra clave.
+function itemsComidasSemana(plan) {
+  const items = [];
+  (plan.nutricionPorDia || [plan.nutricion]).forEach(dia => {
+    (dia || []).forEach(m => (m.opciones || []).forEach(o => {
+      items.push(((o.nombre || '') + ' ' + (o.ingredientes || '')).toLowerCase());
+    }));
+  });
+  return items;
+}
+
+function macrosSemanaReal(plan) {
+  let prot = 0, carbs = 0, kcal = 0, dias = 0;
+  (plan.nutricionPorDia || []).forEach(dia => {
+    dias++;
+    dia.forEach(m => {
+      const o = m.opciones[0];
+      prot += parseInt(o.prot) || 0;
+      carbs += parseInt(o.carbs) || 0;
+      kcal += parseInt(o.kcal) || 0;
+    });
+  });
+  if (!dias) return null;
+  return { prot: prot / dias, carbs: carbs / dias, kcal: kcal / dias };
+}
+
+// Excepciones conocidas y verificadas a mano: la palabra clave aparece pero el
+// alimento real es seguro para esa alergia. "pan"/"leche" cuando el propio
+// texto ya dice "sin gluten"/"sin lactosa" justo al lado (la sustitución
+// correcta deja la palabra base + la coletilla, no la quita entera). Y
+// "tortilla" para alergia a huevo: en "tortilla integral/de trigo/de maíz" es
+// el wrap de harina (sin huevo), no la tortilla francesa/de patatas (con
+// huevo) -- son dos alimentos distintos que comparten nombre en español.
+function esExcepcionSegura(palabra, texto) {
+  if (palabra === 'pan' && /pan sin gluten/.test(texto)) return true;
+  if (palabra === 'granola' && /granola sin gluten/.test(texto)) return true;
+  if (palabra === 'pasta' && /pasta sin gluten/.test(texto)) return true;
+  if (palabra === 'leche' && /leche( semidesnatada| entera)? sin lactosa/.test(texto)) return true;
+  if (palabra === 'yogur' && /yogur( de coco)? \(?sin lactosa\)?|yogur sin lactosa/.test(texto)) return true;
+  if (palabra === 'queso' && /queso[a-záéíóúñ ]* sin lactosa/.test(texto)) return true;
+  if (palabra === 'cottage' && /cottage sin lactosa/.test(texto)) return true;
+  if ((palabra === 'kéfir' || palabra === 'kefir') && /k[ée]fir sin lactosa/.test(texto)) return true;
+  if (palabra === 'skyr' && /skyr sin lactosa/.test(texto)) return true;
+  // "tortilla" + "tofu" en el mismo plato: es la sustitución vegana de la
+  // tortilla de huevo (tortilla de tofu / wrap de trigo), no la de huevo.
+  if (palabra === 'tortilla' && (/tortilla (integral|de trigo|de ma[íi]z)\b/.test(texto) || /tofu/.test(texto))) return true;
+  return false;
+}
+
+// Busca fuga en CADA receta por separado (no en todo el texto de la semana
+// junto), para que una excepción segura en un plato no pueda tapar una fuga
+// real en otro plato distinto.
+function buscarFuga(items, palabras) {
+  for (const texto of items) {
+    for (const p of palabras) {
+      const re = new RegExp('\\b' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+      if (re.test(texto) && !esExcepcionSegura(p, texto)) return p;
+    }
+  }
+  return undefined;
+}
+
+// Espera activamente a que el script de index.html termine de ejecutarse dentro
+// del iframe: readyState "complete" del documento NO garantiza que un script
+// tan grande haya terminado de correr todas sus declaraciones síncronas en todos
+// los navegadores/tiempos, así que se sondea la función real hasta que aparece.
+async function esperarApp(win, timeoutMs) {
+  const t0 = Date.now();
+  while (typeof win.buildPlanFromData !== 'function') {
+    if (Date.now() - t0 > timeoutMs) return false;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  return true;
+}
+
+async function correr() {
+  const iframe = document.getElementById('app');
+  await new Promise(res => { if (iframe.contentDocument.readyState === 'complete') res(); else iframe.addEventListener('load', res); });
+  const win = iframe.contentWindow;
+
+  const listo = await esperarApp(win, 8000);
+  if (!listo) {
+    test('Carga', 'buildPlanFromData accesible', false, 'La app no expuso la función principal en 8s. ¿Cambió el nombre o hay un error de script que aborta la carga?');
+    render();
+    document.getElementById('estado').textContent = 'Error cargando la app.';
+    return;
+  }
+  test('Carga', 'buildPlanFromData accesible', true);
+
+  // ───────────────────────── A. ALERGIAS: seguridad ─────────────────────────
+  const casosAlergia = [
+    { alergia: 'Gluten', familia: 'gluten' },
+    { alergia: 'Lactosa', familia: 'lácteos' },
+    { alergia: 'Frutos secos', familia: 'frutos secos' },
+  ];
+  const casosOtra = [
+    { texto: 'pescado', familia: 'pescado' },
+    { texto: 'marisco', familia: 'marisco' },
+    { texto: 'huevo', familia: 'huevos' },
+    { texto: 'legumbres', familia: 'legumbres' },
+  ];
+  const deportesAlergia = ['Gimnasio / Fuerza', 'Running', 'CrossFit'];
+  const objetivosAlergia = ['Perder grasa', 'Ganar músculo'];
+
+  [...casosAlergia.map(c => ({ alergia: c.alergia, familia: c.familia })),
+   ...casosOtra.map(c => ({ alergia: 'Otra', alergiaOtra: c.texto, familia: c.familia }))]
+  .forEach(caso => {
+    let fugas = [];
+    let combos = 0;
+    deportesAlergia.forEach(deporte => {
+      objetivosAlergia.forEach(objetivo => {
+        for (let s = 0; s < 3; s++) {
+          combos++;
+          const u = perfilBase({
+            deporte, objetivo, alergia: caso.alergia, alergiaOtra: caso.alergiaOtra,
+            peso: 60 + s * 10, email: `test-alg-${caso.familia}-${s}@x.com`
+          });
+          let plan;
+          try { plan = win.buildPlanFromData(u); } catch (e) { fugas.push('ERROR: ' + e.message); return; }
+          const items = itemsComidasSemana(plan);
+          const fuga = buscarFuga(items, FAMILIAS_REF[caso.familia] || []);
+          if (fuga) fugas.push(`"${fuga}" en perfil ${deporte}/${objetivo}/${s}`);
+        }
+      });
+    });
+    const etiqueta = caso.alergiaOtra ? `Alergia libre "${caso.alergiaOtra}"` : `Alergia "${caso.alergia}"`;
+    test('Alergias (seguridad)', `${etiqueta} → sin rastro de ${caso.familia} en ${combos} planes`, fugas.length === 0,
+      fugas.length ? fugas.slice(0, 5).join('\n') : `Verificado en ${combos} combinaciones de deporte/objetivo/peso.`);
+  });
+
+  // ───────────────────────── B. PROTEÍNA/CARBOHIDRATOS calibrados ─────────────────────────
+  const perfilesMacro = [
+    { peso: 70, altura: 175, objetivo: 'Perder grasa', deporte: 'Gimnasio / Fuerza', sexo: 'Hombre' },
+    { peso: 60, altura: 165, objetivo: 'Perder grasa', deporte: 'Running', sexo: 'Mujer' },
+    { peso: 90, altura: 180, objetivo: 'Ganar músculo', deporte: 'Gimnasio / Fuerza', sexo: 'Hombre' },
+    { peso: 95, altura: 175, objetivo: 'Perder grasa', deporte: 'CrossFit', sexo: 'Hombre' },
+    { peso: 55, altura: 160, objetivo: 'Sentirme mejor en general', deporte: 'Gimnasio / Fuerza', sexo: 'Mujer' },
+  ];
+  perfilesMacro.forEach((p, i) => {
+    const u = perfilBase(Object.assign({ diasEntreno: '4 días', email: `test-macro-${i}@x.com` }, p));
+    let plan;
+    try { plan = win.buildPlanFromData(u); } catch (e) {
+      test('Nutrición (calibración)', `${p.objetivo} · ${p.deporte} · ${p.peso}kg`, false, 'ERROR: ' + e.message);
+      return;
+    }
+    const real = macrosSemanaReal(plan);
+    const difProt = Math.abs((real.prot - plan.protObj) / plan.protObj) * 100;
+    const difCarbs = Math.abs((real.carbs - plan.carbsObj) / plan.carbsObj) * 100;
+    const difKcal = Math.abs((real.kcal - plan.kcalObj) / plan.kcalObj) * 100;
+    const pass = difProt <= 20 && difCarbs <= 25 && difKcal <= 15;
+    test('Nutrición (calibración)', `${p.objetivo} · ${p.deporte} · ${p.peso}kg — real vs objetivo dentro de margen`, pass,
+      `kcal: ${Math.round(real.kcal)} vs ${plan.kcalObj} (${difKcal.toFixed(1)}%) · prot: ${Math.round(real.prot)}g vs ${plan.protObj}g (${difProt.toFixed(1)}%) · carbs: ${Math.round(real.carbs)}g vs ${plan.carbsObj}g (${difCarbs.toFixed(1)}%)`);
+  });
+
+  // ───────────────────────── C. ENFOQUE NUTRICIONAL activo ─────────────────────────
+  {
+    const base = perfilBase({ email: 'test-enfoque@x.com' });
+    const eq = win.buildPlanFromData(Object.assign({}, base, { enfoqueMacros: 'Equilibrado' }));
+    const alto = win.buildPlanFromData(Object.assign({}, base, { enfoqueMacros: 'Alto en proteína' }));
+    const bajo = win.buildPlanFromData(Object.assign({}, base, { enfoqueMacros: 'Bajo en carbohidratos' }));
+    test('Nutrición (calibración)', '"Alto en proteína" sube el objetivo de proteína', alto.protObj > eq.protObj,
+      `Equilibrado: ${eq.protObj}g · Alto en proteína: ${alto.protObj}g`);
+    test('Nutrición (calibración)', '"Bajo en carbohidratos" baja el objetivo de carbohidratos', bajo.carbsObj < eq.carbsObj,
+      `Equilibrado: ${eq.carbsObj}g · Bajo en carbohidratos: ${bajo.carbsObj}g`);
+  }
+
+  // ───────────────────────── D. RECETARIO completo ─────────────────────────
+  // Usa el propio abrirRecetario() de la app (igual que lo vería un cliente real)
+  // en vez de leer RECETA_PASOS directamente: es un `const` de nivel superior de
+  // ese script y no queda expuesto en window, así que se comprueba por el efecto
+  // observable (la tarjeta trae o no su sección "Preparación").
+  {
+    let combosOk = 0, combosTotal = 0, faltantesTotal = new Set();
+    const deportesR = ['Gimnasio / Fuerza', 'Running', 'CrossFit', 'Hyrox', 'Híbrido'];
+    const objetivosR = ['Perder grasa', 'Ganar músculo', 'Sentirme mejor en general'];
+    deportesR.forEach(deporte => objetivosR.forEach(objetivo => {
+      for (let s = 0; s < 2; s++) {
+        combosTotal++;
+        const u = perfilBase({ deporte, objetivo, peso: 55 + s * 15, email: `test-recetario-${combosTotal}@x.com` });
+        let plan;
+        try { plan = win.buildPlanFromData(u); } catch (e) { return; }
+        win.generatedPlan = plan;
+        try { win.abrirRecetario(); } catch (e) { return; }
+        const modal = win.document.getElementById('modalRecetario');
+        const cards = [...modal.querySelectorAll('.receta-card')];
+        const sinPasos = cards.filter(c => !c.querySelector('.receta-pasos'));
+        if (sinPasos.length === 0) combosOk++;
+        sinPasos.forEach(c => faltantesTotal.add(c.querySelector('.receta-nombre')?.textContent || '?'));
+        modal.classList.remove('visible');
+      }
+    }));
+    test('Recetario', `Todas las recetas de ${combosTotal} planes generados traen instrucciones`, combosOk === combosTotal,
+      faltantesTotal.size ? `Sin instrucciones: ${[...faltantesTotal].slice(0, 10).join(', ')}` : `${combosOk}/${combosTotal} planes con recetario 100% completo.`);
+  }
+
+  // ───────────────────────── E. LISTA DE LA COMPRA: categorización ─────────────────────────
+  {
+    const u = perfilBase({ email: 'test-lista@x.com' });
+    win.userData = u;
+    win.generatedPlan = win.buildPlanFromData(u);
+    win.comidasSemana = [];
+    win.comidasSeleccionadas = [0, 0, 0, 0, 0];
+    win.diaNutriActual = 0;
+    let modal;
+    try {
+      win.generarListaCompra();
+      modal = win.document.body.lastElementChild;
+    } catch (e) {
+      test('Lista de la compra', 'generarListaCompra() no lanza error', false, e.message);
+    }
+    if (modal) {
+      const otros = [...modal.querySelectorAll('div[style*="margin-bottom:20px"]')]
+        .find(d => d.querySelector('span[style*="Bebas"]')?.textContent === 'OTROS');
+      const itemsOtros = otros ? [...otros.querySelectorAll('label div[style*="font-weight:500"]')].map(d => d.textContent) : [];
+      // Alimentos "reales" (no condimentos) que NUNCA deberían caer en Otros -- los 4
+      // encontrados y arreglados en la auditoría de hoy, como red de seguridad ante
+      // regresiones futuras.
+      const nuncaEnOtros = ['Carne', 'Pasas', 'Cebolleta', 'Cinta de lomo', 'Blanco'];
+      const colados = itemsOtros.filter(i => nuncaEnOtros.some(n => i.toLowerCase() === n.toLowerCase()));
+      test('Lista de la compra', 'Ningún alimento real cae en "Otros" (regresión de bugs ya arreglados)', colados.length === 0,
+        colados.length ? `Colados: ${colados.join(', ')}` : `"Otros" tiene ${itemsOtros.length} items, todos condimentos/especias.`);
+      modal.remove();
+    }
+  }
+
+  document.getElementById('estado').textContent = 'Hecho.';
+  render();
+}
+
+correr().catch(e => {
+  document.getElementById('estado').textContent = 'Error ejecutando los tests: ' + e.message;
+  console.error(e);
+});
+</script>
+</body>
+</html>
