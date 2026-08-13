@@ -12936,6 +12936,78 @@
       });
     }
 
+    // VERIFICACIÓN NUTRICIONAL REAL POR INGREDIENTE — antes, "220g salmón" y la
+    // etiqueta "35g prot" de la receta no tenían ninguna relación matemática
+    // entre sí (la etiqueta era la que había escrito quien redactó la receta a
+    // mano). Aquí se recalcula la proteína/carbohidrato REAL a partir del
+    // gramaje real de los ingredientes reconocidos, usando valores de
+    // referencia por 100g (no una base de datos completa como la del buscador
+    // de alimentos, pero sí datos reales de las fuentes que de verdad aparecen
+    // en el recetario). Si el real difiere de la etiqueta más de un 20%, se
+    // corrige la etiqueta ANTES de que la calibración semanal de más abajo
+    // calcule su factor — así ese factor parte de números ya fiables, en vez
+    // de heredar el desvío de una etiqueta mal puesta a mano.
+    const MACROS_PROT_POR_100G = {
+      'pechuga de pollo': 31, 'pechuga pollo': 31, 'pollo': 27, 'pavo': 29, 'ternera': 26,
+      'solomillo': 27, 'salmón': 25, 'salmon': 25, 'atún': 26, 'atun': 26, 'merluza': 21,
+      'bacalao': 20, 'dorada': 21, 'lubina': 21, 'sardina': 25, 'caballa': 19, 'trucha': 21,
+      'rape': 15, 'gambas': 24, 'langostinos': 24, 'calamar': 18, 'pulpo': 20, 'sepia': 17,
+      'huevo': 13, 'clara': 11, 'queso batido': 8, 'queso fresco': 12, 'queso cottage': 11,
+      'requesón': 11, 'requeson': 11, 'yogur griego': 10, 'skyr': 11, 'proteína en polvo': 80,
+      'proteina en polvo': 80, 'scoop de proteína': 80, 'scoop proteína': 80, 'tofu': 12,
+      'seitán': 25, 'seitan': 25, 'garbanzos': 9, 'lentejas': 9, 'jamón cocido': 18,
+      'jamon cocido': 18, 'lomo embuchado': 30,
+    };
+    const MACROS_CARBS_POR_100G = {
+      'arroz': 28, 'pasta': 25, 'macarrones': 25, 'espaguetis': 25, 'fideos': 25, 'pan': 49,
+      'tostadas': 55, 'tosta': 55, 'patata': 17, 'boniato': 20, 'avena': 60, 'quinoa': 21,
+      'cuscús': 23, 'cuscus': 23, 'tortitas de arroz': 80, 'tortitas de maíz': 80,
+      'tortitas de maiz': 80, 'bulgur': 19, 'granola': 60, 'muesli': 65, 'garbanzos': 27,
+      'lentejas': 20,
+    };
+    const _clavesPorLongitud = tabla => Object.keys(tabla).sort((a, b) => b.length - a.length);
+    const _clavesProt = _clavesPorLongitud(MACROS_PROT_POR_100G);
+    const _clavesCarbs = _clavesPorLongitud(MACROS_CARBS_POR_100G);
+    // Suma el macro real de TODAS las cláusulas reconocidas (no solo la
+    // primera): un plato puede tener más de una fuente ("2 huevos + 100g pavo").
+    const _macroRealTotal = (texto, tabla, claves) => {
+      let total = 0, encontrado = false;
+      (texto || '').split(',').forEach(x => {
+        const t = x.trim().toLowerCase();
+        if (!t) return;
+        const key = claves.find(k => t.includes(k));
+        if (!key) return;
+        const m = t.match(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/);
+        if (!m) return;
+        const gramos = parseFloat(m[1].replace(',', '.'));
+        if (!gramos) return;
+        total += gramos * tabla[key] / 100;
+        encontrado = true;
+      });
+      return encontrado ? Math.round(total) : null;
+    };
+    {
+      const _yaVerificadas = new Set();
+      nutricionPorDia.forEach(dia => {
+        dia.forEach(m => {
+          (m.opciones || []).forEach(o => {
+            if (_yaVerificadas.has(o)) return;
+            _yaVerificadas.add(o);
+            const protReal = _macroRealTotal(o.ingredientes, MACROS_PROT_POR_100G, _clavesProt);
+            const protEtiqueta = parseInt(o.prot) || 0;
+            if (protReal !== null && protEtiqueta > 0 && Math.abs(protReal - protEtiqueta) / protEtiqueta > 0.2) {
+              o.prot = `${protReal}g prot`;
+            }
+            const carbsReal = _macroRealTotal(o.ingredientes, MACROS_CARBS_POR_100G, _clavesCarbs);
+            const carbsEtiqueta = parseInt(o.carbs) || 0;
+            if (carbsReal !== null && carbsEtiqueta > 0 && Math.abs(carbsReal - carbsEtiqueta) / carbsEtiqueta > 0.2) {
+              o.carbs = `${carbsReal}g carbs`;
+            }
+          });
+        });
+      });
+    }
+
     // CALIBRAR PROTEÍNA Y CARBOHIDRATOS AL OBJETIVO REAL (protObj/carbsObj)
     // Hasta ahora, cada receta escalaba su proteína y carbohidratos con
     // escalaRacion -- el mismo ratio pensado para CALORÍAS (kcalObj/kcal de la
@@ -13041,6 +13113,50 @@
         notasDeporte.push(`Core: tu plan de esta semana trae trabajo de core en ${diasConCore} día${diasConCore === 1 ? '' : 's'}. Lo recomendable son al menos 2x/semana — añade 3×30-45s de plancha + 3×12/lado de dead bug al final de dos de tus sesiones.`);
       } else {
         notasDeporte.push(`Core: tu plan ya trae trabajo de core en ${diasConCore} días esta semana — dentro del mínimo recomendado de 2x/semana.`);
+      }
+
+      // VOLUMEN SEMANAL POR GRUPO MUSCULAR — antes esto solo existía como algún
+      // comentario suelto dejado por quien tocara el código en su momento
+      // ("~107 series semanales" en un split muy concreto), sin ningún cálculo
+      // sistemático ni verificable para el resto de combinaciones nivel×días×
+      // objetivo. Aquí se cuenta de verdad, sobre la semana YA generada de
+      // este usuario (con lesión/material/rotación ya aplicados), sumando las
+      // series (el primer número de cada "4×8") de los ejercicios reconocidos
+      // por grupo muscular. Solo aplica a Gimnasio/Híbrido: en Running/Hyrox/
+      // CrossFit el volumen se mide en km/WOD, no en series por grupo, forzar
+      // esta métrica ahí sería una comparación sin sentido.
+      if (esGimnasio || esCombinacion) {
+        const GRUPOS_MUSCULARES = {
+          'Pecho': /press banca|press inclinado|aperturas|fondos en paralelas|fondos en banco|cruces en polea/i,
+          'Espalda': /remo|dominadas|jal[oó]n|peso muerto|pull[- ]?ups?/i,
+          'Piernas': /sentadilla|prensa de piernas|zancadas|hip thrust|gemelos|curl femoral|leg curl|step-?ups?/i,
+          'Hombros': /press militar|press de hombro|overhead press|elevaciones laterales|p[aá]jaros|press arnold/i,
+          'Brazos': /curl b[ií]ceps|curl martillo|press franc[eé]s|extensi[oó]n de tr[ií]ceps|curl de biceps/i,
+        };
+        const volumenSemanal = { Pecho: 0, Espalda: 0, Piernas: 0, Hombros: 0, Brazos: 0 };
+        semana.forEach(d => {
+          if (!d.detalle) return;
+          d.detalle.split(',').forEach(clausula => {
+            const m = clausula.match(/(\d+)\s*[x×]\s*\d+/);
+            if (!m) return;
+            const series = parseInt(m[1], 10);
+            if (!series) return;
+            const grupo = Object.keys(GRUPOS_MUSCULARES).find(g => GRUPOS_MUSCULARES[g].test(clausula));
+            if (grupo) volumenSemanal[grupo] += series;
+          });
+        });
+        // Umbral de mínimo efectivo: ~6 series/semana por grupo es el suelo
+        // habitual citado para mantener/progresar en hipertrofia (por debajo,
+        // el estímulo semanal es insuficiente para ese grupo concreto).
+        const gruposBajos = Object.entries(volumenSemanal).filter(([, s]) => s > 0 && s < 6).map(([g]) => g);
+        const gruposAusentes = Object.entries(volumenSemanal).filter(([, s]) => s === 0).map(([g]) => g);
+        if (gruposAusentes.length) {
+          notasDeporte.push(`Volumen semanal: esta semana no hemos detectado series directas de ${gruposAusentes.join(', ').toLowerCase()} en tu plan — puede que lo trabajes indirectamente con otros ejercicios, pero si notas ese grupo flojo, coméntanoslo por el chat.`);
+        } else if (gruposBajos.length) {
+          notasDeporte.push(`Volumen semanal: ${gruposBajos.map(g => `${g.toLowerCase()} (${volumenSemanal[g]} series)`).join(', ')} está por debajo de las ~6 series/semana recomendadas como mínimo para progresar. El resto de grupos está en rango.`);
+        } else {
+          notasDeporte.push(`Volumen semanal por grupo: Pecho ${volumenSemanal.Pecho}, Espalda ${volumenSemanal.Espalda}, Piernas ${volumenSemanal.Piernas}, Hombros ${volumenSemanal.Hombros}, Brazos ${volumenSemanal.Brazos} series — todos los grupos dentro del rango mínimo recomendado.`);
+        }
       }
     }
     // Nota sobre alcohol: aplica a cualquier objetivo/deporte, así que va fuera
