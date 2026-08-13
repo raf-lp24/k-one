@@ -12805,6 +12805,23 @@
         }
         return { ...m, opciones: filtradas.length > 0 ? filtradas : m.opciones.slice(0, 1) };
       });
+      // BUG REAL encontrado verificando este cambio: los pools de "fueling"
+      // (antes/después de entrenar/WOD/carrera) NUNCA pasaban por este filtro,
+      // así que un usuario vegetariano podía recibir "Arroz blanco con pollo y
+      // miel" en su comida forzada de pre-entreno — el filtro de arriba solo
+      // tocaba `nutricion`, no estos 4 arrays aparte. Ya existía para Running/
+      // Hyrox/CrossFit, pero al añadir el "fueling" a Gimnasio/Fuerza esta
+      // sesión se volvió mucho más probable que le tocara a algún vegetariano
+      // de verdad. Si el filtro vacía una lista, forzar() ya tiene guard
+      // (`if (!lista.length) return`) y simplemente no fuerza nada ese día —
+      // no hace falta un fallback aparte, el resto del menú ya es vegetariano.
+      const _sinCarne = arr => arr.filter(o => !carneRegex.test(o.nombre + ' ' + o.ingredientes));
+      const _sinAnimal = arr => { const f = arr.filter(o => !veganRegex.test(o.nombre + ' ' + o.ingredientes)); return f.length > 0 ? f : arr; };
+      const _filtrarVeg = arr => { const sc = _sinCarne(arr); return esVegano ? _sinAnimal(sc) : sc; };
+      fuelingPreCarrera  = _filtrarVeg(fuelingPreCarrera);
+      fuelingPostCarrera = _filtrarVeg(fuelingPostCarrera);
+      fuelingPreWod      = _filtrarVeg(fuelingPreWod);
+      fuelingPostWod     = _filtrarVeg(fuelingPostWod);
     }
 
     // FILTRAR ALIMENTOS NO DESEADOS + ALERGIA "OTRA" (texto libre)
