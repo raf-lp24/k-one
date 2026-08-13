@@ -9000,6 +9000,16 @@
     [/curl b[ií]ceps?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
     [/press franc[eé]s|extensi[oó]n de tr[ií]ceps/i, ['Fondos en banco', 'Press cerrado']],
     [/elevaciones laterales/i, ['Elevaciones en polea', 'Press Arnold']],
+    // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
+    [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
+    [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
+    [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas']],
+    [/curl femoral|leg curl( tumbado| sentado)?/i, ['Peso muerto rumano', 'Hip thrust']],
+    [/\bgemelos\b/i, ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
+    [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
+    [/dead hang/i, ['Suspensión activa en barra', 'Remo en polea baja']],
+    [/pistol squat/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
+    [/muscle[- ]up/i, ['Dominadas + fondos en banco', 'Dominadas explosivas']],
     // ── Cardio / acondicionamiento: rotan cada semana, con más variedad de
     // intensidad (desde andar hasta pliometría) para no repetir siempre lo mismo.
     [/burpees?/i, ['Mountain climbers', 'Cinta con inclinación a paso rápido', 'Remo o bici suave 5 min'], true],
@@ -9013,6 +9023,10 @@
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
     [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano'], true],
+    [/sled push/i, ['Farmer carry', 'Zancadas cargadas con mancuernas'], true],
+    [/sled pull/i, ['Farmer carry', 'Remo con banda de resistencia'], true],
+    [/farmer carry/i, ['Sled push', 'Suitcase carry a un lado'], true],
+    [/sandbag lunges/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas'], true],
   ];
   const alternativasParaEjercicio = nombre => {
     const entry = ALTERNATIVAS_EJERCICIO.find(([re]) => re.test(nombre));
@@ -10813,7 +10827,7 @@
            resumen: numDias >= 2 ? "Cardio · Run/walk + core" : "Movilidad",
            detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${sm ? '' : ', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, pallof press con banda 3×10/lado` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Circuito combinado · Fuerza + cardio" : "Descanso",
            detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${sm ? '10 sentadillas, 8 flexiones, 12 zancadas/pierna, 30s mountain climbers, 200m carrera' : '10 goblet squats, 8 push press mancuernas, 10 remo mancuerna/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
@@ -10831,19 +10845,19 @@
              ? `Fuerza · Sentadilla búlgara ${v}×10/pierna, flexiones ${v}×12, hip thrust suelo ${v}×15, dominadas australianas ${v}×10, plancha lateral ${v}×25s/lado. Finisher metabólico: Tabata 4 min (20s trabajo/10s descanso × 8): alternando burpees y sentadillas con salto`
              : `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
            etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Zona 2 · Cardio aeróbico" : "Movilidad",
            detalle: numDias >= 2 ? `Zona 2 · ${sesionCorta ? '25-30 min' : '35-45 min'} ${sm ? 'carrera a ritmo conversacional' : 'rota cada 10 min entre remo, bici y carrera a zona 2 (RPE 3-4)'}. Al acabar: 4 strides de 60m` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad", detalle:"", etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad", detalle:"Movilidad general 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Metcon · Complejo + cardio" : "Descanso",
            detalle: numDias >= 3 ? (sm
              ? `AMRAP 20 min: 10 sentadillas con salto, 8 flexiones explosivas, 12 zancadas/pierna, 200m carrera, 10 burpees. Ritmo sostenible. Anota rondas`
              : `Complejo con mancuernas 5 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Anota tiempos`) : "",
            etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
-          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
+          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else if (esAvanzado) {
@@ -10885,7 +10899,7 @@
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Cardio multimodal",
            detalle:`Zona 2 · ${sesionCorta ? '25-30 min' : '35-40 min'} ${sm ? 'carrera a ritmo conversacional + 4 strides de 60m al final' : 'rotar cada 8-10 min entre remo, bici y carrera a zona 2 (RPE 3-4). Al acabar: 4 strides de 60m'}`,
            etiqueta:"Cardio"},
-          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
            detalle: sm
              ? `Piernas · Sentadilla búlgara ${v}×10/pierna, hip thrust suelo ${v}×15, zancadas ${v}×10/pierna, puente a una pierna ${v}×12/lado, gemelos en escalón 3×20, plancha ${v}×45s`
@@ -11042,7 +11056,7 @@
            resumen: numDias >= 2 ? "Fundamentos · Press + For Time" : "Movilidad",
            detalle: numDias >= 2 ? `Strength · Press con mancuernas 4×10 + fondos en banco 3×10 + hollow body hold 3×20s. WOD For Time (cap 12 min): 3 rondas de 10 push press con mancuernas (ligero), 15 sentadillas aéreas, 200m carrera. Anota tiempo` : "",
            etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Metcon · Chipper bodyweight" : "Descanso activo",
            detalle: numDias >= 3 ? `WOD Chipper For Time (cap 15 min): 30 sentadillas aéreas, 20 flexiones (rodillas ok), 20 sit-ups, 15 burpees, 10 jumping lunges por pierna, 200m carrera. Todo seguido, sin descanso programado. Anota tiempo y scaling` : "",
@@ -11060,14 +11074,14 @@
              ? `Strength · Sentadilla ${esAvanzado ? `5×3 al ${pct1RM(80)}%` : `5×5 al ${pctRango1RM(70,75)}`}. ${benchWod}`
              : `Strength · ${esAvanzado ? `Sentadilla trasera 5×3 al ${pctRango1RM(80,85)} + power clean 4×3` : `Sentadilla trasera 5×5 al ${pctRango1RM(70,75)}`}. ${benchWod}`,
            etiqueta:"WOD"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Weightlifting + AMRAP largo" : "Movilidad",
            detalle: numDias >= 2 ? (cf
              ? `Skill · ${esAvanzado ? 'Hang clean 4×3 + push jerk 4×3' : 'Hang clean con KB o mancuerna 4×6 + push press 4×8'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 dumbbell clean & press, 10 sit-ups, 12 box jumps o step-ups'}. Anota rondas`
              : `Skill · ${esAvanzado ? `Clean & jerk 4×3 al ${pct1RM(70)}% + snatch técnica 4×2` : 'Power clean técnica 5×3 (barra vacía o ligero)'}. AMRAP 15 min: ${esAvanzado ? '5 clean & jerk (61/43kg), 10 toes-to-bar, 15 box jumps' : '8 power clean (40/30kg), 10 sit-ups, 12 box jumps'}. Anota rondas`) : "",
            etiqueta: numDias >= 2 ? "WOD" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? (esAvanzado ? "Benchmark · Diane" : "EMOM + Gimnástica") : "Descanso",
            detalle: numDias >= 3 ? (esAvanzado
@@ -11076,7 +11090,7 @@
                : `WOD "Diane" For Time: 21-15-9 peso muerto (102/70kg), HSPU (kipping ok, abmat si necesitas). Cronometra. Cierre: 3×máx muscle-ups o dips + 3×10 toes-to-bar`)
              : `EMOM 16 min: min1: ${cf ? '10 sentadillas con salto' : '10 KB swings (16/12kg)'} · min2: 8 flexiones + 30s plancha · min3: ${cf ? '8 burpees' : '10 wall balls (6/4kg)'} · min4: descanso. Cierre: pull-ups progresión 4×máx`) : "",
            etiqueta: numDias >= 3 ? "WOD" : "Descanso"},
-          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
+          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else {
@@ -11159,12 +11173,12 @@
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Sin material",
              detalle:`Sin material · Sentadilla ${sVol}×15, flexiones ${sVol}×10 (rodillas ok si necesitas), puente de glúteo ${sVol}×20, plancha ${sVol}×30s, mountain climbers ${sVol}×20${finisher3}`,
              etiqueta:"Fuerza"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 2 ? "Full Body B · Variantes" : "Movilidad",
              detalle: numDias >= 2 ? `Variantes · Hip thrust en suelo ${sVol}×20, flexiones pique (pike push-ups) ${sVol}×10, sentadilla sumo ${sVol}×15, zancadas ${sVol}×10 por pierna, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 3 ? "Full Body B · Variantes" : "Descanso activo",
              detalle: numDias >= 3 ? `Variantes · Hip thrust en suelo ${sVol}×20, flexiones pique (pike push-ups) ${sVol}×10, sentadilla sumo ${sVol}×15, zancadas ${sVol}×10 por pierna, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
@@ -11181,15 +11195,15 @@
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Empuje bodyweight",
              detalle:`Pecho, hombros, tríceps · Flexiones ${volP}×15, flexiones con pies elevados ${volP}×12, flexiones pique ${volP}×10, fondos en sillas ${volA}×12, archer push-ups ${volA}×8 por lado${finisher3}`,
              etiqueta:"Empuje"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Tracción bodyweight",
              detalle:`Espalda, bíceps · Remo bajo mesa (inverted rows) ${volP}×12, dominadas en barra puerta ${volP}×6 (con silla si necesitas), remo supino ${volA}×10, face pull con banda ${volA}×15, plancha 3×45s${finisher3}`,
              etiqueta:"Tracción"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos bodyweight",
              detalle:`Cuádriceps, isquios, glúteos · Sentadilla ${volP}×20, sentadilla búlgara en silla ${volP}×12 por pierna, hip thrust en suelo ${volA}×25, puente a una pierna ${volA}×15 por pierna, gemelos en escalón ${volA}×20${finisher3}`,
              etiqueta:"Piernas"},
-            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
+            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         } else {
@@ -11201,7 +11215,7 @@
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Piernas y glúteos bodyweight",
              detalle:`Cuádriceps, glúteos · Sentadilla ${volP}×20, sentadilla búlgara en silla ${volA}×12 por pierna, hip thrust en suelo ${volA}×25, sentadilla sumo ${volA}×20, gemelos en escalón ${volA}×25${finisher4}`,
              etiqueta:"Piernas"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Espalda y bíceps bodyweight",
              detalle:`Dorsal, bíceps · Remo bajo mesa ${volP}×12, dominadas en barra puerta ${volP}×6 (asistidas si necesitas), remo supino ${volA}×10, face pull con banda ${volA}×15, plancha 4×45s${finisher4}`,
              etiqueta:"Tracción"},
@@ -11226,12 +11240,12 @@
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Patrones básicos",
              detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
              etiqueta:"Fuerza"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 2 ? "Full Body B · Variantes" : "Movilidad",
              detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 3 ? "Full Body B · Variantes" : "Descanso activo",
              detalle: numDias >= 3 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
@@ -11251,7 +11265,7 @@
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
              detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
              etiqueta:"Piernas"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"", etiqueta:"Descanso"},
+            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"10-15 min de movilidad: cadera (90/90), tobillo, hombros (band pull-apart), columna torácica. Opcional: 10-15 min caminar suave", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Variante",
              detalle:`Pecho, espalda, hombros, brazos · Press inclinado mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales mancuernas 3×15 (sin balanceo, aguanta 1s arriba), remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15 (baja completo, aprieta 1s abajo, sube resistiendo), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
              etiqueta:"Empuje+Tracción"},
@@ -11274,19 +11288,19 @@
                ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo), plancha 3×45s${finisher3}`
                : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
              etiqueta:"Empuje"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
              detalle: sesionCorta
                ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada), elevación de piernas 3×12${finisher3}`
                : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
              etiqueta:"Tracción"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
              detalle: sesionCorta
                ? `Cuádriceps, isquios, glúteos · Sentadilla 5×6, hip thrust 4×10, peso muerto rumano 3×10, femoral tumbado 3×12${finisher3}`
                : `Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano 3×10, prensa 3×12, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
              etiqueta:"Piernas"},
-            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"", etiqueta:"Descanso"},
+            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         } else {
@@ -11306,7 +11320,7 @@
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
              detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
              etiqueta:"Tracción"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"", etiqueta:"Descanso"},
+            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas y glúteos",
              detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volA}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, elevación de gemelos 4×15${finisher4}`,
              etiqueta:"Piernas"},
@@ -12465,15 +12479,19 @@
       op('Tosta de mermelada y queso batido (recarga tras tirada larga)', '2 tostadas pan blanco, 20g mermelada, 150g queso batido 0%', '290 kcal', '16g prot', '48g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min')
     ];
+    // El nombre dice "antes/después de entrenar" (no "del WOD") a propósito: este
+    // mismo pool se usa también para Gimnasio/Fuerza, no solo Hyrox/CrossFit —
+    // nutricionalmente el timing de carbohidrato+proteína pre/post sesión es el
+    // mismo tanto si la sesión es un WOD como si es una tanda de fuerza.
     let fuelingPreWod = [
-      op('Arroz blanco con pollo y miel (90 min antes del WOD)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
-      op('Tortitas de arroz con pavo y miel (90 min antes del WOD)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
-      op('Boniato asado con huevo y jamón cocido (90 min antes del WOD)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min')
+      op('Arroz blanco con pollo y miel (90 min antes de entrenar)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
+      op('Tortitas de arroz con pavo y miel (90 min antes de entrenar)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Boniato asado con huevo y jamón cocido (90 min antes de entrenar)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min')
     ];
     let fuelingPostWod = [
-      op('Batido de proteína con plátano y avena (recuperación post-WOD)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
-      op('Queso batido con miel y tortitas de arroz (recuperación post-WOD)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
-      op('Skyr con plátano y canela (recuperación post-WOD)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
+      op('Batido de proteína con plátano y avena (recuperación post-entreno)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
+      op('Queso batido con miel y tortitas de arroz (recuperación post-entreno)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
+      op('Skyr con plátano y canela (recuperación post-entreno)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
     ];
     // OJO: estas 4 listas NO se añaden aquí al pool general de Desayuno/Comida/
     // Merienda. Antes sí se añadían (con `nutriMomento(...).opciones.push(...)`),
@@ -12694,14 +12712,23 @@
             op('Bowl de fruta con semillas y miel', '1 plátano, 150g frutos rojos, 20g semillas de girasol, 15g miel', '330 kcal', '8g prot', '58g carbs', '10g grasa', 'Sin cocción · 3 min'),
             veg
               ? op('Revuelto de tofu con tomate y aguacate', '200g tofu firme, 150g tomate, 1/2 aguacate, cúrcuma, AOVE', '390 kcal', '24g prot', '14g carbs', '28g grasa', 'Fácil · 10 min')
-              : op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min')
+              : op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min'),
+            op('Bol de yogur de coco con fruta y semillas de calabaza', '200g yogur de coco, 1 plátano, 15g semillas de calabaza', '350 kcal', '6g prot', '46g carbs', '17g grasa', 'Sin cocción · 3 min'),
+            veg
+              ? op('Batido de plátano y semillas de chía', '1 plátano, 250ml bebida de arroz, 15g semillas de chía, canela', '280 kcal', '7g prot', '46g carbs', '8g grasa', 'Fácil · 3 min')
+              : op('Salmón ahumado con aguacate y tomate', '80g salmón ahumado, 1/2 aguacate, 150g tomate', '340 kcal', '20g prot', '10g carbs', '25g grasa', 'Sin cocción · 5 min'),
+            op('Bol de arroz inflado con fruta y semillas de girasol', '40g arroz inflado, 1 plátano, 200ml bebida de arroz, 15g semillas de girasol', '310 kcal', '8g prot', '52g carbs', '9g grasa', 'Sin cocción · 3 min')
           ],
           'Media mañana': [
             op('Manzana con semillas de girasol', '1 manzana, 20g semillas de girasol', '190 kcal', '5g prot', '26g carbs', '9g grasa', 'Sin cocción · 1 min'),
             op('Tortitas de arroz con aguacate y tomate', '3 tortitas de arroz, 1/2 aguacate, 100g tomate, sal', '250 kcal', '5g prot', '30g carbs', '13g grasa', 'Sin cocción · 3 min'),
             veg
               ? op('Hummus con crudités de zanahoria', '80g hummus, 150g zanahoria en bastones', '220 kcal', '7g prot', '22g carbs', '12g grasa', 'Sin cocción · 3 min')
-              : op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min')
+              : op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min'),
+            veg
+              ? op('Batido verde de espinaca y plátano', '1 plátano, 100g espinacas, 200ml bebida de arroz, 10g semillas de chía', '220 kcal', '5g prot', '38g carbs', '6g grasa', 'Fácil · 3 min')
+              : op('Atún con tomate y aguacate', '1 lata de atún al natural, 150g tomate, 1/2 aguacate', '280 kcal', '24g prot', '10g carbs', '17g grasa', 'Sin cocción · 3 min'),
+            op('Fruta variada con semillas de calabaza', '1 pieza de fruta, 1 mandarina, 15g semillas de calabaza', '180 kcal', '5g prot', '24g carbs', '8g grasa', 'Sin cocción · 1 min')
           ],
           'Comida': [
             veg
@@ -12710,14 +12737,24 @@
             veg
               ? op('Garbanzos con espinacas y quinoa', '200g garbanzos cocidos, 150g espinacas, 80g quinoa, AOVE, pimentón', '490 kcal', '22g prot', '62g carbs', '14g grasa', 'Fácil · 20 min')
               : op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '540 kcal', '40g prot', '42g carbs', '24g grasa', 'Medio · 25 min'),
-            op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '470 kcal', '20g prot', '40g carbs', '26g grasa', 'Medio · 25 min')
+            op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '470 kcal', '20g prot', '40g carbs', '26g grasa', 'Medio · 25 min'),
+            veg
+              ? op('Quinoa con garbanzos, pimiento y espinacas', '80g quinoa, 150g garbanzos cocidos, pimiento, espinacas, AOVE', '500 kcal', '20g prot', '66g carbs', '16g grasa', 'Fácil · 25 min')
+              : op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g verduras, AOVE', '520 kcal', '44g prot', '44g carbs', '16g grasa', 'Fácil · 30 min'),
+            veg
+              ? op('Arroz con tofu, calabacín y zanahoria', '80g arroz, 180g tofu, calabacín, zanahoria, AOVE', '470 kcal', '24g prot', '58g carbs', '14g grasa', 'Fácil · 20 min')
+              : op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min')
           ],
           'Merienda': [
             op('Plátano con semillas de calabaza', '1 plátano, 20g semillas de calabaza', '220 kcal', '7g prot', '28g carbs', '10g grasa', 'Sin cocción · 1 min'),
             veg
               ? op('Batido de plátano con bebida de arroz', '1 plátano, 250ml bebida de arroz, canela, 10g semillas de lino', '260 kcal', '5g prot', '48g carbs', '6g grasa', 'Fácil · 3 min')
               : op('Pavo en lonchas con tomate y aguacate', '100g pavo en lonchas, 150g tomate, 1/2 aguacate', '270 kcal', '24g prot', '10g carbs', '16g grasa', 'Sin cocción · 3 min'),
-            op('Bol de frutos rojos con semillas de girasol', '200g frutos rojos, 20g semillas de girasol, canela', '210 kcal', '6g prot', '24g carbs', '10g grasa', 'Sin cocción · 2 min')
+            op('Bol de frutos rojos con semillas de girasol', '200g frutos rojos, 20g semillas de girasol, canela', '210 kcal', '6g prot', '24g carbs', '10g grasa', 'Sin cocción · 2 min'),
+            veg
+              ? op('Batido de fruta con bebida de arroz', '1 plátano, 100g frutos rojos, 200ml bebida de arroz', '210 kcal', '4g prot', '40g carbs', '4g grasa', 'Fácil · 3 min')
+              : op('Huevos cocidos con tomate y AOVE', '2 huevos cocidos, 150g tomate, 5g AOVE', '200 kcal', '14g prot', '8g carbs', '13g grasa', 'Sin cocción · 5 min'),
+            op('Tortitas de arroz con plátano y canela', '3 tortitas de arroz, 1 plátano, canela', '230 kcal', '4g prot', '48g carbs', '2g grasa', 'Sin cocción · 2 min')
           ],
           'Cena': [
             veg
@@ -12726,7 +12763,13 @@
             veg
               ? op('Crema de verduras con huevos cocidos', '400ml crema de calabacín y puerro, 2 huevos cocidos, AOVE', '330 kcal', '18g prot', '22g carbs', '20g grasa', 'Fácil · 20 min')
               : op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
-            op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min')
+            op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),
+            veg
+              ? op('Sopa de verduras con tofu', '400ml caldo de verduras, 150g tofu, zanahoria, puerro', '280 kcal', '18g prot', '16g carbs', '15g grasa', 'Fácil · 20 min')
+              : op('Rape a la plancha con calabacín y patata', '200g rape, 150g calabacín, 150g patata, AOVE', '380 kcal', '36g prot', '32g carbs', '12g grasa', 'Fácil · 20 min'),
+            veg
+              ? op('Tortilla de patata sin cebolla con ensalada', '3 huevos, 200g patata, ensalada, AOVE', '440 kcal', '20g prot', '36g carbs', '24g grasa', 'Medio · 25 min')
+              : op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')
           ]
         };
         return pool[momento] || pool['Comida'];
@@ -12869,6 +12912,13 @@
           forzar(dm, 'Comida', fuelingPreWod);
           forzar(dm, 'Merienda', fuelingPostWod);
         }
+        // Gimnasio/Fuerza no tenía ninguna comida de repostaje ligada al día real
+        // de entreno (antes solo corredores/Hyrox/CrossFit la recibían) — el
+        // aviso de proteína+creatina en "Hoy" no toca el menú real del día.
+        if (esGimnasio && d.tipo === 'Entrenamiento') {
+          forzar(dm, 'Comida', fuelingPreWod);
+          forzar(dm, 'Merienda', fuelingPostWod);
+        }
       });
     }
 
@@ -12966,6 +13016,12 @@
       notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
       notasDeporte.push('Vuelta a la calma: 5 min de estiramientos estáticos (30s por grupo muscular) al terminar. Los músculos que más has trabajado hoy son los que más necesitan estirarse.');
     }
+    // Nota sobre alcohol: aplica a cualquier objetivo/deporte, así que va fuera
+    // de los bloques por deporte de arriba. El alcohol no solo aporta calorías
+    // vacías (7 kcal/g) — reduce la síntesis de proteína muscular hasta 24h
+    // después y empeora la calidad del sueño, justo cuando más se necesita
+    // para recuperar.
+    notasDeporte.push('Alcohol: si bebes, que sea la excepción y no la norma. Además de sumar calorías vacías, reduce la síntesis de proteína muscular hasta 24h y empeora la calidad del sueño — justo lo que más necesitas para recuperar.');
 
     // NORMALIZACIÓN CALÓRICA: ajusta las kcal de cada opción para que el total
     // diario promedio (eligiendo la opción 0 de cada comida) se acerque al objetivo.
