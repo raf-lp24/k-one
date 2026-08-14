@@ -8976,23 +8976,28 @@
   // funcional, WOD) con 2 alternativas equivalentes cada uno, para que el
   // cliente pueda cambiarlo él mismo al momento desde la ficha "Cómo se hace".
   // `cardio: true` marca movimientos de acondicionamiento/WOD sin progresión de
-  // carga real (no llevan stepper de peso) -- estos rotan cada SEMANA. Los
-  // levantamientos de fuerza (`cardio: false`, o sin marcar) sí tienen stepper
-  // de peso con historial, así que rotan cada BLOQUE (4 semanas): cambiar de
-  // ejercicio cada semana rompería la referencia de "peso anterior" justo
-  // cuando más sirve, que es viendo la progresión de un mismo movimiento.
+  // carga real (no llevan stepper de peso) -- estos rotan cada SEMANA.
+  // Para el resto (fuerza con peso registrado) se distingue PRINCIPAL de
+  // ACCESORIO: el principal de cada día (sentadilla, press banca, dominadas...)
+  // se queda fijo todo el bloque de 4 semanas para que el peso y el historial
+  // sigan siendo comparables semana a semana -- es lo que deja ver progreso
+  // real. Los accesorios (curl, elevaciones, face pull, gemelos...) no llevan
+  // ese mismo peso de seguimiento tan crítico, así que SÍ rotan cada semana
+  // dentro del bloque -- para que el mes no se sienta repetitivo sin perder
+  // la referencia de progresión donde más importa.
+  // Formato: [regex, alternativas[], cardio?, esPrincipal?]
   const ALTERNATIVAS_EJERCICIO = [
-    [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet']],
+    [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet'], false, true],
     [/sentadilla goblet/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
     [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
     [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
     [/peso muerto rumano/i, ['Hip thrust', 'Extensión lumbar en máquina']],
-    [/peso muerto( convencional)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra']],
-    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas']],
+    [/peso muerto( convencional)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
+    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas'], false, true],
     [/press inclinado/i, ['Press banca plano', 'Press con mancuernas']],
-    [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold']],
-    [/dominadas|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja']],
-    [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna']],
+    [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold'], false, true],
+    [/dominadas|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja'], false, true],
+    [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna'], false, true],
     [/remo con mancuerna/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
     [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
     [/hip thrust/i, ['Peso muerto rumano', 'Puente de glúteo']],
@@ -9008,8 +9013,8 @@
     [/\bgemelos\b/i, ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
     [/dead hang/i, ['Suspensión activa en barra', 'Remo en polea baja']],
-    [/pistol squat/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
-    [/muscle[- ]up/i, ['Dominadas + fondos en banco', 'Dominadas explosivas']],
+    [/pistol squat/i, ['Step-ups con mancuernas', 'Sentadilla búlgara'], false, true],
+    [/muscle[- ]up/i, ['Dominadas + fondos en banco', 'Dominadas explosivas'], false, true],
     // ── Cardio / acondicionamiento: rotan cada semana, con más variedad de
     // intensidad (desde andar hasta pliometría) para no repetir siempre lo mismo.
     [/burpees?/i, ['Mountain climbers', 'Cinta con inclinación a paso rápido', 'Remo o bici suave 5 min'], true],
@@ -9051,8 +9056,10 @@
   // siempre tienen la última palabra sobre esto -- se aplican después, en
   // formatearSesion, y pisan lo que decida la rotación automática.
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso) => {
-    return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio]) => {
-      const cicloClave = cardio ? semanaActual : bloqueMeso;
+    return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
+      // Cardio y accesorios (esPrincipal=false) rotan cada semana; el ejercicio
+      // principal de fuerza (esPrincipal=true) se queda fijo todo el bloque.
+      const cicloClave = (cardio || !esPrincipal) ? semanaActual : bloqueMeso;
       const opciones = alternativas.length + 1; // +1 = mantener el original
       const idx = _hashRotacion(regex.source + semilla + cicloClave) % opciones;
       return idx === 0 ? null : [regex, alternativas[idx - 1]];
