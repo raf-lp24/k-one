@@ -12907,12 +12907,24 @@
     // La rotación también varía por mes para renovar platos mensualmente.
     // El "periodo" hace avanzar la rotación con el tiempo según lo que el cliente
     // eligió en su panel (semanal/mensual/fija). Ver _periodoNutricion().
+    //
+    // BUG REAL encontrado y arreglado: el multiplicador del día era 11 -- y
+    // "Comida"/"Cena" en Gimnasio/CrossFit tienen exactamente 11 opciones (8
+    // base + 3 extra de proteína que se añaden más arriba). rotar() usa
+    // `off % arr.length`, así que con arr.length=11 y offset "... + dia*11",
+    // el término del día se anulaba SIEMPRE (11 % 11 = 0 para cualquier día),
+    // dejando la MISMA rotación los 7 días de la semana -- el cliente veía
+    // literalmente la misma comida cada día, sin que ningún filtro hubiera
+    // fallado, solo una coincidencia numérica entre el multiplicador y el
+    // tamaño real del pool. Se cambia a 31 (primo, mayor que cualquier pool
+    // de recetas real de esta app) para que `dia*31 % N` nunca se anule por
+    // coincidencia con el tamaño N de ningún pool.
     const periodoRot = _periodoNutricion(u.rotacionMenu);
     const nutricionPorDia = [];
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
         ...m,
-        opciones: rotar(m.opciones, semilla + i * 3 + periodoRot * 5 + dia * 11).slice(0, 5)
+        opciones: rotar(m.opciones, semilla + i * 3 + periodoRot * 5 + dia * 31).slice(0, 5)
       })));
     }
 
