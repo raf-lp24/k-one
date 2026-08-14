@@ -65,9 +65,22 @@ module.exports = async (req, res) => {
     // del cliente (sería manipulable): se verifica el historial real de Stripe.
     // Un customer recién creado no tiene historial, así que se salta la llamada.
     let tieneHistorial = false;
+    let yaTieneActiva = false;
     if (!customerEraNuevo) {
-      const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
+      const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 });
       tieneHistorial = prev.data.length > 0;
+      yaTieneActiva = prev.data.some(s => ['active', 'trialing', 'past_due'].includes(s.status));
+    }
+
+    // SEGURIDAD: si el cliente ya tiene una suscripción activa/en prueba/con pago
+    // pendiente, no le dejamos crear una segunda. Sin este guard, dos clicks en
+    // "empezar" (doble click, doble pestaña, o repetir la llamada) crean DOS
+    // suscripciones reales en Stripe sobre el mismo customer -- doble cobro. Nuestra
+    // sync (syncCustomerFromStripe) solo refleja "la mejor" en Supabase, así que el
+    // problema pasaría desapercibido en el panel aunque Stripe siguiera cobrando
+    // ambas. Para cambiar de plan ya existe update-subscription.js.
+    if (yaTieneActiva) {
+      return res.status(400).json({ error: 'Ya tienes una suscripción activa. Gestiona tu plan desde el panel de tu cuenta.' });
     }
 
     let priceId;

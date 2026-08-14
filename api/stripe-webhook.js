@@ -356,6 +356,36 @@ module.exports = async (req, res) => {
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
         break;
       }
+      // Antes no se manejaba: una disputa/chargeback solo se veía si alguien
+      // entraba al dashboard de Stripe. NOTA: para que este evento llegue aquí,
+      // hay que activarlo en Stripe → Developers → Webhooks → (este endpoint) →
+      // "Select events" → añadir charge.dispute.created. Si no está marcado ahí,
+      // este case nunca se ejecuta aunque el código esté desplegado.
+      case 'charge.dispute.created': {
+        const dispute = event.data.object;
+        try {
+          const apiKey = process.env.RESEND_API_KEY;
+          if (apiKey) {
+            const importe = ((dispute.amount || 0) / 100).toFixed(2);
+            const limite = dispute.evidence_details?.due_by
+              ? new Date(dispute.evidence_details.due_by * 1000).toLocaleDateString('es-ES')
+              : 'no especificada';
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: 'K-ONE <equipo@k-one.fit>',
+                to: ['k.one.fit26@gmail.com'],
+                subject: `⚠️ Disputa de cobro abierta (${importe}€)`,
+                html: `<p>Se ha abierto una disputa/chargeback para el cargo <b>${dispute.charge}</b> por <b>${importe}€</b>.</p><p>Motivo: ${dispute.reason || 'no especificado'}</p><p>Hay que responder desde el dashboard de Stripe antes del <b>${limite}</b>, o Stripe la resuelve automáticamente en contra.</p>`,
+              }),
+            }).catch(e => console.warn('[stripe-webhook] dispute email error:', e.message));
+          }
+        } catch (e) {
+          console.warn('[stripe-webhook] dispute handling error:', e.message);
+        }
+        break;
+      }
       default:
         break;
     }
