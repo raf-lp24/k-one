@@ -5493,6 +5493,34 @@
   .skeleton { background:var(--carbon); border-radius:8px; overflow:hidden; position:relative; }
   .skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation:skeletonShimmer 1.5s infinite; }
   @keyframes skeletonShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+  /* Ninguna de las reglas @media de arriba (todas entre las líneas 563 y
+     4863) cubre el cuestionario, el login/registro ni NINGÚN modal (paywall,
+     check-in, recuperar contraseña, ficha de ejercicio...) -- ese bloque de
+     estilos, entre .auth-card y aquí, no tenía ni un solo @media. El caso
+     más concreto: .form-grid ponía dos columnas fijas siempre, así que el
+     stepper de peso/altura/edad quedaba con ~30-40px de ancho real en un
+     móvil de 360-375px (uso declarado de la app: mirar el plan en el
+     gimnasio desde el móvil). */
+  @media (max-width: 560px) {
+    /* Cuestionario: una columna en vez de dos, el stepper recupera su
+       ancho completo (hasta 240px) en vez de compartir la mitad de la
+       columna con las flechas +/- de 48px cada una. */
+    .form-grid { grid-template-columns: 1fr; gap: 18px; }
+
+    /* Auth (login/registro/bienvenida): menos padding lateral y logo/título
+       más pequeños para que quepan con margen en una pantalla estrecha. */
+    .auth-card { padding: 0 16px; }
+    .auth-logo { font-size: 28px; margin-bottom: 32px; }
+    .welcome-title { font-size: 38px; }
+    .welcome-sub { margin-bottom: 32px; }
+
+    /* Modales: el overlay no tenía padding propio, así que .modal-box (con
+       padding fijo de 48px 40px) podía tocar los bordes de la pantalla sin
+       ningún margen de seguridad. */
+    .modal-overlay { padding: 16px; }
+    .modal-box, .modal-box-wide, .modal-box-recetario { padding: 28px 20px; max-height: 90vh; }
+  }
 </style>
 </head>
 <body>
