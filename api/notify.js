@@ -29,6 +29,51 @@ function esc(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Límites por hora para los tipos sin sesión (lead/mensaje). "lead" se permite
+// más veces porque cualquiera puede pasar por el lead-magnet de la landing
+// varias veces sin ser un abuso; "mensaje" es más generoso en abuso potencial
+// (contenido libre, reply_to arbitrario) así que va más ajustado.
+const RATE_LIMITS = { lead: 5, mensaje: 3 };
+const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hora
+
+// Vercel pone la IP real del cliente en x-forwarded-for (primer valor de la
+// lista, el resto son proxies intermedios). Sin cabecera, se agrupan todas
+// las peticiones bajo una clave común -- peor que nada, pero nunca deja
+// pasar una petición sin comprobar límite alguno.
+function _ipDe(req) {
+  const fwd = req.headers['x-forwarded-for'];
+  if (fwd) return String(fwd).split(',')[0].trim();
+  return req.socket?.remoteAddress || 'desconocida';
+}
+
+// Antes el único límite era un contador en localStorage del propio navegador
+// -- trivial de saltar con curl/Postman o borrando esa clave. Este registra
+// cada petición sin sesión (lead/mensaje) en Supabase y cuenta cuántas ha
+// hecho esa IP para ese tipo en la última hora. Si Supabase falla, se deja
+// pasar la petición (fail-open): un rate-limit caído no debería tumbar el
+// formulario de contacto entero.
+async function estaLimitadoPorTasa(req, tipo) {
+  try {
+    const supa = getSupabaseAdmin();
+    const ip = _ipDe(req);
+    const clave = `${tipo}:${ip}`;
+    const desde = new Date(Date.now() - RATE_WINDOW_MS).toISOString();
+    const { count, error } = await supa
+      .from('rate_limits')
+      .select('id', { count: 'exact', head: true })
+      .eq('clave', clave)
+      .gte('created_at', desde);
+    if (error) { console.warn('[notify] rate-limit check falló, se deja pasar:', error.message); return false; }
+    const limite = RATE_LIMITS[tipo] || 5;
+    if ((count || 0) >= limite) return true;
+    await supa.from('rate_limits').insert({ clave });
+    return false;
+  } catch (e) {
+    console.warn('[notify] rate-limit check con excepción, se deja pasar:', e.message);
+    return false;
+  }
+}
+
 function emailWrapper(contenido) {
   return `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div>${contenido}<div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo K-<span style="color:#E8490F;font-weight:600">ONE</span></p><p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p></div></div></div>`;
 }
@@ -505,6 +550,18 @@ async function handlePost(req, res) {
       const supa = getSupabaseAdmin();
       const user = await getAuthUser(req, supa);
       if (!user) return res.status(401).json({ error: 'No autenticado' });
+    }
+    // Rate-limit server-side para los dos tipos que NO exigen sesión (lead y
+    // mensaje): antes, el único límite era un contador en localStorage del
+    // propio navegador del cliente -- trivial de saltar con curl/Postman o
+    // simplemente borrando esa clave. Sin esto, cualquiera podía hacer que
+    // el dominio de K-ONE mandara correos arbitrarios (spam/phishing) sin
+    // límite y quemara la cuota de Resend.
+    if (tipo === 'lead' || tipo === 'mensaje') {
+      const limitado = await estaLimitadoPorTasa(req, tipo);
+      if (limitado) {
+        return res.status(429).json({ error: 'Demasiadas peticiones. Inténtalo de nuevo en un rato.' });
+      }
     }
     if (tipo === 'lead' && datos.email) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) {

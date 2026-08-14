@@ -5494,7 +5494,6 @@
   .skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation:skeletonShimmer 1.5s infinite; }
   @keyframes skeletonShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -5603,9 +5602,21 @@
 
     <label class="auth-check">
       <input type="checkbox" id="reg-terminos">
-      <span class="auth-check-label">Acepto los <a onclick="goToLegal('terminos')" style="cursor:pointer">términos y condiciones</a> y la <a onclick="goToLegal('privacidad')" style="cursor:pointer">política de privacidad</a>, incluido el tratamiento de mis datos de salud para personalizar el plan. Acepto que el servicio comience de forma inmediata y entiendo que esto supone la renuncia al derecho de desistimiento. Esta plataforma es orientación personalizada, no consejo médico.</span>
+      <span class="auth-check-label">Acepto los <a onclick="goToLegal('terminos')" style="cursor:pointer">términos y condiciones</a> y la <a onclick="goToLegal('privacidad')" style="cursor:pointer">política de privacidad</a>. Acepto que el servicio comience de forma inmediata y entiendo que esto supone la renuncia al derecho de desistimiento. Esta plataforma es orientación personalizada, no consejo médico.</span>
     </label>
     <div class="auth-error" id="err-terminos">Debes aceptar los términos para continuar</div>
+
+    <!-- Consentimiento específico para datos de salud (art. 9.2.a RGPD): antes
+         iba mezclado dentro de la casilla general de términos/privacidad junto
+         con otros 4 consentimientos distintos (T&C, privacidad, inicio
+         inmediato, renuncia de desistimiento). El RGPD exige que el
+         consentimiento para categorías especiales de datos (salud) sea
+         específico y distinguible del resto, no empaquetado. -->
+    <label class="auth-check">
+      <input type="checkbox" id="reg-datosSalud">
+      <span class="auth-check-label">Consiento expresamente el tratamiento de mis datos de salud (lesiones, enfermedades, alergias, medicación) que voy a facilitar en el cuestionario, únicamente para personalizar mi plan.</span>
+    </label>
+    <div class="auth-error" id="err-datosSalud">Debes consentir el tratamiento de tus datos de salud para continuar</div>
 
     <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
     </form>
@@ -8145,6 +8156,11 @@
   </div>
 </div>
 
+<!-- Movido desde <head>: bloqueaba el primer render de toda la página para
+     descargar/ejecutar un script remoto antes de pintar nada. Aquí, justo
+     antes del script principal que lo necesita, solo bloquea este punto
+     concreto (después de que el resto del HTML/CSS ya se ha parseado). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ===== SUPABASE =====
   const SUPABASE_URL = 'https://rfdrqbnzceudwclagjvp.supabase.co';
@@ -8855,12 +8871,22 @@
         return;
       }
       if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 1.99 });
-      try { buildDashboard(); } catch (dashErr) { console.error('Error cargando dashboard:', dashErr); }
 
       // Guardar datos del usuario si está logueado
       const user = getCurrentUser();
       if (user) {
         saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      }
+
+      // El paywall se comprobaba DESPUÉS de construir el dashboard entero
+      // (plan de entreno y nutrición ya en el DOM, solo tapado por el modal
+      // con CSS) -- cualquiera con las DevTools podía quitar la clase
+      // "visible" del modal y ver el plan completo sin haber pagado nunca.
+      // Ahora el contenido de pago no se construye en absoluto si no hay
+      // acceso activo: el modal cubre un dashboard vacío, no uno relleno.
+      const accesoOk = !user || tieneAccesoActivo(user.email);
+      if (accesoOk) {
+        try { buildDashboard(); } catch (dashErr) { console.error('Error cargando dashboard:', dashErr); }
       }
       // Actualizar nombre en dashboard
       if (user) {
@@ -8871,10 +8897,9 @@
 
       goTo('dashboard');
       // Antes de usar el dashboard, hay que activar el primer mes por 1,99€.
-      const u = getCurrentUser();
-      if (u && !tieneAccesoActivo(u.email)) {
-        comprobarPaywall(u.email);
-      } else if (!userData.onboardingCompletado && !userData._planRegenerado) {
+      if (user && !accesoOk) {
+        comprobarPaywall(user.email);
+      } else if (accesoOk && !userData.onboardingCompletado && !userData._planRegenerado) {
         startOnboarding();
       }
       userData._planRegenerado = true;
@@ -9496,7 +9521,7 @@
     cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
       <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${_esc(cat.toUpperCase())}</div>
       ${arr.map(([k, a]) => `
-        <div class="alimento-fila alimento-fila-click" onclick="agregarComidaExtra('${_esc(k).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">
+        <div class="alimento-fila alimento-fila-click" onclick="agregarComidaExtra('${_esc(k.replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}')">
           <span class="alimento-nombre">${_esc(a.n)}</span>
           <span class="alimento-macros">
             <b>${Math.round(a.kcal * f)}</b> kcal
@@ -9973,7 +9998,12 @@
   function _renderSustitucionEjercicioUI(nombre, diaNombre) {
     const cont = document.getElementById('infoEjercicioSustituir');
     if (!cont) return;
-    const jsEsc = s => _esc(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    // Orden importa: escapar para JS (barra invertida y comilla simple)
+    // ANTES de escapar para HTML, no después -- si _esc() corre primero,
+    // convierte la comilla en &#39; y el .replace de después ya no
+    // encuentra ninguna comilla cruda que escapar (no-op), dejando el
+    // mismo hueco que si no se escapara nada para este contexto.
+    const jsEsc = s => _esc(String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     if (!diaNombre) { cont.innerHTML = ''; cont.style.display = 'none'; return; }
     const btnStyle = 'background:var(--carbon);border:1px solid var(--humo);color:var(--blanco);font-size:12.5px;padding:8px 14px;border-radius:20px;cursor:pointer';
     const labelStyle = 'font-size:11px;color:var(--metal);font-family:\'DM Mono\',monospace;letter-spacing:1px;margin-bottom:8px';
@@ -17497,9 +17527,10 @@
     const pass = document.getElementById('reg-pass').value;
     const pass2 = document.getElementById('reg-pass2').value;
     const terminos = document.getElementById('reg-terminos').checked;
+    const datosSalud = document.getElementById('reg-datosSalud').checked;
 
     // Limpiar errores
-    ['nombre','email','pass','pass2','terminos'].forEach(id => {
+    ['nombre','email','pass','pass2','terminos','datosSalud'].forEach(id => {
       document.getElementById(`err-${id}`).classList.remove('visible');
       const input = document.getElementById(`reg-${id}`);
       if (input) input.classList.remove('error');
@@ -17527,6 +17558,10 @@
     }
     if (!terminos) {
       document.getElementById('err-terminos').classList.add('visible');
+      ok = false;
+    }
+    if (!datosSalud) {
+      document.getElementById('err-datosSalud').classList.add('visible');
       ok = false;
     }
 
@@ -17585,6 +17620,7 @@
       if (el) el.value = '';
     });
     document.getElementById('reg-terminos').checked = false;
+    document.getElementById('reg-datosSalud').checked = false;
 
     // Si el proyecto de Supabase exige confirmar el email, no hay sesión todavía:
     // avisamos y mandamos a login para que entre tras confirmar.
@@ -17894,8 +17930,13 @@
           generatedPlan.nutricion = filtrarNoComida(generatedPlan.nutricion, userData.noComida);
         }
         regenerarEntrenamientoHoy(generatedPlan);
-        buildDashboard();
-        if (skel) skel.style.display = 'none';
+        // Mismo fix que en generatePlan(): no construir el dashboard con el
+        // plan real si no hay acceso activo -- si no, el paywall de abajo
+        // solo tapa con CSS un plan que ya está entero en el DOM.
+        if (tieneAccesoActivo(email)) {
+          buildDashboard();
+          if (skel) skel.style.display = 'none';
+        }
       }
     }
     const user = getCurrentUser();
@@ -19126,7 +19167,7 @@
         </a>
       </div>
       <div style="margin-top:12px;text-align:center">
-        <button onclick="borrarCliente('${c.id}','${_esc(c.nombre)}','${_esc(c.email)}',this)" style="background:none;border:1px solid #333;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 20px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s">
+        <button onclick="borrarCliente('${c.id}','${_esc((c.nombre || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}','${_esc((c.email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}',this)" style="background:none;border:1px solid #333;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 20px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           Eliminar cliente
         </button>
@@ -19682,39 +19723,41 @@
         .select('nombre, inicial, edad, plan, estrellas, texto')
         .order('created_at', { ascending: false })
         .limit(20);
-      const testimoniosFallback = [
-        { nombre: 'Carlos M.', inicial: 'C', edad: 28, plan: 'Gimnasio', estrellas: 5, texto: 'Llevaba años yendo al gimnasio sin saber lo que hacía. Desde que uso K-ONE tengo un plan de verdad y noto que progreso semana a semana. Lo mejor es que puedo registrar mis pesos y ver cómo subo.' },
-        { nombre: 'Laura G.', inicial: 'L', edad: 34, plan: 'Nutrición', estrellas: 4, texto: 'La nutrición es lo que más me ha sorprendido. Tener 5 opciones por comida hace que no me aburra y como mucho mejor sin pasar hambre. Lo único que echo en falta son más recetas de cena rápida.' },
-        { nombre: 'Javi R.', inicial: 'J', edad: 26, plan: 'Hyrox', estrellas: 5, texto: 'Entreno Hyrox en mi box y usaba K-ONE solo para la nutrición. Se nota que ajustan las kcal y la proteína a lo que exige preparar las estaciones, no es una dieta genérica. Recomendable.' },
-        { nombre: 'Ana P.', inicial: 'A', edad: 31, plan: 'Solo nutrición', estrellas: 4, texto: 'Solo contraté la nutrición porque ya tenía mi entrenador. El plan de comidas está bien pensado y las recetas son fáciles. La lista de la compra es un detalle que parece tonto pero me ahorra mucho tiempo.' },
-        { nombre: 'Diego S.', inicial: 'D', edad: 22, plan: 'CrossFit', estrellas: 5, texto: 'Empecé CrossFit hace poco y no sabía cómo comer para rendir. K-ONE me ajustó los carbos y la proteína a mi deporte y noto mucha diferencia en los WODs. El check-in semanal está guay para ir ajustando.' }
-      ];
-      const items = (data && data.length > 0) ? data : testimoniosFallback;
-      // El schema de reseñas (Review/AggregateRating) SOLO se genera con `data`
-      // (opiniones reales de Supabase), nunca con testimoniosFallback. Marcar
-      // como reseñas reales unos testimonios de relleno sería swearing fake
-      // review data a Google — además de faltar a la verdad con quien las lea.
-      // Se activa solo cuando haya opiniones de verdad, sin tocar nada más.
-      _actualizarReviewSchema(data && data.length > 0 ? data : null);
+      if (error) throw error;
+      // Antes, si no había opiniones reales todavía se rellenaba con 5
+      // testimonios inventados (mismo diseño de tarjeta, sin ningún
+      // distintivo) — contradecía el propio texto de la sección ("sin
+      // inventar") y es justo el tipo de reseña falsa que la Directiva UE
+      // 2019/2161 prohíbe expresamente. Ahora, sin datos reales, se usa
+      // siempre el estado vacío honesto que ya existía en el código.
+      if (!data || !data.length) {
+        _mostrarTestimoniosVacios();
+        _actualizarReviewSchema(null);
+        return;
+      }
+      _actualizarReviewSchema(data);
       const carousel = document.getElementById('testimonialsCarousel');
       const empty = document.getElementById('testimonialsEmpty');
       if (carousel) carousel.style.display = '';
       if (empty) empty.style.display = 'none';
-      track.innerHTML = items.map(t => {
+      track.innerHTML = data.map(t => {
         const estrellas = '★'.repeat(Math.max(1, Math.min(5, t.estrellas || 5))) +
                           '☆'.repeat(5 - Math.max(1, Math.min(5, t.estrellas || 5)));
-        const quoteHTML = t.texto
-          ? `<p class="testimonial-quote">"${t.texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}"</p>`
-          : '';
-        const planSafe = t.plan ? String(t.plan).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-        const roleText = [t.edad ? `${t.edad} años` : '', planSafe ? `<b>${planSafe}</b>` : ''].filter(Boolean).join(' · ');
+        // t.nombre/t.inicial pueden venir de cualquiera (el formulario público
+        // de opinión no exige login) -- antes se volcaban sin escapar, XSS
+        // almacenado explotable contra cualquier visitante de la landing.
+        const quoteHTML = t.texto ? `<p class="testimonial-quote">"${_esc(t.texto)}"</p>` : '';
+        const planSafe = t.plan ? _esc(t.plan) : '';
+        const roleText = [t.edad ? `${parseInt(t.edad) || t.edad} años` : '', planSafe ? `<b>${planSafe}</b>` : ''].filter(Boolean).join(' · ');
+        const nombreSafe = _esc(t.nombre || 'Cliente');
+        const inicialSafe = _esc((t.inicial || t.nombre?.[0] || '?').toUpperCase());
         return `<div class="testimonial-card">
           <div class="testimonial-stars">${estrellas}</div>
           ${quoteHTML}
           <div class="testimonial-author">
-            <div class="testimonial-avatar">${(t.inicial || t.nombre?.[0] || '?').toUpperCase()}</div>
+            <div class="testimonial-avatar">${inicialSafe}</div>
             <div>
-              <div class="testimonial-name">${t.nombre || 'Cliente'}</div>
+              <div class="testimonial-name">${nombreSafe}</div>
               <div class="testimonial-role">${roleText}</div>
             </div>
           </div>

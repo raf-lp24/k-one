@@ -193,6 +193,21 @@ alter table public.webhook_events enable row level security;
 --  al service role, que ignora RLS por diseño de Supabase.)
 
 -- ============================================================
+-- 5b. TABLA: rate_limits
+-- Rate-limit server-side para peticiones sin sesión a api/notify.js
+-- (lead/mensaje). Ver supabase/migration-rate-limits.sql para el detalle.
+-- Igual que webhook_events: cerrada a todos salvo service_role.
+-- ============================================================
+create table if not exists public.rate_limits (
+  id uuid primary key default gen_random_uuid(),
+  clave text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists rate_limits_clave_fecha_idx
+  on public.rate_limits (clave, created_at desc);
+alter table public.rate_limits enable row level security;
+
+-- ============================================================
 -- 6. FUNCIÓN HELPER: is_admin()
 -- Devuelve true si el usuario autenticado tiene app_metadata.is_admin = true.
 -- app_metadata solo puede ser modificado por el service role (no por el usuario),
@@ -241,6 +256,7 @@ create table if not exists public.testimonios (
   plan text,
   estrellas int not null default 5,
   texto text,
+  aprobado boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -250,9 +266,13 @@ drop policy if exists "testimonios_insert" on public.testimonios;
 create policy "testimonios_insert" on public.testimonios
   for insert with check (true);
 
+-- Solo se muestran públicamente los testimonios ya moderados/aprobados
+-- (ver supabase/migration-testimonios-moderacion.sql) -- el insert público
+-- sin login sigue abierto, pero nada se ve hasta aprobarlo a mano en el
+-- Table Editor de Supabase.
 drop policy if exists "testimonios_select" on public.testimonios;
 create policy "testimonios_select" on public.testimonios
-  for select using (true);
+  for select using (aprobado = true);
 
 -- ============================================================
 -- 9. CUENTA DE TEST (opcional)
