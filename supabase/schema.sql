@@ -288,9 +288,15 @@ create policy "testimonios_select" on public.testimonios
 -- No se define aquí su "create table" porque su esquema completo no vive
 -- en este repositorio (columnas conocidas por el código que la usa:
 -- user_id, nombre, email, asunto, mensaje, respuesta, created_at, id).
--- Ver supabase/migration-mensajes-cliente-rls.sql para activar RLS y la
--- política de insert correcta (auth.uid() = user_id) -- solo el
--- service_role (panel de admin) lee/gestiona esta tabla.
+--
+-- Verificado directamente en la base real (agosto 2026): YA tiene RLS
+-- activado con políticas correctas, con nombres que no coinciden con el
+-- resto de convenciones de este archivo:
+--   mensajes_insert_own (insert)
+--   mensajes_select_own (select using auth.uid() = user_id)
+-- Cada cliente solo puede leer sus propios mensajes, nunca los de otro.
+-- El panel de admin gestiona la tabla aparte con el service_role.
+-- No hace falta ninguna migración extra para esta tabla.
 -- ============================================================
 
 -- ============================================================
