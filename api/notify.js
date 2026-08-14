@@ -21,7 +21,11 @@ function enviarEmail(apiKey, { from, to, subject, html, reply_to }) {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    // Antes dependía enteramente del maxDuration de la función de Vercel
+    // para cortar si Resend se colgaba -- con esto falla en 10s de forma
+    // predecible en vez de consumir todo el tiempo de la función.
+    signal: AbortSignal.timeout(10000)
   });
 }
 

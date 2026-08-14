@@ -275,6 +275,16 @@ create policy "testimonios_select" on public.testimonios
   for select using (aprobado = true);
 
 -- ============================================================
+-- 8b. TABLA: mensajes_cliente (formulario de contacto del dashboard)
+-- No se define aquí su "create table" porque su esquema completo no vive
+-- en este repositorio (columnas conocidas por el código que la usa:
+-- user_id, nombre, email, asunto, mensaje, respuesta, created_at, id).
+-- Ver supabase/migration-mensajes-cliente-rls.sql para activar RLS y la
+-- política de insert correcta (auth.uid() = user_id) -- solo el
+-- service_role (panel de admin) lee/gestiona esta tabla.
+-- ============================================================
+
+-- ============================================================
 -- 9. CUENTA DE TEST (opcional)
 -- La cuenta de demo (test@k-one.es / kone123) se crea desde la
 -- propia app la primera vez que alguien entra con esas credenciales

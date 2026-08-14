@@ -3,7 +3,11 @@ const { createClient } = require('@supabase/supabase-js');
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY no definida');
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
+  // Sin timeout propio, una llamada a Stripe que tardara de más consumía
+  // todo el maxDuration de la función (varias llamadas encadenadas en
+  // create-checkout-session.js, hasta 4 seguidas) en vez de fallar rápido
+  // y de forma predecible.
+  return new Stripe(process.env.STRIPE_SECRET_KEY, { timeout: 10000 });
 }
 
 // A-1: URL desde variable de entorno, nunca hardcodeada
