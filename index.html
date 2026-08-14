@@ -6459,8 +6459,14 @@
       <p class="hero-sub">Tu plan de entrenamiento y nutrición generado con tus datos reales. Se adapta cada semana según tu progreso.</p>
       <div class="hero-cta">
         <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
-        <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 1,99€. Crear cuenta nueva" onclick="goTo('registro')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('registro');}">
+        <!-- Antes "primer mes" solo estaba en el aria-label (invisible para
+             quien ve la pantalla) y el clic saltaba directo a "registro",
+             el único CTA de toda la landing que se salta la pantalla
+             "bienvenida" (con la opción de "ya tengo cuenta") que sí usan
+             todos los demás. Ambas cosas corregidas. -->
+        <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes por 1,99€. Crear cuenta nueva" onclick="goTo('bienvenida')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('bienvenida');}">
           <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>1,99€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--metal-claro);margin-top:2px">Solo el primer mes</div>
         </div>
       </div>
       <div class="hero-trust">
@@ -6789,7 +6795,7 @@
           <li>Seguimiento de progreso y cargas</li>
           <li>Gimnasio, running e híbrido</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
       <div class="price-card featured">
         <div class="price-badge">Más popular</div>
@@ -6803,7 +6809,7 @@
           <li>Ahorro de 9€ cada trimestre</li>
           <li>Precio bloqueado 3 meses</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
       <div class="price-card">
         <div class="price-tag">Solo nutrición</div>
@@ -6817,7 +6823,7 @@
           <li>Macros y calorías calculados</li>
           <li>Sin plan de entrenamiento</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar</button>
+        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar por 1,99€</button>
       </div>
     </div>
     <div class="trust-bar">
@@ -7331,7 +7337,7 @@
             </div>
           </div>
           <div class="field">
-            <label>¿Cocinas en casa o comes fuera? <span class="required">Obligatorio</span></label>
+            <label>¿Cocinas en casa o comes fuera? <span class="optional">Opcional</span></label>
             <div class="radio-group" id="cocina">
               <div class="radio-opt" onclick="selectRadio(this,'cocina')">Casi siempre en casa</div>
               <div class="radio-opt" onclick="selectRadio(this,'cocina')">Mitad y mitad</div>
@@ -8597,8 +8603,13 @@
     2: [],
     3: [
       { type: 'radio', id: 'dieta' },
-      { type: 'radio', id: 'comidas' },
-      { type: 'radio', id: 'cocina' }
+      { type: 'radio', id: 'comidas' }
+      // 'cocina' quitado de obligatorio: se pedía pero buildPlanFromData
+      // nunca lo lee (confirmado por auditoría, ningún .cocina fuera de
+      // collectFormData/DOM) -- forzar una respuesta que el motor ignora
+      // no tiene sentido. Se deja como pregunta opcional por si se conecta
+      // al motor más adelante (ej. sesgar hacia recetas sin cocción si
+      // "come casi siempre fuera").
     ],
     4: [
       { type: 'radio', id: 'tipoPlan' },
@@ -9000,7 +9011,7 @@
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>', title: 'Tú eliges cómo se renueva tu dieta', text: 'Arriba del todo en Nutrición decides cada cuánto quieres platos nuevos: cada semana, cada mes o mantenerlos fijos. Al renovarse, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/><circle cx="19" cy="18" r="2"/></svg>', title: 'Pesa lo que comes', text: 'Cada ingrediente lleva su cantidad en gramos: no es capricho, es lo que hace que el plan funcione. Solo las especias y el limón van al gusto (no suman calorías). En "Ver macros" puedes abrir cualquier plato y ver de dónde sale cada caloría.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', title: 'Buscador de alimentos', text: '¿Cuánta proteína tiene un huevo? ¿Y 200g de arroz? En Nutrición tienes un buscador con los macros oficiales de la USDA: escribe el alimento, pon los gramos y lo tienes. Útil cuando comes fuera del plan.' },
-    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>', title: 'Recetario completo', text: '"Ver recetario completo" te abre más de 200 recetas buscables, no solo las de tu plan de hoy. Sirve para cambiar algo puntual o para coger ideas.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>', title: 'Recetario completo', text: '"Ver recetario completo" te abre todas las opciones de tu plan de esta semana juntas (no solo la que toca hoy), buscable por nombre. Sirve para cambiar algo puntual o para coger ideas dentro de tu semana.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>', title: 'Lista de la compra', text: 'Cuando completes los 7 días de comidas, aparece el botón "Lista de la compra": junta todo lo que necesitas esa semana, sin que tengas que sumarlo tú.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>', title: 'Descarga tu plan', text: '"Descargar plan semanal" te da un PDF con toda tu semana de entrenamiento y nutrición, para llevarlo contigo o imprimirlo si no tienes conexión.' },
     { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in semanal', text: 'Cada semana cuéntanos cómo te fue (días entrenados, energía, sensaciones) y ajustamos tu plan de la semana siguiente automáticamente.' },
@@ -16583,9 +16594,14 @@
       // Sigue en el primer mes a 1,99€: no se cambia la facturación, solo el plan.
       msgPago = ' Sigues en tu primer mes a 1,99€. Al renovar pasarás automáticamente a 7,99€/mes (o al plan que elijas).';
     } else if (planCambia || periodCambia) {
-      // proration_behavior 'create_prorations' NO cobra al instante: la diferencia
-      // (a favor o en contra) se prorratea y aparece en la próxima factura.
-      msgPago = ' El ajuste de precio se prorratea y se reflejará en tu próxima factura.';
+      // OJO: este mensaje decía "se prorratea", pero api/update-subscription.js
+      // NO prorratea -- usa un subscriptionSchedule con la fase actual (precio
+      // viejo hasta que acabe el período ya pagado) y una fase nueva (precio
+      // nuevo desde la siguiente renovación), sin cargo ni devolución
+      // intermedia. Es justo lo que promete la FAQ pública ("se aplica en el
+      // siguiente período, nunca a mitad de mes, sin cargos extra") -- el
+      // mensaje viejo la contradecía.
+      msgPago = ' Sigues pagando el precio actual hasta tu próxima renovación; a partir de ahí se aplica el nuevo plan/precio, sin cargos extra ahora.';
     }
     showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.' + msgPago);
   }
@@ -17632,7 +17648,11 @@
       document.getElementById('reg-nombre').classList.add('error');
       ok = false;
     }
-    if (!email || !email.includes('@') || !email.includes('.')) {
+    // Antes solo comprobaba includes('@')/includes('.') aquí, más laxo que
+    // la validación en tiempo real de validarCampoReg (línea ~17521/17558)
+    // -- un email como "a@.b" pasaba el envío aunque el check visual en
+    // vivo ya lo hubiera marcado inválido. Misma regex en los dos sitios.
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
       document.getElementById('err-email').classList.add('visible');
       document.getElementById('reg-email').classList.add('error');
       ok = false;
@@ -18026,7 +18046,6 @@
         // solo tapa con CSS un plan que ya está entero en el DOM.
         if (tieneAccesoActivo(email)) {
           buildDashboard();
-          if (skel) skel.style.display = 'none';
         }
       }
     }
@@ -18038,6 +18057,13 @@
     comprobarPaywall(email);
     comprobarRenovacionMensual();
     comprobarRecordatorioCheckin();
+    // Antes solo se ocultaba dentro del "if (generatedPlan) { if
+    // (tieneAccesoActivo) {...} }" -- si saved no existía, o existía sin
+    // plan, o el acceso no estaba activo (paywall), el esqueleto de carga
+    // se quedaba mostrando el shimmer para siempre, sin ninguna ruta de
+    // salida. Se oculta aquí siempre, al final, cubra o no cubra el
+    // paywall lo que hay debajo.
+    if (skel) skel.style.display = 'none';
   }
 
   function comprobarRenovacionMensual() {

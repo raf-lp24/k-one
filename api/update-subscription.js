@@ -4,7 +4,13 @@ const {
 } = require('./_stripeHelpers');
 const { canjearNivelHitos } = require('./_hitosReward');
 
-// Cambia el precio de la suscripción activa con prorrateo.
+// Cambia el precio de la suscripción activa SIN prorrateo: crea un
+// subscriptionSchedule con la fase actual (precio viejo hasta que acabe el
+// período ya pagado) y una fase nueva (precio nuevo desde la siguiente
+// renovación) -- coincide con lo que promete la FAQ pública ("se aplica en
+// el siguiente período, nunca a mitad de mes, sin cargos extra"). Este
+// comentario decía "con prorrateo" y contradecía tanto el código real de
+// abajo como el mensaje que ve el cliente en index.html (ya corregido).
 //
 // También atiende `accion: 'canjear-hito'`, que aplica el % de descuento de un
 // nivel de hitos a la próxima cuota. Va aquí, y no en su propio endpoint, porque

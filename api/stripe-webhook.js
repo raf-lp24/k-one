@@ -301,6 +301,54 @@ module.exports = async (req, res) => {
             }
           } catch (e) { console.warn('[stripe-webhook] renovacion error:', e.message); }
         }
+
+        // Aviso al CLIENTE cuando el cobro falla (status pasa a past_due).
+        // Antes solo se enteraba el admin (digest interno) -- el cliente
+        // dependía enteramente de los reintentos/emails automáticos de
+        // Stripe (fuera de nuestro control) para saber que su tarjeta
+        // falló. Solo se envía en la TRANSICIÓN a past_due (prev.status
+        // existe y era distinto), no en cada webhook mientras sigue en
+        // past_due -- si no, Stripe podría mandar varios "updated"
+        // seguidos y el cliente recibiría el mismo aviso repetido.
+        if (subscription.status === 'past_due' && prev?.status && prev.status !== 'past_due') {
+          try {
+            let prof = null;
+            if (subscription.metadata?.supabase_user_id) {
+              const { data } = await supabaseAdmin.from('profiles')
+                .select('nombre, email').eq('id', subscription.metadata.supabase_user_id).maybeSingle();
+              prof = data;
+            }
+            if (!prof) {
+              const { data: sub } = await supabaseAdmin.from('subscriptions')
+                .select('user_id').eq('stripe_customer_id', subscription.customer).maybeSingle();
+              if (sub?.user_id) {
+                const { data } = await supabaseAdmin.from('profiles')
+                  .select('nombre, email').eq('id', sub.user_id).maybeSingle();
+                prof = data;
+              }
+            }
+            if (prof?.email) {
+              const primerNombre = (prof.nombre || '').split(' ')[0] || 'Hola';
+              const APP_URL = process.env.APP_URL || 'https://k-one.fit';
+              const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
+              const apiKey = process.env.RESEND_API_KEY;
+              if (apiKey) {
+                fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    from: 'K-ONE <equipo@k-one.fit>',
+                    to: [prof.email],
+                    reply_to: ADMIN_EMAIL,
+                    subject: `${primerNombre}, no hemos podido cobrar tu suscripción K-ONE`,
+                    html: `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div><div style="padding:32px 28px 0"><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${primerNombre}</span>,</p><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hemos intentado cobrar tu suscripción y el pago no se ha completado (tarjeta caducada, fondos insuficientes, o el banco lo ha rechazado). Sigues teniendo acceso a tu plan mientras lo intentamos de nuevo, pero si no se resuelve pronto tu acceso se pausará.</p><p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Actualiza tu método de pago para que no se interrumpa nada:</p></div><div style="padding:0 28px 28px;text-align:center"><a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTUALIZAR MI PAGO</a></div><div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo de K-<span style="color:#E8490F;font-weight:600">ONE</span></p></div></div></div>`
+                  })
+                }).catch(e => console.warn('[stripe-webhook] pago-fallido email error:', e.message));
+                supabaseAdmin.from('email_log').insert({ tipo: 'pago_fallido', destinatario: prof.email, asunto: `${primerNombre}, no hemos podido cobrar tu suscripción K-ONE`, datos: JSON.stringify({ nombre: prof.nombre }) }).then(() => {}).catch(() => {});
+              }
+            }
+          } catch (e) { console.warn('[stripe-webhook] pago-fallido error:', e.message); }
+        }
         break;
       }
       case 'customer.subscription.deleted': {

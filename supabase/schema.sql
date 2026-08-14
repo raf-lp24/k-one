@@ -35,6 +35,14 @@ create table if not exists public.profiles (
 -- y darse premium gratis. El trigger de abajo lo impide.
 alter table public.profiles add column if not exists is_beta boolean not null default false;
 
+-- Fecha en la que expira el acceso premium gratuito concedido vía is_beta
+-- (invitaciones de admin, api/admin-crear-cliente.js). Esta columna se venía
+-- usando en el código (index.html:17353,17756; api/admin-*.js) desde antes
+-- de estar documentada aquí -- si se reconstruía la base desde este schema
+-- limpio, faltaba en silencio. Igual de sensible que is_beta: protegida por
+-- el mismo trigger de abajo.
+alter table public.profiles add column if not exists beta_expires timestamptz;
+
 alter table public.profiles enable row level security;
 
 -- Protección de columnas sensibles: los roles de cliente (authenticated/anon) no pueden
@@ -47,6 +55,7 @@ as $$
 begin
   if current_user in ('authenticated', 'anon') then
     new.is_beta := old.is_beta;
+    new.beta_expires := old.beta_expires;
   end if;
   return new;
 end;

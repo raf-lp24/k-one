@@ -1,6 +1,11 @@
 desktop.ini
 node_modules/
 
+# Nunca commitear secretos reales si alguien crea un .env local para pruebas
+.env
+.env.local
+.env*.local
+
 # Archivos temporales/bloqueo de Microsoft Word
 ~$*
 *.tmp
