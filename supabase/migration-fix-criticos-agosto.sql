@@ -47,13 +47,22 @@ revoke all on public.admin_clientes from anon, authenticated;
 -- sin ser admin) podía llamar desde la consola del navegador:
 --   supabase.rpc('crear_codigo_promo', { p_codigo:'HACK', p_tipo:'mes_gratis', p_valor:3650, ... })
 -- crear un código con años de descuento, guardarlo en su propio perfil,
--- y canjearlo al pagar -- suscripción gratis indefinida.
+-- y canjearlo al pagar -- suscripción gratis indefinida. Confirmado en
+-- real: una llamada de prueba a la API pública (sin sesión) creó un
+-- código sin problema hasta que se aplicó el fix de abajo.
 --
--- IMPORTANTE: la firma exacta (nombres y tipos de los parámetros) tiene
--- que coincidir con la función real. Cópiala tal cual aparece en
--- migration-codigos-promo.sql si difiere de esta -- Postgres identifica
--- las funciones por nombre + firma completa de parámetros.
-revoke execute on function public.crear_codigo_promo(text, text, int, text, int, timestamptz) from anon, authenticated;
+-- Firma real (comprobada con pg_get_function_identity_arguments):
+--   p_codigo text, p_tipo text, p_valor integer, p_descripcion text,
+--   p_usos_max integer, p_expira_at timestamp with time zone
+--
+-- OJO -- esto costó dos intentos: "revoke ... from anon, authenticated"
+-- NO basta. El EXECUTE de una función nueva se concede automáticamente a
+-- PUBLIC (el pseudo-rol "todo el mundo"), no a anon/authenticated
+-- directamente -- revocarlo de esos dos roles no quita nada si el permiso
+-- real vive en PUBLIC. Hay que revocarlo de PUBLIC explícitamente.
+-- Verificado con has_function_privilege('anon', ..., 'execute') = false
+-- tras este comando.
+revoke execute on function public.crear_codigo_promo(text, text, integer, text, integer, timestamp with time zone) from public;
 
 -- ============================================================
 -- 3) beta_expires: columna usada en el código desde hace tiempo pero nunca
