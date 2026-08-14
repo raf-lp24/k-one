@@ -14174,16 +14174,47 @@
   }
 
   // ===== FOTO DE PERFIL =====
+  // Las fotos (perfil + progreso) se guardan en el bucket "fotos-progreso". Antes
+  // se guardaba la URL pública fija (accesible por cualquiera que la adivinara);
+  // ahora se guarda solo la ruta ("sb-path:<ruta>") y se firma una URL temporal
+  // en cada visualización, con caché para no volver a firmar en cada re-render.
+  const _signedUrlFotoCache = {};
+  const SIGNED_URL_TTL_SEG = 60 * 60 * 24 * 7; // 7 días
+  async function resolverUrlFoto(valor) {
+    if (!valor) return null;
+    if (valor.startsWith('data:')) return valor;
+    if (valor.startsWith('sb-path:')) {
+      const path = valor.slice('sb-path:'.length);
+      const cache = _signedUrlFotoCache[path];
+      if (cache && cache.expiraEn > Date.now() + 60000) return cache.url;
+      try {
+        const { data, error } = await supa.storage.from('fotos-progreso').createSignedUrl(path, SIGNED_URL_TTL_SEG);
+        if (error || !data?.signedUrl) {
+          console.warn('[fotos] Error firmando URL:', error?.message);
+          return null;
+        }
+        _signedUrlFotoCache[path] = { url: data.signedUrl, expiraEn: Date.now() + SIGNED_URL_TTL_SEG * 1000 };
+        return data.signedUrl;
+      } catch (e) {
+        console.warn('[fotos] Excepción firmando URL:', e.message);
+        return null;
+      }
+    }
+    // URL pública completa guardada antes de este cambio: se sirve tal cual
+    // hasta que el usuario vuelva a subir la foto (entonces pasa a sb-path:).
+    return valor;
+  }
+
   // Pinta el avatar del sidebar: usa la foto de perfil guardada si existe,
   // y si no, la inicial del nombre (o del objetivo como respaldo).
-  function aplicarAvatarPerfil() {
+  async function aplicarAvatarPerfil() {
     const av = document.getElementById('userAvatar');
     if (!av) return;
     const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
     const letra = (user?.nombre?.charAt(0) || userData?.objetivo?.charAt(0) || 'U').toUpperCase();
     const letraEl = document.getElementById('userAvatarLetter');
     if (letraEl) letraEl.textContent = letra;
-    const foto = userData?.fotoPerfil;
+    const foto = await resolverUrlFoto(userData?.fotoPerfil);
     if (foto) {
       av.style.backgroundImage = `url("${foto}")`;
       av.classList.add('has-photo');
@@ -14213,17 +14244,17 @@
         const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
         ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
         canvas.toBlob(async (blob) => {
-          let fotoUrl = null;
+          let fotoValor = null;
           if (_supaUserId) {
             const path = `${_supaUserId}/perfil.jpg`;
             const { error } = await supa.storage.from('fotos-progreso').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
             if (error) {
               console.warn('[fotoPerfil] Error subiendo a Storage:', error.message);
             } else {
-              fotoUrl = supa.storage.from('fotos-progreso').getPublicUrl(path).data.publicUrl;
+              fotoValor = `sb-path:${path}`;
             }
           }
-          userData.fotoPerfil = fotoUrl || canvas.toDataURL('image/jpeg', 0.8);
+          userData.fotoPerfil = fotoValor || canvas.toDataURL('image/jpeg', 0.8);
           aplicarAvatarPerfil();
           const user = getCurrentUser();
           if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
@@ -14816,7 +14847,7 @@
     }
   }
 
-  function renderFotosProgreso() {
+  async function renderFotosProgreso() {
     const grid = document.getElementById('photosGrid');
     const nav = document.getElementById('fotosNav');
     if (!grid) return;
@@ -14834,9 +14865,10 @@
 
     const startMes = fotoPagina * 4 + 1;
     const slots = [startMes, startMes + 1, startMes + 2, startMes + 3];
+    const urls = await Promise.all(slots.map(mes => resolverUrlFoto(fotosObj[mes])));
 
-    grid.innerHTML = slots.map(mes => {
-      const src = fotosObj[mes];
+    grid.innerHTML = slots.map((mes, i) => {
+      const src = urls[i];
       if (src) {
         return `<div class="photo-slot filled" onclick="seleccionarFoto(${mes})">
           <img src="${src}" alt="Mes ${mes}" loading="lazy">
@@ -14887,17 +14919,17 @@
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         normalizarFotos();
         canvas.toBlob(async (blob) => {
-          let fotoUrl = null;
+          let fotoValor = null;
           if (_supaUserId) {
             const path = `${_supaUserId}/mes-${mes}.jpg`;
             const { error } = await supa.storage.from('fotos-progreso').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
             if (error) {
               console.warn('[fotosProgreso] Error subiendo a Storage:', error.message);
             } else {
-              fotoUrl = supa.storage.from('fotos-progreso').getPublicUrl(path).data.publicUrl;
+              fotoValor = `sb-path:${path}`;
             }
           }
-          userData.fotosProgreso[mes] = fotoUrl || canvas.toDataURL('image/jpeg', 0.6);
+          userData.fotosProgreso[mes] = fotoValor || canvas.toDataURL('image/jpeg', 0.6);
           fotoPagina = Math.floor((mes - 1) / 4);
           renderFotosProgreso();
           guardarProgresoUsuario();
