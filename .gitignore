@@ -13,3 +13,7 @@ node_modules/
 
 # Vídeos exportados de marketing (se regeneran con los scripts)
 marketing/*.mp4
+
+# Archivos locales que no pertenecen al repo del sitio
+.claude/
+*.docx
