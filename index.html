@@ -6907,7 +6907,7 @@
 <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
   <p style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica se usan de forma anónima. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" style="color:var(--brasa);text-decoration:none">Más información</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0">
-    <button onclick="rechazarCookies()" style="padding:8px 20px;background:transparent;color:#B5B2AD;border:1px solid #2A2A2A;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Solo necesarias</button>
+    <button onclick="rechazarCookies()" style="padding:8px 20px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
     <button onclick="aceptarCookies()" style="padding:8px 20px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
   </div>
 </div>
@@ -6926,7 +6926,11 @@
 <!-- ==================== LEGAL ==================== -->
 <div class="screen" id="legal">
   <div class="legal-wrap">
-    <button class="legal-back" onclick="goTo('landing')">← Volver al inicio</button>
+    <!-- Antes siempre volvía a "landing" -- para un cliente logueado que
+         entraba aquí desde el dashboard (nuevo enlace "Aviso legal" del
+         panel), eso lo sacaba de su área sin ninguna forma directa de
+         volver salvo iniciar sesión otra vez. -->
+    <button class="legal-back" onclick="goTo(getCurrentUser() ? 'dashboard' : 'landing')">← Volver</button>
 
     <h2 class="legal-h1">Aviso legal y privacidad</h2>
     <div class="legal-updated">Última actualización: 14 de junio de 2026</div>
@@ -6996,7 +7000,7 @@
       <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
       <h3>2.8. Seguridad</h3>
-      <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. Tus datos se almacenan de forma cifrada en servidores seguros en la nube (Supabase, infraestructura AWS en la UE). La comunicación entre tu navegador y nuestros servidores viaja cifrada mediante HTTPS/TLS. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1, y en ningún momento almacenamos datos de tarjeta en nuestros sistemas.</p>
+      <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. Tus datos se almacenan de forma cifrada en servidores seguros en la nube (Supabase, infraestructura AWS en la UE). La comunicación entre tu navegador y nuestros servidores viaja cifrada mediante HTTPS/TLS. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1, y en ningún momento almacenamos datos de tarjeta en nuestros sistemas. Además, tu propio dispositivo guarda una copia local de tu plan y tus datos (incluidos los de salud que hayas facilitado) para que la app cargue más rápido sin depender siempre de la conexión; si usas un ordenador o móvil compartido, cierra sesión al terminar para no dejar esa copia accesible a otra persona.</p>
     </section>
 
     <section class="legal-section" id="terminos">
@@ -7543,6 +7547,12 @@
         </button>
         <button class="logout-btn" onclick="logout()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Cerrar sesión
+        </button>
+        <!-- Antes el aviso legal/política de privacidad solo era accesible desde
+             la landing (pre-login) -- una vez dentro del dashboard no había
+             forma de volver a consultarlo sin cerrar sesión. -->
+        <button class="logout-btn" onclick="goToLegal()" style="border:none;border-radius:8px;padding:8px 14px;font-size:11px;color:var(--metal)">
+          <span>⬡</span> Aviso legal y privacidad
         </button>
       </div>
     </aside>
@@ -13406,7 +13416,15 @@
 
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
-    if (!generatedPlan) return;
+    if (!generatedPlan) {
+      // Los dos sitios que llaman a buildDashboard() ya comprueban que
+      // generatedPlan existe antes de llamar, así que llegar aquí sin plan
+      // es un estado inesperado (dato corrupto/perdido), no un caso normal
+      // -- antes esto se abortaba en silencio y el usuario se quedaba
+      // mirando un dashboard vacío sin ninguna pista de qué pasó.
+      try { if (typeof showToast === 'function') showToast('No hemos podido cargar tu plan. Prueba a recargar la página; si sigue sin aparecer, escríbenos.', 6000); } catch (e) {}
+      return;
+    }
     _refrescarMenuNutricion();
 
     // Backfill de objetivos nutricionales: los planes generados antes de incorporar
@@ -15231,7 +15249,7 @@
         <div class="nota-item">
           <div class="nota-content">
             <div class="nota-date">${fechaStr}</div>
-            <div class="nota-text">${nota.texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+            <div class="nota-text">${_esc(nota.texto)}</div>
           </div>
           <button class="nota-delete" onclick="deleteNota(${idx})">Eliminar</button>
         </div>`;
@@ -20571,6 +20589,17 @@
     if (!hasVisible) {
       var landing = document.getElementById('landing');
       if (landing) { landing.classList.add('active'); landing.style.display = 'block'; }
+      // Antes esto dejaba al usuario de vuelta en la landing sin explicar
+      // nada -- si venía de mitad del cuestionario o del dashboard, no
+      // tenía forma de saber que algo había fallado. showToast puede no
+      // existir todavía si el error ocurrió durante el parseo inicial del
+      // script, de ahí el try/catch (para no generar un segundo error
+      // dentro del propio manejador de errores).
+      try {
+        if (typeof showToast === 'function') {
+          showToast('Algo ha ido mal. Si estabas a mitad de algo, inténtalo de nuevo — si persiste, escríbenos.', 6000);
+        }
+      } catch (e) {}
     }
   };
 
