@@ -14622,7 +14622,7 @@
     const dataUrl = canvas.toDataURL('image/png');
     const preview = document.getElementById('sharePreview');
     preview.style.display = 'block';
-    preview.innerHTML = `<img src="${dataUrl}" style="width:100%;max-width:400px;border-radius:8px;border:1px solid var(--humo);margin-bottom:10px"><br>
+    preview.innerHTML = `<img src="${dataUrl}" alt="Tu imagen de progreso para compartir" style="width:100%;max-width:400px;border-radius:8px;border:1px solid var(--humo);margin-bottom:10px"><br>
       <a href="${dataUrl}" download="mi-progreso-kone.png" class="btn-primary" style="font-size:12px;padding:8px 16px;text-decoration:none;display:inline-block">Descargar imagen</a>`;
     showToast('Imagen generada. Descárgala y compártela.');
   }
