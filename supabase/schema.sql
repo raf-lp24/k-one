@@ -43,11 +43,27 @@ alter table public.profiles add column if not exists is_beta boolean not null de
 -- el mismo trigger de abajo.
 alter table public.profiles add column if not exists beta_expires timestamptz;
 
+-- Crédito acumulado (en euros) del programa de referidos, aplicado como saldo
+-- negativo real en Stripe en la siguiente renovación (api/stripe-webhook.js,
+-- case customer.subscription.updated). Tan sensible como is_beta: hasta agosto
+-- de 2026 esta columna NO estaba en la lista de protegidas del trigger de abajo,
+-- así que cualquier usuario podía hacer
+--   supabase.from('profiles').update({ descuento_referidos: 1000 })
+-- desde la consola y quedarse la suscripción gratis en la siguiente renovación
+-- (el bloque que APLICA el descuento no tiene tope máximo; el límite de 15€
+-- solo existe en el bloque que ACREDITA nuevos referidos, que está pausado).
+-- Encontrado auditando pg_policies de todas las tablas, no solo las conocidas
+-- -- ver supabase/migration-fix-criticos-agosto-2.sql para el detalle completo
+-- (también cerró una política vieja que anulaba la moderación de testimonios,
+-- y dos tablas más con políticas huérfanas: invitaciones_premium y referidos).
+alter table public.profiles add column if not exists descuento_referidos numeric not null default 0;
+
 alter table public.profiles enable row level security;
 
 -- Protección de columnas sensibles: los roles de cliente (authenticated/anon) no pueden
--- cambiar is_beta. Si lo intentan, se conserva el valor anterior silenciosamente. Solo
--- service_role / postgres (SQL Editor, scripts de admin) pueden modificarla.
+-- cambiar is_beta/beta_expires/descuento_referidos. Si lo intentan, se conserva el valor
+-- anterior silenciosamente. Solo service_role / postgres (SQL Editor, scripts de admin)
+-- pueden modificarlas.
 create or replace function public.protect_profile_sensitive_cols()
 returns trigger
 language plpgsql
@@ -56,6 +72,7 @@ begin
   if current_user in ('authenticated', 'anon') then
     new.is_beta := old.is_beta;
     new.beta_expires := old.beta_expires;
+    new.descuento_referidos := old.descuento_referidos;
   end if;
   return new;
 end;
@@ -283,6 +300,15 @@ drop policy if exists "testimonios_select" on public.testimonios;
 create policy "testimonios_select" on public.testimonios
   for select using (aprobado = true);
 
+-- OJO -- hasta agosto de 2026 convivía aquí una política huérfana
+-- "testimonios_public_read" (using (true), sin filtrar por aprobado) que
+-- ANULABA la de arriba: las políticas permisivas se combinan con OR, así
+-- que cualquier testimonio sin aprobar seguía siendo público pese a esta
+-- política. Se detectó auditando pg_policies de todas las tablas (no solo
+-- las documentadas aquí) y se borró en migration-fix-criticos-agosto-2.sql.
+-- Moraleja para el futuro: el número de políticas de una tabla no dice si
+-- están bien: hay que leer el contenido de cada una.
+
 -- ============================================================
 -- 8b. TABLA: mensajes_cliente (formulario de contacto del dashboard)
 -- No se define aquí su "create table" porque su esquema completo no vive
@@ -297,6 +323,33 @@ create policy "testimonios_select" on public.testimonios
 -- Cada cliente solo puede leer sus propios mensajes, nunca los de otro.
 -- El panel de admin gestiona la tabla aparte con el service_role.
 -- No hace falta ninguna migración extra para esta tabla.
+-- ============================================================
+
+-- ============================================================
+-- 8c. TABLAS: invitaciones_premium y referidos
+-- Tampoco viven en este repositorio (igual que mensajes_cliente). Ambas
+-- tenían RLS activado pero con políticas huérfanas -- de una versión
+-- anterior, probablemente de cuando se estaba depurando el feature -- que
+-- dejaban la tabla abierta a cualquiera pese a que las políticas correctas
+-- también estaban puestas al lado (las permisivas se combinan con OR, así
+-- que la más abierta siempre gana). Encontrado y cerrado en agosto de 2026
+-- auditando pg_policies de TODAS las tablas, no solo las conocidas -- ver
+-- migration-fix-criticos-agosto-2.sql.
+--
+-- invitaciones_premium (email invitado a premium por el admin, ver
+-- api/admin-crear-cliente.js): se borraron "invitaciones_select" (dejaba
+-- leer la tabla entera, con roles anon+authenticated, a cualquiera) e
+-- "invitaciones_delete" (dejaba a cualquier usuario logueado borrar la
+-- invitación de OTRO). Quedan solo las políticas que limitan a "tu propio
+-- email" (comparando contra auth.jwt()->>'email' o un join a auth.users).
+--
+-- referidos (referrer_id, referido_id, estado, pagado_at): se borraron
+-- "Service role inserta" y "Service role actualiza" -- pese al nombre,
+-- tenían roles = public (cualquiera, no solo el backend) y using/with_check
+-- = true sin comprobar propiedad. El service_role real no necesita ninguna
+-- política porque salta RLS por diseño; estas dos solo abrían la tabla a
+-- cualquier usuario. Quedan solo referidos_insert_self (auth.uid() =
+-- referido_id) y las de select limitadas a referrer_id/referido_id propios.
 -- ============================================================
 
 -- ============================================================
