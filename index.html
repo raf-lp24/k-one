@@ -8293,6 +8293,12 @@
   const totalBlocks = 6;
   let userData = {};
   let generatedPlan = null;
+  // Ayuda SOLO para tests.html: generatedPlan es "let" de ámbito de script, no
+  // window.generatedPlan -- asignarlo desde fuera (win.generatedPlan = plan) no
+  // lo toca de verdad, así que abrirRecetario() seguía viendo null y no pintaba
+  // nada. Esta función SÍ tiene acceso de cierre de verdad, así que expone un
+  // setter real. No se usa en ningún flujo de la app normal.
+  function _testSetGeneratedPlan(p) { generatedPlan = p; }
   let comidasSeleccionadas = []; // índice de la opción elegida por comida (0-4) para el día actual
   let comidasSemana = []; // 7 arrays (L-D), cada uno con 5 índices (una por toma)
   let diaNutriActual = 0; // 0=L, 1=M, ... 6=D
@@ -16582,13 +16588,37 @@
     "Crepes de avena con frutos rojos y yogur": "Bate la harina de avena, el huevo y la leche hasta obtener una masa fina. Cuece 2-3 crepes finas en sartén antiadherente 1-2 min por lado. Cubre con el yogur griego, los frutos rojos y un chorrito de miel."
   };
 
+  // Genera una preparación razonable para cualquier plato que no tenga una
+  // entrada escrita a mano en RECETA_PASOS -- que TODOS los platos tengan algo
+  // que enseñar, aunque no sea un paso a paso currado. Se apoya en dos pistas
+  // que ya existen en cada receta: el nombre (para detectar el tipo de plato:
+  // wok, batido, tostada...) y el campo "prep" (dificultad + tiempo, ya escrito
+  // a mano por receta, ej. "Sin cocción · 3 min").
+  function _pasoGenerico(nombre, ingredientes, prep) {
+    const n = (nombre || '').toLowerCase();
+    const ing = (ingredientes || '').toLowerCase();
+    const sinCoccion = /sin cocción/i.test(prep || '');
+    if (/batido|smoothie/.test(n)) return 'Pon todos los ingredientes en la batidora o coctelera y bate hasta que quede homogéneo. Toma al momento.';
+    if (/wok|salteado|salteada/.test(n)) return 'Saltea la proteína primero a fuego fuerte 3-4 min. Añade las verduras y saltea 3-4 min más. Incorpora el resto de ingredientes y cocina 2-3 min removiendo.';
+    if (/curry/.test(n)) return 'Sofríe las verduras 3-4 min. Añade la proteína y dórala. Incorpora el líquido (leche de coco o caldo) y las especias de curry. Cuece a fuego medio 10-15 min hasta que espese.';
+    if (/tostadas?|tostas?/.test(n) && sinCoccion) return 'Tuesta el pan. Monta el resto de ingredientes encima en el orden que prefieras. Listo.';
+    if (/tostadas?|tostas?/.test(n)) return 'Tuesta el pan. Cocina la parte que lo necesite (huevo, proteína...) por separado y monta encima del pan.';
+    if (/tortilla|revuelto/.test(n)) return 'Bate los huevos. Saltea el resto de ingredientes 2-3 min. Añade el huevo batido y cuaja a fuego medio, removiendo si es revuelto o dejando cuajar si es tortilla.';
+    if (/sopa|crema de/.test(n)) return 'Sofríe las verduras 5 min. Cubre con agua o caldo y cuece a fuego medio hasta que estén tiernas (15-20 min). Tritura si es crema. Añade el resto de ingredientes al final.';
+    if (/ensalada|bowl|bol de/.test(n) && sinCoccion) return 'Corta y mezcla todos los ingredientes en un bol. Aliña al gusto justo antes de comer.';
+    if (/al horno|asad[oa]/.test(n)) return 'Precalienta el horno a 200°C. Coloca todos los ingredientes en una bandeja con un chorrito de AOVE. Hornea 20-30 min según el grosor de la proteína, dando la vuelta a mitad.';
+    if (/a la plancha/.test(n)) return 'Calienta una sartén o plancha a fuego medio-alto con un poco de AOVE. Cocina la proteína 3-5 min por lado. Sirve con el resto de ingredientes.';
+    if (sinCoccion) return `Junta todos los ingredientes (${ing.split(',')[0] || 'la base'}...) en un plato o bol. Mezcla y sirve. Sin cocción.`;
+    return 'Cocina la proteína (a la plancha, al horno o salteada, según el tipo) hasta que esté hecha. Prepara el resto de ingredientes por separado y sirve todo junto.';
+  }
+
   function abrirRecetario() {
     if (!generatedPlan || !generatedPlan.nutricion) return;
     const contenido = document.getElementById('recetarioContenido');
     contenido.innerHTML = generatedPlan.nutricion.map((meal, mealIdx) => {
       const cards = meal.opciones.map((opt, i) => {
         const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
-        const pasos = RECETA_PASOS[opt.nombre] || '';
+        const pasos = RECETA_PASOS[opt.nombre] || _pasoGenerico(opt.nombre, opt.ingredientes, opt.prep);
         return `
           <div class="receta-card">
             <div class="receta-num">Opción ${i + 1}</div>

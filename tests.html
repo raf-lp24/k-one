@@ -281,12 +281,22 @@ async function correr() {
         const u = perfilBase({ deporte, objetivo, peso: 55 + s * 15, email: `test-recetario-${combosTotal}@x.com` });
         let plan;
         try { plan = win.buildPlanFromData(u); } catch (e) { return; }
-        win.generatedPlan = plan;
+        // OJO -- win.generatedPlan = plan NO llega al generatedPlan real que lee
+        // abrirRecetario() (ese es un "let" de ámbito de script, no window.X): con
+        // eso, abrirRecetario() no pintaba nada, cards quedaba vacío, y
+        // sinPasos.length === 0 sobre un array vacío daba "OK" sin comprobar nada
+        // de verdad. Encontrado el 14 ago 2026 al ampliar el recetario -- este test
+        // llevaba tiempo pasando en falso. Arreglado con el setter real que sí
+        // tiene acceso de cierre (ver _testSetGeneratedPlan en index.html).
+        win._testSetGeneratedPlan(plan);
         try { win.abrirRecetario(); } catch (e) { return; }
         const modal = win.document.getElementById('modalRecetario');
         const cards = [...modal.querySelectorAll('.receta-card')];
         const sinPasos = cards.filter(c => !c.querySelector('.receta-pasos'));
-        if (sinPasos.length === 0) combosOk++;
+        // Red de seguridad contra el mismo fallo silencioso: si no se pintó
+        // ninguna tarjeta, NO cuenta como "ok" aunque sinPasos también sea 0.
+        if (cards.length > 0 && sinPasos.length === 0) combosOk++;
+        if (cards.length === 0) faltantesTotal.add('(no se pintó ninguna tarjeta)');
         sinPasos.forEach(c => faltantesTotal.add(c.querySelector('.receta-nombre')?.textContent || '?'));
         modal.classList.remove('visible');
       }
