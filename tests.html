@@ -134,6 +134,10 @@ function esExcepcionSegura(palabra, texto) {
   if (palabra === 'granola' && /granola sin gluten/.test(texto)) return true;
   if (palabra === 'pasta' && /pasta sin gluten/.test(texto)) return true;
   if (palabra === 'leche' && /leche( semidesnatada| entera)? sin lactosa/.test(texto)) return true;
+  // "leche de coco" es el término culinario real en español para un ingrediente
+  // sin lactosa (no es un lácteo animal) -- a diferencia de avena/soja/almendra,
+  // aquí no existe una alternativa de nombre más natural que "bebida de coco".
+  if (palabra === 'leche' && /leche de coco/.test(texto)) return true;
   if (palabra === 'yogur' && /yogur( de coco)? \(?sin lactosa\)?|yogur sin lactosa/.test(texto)) return true;
   if (palabra === 'queso' && /queso[a-záéíóúñ ]* sin lactosa/.test(texto)) return true;
   if (palabra === 'cottage' && /cottage sin lactosa/.test(texto)) return true;
