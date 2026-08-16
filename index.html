@@ -7741,6 +7741,23 @@
           </div>
         </div>
 
+        <!-- Invitación puntual a dejar feedback. A diferencia de los avisos de arriba
+             (que reaparecen porque hay una fecha real detrás), este se cierra para
+             siempre en cuanto se descarta una vez -- ver cerrarBannerFeedback(). -->
+        <div id="bannerFeedback" style="display:none;background:#1a1a1a;border:1px solid var(--brasa);border-radius:10px;padding:18px 20px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:22px;line-height:1.2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">¿Se te ocurre algo para mejorar K-ONE?</div>
+              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">Cuéntanoslo — leemos cada sugerencia y muchas se acaban metiendo en el producto.</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="showSection('contacto')">Enviar sugerencia →</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerFeedback()">Ahora no, gracias</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
             <div class="motivation-label">Entrenamiento de hoy</div>
@@ -13689,6 +13706,7 @@
 
     actualizarDiasRestantesPlan();
     actualizarAvisoRenovacion();
+    actualizarBannerFeedback();
 
     // Notas / agenda
     renderNotas();
@@ -18275,6 +18293,30 @@
       localStorage.setItem(clave, '1');
     } catch (e) {}
     const box = document.getElementById('avisoRenovacion');
+    if (box) box.style.display = 'none';
+  }
+
+  // Invitación puntual a dejar feedback: a diferencia del aviso de renovación (que
+  // tiene una fecha real detrás y por eso vuelve a salir), esta se descarta para
+  // siempre en cuanto el usuario la cierra una vez -- sin fecha en la clave.
+  function actualizarBannerFeedback() {
+    const box = document.getElementById('bannerFeedback');
+    if (!box) return;
+    const user = getCurrentUser();
+    try {
+      const clave = 'kone_feedback_banner_' + ((user && user.email) || '');
+      if (localStorage.getItem(clave)) { box.style.display = 'none'; return; }
+    } catch (e) {}
+    box.style.display = 'block';
+  }
+
+  function cerrarBannerFeedback() {
+    const user = getCurrentUser();
+    try {
+      const clave = 'kone_feedback_banner_' + ((user && user.email) || '');
+      localStorage.setItem(clave, '1');
+    } catch (e) {}
+    const box = document.getElementById('bannerFeedback');
     if (box) box.style.display = 'none';
   }
 
