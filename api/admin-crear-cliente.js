@@ -1,4 +1,5 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
@@ -32,6 +33,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ ok: true, email: emailLower });
   } catch (err) {
     console.error('[admin-crear-cliente] error:', err);
+    capturarError(err, { fn: 'admin-crear-cliente' });
     return res.status(500).json({ error: 'Error interno' });
   }
 };

@@ -1,5 +1,6 @@
 const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
 const { resolverBeneficioPromo } = require('./_promo');
+const { capturarError } = require('./_sentry');
 
 // Crea una sesión de Stripe Checkout (suscripción) para el plan/periodicidad
 // elegidos por el usuario logueado y devuelve la URL a la que redirigir.
@@ -140,6 +141,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[create-checkout-session] error:', err);
+    capturarError(err, { fn: 'create-checkout-session' });
     const status = err.statusCode || 500;
     return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
   }

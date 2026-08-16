@@ -3,6 +3,7 @@ const {
   getActiveSubscriptionId, assertSubscriptionOwnership
 } = require('./_stripeHelpers');
 const { canjearNivelHitos } = require('./_hitosReward');
+const { capturarError } = require('./_sentry');
 
 // Cambia el precio de la suscripción activa SIN prorrateo: crea un
 // subscriptionSchedule con la fase actual (precio viejo hasta que acabe el
@@ -108,6 +109,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[update-subscription] error:', err);
+    capturarError(err, { fn: 'update-subscription' });
     const status = err.statusCode || 500;
     return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
   }

@@ -1,4 +1,5 @@
 const { getStripe, getSupabaseAdmin } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 // Vercel necesita el cuerpo de la petición sin parsear para verificar la firma de Stripe.
 module.exports.config = { api: { bodyParser: false } };
@@ -398,6 +399,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[stripe-webhook] error no controlado:', err);
+    capturarError(err, { fn: 'stripe-webhook' });
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

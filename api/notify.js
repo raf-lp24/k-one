@@ -5,6 +5,7 @@
 // Variables de entorno: RESEND_API_KEY, CRON_SECRET
 
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
 
@@ -503,6 +504,7 @@ async function handleCronRetencion(req, res) {
     return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosResumen, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
+    capturarError(err, { fn: 'notify-cron' });
     return res.status(500).json({ error: 'Error interno' });
   }
 }
@@ -993,6 +995,7 @@ async function handlePost(req, res) {
 
   } catch (err) {
     console.error('[notify] error:', err);
+    capturarError(err, { fn: 'notify' });
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

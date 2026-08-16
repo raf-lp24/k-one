@@ -2,6 +2,7 @@ const {
   getStripe, getSupabaseAdmin, getAuthUser,
   getActiveSubscriptionId, assertSubscriptionOwnership
 } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 // Reactiva una suscripción marcada para cancelarse (deshace cancel_at_period_end),
 // SIN cobrar nada nuevo: el cliente sigue con su plan y misma fecha de renovación.
@@ -62,6 +63,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[reactivate-subscription] error:', err);
+    capturarError(err, { fn: 'reactivate-subscription' });
     const status = err.statusCode || 500;
     return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
   }

@@ -2,6 +2,7 @@ const {
   getStripe, getSupabaseAdmin, getAuthUser,
   getActiveSubscriptionId, assertSubscriptionOwnership
 } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 // Cancela la suscripción al final del período actual (cancel_at_period_end: true).
 // La cuenta sigue activa hasta current_period_end; no se renueva después.
@@ -58,6 +59,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[cancel-subscription] error:', err);
+    capturarError(err, { fn: 'cancel-subscription' });
     const status = err.statusCode || 500;
     return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
   }

@@ -1,4 +1,5 @@
 const { getStripe, getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 // Crea una sesión del Portal de Clientes de Stripe para que el usuario
 // gestione/cambie/cancele su suscripción y método de pago.
@@ -37,6 +38,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[create-portal-session] error:', err);
+    capturarError(err, { fn: 'create-portal-session' });
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

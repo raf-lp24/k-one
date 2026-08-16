@@ -1,4 +1,5 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
@@ -9,7 +10,8 @@ module.exports = async (req, res) => {
     const admins = (process.env.ADMIN_EMAILS || '')
       .split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
     return res.status(200).json({ isAdmin: admins.includes((user.email || '').toLowerCase()) });
-  } catch {
+  } catch (err) {
+    capturarError(err, { fn: 'is-admin' });
     return res.status(200).json({ isAdmin: false });
   }
 };

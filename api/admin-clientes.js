@@ -1,4 +1,5 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { capturarError } = require('./_sentry');
 
 // A-5: sin fallback hardcodeado — fail-closed si ADMIN_EMAILS no está configurada
 function getAdmins() {
@@ -300,6 +301,7 @@ module.exports = async (req, res) => {
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);
+    capturarError(err, { fn: 'admin-clientes' });
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

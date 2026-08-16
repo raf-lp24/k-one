@@ -4,6 +4,7 @@
   "private": true,
   "description": "K-ONE — funciones serverless de Vercel (Stripe + Supabase)",
   "dependencies": {
+    "@sentry/node": "^10.0.0",
     "@supabase/supabase-js": "^2.45.4",
     "stripe": "^16.12.0"
   }
