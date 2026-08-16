@@ -1450,6 +1450,17 @@
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; object-position: center 35%; z-index: 0;
   }
+  /* crossfit.jpg tiene el texto "K-ONE CHAMPIONSHIP - LIVE / SCORE" grabado en la
+     propia foto hacia la mitad de su altura. Con object-fit:cover en un banner tan
+     ancho y bajo (190px), el recorte visible se desplaza hacia abajo cuanto MÁS
+     ESTRECHA es la ventana de escritorio (no al revés) -- verificado recortando la
+     imagen real a los anchos límite del layout de escritorio (900-1920px). No había
+     un solo porcentaje que sirviera para todo el rango sin asomar el texto en las
+     ventanas más estrechas, así que se reparte en dos tramos. */
+  .banner-photo-crossfit { object-position: center 17%; }
+  @media (max-width: 1100px) {
+    .banner-photo-crossfit { object-position: center 8%; }
+  }
   .section-banner::after {
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.55) 45%, rgba(10,10,10,0.93) 100%);
@@ -7858,7 +7869,7 @@
         <div class="section-banner">
           <picture>
             <source srcset="/img/landing/crossfit.webp" type="image/webp">
-            <img class="section-banner-photo" src="/img/landing/crossfit.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 22%" width="900" height="1205">
+            <img class="section-banner-photo banner-photo-crossfit" src="/img/landing/crossfit.jpg" alt="" loading="lazy" aria-hidden="true" width="900" height="1205">
           </picture>
           <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
           <div class="section-banner-content">
@@ -8167,7 +8178,7 @@
         <div class="section-banner">
           <picture>
             <source srcset="/img/landing/notas-banner.webp" type="image/webp">
-            <img class="section-banner-photo" src="/img/landing/notas-banner.jpg" alt="" loading="lazy" aria-hidden="true" width="1200" height="800">
+            <img class="section-banner-photo" src="/img/landing/notas-banner.jpg" alt="" loading="lazy" aria-hidden="true" style="object-position:center 60%" width="1200" height="800">
           </picture>
           <div class="section-banner-brand" aria-hidden="true">K-ONE</div>
           <div class="section-banner-content">
