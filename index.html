@@ -4246,6 +4246,66 @@
   }
   .progress-share-export-col { flex: 1 1 260px; min-width: 0; }
 
+  /* CALENDARIO DE CONSTANCIA — mapa de calor tipo GitHub. cal-scroll permite
+     desplazar el histórico completo sin romper el layout en móvil; arranca
+     scrolleado al final (semana actual) desde JS. */
+  .cal-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .cal-months {
+    display: flex;
+    gap: 3px;
+    padding-left: 16px;
+    margin-bottom: 4px;
+  }
+  .cal-months span {
+    width: 13px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--metal);
+    flex-shrink: 0;
+  }
+  .cal-grid { display: flex; gap: 3px; width: max-content; }
+  .cal-daylabels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .cal-daylabels span {
+    width: 13px;
+    height: 13px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--metal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-week { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+  .cal-day {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    background: var(--humo);
+  }
+  .cal-day.done { background: var(--brasa); }
+  .cal-day.today { box-shadow: 0 0 0 1.5px var(--blanco) inset; }
+  .cal-day.future { background: transparent; }
+
+  /* COMPARADOR DE FOTOS */
+  .comparador-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .comparador-col { flex: 1 1 220px; min-width: 0; }
+  .comparador-foto {
+    aspect-ratio: 3/4;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comparador-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .comparador-loading { font-size: 12px; color: var(--metal); }
+
   /* INFORME SEMANAL: solo los récords de carga, sin tarjetas de adherencia ni
      mensaje motivacional (se quitaron a propósito: ocupaban mucho para lo que
      aportaban). Eyebrow ligero + chips con la flecha en su propio círculo, el
@@ -7994,9 +8054,21 @@
         </div>
 
         <div class="progress-section">
+          <div class="progress-title">Evolución de fuerza</div>
+          <p class="field-hint" style="margin-bottom:16px">Elige un ejercicio y mira cómo ha subido el peso que levantas.</p>
+          <div id="graficoFuerzaWrap"></div>
+        </div>
+
+        <div class="progress-section">
           <div class="progress-title">Evolución de tu peso</div>
           <p class="field-hint" style="margin-bottom:16px">Se registra solo con cada check-in semanal — sin nada que rellenar a mano.</p>
           <div id="graficoPesoWrap"></div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Calendario de constancia</div>
+          <p class="field-hint" style="margin-bottom:16px">Cada casilla es un día. El naranja es un entreno completado.</p>
+          <div id="calendarioConstancia"></div>
         </div>
 
         <div class="progress-section">
@@ -8005,6 +8077,12 @@
           <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
           <div class="fotos-nav" id="fotosNav"></div>
           <div class="photos-grid" id="photosGrid"></div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-title">Comparar fotos</div>
+          <p class="field-hint" style="margin-bottom:16px">Pon dos meses lado a lado y mira la diferencia de verdad.</p>
+          <div id="comparadorFotos"></div>
         </div>
 
         <div class="progress-section">
@@ -15467,6 +15545,28 @@
     return 0;
   }
 
+  // Detecta si hubo una racha de 5+ días que se rompió y, después, el cliente
+  // volvió a entrenar. El sistema de hitos solo premiaba rachas perfectas
+  // (racha5, racha14...) y nunca decía nada cuando alguien la rompía -- que es
+  // justo el momento en que más gente se plantea dejarlo. Reconstruye las
+  // rachas históricas a partir de historialEntrenos (fechas únicas, sin huecos
+  // artificiales) y comprueba si alguna racha ya cerrada (no la última, que
+  // puede seguir activa) llegó a 5 días.
+  function _huboVueltaTrasRacha() {
+    const fechas = [...new Set(userData.historialEntrenos || [])].sort();
+    if (fechas.length < 2) return false;
+    const longitudes = [];
+    let inicioRacha = 0;
+    for (let i = 1; i <= fechas.length; i++) {
+      const consecutivo = i < fechas.length && (new Date(fechas[i]) - new Date(fechas[i - 1])) === 86400000;
+      if (!consecutivo) {
+        longitudes.push(i - inicioRacha);
+        inicioRacha = i;
+      }
+    }
+    return longitudes.slice(0, -1).some(len => len >= 5);
+  }
+
   function calcularHitos() {
     if (!userData.hitos) userData.hitos = {};
     const semanas = (userData.progreso && userData.progreso.semana) || 1;
@@ -15503,6 +15603,9 @@
       { key: 'racha5', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="12" y1="10" x2="12" y2="14"/></svg>', name: 'Sin romper la cadena',
         desc: '5 días seguidos entrenando. El hábito ya tiene raíces. No lo rompes tú ahora.',
         cumple: () => racha >= 5 },
+      { key: 'la_vuelta', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>', name: 'La vuelta',
+        desc: 'Tuviste una racha, la rompiste, y volviste a entrenar de todas formas. Eso pesa más que no haberla roto nunca.',
+        cumple: () => _huboVueltaTrasRacha() },
       { key: 'mes1', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M6 8H5a4 4 0 000 8h1"/><line x1="6" y1="12" x2="18" y2="12"/></svg>', name: 'Primer mes completado',
         desc: 'Un mes entero. Eso dice más de ti que cualquier kilo en la barra. El 80% lo deja antes de llegar aquí.',
         cumple: () => semanas >= 5 },
@@ -15785,12 +15888,98 @@
 
   function renderProgresoSection() {
     renderInformeSemanal();
+    renderGraficoFuerza();
     renderGraficoPeso();
+    renderCalendarioConstancia();
     renderFotosProgreso();
+    renderComparadorFotos();
     renderHitos();
   }
 
-  // ===== GRÁFICO DE EVOLUCIÓN DE PESO =====
+  // ===== GRÁFICOS DE LÍNEA (peso corporal y fuerza por ejercicio) =====
+  // Dibujador genérico compartido: ambos gráficos son la misma idea (una
+  // serie de {fecha, peso} en el tiempo), así que comparten el trazado en
+  // canvas en vez de duplicar ~60 líneas de dibujo por cada uno.
+  const fmtFechaCorta = iso => { const d = new Date(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; };
+
+  function _dibujarGraficoLinea(canvasId, wrap, ordenado, sufijo) {
+    wrap.querySelector(`#${canvasId}`) || (wrap.innerHTML += `<canvas id="${canvasId}" style="width:100%;height:220px;display:block"></canvas>`);
+    const canvas = document.getElementById(canvasId);
+    const dpr = window.devicePixelRatio || 1;
+    const W = Math.max(260, wrap.clientWidth || 320);
+    const H = 220;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const valores = ordenado.map(h => h.peso);
+    const min = Math.min(...valores), max = Math.max(...valores);
+    const pad = (max - min) * 0.2 || 1;
+    const yMin = min - pad, yMax = max + pad;
+
+    const marginL = 34, marginR = 10, marginT = 14, marginB = 22;
+    const plotW = W - marginL - marginR;
+    const plotH = H - marginT - marginB;
+    const x = i => marginL + (ordenado.length === 1 ? plotW / 2 : (i / (ordenado.length - 1)) * plotW);
+    const y = v => marginT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.font = '10px "DM Mono", monospace';
+    ctx.fillStyle = '#8A8A8A';
+    ctx.textAlign = 'left';
+    [0, 0.5, 1].forEach(t => {
+      const v = yMin + (yMax - yMin) * t;
+      const yy = y(v);
+      ctx.beginPath(); ctx.moveTo(marginL, yy); ctx.lineTo(W - marginR, yy); ctx.stroke();
+      ctx.fillText(v.toFixed(1), 0, yy + 3);
+    });
+
+    ctx.beginPath();
+    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
+    ctx.lineTo(x(ordenado.length - 1), marginT + plotH);
+    ctx.lineTo(x(0), marginT + plotH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, marginT, 0, marginT + plotH);
+    grad.addColorStop(0, 'rgba(232,73,15,0.28)');
+    grad.addColorStop(1, 'rgba(232,73,15,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.beginPath();
+    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
+    ctx.strokeStyle = '#E8490F';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ordenado.forEach((h, i) => {
+      const xx = x(i), yy = y(h.peso);
+      const esBorde = i === 0 || i === ordenado.length - 1;
+      ctx.beginPath();
+      ctx.arc(xx, yy, esBorde ? 4 : 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = esBorde ? '#E8490F' : '#F0EDE8';
+      ctx.fill();
+    });
+
+    const primero = ordenado[0], ultimo = ordenado[ordenado.length - 1];
+    ctx.font = '600 12px Inter, sans-serif';
+    ctx.fillStyle = '#F0EDE8';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${primero.peso}${sufijo}`, x(0), y(primero.peso) - 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${ultimo.peso}${sufijo}`, x(ordenado.length - 1), y(ultimo.peso) - 10);
+
+    ctx.font = '10px "DM Mono", monospace';
+    ctx.fillStyle = '#8A8A8A';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmtFechaCorta(primero.fecha), marginL, H - 4);
+    ctx.textAlign = 'right';
+    ctx.fillText(fmtFechaCorta(ultimo.fecha), W - marginR, H - 4);
+  }
+
+  // ===== EVOLUCIÓN DE PESO CORPORAL =====
   // userData.historialPeso ya se registraba en cada check-in semanal (lo usa
   // evaluarYAjustarCalorias para recalibrar calorías si alguien se estanca),
   // pero nunca se le enseñaba al cliente salvo como CSV. Es el dato más
@@ -15808,99 +15997,148 @@
     const ordenado = [...hist].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     const primero = ordenado[0], ultimo = ordenado[ordenado.length - 1];
     const delta = ultimo.peso - primero.peso;
-    const fmtFecha = iso => { const d = new Date(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; };
     const resumen = Math.abs(delta) < 0.1
-      ? `Peso estable desde el ${fmtFecha(primero.fecha)}`
-      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFecha(primero.fecha)}`;
-
-    wrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div><canvas id="graficoPeso" style="width:100%;height:220px;display:block"></canvas>`;
-    const canvas = document.getElementById('graficoPeso');
-    const dpr = window.devicePixelRatio || 1;
-    const W = Math.max(260, wrap.clientWidth || 320);
-    const H = 220;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    const pesos = ordenado.map(h => h.peso);
-    const min = Math.min(...pesos), max = Math.max(...pesos);
-    const pad = (max - min) * 0.2 || 1;
-    const yMin = min - pad, yMax = max + pad;
-
-    const marginL = 34, marginR = 10, marginT = 14, marginB = 22;
-    const plotW = W - marginL - marginR;
-    const plotH = H - marginT - marginB;
-    const x = i => marginL + (ordenado.length === 1 ? plotW / 2 : (i / (ordenado.length - 1)) * plotW);
-    const y = v => marginT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
-
-    // líneas de referencia horizontales
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    ctx.font = '10px "DM Mono", monospace';
-    ctx.fillStyle = '#8A8A8A';
-    ctx.textAlign = 'left';
-    [0, 0.5, 1].forEach(t => {
-      const v = yMin + (yMax - yMin) * t;
-      const yy = y(v);
-      ctx.beginPath(); ctx.moveTo(marginL, yy); ctx.lineTo(W - marginR, yy); ctx.stroke();
-      ctx.fillText(v.toFixed(1), 0, yy + 3);
-    });
-
-    // área bajo la curva
-    ctx.beginPath();
-    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
-    ctx.lineTo(x(ordenado.length - 1), marginT + plotH);
-    ctx.lineTo(x(0), marginT + plotH);
-    ctx.closePath();
-    const grad = ctx.createLinearGradient(0, marginT, 0, marginT + plotH);
-    grad.addColorStop(0, 'rgba(232,73,15,0.28)');
-    grad.addColorStop(1, 'rgba(232,73,15,0)');
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // línea
-    ctx.beginPath();
-    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
-    ctx.strokeStyle = '#E8490F';
-    ctx.lineWidth = 2.5;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // puntos
-    ordenado.forEach((h, i) => {
-      const xx = x(i), yy = y(h.peso);
-      const esBorde = i === 0 || i === ordenado.length - 1;
-      ctx.beginPath();
-      ctx.arc(xx, yy, esBorde ? 4 : 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = esBorde ? '#E8490F' : '#F0EDE8';
-      ctx.fill();
-    });
-
-    // etiquetas de valor en primer y último punto
-    ctx.font = '600 12px Inter, sans-serif';
-    ctx.fillStyle = '#F0EDE8';
-    ctx.textAlign = 'left';
-    ctx.fillText(`${primero.peso}kg`, x(0), y(primero.peso) - 10);
-    ctx.textAlign = 'right';
-    ctx.fillText(`${ultimo.peso}kg`, x(ordenado.length - 1), y(ultimo.peso) - 10);
-
-    // fechas en el eje
-    ctx.font = '10px "DM Mono", monospace';
-    ctx.fillStyle = '#8A8A8A';
-    ctx.textAlign = 'left';
-    ctx.fillText(fmtFecha(primero.fecha), marginL, H - 4);
-    ctx.textAlign = 'right';
-    ctx.fillText(fmtFecha(ultimo.fecha), W - marginR, H - 4);
+      ? `Peso estable desde el ${fmtFechaCorta(primero.fecha)}`
+      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
+    wrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div>`;
+    _dibujarGraficoLinea('graficoPeso', wrap, ordenado, 'kg');
   }
-  let _resizeGraficoPesoTimer = null;
+
+  // ===== EVOLUCIÓN DE FUERZA POR EJERCICIO =====
+  // userData.pesosEjercicios[key].historial ya se guardaba desde "Añadir
+  // peso" en cada sesión, pero solo se enseñaba el registro de ESTA semana
+  // (informe semanal). El histórico completo por ejercicio nunca se veía.
+  let _fuerzaEjSeleccionado = null;
+  function renderGraficoFuerza() {
+    const wrap = document.getElementById('graficoFuerzaWrap');
+    if (!wrap) return;
+    const entradas = Object.entries(userData.pesosEjercicios || {})
+      .filter(([, e]) => e && Array.isArray(e.historial) && e.historial.length >= 2);
+    if (!entradas.length) {
+      wrap.innerHTML = '<p class="informe-vacio">Todavía no hay suficiente histórico de cargas. Se guarda solo cada vez que apuntas un peso en un ejercicio, al menos 2 registros distintos para poder dibujar la línea.</p>';
+      return;
+    }
+    entradas.sort((a, b) => b[1].historial.length - a[1].historial.length);
+    if (!_fuerzaEjSeleccionado || !entradas.some(([k]) => k === _fuerzaEjSeleccionado)) {
+      _fuerzaEjSeleccionado = entradas[0][0];
+    }
+    const opciones = entradas.map(([key, e]) =>
+      `<option value="${_esc(key)}" ${key === _fuerzaEjSeleccionado ? 'selected' : ''}>${_esc(e.nombre || key)} (${e.historial.length} registros)</option>`
+    ).join('');
+    wrap.innerHTML = `
+      <select id="selectorFuerzaEj" onchange="_fuerzaEjSeleccionado=this.value;renderGraficoFuerza()" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:13px;font-family:inherit;border-radius:8px;margin-bottom:14px">${opciones}</select>
+      <div id="graficoFuerzaChart"></div>`;
+    const chartWrap = document.getElementById('graficoFuerzaChart');
+    const entry = userData.pesosEjercicios[_fuerzaEjSeleccionado];
+    const ordenado = [...entry.historial].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    const primero = ordenado[0], ultimo = ordenado[ordenado.length - 1];
+    const delta = ultimo.peso - primero.peso;
+    const resumen = Math.abs(delta) < 0.1
+      ? `Mismo peso desde el ${fmtFechaCorta(primero.fecha)}`
+      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
+    chartWrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div>`;
+    _dibujarGraficoLinea('graficoFuerza', chartWrap, ordenado, 'kg');
+  }
+
+  let _resizeGraficosTimer = null;
   window.addEventListener('resize', () => {
-    clearTimeout(_resizeGraficoPesoTimer);
-    _resizeGraficoPesoTimer = setTimeout(() => {
-      const wrap = document.getElementById('graficoPesoWrap');
-      if (wrap && wrap.offsetParent !== null) renderGraficoPeso();
+    clearTimeout(_resizeGraficosTimer);
+    _resizeGraficosTimer = setTimeout(() => {
+      const wp = document.getElementById('graficoPesoWrap');
+      if (wp && wp.offsetParent !== null) renderGraficoPeso();
+      const wf = document.getElementById('graficoFuerzaWrap');
+      if (wf && wf.offsetParent !== null) renderGraficoFuerza();
     }, 200);
   }, { passive: true });
+
+  // ===== CALENDARIO DE CONSTANCIA (mapa de calor tipo GitHub) =====
+  // userData.historialEntrenos ya es un array de fechas (YYYY-MM-DD) sin
+  // huecos ni duplicados -- es justo lo que hace falta para pintar un mapa
+  // de calor, solo que nunca se había dibujado como tal.
+  function renderCalendarioConstancia() {
+    const cont = document.getElementById('calendarioConstancia');
+    if (!cont) return;
+    const entrenados = new Set(userData.historialEntrenos || []);
+    const SEMANAS = 20;
+    const hoyISO = getFechaHoyISO();
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const lunesActual = new Date(hoy); lunesActual.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+    const inicio = new Date(lunesActual); inicio.setDate(inicio.getDate() - (SEMANAS - 1) * 7);
+
+    const DIAS_CORTOS = ['L','M','X','J','V','S','D'];
+    const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    let totalEntrenados = 0;
+    const semanasHTML = [];
+    const etiquetasMes = [];
+    let mesAnterior = null;
+
+    for (let s = 0; s < SEMANAS; s++) {
+      const celdas = [];
+      for (let d = 0; d < 7; d++) {
+        const fecha = new Date(inicio); fecha.setDate(inicio.getDate() + s * 7 + d);
+        const iso = `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}-${String(fecha.getDate()).padStart(2,'0')}`;
+        const esFuturo = fecha > hoy;
+        const esHoy = iso === hoyISO;
+        const entrenado = entrenados.has(iso);
+        if (entrenado) totalEntrenados++;
+        if (d === 0) {
+          const mes = fecha.getMonth();
+          etiquetasMes.push(mes !== mesAnterior ? MESES_CORTOS[mes] : '');
+          mesAnterior = mes;
+        }
+        const fechaLegible = `${String(fecha.getDate()).padStart(2,'0')}/${String(fecha.getMonth()+1).padStart(2,'0')}/${fecha.getFullYear()}`;
+        const titulo = esFuturo ? '' : `${fechaLegible}${entrenado ? ' · entrenaste' : ' · descanso'}`;
+        celdas.push(`<div class="cal-day${entrenado ? ' done' : ''}${esHoy ? ' today' : ''}${esFuturo ? ' future' : ''}" title="${titulo}"></div>`);
+      }
+      semanasHTML.push(`<div class="cal-week">${celdas.join('')}</div>`);
+    }
+
+    cont.innerHTML = `
+      <div class="informe-eyebrow">${totalEntrenados} entrenos en las últimas ${SEMANAS} semanas</div>
+      <div class="cal-scroll">
+        <div class="cal-months">${etiquetasMes.map(m => `<span>${m}</span>`).join('')}</div>
+        <div class="cal-grid">
+          <div class="cal-daylabels">${DIAS_CORTOS.map(d => `<span>${d}</span>`).join('')}</div>
+          ${semanasHTML.join('')}
+        </div>
+      </div>`;
+    // Empieza scrolleado al final (semana actual) en vez de al principio.
+    const scrollEl = cont.querySelector('.cal-scroll');
+    if (scrollEl) scrollEl.scrollLeft = scrollEl.scrollWidth;
+  }
+
+  // ===== COMPARADOR DE FOTOS (antes / después) =====
+  let _compA = null, _compB = null;
+  async function renderComparadorFotos() {
+    const cont = document.getElementById('comparadorFotos');
+    if (!cont) return;
+    normalizarFotos();
+    const fotosObj = userData.fotosProgreso;
+    const keys = Object.keys(fotosObj).map(Number).filter(n => fotosObj[n]).sort((a, b) => a - b);
+    if (keys.length < 2) {
+      cont.innerHTML = '<p class="informe-vacio">Sube fotos de al menos dos meses distintos para poder compararlas lado a lado.</p>';
+      return;
+    }
+    if (_compA === null || !keys.includes(_compA)) _compA = keys[0];
+    if (_compB === null || !keys.includes(_compB)) _compB = keys[keys.length - 1];
+    const opciones = mesSel => keys.map(k => `<option value="${k}" ${k === mesSel ? 'selected' : ''}>Mes ${k}</option>`).join('');
+    cont.innerHTML = `
+      <div class="comparador-row">
+        <div class="comparador-col">
+          <select onchange="_compA=parseInt(this.value);renderComparadorFotos()" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:9px 10px;font-size:13px;font-family:inherit;border-radius:8px;margin-bottom:10px">${opciones(_compA)}</select>
+          <div class="comparador-foto" id="comparadorFotoA"><div class="comparador-loading">Cargando...</div></div>
+        </div>
+        <div class="comparador-col">
+          <select onchange="_compB=parseInt(this.value);renderComparadorFotos()" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:9px 10px;font-size:13px;font-family:inherit;border-radius:8px;margin-bottom:10px">${opciones(_compB)}</select>
+          <div class="comparador-foto" id="comparadorFotoB"><div class="comparador-loading">Cargando...</div></div>
+        </div>
+      </div>`;
+    const [urlA, urlB] = await Promise.all([resolverUrlFoto(fotosObj[_compA]), resolverUrlFoto(fotosObj[_compB])]);
+    const elA = document.getElementById('comparadorFotoA');
+    const elB = document.getElementById('comparadorFotoB');
+    if (elA) elA.innerHTML = urlA ? `<img src="${urlA}" alt="Foto mes ${_compA}">` : '<div class="comparador-loading">No se pudo cargar</div>';
+    if (elB) elB.innerHTML = urlB ? `<img src="${urlB}" alt="Foto mes ${_compB}">` : '<div class="comparador-loading">No se pudo cargar</div>';
+  }
 
   // ===== INFORME SEMANAL =====
   // Resumen de "cómo ha ido la semana", calculado del todo a partir de datos
