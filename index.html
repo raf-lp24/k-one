@@ -9126,7 +9126,11 @@
     // ("Press con mancuernas en máquina" -- dos materiales contradictorios).
     [/press inclinado(?! en (máquina|multipower))/i, ['Press banca plano', 'Press con mancuernas']],
     [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold'], false, true],
-    [/dominadas|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja'], false, true],
+    // Excluye los sufijos que puede traer "dominadas" en la plantilla
+    // ("dominadas asistidas o jalón", "dominadas lastradas", "dominadas
+    // australianas en mesa", "dominadas o jalón"): sin esto quedaba colgando
+    // ("Remo en polea baja asistidas o jalón" -- bug real encontrado ago 2026).
+    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja'], false, true],
     [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna'], false, true],
     // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
     // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
@@ -9159,9 +9163,15 @@
     [/curl femoral|leg curl( tumbado| sentado)?/i, ['Peso muerto rumano', 'Hip thrust']],
     [/\bgemelos\b/i, ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
-    [/dead hang/i, ['Suspensión activa en barra', 'Remo en polea baja']],
+    // "Suspensión activa en barra" (nombre inventado, nadie lo busca así) quitado:
+    // "dead hang" es el término real, usado tal cual hasta en medios en español
+    // (verificado ago 2026) -- rotar a sí mismo no aporta nada.
+    [/dead hang/i, ['Remo en polea baja']],
     [/pistol squat/i, ['Step-ups con mancuernas', 'Sentadilla búlgara'], false, true],
-    [/muscle[- ]up/i, ['Dominadas + fondos en banco', 'Dominadas explosivas'], false, true],
+    // "s?" a propósito: la plantilla escribe "muscle-ups" en plural ("3×máx
+    // muscle-ups o dips"). Sin la "s" opcional quedaba colgando ("Dominadas
+    // explosivass o dips" -- bug real encontrado ago 2026).
+    [/muscle[- ]ups?/i, ['Dominadas + fondos en banco', 'Dominadas explosivas'], false, true],
     // ── Cardio / acondicionamiento: rotan cada semana, con más variedad de
     // intensidad (desde andar hasta pliometría) para no repetir siempre lo mismo.
     [/burpees?/i, ['Mountain climbers', 'Cinta con inclinación a paso rápido', 'Remo o bici suave 5 min'], true],
