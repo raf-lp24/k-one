@@ -9108,20 +9108,45 @@
     [/sentadilla goblet/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
     [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
     [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
-    [/peso muerto rumano/i, ['Hip thrust', 'Extensión lumbar en máquina']],
-    [/peso muerto( convencional)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
+    [/peso muerto rumano( con mancuernas?)?/i, ['Hip thrust', 'Extensión lumbar en máquina']],
+    // "( sumo)?( con mancuernas?)?" consume el material/variante que puede ir
+    // detrás en la plantilla ("peso muerto con mancuernas", "peso muerto sumo
+    // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
+    // mancuernas" -- dos materiales contradictorios en el mismo nombre).
+    [/peso muerto( convencional| sumo| rumano)?( con mancuernas?)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
     [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas'], false, true],
-    [/press inclinado/i, ['Press banca plano', 'Press con mancuernas']],
+    // "(?!...)" evita que esta regla vuelva a tocar el texto que ya dejó la
+    // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
+    // "press inclinado en máquina/multipower": sin esto quedaba colgando
+    // ("Press con mancuernas en máquina" -- dos materiales contradictorios).
+    [/press inclinado(?! en (máquina|multipower))/i, ['Press banca plano', 'Press con mancuernas']],
     [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold'], false, true],
     [/dominadas|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja'], false, true],
     [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna'], false, true],
-    [/remo con mancuerna/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
+    // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
+    // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
+    // polea baja a una mano").
+    // "(?! apoyado)" evita tocar "remo con mancuerna apoyado en banco" (opción
+    // de poolsEjercicio, más abajo): sin esto quedaba colgando ("Remo en polea
+    // baja apoyado en banco").
+    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
     [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
     [/hip thrust/i, ['Peso muerto rumano', 'Puente de glúteo']],
     [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas']],
-    [/curl b[ií]ceps?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
-    [/press franc[eé]s|extensi[oó]n de tr[ií]ceps/i, ['Fondos en banco', 'Press cerrado']],
-    [/elevaciones laterales/i, ['Elevaciones en polea', 'Press Arnold']],
+    // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
+    // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
+    // ellos quedaba colgando el material que trae esa opción por su cuenta
+    // ("Curl en polea baja con barra Z", "Fondos en banco con cuerda",
+    // "Elevaciones en polea con mancuernas" -- materiales contradictorios).
+    // "ceps" sin la "s?" opcional a propósito: con ella, el motor de regex
+    // retrocedía para esquivar la exclusión de abajo (probaba "curl bícep"
+    // sin la última "s", donde el lookahead ya no encontraba "s en banco
+    // scott" pegado) y colaba el match igual -- salía "Curl martillos en
+    // banco scott" (con una "s" de más). "bíceps" en español no tiene
+    // singular sin ella, así que exigirla no pierde ningún caso real.
+    [/curl b[ií]ceps(?! con barra z| en banco scott)|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
+    [/press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza)/i, ['Fondos en banco', 'Press cerrado']],
+    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Press Arnold']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
@@ -11219,7 +11244,7 @@
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body · Fuerza base",
            detalle: sm
              ? `Fuerza full body · Sentadilla aérea 3×12, flexiones 3×8 (rodillas ok), puente de glúteo 3×15, dominadas australianas en mesa 3×8, zancadas 3×10/pierna, plancha 3×30s. Finisher: 3 rondas sin descanso de 10 sentadillas + 8 flexiones + 6 burpees`
-             : `Fuerza full body · Sentadilla goblet 3×10, press mancuernas 3×10, remo mancuerna 3×10/lado, hip thrust con mancuerna 3×12, farmer carry 3×20m con mancuernas, plancha 3×30s`,
+             : `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry 3×20m con mancuernas, plancha 3×30s`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Cardio suave · Zona 2" : "Recuperación",
@@ -11232,11 +11257,11 @@
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Circuito combinado · Fuerza + cardio" : "Descanso",
-           detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${sm ? '10 sentadillas, 8 flexiones, 12 zancadas/pierna, 30s mountain climbers, 200m carrera' : '10 goblet squats, 8 push press mancuernas, 10 remo mancuerna/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
+           detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${sm ? '10 sentadillas, 8 flexiones, 12 zancadas/pierna, 30s mountain climbers, 200m carrera' : '10 goblet squats, 8 push press con mancuernas, 10 remo con mancuerna a una mano/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
            etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Sesión larga · Fuerza + zona 2" : "Descanso",
-           detalle: numDias >= 4 ? `Combinado · ${sm ? '25 min carrera zona 2 + sentadilla aérea 3×15 + flexiones 3×12 + hip thrust suelo 3×15' : '20 min remo/bici zona 2 + sentadilla goblet 3×12 + press mancuernas 3×10 + remo mancuerna 3×10/lado'}. Cierre: plancha 3×30s` : "",
+           detalle: numDias >= 4 ? `Combinado · ${sm ? '25 min carrera zona 2 + sentadilla aérea 3×15 + flexiones 3×12 + hip thrust suelo 3×15' : '20 min remo/bici zona 2 + sentadilla goblet 3×12 + press banca con mancuernas 3×10 + remo con mancuerna a una mano 3×10/lado'}. Cierre: plancha 3×30s` : "",
            etiqueta: numDias >= 4 ? "Híbrido" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -11245,7 +11270,7 @@
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Full body + finisher",
            detalle: sm
              ? `Fuerza · Sentadilla búlgara ${v}×10/pierna, flexiones ${v}×12, hip thrust suelo ${v}×15, dominadas australianas ${v}×10, plancha lateral ${v}×25s/lado. Finisher metabólico: Tabata 4 min (20s trabajo/10s descanso × 8): alternando burpees y sentadillas con salto`
-             : `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
+             : `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo con barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
@@ -11267,7 +11292,7 @@
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior + carries",
            detalle: sm
              ? `Push/Pull · Flexiones ${vv}×15, flexiones con pies elevados ${vv}×12, dominadas australianas ${v}×12, dips en sillas ${v}×12, archer push-ups 3×8/lado, plancha lateral ${v}×30s/lado. Loaded carry: suitcase carry con mochila pesada 4×30m/lado`
-             : `Push/Pull · Press banca ${vv}×6, remo barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
+             : `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Cardio calidad · Series + zona 2",
            detalle:`${sesionCorta ? '25 min total' : (enfasisFuerza ? '35-40 min total' : '45-50 min total')}: 15 min zona 2 calentamiento + ${sesionCorta ? '5×400m con 90s rec' : (enfasisFuerza ? '4×800m con 2 min rec a ritmo umbral (RPE 7-8)' : '6×800m con 90s rec a ritmo umbral (RPE 7-8)')}. Cronometra cada rep. Enfriamiento: 10 min zona 1 + 4 strides de 80m`,
@@ -11296,7 +11321,7 @@
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior",
            detalle: sm
              ? `Push/Pull · Flexiones ${v}×12, flexiones con pies elevados ${v}×10, dominadas australianas ${v}×10, dips en sillas 3×10, plancha lateral 3×30s/lado. Finisher: 3 rondas de 8 burpees + 10 mountain climbers sin descanso`
-             : `Push/Pull · Press banca ${v}×8, remo barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m. Finisher: EMOM 6 min: 5 thrusters con mancuernas + 5 burpees`,
+             : `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m. Finisher: EMOM 6 min: 5 thrusters con mancuernas + 5 burpees`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Cardio multimodal",
            detalle:`Zona 2 · ${sesionCorta ? '25-30 min' : '35-40 min'} ${sm ? 'carrera a ritmo conversacional + 4 strides de 60m al final' : 'rotar cada 8-10 min entre remo, bici y carrera a zona 2 (RPE 3-4). Al acabar: 4 strides de 60m'}`,
@@ -11506,7 +11531,7 @@
            etiqueta:"WOD"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Weightlifting + AMRAP mixto",
            detalle: cf
-             ? `Skill · ${rx ? 'Hang snatch 4×2 + hang clean & jerk 4×2' : 'Hang clean con KB 4×6 + push press mancuernas 4×8'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '6 dumbbell snatches (alternando), 8 burpees, 12 sit-ups'}. Anota rondas`
+             ? `Skill · ${rx ? 'Hang snatch 4×2 + hang clean & jerk 4×2' : 'Hang clean con KB 4×6 + push press con mancuernas 4×8'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '6 dumbbell snatches (alternando), 8 burpees, 12 sit-ups'}. Anota rondas`
              : `Skill · ${rx ? `Power snatch 4×2 al ${pct1RM(70)}% + clean & jerk 4×2 al ${pct1RM(70)}%` : 'Power clean 5×3 ligero (técnica)'}. AMRAP 12 min: ${rx ? '3 power snatches (50/35kg), 6 burpees box jump over, 9 toes-to-bar' : '5 power cleans (40/30kg), 8 burpees, 10 sit-ups'}. Anota rondas`,
            etiqueta:"WOD"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · Movilidad",
@@ -11640,21 +11665,21 @@
         if (numDias <= 2 || (esPrincipiante && numDias === 3)) {
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Patrones básicos",
-             detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
+             detalle:`Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo con mancuerna a una mano ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}`,
              etiqueta:"Fuerza"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 2 ? "Full Body B · Variantes" : "Movilidad",
-             detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
+             detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 3 ? "Full Body B · Variantes" : "Descanso activo",
-             detalle: numDias >= 3 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado mancuernas ${sVol}×10, jalón polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
+             detalle: numDias >= 3 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 3 ? "Fuerza" : "Descanso"},
             {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 4 ? "Full Body A · Sube el peso" : "Descanso activo",
-             detalle: numDias >= 4 ? `Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo mancuerna ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}` : "",
+             detalle: numDias >= 4 ? `Cuerpo completo · Sentadilla goblet ${sVol}×10, press con mancuernas ${sVol}×10, remo con mancuerna a una mano ${sVol}×10 por lado, peso muerto con mancuernas ${sVol}×10, plancha ${sVol}×30s${finisher3}` : "",
              etiqueta: numDias >= 4 ? "Fuerza" : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
@@ -11662,14 +11687,14 @@
           // Principiante + 4-5 días → Upper/Lower: 2× frecuencia, volumen moderado, foco en técnica
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Upper A · Empuje + tirón",
-             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press mancuernas en hombro (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo mancuerna a un brazo 3×10/lado, fondos en banco (tríceps, codos pegados al cuerpo) 3×15, curl bíceps alterno 3×12 (controlado en la subida y bajada, sin balanceo), plancha 3×30s${finisher3}`,
+             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press de hombro con mancuernas (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo con mancuerna a una mano 3×10/lado, fondos en banco (tríceps, codos pegados al cuerpo) 3×15, curl bíceps alterno 3×12 (controlado en la subida y bajada, sin balanceo), plancha 3×30s${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
              detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
              etiqueta:"Piernas"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"10-15 min de movilidad: cadera (90/90), tobillo, hombros (band pull-apart), columna torácica. Opcional: 10-15 min caminar suave", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Variante",
-             detalle:`Pecho, espalda, hombros, brazos · Press inclinado mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales mancuernas 3×15 (sin balanceo, aguanta 1s arriba), remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15 (baja completo, aprieta 1s abajo, sube resistiendo), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
+             detalle:`Pecho, espalda, hombros, brazos · Press inclinado con mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales con mancuernas 3×15 (sin balanceo, aguanta 1s arriba), remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15 (baja completo, aprieta 1s abajo, sube resistiendo), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Lower B · Isquios + glúteos",
              detalle:`Piernas y glúteos · Prensa de piernas 3×12, peso muerto sumo con mancuernas 3×12, hip thrust a una pierna 3×10/pierna, femoral tumbado en máquina 3×12, step-ups controlados 3×10/pierna, gemelos en prensa o máquina 3×20${finisher3}`,
@@ -11677,7 +11702,7 @@
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico · Full Body ligero" : "Core + accesorios") : "Descanso activo",
              detalle: numDias >= 5 ? (perdidaGrasa
-               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo mancuerna/lado, 30s plancha. Descanso 90s entre rondas${finisher3}`
+               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo con mancuerna a una mano/lado, 30s plancha. Descanso 90s entre rondas${finisher3}`
                : `Core y complementos · Peso muerto con mancuernas 3×10, jalón en polea 3×10, press en máquina 3×10, plancha 3×40s, elevación de piernas en barra o banco 3×15, plancha lateral 3×30s/lado`) : "",
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -11687,14 +11712,14 @@
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
              detalle: sesionCorta
-               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo), plancha 3×45s${finisher3}`
-               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
+               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado con mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo), plancha 3×45s${finisher3}`
+               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado con mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
              detalle: sesionCorta
-               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada), elevación de piernas 3×12${finisher3}`
-               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo barra ${volA}×8, remo polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
+               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo con barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada), elevación de piernas 3×12${finisher3}`
+               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo con barra ${volA}×8, remo en polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
              etiqueta:"Tracción"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
@@ -11717,10 +11742,10 @@
              // por encima del rango donde el volumen extra sigue aportando algo.
              // Quitar los fondos reduce ese solapamiento sin tocar el estímulo
              // real del pectoral, que ya lo cubren los dos press y el cruce.
-             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado mancuernas ${volA}×10, cruces en polea 3×15, extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
+             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado con mancuernas ${volA}×10, cruces en polea 3×15, extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
-             detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo barra ${volA}×8, jalón polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
+             detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo con barra ${volA}×8, jalón en polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
              etiqueta:"Tracción"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas y glúteos",
@@ -11739,8 +11764,8 @@
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios y core") : "Descanso",
              detalle: numDias >= 5 ? (perdidaGrasa
-               ? "Acondicionamiento · 5 rondas: 10 sentadillas goblet, 10 flexiones, 15 hip thrusts, 12 remo mancuerna por lado, 30s plancha. Descanso 90s entre rondas"
-               : `Accesorios · Sentadilla búlgara 3×12 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, cruce de polea 3×15, encogimientos de hombro 3×12, plancha lateral 3×30s por lado`) : "",
+               ? "Acondicionamiento · 5 rondas: 10 sentadillas goblet, 10 flexiones, 15 hip thrusts, 12 remo con mancuerna a una mano por lado, 30s plancha. Descanso 90s entre rondas"
+               : `Accesorios · Sentadilla búlgara 3×12 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, cruces en polea 3×15, encogimientos de hombro 3×12, plancha lateral 3×30s por lado`) : "",
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
@@ -11833,7 +11858,7 @@
         [/[Pp]eso muerto( con mancuernas| convencional)?/g, 'Hip thrust'],
         [/\bdeadlifts?\b/gi, 'hip thrust'],
         [/[Rr]ussian twist/g, 'Plancha frontal'],
-        [/[Rr]emo barra( inclinado)?/g, eq('Remo en máquina con apoyo de pecho', 'Remo con mancuerna apoyado en banco', 'Remo bajo mesa')],
+        [/[Rr]emo con barra( inclinado)?/g, eq('Remo en máquina con apoyo de pecho', 'Remo con mancuerna apoyado en banco', 'Remo bajo mesa')],
         [/[Gg]ood mornings?/g, 'Hip thrust'],
         // Levantamientos olímpicos: la barra desde el suelo a alta velocidad es el
         // gesto que más comprime la lumbar, no tiene sentido mandarlo con lesión.
@@ -12109,7 +12134,7 @@
     // variantes y las adaptaciones por lesión, y el formato N×M intacto.
     if (!soloDieta && semana.length) {
       const poolsEjercicio = [
-        [/press inclinado mancuernas/gi, ['press inclinado mancuernas', 'press inclinado en multipower', 'press inclinado en máquina']],
+        [/press inclinado con mancuernas/gi, ['press inclinado con mancuernas', 'press inclinado en multipower', 'press inclinado en máquina']],
         [/cruces en polea/gi, ['cruces en polea', 'aperturas en polea', 'cruces de polea desde arriba', 'aperturas inclinado']],
         // Mismo problema que "copa de tríceps": esta variante llevaba su propia
         // nota "(aprieta en el pico)" y el día ya trae detrás una nota casi
@@ -12121,7 +12146,7 @@
         // nota del día -- se perdía la tarjeta de peso).
         [/curl bíceps(?! polea)( alterno)?/gi, ['curl bíceps', 'curl bíceps con barra Z', 'curl bíceps en banco scott', 'curl en polea baja con soga', 'curl concentrado']],
         [/curl martillo/gi, ['curl martillo', 'curl martillo con cuerda en polea', 'curl en polea alta (tensión constante)']],
-        [/remo mancuerna/gi, ['remo mancuerna', 'remo con mancuerna a una mano']],
+        [/remo con mancuerna a una mano/gi, ['remo con mancuerna a una mano', 'remo con mancuerna apoyado en banco']],
         // "copa de tríceps con mancuerna" iba con su propia nota entre paréntesis
         // ("codos cerrados..."), y el día ya trae detrás su propia nota casi
         // idéntica ("codos fijos cerca de la cabeza, no los abras") -- las dos
@@ -12213,7 +12238,7 @@
         r(/remo en máquina o polea baja/gi, 'remo con mancuerna a una mano'),
         r(/remo (en )?polea baja/gi, 'remo con mancuerna a una mano'),
         r(/remo en máquina/gi, 'remo con mancuerna apoyado en banco'),
-        r(/remo barra/gi, 'remo con mancuernas'),
+        r(/remo con barra/gi, 'remo con mancuernas'),
         r(/dominadas asistidas o jalón/gi, 'dominadas asistidas con banda elástica'),
         r(/dominadas o jalón/gi, 'dominadas (o remo australiano bajo mesa)'),
         r(/jalón (en |con )?polea o remo australiano/gi, 'remo australiano bajo mesa'),
@@ -12253,7 +12278,7 @@
         r(/extensión (de )?tríceps en polea/gi, 'fondos en silla'),
         r(/remo en máquina( con apoyo de pecho| o polea baja)?/gi, 'remo bajo mesa'),
         r(/remo (en )?polea baja/gi, 'remo bajo mesa'),
-        r(/remo barra/gi, 'remo bajo mesa'),
+        r(/remo con barra/gi, 'remo bajo mesa'),
         r(/dominadas asistidas o jalón/gi, 'remo bajo mesa'),
         r(/dominadas o jalón/gi, 'remo bajo mesa'),
         r(/jalón (en |con )?polea( o remo australiano)?/gi, 'remo bajo mesa'),
