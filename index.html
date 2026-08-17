@@ -12903,6 +12903,10 @@
           op("Porridge cargado pre-carrera", "80g avena, 200ml leche, 1 plátano, 20g miel, 10g pasas", "520 kcal", "14g prot", "92g carbs", "10g grasa", "Fácil · 8 min"),
           op("Tostadas con mermelada y plátano", "3 tostadas integrales, mermelada sin azúcar, 1 plátano, café", "380 kcal", "10g prot", "72g carbs", "6g grasa", "Sin cocción · 3 min")
         );
+        if (m.momento === 'Media mañana') m.opciones.push(
+          op("Barritas de dátiles y avena caseras (energía para entrenar)", "4 dátiles, 40g avena, 10g miel, canela", "230 kcal", "5g prot", "44g carbs", "4g grasa", "Sin cocción · 5 min"),
+          op("Plátano con miel y un puñado de pasas (energía para entrenar)", "1 plátano, 10g miel, 15g pasas", "210 kcal", "2g prot", "48g carbs", "1g grasa", "Sin cocción · 1 min")
+        );
       });
     }
     if (esGimnasio || esCrossfit) {
@@ -12926,6 +12930,14 @@
             : op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
           op("Cottage con frutos rojos y nueces", "200g queso cottage, 80g frutos rojos, 15g nueces", "240 kcal", "26g prot", "18g carbs", "8g grasa", "Sin cocción · 2 min")
         );
+        if (m.momento === 'Media mañana') m.opciones.push(
+          esVegetariano
+            ? op("Skyr con nueces y canela (snack proteico pre-entreno)", "150g skyr natural, 15g nueces, canela", "220 kcal", "19g prot", "14g carbs", "10g grasa", "Sin cocción · 1 min")
+            : op("Huevos duros con jamón serrano (snack proteico pre-entreno)", "2 huevos duros, 20g jamón serrano, pimienta", "220 kcal", "20g prot", "2g carbs", "14g grasa", "Fácil · 8 min"),
+          esVegetariano
+            ? op("Edamame con sal y pipas de calabaza (snack proteico pre-entreno)", "150g edamame cocido, sal marina, 10g pipas de calabaza", "210 kcal", "17g prot", "14g carbs", "9g grasa", "Fácil · 5 min")
+            : op("Rollitos de pavo y queso fresco (snack proteico pre-entreno)", "80g pavo en lonchas, 60g queso fresco, orégano", "190 kcal", "24g prot", "4g carbs", "8g grasa", "Sin cocción · 3 min")
+        );
       });
     }
     if (esCombinacion) {
@@ -12942,6 +12954,11 @@
           esVegetariano
             ? op("Poke bowl vegano de tofu", "180g tofu marinado, 80g arroz, aguacate, zanahoria, soja, sésamo", "420 kcal", "24g prot", "44g carbs", "16g grasa", "Sin cocción · 10 min")
             : op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
+        );
+        if (m.momento === 'Media mañana') m.opciones.push(
+          esVegetariano
+            ? op("Hummus con tostas de maíz (energía para el entreno híbrido)", "80g hummus, 2 tostas de maíz, pimentón", "220 kcal", "9g prot", "26g carbs", "9g grasa", "Sin cocción · 2 min")
+            : op("Wrap pequeño de atún y aguacate (energía para el entreno híbrido)", "1 tortilla integral pequeña, 1 lata atún, 1/4 aguacate, tomate", "260 kcal", "22g prot", "20g carbs", "10g grasa", "Sin cocción · 5 min")
         );
       });
     }
