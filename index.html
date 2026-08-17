@@ -3144,6 +3144,14 @@
      por defecto del navegador que no encajaba con el resto del diseño. */
   .paso-ejercicio { display: flex; gap: 10px; align-items: flex-start; }
   .paso-ejercicio-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brasa); flex-shrink: 0; padding-top: 2px; }
+
+  /* Consejos de técnica dentro de "Cómo se hace" -- antes vivían como texto
+     suelto debajo de casi cada ejercicio del plan (sobraba visualmente,
+     salía repetido en muchas tarjetas); ahora es contenido curado por
+     ejercicio dentro de la ficha, donde tiene sentido consultarlo. */
+  .ejercicio-consejos-list { margin: 0; padding-left: 18px; color: var(--metal-claro); font-size: 13px; line-height: 1.6; }
+  .ejercicio-consejos-list li { margin-bottom: 6px; }
+  .ejercicio-consejos-list li::marker { color: var(--brasa); }
   .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
   .ej-foto { margin: 0; }
   .ej-foto img {
@@ -6400,6 +6408,7 @@
     <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CÓMO SE HACE</div>
     <div id="infoEjercicioPasos" style="margin:0 0 18px;color:var(--metal-claro);font-size:13.5px;line-height:1.55;display:flex;flex-direction:column;gap:10px"></div>
+    <div id="infoEjercicioConsejos" style="display:none;margin:0 0 18px"></div>
     <div id="infoEjercicioSustituir" style="display:none"></div>
     <a id="infoEjercicioVideo" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:100%;display:block;text-align:center;text-decoration:none;box-sizing:border-box">▶ Ver vídeo de técnica</a>
     <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0;line-height:1.5">Instrucciones: exercises-dataset (MIT) · Fotos: free-exercise-db (dominio público)</p>
@@ -9743,6 +9752,16 @@
       `<div class="paso-ejercicio"><span class="paso-ejercicio-num">${String(i + 1).padStart(2, '0')}</span><span>${_esc(p)}</span></div>`).join('');
     pasosEl.previousElementSibling.style.display = (info.pasos && info.pasos.length) ? '' : 'none';
     pasosEl.style.display = (info.pasos && info.pasos.length) ? 'flex' : 'none';
+    const consejosEl = document.getElementById('infoEjercicioConsejos');
+    if (info.consejos && info.consejos.length) {
+      consejosEl.innerHTML = `
+        <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CONSEJOS</div>
+        <ul class="ejercicio-consejos-list">${info.consejos.map(c => `<li>${_esc(c)}</li>`).join('')}</ul>`;
+      consejosEl.style.display = '';
+    } else {
+      consejosEl.innerHTML = '';
+      consejosEl.style.display = 'none';
+    }
     document.getElementById('infoEjercicioVideo').href = getVideoUrl(nombre);
     document.getElementById('modalInfoEjercicio').classList.add('visible');
   }
