@@ -12135,11 +12135,21 @@
       }
     }
 
-    // Variantes de ejercicio elegidas en el feedback de la sesión anterior
+    // Variantes de ejercicio elegidas en "¿Cómo va el entreno?" -- BUG REAL
+    // encontrado ago 2026: antes solo se leía la ÚLTIMA sesión de feedback
+    // (u.variantPreferences[length-1]), así que cada vez que el cliente
+    // volvía a usar el formulario, TODOS los cambios de sesiones anteriores
+    // desaparecían en silencio, aunque el mensaje de confirmación prometía
+    // que "el plan de la semana que viene también lo tendrá en cuenta".
+    // Verificado generando dos sesiones seguidas: la primera preferencia se
+    // perdía al aplicar la segunda. Ahora se combinan TODAS las sesiones —
+    // si el cliente cambia de opinión sobre el mismo ejercicio, la elección
+    // más reciente gana (por eso el forEach en orden cronológico, no al revés).
     if (!soloDieta && u.variantPreferences && u.variantPreferences.length) {
-      const ultimo = u.variantPreferences[u.variantPreferences.length - 1];
+      const cambiosAcumulados = {};
+      u.variantPreferences.forEach(pref => Object.assign(cambiosAcumulados, pref.cambios || {}));
       const cambiosTexto = [];
-      Object.entries(ultimo.cambios || {}).forEach(([key, idx]) => {
+      Object.entries(cambiosAcumulados).forEach(([key, idx]) => {
         const data = variantesDB[key];
         if (!data || !data.variantes[idx]) return;
         const variante = data.variantes[idx];
