@@ -6237,8 +6237,8 @@
       <span class="nav-link" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('sports')" onkeydown="if(event.key==='Enter')this.click()">Deportes</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('how')" onkeydown="if(event.key==='Enter')this.click()">Cómo funciona</span>
-      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 1,99€</button>
     </div>
@@ -6251,8 +6251,8 @@
     <span class="nav-link" id="navEntrarMobile" onclick="closeMobileMenu(); entrarODashboard()">Entrar</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
-    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza por 1,99€</button>
   </div>
@@ -6550,55 +6550,6 @@
     </div>
   </section>
 
-  <section class="faq-section" id="faq">
-    <div class="section-header">
-      <h2 class="section-title">Preguntas frecuentes</h2>
-      <p class="section-note">Las dudas más comunes antes de empezar.</p>
-    </div>
-    <div class="faq-grid">
-      <details class="faq-item">
-        <summary class="faq-q">¿Qué pasa después del mes de prueba a 1,99€?</summary>
-        <p class="faq-a">Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o solo nutrición 4,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
-        <p class="faq-a">K-One usa un motor de reglas basado en principios reales de entrenamiento y nutrición: periodización, déficit/superávit calórico, progresión de cargas, macros. No es una IA conversacional que inventa — es un sistema con criterio fijo y trazable.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Y si tengo lesiones o alergias alimentarias?</summary>
-        <p class="faq-a">Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición. Ante cualquier duda, consulta siempre con un profesional sanitario.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Puedo cambiar de objetivo o de deporte más adelante?</summary>
-        <p class="faq-a">Sí. Desde tu dashboard, en "Cambiar objetivo / deporte", puedes actualizar tu perfil cuando quieras —incluido tu peso actual— y el plan se regenera al momento con los nuevos datos: entrenamiento, calorías y proteína se recalculan según tu peso y tu objetivo.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">Si cambio de plan a mitad de mes, ¿cómo se cobra?</summary>
-        <p class="faq-a">El cambio de plan se aplica <strong>a partir del siguiente período de facturación</strong>, nunca a mitad de mes. Hasta que termine tu ciclo actual, mantienes el plan que ya pagaste. Cuando se renueve, se cobra el nuevo plan que hayas elegido. Sin cargos extra, sin devoluciones, sin sorpresas.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
-        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 4,99€/mes. Recibes un plan de alimentación personalizado con hasta 5 tomas y 5 opciones por comida (según cuántas veces comes al día), adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Con qué frecuencia se actualiza el plan?</summary>
-        <p class="faq-a">Cada semana. Los domingos haces un check-in de 2 minutos contando cómo fue la semana (energía, descanso, adherencia). El lunes tienes un plan nuevo ajustado a ese feedback.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Puedo cancelar cuando quiera?</summary>
-        <p class="faq-a">Sí, desde tu perfil en cualquier momento. Sin llamadas, sin formularios, sin excusas. El acceso se mantiene hasta el final del período pagado.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Mis datos están seguros?</summary>
-        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
-        <p class="faq-a">Al elegir tus comidas de la semana, K-ONE genera automáticamente una lista de la compra con todos los ingredientes sumados y organizados por categorías (proteínas, verduras, cereales...). La copias con un clic y la llevas al supermercado. Como tu dieta se mantiene durante todo el mes, compras una vez y tienes todo cubierto.</p>
-      </details>
-    </div>
-  </section>
-
   <section class="pricing" id="pricing">
     <div class="section-header">
       <h2 class="section-title">Sin letra pequeña</h2>
@@ -6691,6 +6642,55 @@
         </span>
         Nunca vendemos tus datos
       </span>
+    </div>
+  </section>
+
+  <section class="faq-section" id="faq">
+    <div class="section-header">
+      <h2 class="section-title">Preguntas frecuentes</h2>
+      <p class="section-note">Las dudas más comunes antes de empezar.</p>
+    </div>
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary class="faq-q">¿Qué pasa después del mes de prueba a 1,99€?</summary>
+        <p class="faq-a">Al terminar tu primer mes, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o solo nutrición 4,99€/mes). Puedes cambiar de plan o cancelar desde tu perfil. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
+        <p class="faq-a">K-One usa un motor de reglas basado en principios reales de entrenamiento y nutrición: periodización, déficit/superávit calórico, progresión de cargas, macros. No es una IA conversacional que inventa — es un sistema con criterio fijo y trazable.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Y si tengo lesiones o alergias alimentarias?</summary>
+        <p class="faq-a">Las informas en el cuestionario inicial y el plan las tiene en cuenta. Los ejercicios que afecten a tu lesión se sustituyen o eliminan. Los alimentos que no puedes tomar no aparecen en tu plan de nutrición. Ante cualquier duda, consulta siempre con un profesional sanitario.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Puedo cambiar de objetivo o de deporte más adelante?</summary>
+        <p class="faq-a">Sí. Desde tu dashboard, en "Cambiar objetivo / deporte", puedes actualizar tu perfil cuando quieras —incluido tu peso actual— y el plan se regenera al momento con los nuevos datos: entrenamiento, calorías y proteína se recalculan según tu peso y tu objetivo.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Si cambio de plan a mitad de mes, ¿cómo se cobra?</summary>
+        <p class="faq-a">El cambio de plan se aplica <strong>a partir del siguiente período de facturación</strong>, nunca a mitad de mes. Hasta que termine tu ciclo actual, mantienes el plan que ya pagaste. Cuando se renueve, se cobra el nuevo plan que hayas elegido. Sin cargos extra, sin devoluciones, sin sorpresas.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
+        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 4,99€/mes. Recibes un plan de alimentación personalizado con hasta 5 tomas y 5 opciones por comida (según cuántas veces comes al día), adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Con qué frecuencia se actualiza el plan?</summary>
+        <p class="faq-a">Cada semana. Los domingos haces un check-in de 2 minutos contando cómo fue la semana (energía, descanso, adherencia). El lunes tienes un plan nuevo ajustado a ese feedback.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Puedo cancelar cuando quiera?</summary>
+        <p class="faq-a">Sí, desde tu perfil en cualquier momento. Sin llamadas, sin formularios, sin excusas. El acceso se mantiene hasta el final del período pagado.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Mis datos están seguros?</summary>
+        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
+        <p class="faq-a">Al elegir tus comidas de la semana, K-ONE genera automáticamente una lista de la compra con todos los ingredientes sumados y organizados por categorías (proteínas, verduras, cereales...). La copias con un clic y la llevas al supermercado. Como tu dieta se mantiene durante todo el mes, compras una vez y tienes todo cubierto.</p>
+      </details>
     </div>
   </section>
 
