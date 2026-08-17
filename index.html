@@ -4556,21 +4556,92 @@
   .btn-completado.completado:hover { background: var(--brasa-oscura); border-color: var(--brasa-oscura); color: var(--blanco-puro); }
 
   /* NOTAS / AGENDA */
-  .contacto-motivo {
-    padding: 10px 16px;
-    background: var(--grafito);
-    border: 1px solid var(--humo);
-    border-radius: 10px;
-    color: var(--metal-claro);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  /* Tarjetas de icono, mismo lenguaje que .pillar-card / .trust-icon del
+     resto de la web -- antes eran solo pastillas de texto en fila, sin
+     relación visual con nada más de la app. */
+  .contacto-motivos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
   }
-  .contacto-motivo:hover { border-color: var(--brasa); color: var(--blanco); }
-  .contacto-motivo.selected { background: rgba(232,73,15,0.12); border-color: var(--brasa); color: var(--blanco); }
+  .contacto-motivo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 8px;
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 12px;
+    color: var(--metal-claro);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+  }
+  .contacto-motivo:hover { border-color: rgba(232,73,15,0.45); transform: translateY(-1px); }
+  .contacto-motivo.selected { background: rgba(232,73,15,0.06); border-color: var(--brasa); color: var(--blanco); }
+  .contacto-motivo-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(232,73,15,0.10);
+    color: var(--brasa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .contacto-motivo:not(.selected) .contacto-motivo-icon { opacity: 0.75; }
+
+  /* Tarjeta del mensaje: la pista de arriba cambia según el motivo elegido
+     (seleccionarMotivo actualiza #contactoHint), para que el cliente sepa
+     qué contar sin tener que adivinarlo. */
+  .contacto-card {
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .contacto-hint {
+    font-size: 12.5px;
+    color: var(--metal-claro);
+    line-height: 1.5;
+    margin: 0 0 12px;
+  }
+  .contacto-card textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--blanco);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 0;
+    min-height: 130px;
+    resize: none;
+    box-sizing: border-box;
+    outline: none;
+    line-height: 1.6;
+  }
+  .contacto-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--humo);
+  }
+  .contacto-footer-note { font-size: 11px; color: var(--metal); font-family: 'DM Mono', monospace; }
+
+  /* Reutiliza el mismo .trust-bar de precios (icono en círculo + texto) en
+     vez de las dos tarjetas sueltas de antes, que repetían casi la misma
+     frase que ya está en el pie del formulario. */
+  .contacto-trust { justify-content: flex-start; margin-top: 0; }
 
   .notes-form {
     background: var(--carbon);
@@ -8200,45 +8271,59 @@
           </div>
         </div>
 
-        <!-- Motivos rápidos como botones -->
+        <!-- Motivos rápidos, como tarjetas de icono (mismo lenguaje que los
+             pillar-card / trust-icon del resto de la web) -->
         <div style="margin-bottom:20px">
-          <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:10px">¿SOBRE QUÉ QUIERES ESCRIBIRNOS?</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap" id="contactoMotivos">
-            <button class="contacto-motivo selected" onclick="seleccionarMotivo(this,'sugerencia')">Sugerencia</button>
-            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'alimento')">Alimento</button>
-            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'ejercicio')">Ejercicio</button>
-            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'plan')">Mi plan</button>
-            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'pago')">Pago</button>
-            <button class="contacto-motivo" onclick="seleccionarMotivo(this,'otro')">Otro</button>
+          <div class="informe-eyebrow">¿Sobre qué quieres escribirnos?</div>
+          <div class="contacto-motivos-grid" id="contactoMotivos">
+            <button type="button" class="contacto-motivo selected" data-hint="Cuéntanos qué mejorarías. Leemos todo." onclick="seleccionarMotivo(this,'sugerencia')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7c.5.4.8 1 .8 1.7v.6h6.4v-.6c0-.7.3-1.3.8-1.7A7 7 0 0012 2z"/></svg></span>
+              <span>Sugerencia</span>
+            </button>
+            <button type="button" class="contacto-motivo" data-hint="¿Falta un alimento, una receta no cuadra, o algo no te gusta? Dinos qué." onclick="seleccionarMotivo(this,'alimento')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7a2 2 0 002 2 2 2 0 002-2V2"/><path d="M5 11v11"/><path d="M19 2v20"/><path d="M15 2v7a2 2 0 002 2 2 2 0 002-2V2"/></svg></span>
+              <span>Alimento</span>
+            </button>
+            <button type="button" class="contacto-motivo" data-hint="¿Un ejercicio mal explicado, una foto que no encaja, o quieres pedir un cambio?" onclick="seleccionarMotivo(this,'ejercicio')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/><line x1="6" y1="12" x2="18" y2="12"/><rect x="8" y="7" width="2" height="10" rx="1"/><rect x="14" y="7" width="2" height="10" rx="1"/></svg></span>
+              <span>Ejercicio</span>
+            </button>
+            <button type="button" class="contacto-motivo" data-hint="Dudas sobre tu plan de entrenamiento o nutrición actual." onclick="seleccionarMotivo(this,'plan')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6a1 1 0 011 1v1H8V3a1 1 0 011-1z"/><rect x="5" y="4" width="14" height="18" rx="2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="13" y2="19"/></svg></span>
+              <span>Mi plan</span>
+            </button>
+            <button type="button" class="contacto-motivo" data-hint="Incluye la fecha aproximada del cobro si la recuerdas, así lo revisamos más rápido." onclick="seleccionarMotivo(this,'pago')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span>
+              <span>Pago</span>
+            </button>
+            <button type="button" class="contacto-motivo" data-hint="Cuéntanos lo que necesites." onclick="seleccionarMotivo(this,'otro')">
+              <span class="contacto-motivo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+              <span>Otro</span>
+            </button>
           </div>
           <input type="hidden" id="contactoAsunto" value="sugerencia">
         </div>
 
         <!-- Mensaje -->
-        <div style="background:var(--carbon);border:1px solid var(--humo);border-radius:14px;padding:20px;margin-bottom:20px">
-          <textarea id="contactoMensaje" placeholder="Cuéntanos lo que necesites..." style="width:100%;background:transparent;border:none;color:var(--blanco);font-family:inherit;font-size:15px;padding:0;min-height:140px;resize:none;box-sizing:border-box;outline:none;line-height:1.6"></textarea>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--humo)">
-            <span style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace">Te respondemos en menos de 24h</span>
-            <button class="btn-primary" onclick="enviarContacto()" style="padding:10px 24px;font-size:12px">Enviar →</button>
+        <div class="contacto-card">
+          <p class="contacto-hint" id="contactoHint">Cuéntanos qué mejorarías. Leemos todo.</p>
+          <textarea id="contactoMensaje" placeholder="Escribe aquí..." aria-label="Mensaje de contacto"></textarea>
+          <div class="contacto-card-footer">
+            <span class="contacto-footer-note">Te respondemos en menos de 24h</span>
+            <button class="btn-primary" id="btnEnviarContacto" onclick="enviarContacto()" style="padding:10px 24px;font-size:12px">Enviar →</button>
           </div>
         </div>
 
         <!-- Info de contacto -->
-        <div style="display:flex;gap:16px;flex-wrap:wrap">
-          <div style="flex:1;min-width:200px;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
-            <div style="width:36px;height:36px;background:rgba(232,73,15,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-            <div>
-              <div style="font-size:11px;color:var(--metal)">Email directo</div>
-              <div style="font-size:13px;color:var(--blanco)">k.one.fit26@gmail.com</div>
-            </div>
-          </div>
-          <div style="flex:1;min-width:200px;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
-            <div style="width:36px;height:36px;background:rgba(232,73,15,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div>
-              <div style="font-size:11px;color:var(--metal)">Tiempo de respuesta</div>
-              <div style="font-size:13px;color:var(--blanco)">Menos de 24 horas</div>
-            </div>
-          </div>
+        <div class="trust-bar contacto-trust">
+          <span>
+            <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+            k.one.fit26@gmail.com
+          </span>
+          <span>
+            <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            Respuesta en menos de 24h
+          </span>
         </div>
       </div>
 
@@ -16342,6 +16427,8 @@
     document.querySelectorAll('.contacto-motivo').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     document.getElementById('contactoAsunto').value = valor;
+    const hint = document.getElementById('contactoHint');
+    if (hint && el.dataset.hint) hint.textContent = el.dataset.hint;
   }
 
   // ===== SISTEMA DE REFERIDOS =====
@@ -16421,6 +16508,8 @@
     const user = getCurrentUser();
     if (!user) { showToast('Inicia sesión primero'); return; }
     const asuntoTexto = { sugerencia:'Sugerencia', alimento:'Alimento', ejercicio:'Ejercicio', plan:'Plan', pago:'Pago', otro:'Otro' };
+    const btn = document.getElementById('btnEnviarContacto');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
     try {
       await supa.from('mensajes_cliente').insert({
         user_id: _supaUserId,
@@ -16432,8 +16521,13 @@
       notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: asuntoTexto[asunto], mensaje });
       document.getElementById('contactoMensaje').value = '';
       showToast('Mensaje enviado. Te responderemos lo antes posible.');
+      if (btn) {
+        btn.textContent = '✓ Enviado';
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Enviar →'; }, 2200);
+      }
     } catch (e) {
       showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Enviar →'; }
     }
   }
 
