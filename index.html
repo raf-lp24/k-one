@@ -9007,6 +9007,7 @@
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Nutrición', text: 'Elige tus comidas día a día (lunes a domingo). Para cada toma tienes 5 opciones. Confirma cada día y pasa al siguiente.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>', title: 'Tú eliges cómo se renueva tu dieta', text: 'Arriba del todo en Nutrición decides cada cuánto quieres platos nuevos: cada semana, cada mes o mantenerlos fijos. Al renovarse, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/><circle cx="19" cy="18" r="2"/></svg>', title: 'Pesa lo que comes', text: 'Cada ingrediente lleva su cantidad en gramos: no es capricho, es lo que hace que el plan funcione. Solo las especias y el limón van al gusto (no suman calorías). En "Ver macros" puedes abrir cualquier plato y ver de dónde sale cada caloría.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>', title: 'Añade tu propia comida', text: 'Si prefieres comer algo distinto a las opciones del plan, pulsa "+ Añadir tu comida" al final de cada toma. Busca el alimento, ajusta la cantidad y se añade con sus macros reales (tabla USDA), como una opción más de esa comida.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', title: 'Buscador de alimentos', text: '¿Cuánta proteína tiene un huevo? ¿Y 200g de arroz? En Nutrición tienes un buscador con los macros oficiales de la USDA: escribe el alimento, pon los gramos y lo tienes. Útil cuando comes fuera del plan.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>', title: 'Recetario completo', text: '"Ver recetario completo" te abre todas las opciones de tu plan de esta semana juntas (no solo la que toca hoy), buscable por nombre. Sirve para cambiar algo puntual o para coger ideas dentro de tu semana.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>', title: 'Lista de la compra', text: 'Cuando completes los 7 días de comidas, aparece el botón "Lista de la compra": junta todo lo que necesitas esa semana, sin que tengas que sumarlo tú.' },
@@ -9972,7 +9973,7 @@
     return `<div class="entreno-bloque">
       <div class="entreno-bloque-head"><span class="entreno-bloque-num">+</span><span class="entreno-bloque-title">Tus ejercicios</span></div>
       <div class="ejercicios-peso-list">${cards}</div>
-      <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirEjercicio('${diaNombre}')">+ Añadir ejercicio</button>
+      <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirEjercicio('${diaNombre}')" title="Mete un ejercicio que no esté en tu plan de hoy">+ Añadir ejercicio</button>
     </div>`;
   }
 
@@ -14346,7 +14347,7 @@
           <div class="meal-preview-row" id="mealPreview${mealIdx}">${previewHTML}</div>
           <div class="meal-options" id="mealOptions${mealIdx}">
             ${optionsHTML}
-            <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirComida(${mealIdx})">+ Añadir tu comida</button>
+            <button type="button" class="btn-anadir-ejercicio" onclick="event.stopPropagation();abrirAnadirComida(${mealIdx})" title="Busca un alimento y añádelo como opción propia para esta toma">+ Añadir tu comida</button>
           </div>
         </div>`;
     });
