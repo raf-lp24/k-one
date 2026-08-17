@@ -284,8 +284,12 @@ module.exports = async (req, res) => {
 
     let emailLog = [];
     try {
+      // limit 50 (arbitrario, agosto 2026) se quedaba corto: entre el digest diario de
+      // Jarvis y los resúmenes semanales de cada cliente activo, esos dos tipos por sí
+      // solos podían llenar las 50 posiciones y tapar emails más raros (bienvenida, pago
+      // fallido) que Jarvis necesita ver.
       const { data: logData } = await supabaseAdmin
-        .from('email_log').select('id, tipo, destinatario, asunto, datos, created_at').order('created_at', { ascending: false }).limit(50);
+        .from('email_log').select('id, tipo, destinatario, asunto, datos, created_at').order('created_at', { ascending: false }).limit(300);
       emailLog = logData || [];
     } catch (e) { console.warn('[admin-clientes] emailLog query error:', e.message); }
 
