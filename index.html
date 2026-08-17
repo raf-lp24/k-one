@@ -369,6 +369,7 @@
   [data-theme="light"] .landing-nav { background: rgba(255,255,255,0.97) !important; border-bottom-color: #E0DCD5 !important; }
   [data-theme="light"] .nav-link { color: #5A5A5A !important; }
   [data-theme="light"] .nav-link:hover { color: #E8490F !important; }
+  [data-theme="light"] .testimonial-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .sport-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .price-card { border-color: #E0DCD5 !important; }
   [data-theme="light"] .price-card.featured { border-color: #E8490F !important; }
@@ -1814,6 +1815,131 @@
     letter-spacing: 0.5px;
   }
 
+  /* TESTIMONIALS */
+  .testimonials {
+    padding: 120px 40px;
+    border-top: 1px solid var(--humo);
+  }
+
+  .testimonials-carousel {
+    margin-top: 64px;
+    position: relative;
+  }
+
+  .testimonials-track {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 8px 4px 16px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+
+  .testimonials-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .testimonial-card {
+    background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 14px;
+    padding: 34px 30px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 360px;
+    transition: border-color .25s, transform .25s;
+  }
+  .testimonial-card:hover {
+    border-color: rgba(232,73,15,0.55);
+    transform: translateY(-4px);
+  }
+
+  .testimonials-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(20,20,20,0.85);
+    backdrop-filter: blur(3px);
+    border: 1px solid var(--humo);
+    color: var(--blanco);
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background .2s, color .2s, border-color .2s;
+  }
+
+  .testimonials-nav:hover {
+    background: var(--brasa);
+    color: var(--blanco-puro);
+    border-color: var(--brasa);
+  }
+
+  .testimonials-nav--prev { left: -24px; }
+  .testimonials-nav--next { right: -24px; }
+
+  .testimonial-stars {
+    color: var(--brasa);
+    font-size: 14px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+  }
+
+  .testimonial-quote {
+    font-size: 14.5px;
+    color: var(--blanco);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 24px;
+    flex-grow: 1;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--humo);
+    padding-top: 18px;
+  }
+
+  .testimonial-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brasa), #7a2408);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--blanco-puro);
+    flex-shrink: 0;
+  }
+
+  .testimonial-name {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .testimonial-role {
+    font-size: 11px;
+    color: var(--metal-claro);
+    font-family: 'DM Mono', monospace;
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+  .testimonial-role b { color: var(--brasa); font-weight: 700; }
+
   .landing-cta-float {
     display: none;
     position: fixed;
@@ -1852,6 +1978,26 @@
   }
   .btn-volver-dashboard:hover { background: #ff5a10; transform: translateY(-2px); }
 
+  .testimonials-empty {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .testimonials-empty-icon { margin-bottom: 20px; opacity: 0.7; }
+  .testimonials-empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--blanco);
+  }
+  .testimonials-empty-desc {
+    font-size: 14px;
+    color: var(--metal-claro);
+    line-height: 1.7;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
   /* FAQ */
   .faq-section {
     padding: 100px 40px;
@@ -1867,7 +2013,7 @@
     margin-top: 64px;
   }
 
-  /* Mismo lenguaje de tarjeta que .price-card (borde +
+  /* Mismo lenguaje de tarjeta que .price-card / .testimonial-card (borde +
      radio + elevación al hover) -- antes el FAQ era el único bloque plano,
      sin borde ni esquinas redondeadas, pegado a sus vecinos por un hairline
      de 2px, así que desentonaba con el resto de la landing. */
@@ -4522,6 +4668,10 @@
        sola en su fila con un hueco vacío al lado. */
     .sports-grid { grid-template-columns: 1fr; }
     .pricing-cards { grid-template-columns: 1fr; }
+    .testimonial-card { width: 280px; padding: 32px 24px; }
+    .testimonials-nav { width: 36px; height: 36px; font-size: 18px; }
+    .testimonials-nav--prev { left: -8px; }
+    .testimonials-nav--next { right: -8px; }
     .trust-bar { gap: 16px 28px; }
     .pillars-grid { grid-template-columns: 1fr; }
     .form-layout { grid-template-columns: 1fr; }
@@ -4560,7 +4710,7 @@
     #todayPlan, #feedbackPanel, .checkin-card { padding: 20px !important; }
     .landing-nav { padding: 20px 24px; }
     .hero { padding: 100px 24px 60px; min-height: 100vh; }
-    .app-preview, .how, .sports, .pricing, .philosophy { padding: 80px 24px; }
+    .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
   }
 
   @media (max-width: 480px) {
@@ -5968,6 +6118,36 @@
   </div>
 </div>
 
+<!-- MODAL OPINIÓN PÚBLICA (landing) -->
+<div class="modal-overlay" id="modalOpinionPublica">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title" style="font-size:20px">Deja tu opinión</div>
+    <p class="modal-desc" style="margin-bottom:16px">Tu experiencia puede ayudar a otros a decidirse. Rellena lo que quieras y dale a enviar.</p>
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <div style="flex:1">
+        <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Nombre</label>
+        <input type="text" id="opPublicaNombre" placeholder="Tu nombre" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box">
+      </div>
+      <div style="width:80px">
+        <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Edad</label>
+        <input type="number" id="opPublicaEdad" placeholder="—" min="14" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
+      </div>
+    </div>
+    <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Valoración</label>
+    <div class="encuesta-stars" id="opPublicaStars" style="margin-top:4px">
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(1)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(2)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(3)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(4)">★</span>
+      <span class="encuesta-star" onclick="seleccionarEstrellaPublica(5)">★</span>
+    </div>
+    <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu opinión</label>
+    <textarea class="encuesta-textarea" id="opPublicaTexto" placeholder="¿Qué te parece K-One? Cualquier cosa vale."></textarea>
+    <button class="btn-primary" style="width:100%" onclick="enviarOpinionPublica()">Enviar opinión →</button>
+    <button class="encuesta-skip" onclick="document.getElementById('modalOpinionPublica').classList.remove('visible')">Cancelar</button>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE COMIDA (desglose de macros por ingrediente) -->
 <div class="modal-overlay" id="modalInfoComida" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:84vh;overflow-y:auto">
@@ -6059,6 +6239,7 @@
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('how')" onkeydown="if(event.key==='Enter')this.click()">Cómo funciona</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza por 1,99€</button>
     </div>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
@@ -6072,6 +6253,7 @@
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza por 1,99€</button>
   </div>
 
@@ -6509,6 +6691,34 @@
         </span>
         Nunca vendemos tus datos
       </span>
+    </div>
+  </section>
+
+  <section class="testimonials" id="testimonials">
+    <div class="section-header">
+      <h2 class="section-title">Únete a los que ya entrenan con K-ONE</h2>
+      <p class="section-note">Gente real que entrena con nosotros. Sin filtros, sin inventar.</p>
+    </div>
+    <div class="testimonials-carousel" id="testimonialsCarousel">
+    <button class="testimonials-nav testimonials-nav--prev" onclick="scrollTestimonials(-1)" aria-label="Ver opiniones anteriores">‹</button>
+    <button class="testimonials-nav testimonials-nav--next" onclick="scrollTestimonials(1)" aria-label="Ver más opiniones">›</button>
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="testimonial-card" style="display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:13px;font-family:'DM Mono',monospace;letter-spacing:1px">
+        Cargando opiniones...
+      </div>
+    </div>
+    </div>
+    <!-- Estado vacío: visible hasta que haya opiniones reales -->
+    <div class="testimonials-empty" id="testimonialsEmpty" style="display:none">
+      <div class="testimonials-empty-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--brasa)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="9" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="15" y1="10" x2="15" y2="10"/></svg>
+      </div>
+      <p class="testimonials-empty-title">Las primeras opiniones llegarán pronto</p>
+      <p class="testimonials-empty-desc">Cuando nuestros clientes compartan su experiencia, aparecerán aquí. Opiniones reales, sin inventar.</p>
+      <button class="btn-primary" onclick="abrirOpinionPublica()" style="margin-top:20px;padding:12px 28px;font-size:13px">Dejar mi opinión →</button>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn-ghost" onclick="abrirOpinionPublica()" style="padding:10px 24px;font-size:13px">Dejar mi opinión →</button>
     </div>
   </section>
 
@@ -8031,6 +8241,14 @@
       lastY = y;
     }, { passive: true });
   })();
+
+  function scrollTestimonials(direction) {
+    const track = document.querySelector('.testimonials-track');
+    if (!track) return;
+    const card = track.querySelector('.testimonial-card');
+    const step = card ? card.offsetWidth + 2 : 380;
+    track.scrollBy({ left: direction * step, behavior: 'smooth' });
+  }
 
   function toggleMobileMenu() {
     document.getElementById('navToggle').classList.toggle('active');
@@ -20142,6 +20360,156 @@
     }).catch(() => {});
   }
 
+  // ===== OPINIÓN PÚBLICA (desde la landing, sin login) =====
+  let _opPublicaEstrellas = 0;
+
+  function abrirOpinionPublica() {
+    _opPublicaEstrellas = 0;
+    document.getElementById('opPublicaNombre').value = '';
+    document.getElementById('opPublicaEdad').value = '';
+    document.getElementById('opPublicaTexto').value = '';
+    document.querySelectorAll('#opPublicaStars .encuesta-star').forEach(s => s.classList.remove('activa'));
+    document.getElementById('modalOpinionPublica').classList.add('visible');
+  }
+
+  function seleccionarEstrellaPublica(n) {
+    _opPublicaEstrellas = n;
+    document.querySelectorAll('#opPublicaStars .encuesta-star').forEach((s, i) => {
+      s.classList.toggle('activa', i < n);
+    });
+  }
+
+  async function enviarOpinionPublica() {
+    const nombre = (document.getElementById('opPublicaNombre').value || '').trim();
+    const edad = parseInt(document.getElementById('opPublicaEdad').value) || null;
+    const texto = (document.getElementById('opPublicaTexto').value || '').trim();
+    if (!nombre) { showToast('Pon tu nombre para enviar la opinión'); return; }
+    if (_opPublicaEstrellas === 0) { showToast('Selecciona una valoración con las estrellas'); return; }
+    const inicial = nombre.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    const nombrePublico = (() => {
+      const parts = nombre.trim().split(' ');
+      return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : parts[0];
+    })();
+    const { error } = await supa.from('testimonios').insert({
+      nombre: nombrePublico,
+      inicial,
+      edad,
+      plan: null,
+      estrellas: _opPublicaEstrellas,
+      texto: texto || null
+    });
+    if (error) {
+      console.error('Error guardando opinión:', error);
+      showToast('No se pudo enviar la opinión. Inténtalo de nuevo.', 4000);
+      return;
+    }
+    showToast('Opinión enviada. Gracias por tu tiempo.');
+    document.getElementById('modalOpinionPublica').classList.remove('visible');
+    notificarAdmin('opinion', { nombre: nombrePublico, estrellas: _opPublicaEstrellas, texto: texto || '(sin texto)' });
+    cargarTestimoniosLanding();
+  }
+
+  // ===== TESTIMONIALES: CARGA DINÁMICA DESDE SUPABASE =====
+  function _mostrarTestimoniosVacios() {
+    const carousel = document.getElementById('testimonialsCarousel');
+    const empty = document.getElementById('testimonialsEmpty');
+    if (carousel) carousel.style.display = 'none';
+    if (empty) empty.style.display = '';
+  }
+
+  async function cargarTestimoniosLanding() {
+    const track = document.getElementById('testimonialsTrack');
+    if (!track) return;
+    try {
+      const { data, error } = await supa
+        .from('testimonios')
+        .select('nombre, inicial, edad, plan, estrellas, texto')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      // Antes, si no había opiniones reales todavía se rellenaba con 5
+      // testimonios inventados (mismo diseño de tarjeta, sin ningún
+      // distintivo) — contradecía el propio texto de la sección ("sin
+      // inventar") y es justo el tipo de reseña falsa que la Directiva UE
+      // 2019/2161 prohíbe expresamente. Ahora, sin datos reales, se usa
+      // siempre el estado vacío honesto que ya existía en el código.
+      if (!data || !data.length) {
+        _mostrarTestimoniosVacios();
+        _actualizarReviewSchema(null);
+        return;
+      }
+      _actualizarReviewSchema(data);
+      const carousel = document.getElementById('testimonialsCarousel');
+      const empty = document.getElementById('testimonialsEmpty');
+      if (carousel) carousel.style.display = '';
+      if (empty) empty.style.display = 'none';
+      track.innerHTML = data.map(t => {
+        const estrellas = '★'.repeat(Math.max(1, Math.min(5, t.estrellas || 5))) +
+                          '☆'.repeat(5 - Math.max(1, Math.min(5, t.estrellas || 5)));
+        // t.nombre/t.inicial pueden venir de cualquiera (el formulario público
+        // de opinión no exige login) -- antes se volcaban sin escapar, XSS
+        // almacenado explotable contra cualquier visitante de la landing.
+        const quoteHTML = t.texto ? `<p class="testimonial-quote">"${_esc(t.texto)}"</p>` : '';
+        const planSafe = t.plan ? _esc(t.plan) : '';
+        const roleText = [t.edad ? `${parseInt(t.edad) || t.edad} años` : '', planSafe ? `<b>${planSafe}</b>` : ''].filter(Boolean).join(' · ');
+        const nombreSafe = _esc(t.nombre || 'Cliente');
+        const inicialSafe = _esc((t.inicial || t.nombre?.[0] || '?').toUpperCase());
+        return `<div class="testimonial-card">
+          <div class="testimonial-stars">${estrellas}</div>
+          ${quoteHTML}
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">${inicialSafe}</div>
+            <div>
+              <div class="testimonial-name">${nombreSafe}</div>
+              <div class="testimonial-role">${roleText}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      _mostrarTestimoniosVacios();
+      _actualizarReviewSchema(null);
+    }
+  }
+
+  // Genera/actualiza (o retira) el JSON-LD de Review + AggregateRating del
+  // Product ya declarado en el @graph del <head> (mismo @id: se fusionan).
+  // Recibe SIEMPRE opiniones reales de Supabase o null — nunca el fallback.
+  function _actualizarReviewSchema(reviews) {
+    let el = document.getElementById('reviewSchemaLd');
+    if (!reviews || !reviews.length) {
+      if (el) el.remove();
+      return;
+    }
+    const nota = r => Math.max(1, Math.min(5, r.estrellas || 5));
+    const suma = reviews.reduce((s, r) => s + nota(r), 0);
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "@id": "https://k-one.fit/#product",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": (suma / reviews.length).toFixed(1),
+        "reviewCount": reviews.length,
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": reviews.slice(0, 20).map(r => ({
+        "@type": "Review",
+        "author": { "@type": "Person", "name": r.nombre || "Cliente" },
+        "reviewRating": { "@type": "Rating", "ratingValue": String(nota(r)), "bestRating": "5", "worstRating": "1" },
+        "reviewBody": r.texto || ""
+      }))
+    };
+    if (!el) {
+      el = document.createElement('script');
+      el.type = 'application/ld+json';
+      el.id = 'reviewSchemaLd';
+      document.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(schema);
+  }
+
   // ===== GUARDAR DATOS TRAS GENERAR PLAN =====
   // (integrado directamente en generatePlan, sin override)
 
@@ -20894,6 +21262,7 @@
 
   window.onload = async () => {
     _sincronizarPrecios();
+    cargarTestimoniosLanding();
     mostrarCookieBanner();
     updateProgress();
     document.getElementById('login-pass')?.addEventListener('keydown', e => { if(e.key==='Enter') login(); });
