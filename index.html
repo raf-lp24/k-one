@@ -10763,6 +10763,44 @@
       return copia;
     }
 
+    // SEGUNDA VUELTA al mismo problema (agosto 2026). barajarDia() por sí solo
+    // arregló el bug del giro fijo, pero barajaba CADA DÍA por separado: eso es
+    // sortear 7 veces de forma independiente, así que por pura probabilidad unos
+    // platos salían 5-6 de los 7 días y otros no salían ninguno. Medido en real
+    // sobre 5 perfiles: el plato más repetido aparecía hasta 6 días de 7, y en
+    // algunos perfiles solo había 4 platos distintos en la posición por defecto
+    // de toda la semana -- justo la sensación de "siempre lo mismo" que se
+    // quería evitar.
+    //
+    // Esto reparte como se reparten las cartas: se baraja el pool entero y se
+    // van dando 5 por día SIN reemplazo; cuando se acaba la baraja se rebaraja
+    // (con otra semilla) y se sigue. Así cada plato sale su turno completo antes
+    // de que ninguno repita, el reparto queda parejo (con 15 recetas y 5/día,
+    // cada plato sale 2-3 veces en la semana en vez de 0 o 6), y los días
+    // consecutivos no comparten platos mientras dure la vuelta.
+    function repartirDia(arr, seedBase, dia, n) {
+      if (!arr || arr.length === 0) return arr;
+      if (arr.length <= n) return barajarDia(arr, seedBase + dia);
+      const N = arr.length;
+      const out = [];
+      let pos = dia * n;
+      let rondaActual = -1, perm = null;
+      // El guard corta cualquier caso raro (pool con duplicados reales) sin
+      // colgar el bucle: si no encuentra n distintos, devuelve los que haya.
+      let guard = 0;
+      while (out.length < n && guard < N * 4) {
+        const ronda = Math.floor(pos / N);
+        if (ronda !== rondaActual) { rondaActual = ronda; perm = barajarDia(arr, seedBase + ronda * 7919); }
+        const cand = perm[pos % N];
+        // Al cambiar de vuelta, el último plato de una y el primero de la
+        // siguiente pueden coincidir: sin esto, saldría dos veces el mismo
+        // plato dentro del MISMO día.
+        if (cand && out.indexOf(cand) === -1) out.push(cand);
+        pos++; guard++;
+      }
+      return out;
+    }
+
     // BIENVENIDA personalizada
     let bienvenida = '';
     if (soloDieta) {
@@ -13236,7 +13274,10 @@
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
         ...m,
-        opciones: barajarDia(m.opciones, semilla + i * 3 + periodoRot * 5 + dia * 31).slice(0, 5)
+        // La semilla ya NO lleva el día: repartirDia() reparte la semana entera
+        // desde una única baraja por toma (ver su comentario), y es él quien usa
+        // el día como posición dentro del reparto.
+        opciones: repartirDia(m.opciones, semilla + i * 3 + periodoRot * 5, dia, 5)
       })));
     }
 
