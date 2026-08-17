@@ -238,7 +238,7 @@
   /* 2. FONDOS principales */
   [data-theme="light"], [data-theme="light"] body { background: #F8F6F3 !important; }
   [data-theme="light"] .dash-sidebar { background: #FFF !important; border-right: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .dash-section, [data-theme="light"] .dash-main, [data-theme="light"] .dash-content { background: #F8F6F3 !important; }
+  [data-theme="light"] .dash-section, [data-theme="light"] .dash-main { background: #F8F6F3 !important; }
   [data-theme="light"] .dash-header, [data-theme="light"] .motivation-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .stat-card { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
   [data-theme="light"] .nav { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #E0DCD5 !important; }
@@ -300,7 +300,7 @@
   [data-theme="light"] .meal-option.selected { border-color: #E8490F !important; background: rgba(232,73,15,0.04) !important; }
 
   /* 9. OTROS */
-  [data-theme="light"] .photo-slot, [data-theme="light"] .fotos-slot { background: #F0ECE6 !important; border: 1px dashed #D5D0C8 !important; }
+  [data-theme="light"] .photo-slot { background: #F0ECE6 !important; border: 1px dashed #D5D0C8 !important; }
   [data-theme="light"] .milestone { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
   [data-theme="light"] .entreno-completado-badge { background: rgba(39,174,96,0.08) !important; }
   [data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.35) !important; }
@@ -327,7 +327,6 @@
   [data-theme="light"] .peso-btn, [data-theme="light"] .stepper-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
   [data-theme="light"] .peso-btn:hover, [data-theme="light"] .stepper-btn:hover { background: #D5D0C8 !important; }
   [data-theme="light"] .peso-input, [data-theme="light"] .stepper-input { background: #FFF !important; color: #1A1A1A !important; }
-  [data-theme="light"] .peso-display { color: #1A1A1A !important; }
   [data-theme="light"] .cp-peso-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
   [data-theme="light"] .cp-peso-btn:hover { background: #D5D0C8 !important; }
   [data-theme="light"] .macro-bar-track { background: #E0DCD5 !important; }
@@ -341,7 +340,6 @@
   [data-theme="light"] .meal-block-header:hover { background: #F0ECE6 !important; }
   [data-theme="light"] .meal-option:hover { background: #F8F6F3 !important; transform: translateY(-1px); }
   [data-theme="light"] .meal-preview-pill:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .day-block-header:hover { background: #F0ECE6 !important; }
   [data-theme="light"] .week-day-row:hover { background: #F8F6F3 !important; }
   [data-theme="light"] .radio-opt:hover { background: #EDE9E3 !important; }
   [data-theme="light"] .contacto-motivo:hover { background: #EDE9E3 !important; }
@@ -367,13 +365,11 @@
   [data-theme="light"] .form-nav { background: #FFF !important; border-top-color: #E0DCD5 !important; }
   [data-theme="light"] .form-sidebar { background: #FFF !important; }
   [data-theme="light"] .form-main { background: #F8F6F3 !important; }
-  [data-theme="light"] .form-step-dot.active { background: #E8490F !important; }
   [data-theme="light"] .form-progress-mobile { color: #5A5A5A !important; }
   [data-theme="light"] .landing-nav { background: rgba(255,255,255,0.97) !important; border-bottom-color: #E0DCD5 !important; }
   [data-theme="light"] .nav-link { color: #5A5A5A !important; }
   [data-theme="light"] .nav-link:hover { color: #E8490F !important; }
   [data-theme="light"] .testimonial-card { background: #FFF !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .step-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .sport-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .price-card { border-color: #E0DCD5 !important; }
   [data-theme="light"] .price-card.featured { border-color: #E8490F !important; }
@@ -384,8 +380,6 @@
   [data-theme="light"] .philosophy-quote { color: #1A1A1A !important; }
   [data-theme="light"] .week-preview-note { border-left-color: #E0DCD5 !important; color: #5A5A5A !important; }
   [data-theme="light"] .week-day-row.today { background: rgba(232,73,15,0.04) !important; }
-  [data-theme="light"] .entreno-hoy-plan { color: #1A1A1A !important; }
-  [data-theme="light"] .recetario-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .lead-magnet-form input { background: #FFF !important; border-color: #D5D0C8 !important; color: #1A1A1A !important; }
   [data-theme="light"] .modal-box { background: #FFF !important; }
 
@@ -1550,41 +1544,6 @@
     color: var(--metal-claro);
   }
 
-  .mock-chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 52px;
-    margin-top: 4px;
-  }
-
-  .mock-bar {
-    flex: 1;
-    background: var(--humo);
-    border-radius: 3px 3px 0 0;
-    position: relative;
-  }
-  .mock-bar--active { background: var(--brasa); }
-
-  .mock-bar span {
-    position: absolute;
-    bottom: -14px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 8px;
-    color: var(--metal);
-    font-family: 'DM Mono', monospace;
-  }
-
-  .mock-chart-label {
-    margin-top: 18px;
-    font-size: 9.5px;
-    color: var(--metal-claro);
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-  }
-
   .mock-adapt {
     margin-top: 8px;
     padding: 7px 9px;
@@ -2419,15 +2378,6 @@
   .legal-section li { margin-bottom: 6px; }
   .legal-section strong { color: var(--blanco); }
   .legal-section a { color: var(--brasa); text-decoration: underline; }
-  .legal-placeholder {
-    background: var(--grafito);
-    border: 1px dashed var(--humo);
-    color: var(--metal-claro);
-    padding: 1px 6px;
-    border-radius: 2px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-  }
 
   /* ===================== FORMULARIO ===================== */
   #formulario {
@@ -2748,19 +2698,6 @@
   .field input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
   /* SLIDERS (datos físicos) */
-  .field-slider-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-
-  .slider-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 1px;
-    color: var(--brasa);
-    text-transform: none;
-  }
 
   .stepper-wrap {
     display: flex;
@@ -2899,7 +2836,7 @@
     border-left: 2px solid var(--humo);
   }
 
-  .radio-group, .checkbox-group {
+  .radio-group {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -3678,11 +3615,6 @@
   .ejercicio-fila:last-child { border-bottom: none; }
 
   /* Texto del ejercicio y su botón "i", en la misma línea */
-  .ejercicio-fila-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
   .ejercicio-fila-texto { flex: 1; min-width: 0; }
   /* Chip "Cómo se hace": va inline tras el nombre del ejercicio. Con etiqueta
      visible porque el icono suelto pasaba desapercibido. */
@@ -4019,17 +3951,6 @@
   }
 
   /* INGREDIENTE */
-  .ingredient-tag {
-    display: inline-block;
-    background: var(--acero);
-    border: 1px solid var(--humo);
-    padding: 2px 8px;
-    font-size: 11px;
-    color: var(--blanco);
-    margin: 2px 2px 2px 0;
-    line-height: 1.6;
-  }
-
   /* TOUR DE BIENVENIDA */
   .onboarding-modal {
     position: fixed;
@@ -4153,14 +4074,6 @@
     background: var(--carbon);
     padding: 3px 8px;
     text-transform: uppercase;
-  }
-
-  .meal-opt-prep {
-    font-size: 10px;
-    color: var(--metal);
-    font-style: italic;
-    margin-top: 8px;
-    line-height: 1.4;
   }
 
   /* Modo "ocultar calorías": esconde calorías y macros en toda el área de
@@ -4884,9 +4797,6 @@
     .mock-card-title { font-size: 7px; margin-bottom: 5px; }
     .mock-row { font-size: 8px; gap: 4px; padding: 3px 0; }
     .mock-macros { font-size: 7px; margin-top: 5px; padding-top: 5px; }
-    .mock-chart { height: 40px; gap: 3px; }
-    .mock-bar span { font-size: 6px; bottom: -11px; }
-    .mock-chart-label { font-size: 8px; margin-top: 13px; }
     .mock-adapt { font-size: 8px; padding: 5px 7px; margin-top: 6px; }
   }
 
@@ -8299,6 +8209,19 @@
   // nada. Esta función SÍ tiene acceso de cierre de verdad, así que expone un
   // setter real. No se usa en ningún flujo de la app normal.
   function _testSetGeneratedPlan(p) { generatedPlan = p; }
+  // Mismo problema, mismo remedio, para el resto del estado que necesita el test
+  // de la lista de la compra (userData/comidasSemana/comidasSeleccionadas/
+  // diaNutriActual son todos "let" de ámbito de script). Sin esto, ese test
+  // funcionaba de rebote: no fijaba nada de verdad y solo se salvaba porque el
+  // bloque de Recetario, que corre antes, dejaba generatedPlan puesto -- es
+  // decir, medía un plan distinto del que creía y se habría quedado sin
+  // comprobar nada si ese bloque cambiara de orden o dejara de ejecutarse.
+  function _testSetEstadoNutricion({ userData: ud, comidasSemana: cs, comidasSeleccionadas: csel, diaNutriActual: dia }) {
+    if (ud !== undefined) userData = ud;
+    if (cs !== undefined) comidasSemana = cs;
+    if (csel !== undefined) comidasSeleccionadas = csel;
+    if (dia !== undefined) diaNutriActual = dia;
+  }
   let comidasSeleccionadas = []; // índice de la opción elegida por comida (0-4) para el día actual
   let comidasSemana = []; // 7 arrays (L-D), cada uno con 5 índices (una por toma)
   let diaNutriActual = 0; // 0=L, 1=M, ... 6=D
@@ -9273,11 +9196,6 @@
       .toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
       .trim();
-  }
-
-  function getPesoEjercicio(key) {
-    const entry = userData.pesosEjercicios?.[key];
-    return entry ? entry.peso : null;
   }
 
   // Genera las barras del mini-historial (versión pequeña de la de "Mi progreso")
@@ -13654,18 +13572,6 @@
     return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
-  // Pone en mayúscula la primera palabra alfabética de un ingrediente,
-  // ignorando cantidades/unidades iniciales (ej: "80g avena" -> "80g Avena")
-  function capitalizarIngrediente(s) {
-    const partes = s.split(' ');
-    for (let i = 0; i < partes.length; i++) {
-      if (/^[a-záéíóúñ]+$/i.test(partes[i])) {
-        partes[i] = partes[i].charAt(0).toUpperCase() + partes[i].slice(1);
-        break;
-      }
-    }
-    return partes.join(' ');
-  }
 
   // Si el cliente eligió rotación semanal/mensual y ha entrado en un periodo nuevo,
   // regenera el plan para renovar los platos y le hace "rehacer" la semana. Guarda el
@@ -14835,25 +14741,6 @@
     document.getElementById('kcalDiarioProt').textContent = `Prot: ${totalProt}g`;
     document.getElementById('kcalDiarioCarbs').textContent = `Carbs: ${totalCarbs}g`;
     document.getElementById('kcalDiarioGrasa').textContent = `Grasa: ${totalGrasa}g`;
-  }
-
-  // ===== CALCULADORA 1RM (Epley) =====
-  function calcular1RM() {
-    const peso = parseFloat(document.getElementById('rm1Peso').value);
-    const reps = parseInt(document.getElementById('rm1Reps').value);
-    const resEl = document.getElementById('rm1Result');
-    const tablaEl = document.getElementById('rm1Tabla');
-    if (!peso || !reps || peso <= 0 || reps <= 0) { resEl.textContent = '—'; tablaEl.style.display = 'none'; return; }
-    if (reps === 1) { resEl.textContent = peso + ' kg'; tablaEl.style.display = 'none'; return; }
-    const rm = Math.round(peso * (1 + reps / 30));
-    resEl.textContent = rm + ' kg';
-    tablaEl.style.display = 'block';
-    tablaEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:6px">PORCENTAJES DE TU 1RM</div>' +
-      [100,95,90,85,80,75,70,65,60].map(p => {
-        const kg = Math.round(rm * p / 100);
-        const r = p === 100 ? '1' : p >= 95 ? '1-2' : p >= 90 ? '3-4' : p >= 85 ? '5-6' : p >= 80 ? '7-8' : p >= 75 ? '9-10' : p >= 70 ? '11-12' : p >= 65 ? '13-15' : '15+';
-        return `<span style="display:inline-block;background:var(--grafito);padding:3px 8px;border-radius:4px;margin:2px">${p}% = <strong style="color:var(--blanco)">${kg}kg</strong> · ${r} reps</span>`;
-      }).join(' ');
   }
 
   // ===== COMPARTIR PROGRESO =====
@@ -18871,8 +18758,6 @@
   // ===== JARVIS — PANEL DE ADMIN =====
   // El estado de admin lo confirma el backend (api/is-admin) — nunca el frontend.
   let _adminVerificado = false;
-
-  function esAdmin() { return _adminVerificado; }
 
   function actualizarBtnAdmin() {
     const btn = document.getElementById('btnPanelAdmin');

@@ -308,15 +308,34 @@ async function correr() {
   // ───────────────────────── E. LISTA DE LA COMPRA: categorización ─────────────────────────
   {
     const u = perfilBase({ email: 'test-lista@x.com' });
-    win.userData = u;
-    win.generatedPlan = win.buildPlanFromData(u);
-    win.comidasSemana = [];
-    win.comidasSeleccionadas = [0, 0, 0, 0, 0];
-    win.diaNutriActual = 0;
+    // OJO -- win.userData / win.generatedPlan / win.comidasSemana... NO llegan a
+    // las variables reales (son "let" de ámbito de script, igual que el caso ya
+    // documentado arriba en el test de Recetario). Con las asignaciones a
+    // window, este test solo funcionaba de rebote: generarListaCompra() salía
+    // por su primera línea (if (!generatedPlan?.nutricion) return) y lo único
+    // que lo salvaba era que el bloque de Recetario, que corre justo antes,
+    // dejaba generatedPlan puesto -- así que medía un plan distinto del de este
+    // perfil, y se habría quedado sin comprobar NADA si ese bloque cambiara de
+    // orden o fallara. Ahora se fija el estado con setters reales.
+    win._testSetGeneratedPlan(win.buildPlanFromData(u));
+    win._testSetEstadoNutricion({
+      userData: u,
+      comidasSemana: [],
+      comidasSeleccionadas: [0, 0, 0, 0, 0],
+      diaNutriActual: 0,
+    });
     let modal;
     try {
       win.generarListaCompra();
-      modal = win.document.body.lastElementChild;
+      const ultimo = win.document.body.lastElementChild;
+      // Red de seguridad: solo vale si de verdad se pintó el modal de la lista.
+      // Antes se cogía body.lastElementChild a secas, que si no se pintaba nada
+      // devolvía el <script> final y el test seguía "pasando" sobre la nada.
+      modal = ultimo && ultimo.classList.contains('modal-overlay') ? ultimo : null;
+      if (!modal) {
+        test('Lista de la compra', 'generarListaCompra() pinta el modal de la lista', false,
+          `No se pintó ningún modal (último elemento: <${ultimo ? ultimo.tagName.toLowerCase() : 'ninguno'}>).`);
+      }
     } catch (e) {
       test('Lista de la compra', 'generarListaCompra() no lanza error', false, e.message);
     }
