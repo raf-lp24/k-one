@@ -9153,6 +9153,27 @@
   // de ningún ejercicio, así que ninguna otra regla de la tabla lo toca).
   // Segunda pasada: los marcadores se cambian por el texto final con un
   // simple split/join, sin regex, así que no hay una tercera vuelta posible.
+  // Las regex de la tabla cazan el PRINCIPIO del nombre de un ejercicio, no el
+  // nombre entero, así que el trozo que queda detrás puede repetir lo que el
+  // reemplazo ya trae. Detectado escaneando 720 planes reales (5 deportes × 3
+  // niveles × 3 frecuencias × 2 objetivos × 8 semanas), donde salían:
+  //   · "Press con mancuernas mancuernas"  (/press inclinado/ sobre
+  //     "press inclinado mancuernas" → "Press con mancuernas" + " mancuernas")
+  //   · "Peso muerto rumano rumano"        (/peso muerto\b/ sobre
+  //     "Peso muerto rumano" → "Peso muerto rumano" + " rumano")
+  //   · "Step-ups con mancuernas con mancuernas"  (/zancadas?/ sobre
+  //     "Zancadas con mancuernas")
+  // Se limpia aquí, en el único punto por el que pasan todas las rotaciones, en
+  // vez de retocar a mano las ~40 regex de la tabla: así también quedan cubiertas
+  // las combinaciones que aparezcan al añadir ejercicios nuevos más adelante.
+  const _limpiarDuplicadosRotacion = (texto) => {
+    return texto
+      // "con mancuernas con mancuernas" → "con mancuernas"
+      .replace(/\b((?:con|en|de)\s+[a-záéíóúüñ]+)\s+\1\b/gi, '$1')
+      // "mancuernas mancuernas" / "rumano rumano" → una sola vez. Mínimo 4
+      // letras para no tocar números, series ("3×10 10") ni palabras cortas.
+      .replace(/\b([a-záéíóúüñ]{4,})(?:\s+\1\b)+/gi, '$1');
+  };
   const _aplicarRotacionAutomatica = (texto, tabla) => {
     if (!tabla.length || !texto) return texto;
     let out = texto;
@@ -9163,7 +9184,7 @@
     // podía chocar con el marcador de otra regla.
     tabla.forEach(([regex], i) => { out = out.replace(regex, `@@ROT${i}@@`); });
     tabla.forEach(([, reemplazo], i) => { out = out.split(`@@ROT${i}@@`).join(reemplazo); });
-    return out;
+    return _limpiarDuplicadosRotacion(out);
   };
   const _escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
