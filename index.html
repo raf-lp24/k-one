@@ -139,7 +139,7 @@
         {
           "@type": "Question",
           "name": "¿Puedo contratar solo nutrición sin entrenamiento?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Existe el plan 'Solo nutrición' por 4,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Existe el plan 'Solo nutrición' por 4,99€/mes. Recibes un plan de alimentación personalizado con hasta 5 tomas y 5 opciones por comida (según cuántas veces comes al día), adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento." }
         },
         {
           "@type": "Question",
@@ -5501,7 +5501,7 @@
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
-      <label>Nombre y apellidos</label>
+      <label for="reg-nombre">Nombre y apellidos</label>
       <div class="auth-field-wrap">
         <input type="text" id="reg-nombre" placeholder="Ej: Carlos García López" autocomplete="name"
           oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
@@ -5511,7 +5511,7 @@
     <div class="auth-error" id="err-nombre">Introduce tu nombre y apellidos</div>
 
     <div class="auth-field">
-      <label>Email</label>
+      <label for="reg-email">Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="reg-email" name="username" placeholder="tu@email.com" autocomplete="username"
           oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
@@ -5521,7 +5521,7 @@
     <div class="auth-error" id="err-email">Introduce un email válido</div>
 
     <div class="auth-field">
-      <label>Contraseña</label>
+      <label for="reg-pass">Contraseña</label>
       <div class="auth-field-wrap">
         <input type="password" id="reg-pass" name="password" placeholder="Mínimo 8 caracteres, incluye un número" autocomplete="new-password"
           oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
@@ -5532,7 +5532,7 @@
     <div class="auth-error" id="err-pass">Mínimo 8 caracteres y al menos 1 número</div>
 
     <div class="auth-field">
-      <label>Confirmar contraseña</label>
+      <label for="reg-pass2">Confirmar contraseña</label>
       <div class="auth-field-wrap">
         <input type="password" id="reg-pass2" name="confirm-password" placeholder="Repite la contraseña" autocomplete="new-password"
           oninput="validarCampoReg('pass2')" onblur="validarCampoReg('pass2')">
@@ -5567,6 +5567,16 @@
     </label>
     <div class="auth-error" id="err-datosSalud">Debes consentir el tratamiento de tus datos de salud para continuar</div>
 
+    <!-- Los Términos (sección 3.2) exigen ser mayor de 18 años, pero hasta ahora
+         no había ningún control real que lo hiciera cumplir -- solo se aceptaba
+         un checkbox genérico de T&C. Misma casilla y misma validación que
+         términos/datosSalud, para no inventar un patrón nuevo. -->
+    <label class="auth-check">
+      <input type="checkbox" id="reg-mayorEdad">
+      <span class="auth-check-label">Confirmo que soy mayor de 18 años.</span>
+    </label>
+    <div class="auth-error" id="err-mayorEdad">Debes confirmar que eres mayor de 18 años para continuar</div>
+
     <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
     </form>
     <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
@@ -5584,7 +5594,7 @@
 
     <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
     <div class="auth-field">
-      <label>Email</label>
+      <label for="login-email">Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="login-email" name="username" placeholder="tu@email.com" autocomplete="username"
           oninput="if(typeof validarCampoLogin==='function')validarCampoLogin('email')" onblur="if(typeof validarCampoLogin==='function')validarCampoLogin('email')">
@@ -5594,7 +5604,7 @@
     <div class="auth-error" id="err-login-email">Email no encontrado</div>
 
     <div class="auth-field">
-      <label>Contraseña</label>
+      <label for="login-pass">Contraseña</label>
       <input type="password" id="login-pass" name="password" placeholder="Tu contraseña" autocomplete="current-password">
     </div>
     <div class="auth-error" id="err-login-pass">Contraseña incorrecta</div>
@@ -5609,13 +5619,13 @@
 <!-- MODAL RECUPERAR CONTRASEÑA -->
 <div class="modal-overlay" id="modalForgot">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeForgotModal()">✕</button>
+    <button class="modal-close" onclick="closeForgotModal()" aria-label="Cerrar">✕</button>
     <div class="modal-title">Recuperar acceso</div>
 
     <div id="forgotStep1">
       <p class="modal-desc">Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
       <div class="auth-field">
-        <label>Email</label>
+        <label for="forgot-email">Email</label>
         <input type="email" id="forgot-email" placeholder="tu@email.com">
       </div>
       <div class="auth-error" id="err-forgot-email">Introduce un email válido</div>
@@ -5625,12 +5635,12 @@
     <div id="forgotStep2" style="display:none">
       <p class="modal-desc">Elige una nueva contraseña para tu cuenta.</p>
       <div class="auth-field">
-        <label>Nueva contraseña</label>
+        <label for="forgot-newpass">Nueva contraseña</label>
         <input type="password" id="forgot-newpass" placeholder="Mínimo 8 caracteres, incluye un número">
       </div>
       <div class="auth-error" id="err-forgot-newpass">Mínimo 8 caracteres y al menos 1 número</div>
       <div class="auth-field">
-        <label>Repite la contraseña</label>
+        <label for="forgot-newpass2">Repite la contraseña</label>
         <input type="password" id="forgot-newpass2" placeholder="Repite tu nueva contraseña">
       </div>
       <div class="auth-error" id="err-forgot-newpass2">Las contraseñas no coinciden</div>
@@ -5646,7 +5656,7 @@
 <!-- MODAL RECETARIO COMPLETO -->
 <div class="modal-overlay" id="modalRecetario" onclick="if(event.target===this)cerrarRecetario()">
   <div class="modal-box modal-box-recetario">
-    <button class="modal-close" onclick="cerrarRecetario()">✕</button>
+    <button class="modal-close" onclick="cerrarRecetario()" aria-label="Cerrar">✕</button>
     <div style="margin-bottom:20px">
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
@@ -5662,7 +5672,7 @@
   <div class="modal-box">
     <!-- Solo visible en renovación VOLUNTARIA (el cliente aún tiene acceso). El paywall
          obligatorio de fin de período no muestra esta X. -->
-    <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()">✕</button>
+    <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()" aria-label="Cerrar">✕</button>
     <div class="modal-title" id="paywallTitulo">Tu mes de prueba ha terminado</div>
     <p class="modal-desc" id="paywallDesc">Has disfrutado de K-One por 1,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
     <!-- Modo "primer mes": oferta de 1,99€. El cliente elige aquí mismo a qué
@@ -5975,7 +5985,7 @@
 <!-- MODAL CAMBIAR OBJETIVO / DEPORTE -->
 <div class="modal-overlay" id="modalCambiarPlan">
   <div class="modal-box modal-box-wide">
-    <button class="modal-close" onclick="closeCambiarPlanModal()">✕</button>
+    <button class="modal-close" onclick="closeCambiarPlanModal()" aria-label="Cerrar">✕</button>
     <div id="cpStep1">
     <div class="modal-title">Cambiar tu plan</div>
     <p class="modal-desc">¿Quieres cambiar de objetivo, deporte o cualquier otra preferencia? Actualiza lo que necesites y recalculamos al momento tu entrenamiento, tu nutrición y tu plan semanal. Los entrenamientos ya completados esta semana se conservan en tu racha.</p>
@@ -6130,7 +6140,7 @@
      ese día hasta que el cliente lo quite. -->
 <div class="modal-overlay" id="modalAnadirEjercicio">
   <div class="modal-box" style="max-width:420px">
-    <button class="modal-close" onclick="cerrarAnadirEjercicio()">✕</button>
+    <button class="modal-close" onclick="cerrarAnadirEjercicio()" aria-label="Cerrar">✕</button>
     <div class="modal-title" style="font-size:20px">Añadir ejercicio</div>
     <p class="modal-desc">Se repetirá cada semana este día hasta que lo quites.</p>
     <div class="auth-field" style="position:relative">
@@ -6244,7 +6254,7 @@
 <!-- MODAL AÑADIR TU COMIDA (opción propia, macros reales de la tabla USDA) -->
 <div class="modal-overlay" id="modalAnadirComida" onclick="if(event.target===this)cerrarAnadirComida()">
   <div class="modal-box" style="max-width:560px;max-height:84vh;display:flex;flex-direction:column">
-    <button class="modal-close" onclick="cerrarAnadirComida()">✕</button>
+    <button class="modal-close" onclick="cerrarAnadirComida()" aria-label="Cerrar">✕</button>
     <div class="modal-title" style="font-size:20px">Añade tu comida</div>
     <p class="modal-desc" style="margin-bottom:12px">Busca el alimento, ajusta la cantidad y tócalo para añadirlo como una opción más de esta toma. Los macros salen de la tabla oficial de la USDA, igual que el resto del plan.</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -6264,7 +6274,7 @@
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
-    <button class="modal-close" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')">✕</button>
+    <button class="modal-close" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')" aria-label="Cerrar">✕</button>
     <div class="modal-title" style="font-size:20px" id="infoEjercicioTitulo">Ejercicio</div>
     <div id="infoEjercicioFotos" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin:14px 0 8px">MÚSCULOS TRABAJADOS</div>
@@ -6593,7 +6603,7 @@
 
   <section class="pillars" id="transparencia">
     <div class="section-header">
-      <h2 class="section-title">Cómo funciona la IA</h2>
+      <h2 class="section-title">Cómo se genera tu plan</h2>
       <p class="section-note">No inventamos. Cada decisión del plan tiene un porqué basado en ciencia real del entrenamiento.</p>
     </div>
     <div class="pillars-grid">
@@ -6662,7 +6672,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Puedo contratar solo nutrición sin entrenamiento?</summary>
-        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 4,99€/mes. Recibes un plan de alimentación personalizado con 5 tomas y 5 opciones por comida, adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
+        <p class="faq-a">Sí. Existe el plan "Solo nutrición" por 4,99€/mes. Recibes un plan de alimentación personalizado con hasta 5 tomas y 5 opciones por comida (según cuántas veces comes al día), adaptado a tus objetivos, alergias y gustos. Sin plan de entrenamiento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Con qué frecuencia se actualiza el plan?</summary>
@@ -6739,7 +6749,7 @@
         <p class="price-desc">Solo alimentación. Sin entrenamiento. Para quien ya entrena con su entrenador, box o club — incluido CrossFit e Hyrox.</p>
         <ul class="price-features">
           <li>Plan nutricional 100% personalizado</li>
-          <li>5 opciones por comida, 5 tomas</li>
+          <li>Hasta 5 tomas al día, 5 opciones por comida</li>
           <li>Adaptado a alergias y objetivos</li>
           <li>Macros y calorías calculados</li>
           <li>Sin plan de entrenamiento</li>
@@ -6773,7 +6783,7 @@
             <path d="M8 11 V7 a4 4 0 0 1 8 0 v4"/>
           </svg>
         </span>
-        Tus datos nunca se comparten
+        Nunca vendemos tus datos
       </span>
     </div>
   </section>
@@ -7064,16 +7074,16 @@
         </div>
         <div class="form-grid">
           <div class="field">
-            <label>Edad</label>
+            <label for="edad">Edad</label>
             <div class="stepper-wrap">
-              <button class="stepper-btn" onclick="stepVal('edad',-1)">−</button>
+              <button class="stepper-btn" onclick="stepVal('edad',-1)" aria-label="Restar edad">−</button>
               <input type="number" id="edad" min="14" max="80" value="28" class="stepper-input" oninput="updateBmrPanel()">
               <span class="stepper-unit">años</span>
-              <button class="stepper-btn" onclick="stepVal('edad',1)">+</button>
+              <button class="stepper-btn" onclick="stepVal('edad',1)" aria-label="Sumar edad">+</button>
             </div>
           </div>
           <div class="field">
-            <label>Sexo</label>
+            <label for="sexo">Sexo</label>
             <select id="sexo" onchange="updateBmrPanel()">
               <option value="">Selecciona</option>
               <option>Hombre</option>
@@ -7082,22 +7092,22 @@
             </select>
           </div>
           <div class="field">
-            <label>Peso actual</label>
+            <label for="peso">Peso actual</label>
             <div class="stepper-wrap">
-              <button class="stepper-btn" onclick="stepVal('peso',-1)">−</button>
+              <button class="stepper-btn" onclick="stepVal('peso',-1)" aria-label="Restar peso">−</button>
               <input type="number" id="peso" min="40" max="180" value="75" step="0.5" class="stepper-input" oninput="updateBmrPanel()">
               <span class="stepper-unit">kg</span>
-              <button class="stepper-btn" onclick="stepVal('peso',1)">+</button>
+              <button class="stepper-btn" onclick="stepVal('peso',1)" aria-label="Sumar peso">+</button>
             </div>
             <span class="field-hint">Lo usamos para calcular tu metabolismo basal y ajustar las calorías de tu plan.</span>
           </div>
           <div class="field">
-            <label>Altura</label>
+            <label for="altura">Altura</label>
             <div class="stepper-wrap">
-              <button class="stepper-btn" onclick="stepVal('altura',-1)">−</button>
+              <button class="stepper-btn" onclick="stepVal('altura',-1)" aria-label="Restar altura">−</button>
               <input type="number" id="altura" min="140" max="210" value="175" class="stepper-input" oninput="updateBmrPanel()">
               <span class="stepper-unit">cm</span>
-              <button class="stepper-btn" onclick="stepVal('altura',1)">+</button>
+              <button class="stepper-btn" onclick="stepVal('altura',1)" aria-label="Sumar altura">+</button>
             </div>
           </div>
         </div>
@@ -8608,20 +8618,26 @@
       let valid = f.type === 'radio'
         ? !!el.querySelector('.selected')
         : el.value.toString().trim() !== '';
-      // Rangos biológicos para bloque 0
+      // Rangos biológicos para bloque 0 -- deben coincidir con los min/max reales
+      // del HTML (edad:7070, peso:7088, altura:7098). Antes eran mucho más anchos
+      // que los límites que los propios botones +/- del stepper nunca permitirían
+      // superar: un usuario que escribiera el valor a mano (en vez de usar +/-)
+      // podía colar un peso de 300kg o una edad de 15 años y pasar validación
+      // igualmente -- ese dato entra directo en el cálculo de TDEE/BMR
+      // (Mifflin-St Jeor) y desajusta todo el plan de calorías.
       if (valid && f.id === 'edad') {
-        const v = parseInt(el.value); valid = v >= 10 && v <= 100;
+        const v = parseInt(el.value); valid = v >= 14 && v <= 80;
       } else if (valid && f.id === 'peso') {
-        const v = parseFloat(el.value); valid = v >= 20 && v <= 400;
+        const v = parseFloat(el.value); valid = v >= 40 && v <= 180;
       } else if (valid && f.id === 'altura') {
-        const v = parseInt(el.value); valid = v >= 100 && v <= 250;
+        const v = parseInt(el.value); valid = v >= 140 && v <= 210;
       }
       el.classList.toggle('error', !valid);
       if (!valid && !firstInvalid) firstInvalid = el;
     });
 
     if (firstInvalid) {
-      const rangeErrors = { edad: 'Introduce una edad entre 10 y 100 años.', peso: 'Introduce un peso entre 20 y 400 kg.', altura: 'Introduce una altura entre 100 y 250 cm.' };
+      const rangeErrors = { edad: 'Introduce una edad entre 14 y 80 años.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
       showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
       firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
@@ -13872,7 +13888,11 @@
         // Plan solo nutrición: trazabilidad centrada en la alimentación, sin entrenamiento.
         razones.push('Plan de nutrición personalizado a partir de tu cuestionario');
         razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu peso, altura, edad y actividad`);
-        razones.push('5 tomas al día con 5 opciones cada una, ajustadas a tus cantidades');
+        {
+          const numTomas = (generatedPlan.nutricion || []).length || 5;
+          const numOpciones = generatedPlan.nutricion?.[0]?.opciones?.length || 5;
+          razones.push(`${numTomas} toma${numTomas !== 1 ? 's' : ''} al día con ${numOpciones} opciones cada una, ajustadas a tus cantidades`);
+        }
       } else if (semana <= 1) {
         razones.push(`Plan inicial personalizado basado en tu cuestionario de ${userData.deporte || 'entrenamiento'}`);
         razones.push(`Nivel ${(userData.nivel || '').split(',')[0].toLowerCase() || 'adaptado'} · ${userData.diasEntreno || '3'} días/semana · ${userData.lugar || 'tu zona'}`);
@@ -14315,7 +14335,9 @@
     // Subtítulo con objetivo calórico personalizado
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl && generatedPlan.kcalObj) {
-      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes 5 tomas con 5 opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
+      const numTomas = (generatedPlan.nutricion || []).length || 5;
+      const numOpciones = generatedPlan.nutricion?.[0]?.opciones?.length || 5;
+      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes ${numTomas} toma${numTomas !== 1 ? 's' : ''} con ${numOpciones} opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -17960,9 +17982,10 @@
     const pass2 = document.getElementById('reg-pass2').value;
     const terminos = document.getElementById('reg-terminos').checked;
     const datosSalud = document.getElementById('reg-datosSalud').checked;
+    const mayorEdad = document.getElementById('reg-mayorEdad').checked;
 
     // Limpiar errores
-    ['nombre','email','pass','pass2','terminos','datosSalud'].forEach(id => {
+    ['nombre','email','pass','pass2','terminos','datosSalud','mayorEdad'].forEach(id => {
       document.getElementById(`err-${id}`).classList.remove('visible');
       const input = document.getElementById(`reg-${id}`);
       if (input) input.classList.remove('error');
@@ -17998,6 +18021,10 @@
     }
     if (!datosSalud) {
       document.getElementById('err-datosSalud').classList.add('visible');
+      ok = false;
+    }
+    if (!mayorEdad) {
+      document.getElementById('err-mayorEdad').classList.add('visible');
       ok = false;
     }
 
@@ -18057,6 +18084,7 @@
     });
     document.getElementById('reg-terminos').checked = false;
     document.getElementById('reg-datosSalud').checked = false;
+    document.getElementById('reg-mayorEdad').checked = false;
 
     // Si el proyecto de Supabase exige confirmar el email, no hay sesión todavía:
     // avisamos y mandamos a login para que entre tras confirmar.

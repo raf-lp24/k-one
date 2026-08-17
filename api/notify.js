@@ -698,7 +698,7 @@ async function handlePost(req, res) {
               <!-- CTA -->
               <div style="padding:28px;text-align:center">
                 <a href="${APP_URL}?go=registro" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:16px 48px;font-size:16px;font-weight:700;letter-spacing:0.5px;border-radius:6px">EMPEZAR POR 1,99€ →</a>
-                <p style="color:#555;font-size:12px;margin:10px 0 0">Primer mes completo. Después 19,99€/mes. Cancelas cuando quieras.</p>
+                <p style="color:#555;font-size:12px;margin:10px 0 0">Primer mes completo. Después 7,99€/mes (o 4,99€/mes solo nutrición). Cancelas cuando quieras.</p>
               </div>
 
               <!-- Footer -->
@@ -756,7 +756,7 @@ async function handlePost(req, res) {
                     </td>
                     <td style="vertical-align:top;padding:16px 0;border-bottom:1px solid #1a1a1a">
                       <p style="margin:0 0 3px;font-weight:700;color:#fff;font-size:15px">Activa tu primer mes — 1,99€</p>
-                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Acceso completo. Después 19,99€/mes. Sin permanencia: cancelas con un clic.</p>
+                      <p style="margin:0;color:#888;font-size:13px;line-height:1.5">Acceso completo. Después 7,99€/mes (o 4,99€/mes solo nutrición). Sin permanencia: cancelas con un clic.</p>
                     </td>
                   </tr>
                   <tr>
