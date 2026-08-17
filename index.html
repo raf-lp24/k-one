@@ -4609,7 +4609,7 @@
     border-radius: 10px;
     border: 1px solid var(--humo);
   }
-  .nota-content { flex: 1; }
+  .nota-content { flex: 1; min-width: 0; }
   .nota-date {
     font-size: 11px;
     color: var(--brasa);
@@ -4618,7 +4618,9 @@
     margin-bottom: 6px;
   }
   .nota-text { font-size: 14px; line-height: 1.6; color: var(--blanco); white-space: pre-wrap; }
-  .nota-delete {
+
+  .nota-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+  .nota-delete, .nota-edit {
     background: transparent;
     border: 1px solid var(--humo);
     color: var(--metal);
@@ -4629,6 +4631,26 @@
     flex-shrink: 0;
   }
   .nota-delete:hover { border-color: var(--brasa); color: var(--brasa); }
+  .nota-edit:hover { border-color: var(--metal-claro); color: var(--blanco); }
+
+  .nota-edit-input {
+    width: 100%;
+    background: var(--grafito);
+    border: 1px solid var(--brasa);
+    border-radius: 8px;
+    color: var(--blanco);
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  .nota-edit-actions { display: flex; gap: 8px; }
 
   .notes-empty {
     color: var(--metal);
@@ -16252,6 +16274,7 @@
   }
 
   // ===== NOTAS / AGENDA =====
+  let _notaEditando = null;
   function renderNotas() {
     const list = document.getElementById('notasList');
     if (!list) return;
@@ -16263,15 +16286,55 @@
     list.innerHTML = notas.map((nota, idx) => {
       const fecha = new Date(nota.fecha);
       const fechaStr = `${String(fecha.getDate()).padStart(2,'0')}/${String(fecha.getMonth()+1).padStart(2,'0')}/${fecha.getFullYear()} · ${String(fecha.getHours()).padStart(2,'0')}:${String(fecha.getMinutes()).padStart(2,'0')}`;
+      if (idx === _notaEditando) {
+        return `
+          <div class="nota-item">
+            <div class="nota-content">
+              <div class="nota-date">${fechaStr}</div>
+              <textarea class="nota-edit-input" id="notaEditInput-${idx}">${_esc(nota.texto)}</textarea>
+              <div class="nota-edit-actions">
+                <button class="btn-primary" style="font-size:12px;padding:8px 16px" onclick="guardarEdicionNota(${idx})">Guardar</button>
+                <button class="nota-delete" onclick="cancelarEdicionNota()">Cancelar</button>
+              </div>
+            </div>
+          </div>`;
+      }
       return `
         <div class="nota-item">
           <div class="nota-content">
             <div class="nota-date">${fechaStr}</div>
             <div class="nota-text">${_esc(nota.texto)}</div>
           </div>
-          <button class="nota-delete" onclick="deleteNota(${idx})">Eliminar</button>
+          <div class="nota-actions">
+            <button class="nota-edit" onclick="editarNota(${idx})">Editar</button>
+            <button class="nota-delete" onclick="deleteNota(${idx})">Eliminar</button>
+          </div>
         </div>`;
     }).join('');
+  }
+
+  function editarNota(idx) {
+    _notaEditando = idx;
+    renderNotas();
+    const ta = document.getElementById(`notaEditInput-${idx}`);
+    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+
+  function cancelarEdicionNota() {
+    _notaEditando = null;
+    renderNotas();
+  }
+
+  function guardarEdicionNota(idx) {
+    const ta = document.getElementById(`notaEditInput-${idx}`);
+    if (!ta) return;
+    const texto = ta.value.trim();
+    if (!texto) { showToast('La nota no puede quedar vacía'); return; }
+    if (!userData.notas || !userData.notas[idx]) return;
+    userData.notas[idx].texto = texto;
+    _notaEditando = null;
+    renderNotas();
+    guardarProgresoUsuario();
   }
 
   // ===== CONTACTO / SUGERENCIAS =====
@@ -16393,6 +16456,7 @@
   function deleteNota(idx) {
     if (!userData.notas) return;
     userData.notas.splice(idx, 1);
+    _notaEditando = null; // los índices se desplazan al borrar; cierra cualquier edición abierta para no editar la nota equivocada
     renderNotas();
 
     const user = getCurrentUser();
