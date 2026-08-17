@@ -950,93 +950,6 @@
   #landing { position: relative; z-index: 1; }
   #formulario, #login, #registro, #bienvenida, #dashboard { position: relative; z-index: 2; }
 
-  /* ===== CIFRAS REALES: sección grande, separada del manifiesto ===== */
-  .big-stats {
-    position: relative;
-    padding: 100px 40px 110px;
-    text-align: center;
-    overflow: hidden;
-    border-top: 1px solid var(--humo);
-  }
-  .big-stats-glow {
-    position: absolute;
-    left: 50%;
-    top: -12%;
-    width: 900px;
-    height: 900px;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(232,73,15,0.16) 0%, rgba(232,73,15,0.05) 40%, transparent 70%);
-  }
-  .big-stats-inner {
-    position: relative;
-    max-width: 1040px;
-    margin: 0 auto;
-  }
-  .big-stats-tag {
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding-left: 14px;
-    border-left: 2px solid var(--brasa);
-    display: inline-block;
-    color: var(--brasa);
-    margin-bottom: 20px;
-  }
-  .big-stats-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 44px;
-    line-height: 1.05;
-    letter-spacing: 1px;
-    margin: 0 0 64px;
-  }
-  .big-stats-title em {
-    font-style: normal;
-    color: var(--brasa);
-  }
-  .big-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .big-stat {
-    padding: 0 28px;
-  }
-  .big-stat + .big-stat { border-left: 1px solid var(--humo); }
-  .big-stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 80px;
-    line-height: 1;
-    color: var(--blanco);
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 16px;
-    text-shadow: 0 0 60px rgba(232,73,15,0.25);
-  }
-  .big-stat-num span { color: var(--brasa); }
-  .big-stat-label {
-    font-size: 14.5px;
-    color: var(--metal-claro);
-    line-height: 1.5;
-    max-width: 220px;
-    margin: 0 auto;
-  }
-  .big-stats-foot {
-    margin-top: 56px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11.5px;
-    color: var(--metal);
-    letter-spacing: .5px;
-  }
-  @media (max-width: 720px) {
-    .big-stats { padding: 72px 24px 80px; }
-    .big-stats-title { font-size: 32px; }
-    .big-stats-grid { grid-template-columns: 1fr; gap: 40px; }
-    .big-stat + .big-stat { border-left: none; border-top: 1px solid var(--humo); padding-top: 40px; }
-    .big-stat-num { font-size: 64px; }
-  }
-
   /* PILARES */
   .pillars {
     padding: 120px 40px;
@@ -6463,29 +6376,6 @@
       </video>
     </div>
   </div>
-
-  <section class="big-stats" id="cifras">
-    <div class="big-stats-glow" aria-hidden="true"></div>
-    <div class="big-stats-inner">
-      <div class="big-stats-tag">No tenemos miles de usuarios todavía. Esto es lo que sí tenemos ya construido</div>
-      <h2 class="big-stats-title">Nada de cifras de marketing.<br>Solo lo que hay <em>de verdad</em> dentro.</h2>
-      <div class="big-stats-grid">
-        <div class="big-stat">
-          <div class="big-stat-num">400<span>+</span></div>
-          <div class="big-stat-label">recetas reales en el motor de nutrición, no una plantilla genérica</div>
-        </div>
-        <div class="big-stat">
-          <div class="big-stat-num">200<span>+</span></div>
-          <div class="big-stat-label">ejercicios con foto, músculos trabajados e instrucciones paso a paso</div>
-        </div>
-        <div class="big-stat">
-          <div class="big-stat-num">5</div>
-          <div class="big-stat-label">deportes con su propio motor de entrenamiento: gimnasio, running, CrossFit, Hyrox y combinado</div>
-        </div>
-      </div>
-      <div class="big-stats-foot">Números del propio catálogo — no cifras de marketing</div>
-    </div>
-  </section>
 
   <section class="sports" id="sports">
     <div class="section-header">
