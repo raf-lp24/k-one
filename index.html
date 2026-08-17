@@ -11825,13 +11825,6 @@
     const esVegetarianoNota = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
     if (esVegetarianoNota) {
       notasSalud.push('Al no comer carne ni pescado, presta atención a vitamina B12, hierro y omega-3 — son los tres nutrientes que más cuesta cubrir solo con comida en una dieta vegetariana. Si tu analítica lo indica, tu médico puede recomendarte suplementación.');
-    } else {
-      // Nota educativa, no una restricción impuesta: el cliente elige libremente
-      // entre las opciones de cada comida, así que no podemos "prohibir" nada,
-      // pero sí avisar — jamón, bacon, chorizo, salchichas... son carne
-      // procesada, y la OMS la clasifica en el grupo de mayor evidencia de
-      // vínculo con cáncer colorrectal si se toma a diario (no ocasionalmente).
-      notasSalud.push('Verás jamón, bacon, chorizo u otro embutido entre las opciones de varias comidas — están para dar variedad, pero como cualquier carne procesada, mejor no elegirlas todos los días. Un par de veces por semana como mucho es la recomendación general.');
     }
     if (sinFrutosSecos) {
       notasSalud.push('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
