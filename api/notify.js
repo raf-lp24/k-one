@@ -145,12 +145,7 @@ async function handleCronRetencion(req, res) {
       // DÍA 3: registrado hace 3-4 días, NO completó cuestionario, NO tiene sub activa
       if (p.created_at >= hace4d && p.created_at < hace3d && !ud.onboardingCompletado && !tieneSubActiva) {
         if (yaEnviado.has(`retencion_dia3:${email}`)) continue;
-        await enviarEmail(apiKey, {
-          from: 'K-ONE <equipo@k-one.fit>',
-          reply_to: ADMIN_EMAIL,
-          to: email,
-          subject: `${esc(primerNombre)}, el mejor momento para empezar siempre es hoy`,
-          html: emailWrapper(`
+        const htmlDia3 = emailWrapper(`
             <div style="padding:28px 28px 0">
               <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">El mejor momento para empezar siempre es hoy</h1>
               <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
@@ -171,9 +166,15 @@ async function handleCronRetencion(req, res) {
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">COMPLETAR MI PLAN</a>
             </div>
-          `)
+          `);
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: email,
+          subject: `${esc(primerNombre)}, el mejor momento para empezar siempre es hoy`,
+          html: htmlDia3
         });
-        await supa.from('email_log').insert({ tipo: 'retencion_dia3', destinatario: email, asunto: 'El mejor momento para empezar siempre es hoy', datos: JSON.stringify({ nombre, resumen: 'Retención día 3: motivacional para completar cuestionario.' }) });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia3', destinatario: email, asunto: 'El mejor momento para empezar siempre es hoy', html: htmlDia3, datos: JSON.stringify({ nombre, resumen: 'Retención día 3: motivacional para completar cuestionario.' }) });
         enviados3++;
       }
 
@@ -183,12 +184,7 @@ async function handleCronRetencion(req, res) {
         const deporte = ud.deporte || 'Tu deporte';
         const objetivo = ud.objetivo || 'Tu objetivo';
         const dias = ud.diasEntreno || ud.dias || '3-5';
-        await enviarEmail(apiKey, {
-          from: 'K-ONE <equipo@k-one.fit>',
-          reply_to: ADMIN_EMAIL,
-          to: email,
-          subject: `${esc(primerNombre)}, ya sabes qué quieres. Ahora toca ir a por ello.`,
-          html: emailWrapper(`
+        const htmlDia8 = emailWrapper(`
             <div style="padding:28px 28px 0">
               <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Ya sabes qué quieres. Ahora toca ir a por ello.</h1>
               <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
@@ -212,9 +208,15 @@ async function handleCronRetencion(req, res) {
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTIVAR MI PLAN</a>
             </div>
-          `)
+          `);
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: email,
+          subject: `${esc(primerNombre)}, ya sabes qué quieres. Ahora toca ir a por ello.`,
+          html: htmlDia8
         });
-        await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA 1,99€.` }) });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', html: htmlDia8, datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA 1,99€.` }) });
         enviados8++;
       }
 
@@ -234,12 +236,7 @@ async function handleCronRetencion(req, res) {
               'No se trata de no caer, se trata de levantarse cada vez.',
             ];
             const frase = frases7[Math.floor(Math.random() * frases7.length)];
-            await enviarEmail(apiKey, {
-              from: 'K-ONE <equipo@k-one.fit>',
-              reply_to: ADMIN_EMAIL,
-              to: email,
-              subject: `${esc(primerNombre)}, tu plan te sigue esperando`,
-              html: emailWrapper(`
+            const htmlReeng7 = emailWrapper(`
                 <div style="padding:28px 28px 0">
                   <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Llevas una semana fuera. Tu plan sigue aquí.</h1>
                   <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
@@ -252,9 +249,15 @@ async function handleCronRetencion(req, res) {
                 <div style="padding:0 28px 28px;text-align:center">
                   <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VOLVER A MI PLAN</a>
                 </div>
-              `)
+              `);
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, tu plan te sigue esperando`,
+              html: htmlReeng7
             });
-            await supa.from('email_log').insert({ tipo: 'reenganche_7d', destinatario: email, asunto: 'Tu plan te sigue esperando', datos: JSON.stringify({ nombre, resumen: `Re-engagement 7d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Motivacional suave.` }) });
+            await supa.from('email_log').insert({ tipo: 'reenganche_7d', destinatario: email, asunto: 'Tu plan te sigue esperando', html: htmlReeng7, datos: JSON.stringify({ nombre, resumen: `Re-engagement 7d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Motivacional suave.` }) });
             enviadosReenganche++;
           }
 
@@ -262,12 +265,7 @@ async function handleCronRetencion(req, res) {
           if (diasInactivo >= 14 && diasInactivo < 21 && !yaEnviado.has(`reenganche_14d:${email}`)) {
             const entrenos = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length : 0;
             const semana = ud.progreso?.semana || 1;
-            await enviarEmail(apiKey, {
-              from: 'K-ONE <equipo@k-one.fit>',
-              reply_to: ADMIN_EMAIL,
-              to: email,
-              subject: `${esc(primerNombre)}, no dejes que se enfríe lo que ya empezaste`,
-              html: emailWrapper(`
+            const htmlReeng14 = emailWrapper(`
                 <div style="padding:28px 28px 0">
                   <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Dos semanas. Tu cuerpo lo nota.</h1>
                   <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
@@ -290,21 +288,22 @@ async function handleCronRetencion(req, res) {
                 <div style="padding:0 28px 28px;text-align:center">
                   <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">RETOMAR MI ENTRENAMIENTO</a>
                 </div>
-              `)
+              `);
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, no dejes que se enfríe lo que ya empezaste`,
+              html: htmlReeng14
             });
-            await supa.from('email_log').insert({ tipo: 'reenganche_14d', destinatario: email, asunto: 'No dejes que se enfríe lo que ya empezaste', datos: JSON.stringify({ nombre, entrenos, semana, resumen: `Re-engagement 14d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. ${entrenos} entrenos, semana ${semana}.` }) });
+            await supa.from('email_log').insert({ tipo: 'reenganche_14d', destinatario: email, asunto: 'No dejes que se enfríe lo que ya empezaste', html: htmlReeng14, datos: JSON.stringify({ nombre, entrenos, semana, resumen: `Re-engagement 14d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. ${entrenos} entrenos, semana ${semana}.` }) });
             enviadosReenganche++;
           }
 
           // 21 DÍAS (3 semanas) sin entrar
           if (diasInactivo >= 21 && !yaEnviado.has(`reenganche_21d:${email}`)) {
             const deporte = ud.deporte || 'tu deporte';
-            await enviarEmail(apiKey, {
-              from: 'K-ONE <equipo@k-one.fit>',
-              reply_to: ADMIN_EMAIL,
-              to: email,
-              subject: `${esc(primerNombre)}, llevas 3 semanas sin entrar. ¿Todo bien?`,
-              html: emailWrapper(`
+            const htmlReeng21 = emailWrapper(`
                 <div style="padding:28px 28px 0">
                   <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Tres semanas. Esto es un aviso de tu yo del futuro.</h1>
                   <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
@@ -320,9 +319,15 @@ async function handleCronRetencion(req, res) {
                   <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VOLVER A ENTRENAR</a>
                   <p style="margin:12px 0 0;font-size:12px;color:#666">¿Dudas? Responde a este email y te ayudamos.</p>
                 </div>
-              `)
+              `);
+            await enviarEmail(apiKey, {
+              from: 'K-ONE <equipo@k-one.fit>',
+              reply_to: ADMIN_EMAIL,
+              to: email,
+              subject: `${esc(primerNombre)}, llevas 3 semanas sin entrar. ¿Todo bien?`,
+              html: htmlReeng21
             });
-            await supa.from('email_log').insert({ tipo: 'reenganche_21d', destinatario: email, asunto: 'Llevas 3 semanas sin entrar', datos: JSON.stringify({ nombre, deporte, resumen: `Re-engagement 21d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Último aviso. Deporte: ${deporte}.` }) });
+            await supa.from('email_log').insert({ tipo: 'reenganche_21d', destinatario: email, asunto: 'Llevas 3 semanas sin entrar', html: htmlReeng21, datos: JSON.stringify({ nombre, deporte, resumen: `Re-engagement 21d: ${primerNombre} lleva ~${Math.round(diasInactivo)} días sin entrar. Último aviso. Deporte: ${deporte}.` }) });
             enviadosReenganche++;
           }
         }
@@ -358,12 +363,7 @@ async function handleCronRetencion(req, res) {
         ];
         const mensajeSemana = mensajes[semana % mensajes.length];
 
-        await enviarEmail(apiKey, {
-          from: 'K-ONE <equipo@k-one.fit>',
-          reply_to: ADMIN_EMAIL,
-          to: p.email,
-          subject: `${esc(nombre)}, tu semana ${semana} en K-ONE`,
-          html: emailWrapper(`
+        const htmlResumen = emailWrapper(`
             <div style="padding:28px 28px 0">
               <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Tu semana en K-ONE</h1>
               <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Hola <span style="color:#E8490F;font-weight:600">${esc(nombre)}</span>, aquí tienes tu resumen de la semana ${semana}.</p>
@@ -388,9 +388,15 @@ async function handleCronRetencion(req, res) {
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI PLAN</a>
             </div>
-          `)
+          `);
+        await enviarEmail(apiKey, {
+          from: 'K-ONE <equipo@k-one.fit>',
+          reply_to: ADMIN_EMAIL,
+          to: p.email,
+          subject: `${esc(nombre)}, tu semana ${semana} en K-ONE`,
+          html: htmlResumen
         });
-        await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, datos: JSON.stringify({ nombre, entrenos, racha, semana, resumen: `Resumen semana ${semana}: ${entrenos} entrenos, racha ${racha} días. Mensaje: "${mensajeSemana}"` }) });
+        await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, html: htmlResumen, datos: JSON.stringify({ nombre, entrenos, racha, semana, resumen: `Resumen semana ${semana}: ${entrenos} entrenos, racha ${racha} días. Mensaje: "${mensajeSemana}"` }) });
         enviadosResumen++;
       }
     }
@@ -450,11 +456,7 @@ async function handleCronRetencion(req, res) {
             <td style="padding:10px 14px;border-bottom:1px solid #1a1a1a;color:#e0e0e0;font-size:14px">${f.t}</td>
             <td style="padding:10px 14px;border-bottom:1px solid #1a1a1a;text-align:right;font-size:18px;font-weight:700;color:${f.c}">${f.n}</td>
           </tr>`).join('');
-          await enviarEmail(apiKey, {
-            from: 'K-ONE Jarvis <equipo@k-one.fit>',
-            to: ADMIN_EMAIL,
-            subject: `Jarvis · ${totalAcc} cosa${totalAcc > 1 ? 's' : ''} requieren tu atención hoy`,
-            html: emailWrapper(`
+          const htmlDigest = emailWrapper(`
               <div style="padding:28px 28px 0">
                 <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 6px">Resumen de Jarvis</h1>
                 <p style="color:#b5b2ad;font-size:13px;line-height:1.6;margin:0 0 18px">Esto es lo que requiere tu atención hoy en K-ONE:</p>
@@ -462,11 +464,16 @@ async function handleCronRetencion(req, res) {
               </div>
               <div style="padding:20px 28px 28px;text-align:center">
                 <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;border-radius:8px">ABRIR JARVIS</a>
-              </div>`)
+              </div>`);
+          await enviarEmail(apiKey, {
+            from: 'K-ONE Jarvis <equipo@k-one.fit>',
+            to: ADMIN_EMAIL,
+            subject: `Jarvis · ${totalAcc} cosa${totalAcc > 1 ? 's' : ''} requieren tu atención hoy`,
+            html: htmlDigest
           });
           await supa.from('email_log').insert({
             tipo: 'digest_admin', destinatario: ADMIN_EMAIL,
-            asunto: `Jarvis · ${totalAcc} requieren atención`,
+            asunto: `Jarvis · ${totalAcc} requieren atención`, html: htmlDigest,
             datos: JSON.stringify({ resumen: filas.map(f => `${f.t}: ${f.n}`).join(' · '), pagoFallido, cancela, premiumCaduca, inactivos, sinEntrenar, sinResponder })
           });
         }
@@ -576,6 +583,10 @@ async function handlePost(req, res) {
     }
 
     const emails = [];
+    // Guarda el HTML real del email de cara al cliente (o al admin si el tipo
+    // no tiene destinatario cliente) para poder verlo tal cual en Jarvis, no
+    // solo un resumen de texto -- ver el insert en email_log más abajo.
+    let htmlParaLog = null;
 
     if (tipo === 'lead') {
       // 1) Notificación al admin
@@ -593,7 +604,7 @@ async function handlePost(req, res) {
       }));
 
       // 2) Email al lead con preview del área de clientes
-      emails.push(enviarEmail(apiKey, {
+      const optsLead = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
@@ -702,12 +713,14 @@ async function handlePost(req, res) {
             </div>
           </div>
         `
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsLead));
+      htmlParaLog = optsLead.html;
 
     } else if (tipo === 'bienvenida') {
       const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
       // 1) Email al cliente
-      emails.push(enviarEmail(apiKey, {
+      const optsBienvenida = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
@@ -821,7 +834,9 @@ async function handlePost(req, res) {
             </div>
           </div>
         `
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsBienvenida));
+      htmlParaLog = optsBienvenida.html;
       // 2) Notificación al admin
       emails.push(enviarEmail(apiKey, {
         from: 'K-ONE <equipo@k-one.fit>',
@@ -837,7 +852,7 @@ async function handlePost(req, res) {
       }));
 
     } else if (tipo === 'mensaje') {
-      emails.push(enviarEmail(apiKey, {
+      const optsMensaje = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: datos.email,
         to: ADMIN_EMAIL,
@@ -861,12 +876,14 @@ async function handlePost(req, res) {
             </div>
           </div>
         `
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsMensaje));
+      htmlParaLog = optsMensaje.html;
 
     } else if (tipo === 'opinion') {
       const nEstrellas = Math.min(Math.max(parseInt(datos.estrellas) || 0, 0), 5);
       const estrellas = '★'.repeat(nEstrellas) + '☆'.repeat(5 - nEstrellas);
-      emails.push(enviarEmail(apiKey, {
+      const optsOpinion = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
@@ -878,13 +895,15 @@ async function handlePost(req, res) {
           <p><strong>Texto:</strong> ${esc(datos.texto || '(sin texto)')}</p>
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsOpinion));
+      htmlParaLog = optsOpinion.html;
     } else if (tipo === 'renovacion') {
       const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
       const entrenos = datos.entrenos || 0;
       const racha = datos.racha || 0;
       const semana = datos.semana || 1;
-      emails.push(enviarEmail(apiKey, {
+      const optsRenovacion = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: datos.email,
@@ -927,15 +946,19 @@ async function handlePost(req, res) {
             </div>
           </div>
         `
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsRenovacion));
+      htmlParaLog = optsRenovacion.html;
     } else {
-      emails.push(enviarEmail(apiKey, {
+      const optsGenerico = {
         from: 'K-ONE <equipo@k-one.fit>',
         reply_to: ADMIN_EMAIL,
         to: ADMIN_EMAIL,
         subject: `K-ONE · Notificación: ${tipo}`,
         html: `<pre>${JSON.stringify(datos, null, 2)}</pre>`
-      }));
+      };
+      emails.push(enviarEmail(apiKey, optsGenerico));
+      htmlParaLog = optsGenerico.html;
     }
 
     const results = await Promise.allSettled(emails);
@@ -986,7 +1009,7 @@ async function handlePost(req, res) {
         resumen = JSON.stringify(datos, null, 2);
       }
       await supa.from('email_log').insert({
-        tipo, destinatario, asunto,
+        tipo, destinatario, asunto, html: htmlParaLog,
         datos: JSON.stringify({ ...datos, resumen })
       });
     } catch (e) {}

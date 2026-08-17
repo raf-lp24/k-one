@@ -597,7 +597,7 @@
     #modalAdmin [style*="grid-template-columns:repeat(auto-fit"] { grid-template-columns: 1fr !important; }
     #modalAdmin table { display: block; overflow-x: auto; white-space: nowrap; }
   }
-  .email-body-open { max-height:300px !important; }
+  .email-body-open { max-height:640px !important; overflow-y:auto !important; }
   .email-chevron-open { transform:rotate(180deg); }
 
   .btn-ghost {
@@ -19813,8 +19813,10 @@
         <div class="email-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
           <div style="padding:0 18px 16px;font-size:12px;color:var(--metal-claro);line-height:1.6">
             <div style="border-top:1px solid #1e1e1e;padding-top:14px">
-              <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">Contenido del email</div>
-              ${cuerpoPreview
+              <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">${e.html ? 'Email tal como se envió' : 'Contenido del email'}</div>
+              ${e.html
+                ? '<iframe srcdoc="' + _esc(e.html) + '" sandbox="" style="width:100%;height:520px;border:1px solid #1e1e1e;border-radius:8px;background:#0b0b0b" title="Vista previa del email"></iframe>'
+                : cuerpoPreview
                 ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--metal-claro)">' + _esc(cuerpoPreview) + '</div>'
                 : '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;color:#888;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
               <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
