@@ -14923,6 +14923,15 @@
     window.scrollTo(0, 0);
     closeDashMenu();
     mostrarGuiaSeccion(id);
+    // Los gráficos de canvas (peso/fuerza) se construyen en buildDashboard()
+    // sin importar qué pestaña esté activa, así que si "progreso" arrancó
+    // oculta miden un contenedor de ancho 0 y se dibujan a un tamaño de
+    // respaldo pequeño -- redibujarlos aquí, con el contenedor ya visible y
+    // su ancho real, evita el texto gigante/pixelado al abrir la pestaña.
+    if (id === 'progreso') {
+      if (typeof renderGraficoPeso === 'function') renderGraficoPeso();
+      if (typeof renderGraficoFuerza === 'function') renderGraficoFuerza();
+    }
   }
 
   function mostrarGuiaSeccion(id) {
@@ -16040,16 +16049,33 @@
     _dibujarGraficoLinea('graficoFuerza', chartWrap, ordenado, 'kg');
   }
 
-  let _resizeGraficosTimer = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(_resizeGraficosTimer);
-    _resizeGraficosTimer = setTimeout(() => {
-      const wp = document.getElementById('graficoPesoWrap');
-      if (wp && wp.offsetParent !== null) renderGraficoPeso();
-      const wf = document.getElementById('graficoFuerzaWrap');
-      if (wf && wf.offsetParent !== null) renderGraficoFuerza();
-    }, 200);
-  }, { passive: true });
+  // Los gráficos se creaban (con renderProgresoSection, dentro de
+  // buildDashboard) mientras la pestaña Progreso todavía estaba oculta
+  // (display:none), así que medían un ancho de contenedor de 0 y caían al
+  // valor de respaldo de 260-320px. El canvas se dibujaba a esa resolución
+  // pequeña pero el CSS (width:100%) lo estiraba al ancho real de pantalla
+  // al abrir la pestaña -- de ahí el texto gigante y pixelado. ResizeObserver
+  // detecta tanto el resize de ventana normal como el momento exacto en que
+  // el contenedor pasa de oculto a visible con su ancho real, y redibuja.
+  function _initResizeObserverGraficos() {
+    if (typeof ResizeObserver === 'undefined') return;
+    let pendiente = null;
+    const obs = new ResizeObserver(entries => {
+      clearTimeout(pendiente);
+      pendiente = setTimeout(() => {
+        entries.forEach(entry => {
+          if (entry.contentRect.width <= 0) return;
+          if (entry.target.id === 'graficoPesoWrap') renderGraficoPeso();
+          else if (entry.target.id === 'graficoFuerzaWrap') renderGraficoFuerza();
+        });
+      }, 120);
+    });
+    const wp = document.getElementById('graficoPesoWrap');
+    const wf = document.getElementById('graficoFuerzaWrap');
+    if (wp) obs.observe(wp);
+    if (wf) obs.observe(wf);
+  }
+  _initResizeObserverGraficos();
 
   // ===== CALENDARIO DE CONSTANCIA (mapa de calor tipo GitHub) =====
   // userData.historialEntrenos ya es un array de fechas (YYYY-MM-DD) sin
