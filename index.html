@@ -5523,13 +5523,13 @@
     <div class="auth-field">
       <label for="reg-pass">Contraseña</label>
       <div class="auth-field-wrap">
-        <input type="password" id="reg-pass" name="password" placeholder="Mínimo 8 caracteres, incluye un número" autocomplete="new-password"
+        <input type="password" id="reg-pass" name="password" placeholder="Mínimo 8 caracteres, con mayúscula, minúscula y número" autocomplete="new-password"
           oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
         <span class="auth-field-check" id="check-pass">✓</span>
       </div>
     </div>
     <div class="auth-pass-strength" id="pass-strength-bar"><div class="auth-pass-strength-bar" id="pass-strength-fill"></div></div>
-    <div class="auth-error" id="err-pass">Mínimo 8 caracteres y al menos 1 número</div>
+    <div class="auth-error" id="err-pass">Mínimo 8 caracteres, con mayúscula, minúscula y número</div>
 
     <div class="auth-field">
       <label for="reg-pass2">Confirmar contraseña</label>
@@ -5636,9 +5636,9 @@
       <p class="modal-desc">Elige una nueva contraseña para tu cuenta.</p>
       <div class="auth-field">
         <label for="forgot-newpass">Nueva contraseña</label>
-        <input type="password" id="forgot-newpass" placeholder="Mínimo 8 caracteres, incluye un número">
+        <input type="password" id="forgot-newpass" placeholder="Mínimo 8 caracteres, con mayúscula, minúscula y número">
       </div>
-      <div class="auth-error" id="err-forgot-newpass">Mínimo 8 caracteres y al menos 1 número</div>
+      <div class="auth-error" id="err-forgot-newpass">Mínimo 8 caracteres, con mayúscula, minúscula y número</div>
       <div class="auth-field">
         <label for="forgot-newpass2">Repite la contraseña</label>
         <input type="password" id="forgot-newpass2" placeholder="Repite tu nueva contraseña">
@@ -8379,6 +8379,16 @@
 
     const numDias       = dias.includes('2') ? 2 : dias.includes('3') ? 3 : dias.includes('4') ? 4 : 5;
     const esPrincipiante = nivel.includes('Principiante');
+    // BUG REAL encontrado (ago 2026): esta vista previa solo distinguía
+    // Principiante de "todo lo demás" -- "Llevo algo de tiempo" y "Avanzado"
+    // mostraban el mismo split y la misma descripción, aunque el motor real
+    // (buildPlanFromData, más abajo en el archivo) SÍ los trata distinto: más
+    // %1RM y menos repeticiones en fuerza, sesiones más largas en running,
+    // benchmarks y movimientos más exigentes en CrossFit/Hyrox. El split en
+    // sí (PPL, 4 días, 5 días...) es el mismo para intermedio y avanzado --
+    // la diferencia real es la intensidad, así que se añade como nota en vez
+    // de inventar un split distinto que el motor no genera.
+    const esAvanzado     = nivel.includes('Avanzado');
     const sinMat         = lugar.includes('sin material');
     const esGym          = deporte.includes('Gimnasio') || deporte.includes('Fuerza') || deporte.includes('Híbrido') || deporte.includes('casa');
 
@@ -8412,6 +8422,19 @@
     } else {
       split = 'Split clásico · 5 días';
       desc  = 'Plan de 5 días con sesiones especializadas por grupo muscular y una sesión extra de accesorios o circuito metabólico para maximizar el volumen semanal.';
+    }
+
+    // El split (nombre y estructura) es el mismo para "Llevo algo de tiempo" y
+    // "Avanzado" -- lo que cambia de verdad en el motor es la intensidad. Se
+    // avisa aquí para que el recuadro deje de parecer idéntico entre los dos.
+    if (esAvanzado && !nota) {
+      if (deporte.includes('Running')) {
+        nota = 'Al ser avanzado, tus tiradas base son más largas y las series más exigentes que en nivel intermedio.';
+      } else if (deporte.includes('Hyrox') || deporte.includes('CrossFit')) {
+        nota = 'Al ser avanzado, los WODs incluyen movimientos más técnicos y benchmarks reales, en vez de sus versiones escaladas.';
+      } else if (esGym) {
+        nota = 'Al ser avanzado, las series se calculan a mayor % de tu 1RM (más peso, menos repeticiones) que en "Llevo algo de tiempo" — mismo split, más intensidad.';
+      }
     }
 
     document.getElementById('rpSplit').textContent = split;
@@ -17893,11 +17916,15 @@
             fill.style.width = pct; fill.style.background = col;
           }
         }
-        // El check verde tiene que exigir lo mismo que registrar() al enviar
-        // (8+ caracteres y al menos un dígito) — antes solo pedía 6 caracteres,
-        // así que contraseñas como "abcdefgh" se marcaban válidas al escribir y
-        // el envío las rechazaba igualmente, confundiendo justo en el registro.
-        _setFieldState('reg-pass', val.length === 0 ? 'none' : (val.length >= 8 && /\d/.test(val)) ? 'valid' : 'error');
+        // El check verde tiene que exigir lo mismo que registrar() al enviar,
+        // y lo que registrar() exige tiene que coincidir con lo que Supabase
+        // Auth exige de verdad (configurado en el proyecto, fuera de este
+        // código). Antes solo se pedían 8 caracteres + 1 dígito aquí, pero
+        // Supabase rechazaba igualmente contraseñas sin mayúscula Y minúscula
+        // -- el cliente veía el check en verde y el registro fallaba con un
+        // error en inglés que Supabase no traduce. Detectado en real (ago
+        // 2026): "vetorf12" pasaba el check verde y el signUp lo rechazaba.
+        _setFieldState('reg-pass', val.length === 0 ? 'none' : (val.length >= 8 && /\d/.test(val) && /[a-z]/.test(val) && /[A-Z]/.test(val)) ? 'valid' : 'error');
         const v2 = (document.getElementById('reg-pass2') || {}).value || '';
         if (v2) validarCampoReg('pass2');
         break;
@@ -17958,6 +17985,31 @@
     } catch (e) { console.warn('[registro] Error aplicando código pendiente:', e.message); }
   }
 
+  // Supabase Auth devuelve sus errores en inglés y no los traduce -- antes se
+  // colaban tal cual en el banner gris (p.ej. "Password should contain at
+  // least one character of each: abc...xyz, ABC...XYZ, 0123456789."). Cubre
+  // los mensajes reales más comunes; cualquier otro cae en un genérico en
+  // vez de mostrar inglés sin traducir.
+  function _traducirErrorAuth(msg) {
+    const m = (msg || '').toLowerCase();
+    if (/character of each|at least one (uppercase|lowercase|number|digit)/.test(m)) {
+      return 'La contraseña debe tener mayúscula, minúscula y número.';
+    }
+    if (/password.*(at least|should be at least|too short)/.test(m) || /at least (\d+) characters/.test(m)) {
+      return 'La contraseña es demasiado corta.';
+    }
+    if (/rate limit|too many requests/.test(m)) {
+      return 'Demasiados intentos. Espera un momento y vuelve a probar.';
+    }
+    if (/invalid.*email|unable to validate email/.test(m)) {
+      return 'El email no es válido.';
+    }
+    if (/network|fetch/.test(m)) {
+      return 'No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo.';
+    }
+    return 'Inténtalo de nuevo en unos segundos.';
+  }
+
   // ===== REGISTRO =====
   async function registrar() {
     let ok = true;
@@ -18005,7 +18057,7 @@
       document.getElementById('reg-email').classList.add('error');
       ok = false;
     }
-    if (pass.length < 8 || !/\d/.test(pass)) {
+    if (pass.length < 8 || !/\d/.test(pass) || !/[a-z]/.test(pass) || !/[A-Z]/.test(pass)) {
       document.getElementById('err-pass').classList.add('visible');
       document.getElementById('reg-pass').classList.add('error');
       ok = false;
@@ -18040,7 +18092,7 @@
         document.getElementById('err-email').classList.add('visible');
         document.getElementById('reg-email').classList.add('error');
       } else {
-        showToast('No se pudo crear la cuenta: ' + error.message, 5000);
+        showToast('No se pudo crear la cuenta: ' + _traducirErrorAuth(error.message), 5000);
       }
       return;
     }
@@ -18309,7 +18361,7 @@
     document.getElementById('forgot-newpass2').classList.remove('error');
 
     let ok = true;
-    if (newPass.length < 8 || !/\d/.test(newPass)) {
+    if (newPass.length < 8 || !/\d/.test(newPass) || !/[a-z]/.test(newPass) || !/[A-Z]/.test(newPass)) {
       document.getElementById('err-forgot-newpass').classList.add('visible');
       document.getElementById('forgot-newpass').classList.add('error');
       ok = false;
