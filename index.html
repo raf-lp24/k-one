@@ -9827,8 +9827,31 @@
     const match = textoCap.match(/^(.+?)(\s*\d+\s*[x×]\s*\S+)(.*)$/i);
     if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${_esc(textoCap)}</span></div>`;
 
-    const nombre = match[1].trim();
-    const resto = (match[2] + match[3]).trim();
+    let nombre = match[1].trim();
+    const tras = (match[3] || '').trim();
+
+    // BUG REAL encontrado por el usuario (ago 2026): cuando el consejo de técnica
+    // va ENTRE PARÉNTESIS ANTES del "3×12" en el texto original (p.ej. "press
+    // mancuernas en hombro (agarre neutro, baja hasta formar una "L" a 90°) 3×12"),
+    // la regex de arriba lo capturaba entero como si fuera el NOMBRE del
+    // ejercicio -- el titular gigante en mayúsculas de la tarjeta era en
+    // realidad "nombre + toda la técnica". Se separa aquí: el paréntesis final
+    // del nombre capturado no es parte del nombre, es la técnica.
+    let tecnicaPrevia = '';
+    const mCuePrevio = nombre.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    if (mCuePrevio) { nombre = mCuePrevio[1].trim(); tecnicaPrevia = mCuePrevio[2].trim(); }
+
+    // Y cuando el consejo va DESPUÉS del "3×12" (el caso más común: "curl bíceps
+    // alterno 3×12 (controlado en la subida y bajada, sin balanceo)"), se
+    // calculaba en `resto` pero esa variable no se pintaba en ningún sitio del
+    // HTML devuelto -- el consejo de técnica se perdía en silencio para
+    // prácticamente todos los ejercicios con peso del plan.
+    let tecnicaPosterior = '';
+    const mCuePost = tras.match(/\(([^)]+)\)/);
+    if (mCuePost) tecnicaPosterior = mCuePost[1].trim();
+
+    const tecnica = [tecnicaPrevia, tecnicaPosterior].filter(Boolean).join(' — ');
+
     const key = normalizarEjercicio(nombre);
     const entry = userData.pesosEjercicios?.[key];
     const valorAttr = entry?.peso != null ? ` value="${entry.peso}"` : '';
@@ -9898,6 +9921,7 @@
             </div>
           </div>
         </div>
+        ${tecnica ? `<div class="ejercicio-card-detalle">${_esc(tecnica)}</div>` : ''}
       </div>
     </div>`;
   }
@@ -9936,41 +9960,72 @@
 
     // MARCA PERSONAL para core/acondicionamiento: no llevan peso en kg, pero sí
     // hay una cifra de verdad que el cliente puede querer superar -- segundos
-    // aguantados en una plancha ("3×30s") o rondas completadas en un circuito
-    // ("3 rondas sin descanso de..."). Se detecta sobre `resto` (el texto que
-    // queda tras el nombre), nunca sobre el nombre en sí, para no confundir un
-    // "3" que forme parte del nombre del ejercicio con la marca a registrar.
+    // aguantados en una plancha ("3×30s"), o -a petición explícita del usuario,
+    // que NO quería un contador de "rondas" del circuito sino uno POR
+    // MOVIMIENTO- las repeticiones de cada ejercicio suelto dentro de un
+    // circuito ("3 rondas sin descanso de 15 jumping jacks + 10 sentadillas
+    // con salto + 8 flexiones" -> un stepper para jumping jacks, otro para
+    // sentadillas, otro para flexiones). Se detecta sobre `resto` (el texto
+    // que queda tras el nombre), nunca sobre el nombre en sí, para no
+    // confundir un número que forme parte del nombre del ejercicio.
     let unidadMarca = '', valorDefecto = null, etiquetaMarca = '';
+    let movimientosCircuito = null;
     const mSeg = resto.match(/(\d+)\s*[x×]\s*(\d+)\s*s\b/i);
-    const mRondas = !mSeg && resto.match(/^(\d+)\s*rondas?\b/i);
-    if (mSeg) { unidadMarca = 's'; valorDefecto = parseInt(mSeg[2], 10); etiquetaMarca = 'Segundos'; }
-    else if (mRondas) { unidadMarca = 'rondas'; valorDefecto = parseInt(mRondas[1], 10); etiquetaMarca = 'Rondas'; }
+    if (mSeg) {
+      unidadMarca = 's'; valorDefecto = parseInt(mSeg[2], 10); etiquetaMarca = 'Segundos';
+    } else {
+      // "3 rondas sin descanso de 15 jumping jacks + 10 sentadillas... + 8 flexiones"
+      // -> se descarta el número de rondas (no es lo que se quiere registrar) y
+      // se parte el resto por "+" para sacar cada movimiento con su cifra propia.
+      const mCircuito = resto.match(/^\d+\s*rondas?\b.*?\bde\s+(.+)$/i);
+      if (mCircuito) {
+        movimientosCircuito = mCircuito[1].split(/\s*\+\s*/)
+          .map(m => {
+            const mm = m.trim().match(/^(\d+)\s+(.+)$/);
+            return mm ? { cantidad: parseInt(mm[1], 10), nombre: mm[2].trim() } : null;
+          })
+          .filter(Boolean);
+        if (!movimientosCircuito.length) movimientosCircuito = null;
+      }
+    }
 
-    let marcaHTML = '';
-    if (unidadMarca) {
-      const key = normalizarEjercicio(nombre);
+    // Genera un stepper individual (mismo componente que el de peso, reutilizado
+    // con otra unidad) para una marca dada -- se usa tanto para el caso simple
+    // (plancha, un solo stepper) como para cada movimiento suelto de un circuito.
+    const renderStepperMarca = (keyNombre, nombreMostrado, unidad, defecto, etiqueta) => {
+      const key = normalizarEjercicio(keyNombre);
       const entry = userData.marcasEjercicios?.[key];
-      const valorActual = entry?.valor != null ? entry.valor : valorDefecto;
-      const marcaUltimoTexto = entry?.valorAnterior != null ? `Anterior: ${entry.valorAnterior} ${unidadMarca === 's' ? 'segundos' : 'rondas'}` : '';
-      const miniHistorialMarca = renderMiniHistorialHTML(entry?.historial, 'valor', unidadMarca === 's' ? 'segundos' : 'rondas');
-      const paso = unidadMarca === 's' ? 5 : 1;
+      const valorActual = entry?.valor != null ? entry.valor : defecto;
+      const etiquetaUnidad = unidad === 's' ? 'segundos' : 'reps';
+      const marcaUltimoTexto = entry?.valorAnterior != null ? `Anterior: ${entry.valorAnterior} ${etiquetaUnidad}` : '';
+      const miniHistorialMarca = renderMiniHistorialHTML(entry?.historial, 'valor', etiquetaUnidad);
+      const paso = unidad === 's' ? 5 : 1;
+      const min = unidad === 's' ? 5 : 1;
       const keyAttr = _esc(key);
-      marcaHTML = `<div class="ejercicio-metrics">
-          <div class="em em-peso">
-            <div class="em-k">${etiquetaMarca}</div>
+      const nombreMostradoSafe = _esc(nombreMostrado);
+      return `<div class="em em-peso">
+            <div class="em-k">${etiqueta}</div>
             <div class="ejercicio-fila-controls">
               <div class="peso-stepper" onclick="event.stopPropagation()">
-                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,-${paso},${unidadMarca === 's' ? 5 : 1})" aria-label="Restar">−</button>
-                <input type="number" class="peso-input marca-input" step="${paso}" min="${unidadMarca === 's' ? 5 : 1}" inputmode="numeric" placeholder="0"
-                  data-ejercicio="${keyAttr}" data-nombre="${nombreSafe}" data-unidad="${unidadMarca}" value="${valorActual}" onclick="event.stopPropagation()" onchange="guardarMarcaEjercicio(this)">
-                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,${paso},${unidadMarca === 's' ? 5 : 1})" aria-label="Sumar">+</button>
-                <span class="peso-unit">${unidadMarca === 's' ? 'seg' : 'rondas'}</span>
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,-${paso},${min})" aria-label="Restar">−</button>
+                <input type="number" class="peso-input marca-input" step="${paso}" min="${min}" inputmode="numeric" placeholder="0"
+                  data-ejercicio="${keyAttr}" data-nombre="${nombreMostradoSafe}" data-unidad="${unidad}" value="${valorActual}" onclick="event.stopPropagation()" onchange="guardarMarcaEjercicio(this)">
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,${paso},${min})" aria-label="Sumar">+</button>
+                <span class="peso-unit">${unidad === 's' ? 'seg' : 'reps'}</span>
               </div>
               <span class="peso-ultimo marca-ultimo" data-ejercicio="${keyAttr}">${_esc(marcaUltimoTexto)}</span>
               <div class="peso-mini-historial marca-mini-historial" data-ejercicio="${keyAttr}">${miniHistorialMarca}</div>
             </div>
-          </div>
-        </div>`;
+          </div>`;
+    };
+
+    let marcaHTML = '';
+    if (unidadMarca) {
+      marcaHTML = `<div class="ejercicio-metrics">${renderStepperMarca(nombre, nombre, unidadMarca, valorDefecto, etiquetaMarca)}</div>`;
+    } else if (movimientosCircuito) {
+      marcaHTML = `<div class="ejercicio-metrics ejercicio-metrics-circuito">${
+        movimientosCircuito.map(mv => renderStepperMarca(mv.nombre, mv.nombre, 'reps', mv.cantidad, capitalizar(mv.nombre))).join('')
+      }</div>`;
     }
 
     return `<div class="ejercicio-card ejercicio-card-simple">
@@ -10213,7 +10268,7 @@
     if (!key) return;
     const nombre = input.dataset.nombre || key;
     const unidad = input.dataset.unidad || 'reps';
-    const etiqueta = unidad === 's' ? 'segundos' : unidad === 'rondas' ? 'rondas' : unidad;
+    const etiqueta = unidad === 's' ? 'segundos' : 'reps';
     const valor = parseFloat(input.value);
     if (!userData.marcasEjercicios) userData.marcasEjercicios = {};
 
