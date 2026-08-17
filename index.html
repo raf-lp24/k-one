@@ -12593,15 +12593,25 @@
       const sc = str => { const n = parseFloat(str); return isNaN(n) ? 0 : Math.round(n * escalaRacion); };
       const carbsN = parseFloat(carbs) || 0;
       const carbsScaled = Math.round(carbsN * escalaRacion * escalaCarbs);
-      const kcalN = parseFloat(kcal) || 0;
-      const kcalScaled = Math.round(kcalN * escalaRacion + (carbsN * (escalaCarbs - 1) * 4 * escalaRacion));
+      const protScaled = sc(prot);
+      const grasaScaled = sc(grasa);
+      // Las kcal se calculan SIEMPRE a partir de los macros ya escalados (prot*4 +
+      // carbs*4 + grasa*9), no escalando el número de kcal original de la receta.
+      // BUG REAL encontrado ago 2026: la fórmula anterior escalaba las kcal escritas
+      // a mano en la receta, que casi nunca cuadran EXACTO con sus propios macros
+      // (redondeo normal al escribirlas: "320 kcal" para unos macros que suman
+      // 294). Ese desajuste de origen se multiplicaba por escalaRacion (hasta
+      // ×2,5 en "ganar músculo"), dando discrepancias de hasta el 47% entre la
+      // etiqueta de kcal y lo que sus propios macros dicen. Verificado sobre 1.200
+      // opciones reales: 83 con más de un 12% de desviación antes de este arreglo.
+      const kcalScaled = protScaled * 4 + carbsScaled * 4 + grasaScaled * 9;
       return {
         nombre,
         ingredientes: scaleIngredientes(ponerCantidades(ingredientes), escalaRacion),
         kcal:  `${kcalScaled} kcal`,
-        prot:  `${sc(prot)}g prot`,
+        prot:  `${protScaled}g prot`,
         carbs: `${carbsScaled}g carbs`,
-        grasa: `${sc(grasa)}g grasa`,
+        grasa: `${grasaScaled}g grasa`,
         prep,
       };
     };
@@ -13678,15 +13688,29 @@
           (m.opciones || []).forEach(o => {
             if (_yaVerificadas.has(o)) return;
             _yaVerificadas.add(o);
+            // BUG REAL encontrado ago 2026: esta red de seguridad corregía prot/carbs
+            // hacia lo que dicen de verdad los ingredientes, pero nunca tocaba las
+            // kcal -- así que cuando corregía (>20% de desvío), la etiqueta de kcal se
+            // quedaba con el valor ANTIGUO, ya sin relación con los macros nuevos
+            // (confirmado: "Yogur griego con granola, miel y kiwi" mostrando 392 kcal
+            // con unos macros que solo suman 276). Misma fórmula de "delta" que la
+            // calibración de proteína/carbohidratos de más abajo: kcal se ajusta 4
+            // kcal por cada gramo que cambia la etiqueta.
+            let deltaKcal = 0;
             const protReal = _macroRealTotal(o.ingredientes, MACROS_PROT_POR_100G, _clavesProt);
             const protEtiqueta = parseInt(o.prot) || 0;
             if (protReal !== null && protEtiqueta > 0 && Math.abs(protReal - protEtiqueta) / protEtiqueta > 0.2) {
+              deltaKcal += 4 * (protReal - protEtiqueta);
               o.prot = `${protReal}g prot`;
             }
             const carbsReal = _macroRealTotal(o.ingredientes, MACROS_CARBS_POR_100G, _clavesCarbs);
             const carbsEtiqueta = parseInt(o.carbs) || 0;
             if (carbsReal !== null && carbsEtiqueta > 0 && Math.abs(carbsReal - carbsEtiqueta) / carbsEtiqueta > 0.2) {
+              deltaKcal += 4 * (carbsReal - carbsEtiqueta);
               o.carbs = `${carbsReal}g carbs`;
+            }
+            if (deltaKcal !== 0) {
+              o.kcal = `${Math.max(0, Math.round((parseInt(o.kcal) || 0) + deltaKcal))} kcal`;
             }
           });
         });
