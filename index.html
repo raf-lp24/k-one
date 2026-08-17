@@ -3215,6 +3215,11 @@
     border-radius: 999px; padding: 5px 14px; font-size: 12px; font-weight: 600;
   }
   .musculo-chip.principal { background: rgba(232,73,15,.15); border-color: var(--brasa); color: var(--blanco); }
+  /* Pasos de "Cómo se hace": mismo lenguaje de numeración que el resto de la
+     web (DM Mono + acento brasa, como .entreno-bloque-num), en vez del "1. 2."
+     por defecto del navegador que no encajaba con el resto del diseño. */
+  .paso-ejercicio { display: flex; gap: 10px; align-items: flex-start; }
+  .paso-ejercicio-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brasa); flex-shrink: 0; padding-top: 2px; }
   .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
   .ej-foto { margin: 0; }
   .ej-foto img {
@@ -6280,7 +6285,7 @@
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin:14px 0 8px">MÚSCULOS TRABAJADOS</div>
     <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:8px">CÓMO SE HACE</div>
-    <ol id="infoEjercicioPasos" style="margin:0 0 18px;padding-left:22px;color:var(--metal-claro);font-size:13.5px;line-height:1.65;display:flex;flex-direction:column;gap:8px"></ol>
+    <div id="infoEjercicioPasos" style="margin:0 0 18px;color:var(--metal-claro);font-size:13.5px;line-height:1.55;display:flex;flex-direction:column;gap:10px"></div>
     <div id="infoEjercicioSustituir" style="display:none"></div>
     <a id="infoEjercicioVideo" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:100%;display:block;text-align:center;text-decoration:none;box-sizing:border-box">▶ Ver vídeo de técnica</a>
     <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0;line-height:1.5">Instrucciones: exercises-dataset (MIT) · Fotos: free-exercise-db (dominio público)</p>
@@ -9592,7 +9597,8 @@
     musEl.previousElementSibling.style.display = info.m ? '' : 'none';
     musEl.style.display = info.m ? 'flex' : 'none';
     const pasosEl = document.getElementById('infoEjercicioPasos');
-    pasosEl.innerHTML = (info.pasos || []).map(p => `<li>${p}</li>`).join('');
+    pasosEl.innerHTML = (info.pasos || []).map((p, i) =>
+      `<div class="paso-ejercicio"><span class="paso-ejercicio-num">${String(i + 1).padStart(2, '0')}</span><span>${_esc(p)}</span></div>`).join('');
     pasosEl.previousElementSibling.style.display = (info.pasos && info.pasos.length) ? '' : 'none';
     pasosEl.style.display = (info.pasos && info.pasos.length) ? 'flex' : 'none';
     document.getElementById('infoEjercicioVideo').href = getVideoUrl(nombre);
