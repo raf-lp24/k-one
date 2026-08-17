@@ -4237,6 +4237,15 @@
     margin-bottom: 20px;
   }
 
+  /* Compartir y exportar son la misma idea (sacar tus datos fuera de la
+     app) -- van en la misma fila en vez de dos bloques apilados. */
+  .progress-share-export-row {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .progress-share-export-col { flex: 1 1 260px; min-width: 0; }
+
   /* INFORME SEMANAL: solo los récords de carga, sin tarjetas de adherencia ni
      mensaje motivacional (se quitaron a propósito: ocupaban mucho para lo que
      aportaban). Eyebrow ligero + chips con la flecha en su propio círculo, el
@@ -8005,20 +8014,23 @@
         </div>
 
         <div class="progress-section">
-          <div class="progress-title">Compartir progreso</div>
-          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Genera una imagen con tus stats para compartir en redes.</p>
-          <button class="btn-primary" onclick="compartirProgreso()" style="font-size:13px;padding:10px 20px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Generar imagen para compartir
-          </button>
-          <div id="sharePreview" style="margin-top:12px;display:none"></div>
-        </div>
-
-        <div class="progress-section">
-          <div class="progress-title">Exportar datos</div>
-          <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Descarga tu historial de pesos en formato CSV para Excel.</p>
-          <button class="btn-ghost" onclick="exportarProgresoCSV()" style="font-size:13px;padding:10px 20px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar CSV
-          </button>
+          <div class="progress-share-export-row">
+            <div class="progress-share-export-col">
+              <div class="progress-title">Compartir progreso</div>
+              <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Genera una imagen con tus stats para compartir en redes.</p>
+              <button class="btn-primary" onclick="compartirProgreso()" style="font-size:13px;padding:10px 20px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Generar imagen para compartir
+              </button>
+              <div id="sharePreview" style="margin-top:12px;display:none"></div>
+            </div>
+            <div class="progress-share-export-col">
+              <div class="progress-title">Exportar datos</div>
+              <p style="font-size:12px;color:var(--metal);margin-bottom:12px">Descarga tu historial de pesos en formato CSV para Excel.</p>
+              <button class="btn-ghost" onclick="exportarProgresoCSV()" style="font-size:13px;padding:10px 20px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar CSV
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
