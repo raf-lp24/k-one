@@ -7985,6 +7985,12 @@
         </div>
 
         <div class="progress-section">
+          <div class="progress-title">Evolución de tu peso</div>
+          <p class="field-hint" style="margin-bottom:16px">Se registra solo con cada check-in semanal — sin nada que rellenar a mano.</p>
+          <div id="graficoPesoWrap"></div>
+        </div>
+
+        <div class="progress-section">
           <div class="progress-title">Fotos mensuales</div>
           <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan solo en este dispositivo, nadie más las ve, y te ayudan a ver tu evolución mes a mes.</p>
           <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
@@ -15740,9 +15746,122 @@
 
   function renderProgresoSection() {
     renderInformeSemanal();
+    renderGraficoPeso();
     renderFotosProgreso();
     renderHitos();
   }
+
+  // ===== GRÁFICO DE EVOLUCIÓN DE PESO =====
+  // userData.historialPeso ya se registraba en cada check-in semanal (lo usa
+  // evaluarYAjustarCalorias para recalibrar calorías si alguien se estanca),
+  // pero nunca se le enseñaba al cliente salvo como CSV. Es el dato más
+  // esperado en cualquier app de fitness y ya existía, así que solo hacía
+  // falta dibujarlo.
+  function renderGraficoPeso() {
+    const wrap = document.getElementById('graficoPesoWrap');
+    if (!wrap) return;
+    const hist = (userData.historialPeso || [])
+      .filter(h => h && !isNaN(parseFloat(h.peso)) && !isNaN(new Date(h.fecha).getTime()));
+    if (hist.length < 2) {
+      wrap.innerHTML = '<p class="informe-vacio">Todavía no hay suficientes pesajes para dibujar tu evolución. Se añade uno automáticamente con cada check-in semanal.</p>';
+      return;
+    }
+    const ordenado = [...hist].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    const primero = ordenado[0], ultimo = ordenado[ordenado.length - 1];
+    const delta = ultimo.peso - primero.peso;
+    const fmtFecha = iso => { const d = new Date(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; };
+    const resumen = Math.abs(delta) < 0.1
+      ? `Peso estable desde el ${fmtFecha(primero.fecha)}`
+      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFecha(primero.fecha)}`;
+
+    wrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div><canvas id="graficoPeso" style="width:100%;height:220px;display:block"></canvas>`;
+    const canvas = document.getElementById('graficoPeso');
+    const dpr = window.devicePixelRatio || 1;
+    const W = Math.max(260, wrap.clientWidth || 320);
+    const H = 220;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const pesos = ordenado.map(h => h.peso);
+    const min = Math.min(...pesos), max = Math.max(...pesos);
+    const pad = (max - min) * 0.2 || 1;
+    const yMin = min - pad, yMax = max + pad;
+
+    const marginL = 34, marginR = 10, marginT = 14, marginB = 22;
+    const plotW = W - marginL - marginR;
+    const plotH = H - marginT - marginB;
+    const x = i => marginL + (ordenado.length === 1 ? plotW / 2 : (i / (ordenado.length - 1)) * plotW);
+    const y = v => marginT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+    // líneas de referencia horizontales
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.font = '10px "DM Mono", monospace';
+    ctx.fillStyle = '#8A8A8A';
+    ctx.textAlign = 'left';
+    [0, 0.5, 1].forEach(t => {
+      const v = yMin + (yMax - yMin) * t;
+      const yy = y(v);
+      ctx.beginPath(); ctx.moveTo(marginL, yy); ctx.lineTo(W - marginR, yy); ctx.stroke();
+      ctx.fillText(v.toFixed(1), 0, yy + 3);
+    });
+
+    // área bajo la curva
+    ctx.beginPath();
+    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
+    ctx.lineTo(x(ordenado.length - 1), marginT + plotH);
+    ctx.lineTo(x(0), marginT + plotH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, marginT, 0, marginT + plotH);
+    grad.addColorStop(0, 'rgba(232,73,15,0.28)');
+    grad.addColorStop(1, 'rgba(232,73,15,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // línea
+    ctx.beginPath();
+    ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
+    ctx.strokeStyle = '#E8490F';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // puntos
+    ordenado.forEach((h, i) => {
+      const xx = x(i), yy = y(h.peso);
+      const esBorde = i === 0 || i === ordenado.length - 1;
+      ctx.beginPath();
+      ctx.arc(xx, yy, esBorde ? 4 : 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = esBorde ? '#E8490F' : '#F0EDE8';
+      ctx.fill();
+    });
+
+    // etiquetas de valor en primer y último punto
+    ctx.font = '600 12px Inter, sans-serif';
+    ctx.fillStyle = '#F0EDE8';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${primero.peso}kg`, x(0), y(primero.peso) - 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${ultimo.peso}kg`, x(ordenado.length - 1), y(ultimo.peso) - 10);
+
+    // fechas en el eje
+    ctx.font = '10px "DM Mono", monospace';
+    ctx.fillStyle = '#8A8A8A';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmtFecha(primero.fecha), marginL, H - 4);
+    ctx.textAlign = 'right';
+    ctx.fillText(fmtFecha(ultimo.fecha), W - marginR, H - 4);
+  }
+  let _resizeGraficoPesoTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(_resizeGraficoPesoTimer);
+    _resizeGraficoPesoTimer = setTimeout(() => {
+      const wrap = document.getElementById('graficoPesoWrap');
+      if (wrap && wrap.offsetParent !== null) renderGraficoPeso();
+    }, 200);
+  }, { passive: true });
 
   // ===== INFORME SEMANAL =====
   // Resumen de "cómo ha ido la semana", calculado del todo a partir de datos
