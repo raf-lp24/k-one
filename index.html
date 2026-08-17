@@ -9521,10 +9521,31 @@
     // claves más largas primero para que "curl martillo" gane a "curl"
     _infoEjerciciosKeys = Object.keys(_infoEjercicios).sort((a, b) => b.length - a.length);
   }
+  // Palabras de equipo/variante que cambian el ejercicio de verdad (no es lo
+  // mismo "remo" que "remo en máquina" o "remo mancuerna a un brazo", ni
+  // "sentadilla" que "sentadilla búlgara"). El emparejamiento de abajo busca
+  // la clave MÁS LARGA que sea substring del nombre real, pero con ~200
+  // fichas no hay una para cada variante -- así que a veces "gana" una clave
+  // corta y genérica ("remo") para un nombre mucho más específico. Antes eso
+  // se traducía en enseñar fotos/pasos de OTRO ejercicio con normalidad (bug
+  // real reportado por el usuario ago 2026: "remo mancuerna a un brazo"
+  // mostraba la ficha de remo con barra). Sin acentos, igual que
+  // normalizarEjercicio() y las claves del JSON.
+  const _EQUIPO_VARIANTE = ['mancuerna', 'mancuernas', 'barra', 'polea', 'maquina', 'kettlebell',
+    'banda', 'disco', 'goblet', 'sumo', 'rumano', 'bulgara', 'declinado', 'inclinado', 'cerrado',
+    'martillo', 'concentrado', 'predicador', 'apoyado', 'alterno', 'pendlay', 'gironda', 'menton', 'militar'];
   async function abrirInfoEjercicio(nombre, diaNombre) {
     await _cargarInfoEjercicios();
     const n = normalizarEjercicio(nombre);
-    const key = (_infoEjerciciosKeys || []).find(k => n.includes(k));
+    let key = (_infoEjerciciosKeys || []).find(k => n.includes(k));
+    // Si la clave encontrada es corta/genérica (1-2 palabras) y el nombre real
+    // menciona un equipo o variante que esa clave NO cubre, no es una ficha
+    // fiable para este ejercicio -- mejor mandar al vídeo (siempre correcto)
+    // que dar por buena una foto de un movimiento distinto.
+    if (key && key.split(' ').length <= 2) {
+      const noCubre = _EQUIPO_VARIANTE.some(w => n.includes(w) && !key.includes(w));
+      if (noCubre) key = null;
+    }
     const info = key ? _infoEjercicios[key] : null;
     if (!info) {
       // Sin ficha para este ejercicio: llevamos directamente al vídeo de técnica
