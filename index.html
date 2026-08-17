@@ -9261,11 +9261,16 @@
 
   // Genera las barras del mini-historial (versión pequeña de la de "Mi progreso")
   // que acompaña al stepper de cada ejercicio.
-  function renderMiniHistorialHTML(historial) {
+  // `campo`/`unidad` opcionales para reutilizar el mismo mini-gráfico con
+  // datos que no son peso (segundos aguantados, rondas completadas...) --
+  // por defecto se comporta exactamente igual que antes (peso en kg).
+  function renderMiniHistorialHTML(historial, campo, unidad) {
+    campo = campo || 'peso';
+    unidad = unidad || 'kg';
     if (!historial || historial.length === 0) return '';
-    const max = Math.max(...historial.map(h => h.peso), 1);
+    const max = Math.max(...historial.map(h => h[campo]), 1);
     return historial.slice(-6).map(h =>
-      `<div class="peso-bar-mini" style="height:${Math.max(15, Math.round((h.peso / max) * 100))}%" title="${h.fecha}: ${h.peso} kg"></div>`
+      `<div class="peso-bar-mini" style="height:${Math.max(15, Math.round((h[campo] / max) * 100))}%" title="${h.fecha}: ${h[campo]} ${unidad}"></div>`
     ).join('');
   }
 
@@ -9928,6 +9933,46 @@
     const nombreSafe = _esc(nombre);
     const nombreJs = _esc(nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     const diaJs = _esc((diaNombre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+
+    // MARCA PERSONAL para core/acondicionamiento: no llevan peso en kg, pero sí
+    // hay una cifra de verdad que el cliente puede querer superar -- segundos
+    // aguantados en una plancha ("3×30s") o rondas completadas en un circuito
+    // ("3 rondas sin descanso de..."). Se detecta sobre `resto` (el texto que
+    // queda tras el nombre), nunca sobre el nombre en sí, para no confundir un
+    // "3" que forme parte del nombre del ejercicio con la marca a registrar.
+    let unidadMarca = '', valorDefecto = null, etiquetaMarca = '';
+    const mSeg = resto.match(/(\d+)\s*[x×]\s*(\d+)\s*s\b/i);
+    const mRondas = !mSeg && resto.match(/^(\d+)\s*rondas?\b/i);
+    if (mSeg) { unidadMarca = 's'; valorDefecto = parseInt(mSeg[2], 10); etiquetaMarca = 'Segundos'; }
+    else if (mRondas) { unidadMarca = 'rondas'; valorDefecto = parseInt(mRondas[1], 10); etiquetaMarca = 'Rondas'; }
+
+    let marcaHTML = '';
+    if (unidadMarca) {
+      const key = normalizarEjercicio(nombre);
+      const entry = userData.marcasEjercicios?.[key];
+      const valorActual = entry?.valor != null ? entry.valor : valorDefecto;
+      const marcaUltimoTexto = entry?.valorAnterior != null ? `Anterior: ${entry.valorAnterior} ${unidadMarca === 's' ? 'segundos' : 'rondas'}` : '';
+      const miniHistorialMarca = renderMiniHistorialHTML(entry?.historial, 'valor', unidadMarca === 's' ? 'segundos' : 'rondas');
+      const paso = unidadMarca === 's' ? 5 : 1;
+      const keyAttr = _esc(key);
+      marcaHTML = `<div class="ejercicio-metrics">
+          <div class="em em-peso">
+            <div class="em-k">${etiquetaMarca}</div>
+            <div class="ejercicio-fila-controls">
+              <div class="peso-stepper" onclick="event.stopPropagation()">
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,-${paso},${unidadMarca === 's' ? 5 : 1})" aria-label="Restar">−</button>
+                <input type="number" class="peso-input marca-input" step="${paso}" min="${unidadMarca === 's' ? 5 : 1}" inputmode="numeric" placeholder="0"
+                  data-ejercicio="${keyAttr}" data-nombre="${nombreSafe}" data-unidad="${unidadMarca}" value="${valorActual}" onclick="event.stopPropagation()" onchange="guardarMarcaEjercicio(this)">
+                <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,${paso},${unidadMarca === 's' ? 5 : 1})" aria-label="Sumar">+</button>
+                <span class="peso-unit">${unidadMarca === 's' ? 'seg' : 'rondas'}</span>
+              </div>
+              <span class="peso-ultimo marca-ultimo" data-ejercicio="${keyAttr}">${_esc(marcaUltimoTexto)}</span>
+              <div class="peso-mini-historial marca-mini-historial" data-ejercicio="${keyAttr}">${miniHistorialMarca}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
     return `<div class="ejercicio-card ejercicio-card-simple">
       <button type="button" class="ejercicio-thumb" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')" aria-label="Ver cómo se hace: ${nombreSafe}">
         <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>
@@ -9943,6 +9988,7 @@
           </div>
         </div>
         ${resto ? `<div class="ejercicio-card-detalle">${_esc(resto)}</div>` : ''}
+        ${marcaHTML}
       </div>
     </div>`;
   }
@@ -10148,6 +10194,71 @@
   }
 
   // Botones +/- del stepper: ajustan el valor del input y guardan al instante
+  // ===== MARCA PERSONAL (segundos aguantados, rondas completadas...) =====
+  // Mismo patrón exacto que ajustarPeso/guardarPesoEjercicio, para ejercicios
+  // de core/acondicionamiento (plancha, circuitos...) que no se miden en kg
+  // pero el cliente sí puede querer superarse: aguantar más segundos, o
+  // completar más rondas de las que pide el plan. Vive en userData.marcasEjercicios
+  // (aparte de pesosEjercicios) para no mezclar unidades distintas bajo la misma clave.
+  function ajustarMarca(btn, delta, min) {
+    const input = btn.parentElement.querySelector('.marca-input');
+    if (!input) return;
+    const actual = parseFloat(input.value) || 0;
+    input.value = Math.max(min || 0, Math.round(actual + delta));
+    guardarMarcaEjercicio(input);
+  }
+
+  function guardarMarcaEjercicio(input) {
+    const key = input.dataset.ejercicio;
+    if (!key) return;
+    const nombre = input.dataset.nombre || key;
+    const unidad = input.dataset.unidad || 'reps';
+    const etiqueta = unidad === 's' ? 'segundos' : unidad === 'rondas' ? 'rondas' : unidad;
+    const valor = parseFloat(input.value);
+    if (!userData.marcasEjercicios) userData.marcasEjercicios = {};
+
+    const hoy = getFechaHoyISO();
+    const previo = userData.marcasEjercicios[key];
+    const valorAnterior = previo ? previo.valor : null;
+
+    if (isNaN(valor) || valor <= 0) {
+      delete userData.marcasEjercicios[key];
+    } else {
+      const entry = previo || { historial: [] };
+      entry.nombre = nombre;
+      entry.valor = valor;
+      entry.unidad = unidad;
+      entry.fecha = hoy;
+      entry.historial = (entry.historial || []).filter(h => h.fecha !== hoy);
+      entry.historial.push({ fecha: hoy, valor });
+
+      if (valorAnterior != null && valorAnterior !== valor) {
+        entry.valorAnterior = valorAnterior;
+        showToast(`Última marca en ${nombre}: ${valorAnterior} ${etiqueta} · Ahora: ${valor} ${etiqueta}`);
+      }
+
+      userData.marcasEjercicios[key] = entry;
+    }
+
+    const entryActual = userData.marcasEjercicios[key];
+    const historial = entryActual?.historial;
+    const marcaUltimoTexto = entryActual?.valorAnterior != null ? `Anterior: ${entryActual.valorAnterior} ${etiqueta}` : '';
+    document.querySelectorAll(`.marca-input[data-ejercicio="${key}"]`).forEach(el => {
+      if (el !== input) el.value = input.value;
+    });
+    document.querySelectorAll(`.marca-mini-historial[data-ejercicio="${key}"]`).forEach(el => {
+      el.innerHTML = renderMiniHistorialHTML(historial, 'valor', etiqueta);
+    });
+    document.querySelectorAll(`.marca-ultimo[data-ejercicio="${key}"]`).forEach(el => {
+      el.textContent = marcaUltimoTexto;
+    });
+
+    const user = getCurrentUser();
+    if (user) {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+  }
+
   function ajustarPeso(btn, delta) {
     const input = btn.parentElement.querySelector('.peso-input');
     if (!input) return;
