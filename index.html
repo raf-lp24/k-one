@@ -10022,29 +10022,18 @@
     if (!match) return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${_esc(textoCap)}</span></div>`;
 
     let nombre = match[1].trim();
-    const tras = (match[3] || '').trim();
 
-    // BUG REAL encontrado por el usuario (ago 2026): cuando el consejo de técnica
-    // va ENTRE PARÉNTESIS ANTES del "3×12" en el texto original (p.ej. "press
-    // mancuernas en hombro (agarre neutro, baja hasta formar una "L" a 90°) 3×12"),
-    // la regex de arriba lo capturaba entero como si fuera el NOMBRE del
-    // ejercicio -- el titular gigante en mayúsculas de la tarjeta era en
-    // realidad "nombre + toda la técnica". Se separa aquí: el paréntesis final
-    // del nombre capturado no es parte del nombre, es la técnica.
-    let tecnicaPrevia = '';
-    const mCuePrevio = nombre.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-    if (mCuePrevio) { nombre = mCuePrevio[1].trim(); tecnicaPrevia = mCuePrevio[2].trim(); }
-
-    // Y cuando el consejo va DESPUÉS del "3×12" (el caso más común: "curl bíceps
-    // alterno 3×12 (controlado en la subida y bajada, sin balanceo)"), se
-    // calculaba en `resto` pero esa variable no se pintaba en ningún sitio del
-    // HTML devuelto -- el consejo de técnica se perdía en silencio para
-    // prácticamente todos los ejercicios con peso del plan.
-    let tecnicaPosterior = '';
-    const mCuePost = tras.match(/\(([^)]+)\)/);
-    if (mCuePost) tecnicaPosterior = mCuePost[1].trim();
-
-    const tecnica = [tecnicaPrevia, tecnicaPosterior].filter(Boolean).join(' — ');
+    // Cuando el consejo de técnica va ENTRE PARÉNTESIS ANTES del "3×12" en el
+    // texto original (p.ej. "press mancuernas en hombro (agarre neutro, baja
+    // hasta formar una "L" a 90°) 3×12"), la regex de arriba lo capturaba
+    // entero como si fuera el NOMBRE del ejercicio -- el titular gigante en
+    // mayúsculas de la tarjeta era en realidad "nombre + toda la técnica".
+    // Se separa aquí: el paréntesis final del nombre capturado no es parte
+    // del nombre. A petición del usuario (18 ago 2026) el consejo ya no se
+    // muestra en la tarjeta (salía en casi todos los ejercicios y sobraba
+    // visualmente) -- solo se descarta del nombre, no se pinta en ningún sitio.
+    const mCuePrevio = nombre.match(/^(.*?)\s*\([^)]+\)\s*$/);
+    if (mCuePrevio) nombre = mCuePrevio[1].trim();
 
     const key = normalizarEjercicio(nombre);
     const entry = userData.pesosEjercicios?.[key];
@@ -10115,7 +10104,6 @@
             </div>
           </div>
         </div>
-        ${tecnica ? `<div class="ejercicio-card-detalle">${_esc(tecnica)}</div>` : ''}
       </div>
     </div>`;
   }
