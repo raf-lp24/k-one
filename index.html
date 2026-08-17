@@ -4291,8 +4291,12 @@
   .cal-day.future { background: transparent; }
 
   /* COMPARADOR DE FOTOS */
-  .comparador-row { display: flex; gap: 20px; flex-wrap: wrap; }
-  .comparador-col { flex: 1 1 220px; min-width: 0; }
+  /* Grid fijo de 2 columnas, nunca en flex-wrap: si se apilaran en móvil
+     (dos fotos grandes una debajo de otra) dejaría de poder verse el antes
+     y el después a la vez, que es todo el sentido del comparador. */
+  .comparador-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .comparador-col { min-width: 0; }
+  @media (max-width: 480px) { .comparador-row { gap: 8px; } }
   .comparador-foto {
     aspect-ratio: 3/4;
     background: var(--grafito);
