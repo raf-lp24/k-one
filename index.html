@@ -2096,22 +2096,33 @@
   .faq-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2px;
+    gap: 16px;
     margin-top: 64px;
   }
 
+  /* Mismo lenguaje de tarjeta que .price-card / .testimonial-card (borde +
+     radio + elevación al hover) -- antes el FAQ era el único bloque plano,
+     sin borde ni esquinas redondeadas, pegado a sus vecinos por un hairline
+     de 2px, así que desentonaba con el resto de la landing. */
   .faq-item {
     background: var(--carbon);
+    border: 1px solid var(--humo);
+    border-radius: 14px;
     padding: 0;
     cursor: pointer;
+    transition: border-color 0.25s, transform 0.25s;
   }
+  .faq-item:hover { border-color: rgba(232,73,15,0.45); transform: translateY(-2px); }
 
+  /* Inter, no DM Mono: el monoespaciado de la web se reserva para etiquetas
+     cortas (MÚSCULOS TRABAJADOS, 01/02...), no para frases completas de
+     lectura -- en una pregunta entera se leía como texto de terminal. */
   .faq-q {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--blanco);
-    padding: 24px 28px;
+    padding: 22px 26px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -2142,7 +2153,7 @@
     font-size: 14px;
     color: var(--metal-claro);
     line-height: 1.7;
-    padding: 0 28px 24px;
+    padding: 0 26px 24px;
     margin: 0;
   }
 
