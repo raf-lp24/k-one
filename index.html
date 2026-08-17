@@ -13540,16 +13540,43 @@
       // CrossFit el volumen se mide en km/WOD, no en series por grupo, forzar
       // esta métrica ahí sería una comparación sin sentido.
       if (esGimnasio || esCombinacion) {
+        // BUG REAL encontrado auditando el motor (ago 2026): estas regex solo
+        // conocían los nombres de las PLANTILLAS, no los que introduce la
+        // rotación automática de ejercicios (ALTERNATIVAS_EJERCICIO). En cuanto
+        // la rotación cambiaba "curl bíceps" por "Curl en polea baja" y
+        // "extensión de tríceps" por "Press cerrado", Brazos caía a 0 series y
+        // el cliente recibía un aviso FALSO diciendo que su plan no tenía
+        // trabajo directo de brazos — cuando sí lo tenía, solo que con otro
+        // nombre. Reproducido con "Entreno en serio · 3 días". Ahora la tabla
+        // cubre también todos los nombres alternativos de la rotación.
+        //
+        // OJO CON EL ORDEN: se asigna al PRIMER grupo que casa. Brazos va antes
+        // que Pecho porque "fondos en banco" y "press cerrado" son movimientos
+        // de tríceps que antes se contaban como pecho. Y "curl" nunca va suelto
+        // en Brazos, para no tragarse "curl femoral" (que es de isquios).
         const GRUPOS_MUSCULARES = {
-          'Pecho': /press banca|press inclinado|aperturas|fondos en paralelas|fondos en banco|cruces en polea/i,
-          'Espalda': /remo|dominadas|jal[oó]n|peso muerto|pull[- ]?ups?/i,
-          'Piernas': /sentadilla|prensa de piernas|zancadas|hip thrust|gemelos|curl femoral|leg curl|step-?ups?/i,
-          'Hombros': /press militar|press de hombro|overhead press|elevaciones laterales|p[aá]jaros|press arnold/i,
-          'Brazos': /curl b[ií]ceps|curl martillo|press franc[eé]s|extensi[oó]n de tr[ií]ceps|curl de biceps/i,
+          'Brazos': /curl b[ií]ceps|curl de b[ií]ceps|curl de biceps|curl martillo|curl en polea|curl predicador|b[ií]ceps|press franc[eé]s|extensi[oó]n de tr[ií]ceps|tr[ií]ceps|fondos en banco|press cerrado|copa de tr[ií]ceps|patada de tr[ií]ceps/i,
+          'Hombros': /press militar|press de hombro|overhead press|push press|thrusters?|elevaciones laterales|elevaciones en polea|elevaciones frontales|p[aá]jaros|press arnold|face pull|retracci[oó]n escapular|encogimiento/i,
+          'Pecho': /press banca|press inclinado|press con mancuernas|aperturas|aperturas en polea|fondos en paralelas|cruces en polea|cruces de polea|flexiones/i,
+          'Espalda': /remo|dominadas|jal[oó]n|peso muerto|pull[- ]?ups?|suspensi[oó]n activa|dead hang/i,
+          'Piernas': /sentadilla|front squat|back squat|prensa de piernas|zancadas|reverse lunge|hip thrust|puente de gl[uú]teo|gemelos|curl femoral|leg curl|step-?ups?|extensi[oó]n lumbar|extensi[oó]n de cu[áa]driceps/i,
         };
         const volumenSemanal = { Pecho: 0, Espalda: 0, Piernas: 0, Hombros: 0, Brazos: 0 };
+        // El conteo de series solo ve lo que viene en formato "4×10". En los días
+        // de metcon/complejo (sobre todo en Híbrido) el trabajo se escribe como
+        // "5 rondas: 8 RDL + 8 push press + ...", sin ese formato, así que no
+        // suma series aunque el grupo SÍ se esté entrenando. Sin esto, el aviso
+        // saltaba en el 100% de los planes híbridos diciendo que faltaban
+        // hombros o brazos cuando aparecían en los circuitos — medido: 48 avisos
+        // falsos solo entre Gimnasio e Híbrido. Se registra aparte si el grupo
+        // aparece en el texto en cualquier forma, para no acusar de "ausente"
+        // algo que el cliente sí está entrenando.
+        const presenciaEnTexto = { Pecho: false, Espalda: false, Piernas: false, Hombros: false, Brazos: false };
         semana.forEach(d => {
           if (!d.detalle) return;
+          Object.keys(GRUPOS_MUSCULARES).forEach(g => {
+            if (GRUPOS_MUSCULARES[g].test(d.detalle)) presenciaEnTexto[g] = true;
+          });
           d.detalle.split(',').forEach(clausula => {
             const m = clausula.match(/(\d+)\s*[x×]\s*\d+/);
             if (!m) return;
@@ -13563,7 +13590,12 @@
         // habitual citado para mantener/progresar en hipertrofia (por debajo,
         // el estímulo semanal es insuficiente para ese grupo concreto).
         const gruposBajos = Object.entries(volumenSemanal).filter(([, s]) => s > 0 && s < 6).map(([g]) => g);
-        const gruposAusentes = Object.entries(volumenSemanal).filter(([, s]) => s === 0).map(([g]) => g);
+        // Solo cuenta como ausente si NO aparece por ningún lado: si sale en un
+        // circuito sin formato de series, se está entrenando igual y avisar de
+        // que "falta" sería sencillamente falso.
+        const gruposAusentes = Object.entries(volumenSemanal)
+          .filter(([g, s]) => s === 0 && !presenciaEnTexto[g])
+          .map(([g]) => g);
         if (gruposAusentes.length) {
           notasDeporte.push(`Volumen semanal: esta semana no hemos detectado series directas de ${gruposAusentes.join(', ').toLowerCase()} en tu plan — puede que lo trabajes indirectamente con otros ejercicios, pero si notas ese grupo flojo, coméntanoslo por el chat.`);
         } else if (gruposBajos.length) {
