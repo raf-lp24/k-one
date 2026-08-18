@@ -5,6 +5,9 @@ node_modules/
 .env
 .env.local
 .env*.local
+.env.production
+*.pem
+*.key
 
 # Archivos temporales/bloqueo de Microsoft Word
 ~$*
