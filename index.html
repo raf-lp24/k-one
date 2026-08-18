@@ -11957,11 +11957,21 @@
     const eq = (gimnasio, conMaterial, sinMaterial) =>
       _sinMat ? sinMaterial : (_enCasa ? conMaterial : gimnasio);
     if (!soloDieta) {
-    if (lesion.includes('Rodilla')) {
+    // Cuando la lesión es "Otra" (sin categoría concreta), se busca en el texto
+    // libre que el usuario escribió alguna palabra clave de rodilla/espalda/
+    // hombro para aplicar el mismo filtro de seguridad de forma preventiva --
+    // antes esto no hacía nada y el entreno salía sin adaptar ningún ejercicio.
+    const _lesionOtra = lesion.includes('Otra');
+    const _detalleLesion = (u.lesionDetalle || '').toLowerCase();
+    const _mencionaLesion = (...palabras) => palabras.some(p => _detalleLesion.includes(p));
+    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
+    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
+    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
+    if (_lesionZonaRodilla) {
       // Las reglas van de la frase MÁS larga a la más corta y consumen el material
       // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
       // ("Press inclinado en máquina (rango controlado) mancuernas 4×10").
-      mapaLesion = [
+      mapaLesion = mapaLesion.concat([
         [/[Ss]entadilla goblet( con mancuerna)?/g, 'Step-ups controlados (sin salto)'],
         [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'elevaciones de cadera (hip thrust)'],
         // "Burpees box jump over" tiene que ir ANTES que la regla suelta de "box
@@ -12011,10 +12021,13 @@
         [/técnica de front squat \+ lanzamiento/gi, 'empuja desde los hombros, sin bajar a sentadilla'],
         [/[Dd]ouble[- ]unders?/g, 'remo o bici (bajo impacto)'],
         [/[Aa]ir squats?/g, 'sentadillas parciales sin dolor'],
-      ];
-      notasSalud.push('Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos e impacto) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
-    } else if (lesion.includes('Espalda')) {
-      mapaLesion = [
+      ]);
+      notasSalud.push(_lesionOtra
+        ? 'Detectamos mención a la rodilla en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios que más la cargan (sentadilla profunda, zancadas, saltos e impacto). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
+        : 'Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos e impacto) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
+    }
+    if (_lesionZonaEspalda) {
+      mapaLesion = mapaLesion.concat([
         [/[Pp]eso muerto rumano( con mancuernas)?/g, 'Hip thrust'],
         [/[Pp]eso muerto( con mancuernas| convencional)?/g, 'Hip thrust'],
         [/\bdeadlifts?\b/gi, 'hip thrust'],
@@ -12027,10 +12040,13 @@
         [/[Cc]lean & jerk|[Hh]ang clean|[Pp]ower clean|\bcleans?\b/g, 'hip thrust con barra'],
         [/[Kk]ettlebell swings?|\bKB swings?\b/g, 'hip thrust con mancuerna'],
         [/[Hh]iperextensiones?/g, 'plancha frontal'],
-      ];
-      notasSalud.push('Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
-    } else if (lesion.includes('Hombro')) {
-      mapaLesion = [
+      ]);
+      notasSalud.push(_lesionOtra
+        ? 'Detectamos mención a la espalda en lo que nos contaste y hemos sustituido de forma preventiva los ejercicios con más carga lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
+        : 'Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
+    }
+    if (_lesionZonaHombro) {
+      mapaLesion = mapaLesion.concat([
         // Nombre corto a propósito (y en plural, para seguir enlazando con la
         // ficha de ejercicio y el vídeo, que buscan por "elevaciones frontales"):
         // "Elevaciones frontales con mancuernas (ligero)" sumado a la nota técnica
@@ -12083,10 +12099,13 @@
         // lesión reescribiera el nombre — mismo problema que con press banca.
         [/[Ee]levaciones laterales( con mancuernas)?/g, 'Elevaciones laterales por debajo del hombro (rango corto)'],
         [/[Ff]lexiones pique \(pike push-ups\)|[Ff]lexiones pique/g, 'flexiones normales'],
-      ];
-      notasSalud.push('Hemos adaptado los ejercicios que exigen empuje vertical o rango completo de hombro (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza) por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
-    } else if (lesion.includes('Otra')) {
-      notasSalud.push('Nos indicaste que tienes una lesión. No hemos podido adaptar ejercicios concretos porque no la especificaste — si algún ejercicio te genera dolor, usa "¿Cómo va el entreno?" para cambiarlo por una variante más segura.');
+      ]);
+      notasSalud.push(_lesionOtra
+        ? 'Detectamos mención al hombro en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios de empuje vertical o rango completo (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
+        : 'Hemos adaptado los ejercicios que exigen empuje vertical o rango completo de hombro (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza) por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
+    }
+    if (_lesionOtra && !_lesionZonaRodilla && !_lesionZonaEspalda && !_lesionZonaHombro) {
+      notasSalud.push('Nos indicaste que tienes una lesión. No hemos podido adaptar ejercicios concretos porque no identificamos la zona en lo que nos contaste — si algún ejercicio te genera dolor, usa "¿Cómo va el entreno?" para cambiarlo por una variante más segura.');
     }
 
     // OJO: el mapa de lesión NO se aplica aquí. Se aplica más abajo, después de la
