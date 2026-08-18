@@ -79,8 +79,31 @@ async function estaLimitadoPorTasa(req, tipo) {
   }
 }
 
+// Antes: bloque naranja sólido con "K-ONE" en blanco + cuerpo plano — el
+// aspecto genérico de cualquier plantilla de email marketing de plantilla,
+// sin relación visual con la web real. Ahora: la misma tarjeta oscura con
+// borde + esquinas redondeadas que usa toda la app (.price-card,
+// .testimonial-card...), franja naranja fina arriba en vez de un bloque
+// entero, y el logotipo partido K-/ONE tal cual aparece en la web. Tablas en
+// vez de flex/grid para que no se rompa en Outlook de escritorio.
 function emailWrapper(contenido) {
-  return `<div style="background:#0b0b0b;padding:0;font-family:Arial,Helvetica,sans-serif;color:#e0e0e0"><div style="max-width:560px;margin:0 auto"><div style="background:#E8490F;padding:24px;text-align:center"><div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#fff">K-ONE</div></div>${contenido}<div style="padding:16px 28px;border-top:1px solid #1a1a1a;text-align:center"><p style="color:#555;font-size:13px;margin:0">Equipo K-<span style="color:#E8490F;font-weight:600">ONE</span></p><p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> · <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p></div></div></div>`;
+  return `<div style="background:#0A0A0A;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">
+    <div style="max-width:560px;margin:0 auto;background:#141414;border:1px solid #232323;border-radius:16px;overflow:hidden">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+        <tr><td style="height:4px;line-height:4px;font-size:0;background:#E8490F">&nbsp;</td></tr>
+        <tr><td style="padding:26px 28px 18px;text-align:center">
+          <span style="font-size:24px;font-weight:900;letter-spacing:3px;color:#F0EDE8">K-</span><span style="font-size:24px;font-weight:900;letter-spacing:3px;color:#E8490F">ONE</span>
+        </td></tr>
+      </table>
+      ${contenido}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid #232323">
+        <tr><td style="padding:18px 28px;text-align:center">
+          <p style="color:#5A5A5A;font-size:12px;margin:0">Equipo K-<span style="color:#E8490F;font-weight:600">ONE</span></p>
+          <p style="color:#444;font-size:10px;margin:8px 0 0"><a href="mailto:k.one.fit26@gmail.com" style="color:#E8490F;text-decoration:none">k.one.fit26@gmail.com</a> &middot; <a href="${APP_URL}" style="color:#666;text-decoration:none">k-one.fit</a></p>
+        </td></tr>
+      </table>
+    </div>
+  </div>`;
 }
 
 async function handleCronRetencion(req, res) {
@@ -363,31 +386,51 @@ async function handleCronRetencion(req, res) {
         ];
         const mensajeSemana = mensajes[semana % mensajes.length];
 
+        // Antes: fila de 3 cajas con display:flex (Outlook de escritorio no
+        // soporta flex -- se apilaban en vertical en vez de en fila) y un
+        // "Tu semana en K-ONE" genérico como único titular. Ahora: fila de
+        // estadísticas con <table> de verdad (misma técnica que ya usan
+        // otras plantillas de este fichero, ej. el email de día 8), eyebrow
+        // "SEMANA N" + titular que saluda por nombre, y números más grandes
+        // para que el resumen se lea de un vistazo.
         const htmlResumen = emailWrapper(`
-            <div style="padding:28px 28px 0">
-              <h1 style="color:#fff;font-size:20px;font-weight:600;margin:0 0 18px">Tu semana en K-ONE</h1>
-              <p style="color:#b5b2ad;font-size:14px;line-height:1.7;margin:0 0 18px">Hola <span style="color:#E8490F;font-weight:600">${esc(nombre)}</span>, aquí tienes tu resumen de la semana ${semana}.</p>
-              <div style="display:flex;gap:8px;margin-bottom:18px">
-                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-size:24px;font-weight:700;color:#27ae60">${entrenos}</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px">Entrenos</div>
-                </div>
-                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-size:24px;font-weight:700;color:#E8490F">${racha}</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px">Racha</div>
-                </div>
-                <div style="flex:1;background:#141414;border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-size:24px;font-weight:700;color:#F0EDE8">S${semana}</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px">Semana</div>
-                </div>
-              </div>
-              <div style="background:#141414;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px">
-                <p style="margin:0;font-size:13px;color:#b5b2ad;line-height:1.6;font-style:italic">"${mensajeSemana}"</p>
-              </div>
-            </div>
-            <div style="padding:0 28px 28px;text-align:center">
-              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">VER MI PLAN</a>
-            </div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr><td style="padding:0 28px 20px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#E8490F;text-transform:uppercase;margin-bottom:10px">Semana ${semana}</div>
+                <h1 style="color:#F0EDE8;font-size:21px;font-weight:700;margin:0 0 8px;line-height:1.3">Hola ${esc(nombre)}, así te ha ido esta semana</h1>
+                <p style="color:#8A8A8A;font-size:13.5px;line-height:1.6;margin:0">Tu resumen, calculado solo con tus datos.</p>
+              </td></tr>
+            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr>
+                <td width="33.33%" style="padding:0 4px 0 28px;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
+                  <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#27ae60;line-height:1;font-family:Arial,Helvetica,sans-serif">${entrenos}</div>
+                  <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Entrenos</div></div>
+                </td>
+                <td width="6" style="font-size:0;line-height:0">&nbsp;</td>
+                <td width="33.33%" style="padding:0 4px;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
+                  <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#E8490F;line-height:1;font-family:Arial,Helvetica,sans-serif">${racha}</div>
+                  <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Racha</div></div>
+                </td>
+                <td width="6" style="font-size:0;line-height:0">&nbsp;</td>
+                <td width="33.33%" style="padding:0 28px 0 4px;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
+                  <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#F0EDE8;line-height:1;font-family:Arial,Helvetica,sans-serif">S${semana}</div>
+                  <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Semana</div></div>
+                </td>
+              </tr>
+            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr><td style="padding:20px 28px 0">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#0A0A0A;border-left:3px solid #E8490F;border-radius:0 10px 10px 0">
+                  <tr><td style="padding:14px 18px">
+                    <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6;font-style:italic">&ldquo;${esc(mensajeSemana)}&rdquo;</p>
+                  </td></tr>
+                </table>
+              </td></tr>
+              <tr><td style="padding:24px 28px 28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:13px 34px;font-size:13px;font-weight:700;letter-spacing:1px;border-radius:10px">VER MI PLAN →</a>
+              </td></tr>
+            </table>
           `);
         await enviarEmail(apiKey, {
           from: 'K-ONE <equipo@k-one.fit>',
