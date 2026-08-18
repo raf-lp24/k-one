@@ -18766,21 +18766,21 @@
           : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 7000);
         return;
       }
-      // No es promoción: se prueba como invitación de un amigo. La RLS de
-      // profiles impide leer la fila de otro usuario, así que se busca al
-      // referrer con una función SECURITY DEFINER que solo da su id.
-      const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: codigo });
-      if (referrerId && referrerId !== userId) {
-        const { data: filas, error } = await supa.from('profiles')
-          .update({ referido_por: codigo }).eq('id', userId).select('id');
-        if (error || !filas || !filas.length) return; // sin sesión todavía: se reintenta más tarde
-        await supa.from('referidos').insert({ referrer_id: referrerId, referido_id: userId, referido_email: email || '', estado: 'pendiente' });
+      // No es promoción: se prueba como invitación de un amigo. Todo el
+      // registro (resolver el código, comprobar que no es el suyo propio,
+      // actualizar referido_por e insertar en referidos) pasa por una única
+      // función SECURITY DEFINER -- el insert directo desde el cliente
+      // permitía mandar un referrer_id inventado sin pasar por un código real.
+      const { data: reg } = await supa.rpc('registrar_referido', { p_codigo: codigo });
+      if (reg && reg.ok) {
         try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
-      } else {
-        // Código inválido o es el suyo propio: no tiene sentido reintentarlo.
-        if (referrerId === userId) showToast('No puedes usar tu propio código de invitación', 4000);
+      } else if (reg && reg.motivo === 'propio_codigo') {
+        showToast('No puedes usar tu propio código de invitación', 4000);
+        try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
+      } else if (reg && reg.motivo === 'codigo_no_existe') {
         try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
       }
+      // motivo 'sin_sesion': no se borra el código pendiente, se reintenta más tarde.
     } catch (e) { console.warn('[registro] Error aplicando código pendiente:', e.message); }
   }
 
