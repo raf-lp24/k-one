@@ -18971,14 +18971,13 @@
     if (data.user?.id) {
       try {
         await supa.from('profiles').update({ nombre }).eq('id', data.user.id);
-        // Comprobar si tiene invitación premium (añadida desde Jarvis)
-        const { data: inv } = await supa.from('invitaciones_premium')
-          .select('email').eq('email', email).maybeSingle();
-        if (inv) {
-          const expira = new Date();
-          expira.setFullYear(expira.getFullYear() + 1);
-          await supa.from('profiles').update({ is_beta: true, beta_expires: expira.toISOString() }).eq('id', data.user.id);
-          await supa.from('invitaciones_premium').delete().eq('email', email);
+        // Comprobar si tiene invitación premium (añadida desde Jarvis).
+        // Vía RPC porque profiles.is_beta/beta_expires están protegidos por
+        // trigger contra updates directos desde el cliente (authenticated) --
+        // la función SECURITY DEFINER concede el premium comprobando el
+        // email real de la sesión, no el del formulario.
+        const { data: inv } = await supa.rpc('aplicar_invitacion_premium');
+        if (inv?.ok) {
           await syncProfileFromSupabase(data.user);
         }
       } catch (e) {
