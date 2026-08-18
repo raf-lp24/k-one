@@ -9,8 +9,8 @@
      lema se mantienen pero acompañados de lo que la web hace. -->
 <title>K-ONE — Plan de entrenamiento y nutrición personalizado</title>
 <meta name="description" content="K-ONE genera tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a tu progreso. Gimnasio, running e híbrido. Empieza por 1,99€.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='22' fill='%23F0EDE8'>K-<tspan fill='%23E8490F'>1</tspan></text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='32' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='60' fill='%23F0EDE8'>K-<tspan fill='%23E8490F'>1</tspan></text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='22' fill='%23F0EDE8'>K-<tspan fill='%23D1420E'>1</tspan></text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='32' fill='%230a0a0a'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='900' font-size='60' fill='%23F0EDE8'>K-<tspan fill='%23D1420E'>1</tspan></text></svg>">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://k-one.fit">
 <meta property="og:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
@@ -198,7 +198,12 @@
     --carbon: #141414;
     --grafito: #1E1E1E;
     --acero: #2A2A2A;
-    --brasa: #E8490F;
+    /* Antes #E8490F: texto blanco encima daba 3.90:1 de contraste, por debajo
+       del mínimo AA (4.5:1) que exige texto normal (los botones/badges que la
+       usan van a 10-13px, ninguno llega al umbral de "texto grande" que
+       bajaría el mínimo a 3:1). Este tono da 4.67:1 -- 10% más oscuro, sigue
+       leyéndose como el mismo naranja "brasa". */
+    --brasa: #D1420E;
     --brasa-oscura: #C03A08;
     --metal: #8A8A8A;
     --metal-claro: #B5B2AD;
@@ -219,19 +224,19 @@
   }
 
   /* ══════ MODO CLARO ══════ */
-  /* Paleta: fondo crema #F8F6F3, cards #FFF, texto #1A1A1A, secundario #5A5A5A, bordes #E0DCD5, acento #E8490F */
+  /* Paleta: fondo crema #F8F6F3, cards #FFF, texto #1A1A1A, secundario #5A5A5A, bordes #E0DCD5, acento #D1420E */
 
   /* 1. NUCLEAR: todo texto negro, todo borde suave, todo fondo inline → blanco */
   [data-theme="light"] * { color: #1A1A1A !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] *[style] { background: #FFF !important; }
-  [data-theme="light"] [style*="background:#E8490F"] { background: #E8490F !important; }
+  [data-theme="light"] [style*="background:#D1420E"] { background: #D1420E !important; }
   [data-theme="light"] [style*="background:#27ae60"] { background: #27ae60 !important; }
   [data-theme="light"] [style*="background:#e74c3c"] { background: #e74c3c !important; }
   [data-theme="light"] [style*="background:#151515"] { background: #F0ECE6 !important; }
-  [data-theme="light"] [style*="background:#E8490F"] * { color: #FFF !important; }
+  [data-theme="light"] [style*="background:#D1420E"] * { color: #FFF !important; }
   [data-theme="light"] [style*="background:#27ae60"] * { color: #FFF !important; }
   [data-theme="light"] [style*="background:#e74c3c"] * { color: #FFF !important; }
-  [data-theme="light"] [style*="background:linear-gradient(135deg,#E8490F"] { background: linear-gradient(135deg,#E8490F,#ff6b2b) !important; }
+  [data-theme="light"] [style*="background:linear-gradient(135deg,#D1420E"] { background: linear-gradient(135deg,#D1420E,#ff6b2b) !important; }
   [data-theme="light"] [style*="background:rgba(232,73,15"] { background-color: rgba(232,73,15,0.06) !important; }
   [data-theme="light"] [style*="background:rgba(39,174,96"] { background-color: rgba(39,174,96,0.06) !important; }
   [data-theme="light"] [style*="background:#151515"] { background-color: #F0ECE6 !important; }
@@ -259,46 +264,46 @@
   [data-theme="light"] input::placeholder, [data-theme="light"] textarea::placeholder { color: #AAA !important; }
 
   /* 5. BOTONES — naranja y verde mantienen texto blanco */
-  [data-theme="light"] .btn-primary { background: #E8490F !important; color: #FFF !important; border-color: #E8490F !important; }
+  [data-theme="light"] .btn-primary { background: #D1420E !important; color: #FFF !important; border-color: #D1420E !important; }
   [data-theme="light"] .btn-completado { background: #27ae60 !important; color: #FFF !important; border-color: #27ae60 !important; }
   [data-theme="light"] .btn-ghost { background: transparent !important; border-color: #D5D0C8 !important; color: #5A5A5A !important; }
   [data-theme="light"] .btn-ghost:hover { background: #F0ECE6 !important; }
   [data-theme="light"] .jarvis-tab-active { color: #FFF !important; }
-  [data-theme="light"] button[style*="background:#E8490F"], [data-theme="light"] button[style*="background:#27ae60"] { color: #FFF !important; }
+  [data-theme="light"] button[style*="background:#D1420E"], [data-theme="light"] button[style*="background:#27ae60"] { color: #FFF !important; }
 
   /* 6. SIDEBAR nav */
   [data-theme="light"] .dash-nav-item { color: #5A5A5A !important; }
   [data-theme="light"] .dash-nav-item:hover { background: #F0ECE6 !important; color: #1A1A1A !important; }
   [data-theme="light"] .dash-nav-item.active { background: rgba(232,73,15,0.08) !important; }
-  [data-theme="light"] .dash-nav-item.active, [data-theme="light"] .dash-nav-item.active * { color: #E8490F !important; }
+  [data-theme="light"] .dash-nav-item.active, [data-theme="light"] .dash-nav-item.active * { color: #D1420E !important; }
   [data-theme="light"] .dash-user { background: #F8F6F3 !important; border: 1px solid #E0DCD5 !important; }
   [data-theme="light"] .logout-btn { color: #5A5A5A !important; }
   [data-theme="light"] .logout-btn:hover { background: #F0ECE6 !important; }
 
   /* 7. ACENTOS de marca — preservar colores */
-  [data-theme="light"] .motivation-label, [data-theme="light"] .dash-greeting { color: #E8490F !important; }
-  [data-theme="light"] [style*="color:#E8490F"] { color: #E8490F !important; }
+  [data-theme="light"] .motivation-label, [data-theme="light"] .dash-greeting { color: #D1420E !important; }
+  [data-theme="light"] [style*="color:#D1420E"] { color: #D1420E !important; }
   [data-theme="light"] [style*="color:#27ae60"] { color: #27ae60 !important; }
   [data-theme="light"] [style*="color:#e74c3c"] { color: #e74c3c !important; }
   [data-theme="light"] [style*="color:#f39c12"] { color: #f39c12 !important; }
   [data-theme="light"] .logo { color: #1A1A1A !important; }
-  [data-theme="light"] .logo span, [data-theme="light"] .logo .brasa { color: #E8490F !important; }
+  [data-theme="light"] .logo span, [data-theme="light"] .logo .brasa { color: #D1420E !important; }
   [data-theme="light"] .auth-logo { color: #1A1A1A !important; }
-  [data-theme="light"] .auth-logo span { color: #E8490F !important; }
+  [data-theme="light"] .auth-logo span { color: #D1420E !important; }
 
   /* 8. ELEMENTOS interactivos con estado */
   [data-theme="light"] .radio-opt { background: #F5F2EE !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .radio-opt.selected { border-color: #E8490F !important; background: rgba(232,73,15,0.06) !important; }
+  [data-theme="light"] .radio-opt.selected { border-color: #D1420E !important; background: rgba(232,73,15,0.06) !important; }
   [data-theme="light"] .week-tab, [data-theme="light"] .nutri-dia,
   [data-theme="light"] .meal-preview-pill, [data-theme="light"] .rating-btn,
   [data-theme="light"] .fotos-nav-btn, [data-theme="light"] .contacto-motivo { background: #F0ECE6 !important; color: #5A5A5A !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .week-tab.active, [data-theme="light"] .nutri-dia.active,
   [data-theme="light"] .meal-preview-pill.selected, [data-theme="light"] .rating-btn.selected,
-  [data-theme="light"] .fotos-nav-btn.active, [data-theme="light"] .contacto-motivo.selected { background: #E8490F !important; border-color: #E8490F !important; }
+  [data-theme="light"] .fotos-nav-btn.active, [data-theme="light"] .contacto-motivo.selected { background: #D1420E !important; border-color: #D1420E !important; }
   [data-theme="light"] .week-tab.active *, [data-theme="light"] .nutri-dia.active *,
   [data-theme="light"] .meal-preview-pill.selected *, [data-theme="light"] .rating-btn.selected *,
   [data-theme="light"] .fotos-nav-btn.active *, [data-theme="light"] .contacto-motivo.selected * { color: #FFF !important; }
-  [data-theme="light"] .meal-option.selected { border-color: #E8490F !important; background: rgba(232,73,15,0.04) !important; }
+  [data-theme="light"] .meal-option.selected { border-color: #D1420E !important; background: rgba(232,73,15,0.04) !important; }
 
   /* 9. OTROS */
   [data-theme="light"] .photo-slot { background: #F0ECE6 !important; border: 1px dashed #D5D0C8 !important; }
@@ -318,13 +323,13 @@
   [data-theme="light"] .faq-a { color: #5A5A5A !important; }
   [data-theme="light"] .mobile-menu { background: #FFF !important; }
   [data-theme="light"] #kcalDiarioBar { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] #kcalDiarioFill { background: #E8490F !important; }
-  [data-theme="light"] .nutri-resumen-label { color: #E8490F !important; }
+  [data-theme="light"] #kcalDiarioFill { background: #D1420E !important; }
+  [data-theme="light"] .nutri-resumen-label { color: #D1420E !important; }
   [data-theme="light"] .stat-card-label { color: #5A5A5A !important; }
   [data-theme="light"] .nutri-dia:hover { background: #E0DCD5 !important; }
-  [data-theme="light"] .nutri-dia.selected { background: #E8490F !important; border-color: #E8490F !important; }
+  [data-theme="light"] .nutri-dia.selected { background: #D1420E !important; border-color: #D1420E !important; }
   [data-theme="light"] .nutri-dia.selected * { color: #FFF !important; }
-  [data-theme="light"] .nutri-dia.has-selection { border-color: #E8490F !important; }
+  [data-theme="light"] .nutri-dia.has-selection { border-color: #D1420E !important; }
   [data-theme="light"] .peso-btn, [data-theme="light"] .stepper-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
   [data-theme="light"] .peso-btn:hover, [data-theme="light"] .stepper-btn:hover { background: #D5D0C8 !important; }
   [data-theme="light"] .peso-input, [data-theme="light"] .stepper-input { background: #FFF !important; color: #1A1A1A !important; }
@@ -332,10 +337,10 @@
   [data-theme="light"] .cp-peso-btn:hover { background: #D5D0C8 !important; }
   [data-theme="light"] .macro-bar-track { background: #E0DCD5 !important; }
   [data-theme="light"] .macro-bar-fill { background-color: inherit !important; }
-  [data-theme="light"] .macro-bar-fill[style*="background:var(--brasa)"] { background: #E8490F !important; }
+  [data-theme="light"] .macro-bar-fill[style*="background:var(--brasa)"] { background: #D1420E !important; }
   [data-theme="light"] .macro-bar-fill[style*="background:#f0a500"] { background: #f0a500 !important; }
   [data-theme="light"] .macro-bar-fill[style*="background:#27ae60"] { background: #27ae60 !important; }
-  [data-theme="light"] #modalAdmin button[style*="background:#E8490F"] { background: #E8490F !important; color: #FFF !important; }
+  [data-theme="light"] #modalAdmin button[style*="background:#D1420E"] { background: #D1420E !important; color: #FFF !important; }
   [data-theme="light"] #modalAdmin button[style*="Cerrar"],
   [data-theme="light"] #modalAdmin button:last-child { background: revert !important; }
   [data-theme="light"] .meal-block-header:hover { background: #F0ECE6 !important; }
@@ -362,18 +367,18 @@
   [data-theme="light"] #bienvenida, [data-theme="light"] #registro, [data-theme="light"] #login { background: #F8F6F3 !important; }
   [data-theme="light"] .auth-card input { background: #FFF !important; border-color: #D5D0C8 !important; color: #1A1A1A !important; }
   [data-theme="light"] .auth-card label, [data-theme="light"] .auth-card p { color: #5A5A5A !important; }
-  [data-theme="light"] .auth-card a { color: #E8490F !important; }
+  [data-theme="light"] .auth-card a { color: #D1420E !important; }
   [data-theme="light"] .form-nav { background: #FFF !important; border-top-color: #E0DCD5 !important; }
   [data-theme="light"] .form-sidebar { background: #FFF !important; }
   [data-theme="light"] .form-main { background: #F8F6F3 !important; }
   [data-theme="light"] .form-progress-mobile { color: #5A5A5A !important; }
   [data-theme="light"] .landing-nav { background: rgba(255,255,255,0.97) !important; border-bottom-color: #E0DCD5 !important; }
   [data-theme="light"] .nav-link { color: #5A5A5A !important; }
-  [data-theme="light"] .nav-link:hover { color: #E8490F !important; }
+  [data-theme="light"] .nav-link:hover { color: #D1420E !important; }
   [data-theme="light"] .testimonial-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .sport-card { background: #FFF !important; border-color: #E0DCD5 !important; }
   [data-theme="light"] .price-card { border-color: #E0DCD5 !important; }
-  [data-theme="light"] .price-card.featured { border-color: #E8490F !important; }
+  [data-theme="light"] .price-card.featured { border-color: #D1420E !important; }
   [data-theme="light"] ::-webkit-scrollbar-track { background: #F8F6F3; }
   [data-theme="light"] ::-webkit-scrollbar-thumb { background: #D5D0C8; }
   [data-theme="light"] .share-btn--copy { background: #F0ECE6 !important; border-color: #E0DCD5 !important; color: #1A1A1A !important; }
@@ -5994,7 +5999,7 @@
     <div class="jarvis-panel" id="jarvisPanel-buzon" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           </div>
           <div>
@@ -6002,7 +6007,7 @@
             <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Contactos de clientes</div>
           </div>
         </div>
-        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
+        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
@@ -6011,7 +6016,7 @@
     <div class="jarvis-panel" id="jarvisPanel-leads" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
           <div>
@@ -6019,7 +6024,7 @@
             <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Emails que pidieron información</div>
           </div>
         </div>
-        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
+        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px"></div>
     </div>
@@ -6028,7 +6033,7 @@
     <div class="jarvis-panel" id="jarvisPanel-emails" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8490F,#ff6b2b);display:flex;align-items:center;justify-content:center">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
           <div>
@@ -6036,7 +6041,7 @@
             <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Historial completo con contenido</div>
           </div>
         </div>
-        <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#E8490F15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
+        <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">
         <input id="emailFiltroTexto" type="text" placeholder="Buscar email, asunto o contenido..." oninput="renderAdminEmails()" style="flex:1;min-width:180px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:8px 12px;font-family:inherit">
@@ -6989,7 +6994,7 @@
   <button onclick="cerrarPwaBanner()" style="position:absolute;top:0;right:0;background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:13px;line-height:1" aria-label="Cerrar">&times;</button>
   <div style="display:flex;align-items:center;gap:12px">
     <div style="width:36px;height:36px;border-radius:8px;background:#0a0a0a;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <span style="font-weight:900;font-size:11px;color:#F0EDE8;font-family:Arial">K-<span style="color:#E8490F">1</span></span>
+      <span style="font-weight:900;font-size:11px;color:#F0EDE8;font-family:Arial">K-<span style="color:#D1420E">1</span></span>
     </div>
     <p id="pwaInstallText" style="margin:0;font-size:12px;color:#ccc;line-height:1.5;font-family:'DM Mono',monospace"></p>
   </div>
@@ -15116,18 +15121,18 @@
         </div>
       </div>`).join('');
     const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:380px;background:#111;border:1px solid #E8490F40;border-radius:14px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.5);animation:fadeInUp 0.3s ease';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:380px;background:#111;border:1px solid #D1420E40;border-radius:14px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.5);animation:fadeInUp 0.3s ease';
     el.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;background:linear-gradient(135deg,#E8490F,#ff6b2b);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#D1420E,#ff6b2b);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
           <div style="font-size:15px;font-weight:700;color:var(--blanco)">${guia.titulo}</div>
         </div>
         <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:0 4px">✕</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px;border-left:2px solid #E8490F30;padding-left:12px">
+      <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px;border-left:2px solid #D1420E30;padding-left:12px">
         ${itemsHtml}
       </div>
       <button onclick="this.closest('div[style]').remove()" style="background:var(--brasa);border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;width:100%;transition:transform .15s" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='none'">Entendido</button>`;
@@ -15245,15 +15250,15 @@
     const ocultarKcal = document.body.classList.contains('ocultar-kcal');
     let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>Mi dieta — K-ONE</title>
     <style>body{font-family:Arial,sans-serif;padding:20px;max-width:700px;margin:0 auto;color:#1A1A1A}
-    h1{font-size:20px;margin-bottom:4px}h2{font-size:16px;color:#E8490F;margin:20px 0 8px;border-bottom:2px solid #E8490F;padding-bottom:4px}
+    h1{font-size:20px;margin-bottom:4px}h2{font-size:16px;color:#D1420E;margin:20px 0 8px;border-bottom:2px solid #D1420E;padding-bottom:4px}
     .meal{margin-bottom:6px;padding:8px 12px;background:#F5F5F5;border-radius:6px;font-size:13px}
     .meal b{display:block;margin-bottom:2px}.macros{color:#888;font-size:11px}
-    .back{display:inline-block;margin-bottom:16px;color:#E8490F;text-decoration:none;font-size:14px}
+    .back{display:inline-block;margin-bottom:16px;color:#D1420E;text-decoration:none;font-size:14px}
     @media print{.back,.no-print{display:none !important}}</style></head><body>
     <a href="https://k-one.fit" class="back">← Volver a K-ONE</a>
     <h1>Plan de nutrición — ${user?.nombre || 'K-ONE'}</h1>
     ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal/día · ${generatedPlan.protObj || ''}g proteína</p>`}
-    <button onclick="window.print()" class="no-print" style="background:#E8490F;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
+    <button onclick="window.print()" class="no-print" style="background:#D1420E;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
     generatedPlan.nutricion.forEach(meal => {
       html += `<h2>${meal.momento} · ${meal.hora}</h2>`;
       meal.opciones.forEach((opt, i) => {
@@ -15347,20 +15352,20 @@
     canvas.width = 600; canvas.height = 400;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, 600, 400);
-    ctx.fillStyle = '#E8490F'; ctx.fillRect(0, 0, 600, 6);
+    ctx.fillStyle = '#D1420E'; ctx.fillRect(0, 0, 600, 6);
     ctx.font = '900 36px Arial'; ctx.fillStyle = '#F0EDE8'; ctx.fillText('K-', 40, 60);
-    ctx.fillStyle = '#E8490F'; ctx.fillText('ONE', 88, 60);
+    ctx.fillStyle = '#D1420E'; ctx.fillText('ONE', 88, 60);
     ctx.font = '300 14px Arial'; ctx.fillStyle = '#888'; ctx.fillText('Mi progreso', 40, 90);
     ctx.fillStyle = '#1E1E1E'; ctx.fillRect(40, 120, 520, 80); ctx.fillRect(40, 210, 520, 80); ctx.fillRect(40, 300, 520, 80);
     ctx.font = '700 32px Arial';
     ctx.fillStyle = '#27ae60'; ctx.fillText(entrenos, 70, 170);
-    ctx.fillStyle = '#E8490F'; ctx.fillText(racha, 250, 170);
+    ctx.fillStyle = '#D1420E'; ctx.fillText(racha, 250, 170);
     ctx.fillStyle = '#F0EDE8'; ctx.fillText('S' + semana, 430, 170);
     ctx.font = '400 12px Arial'; ctx.fillStyle = '#888';
     ctx.fillText('Entrenos', 70, 190); ctx.fillText('Mejor racha', 250, 190); ctx.fillText('Semana', 430, 190);
     ctx.font = '500 18px Arial'; ctx.fillStyle = '#F0EDE8'; ctx.fillText(user.nombre || 'Atleta', 70, 260);
     ctx.font = '400 13px Arial'; ctx.fillStyle = '#888'; ctx.fillText(deporte, 70, 280);
-    ctx.font = '400 12px Arial'; ctx.fillStyle = '#E8490F'; ctx.fillText('k-one.fit', 70, 350);
+    ctx.font = '400 12px Arial'; ctx.fillStyle = '#D1420E'; ctx.fillText('k-one.fit', 70, 350);
     ctx.fillStyle = '#888'; ctx.fillText('Un paso cada vez', 150, 350);
     const dataUrl = canvas.toDataURL('image/png');
     const preview = document.getElementById('sharePreview');
@@ -15394,7 +15399,7 @@
   }
 
   function lanzarConfetti() {
-    const colors = ['#E8490F','#27ae60','#f0a500','#3498db','#e74c3c','#F0EDE8'];
+    const colors = ['#D1420E','#27ae60','#f0a500','#3498db','#e74c3c','#F0EDE8'];
     for(let i=0;i<40;i++){
       const c=document.createElement('div');
       c.className='confetti-piece';
@@ -16134,7 +16139,7 @@
 
     ctx.beginPath();
     ordenado.forEach((h, i) => { const xx = x(i), yy = y(h.peso); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
-    ctx.strokeStyle = '#E8490F';
+    ctx.strokeStyle = '#D1420E';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.stroke();
@@ -16144,7 +16149,7 @@
       const esBorde = i === 0 || i === ordenado.length - 1;
       ctx.beginPath();
       ctx.arc(xx, yy, esBorde ? 4 : 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = esBorde ? '#E8490F' : '#F0EDE8';
+      ctx.fillStyle = esBorde ? '#D1420E' : '#F0EDE8';
       ctx.fill();
     });
 
@@ -18262,21 +18267,21 @@
       *{margin:0;padding:0;box-sizing:border-box}
       body{font-family:Arial,sans-serif;background:#fff;color:#222;padding:24px;max-width:800px;margin:0 auto}
       h1{font-size:22px;font-weight:800;margin-bottom:2px}
-      h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#E8490F;border-bottom:2px solid #E8490F;padding-bottom:4px}
+      h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#D1420E;border-bottom:2px solid #D1420E;padding-bottom:4px}
       h3{font-size:13px;font-weight:700;margin:12px 0 4px;color:#333}
-      .header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #E8490F;padding-bottom:12px;margin-bottom:16px}
+      .header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #D1420E;padding-bottom:12px;margin-bottom:16px}
       .logo{font-size:24px;font-weight:900;letter-spacing:2px}
-      .logo span{color:#E8490F}
+      .logo span{color:#D1420E}
       .meta{font-size:11px;color:#888;text-align:right}
       .day{margin-bottom:16px;page-break-inside:avoid}
       .exercise{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid #eee}
       .meal{margin-bottom:8px}
       .meal-name{font-size:12px;font-weight:600}
       .meal-ing{font-size:11px;color:#999}
-      .meal-macros{font-size:10px;color:#E8490F;margin-top:2px}
+      .meal-macros{font-size:10px;color:#D1420E;margin-top:2px}
       .section{margin-bottom:24px}
       .nutri-day{margin-bottom:12px;padding:8px;background:#f9f9f9;border-radius:6px}
-      .nutri-day-title{font-size:12px;font-weight:700;color:#E8490F;margin-bottom:6px}
+      .nutri-day-title{font-size:12px;font-weight:700;color:#D1420E;margin-bottom:6px}
       @media print{body{padding:12px}h2{font-size:14px}.exercise,.meal-name{font-size:11px}}
     </style></head><body>`;
 
@@ -20155,16 +20160,16 @@
           const motivoIcons = {'Sugerencia':'💡','Alimento':'🥗','Ejercicio':'🏋️','Mi plan':'📋','Pago':'💳','Otro':'💬'};
           const motivoIcon = motivoIcons[m.asunto] || '💬';
           return `
-          <div style="background:#111;border:1px solid ${pendiente ? '#E8490F30' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .15s">
+          <div style="background:#111;border:1px solid ${pendiente ? '#D1420E30' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .15s">
             <div style="padding:16px 18px">
               <div style="display:flex;align-items:flex-start;gap:14px">
-                <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,#E8490F,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
+                <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,#D1420E,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
                   ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
                 </div>
                 <div style="flex:1;min-width:0">
                   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
                     <span style="font-size:14px;font-weight:600;color:var(--blanco)">${_esc(m.nombre)}</span>
-                    <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#E8490F18' : '#27ae6018'};color:${pendiente ? '#E8490F' : '#27ae60'};font-family:'DM Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
+                    <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#D1420E18' : '#27ae6018'};color:${pendiente ? '#D1420E' : '#27ae60'};font-family:'DM Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
                   </div>
                   <div style="font-size:11px;color:#888;display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace">
                     <span>${_esc(m.email)}</span>
@@ -20176,7 +20181,7 @@
                 </div>
               </div>
               <div style="margin:12px 0 0 54px">
-                <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:8px;background:#E8490F10;padding:3px 10px;border-radius:6px">
+                <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:8px;background:#D1420E10;padding:3px 10px;border-radius:6px">
                   <span>${motivoIcon}</span> ${_esc(m.asunto)}
                 </div>
                 <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:12px 14px;font-size:13px;color:var(--metal-claro);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(m.mensaje)}</div>
@@ -20215,8 +20220,8 @@
           const horasDesde = Math.floor((ahora - new Date(l.created_at).getTime()) / 3600000);
           const esReciente = horasDesde < 24;
           return `
-          <div style="background:#111;border:1px solid ${esReciente ? '#E8490F30' : '#1e1e1e'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='#1a1a1a';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='#111';this.style.transform='none'">
-            <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,#E8490F,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="background:#111;border:1px solid ${esReciente ? '#D1420E30' : '#1e1e1e'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='#1a1a1a';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='#111';this.style.transform='none'">
+            <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,#D1420E,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? '#fff' : '#666'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div style="flex:1;min-width:0">
@@ -20225,7 +20230,7 @@
                 <span>${_fmtFecha(l.created_at)}</span>
                 <span style="color:#333">·</span>
                 <span>${fmtLeadHora(l.created_at)}</span>
-                ${esReciente ? '<span style="color:#E8490F;font-weight:600">· NUEVO</span>' : ''}
+                ${esReciente ? '<span style="color:#D1420E;font-weight:600">· NUEVO</span>' : ''}
               </div>
             </div>
             <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(l.email)}&su=${encodeURIComponent('Tu plan personalizado — K-ONE')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="width:32px;height:32px;border-radius:8px;background:var(--brasa);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='none'">
@@ -20567,7 +20572,7 @@
 
   // ===== PANEL DE EMAILS: tipos, filtros y render =====
   const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario' };
-  const _emailTipoColor = { lead: '#E8490F', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db', resumen_semanal: '#9b59b6', retencion_dia3: '#e67e22', retencion_dia8: '#d35400', reenganche_7d: '#e74c3c', reenganche_14d: '#c0392b', reenganche_21d: '#922b21', renovacion: '#1abc9c', digest_admin: '#7f8c8d' };
+  const _emailTipoColor = { lead: '#D1420E', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db', resumen_semanal: '#9b59b6', retencion_dia3: '#e67e22', retencion_dia8: '#d35400', reenganche_7d: '#e74c3c', reenganche_14d: '#c0392b', reenganche_21d: '#922b21', renovacion: '#1abc9c', digest_admin: '#7f8c8d' };
   function _emailIcon(tipo) {
     const c = _emailTipoColor[tipo] || '#888';
     const iconos = {
@@ -22057,11 +22062,11 @@
         const txt = document.getElementById('pwaInstallText');
         if (!banner || !txt) return;
         if (isIOS) {
-          txt.innerHTML = 'Usa K-ONE como una app. Toca <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8490F" stroke-width="2" style="vertical-align:-2px"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> <strong style="color:#fff">Compartir</strong> y luego <strong style="color:#fff">"Añadir a pantalla de inicio"</strong>.';
+          txt.innerHTML = 'Usa K-ONE como una app. Toca <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1420E" stroke-width="2" style="vertical-align:-2px"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> <strong style="color:#fff">Compartir</strong> y luego <strong style="color:#fff">"Añadir a pantalla de inicio"</strong>.';
         } else {
           txt.innerHTML = 'Instala K-ONE como app para acceder más rápido desde tu pantalla de inicio.';
           if (deferredPrompt) {
-            txt.innerHTML += ' <a onclick="window._pwaInstall()" style="color:#E8490F;cursor:pointer;font-weight:600;text-decoration:underline">Instalar ahora</a>';
+            txt.innerHTML += ' <a onclick="window._pwaInstall()" style="color:#D1420E;cursor:pointer;font-weight:600;text-decoration:underline">Instalar ahora</a>';
           } else {
             txt.innerHTML += ' Toca <strong style="color:#fff">⋮</strong> y luego <strong style="color:#fff">"Instalar app"</strong>.';
           }
