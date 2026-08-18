@@ -34,6 +34,76 @@ function esc(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ===== DATOS EXTRA DEL RESUMEN SEMANAL =====
+// Mismo cálculo que renderInformeSemanal() en index.html (récords de carga:
+// ejercicio cuyo último registro de peso en los últimos 7 días es mayor que
+// el registro inmediatamente anterior). Duplicado a propósito -- este
+// fichero corre en Vercel, sin acceso al scope de index.html.
+function _recordsFuerzaSemana(ud, ahora) {
+  const inicioSemana = new Date(ahora.getTime() - 7 * 86400000);
+  const records = [];
+  const pesos = ud.pesosEjercicios || {};
+  Object.values(pesos).forEach(entry => {
+    const hist = (entry && entry.historial || []).filter(h => h && h.fecha && !isNaN(new Date(h.fecha).getTime()));
+    if (hist.length < 2) return;
+    const ordenado = [...hist].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    const ultimo = ordenado[ordenado.length - 1];
+    const anterior = ordenado[ordenado.length - 2];
+    if (new Date(ultimo.fecha) < inicioSemana) return;
+    if (ultimo.peso > anterior.peso) {
+      records.push({ nombre: entry.nombre || 'Ejercicio', antes: anterior.peso, ahora: ultimo.peso });
+    }
+  });
+  records.sort((a, b) => (b.ahora - b.antes) - (a.ahora - a.antes));
+  return records;
+}
+
+// Nombre visible de cada hito -- copiado de los `name:` de calcularHitos()
+// en index.html (mismo motivo que arriba: sin acceso a ese scope aquí).
+// Si se añade un hito nuevo en index.html, hay que replicar su nombre aquí
+// para que el resumen semanal pueda citarlo; si no está en el mapa, el
+// email simplemente no menciona ningún hito esa semana (nunca inventa uno).
+const HITO_NOMBRES = {
+  primer_entreno: 'La primera piedra', tres_entrenos: 'Ya no es un capricho',
+  semana1: 'Primera semana completada', primer_foto: 'La foto que no miente',
+  diez_entrenos: 'Doble dígito', racha5: 'Sin romper la cadena', la_vuelta: 'La vuelta',
+  mes1: 'Primer mes completado', veinte_entrenos: '20 sesiones', mes2: 'Dos meses en pie',
+  racha14: 'Dos semanas sin parar', mes3: 'Tres meses', cincuenta: 'Medio centenar',
+  mes6: 'Seis meses', cien: 'Triple dígito', un_anio: 'Un año', doscientos: '200 sesiones',
+  primer_lista_compra: 'Primera lista de la compra', primer_checkin: 'Primer check-in',
+  semana_nutricion_completa: 'Semana redonda', mes_nutricion: 'Un mes siguiendo el plan',
+  primer_feedback_entreno: 'Tu plan te escucha', progreso_compartido: 'Lo enseñaste',
+  primer_amigo: 'Primer amigo invitado', tres_amigos: 'Tres amigos en K-ONE',
+  primer_peso: 'Primer peso apuntado', progresion_peso: 'Progresión real',
+  diez_pct_fuerte: '+10% más fuerte', cinco_ejercicios_reg: 'Cuaderno de hierro',
+  racha21: '21 días seguidos', racha30: 'Un mes sin fallar',
+  fotos3: 'La comparativa habla sola', fotos6: 'Medio año en imágenes',
+  kilo1: 'Primer kilo conquistado', kilo5: 'Cinco kilos de camino', kilo10: 'Diez kilos de camino',
+  constancia_bascula: 'Constancia de báscula', nota1: 'Primera nota', notas10: 'Diario de guerra',
+  trescientos: '300 sesiones', dos_anios: 'Dos años', testimonio_dejado: 'Tu historia inspira'
+};
+// El hito conseguido más reciente dentro de los últimos 7 días, o null.
+function _hitoDeEstaSemana(ud, ahora) {
+  const inicioSemana = new Date(ahora.getTime() - 7 * 86400000);
+  const hitos = ud.hitos || {};
+  let mejorFecha = null, mejorKey = null;
+  Object.entries(hitos).forEach(([key, fechaISO]) => {
+    const f = new Date(fechaISO);
+    if (isNaN(f.getTime()) || f < inicioSemana) return;
+    if (!mejorFecha || f > mejorFecha) { mejorFecha = f; mejorKey = key; }
+  });
+  return mejorKey ? (HITO_NOMBRES[mejorKey] || null) : null;
+}
+// Entrenos de la semana pasada (7-14 días atrás), a partir de historialEntrenos
+// (fechas persistentes, a diferencia de entrenosCompletados que se vacía en
+// cada check-in) -- para poder comparar con la semana actual.
+function _entrenosSemanaAnterior(ud, ahora) {
+  const hace7d = new Date(ahora.getTime() - 7 * 86400000);
+  const hace14d = new Date(ahora.getTime() - 14 * 86400000);
+  const fechas = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
+  return fechas.filter(f => { const d = new Date(f); return !isNaN(d.getTime()) && d >= hace14d && d < hace7d; }).length;
+}
+
 // Límites por hora para los tipos sin sesión (lead/mensaje). "lead" se permite
 // más veces porque cualquiera puede pasar por el lead-magnet de la landing
 // varias veces sin ser un abuso; "mensaje" es más generoso en abuso potencial
@@ -387,6 +457,23 @@ async function handleCronRetencion(req, res) {
         const racha = ud.rachaDias || 0;
         const semana = ud.progreso?.semana || 1;
 
+        // Datos extra a petición del usuario (18 ago 2026): comparación con
+        // la semana pasada, récord de fuerza y hito conseguido esta semana.
+        // Los tres son opcionales de verdad -- si no hay dato, ese bloque
+        // simplemente no se pinta, nunca se rellena con algo inventado.
+        const entrenosSemanaPasada = _entrenosSemanaAnterior(ud, ahora);
+        const comparacionTxt = entrenos > entrenosSemanaPasada
+          ? `↑ ${entrenos - entrenosSemanaPasada} más que la semana pasada (${entrenosSemanaPasada})`
+          : entrenos < entrenosSemanaPasada
+            ? `↓ ${entrenosSemanaPasada - entrenos} menos que la semana pasada (${entrenosSemanaPasada})`
+            : entrenosSemanaPasada > 0 ? `= Igual que la semana pasada` : null;
+
+        const recordsSemana = _recordsFuerzaSemana(ud, ahora);
+        const mejorRecord = recordsSemana[0] || null;
+        const recordExtraTxt = recordsSemana.length > 1 ? ` (+${recordsSemana.length - 1} ejercicio${recordsSemana.length > 2 ? 's' : ''} más)` : '';
+
+        const nombreHito = _hitoDeEstaSemana(ud, ahora);
+
         const mensajes = [
           'La constancia gana a la motivación. Cada entreno cuenta.',
           'No se trata de ser perfecto, se trata de no parar.',
@@ -429,6 +516,34 @@ async function handleCronRetencion(req, res) {
                 </td>
               </tr>
             </table>
+            ${comparacionTxt ? `
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr><td style="padding:10px 28px 0;text-align:center">
+                <span style="font-size:11.5px;color:#8A8A8A;font-family:'Courier New',monospace">${esc(comparacionTxt)}</span>
+              </td></tr>
+            </table>` : ''}
+            ${mejorRecord ? `
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr><td style="padding:18px 28px 0">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#0A0A0A;border:1px solid #232323;border-radius:12px">
+                  <tr><td style="padding:14px 18px">
+                    <div style="font-size:10px;letter-spacing:1.5px;color:#27ae60;font-weight:700;text-transform:uppercase;margin-bottom:6px">Récord de la semana</div>
+                    <p style="margin:0;font-size:14px;color:#F0EDE8;line-height:1.5"><strong>${esc(mejorRecord.nombre)}</strong>: ${esc(String(mejorRecord.antes))} → <span style="color:#27ae60;font-weight:700">${esc(String(mejorRecord.ahora))} kg</span>${esc(recordExtraTxt)}</p>
+                  </td></tr>
+                </table>
+              </td></tr>
+            </table>` : ''}
+            ${nombreHito ? `
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <tr><td style="padding:18px 28px 0">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#0A0A0A;border:1px solid #232323;border-radius:12px">
+                  <tr><td style="padding:14px 18px">
+                    <div style="font-size:10px;letter-spacing:1.5px;color:#E8490F;font-weight:700;text-transform:uppercase;margin-bottom:6px">Nuevo hito desbloqueado</div>
+                    <p style="margin:0;font-size:14px;color:#F0EDE8;line-height:1.5;font-weight:600">${esc(nombreHito)}</p>
+                  </td></tr>
+                </table>
+              </td></tr>
+            </table>` : ''}
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
               <tr><td style="padding:20px 28px 0">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#0A0A0A;border-left:3px solid #E8490F;border-radius:0 10px 10px 0">
