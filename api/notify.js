@@ -749,6 +749,17 @@ async function handlePost(req, res) {
         return res.status(400).json({ error: 'Email no válido' });
       }
     }
+    // El formulario de contacto solo validaba en el cliente (saltable con
+    // curl/Postman): sin límite de tamaño ni formato de email real, aunque
+    // el contenido ya se escapa con esc() antes de insertarlo en el HTML.
+    if (tipo === 'mensaje') {
+      if (datos.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) {
+        return res.status(400).json({ error: 'Email no válido' });
+      }
+      if ((datos.nombre || '').length > 100 || (datos.asunto || '').length > 150 || (datos.mensaje || '').length > 3000) {
+        return res.status(400).json({ error: 'Algún campo supera la longitud máxima permitida' });
+      }
+    }
 
     const emails = [];
     // Guarda el HTML real del email de cara al cliente (o al admin si el tipo

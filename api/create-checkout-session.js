@@ -143,6 +143,10 @@ module.exports = async (req, res) => {
     console.error('[create-checkout-session] error:', err);
     capturarError(err, { fn: 'create-checkout-session' });
     const status = err.statusCode || 500;
-    return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
+    // Solo los errores de tarjeta de Stripe están pensados para mostrarse al
+    // usuario tal cual; el resto (invalid_request_error, etc.) puede filtrar
+    // detalles internos (IDs de objetos, configuración) que no son de nadie
+    // más que del servidor.
+    return res.status(status).json({ error: err.type === 'StripeCardError' ? err.message : 'Error interno del servidor' });
   }
 };

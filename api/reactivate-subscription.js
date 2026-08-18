@@ -65,6 +65,6 @@ module.exports = async (req, res) => {
     console.error('[reactivate-subscription] error:', err);
     capturarError(err, { fn: 'reactivate-subscription' });
     const status = err.statusCode || 500;
-    return res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
+    return res.status(status).json({ error: err.type === 'StripeCardError' ? err.message : 'Error interno del servidor' });
   }
 };
