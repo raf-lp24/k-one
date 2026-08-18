@@ -1,0 +1,38 @@
+-- ============================================================
+-- K-ONE — Migración: canjear_codigo_promo() sin REVOKE real de PUBLIC
+-- ============================================================
+-- Encontrado en la auditoría previa al envío de la campaña de WhatsApp con
+-- el código GRATIS1MES.
+--
+-- migration-codigos-promo.sql:179 hace:
+--   revoke execute on function public.canjear_codigo_promo(text, uuid)
+--   from anon, authenticated;
+--
+-- Ese patrón es insuficiente en Postgres/Supabase: al crear una función se
+-- concede EXECUTE a PUBLIC por defecto, y revocar de roles individuales NO
+-- quita ese permiso heredado de PUBLIC. Este mismo problema ya se detectó y
+-- corrigió para la función hermana crear_codigo_promo() en
+-- migration-fix-criticos-agosto.sql:65 -- pero el comentario de esa misma
+-- migración (línea 43) afirma erróneamente que canjear_codigo_promo() "SÍ
+-- tiene el revoke [correcto]", cuando en realidad se quedó con el mismo
+-- patrón insuficiente sin corregir.
+--
+-- Impacto: si el revoke de PUBLIC nunca se aplicó, cualquier usuario
+-- autenticado puede llamar
+--   supabase.rpc('canjear_codigo_promo', { p_codigo: 'X', p_user_id: '<uuid-ajeno>' })
+-- directamente desde el navegador, insertando canjes a nombre de otros
+-- usuarios sin su consentimiento y falseando el contador de usos del código.
+-- Hoy GRATIS1MES no tiene usos_max (ilimitado) y el beneficio real (trial de
+-- Stripe) sigue protegido en api/create-checkout-session.js contra el
+-- historial real de Stripe, así que no permite robar mes gratis extra -- pero
+-- sí sería explotable como abuso/DoS con códigos futuros que sí tengan tope.
+revoke execute on function public.canjear_codigo_promo(text, uuid) from public;
+
+-- ============================================================
+-- VERIFICACIÓN — ejecuta esto después para confirmar
+-- ============================================================
+-- select has_function_privilege('anon', 'public.canjear_codigo_promo(text,uuid)', 'execute');
+-- -- debe devolver false
+-- select has_function_privilege('authenticated', 'public.canjear_codigo_promo(text,uuid)', 'execute');
+-- -- debe devolver false (el frontend no llama a esta función directamente,
+-- -- solo el backend con service_role, que salta RLS/GRANT por diseño)
