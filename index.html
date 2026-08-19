@@ -8356,12 +8356,6 @@
      antes del script principal que lo necesita, solo bloquea este punto
      concreto (después de que el resto del HTML/CSS ya se ha parseado). -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Antibot del registro: el widget solo consigue el token en el navegador.
-     La verificación real (que ese token es de verdad de Cloudflare y no
-     inventado) la hace Supabase Auth server-side contra la secret key
-     configurada en su panel -- por eso no hace falta ningún endpoint propio
-     aquí, y no se puede saltar mandando signUp() sin pasar por el widget. -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
   // ===== SUPABASE =====
   const SUPABASE_URL = 'https://rfdrqbnzceudwclagjvp.supabase.co';
@@ -8370,13 +8364,6 @@
   // id del usuario autenticado en Supabase; null si no hay sesión. Se usa para
   // sincronizar getUserData/saveUserData con la tabla profiles.
   let _supaUserId = null;
-
-  // Token del widget de Turnstile en el formulario de registro. Se rellena en
-  // onTurnstileSuccess() (callback del widget) y se vacía en cuanto se usa o
-  // caduca -- los tokens de Turnstile son de un solo uso.
-  let _turnstileToken = '';
-  window.onTurnstileSuccess = function (token) { _turnstileToken = token; };
-  window.onTurnstileExpired = function () { _turnstileToken = ''; };
 
   // ===== STATE =====
   let currentBlock = 0;
