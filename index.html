@@ -167,6 +167,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://rfdrqbnzceudwclagjvp.supabase.co">
 <link rel="preconnect" href="https://js.stripe.com">
+<!-- El <script src=".../supabase-js@2"> de más abajo bloquea el render mientras
+     se descarga: no lleva defer a propósito, porque el <script> inline que va
+     justo detrás usa supabase.createClient(...) en su primera línea y depende
+     de él en todo el archivo -- si se difiere el externo sin diferir también
+     el inline (que no se puede: defer no tiene efecto en scripts sin src),
+     se rompe todo con "supabase is not defined". Este preload no cambia el
+     orden de ejecución, solo adelanta la DESCARGA: cuando el parser llegue al
+     <script> real ya lo tiene en caché, así que la pausa que queda es solo la
+     de ejecutarlo (rápida), no la de ida y vuelta de red (lenta en 4G). -->
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
 <script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
 <!-- Google Analytics: NO se carga aquí a ciegas. Antes se ejecutaba en cuanto
