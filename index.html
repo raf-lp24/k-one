@@ -5715,8 +5715,6 @@
     </label>
     <div class="auth-error" id="err-mayorEdad">Debes confirmar que eres mayor de 18 años para continuar</div>
 
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAAEUfWJUUsehHYAcQ" data-theme="dark" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" style="margin:16px 0"></div>
-
     <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
     </form>
     <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
@@ -18917,20 +18915,12 @@
       document.getElementById('err-mayorEdad').classList.add('visible');
       ok = false;
     }
-    if (!_turnstileToken) {
-      showToast('Completa la verificación antibot antes de crear la cuenta.', 4000);
-      ok = false;
-    }
 
     if (!ok) return;
 
     const { data, error } = await supa.auth.signUp({
-      email, password: pass, options: { data: { nombre }, emailRedirectTo: window.location.origin, captchaToken: _turnstileToken }
+      email, password: pass, options: { data: { nombre }, emailRedirectTo: window.location.origin }
     });
-    // Los tokens de Turnstile son de un solo uso -- si el signUp falla (email
-    // duplicado, etc.) hay que refrescar el widget para que puedan reintentar.
-    _turnstileToken = '';
-    if (typeof turnstile !== 'undefined') turnstile.reset();
 
     if (error) {
       if (/registered|already|existe/i.test(error.message)) {
