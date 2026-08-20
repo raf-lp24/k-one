@@ -22,11 +22,7 @@ module.exports = async (req, res) => {
     const user = await getAuthUser(req, supabaseAdmin);
     if (!user) return res.status(401).json({ error: 'No autenticado' });
 
-    const { tipoPlan, periodicidad, oferta } = req.body;
-
-    // Modo oferta: primer mes a 1,99€. Modo normal: plan elegido en el paywall.
-    const ofertaPriceId = process.env.STRIPE_PRICE_OFERTA_MES;
-    const usarOferta = !!oferta && !!ofertaPriceId;
+    const { tipoPlan, periodicidad } = req.body;
 
     const { data: existingSub } = await supabaseAdmin
       .from('subscriptions')
@@ -84,21 +80,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Ya tienes una suscripción activa. Gestiona tu plan desde el panel de tu cuenta.' });
     }
 
-    let priceId;
-    if (usarOferta) {
-      if (tieneHistorial) {
-        return res.status(400).json({ error: 'La oferta de primer mes ya no está disponible para esta cuenta.' });
-      }
-      priceId = ofertaPriceId;
-    } else {
-      // A-2 + B-2: getPriceId ya no hace fallback silencioso
-      if (!tipoPlan || !periodicidad) {
-        return res.status(400).json({ error: 'tipoPlan y periodicidad son obligatorios' });
-      }
-      priceId = getPriceId(tipoPlan, periodicidad);
-      if (!priceId) {
-        return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
-      }
+    // A-2 + B-2: getPriceId ya no hace fallback silencioso
+    if (!tipoPlan || !periodicidad) {
+      return res.status(400).json({ error: 'tipoPlan y periodicidad son obligatorios' });
+    }
+    const priceId = getPriceId(tipoPlan, periodicidad);
+    if (!priceId) {
+      return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
     }
 
     const origin = process.env.APP_URL;
@@ -113,8 +101,19 @@ module.exports = async (req, res) => {
     // El metadata de la sesión NO se copia a la suscripción. Se propaga aquí para
     // que los eventos customer.subscription.* del webhook (renovación, descuento de
     // referidos) puedan identificar al usuario de Supabase directamente.
+    //
+    // PRIMER MES GRATIS AUTOMÁTICO: antes, el primer mes costaba 1,99€ de verdad
+    // y un webhook programaba (subscriptionSchedule) el cambio al precio real un
+    // mes después -- ese mecanismo se deja intacto para los clientes que ya
+    // estaban dentro de esa oferta (metadata.oferta === 'si' en stripe-webhook.js),
+    // pero ya no se usa para checkouts nuevos. Ahora, todo cliente sin historial
+    // real en Stripe se suscribe DIRECTAMENTE a su plan real desde el día 1, con
+    // un periodo de prueba que retrasa el primer cobro -- el mismo mecanismo que
+    // ya usaba el código GRATIS1MES (trial_period_days), solo que automático para
+    // todos y sin depender de que nadie escriba ningún código.
+    const diasPrueba = (promo && promo.trialDays) ? promo.trialDays : (!tieneHistorial ? 30 : 0);
     const subscriptionData = { metadata: { supabase_user_id: user.id } };
-    if (promo && promo.trialDays) subscriptionData.trial_period_days = promo.trialDays;
+    if (diasPrueba) subscriptionData.trial_period_days = diasPrueba;
 
     const params = {
       mode: 'subscription',
@@ -128,7 +127,6 @@ module.exports = async (req, res) => {
         supabase_user_id: user.id,
         tipoPlan:    tipoPlan    || '',
         periodicidad: periodicidad || '',
-        oferta: usarOferta ? 'si' : 'no',
         codigo_promo: promo ? promo.codigo : ''
       },
       subscription_data: subscriptionData
