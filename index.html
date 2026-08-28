@@ -5705,11 +5705,11 @@
     <div class="auth-error" id="err-pass2">Las contraseñas no coinciden</div>
 
     <div class="auth-field" style="margin-bottom:12px">
-      <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TIENES UN CÓDIGO? <span style="color:var(--metal-claro)">(opcional)</span></div>
-      <input type="text" id="reg-codigoInvitacion" placeholder="Código de invitación o promoción" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
+      <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TE INVITÓ UN AMIGO? <span style="color:var(--metal-claro)">(opcional)</span></div>
+      <input type="text" id="reg-codigoInvitacion" placeholder="Código de invitación" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
         oninput="comprobarCodigoRegistro()">
       <div id="reg-codigoInfo" style="display:none;font-size:12px;margin-top:7px;line-height:1.5"></div>
-      <div style="font-size:11px;color:var(--metal);margin-top:6px;line-height:1.5">Código de un amigo que te invitó, o un código de promoción de nuestras redes.</div>
+      <div style="font-size:11px;color:var(--metal);margin-top:6px;line-height:1.5">Código de un amigo que te invitó a K-ONE.</div>
     </div>
 
     <label class="auth-check">
@@ -5860,18 +5860,6 @@
         <p style="margin:0;font-size:12px;color:#ffd700;line-height:1.5;font-weight:500" id="pwOfertaAviso"></p>
       </div>
     </div>
-    <!-- Aviso de mes gratis por código promocional. Se muestra solo si el
-         cliente tiene un código válido, y deja claro que después se cobra.
-         A propósito NO repite "tu primer mes es gratis" ni "no se cobra nada
-         hoy": eso ya lo dice el título/descripción del modal justo encima;
-         aquí solo van los detalles concretos (qué código, cuándo y a qué
-         precio se renueva) para no duplicar el mismo mensaje dos veces. -->
-    <div id="paywallPromoBox" style="display:none">
-      <div style="display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,rgba(209,66,14,.14),var(--carbon));border:1px solid var(--brasa);border-radius:10px;padding:12px 14px;margin-bottom:14px">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        <p style="margin:0;font-size:12.5px;color:var(--metal-claro);line-height:1.55">Código <strong id="paywallPromoCodigo" style="color:var(--brasa)"></strong> aplicado. Pasados los 30 días se renueva automáticamente al precio del plan que elijas abajo — puedes cancelar cuando quieras desde tu perfil, también durante el mes gratis.</p>
-      </div>
-    </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
     <div id="paywallPlanChooser">
       <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
@@ -5935,7 +5923,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:12.5px;color:var(--metal-claro)">
           <div><strong style="color:#fff">Primer mes:</strong> gratis automático para todo cliente nuevo, cualquier plan (desde 19 ago 2026)</div>
-          <div><strong style="color:#fff">Código GRATIS1MES:</strong> redundante ahora para todos (el mes gratis ya es automático para quien no tiene historial de pago, que es a quien el código también se limitaba). Los códigos de % de descuento sí siguen aportando algo, se aplican al primer cobro real tras el mes gratis.</div>
+          <div><strong style="color:#fff">Códigos promocionales:</strong> retirados (2026-08). Ya no existen códigos de mes gratis ni de % de descuento — el único beneficio es el mes gratis automático de arriba. El campo de código en el registro ahora es solo para invitaciones de amigos.</div>
           <div><strong style="color:#fff">Incentivo referidos:</strong> pausado (5€/amigo, en espera de nueva mecánica)</div>
         </div>
       </div>
@@ -16515,11 +16503,11 @@
   }
 
   // ===== SISTEMA DE REFERIDOS =====
-  // PAUSADO (2026-08): mientras el mes gratis (GRATIS1MES) está abierto a todo el
-  // mundo, no tiene sentido la recompensa de 5€/amigo — se retoma con la mecánica
-  // nueva (amigo entra con mes gratis, tú cobras al confirmarse su renovación)
-  // cuando se retire el código público. Para reactivar esta versión: quitar el
-  // "return" de aquí abajo y en api/stripe-webhook.js (buscar el mismo aviso).
+  // PAUSADO (2026-08): mientras el mes gratis es automático para todo el mundo,
+  // no tiene sentido la recompensa de 5€/amigo — se retoma con la mecánica
+  // nueva (amigo entra con mes gratis, tú cobras al confirmarse su renovación).
+  // Para reactivar esta versión: quitar el "return" de aquí abajo y en
+  // api/stripe-webhook.js (buscar el mismo aviso).
   async function cargarReferidos() {
     return; // eslint-disable-line no-unreachable
     const banner = document.getElementById('bannerReferidos');
@@ -18715,17 +18703,19 @@
     if (checkEl) checkEl.classList.toggle('visible', estado === 'valid');
   }
 
-  // ===== CÓDIGOS EN EL REGISTRO (invitación de un amigo o promoción) =====
-  // Comprueba el código mientras se escribe y dice qué es, para que el cliente
-  // sepa antes de crear la cuenta si su código sirve y qué le da.
+  // ===== CÓDIGO DE INVITACIÓN EN EL REGISTRO =====
+  // Comprueba el código mientras se escribe y dice si es válido, para que el
+  // cliente sepa antes de crear la cuenta si su código sirve.
+  // Antes esto también comprobaba códigos promocionales (mes gratis, % de
+  // descuento) contra validar_codigo_promo() -- se retiraron (2026-08): el
+  // mes gratis ya es automático para todo cliente nuevo, sin necesidad de
+  // ningún código, así que solo queda el código de invitación de un amigo.
   let _codigoRegTimer = null;
-  let _codigoRegPromo = null;   // { tipo, valor, descripcion } si es promoción válida
   function comprobarCodigoRegistro() {
     const input = document.getElementById('reg-codigoInvitacion');
     const info  = document.getElementById('reg-codigoInfo');
     if (!input || !info) return;
     const cod = (input.value || '').trim().toUpperCase();
-    _codigoRegPromo = null;
     clearTimeout(_codigoRegTimer);
     if (cod.length < 3) { info.style.display = 'none'; return; }
 
@@ -18735,34 +18725,14 @@
 
     _codigoRegTimer = setTimeout(async () => {
       try {
-        // 1) ¿Es un código de promoción?
-        const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: cod });
-        if (promo && promo.valido) {
-          _codigoRegPromo = { tipo: promo.tipo, valor: promo.valor };
-          info.style.color = 'var(--brasa)';
-          // Se avisa desde el principio de que después se renueva: nadie debe
-          // llevarse la sorpresa de un cobro que no esperaba.
-          info.innerHTML = promo.tipo === 'mes_gratis'
-            ? `✓ Código válido — <strong>tu primer mes es gratis</strong>` +
-              `<div style="color:var(--metal);margin-top:3px">Pasados los 30 días se renueva al precio de tu plan. Cancela cuando quieras.</div>`
-            : `✓ Código válido — <strong>${promo.valor}% de descuento</strong> en tu primera cuota` +
-              `<div style="color:var(--metal);margin-top:3px">Las siguientes cuotas van al precio normal de tu plan.</div>`;
-          return;
-        }
-        // 2) ¿Es el código de invitación de un amigo?
         const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: cod });
         if (referrerId) {
           info.style.color = 'var(--brasa)';
           info.textContent = '✓ Código de invitación válido';
           return;
         }
-        // 3) Ni una cosa ni la otra
         info.style.color = 'var(--metal-claro)';
-        info.textContent = promo && promo.motivo === 'agotado'
-          ? 'Este código ya se ha agotado'
-          : (promo && promo.motivo === 'caducado'
-              ? 'Este código ha caducado'
-              : 'No reconocemos este código (puedes crear la cuenta igual)');
+        info.textContent = 'No reconocemos este código (puedes crear la cuenta igual)';
       } catch (e) {
         info.style.display = 'none';
       }
@@ -18824,31 +18794,21 @@
     }
   }
 
-  // Aplica un código de promoción/invitación guardado en localStorage por
-  // registrar() cuando todavía no había sesión. Verifica con .select() que el
-  // UPDATE afectó a alguna fila de verdad (una RLS que bloquea en silencio no
-  // cuenta como éxito) antes de dar el código por aplicado y borrarlo.
+  // Aplica un código de invitación guardado en localStorage por registrar()
+  // cuando todavía no había sesión.
+  // Antes esto probaba primero si el código era una PROMOCIÓN (mes gratis o %
+  // de descuento) antes de probarlo como invitación de un amigo -- se retiró
+  // (2026-08) junto con el resto de códigos promocionales, así que ahora va
+  // directo a invitación. Todo el registro (resolver el código, comprobar que
+  // no es el suyo propio, actualizar referido_por e insertar en referidos)
+  // pasa por una única función SECURITY DEFINER -- el insert directo desde el
+  // cliente permitía mandar un referrer_id inventado sin pasar por un código
+  // real.
   async function _aplicarCodigoPendiente(userId, email) {
     let codigo = '';
     try { codigo = localStorage.getItem('kone_codigo_pendiente') || ''; } catch (e) {}
     if (!codigo || !userId) return;
     try {
-      const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: codigo });
-      if (promo && promo.valido) {
-        const { data: filas, error } = await supa.from('profiles')
-          .update({ codigo_promo: codigo }).eq('id', userId).select('id');
-        if (error || !filas || !filas.length) return; // sin sesión todavía: se reintenta más tarde
-        try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
-        showToast(promo.tipo === 'mes_gratis'
-          ? '¡Código aplicado! Tu primer mes es gratis. Después se renueva al precio de tu plan; cancela cuando quieras.'
-          : `¡Código aplicado! ${promo.valor}% de descuento en tu primera cuota.`, 7000);
-        return;
-      }
-      // No es promoción: se prueba como invitación de un amigo. Todo el
-      // registro (resolver el código, comprobar que no es el suyo propio,
-      // actualizar referido_por e insertar en referidos) pasa por una única
-      // función SECURITY DEFINER -- el insert directo desde el cliente
-      // permitía mandar un referrer_id inventado sin pasar por un código real.
       const { data: reg } = await supa.rpc('registrar_referido', { p_codigo: codigo });
       if (reg && reg.ok) {
         try { localStorage.removeItem('kone_codigo_pendiente'); } catch (e) {}
@@ -18990,8 +18950,7 @@
     notificarAdmin('bienvenida', { email, nombre });
     if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'email' });
 
-    // Guardar el código que introdujo: puede ser una PROMOCIÓN (mes gratis,
-    // descuento) o la INVITACIÓN de un amigo.
+    // Guardar el código de INVITACIÓN de un amigo que introdujo (si lo hizo).
     // OJO: si el proyecto exige confirmar el email (es el caso: ver el evento
     // SIGNED_IN con access_token en el hash, más abajo), en este punto todavía
     // NO hay sesión activa — auth.signUp() devuelve el user pero data.session es
@@ -19623,57 +19582,9 @@
       preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
       actualizarPrecioPaywall();
     }
-    // Oculto por defecto; se muestra si el cliente trae un código de mes gratis.
-    const promoBox = document.getElementById('paywallPromoBox');
-    if (promoBox) promoBox.style.display = 'none';
-    if (primerMes) _comprobarPromoPaywall();
-  }
-  // ===== MES GRATIS POR CÓDIGO: aviso claro en el paywall =====
-  // Si el cliente trae un código de mes gratis, se le enseña el selector de plan
-  // (el mes gratis se aplica sobre el plan que elija) y un aviso de que, pasados
-  // los 30 días, la suscripción se renueva y se le cobra. Sin sorpresas.
-  let _paywallPromoMesGratis = false;
-
-  async function _comprobarPromoPaywall() {
-    _paywallPromoMesGratis = false;
-    try {
-      const { data: { session } } = await supa.auth.getSession();
-      if (!session) return;
-      const { data: prof } = await supa.from('profiles')
-        .select('codigo_promo').eq('id', session.user.id).maybeSingle();
-      const cod = (prof?.codigo_promo || '').trim().toUpperCase();
-      if (!cod) return;
-      const { data: promo } = await supa.rpc('validar_codigo_promo', { p_codigo: cod });
-      if (!promo || !promo.valido || promo.tipo !== 'mes_gratis') return;
-
-      _paywallPromoMesGratis = true;
-      const box = document.getElementById('paywallPromoBox');
-      const codEl = document.getElementById('paywallPromoCodigo');
-      if (codEl) codEl.textContent = cod;
-      if (box) box.style.display = 'block';
-      // Con mes gratis manda el selector de plan, no la oferta de 1,99€.
-      const oferta = document.getElementById('paywallOfertaBox');
-      const chooser = document.getElementById('paywallPlanChooser');
-      if (oferta) oferta.style.display = 'none';
-      if (chooser) chooser.style.display = 'block';
-      const titulo = document.getElementById('paywallTitulo');
-      const desc = document.getElementById('paywallDesc');
-      const btn = document.getElementById('paywallBtn');
-      if (titulo) titulo.textContent = 'Tu primer mes es gratis';
-      if (desc) desc.textContent = 'Elige el plan que quieres. Los detalles del mes gratis están justo debajo.';
-      // Preseleccionar lo que eligió en el cuestionario. Sin esto el selector salía
-      // por defecto en "Entrenamiento + nutrición", así que un cliente de "Solo
-      // nutrición" que no se fijara acabaría pagando 7,99€ en vez de 4,99€.
-      const emailPromo = (getCurrentUser() || {}).email || '';
-      const tpPromo = getUserData(emailPromo)?.userData?.tipoPlan || userData.tipoPlan || '';
-      preseleccionarRadio('pw-tipoPlan', tpPromo.includes('Solo nutrición') ? 'Solo nutrición' : 'Entrenamiento + nutrición');
-      actualizarOpcionesPeriodicidad(tpPromo, 'pw-periodicidad');
-      if (btn) btn.textContent = 'Empezar mi mes gratis →';
-      actualizarPrecioPaywall();
-    } catch (e) { /* sin promo: el paywall se queda como estaba */ }
   }
 
-  // ¿A qué plan pasa el cliente al terminar el mes de 1,99€? Lo elige él en el
+  // ¿A qué plan pasa el cliente al terminar el mes gratis? Lo elige él en el
   // propio paywall. "Solo nutrición" no tiene trimestral: se oculta el selector.
   // Qué incluye el plan según el selector de la oferta. Si por lo que sea no
   // existiera el selector, se respeta lo que eligió en el cuestionario.
@@ -19729,8 +19640,7 @@
   function pagarDesdePaywall() {
     const user = getCurrentUser();
     const primerMes = !(user && user.tieneSub);
-    // Con mes gratis se cobra el plan elegido (con 30 días de prueba), no la oferta.
-    if (primerMes && !_paywallPromoMesGratis) {
+    if (primerMes) {
       _aplicarTipoPlanDeLaOferta();
       confirmarPagoSuscripcion(true);
     } else {
@@ -19764,7 +19674,7 @@
     const user = getCurrentUser();
     if (!user) return;
     // En la oferta también se manda tipoPlan y periodicidad: el webhook los usa para
-    // programar a qué plan pasa el cliente al acabar el mes de 1,99€. Si se enviaban
+    // saber a qué plan pasa el cliente al acabar el mes gratis. Si se enviaban
     // vacíos, TODO EL MUNDO pasaba al plan completo mensual — incluida la gente de
     // "Solo nutrición", a la que se le habría cobrado 7,99€ en vez de 4,99€.
     const periodicidad = oferta ? periodicidadTrasOferta() : valorPeriodicidad('pw-periodicidad');
