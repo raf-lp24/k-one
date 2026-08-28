@@ -21042,10 +21042,12 @@
 
   // ===== NOTIFICACIÓN AL ADMIN POR EMAIL =====
   async function notificarAdmin(tipo, datos) {
-    // /api/notify exige sesión para 'bienvenida'/'opinion'/'renovacion' (tiposProtegidos),
-    // pero esta función nunca mandaba el token: esas peticiones siempre devolvían 401
-    // y, al ser fetch().catch(()=>{}), el fallo era invisible (fetch no rechaza por
-    // status HTTP). Resultado real: el email de bienvenida nunca llegaba a nadie.
+    // /api/notify exige sesión solo para 'opinion'/'renovacion' (tiposProtegidos);
+    // 'bienvenida' se envía justo tras signUp(), cuando todavía no hay sesión
+    // (el proyecto exige confirmar email), así que va sin token -- protegido en
+    // el servidor con rate-limit por IP en vez de auth. Para los tipos que sí
+    // exigen sesión, si no hay token la petición devuelve 401 en silencio
+    // (fetch().catch(()=>{}) no distingue status HTTP de fallo de red).
     const headers = { 'Content-Type': 'application/json' };
     try {
       const { data: { session } } = await supa.auth.getSession();

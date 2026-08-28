@@ -108,7 +108,7 @@ function _entrenosSemanaAnterior(ud, ahora) {
 // más veces porque cualquiera puede pasar por el lead-magnet de la landing
 // varias veces sin ser un abuso; "mensaje" es más generoso en abuso potencial
 // (contenido libre, reply_to arbitrario) así que va más ajustado.
-const RATE_LIMITS = { lead: 5, mensaje: 3 };
+const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5 };
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 
 // Vercel pone la IP real del cliente en x-forwarded-for (primer valor de la
@@ -726,28 +726,39 @@ async function handlePost(req, res) {
     if (!tiposValidos.includes(tipo)) {
       return res.status(400).json({ error: 'Tipo no válido' });
     }
-    const tiposProtegidos = ['bienvenida', 'opinion', 'renovacion'];
+    const tiposProtegidos = ['opinion', 'renovacion'];
     if (tiposProtegidos.includes(tipo)) {
       const supa = getSupabaseAdmin();
       const user = await getAuthUser(req, supa);
       if (!user) return res.status(401).json({ error: 'No autenticado' });
     }
-    // Rate-limit server-side para los dos tipos que NO exigen sesión (lead y
-    // mensaje): antes, el único límite era un contador en localStorage del
-    // propio navegador del cliente -- trivial de saltar con curl/Postman o
-    // simplemente borrando esa clave. Sin esto, cualquiera podía hacer que
-    // el dominio de K-ONE mandara correos arbitrarios (spam/phishing) sin
-    // límite y quemara la cuota de Resend.
-    if (tipo === 'lead' || tipo === 'mensaje') {
+    // Rate-limit server-side para los tipos que NO exigen sesión (lead,
+    // mensaje, bienvenida): antes, el único límite era un contador en
+    // localStorage del propio navegador del cliente -- trivial de saltar con
+    // curl/Postman o simplemente borrando esa clave. Sin esto, cualquiera
+    // podía hacer que el dominio de K-ONE mandara correos arbitrarios
+    // (spam/phishing) sin límite y quemara la cuota de Resend.
+    //
+    // 'bienvenida' no exige sesión a propósito: el aviso de "nuevo registro"
+    // se dispara justo tras signUp(), y como el proyecto exige confirmar el
+    // email, en ese instante todavía NO hay sesión activa (data.session es
+    // null hasta que el cliente confirma) -- exigir auth aquí hacía que el
+    // aviso nunca llegara (401 silencioso, ver notificarAdmin() en
+    // index.html). Mismo perfil de riesgo que 'lead': email a destinatario
+    // arbitrario sin sesión, acotado por límite de IP + validación.
+    if (tipo === 'lead' || tipo === 'mensaje' || tipo === 'bienvenida') {
       const limitado = await estaLimitadoPorTasa(req, tipo);
       if (limitado) {
         return res.status(429).json({ error: 'Demasiadas peticiones. Inténtalo de nuevo en un rato.' });
       }
     }
-    if (tipo === 'lead' && datos.email) {
+    if ((tipo === 'lead' || tipo === 'bienvenida') && datos.email) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) {
         return res.status(400).json({ error: 'Email no válido' });
       }
+    }
+    if (tipo === 'bienvenida' && (datos.nombre || '').length > 100) {
+      return res.status(400).json({ error: 'Algún campo supera la longitud máxima permitida' });
     }
     // El formulario de contacto solo validaba en el cliente (saltable con
     // curl/Postman): sin límite de tamaño ni formato de email real, aunque
