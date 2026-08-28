@@ -88,13 +88,22 @@ module.exports = async (req, res) => {
           avisos.push(`No se pudo borrar el Customer de Stripe (${sub.stripe_customer_id}): ${stripeErr.message}. Bórralo a mano en el dashboard de Stripe.`);
         }
       }
-      await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
-      await supabaseAdmin.from('profiles').delete().eq('id', userId);
+      // Se borra el usuario de Auth ANTES que profiles/subscriptions (a propósito:
+      // antes se borraban esas dos tablas primero y, si el borrado de Auth fallaba
+      // después, la función devolvía 500 pero el perfil y la suscripción ya
+      // estaban borrados -- quedaba una cuenta de Auth huérfana, sin perfil, que
+      // podía seguir logueándose y rompía cualquier parte de la app que asume que
+      // el perfil existe). profiles y subscriptions tienen FK a auth.users con
+      // "on delete cascade", así que borrar primero el usuario de Auth ya las
+      // limpia solas; los deletes explícitos de abajo quedan como red de
+      // seguridad (no fallan si la fila ya no existe).
       const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
       if (authErr) {
         console.error('[admin-mensaje] borrar_cliente auth error:', authErr);
         return res.status(500).json({ error: 'Error eliminando usuario' });
       }
+      await supabaseAdmin.from('subscriptions').delete().eq('user_id', userId);
+      await supabaseAdmin.from('profiles').delete().eq('id', userId);
 
       // Rastro fuera de las tablas con FK a auth.users (esas se limpian solas por
       // "on delete cascade": profiles, subscriptions, referidos, canjes_promo,

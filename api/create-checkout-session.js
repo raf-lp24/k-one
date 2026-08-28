@@ -52,9 +52,22 @@ module.exports = async (req, res) => {
         customerEraNuevo = true;
       }
 
-      await supabaseAdmin
+      // Si este upsert falla (p.ej. fallo transitorio de Supabase), la próxima
+      // vez que este usuario pague no encontraremos su stripe_customer_id aquí
+      // y, si tampoco lo localiza la búsqueda por metadata de más arriba (lag
+      // de consistencia de Stripe justo tras crear el customer), se crearía UN
+      // SEGUNDO Customer -- con su propio historial vacío, así que ese usuario
+      // podría acabar con dos meses de prueba automáticos y dos suscripciones
+      // cobrando en paralelo. No podemos evitar el 100% del caso (es una carrera
+      // con la propia consistencia eventual de Stripe), pero como mínimo el
+      // fallo debe quedar visible en vez de perderse en silencio.
+      const { error: upsertErr } = await supabaseAdmin
         .from('subscriptions')
         .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: 'user_id' });
+      if (upsertErr) {
+        console.error('[create-checkout-session] upsert stripe_customer_id falló:', upsertErr.message);
+        capturarError(new Error(`upsert stripe_customer_id falló: ${upsertErr.message}`), { fn: 'create-checkout-session', userId: user.id, customerId });
+      }
     }
 
     // SEGURIDAD: la oferta de primer mes (1,99€) y las promociones de bienvenida

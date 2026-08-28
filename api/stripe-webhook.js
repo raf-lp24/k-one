@@ -257,7 +257,13 @@ module.exports = async (req, res) => {
           }
         }
 
-        if (subscription.status === 'active' && prev?.current_period_start) {
+        // OJO: prev.status !== 'trialing' descarta la primera transición del mes de
+        // prueba gratis al primer cobro real -- ese evento TAMBIÉN cambia
+        // current_period_start y pasa a 'active', así que sin este descarte se
+        // mandaba este email de "renovación" ("la mayoría abandona... tú has
+        // decidido seguir") justo cuando a alguien se le acaba de cobrar por
+        // primera vez, antes de que haya renovado nada de verdad.
+        if (subscription.status === 'active' && prev?.current_period_start && prev?.status !== 'trialing') {
           try {
             let prof = null;
             if (subscription.metadata?.supabase_user_id) {

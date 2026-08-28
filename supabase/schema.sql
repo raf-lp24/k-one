@@ -58,12 +58,24 @@ alter table public.profiles add column if not exists beta_expires timestamptz;
 -- y dos tablas más con políticas huérfanas: invitaciones_premium y referidos).
 alter table public.profiles add column if not exists descuento_referidos numeric not null default 0;
 
+-- Notas internas del admin sobre el cliente (CRM en Jarvis) y heartbeat de última
+-- actividad. Añadidas originalmente por migration-last-seen.sql; se repiten aquí
+-- porque el trigger de más abajo referencia nota_admin -- sin esta columna, ese
+-- trigger fallaría con "column does not exist" en cada UPDATE de un perfil si
+-- este fichero se ejecuta solo, en una base nueva.
+alter table public.profiles add column if not exists last_seen timestamptz;
+alter table public.profiles add column if not exists nota_admin text;
+
 alter table public.profiles enable row level security;
 
 -- Protección de columnas sensibles: los roles de cliente (authenticated/anon) no pueden
--- cambiar is_beta/beta_expires/descuento_referidos. Si lo intentan, se conserva el valor
--- anterior silenciosamente. Solo service_role / postgres (SQL Editor, scripts de admin)
--- pueden modificarlas.
+-- cambiar is_beta/beta_expires/descuento_referidos/nota_admin. Si lo intentan, se conserva
+-- el valor anterior silenciosamente. Solo service_role / postgres (SQL Editor, scripts de
+-- admin) pueden modificarlas.
+-- OJO: esta función se define con CREATE OR REPLACE, que sustituye el cuerpo entero (no
+-- fusiona versiones) -- por eso nota_admin está aquí ya incluida y no solo en la migración
+-- que la añadió (migration-fix-rls-referidos-y-otros.sql). Si este fichero se vuelve a
+-- ejecutar sin esa columna en la lista, se anula esa protección en silencio.
 create or replace function public.protect_profile_sensitive_cols()
 returns trigger
 language plpgsql
@@ -73,6 +85,7 @@ begin
     new.is_beta := old.is_beta;
     new.beta_expires := old.beta_expires;
     new.descuento_referidos := old.descuento_referidos;
+    new.nota_admin := old.nota_admin;
   end if;
   return new;
 end;
@@ -348,8 +361,16 @@ create policy "testimonios_select" on public.testimonios
 -- tenían roles = public (cualquiera, no solo el backend) y using/with_check
 -- = true sin comprobar propiedad. El service_role real no necesita ninguna
 -- política porque salta RLS por diseño; estas dos solo abrían la tabla a
--- cualquier usuario. Quedan solo referidos_insert_self (auth.uid() =
--- referido_id) y las de select limitadas a referrer_id/referido_id propios.
+-- cualquier usuario.
+--
+-- ACTUALIZADO (ver migration-fix-rls-referidos-y-otros.sql): la política
+-- "referidos_insert_self" (auth.uid() = referido_id) mencionada arriba
+-- también se borró después -- validaba quién RECIBE el referido pero no
+-- quién lo ENVÍA, así que cualquiera podía insertar {referrer_id: <uuid
+-- ajeno>, referido_id: propio} y acreditarle un referido a otra persona sin
+-- su intervención. Los INSERT ahora pasan por la función SECURITY DEFINER
+-- registrar_referido(p_codigo), que valida ambos lados desde el servidor.
+-- No debe quedar ninguna política de INSERT directo en esta tabla.
 -- ============================================================
 
 -- ============================================================

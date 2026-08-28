@@ -5838,10 +5838,10 @@
     <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()" aria-label="Cerrar">✕</button>
     <div class="modal-title" id="paywallTitulo">Tu mes de prueba ha terminado</div>
     <p class="modal-desc" id="paywallDesc">Has disfrutado de K-One por 1,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
-    <!-- Modo "primer mes": oferta de 1,99€. El cliente elige aquí mismo a qué
-         plan pasará al terminar los 30 días, para que no haya sorpresas. -->
+    <!-- Modo "primer mes gratis" (automático, sin código): el cliente elige aquí
+         mismo a qué plan pasará al terminar los 30 días, para que no haya sorpresas. -->
     <div id="paywallOfertaBox" style="display:none">
-      <div class="price-amount" style="margin-bottom:4px"><span>1,99€</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
+      <div class="price-amount" style="margin-bottom:4px"><span>Gratis</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
       <div style="margin:14px 0 0">
         <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
         <div class="radio-group" id="pw-ofertaTipo" style="margin-bottom:8px">
@@ -11997,6 +11997,27 @@
     const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
     const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
     const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
+    // Thrusters, wall balls y snatch tocan a la vez rodilla/espalda Y hombro (un
+    // "Otra" que mencione las dos zonas activa ambos bloques). Como mapaLesion
+    // aplica un .replace() detrás de otro, la primera zona en tocar el texto se
+    // lo "come" antes de que la otra pueda actuar -- y su reemplazo puede seguir
+    // siendo justo lo que la otra zona intenta evitar: rodilla cambiaba
+    // "Thrusters" por "press de hombro..." (sigue siendo empuje sobre cabeza) y
+    // hombro cambiaba "Wall balls" por "goblet squat" (sigue siendo sentadilla
+    // profunda). Van SIEMPRE primero, con un reemplazo que no repite ningún de
+    // los dos problemas, para que las reglas de zona única de abajo ya no
+    // encuentren el texto original con el que coincidir.
+    if ((_lesionZonaRodilla || _lesionZonaEspalda) && _lesionZonaHombro) {
+      mapaLesion = mapaLesion.concat([
+        [/[Tt]hrusters?( con mancuernas| mancuernas)?/g, 'remo con mancuerna apoyado en banco (sin sentadilla ni empuje sobre cabeza)'],
+        [/[Ww]all balls?( con balón)?/g, 'remo con mancuerna apoyado en banco (sin sentadilla ni empuje sobre cabeza)'],
+      ]);
+    }
+    if (_lesionZonaEspalda && _lesionZonaHombro) {
+      mapaLesion = mapaLesion.concat([
+        [/[Pp]ower snatch(es)?|\bsnatch(es)?\b/gi, 'remo en máquina con apoyo de pecho (sin tirón desde el suelo ni empuje sobre cabeza)'],
+      ]);
+    }
     if (_lesionZonaRodilla) {
       // Las reglas van de la frase MÁS larga a la más corta y consumen el material
       // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
