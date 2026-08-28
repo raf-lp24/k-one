@@ -41,7 +41,7 @@ $cNegro   = [System.Drawing.Color]::FromArgb(10,10,10)
 $cCarbon  = [System.Drawing.Color]::FromArgb(20,19,18)
 $cGrafito = [System.Drawing.Color]::FromArgb(28,27,26)
 $cHumo    = [System.Drawing.Color]::FromArgb(38,36,34)
-$cBrasa   = [System.Drawing.Color]::FromArgb(232,73,15)
+$cBrasa   = [System.Drawing.Color]::FromArgb(209,66,14)
 $cBlanco  = [System.Drawing.Color]::FromArgb(244,241,236)
 $cMetal   = [System.Drawing.Color]::FromArgb(143,135,126)
 $cMetalCl = [System.Drawing.Color]::FromArgb(190,183,175)
@@ -317,9 +317,9 @@ foreach($s in $SC){
         if($p -gt 0.42){ TxtC $g 'Entrenamiento + nutrición' $fSub $bMetalCl ($W/2) 1010 }
       } else {
         TxtC $g 'UN MES GRATIS' $fTitulo $bBrasa ($W/2) 640
-        TxtC $g 'Escríbenos la palabra' $fSub $bMetalCl ($W/2) 790
-        TxtC $g '"GRATIS"' $fTitulo $bBlanco ($W/2) 840
-        TxtC $g 'por mensaje privado' $fSub $bMetalCl ($W/2) 970
+        TxtC $g 'Regístrate gratis' $fSub $bMetalCl ($W/2) 790
+        TxtC $g 'SIN CÓDIGO' $fTitulo $bBlanco ($W/2) 840
+        TxtC $g 'automático al crear tu cuenta' $fSub $bMetalCl ($W/2) 970
         $pen2 = New-Object System.Drawing.Pen $cBrasa,3
         StrokeRound $g $pen2 ([int](($W-460)/2)) 1080 460 96 16
         $pen2.Dispose()
