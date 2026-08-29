@@ -1,4 +1,4 @@
-const { getStripe, getSupabaseAdmin } = require('./_stripeHelpers');
+const { getStripe, getSupabaseAdmin, getSubscriptionPeriod } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 
 // Vercel necesita el cuerpo de la petición sin parsear para verificar la firma de Stripe.
@@ -140,13 +140,14 @@ module.exports = async (req, res) => {
                 : process.env.STRIPE_PRICE_COMPLETO_MENSUAL);
           if (siguientePriceId) {
             try {
+              const { start: periodStart, end: periodEnd } = getSubscriptionPeriod(subscription);
               await stripe.subscriptionSchedules.create({
                 from_subscription: subscription.id,
                 phases: [
                   {
                     items: [{ price: subscription.items.data[0].price.id, quantity: 1 }],
-                    start_date: subscription.current_period_start,
-                    end_date: subscription.current_period_end,
+                    start_date: periodStart,
+                    end_date: periodEnd,
                   },
                   {
                     // Última fase SIN end_date ni iterations: así se renueva de forma

@@ -17,19 +17,38 @@ module.exports = async (req, res) => {
     const { userId, premium } = req.body || {};
     if (!userId) return res.status(400).json({ error: 'userId requerido' });
 
+    // supabase-js no lanza en errores de query (devuelve {data, error}) -- sin
+    // comprobar esto, un fallo de la UPDATE o un userId que no coincide con
+    // ningún perfil devolvían igualmente {ok:true}, así que un admin podía
+    // creer que había concedido o revocado premium y en realidad no había
+    // pasado nada.
     if (premium) {
       const expira = new Date();
       expira.setFullYear(expira.getFullYear() + 1);
-      await supabaseAdmin.from('profiles').update({
+      const { data, error } = await supabaseAdmin.from('profiles').update({
         is_beta: true,
         beta_expires: expira.toISOString()
-      }).eq('id', userId);
+      }).eq('id', userId).select('id');
+      if (error) {
+        console.error('[admin-set-premium] update falló:', error.message);
+        return res.status(500).json({ error: 'No se pudo conceder premium' });
+      }
+      if (!data || !data.length) {
+        return res.status(404).json({ error: 'No existe ningún cliente con ese userId' });
+      }
       return res.status(200).json({ ok: true, is_beta: true, beta_expires: expira.toISOString() });
     } else {
-      await supabaseAdmin.from('profiles').update({
+      const { data, error } = await supabaseAdmin.from('profiles').update({
         is_beta: false,
         beta_expires: null
-      }).eq('id', userId);
+      }).eq('id', userId).select('id');
+      if (error) {
+        console.error('[admin-set-premium] update falló:', error.message);
+        return res.status(500).json({ error: 'No se pudo revocar premium' });
+      }
+      if (!data || !data.length) {
+        return res.status(404).json({ error: 'No existe ningún cliente con ese userId' });
+      }
       return res.status(200).json({ ok: true, is_beta: false });
     }
   } catch (err) {

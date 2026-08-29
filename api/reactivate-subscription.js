@@ -1,6 +1,6 @@
 const {
   getStripe, getSupabaseAdmin, getAuthUser,
-  getActiveSubscriptionId, assertSubscriptionOwnership
+  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod
 } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 
@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
 
     if (subscription.cancel_at_period_end) {
       const updated = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: false });
-      return res.status(200).json({ ok: true, reactivated: true, currentPeriodEnd: updated.current_period_end });
+      return res.status(200).json({ ok: true, reactivated: true, currentPeriodEnd: getSubscriptionPeriod(updated).end });
     }
 
     // Ya estaba activa sin cancelación pendiente: nada que hacer.

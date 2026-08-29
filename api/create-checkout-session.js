@@ -51,21 +51,30 @@ module.exports = async (req, res) => {
         customerEraNuevo = true;
       }
 
-      // Si este upsert falla (p.ej. fallo transitorio de Supabase), la próxima
-      // vez que este usuario pague no encontraremos su stripe_customer_id aquí
-      // y, si tampoco lo localiza la búsqueda por metadata de más arriba (lag
-      // de consistencia de Stripe justo tras crear el customer), se crearía UN
-      // SEGUNDO Customer -- con su propio historial vacío, así que ese usuario
-      // podría acabar con dos meses de prueba automáticos y dos suscripciones
-      // cobrando en paralelo. No podemos evitar el 100% del caso (es una carrera
-      // con la propia consistencia eventual de Stripe), pero como mínimo el
-      // fallo debe quedar visible en vez de perderse en silencio.
+      // ignoreDuplicates: si dos peticiones casi simultáneas de un usuario SIN
+      // fila todavía en `subscriptions` llegan aquí a la vez, la búsqueda por
+      // metadata de más arriba puede no ver el customer que la otra acaba de
+      // crear (lag de consistencia eventual de Stripe) y las dos crean un
+      // Customer distinto. Con upsert normal, la segunda sobrescribiría el
+      // stripe_customer_id de la primera -- y esta petición seguiría usando SU
+      // propio customerId local para la sesión de checkout, desincronizado del
+      // que quedó guardado. Con ignoreDuplicates la fila la "gana" quien
+      // upsertea primero y no se pisa; releyendo justo debajo, ambas peticiones
+      // convergen en el mismo customerId para crear la sesión (el candado de
+      // más abajo ya se encarga de que solo una de las dos llegue a crearla).
       const { error: upsertErr } = await supabaseAdmin
         .from('subscriptions')
-        .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: 'user_id' });
+        .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: 'user_id', ignoreDuplicates: true });
       if (upsertErr) {
         console.error('[create-checkout-session] upsert stripe_customer_id falló:', upsertErr.message);
         capturarError(new Error(`upsert stripe_customer_id falló: ${upsertErr.message}`), { fn: 'create-checkout-session', userId: user.id, customerId });
+      } else {
+        const { data: filaActual } = await supabaseAdmin
+          .from('subscriptions')
+          .select('stripe_customer_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (filaActual?.stripe_customer_id) customerId = filaActual.stripe_customer_id;
       }
     }
 

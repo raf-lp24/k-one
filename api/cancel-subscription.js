@@ -1,6 +1,6 @@
 const {
   getStripe, getSupabaseAdmin, getAuthUser,
-  getActiveSubscriptionId, assertSubscriptionOwnership
+  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod
 } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 
@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
         ok: true,
         alreadyCancelled: true,
         cancelAt: subscription.cancel_at,
-        currentPeriodEnd: subscription.current_period_end
+        currentPeriodEnd: getSubscriptionPeriod(subscription).end
       });
     }
 
@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       ok: true,
       cancelAt: updated.cancel_at,
-      currentPeriodEnd: updated.current_period_end
+      currentPeriodEnd: getSubscriptionPeriod(updated).end
     });
 
   } catch (err) {

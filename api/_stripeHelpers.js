@@ -61,6 +61,21 @@ async function getActiveSubscriptionId(stripe, sub) {
   return lista.data.find(s => ['active', 'trialing'].includes(s.status))?.id || null;
 }
 
+// current_period_start/end pueden venir en el objeto subscription de nivel
+// superior o, según la versión de la API de Stripe, solo dentro de cada item
+// de la suscripción. Este fallback ya existía duplicado solo en el webhook
+// (upsertFromSubscription); update-subscription/cancel-subscription/
+// reactivate-subscription leían subscription.current_period_* directo y se
+// habrían quedado con `undefined` en el mismo escenario que motivó el fix
+// original -- aquí queda centralizado para los cuatro sitios que lo usan.
+function getSubscriptionPeriod(subscription) {
+  const item = subscription.items?.data?.[0];
+  return {
+    start: item?.current_period_start ?? subscription.current_period_start,
+    end:   item?.current_period_end   ?? subscription.current_period_end,
+  };
+}
+
 // C-1: verifica que la suscripción de Stripe pertenece al cliente del usuario autenticado.
 // Llama después de stripe.subscriptions.retrieve() en update/cancel/reactivate.
 function assertSubscriptionOwnership(subscription, stripeCustomerId) {
@@ -78,4 +93,5 @@ module.exports = {
   getAuthUser,
   getActiveSubscriptionId,
   assertSubscriptionOwnership,
+  getSubscriptionPeriod,
 };
