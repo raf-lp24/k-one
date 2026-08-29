@@ -69,13 +69,17 @@ alter table public.profiles add column if not exists nota_admin text;
 alter table public.profiles enable row level security;
 
 -- Protección de columnas sensibles: los roles de cliente (authenticated/anon) no pueden
--- cambiar is_beta/beta_expires/descuento_referidos/nota_admin. Si lo intentan, se conserva
--- el valor anterior silenciosamente. Solo service_role / postgres (SQL Editor, scripts de
--- admin) pueden modificarlas.
+-- cambiar is_beta/beta_expires/descuento_referidos/nota_admin/email. Si lo intentan, se
+-- conserva el valor anterior silenciosamente. Solo service_role / postgres (SQL Editor,
+-- scripts de admin) pueden modificarlas.
 -- OJO: esta función se define con CREATE OR REPLACE, que sustituye el cuerpo entero (no
 -- fusiona versiones) -- por eso nota_admin está aquí ya incluida y no solo en la migración
 -- que la añadió (migration-fix-rls-referidos-y-otros.sql). Si este fichero se vuelve a
 -- ejecutar sin esa columna en la lista, se anula esa protección en silencio.
+-- `email` se añadió en la auditoría de agosto 2026: no tenía `unique` ni protección, así
+-- que un usuario podía poner su propio email igual al de una invitación premium ajena
+-- (supabase.from('profiles').update({email:'victima@x.com'})) y afectar de rebote a
+-- api/admin-mensaje.js (borrar_cliente), que resuelve la invitación a borrar por email.
 create or replace function public.protect_profile_sensitive_cols()
 returns trigger
 language plpgsql
@@ -86,6 +90,7 @@ begin
     new.beta_expires := old.beta_expires;
     new.descuento_referidos := old.descuento_referidos;
     new.nota_admin := old.nota_admin;
+    new.email := old.email;
   end if;
   return new;
 end;
@@ -210,6 +215,17 @@ from public.profiles p
 left join public.subscriptions s on s.user_id = p.id
 order by p.created_at desc;
 
+-- Sin esto, la vista se ejecuta con los privilegios de quien la consulta (o
+-- con los del dueño si no se marca security_invoker) y anon/authenticated
+-- pueden leerla entera vía REST (GET /rest/v1/admin_clientes?select=*),
+-- saltándose el RLS de profiles/subscriptions por completo -- email, lesión,
+-- alergia, medicación y estado de pago de TODOS los clientes. Cerrado en
+-- agosto 2026 (migration-fix-criticos-agosto.sql) pero faltaba aquí: si se
+-- reconstruye la base solo con este schema.sql, la vista volvía a quedar
+-- abierta.
+alter view public.admin_clientes set (security_invoker = on);
+revoke all on public.admin_clientes from anon, authenticated;
+
 -- ============================================================
 -- 5. TABLA: webhook_events
 -- Garantiza idempotencia en el webhook de Stripe: Stripe envía cada
@@ -232,10 +248,13 @@ alter table public.webhook_events enable row level security;
 --  al service role, que ignora RLS por diseño de Supabase.)
 
 -- ============================================================
--- 5b. TABLA: rate_limits
--- Rate-limit server-side para peticiones sin sesión a api/notify.js
--- (lead/mensaje). Ver supabase/migration-rate-limits.sql para el detalle.
--- Igual que webhook_events: cerrada a todos salvo service_role.
+-- 5b. TABLA: rate_limits (histórica, ya no la usa el código)
+-- Quedaba obsoleta por diseño: contar filas y luego insertar (como hacía
+-- api/notify.js) son dos pasos separados, no atómicos, así que peticiones
+-- concurrentes podían leer todas el mismo count antes de que ninguna
+-- insertara su fila y saltarse el límite en ráfaga (fácil con un script que
+-- lance varias peticiones a la vez). Se deja la tabla tal cual, sin borrar
+-- historial, pero notify.js ya no la usa -- ver 5c más abajo.
 -- ============================================================
 create table if not exists public.rate_limits (
   id uuid primary key default gen_random_uuid(),
@@ -245,6 +264,50 @@ create table if not exists public.rate_limits (
 create index if not exists rate_limits_clave_fecha_idx
   on public.rate_limits (clave, created_at desc);
 alter table public.rate_limits enable row level security;
+
+-- ============================================================
+-- 5c. TABLA + FUNCIÓN: rate_limits_contador / check_rate_limit()
+-- Sustituye a rate_limits (ver nota de arriba) por un contador atómico por
+-- ventana fija, mismo truco que el candado de checkout
+-- (create-checkout-session.js): un solo INSERT ... ON CONFLICT ... DO UPDATE
+-- ... WHERE es una operación atómica de Postgres (se serializa a nivel de
+-- fila), así que con peticiones concurrentes como mucho una de ellas ve la
+-- condición cumplida por cada hueco del contador.
+-- ============================================================
+create table if not exists public.rate_limits_contador (
+  clave    text        not null,
+  ventana  timestamptz not null,
+  contador int         not null default 1,
+  primary key (clave, ventana)
+);
+alter table public.rate_limits_contador enable row level security;
+-- Sin políticas: cerrada a todos salvo service_role, igual que webhook_events.
+
+create or replace function public.check_rate_limit(p_clave text, p_limite int, p_ventana timestamptz)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_contador int;
+begin
+  insert into public.rate_limits_contador (clave, ventana, contador)
+  values (p_clave, p_ventana, 1)
+  on conflict (clave, ventana) do update
+    set contador = public.rate_limits_contador.contador + 1
+    where public.rate_limits_contador.contador < p_limite
+  returning contador into v_contador;
+
+  -- v_contador queda NULL si la fila ya existía Y el WHERE del DO UPDATE no
+  -- se cumplió (contador >= p_limite): esa combinación es justo "límite
+  -- alcanzado, no incrementar".
+  return v_contador is not null;
+end;
+$$;
+
+revoke all on function public.check_rate_limit(text, int, timestamptz) from public;
+grant execute on function public.check_rate_limit(text, int, timestamptz) to service_role;
 
 -- ============================================================
 -- 6. FUNCIÓN HELPER: is_admin()
@@ -299,6 +362,19 @@ create table if not exists public.testimonios (
   created_at timestamptz not null default now()
 );
 
+-- Rango válido de estrellas. Sin esto, el insert público (with check (true),
+-- a propósito) deja que cualquiera mande estrellas:-999 o estrellas:99999
+-- directo por REST -- la moderación evita que se PUBLIQUE, pero no que
+-- ensucie la cola de revisión. DO block porque Postgres no soporta
+-- "ADD CONSTRAINT IF NOT EXISTS": así el fichero se puede volver a ejecutar
+-- entero sin fallar si la constraint ya existe.
+do $$
+begin
+  alter table public.testimonios
+    add constraint testimonios_estrellas_range check (estrellas between 1 and 5);
+exception when duplicate_object then null;
+end $$;
+
 alter table public.testimonios enable row level security;
 
 drop policy if exists "testimonios_insert" on public.testimonios;
@@ -340,7 +416,13 @@ create policy "testimonios_select" on public.testimonios
 
 -- ============================================================
 -- 8c. TABLAS: invitaciones_premium y referidos
--- Tampoco viven en este repositorio (igual que mensajes_cliente). Ambas
+-- CORRECCIÓN (auditoría 29 ago 2026): esta nota decía que "tampoco viven en
+-- este repositorio", pero SÍ viven -- las crea supabase/migration-
+-- referidos.sql (invitaciones_premium y referidos completas, con políticas).
+-- Si se reconstruye una base nueva, hay que ejecutar esa migración Y DESPUÉS
+-- migration-fix-rls-referidos-y-otros.sql (que borra "referidos_insert_self",
+-- ver más abajo) -- ejecutar solo la primera deja el hueco de seguridad
+-- reabierto. Lo que sigue describe el estado ya cerrado en producción:
 -- tenían RLS activado pero con políticas huérfanas -- de una versión
 -- anterior, probablemente de cuando se estaba depurando el feature -- que
 -- dejaban la tabla abierta a cualquiera pese a que las políticas correctas

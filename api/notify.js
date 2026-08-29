@@ -122,27 +122,31 @@ function _ipDe(req) {
 }
 
 // Antes el único límite era un contador en localStorage del propio navegador
-// -- trivial de saltar con curl/Postman o borrando esa clave. Este registra
-// cada petición sin sesión (lead/mensaje) en Supabase y cuenta cuántas ha
-// hecho esa IP para ese tipo en la última hora. Si Supabase falla, se deja
-// pasar la petición (fail-open): un rate-limit caído no debería tumbar el
-// formulario de contacto entero.
+// -- trivial de saltar con curl/Postman o borrando esa clave. Este cuenta
+// cuántas peticiones sin sesión (lead/mensaje) ha hecho esa IP para ese tipo
+// en la ventana actual. Si Supabase falla, se deja pasar la petición
+// (fail-open): un rate-limit caído no debería tumbar el formulario de
+// contacto entero.
+//
+// Usa check_rate_limit() (función atómica en Supabase, ver migration-
+// agosto29-hardening.sql) en vez de "contar y luego insertar" en dos pasos
+// sueltos: esa versión anterior tenía una condición de carrera real -- N
+// peticiones concurrentes (trivial con un script) podían leer todas el mismo
+// count antes de que ninguna hubiera insertado su fila, saltándose el límite
+// en ráfaga. El INSERT ... ON CONFLICT ... DO UPDATE ... WHERE de la función
+// es una sola operación atómica de Postgres, serializada a nivel de fila.
 async function estaLimitadoPorTasa(req, tipo) {
   try {
     const supa = getSupabaseAdmin();
     const ip = _ipDe(req);
     const clave = `${tipo}:${ip}`;
-    const desde = new Date(Date.now() - RATE_WINDOW_MS).toISOString();
-    const { count, error } = await supa
-      .from('rate_limits')
-      .select('id', { count: 'exact', head: true })
-      .eq('clave', clave)
-      .gte('created_at', desde);
-    if (error) { console.warn('[notify] rate-limit check falló, se deja pasar:', error.message); return false; }
     const limite = RATE_LIMITS[tipo] || 5;
-    if ((count || 0) >= limite) return true;
-    await supa.from('rate_limits').insert({ clave });
-    return false;
+    const ventana = new Date(Math.floor(Date.now() / RATE_WINDOW_MS) * RATE_WINDOW_MS).toISOString();
+    const { data: permitido, error } = await supa.rpc('check_rate_limit', {
+      p_clave: clave, p_limite: limite, p_ventana: ventana
+    });
+    if (error) { console.warn('[notify] rate-limit check falló, se deja pasar:', error.message); return false; }
+    return permitido === false;
   } catch (e) {
     console.warn('[notify] rate-limit check con excepción, se deja pasar:', e.message);
     return false;
