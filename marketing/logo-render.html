@@ -1,0 +1,26 @@
+<!doctype html>
+<!--
+  K-ONE · logotipo nítido para usar como start_image en vídeos de IA.
+
+  Renderiza el logotipo real de la marca (misma tipografía y colores que
+  .logo en index.html: Bebas Neue, "K-" en blanco + "ONE" en brasa) a pantalla
+  completa 1080x1920 sobre negro puro.
+
+  Por qué existe: a un modelo de vídeo por IA nunca se le debe pedir que
+  "escriba" un nombre -- el texto generado por IA en vídeo casi siempre sale
+  deformado o ilegible. La tipografía la pone este render (Chrome headless),
+  no la IA; la IA solo anima partículas a partir de esta imagen ya perfecta.
+  Usado para generar ai-logo-brasas-raw.mp4 (ver generar-logo-brasas.ps1).
+
+  Captura con Chrome headless:
+    chrome --headless=new --disable-gpu --window-size=1080,1920 \
+      --virtual-time-budget=4000 --screenshot=logo.png "file:///ruta/a/este/archivo.html"
+-->
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:230px;letter-spacing:16px;color:#F0EDE8;line-height:1}
+  .logo span{color:#D1420E}
+</style>
+<body><div class="logo">K-<span>ONE</span></div></body>
