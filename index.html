@@ -93,6 +93,14 @@
         },
         {
           "@type": "Offer",
+          "name": "Plan trimestral completo",
+          "price": "14.99",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://k-one.fit/"
+        },
+        {
+          "@type": "Offer",
           "name": "Solo nutrición",
           "price": "4.99",
           "priceCurrency": "EUR",
@@ -227,7 +235,11 @@
     --grafito: #F0ECE6;
     --acero: #EDE9E3;
     --metal: #5A5A5A;
-    --metal-claro: #777;
+    /* #777 daba 4.48:1 sobre --carbon y solo 4.39:1 sobre --negro (#F8F6F3), por debajo
+       del mínimo AA (4.5:1) para texto normal -- se usa en más de 50 sitios como texto
+       secundario a 11-13px, ninguno llega al umbral de "texto grande". #6E6E6E da 4.72:1
+       y 5.10:1 respectivamente. */
+    --metal-claro: #6E6E6E;
     --humo: #E0DCD5;
     --blanco: #1A1A1A;
     --blanco-puro: #111111;
@@ -5764,9 +5776,17 @@
     .modal-overlay { padding: 16px; }
     .modal-box, .modal-box-wide, .modal-box-recetario { padding: 28px 20px; max-height: 90vh; }
   }
+  /* Skip-link: oculto hasta que recibe foco por teclado (primer Tab de la
+     página). Sin esto, con el menú fijo y el resto de la navegación sin
+     tabindex antes de este arreglo, alguien navegando solo con teclado tenía
+     que tabular por todo el menú en cada carga antes de llegar al contenido. */
+  .skip-link{position:absolute;top:8px;left:-9999px;z-index:9999;background:var(--brasa);color:#fff;
+    padding:10px 18px;border-radius:8px;font-weight:700;text-decoration:none}
+  .skip-link:focus{left:8px}
 </style>
 </head>
 <body>
+<a href="#landing" class="skip-link">Saltar al contenido</a>
 
 
 <!-- LOADING -->
@@ -5801,7 +5821,7 @@
     <h2 class="welcome-title">
       ¿Es tu primera<br>
       <em>vez aquí?</em>
-    </h1>
+    </h2>
     <p class="welcome-sub">Tu proceso empieza con una decisión. Crear una cuenta te lleva menos de dos minutos.</p>
     <div class="welcome-btns">
       <button class="btn-primary" onclick="goTo('registro')">Crear cuenta nueva</button>
@@ -5826,32 +5846,32 @@
       <label for="reg-nombre">Nombre y apellidos</label>
       <div class="auth-field-wrap">
         <input type="text" id="reg-nombre" placeholder="Ej: Carlos García López" autocomplete="name"
-          oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
+          aria-describedby="err-nombre" oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
         <span class="auth-field-check" id="check-nombre">✓</span>
       </div>
     </div>
-    <div class="auth-error" id="err-nombre">Introduce tu nombre y apellidos</div>
+    <div class="auth-error" id="err-nombre" role="alert" aria-live="polite">Introduce tu nombre y apellidos</div>
 
     <div class="auth-field">
       <label for="reg-email">Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="reg-email" name="username" placeholder="tu@email.com" autocomplete="username"
-          oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
+          aria-describedby="err-email" oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
         <span class="auth-field-check" id="check-email">✓</span>
       </div>
     </div>
-    <div class="auth-error" id="err-email">Introduce un email válido</div>
+    <div class="auth-error" id="err-email" role="alert" aria-live="polite">Introduce un email válido</div>
 
     <div class="auth-field">
       <label for="reg-pass">Contraseña</label>
       <div class="auth-field-wrap">
         <input type="password" id="reg-pass" name="password" placeholder="Mínimo 8 caracteres, con mayúscula, minúscula y número" autocomplete="new-password"
-          oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
+          aria-describedby="err-pass" oninput="validarCampoReg('pass')" onblur="validarCampoReg('pass')">
         <span class="auth-field-check" id="check-pass">✓</span>
       </div>
     </div>
     <div class="auth-pass-strength" id="pass-strength-bar"><div class="auth-pass-strength-bar" id="pass-strength-fill"></div></div>
-    <div class="auth-error" id="err-pass">Mínimo 8 caracteres, con mayúscula, minúscula y número</div>
+    <div class="auth-error" id="err-pass" role="alert" aria-live="polite">Mínimo 8 caracteres, con mayúscula, minúscula y número</div>
 
     <div class="auth-field">
       <label for="reg-pass2">Confirmar contraseña</label>
@@ -6617,7 +6637,7 @@
   </picture>
 </div>
 
-<div class="screen" id="landing">
+<div class="screen" id="landing" tabindex="-1">
   <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
   <nav class="landing-nav">
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
@@ -18876,6 +18896,7 @@
     input.classList.toggle('error', estado === 'error');
     input.classList.toggle('valid', estado === 'valid');
     if (estado === 'none') { input.classList.remove('error', 'valid'); }
+    input.setAttribute('aria-invalid', estado === 'error' ? 'true' : 'false');
     if (errEl)   errEl.classList.toggle('visible',  estado === 'error');
     if (checkEl) checkEl.classList.toggle('visible', estado === 'valid');
   }
@@ -22108,6 +22129,65 @@
       } catch (e) {}
     }
   };
+
+  // ===== ACCESIBILIDAD: operabilidad por teclado de los pseudo-botones =====
+  // Auditoría de accesibilidad (29 ago 2026): todo el cuestionario de alta
+  // (radio-opt/check-opt), la navegación "volver"/logo de las pantallas de
+  // login/registro, y en general cualquier elemento con onclick que no sea
+  // ya un <button>/<a> nativo, no tenían tabindex ni respondían a
+  // Enter/Espacio -- inoperables para quien navega solo con teclado. El
+  // patrón correcto ya existía en un solo sitio (enlaces del menú, con
+  // tabindex/role/onkeydown a mano) pero no se había replicado en el resto.
+  // Como mucho de ese contenido se genera dinámicamente (innerHTML) después
+  // de cargar la página -- el cuestionario, el dashboard, los modales -- un
+  // MutationObserver reetiqueta cualquier [onclick] nuevo, en vez de tocar
+  // las más de 400 líneas que ya usan onclick.
+  function _marcarOperablesTeclado(raiz) {
+    (raiz || document).querySelectorAll('[onclick]:not([tabindex])').forEach(el => {
+      if (['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+      el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('[onclick][tabindex]');
+    if (!el || ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+    e.preventDefault();
+    el.click();
+  });
+  _marcarOperablesTeclado();
+  new MutationObserver((mutaciones) => {
+    for (const m of mutaciones) {
+      if (m.addedNodes.length) { _marcarOperablesTeclado(); break; }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+
+  // Modales como diálogo real: role/aria-modal (son contenedores estáticos ya
+  // presentes en el HTML inicial, solo cambian de visibilidad) + Escape para
+  // cerrar el que esté abierto. Reutiliza el mismo patrón "click en el fondo
+  // cierra" que ya usan la mayoría de modales (onclick="if(event.target===
+  // this)cerrarX()"): un click sintético SOBRE el propio overlay hace que
+  // event.target sea ese overlay, así que ese onclick se dispara igual que
+  // si el usuario hubiera clicado fuera -- sin tener que enumerar y llamar
+  // a cada función cerrarX() por separado.
+  document.querySelectorAll('.modal-overlay, .onboarding-modal, #modalJarvisCliente').forEach(el => {
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const abiertos = [...document.querySelectorAll('.modal-overlay.visible, .onboarding-modal.visible, #modalJarvisCliente.visible')];
+    if (!abiertos.length) return;
+    const ultimo = abiertos[abiertos.length - 1];
+    // Prioriza el botón "✕" real del modal (el mismo que ya usa cada uno para
+    // cerrarse, con su propia función -- guardar cambios, limpiar estado,
+    // etc.) sobre el truco de "clic en el fondo", que solo cierra los
+    // modales que tienen el patrón onclick="if(event.target===this)...".
+    const boton = ultimo.querySelector('.modal-close:not([style*="display:none"]):not([style*="display: none"])');
+    if (boton) boton.click();
+    else ultimo.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  });
 
   window.onload = async () => {
     _sincronizarPrecios();
