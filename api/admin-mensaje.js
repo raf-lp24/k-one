@@ -66,13 +66,21 @@ module.exports = async (req, res) => {
       // que sepa que tiene que borrar el Customer a mano en el dashboard de
       // Stripe si esto ocurre.
       const avisos = [];
+      // Stripe devuelve code:'resource_missing' cuando el objeto (suscripción o
+      // Customer) ya no existe ahí -- no es un fallo del borrado, es que ya no
+      // había nada que borrar (se borró antes, o el ID en Supabase estaba
+      // desactualizado). En ese caso no hay ningún aviso real que dar: decirle
+      // al admin "bórralo a mano en el dashboard" sobre algo que Stripe dice
+      // que no existe es una instrucción imposible de seguir y solo confunde.
       if (sub?.stripe_subscription_id) {
         try {
           const { getStripe } = require('./_stripeHelpers');
           await getStripe().subscriptions.cancel(sub.stripe_subscription_id);
         } catch (stripeErr) {
-          console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message);
-          avisos.push(`No se pudo cancelar la suscripción de Stripe (${sub.stripe_subscription_id}): ${stripeErr.message}`);
+          if (stripeErr.code !== 'resource_missing') {
+            console.warn('[admin-mensaje] stripe cancel error:', stripeErr.message);
+            avisos.push(`No se pudo cancelar la suscripción de Stripe (${sub.stripe_subscription_id}): ${stripeErr.message}`);
+          }
         }
       }
       // Cancelar la suscripción NO borra el Customer de Stripe: el email se
@@ -84,8 +92,10 @@ module.exports = async (req, res) => {
           const { getStripe } = require('./_stripeHelpers');
           await getStripe().customers.del(sub.stripe_customer_id);
         } catch (stripeErr) {
-          console.warn('[admin-mensaje] stripe customer delete error:', stripeErr.message);
-          avisos.push(`No se pudo borrar el Customer de Stripe (${sub.stripe_customer_id}): ${stripeErr.message}. Bórralo a mano en el dashboard de Stripe.`);
+          if (stripeErr.code !== 'resource_missing') {
+            console.warn('[admin-mensaje] stripe customer delete error:', stripeErr.message);
+            avisos.push(`No se pudo borrar el Customer de Stripe (${sub.stripe_customer_id}): ${stripeErr.message}. Bórralo a mano en el dashboard de Stripe.`);
+          }
         }
       }
       // Se borra el usuario de Auth ANTES que profiles/subscriptions (a propósito:
