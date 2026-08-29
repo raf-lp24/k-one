@@ -256,6 +256,7 @@ module.exports = async (req, res) => {
         alergiaOtra:  ud.alergiaOtra  || null,
         medicacion:   ud.medicacion   || null,
         peso:         ud.peso || ud.pesoActual || null,
+        edad:         ud.edad || null,
         onboarding:   !!ud.onboardingCompletado,
         entrenosTotal,
         semanaActual,

@@ -20393,9 +20393,9 @@
   }
   function exportarAdminCSV() {
     if (!_adminDatos) return;
-    const cols = ['Nombre','Email','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
+    const cols = ['Nombre','Email','Edad','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
     const fila = (c) => [
-      c.nombre, c.email,
+      c.nombre, c.email, c.edad || '',
       c.alta ? new Date(c.alta).toLocaleDateString('es-ES') : '',
       c.enOferta ? 'Oferta 1,99€' : c.estado,
       c.tipoPlan, c.objetivo, c.deporte,
@@ -20464,9 +20464,10 @@
       <div style="display:grid;grid-template-columns:1fr;gap:10px">
         ${row('Última conexión', _fmtRelativo(c.ultimaConexion) + (c.ultimaConexion ? ' · ' + _fmtFecha(c.ultimaConexion) : ''), _colorConexion(c.ultimaConexion))}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Objetivo', c.objetivo)}
         ${row('Deporte', c.deporte)}
+        ${row('Edad', c.edad ? c.edad + ' años' : '—')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Semana', c.semanaActual || 1)}
