@@ -76,6 +76,30 @@ function getSubscriptionPeriod(subscription) {
   };
 }
 
+// Candado atómico compartido por cancel/reactivate/update-subscription: sin
+// esto, dos pestañas del mismo usuario cancelando y reactivando casi a la
+// vez pueden pisarse el estado en Stripe (gana quien complete el UPDATE de
+// Stripe más tarde, no la intención real del usuario). Mismo patrón que
+// checkout_lock_until en create-checkout-session.js: un UPDATE...WHERE es
+// atómico en Postgres, así que con peticiones simultáneas como mucho una ve
+// la condición cumplida. Requiere la columna sub_action_lock_until
+// (supabase/migration-agosto29-hardening.sql). Fail-open si la columna no
+// existe todavía (no bloquea nada, igual que antes de este fix).
+async function adquirirCandadoSuscripcion(supabaseAdmin, userId, segundos = 15) {
+  const ahora = new Date();
+  const { data, error } = await supabaseAdmin
+    .from('subscriptions')
+    .update({ sub_action_lock_until: new Date(ahora.getTime() + segundos * 1000).toISOString() })
+    .eq('user_id', userId)
+    .or(`sub_action_lock_until.is.null,sub_action_lock_until.lt.${ahora.toISOString()}`)
+    .select('user_id');
+  if (error) {
+    console.warn('[adquirirCandadoSuscripcion] no se pudo comprobar el candado, se deja pasar:', error.message);
+    return true;
+  }
+  return !!(data && data.length);
+}
+
 // C-1: verifica que la suscripción de Stripe pertenece al cliente del usuario autenticado.
 // Llama después de stripe.subscriptions.retrieve() en update/cancel/reactivate.
 function assertSubscriptionOwnership(subscription, stripeCustomerId) {
@@ -94,4 +118,5 @@ module.exports = {
   getActiveSubscriptionId,
   assertSubscriptionOwnership,
   getSubscriptionPeriod,
+  adquirirCandadoSuscripcion,
 };

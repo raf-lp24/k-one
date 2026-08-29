@@ -20,6 +20,14 @@
 --     por un contador atómico de ventana fija -- mismo patrón que el candado
 --     de doble-checkout. Sin esto, peticiones concurrentes podían saltarse
 --     el límite de 3-5/hora en ráfaga.
+--  4-6. Reafirma admin_clientes, índice de referidos.referrer_id y tope
+--     inferior en descuento_referidos (ver comentarios en cada bloque).
+--  7. sub_action_lock_until: candado para cancel/reactivate/update-
+--     subscription (dos pestañas pisándose el estado en Stripe).
+--  8. profiles.email UNIQUE (solo si no hay duplicados ya -- revisa los
+--     RAISE NOTICE al ejecutar).
+--  9. Normaliza el tipo de descuento_referidos a numeric por si seguía
+--     siendo int en producción.
 -- =============================================================================
 
 -- 1. Proteger profiles.email igual que is_beta/beta_expires/descuento_referidos/nota_admin
@@ -102,7 +110,50 @@ begin
 exception when duplicate_object then null;
 end $$;
 
+-- 7. Candados de subscriptions: checkout_lock_until faltaba aquí igual que
+--    admin_clientes (solo vivía en migration-checkout-lock.sql, no en
+--    schema.sql) -- añadido ahí también. sub_action_lock_until es nuevo:
+--    cancel/reactivate/update-subscription no tenían ningún candado entre sí
+--    (a diferencia del checkout), así que dos pestañas cancelando y
+--    reactivando casi a la vez podían pisarse el estado real en Stripe.
+alter table public.subscriptions add column if not exists checkout_lock_until timestamptz;
+alter table public.subscriptions add column if not exists sub_action_lock_until timestamptz;
+
+-- 8. profiles.email UNIQUE -- solo si no hay ya duplicados (si los hay, no
+--    rompe la migración: avisa con RAISE NOTICE y se queda sin aplicar hasta
+--    que se resuelvan a mano). Cierra del todo el hueco del punto 1: antes
+--    dos usuarios podían compartir el mismo email en `profiles` sin que la
+--    BD lo impidiera.
+do $$
+declare
+  v_duplicados int;
+begin
+  select count(*) into v_duplicados from (
+    select email from public.profiles
+    where email is not null
+    group by email having count(*) > 1
+  ) t;
+  if v_duplicados = 0 then
+    begin
+      alter table public.profiles add constraint profiles_email_unique unique (email);
+    exception when duplicate_object then null;
+    end;
+  else
+    raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE. Resuélvelos y vuelve a correr este bloque.', v_duplicados;
+  end if;
+end $$;
+
+-- 9. profiles.descuento_referidos: normaliza el tipo a numeric por si en
+--    producción seguía siendo `int` (la migración original la creó `int`;
+--    schema.sql la declara `numeric`, pero `add column if not exists` no
+--    cambia el tipo de una columna ya existente, así que nunca se aplicó
+--    solo con schema.sql). Operación segura tanto si ya es numeric (no-op)
+--    como si es int (ensanchar int->numeric no pierde datos).
+alter table public.profiles alter column descuento_referidos type numeric using descuento_referidos::numeric;
+
 -- Verificación rápida después de ejecutar:
 --   select proname from pg_proc where proname in ('protect_profile_sensitive_cols','check_rate_limit');
 --   select conname from pg_constraint where conname = 'testimonios_estrellas_range';
 --   select * from information_schema.tables where table_name = 'rate_limits_contador';
+--   select column_name, data_type from information_schema.columns where table_name='profiles' and column_name='descuento_referidos';
+--   select conname from pg_constraint where conname = 'profiles_email_unique';

@@ -57,6 +57,11 @@ alter table public.profiles add column if not exists beta_expires timestamptz;
 -- (también cerró una política vieja que anulaba la moderación de testimonios,
 -- y dos tablas más con políticas huérfanas: invitaciones_premium y referidos).
 alter table public.profiles add column if not exists descuento_referidos numeric not null default 0;
+-- `add column if not exists` NO cambia el tipo si la columna ya existe: la
+-- migración original (migration-referidos.sql) la creó `int`, así que sin
+-- esta línea la columna real podía seguir siendo int aunque este archivo
+-- diga `numeric`. Ensanchar int->numeric no pierde datos, operación segura.
+alter table public.profiles alter column descuento_referidos type numeric using descuento_referidos::numeric;
 
 -- Defensa en profundidad barata: el trigger de más abajo ya impide que un
 -- usuario normal toque esta columna, pero un tope >= 0 a nivel de BD evita
@@ -129,6 +134,26 @@ create policy "profiles_insert_own" on public.profiles
 -- admin_clientes; sin índice cada consulta por email hace seq scan.
 create index if not exists profiles_email_idx on public.profiles (email);
 
+-- UNIQUE solo si no hay ya duplicados -- si los hay (dato histórico), no
+-- rompe la ejecución de este archivo: avisa con RAISE NOTICE y se queda sin
+-- aplicar hasta que se resuelvan a mano.
+do $$
+declare
+  v_duplicados int;
+begin
+  select count(*) into v_duplicados from (
+    select email from public.profiles where email is not null group by email having count(*) > 1
+  ) t;
+  if v_duplicados = 0 then
+    begin
+      alter table public.profiles add constraint profiles_email_unique unique (email);
+    exception when duplicate_object then null;
+    end;
+  else
+    raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+  end if;
+end $$;
+
 -- Mantiene updated_at al día en cada UPDATE.
 create or replace function public.set_updated_at()
 returns trigger as $$
@@ -180,6 +205,13 @@ create table if not exists public.subscriptions (
   cancel_at_period_end boolean not null default false, -- true: oferta 0,99€ o cancelación; no renovará
   updated_at timestamptz not null default now()
 );
+
+-- Candados atómicos anti-doble-petición (create-checkout-session.js y
+-- cancel/reactivate/update-subscription.js). No estaban aquí -- solo en sus
+-- migraciones sueltas (migration-checkout-lock.sql) -- así que reconstruir
+-- la base solo con este archivo los dejaba sin efecto en silencio.
+alter table public.subscriptions add column if not exists checkout_lock_until timestamptz;
+alter table public.subscriptions add column if not exists sub_action_lock_until timestamptz;
 
 alter table public.subscriptions enable row level security;
 

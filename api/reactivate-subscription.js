@@ -1,6 +1,7 @@
 const {
   getStripe, getSupabaseAdmin, getAuthUser,
-  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod
+  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod,
+  adquirirCandadoSuscripcion
 } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 
@@ -24,6 +25,11 @@ module.exports = async (req, res) => {
 
     const user = await getAuthUser(req, supabaseAdmin);
     if (!user) return res.status(401).json({ error: 'No autenticado' });
+
+    // Candado compartido con cancel/update-subscription (ver cancel-subscription.js).
+    if (!(await adquirirCandadoSuscripcion(supabaseAdmin, user.id))) {
+      return res.status(429).json({ error: 'Hay otra operación sobre tu suscripción en curso. Espera unos segundos e inténtalo de nuevo.' });
+    }
 
     const { data: sub } = await supabaseAdmin
       .from('subscriptions')

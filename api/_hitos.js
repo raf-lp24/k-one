@@ -86,18 +86,38 @@ function contarHitosVerificados(userdata, createdAt, referidosPagados) {
   const mesesDesdeAlta = Math.floor(diasDesdeAlta / 30) + 1;
   const numFotos = Math.min(Object.values(fotosObj).filter(Boolean).length, mesesDesdeAlta);
 
+  // historial[].fecha se valida con el mismo criterio que historialEntrenos
+  // (dentro de [alta, hoy]) -- sin esto, primer_peso/progresion_peso/
+  // diez_pct_fuerte/cinco_ejercicios_reg se sacaban con un solo UPDATE a
+  // userdata vía REST (con el propio JWT del cliente), sin haber registrado
+  // ningún peso real: `pesosEjercicios` solo necesitaba tener claves, y las
+  // comparaciones de progresión no comprobaban fecha alguna.
+  const fechaValida = (f, altaMs) => {
+    if (!f) return false;
+    const t = Date.parse(f);
+    if (isNaN(t)) return false;
+    return t <= Date.now() + DIA_MS && t >= altaMs - DIA_MS;
+  };
   const pesos   = (u.pesosEjercicios && typeof u.pesosEjercicios === 'object') ? u.pesosEjercicios : {};
-  const nPesos  = Object.keys(pesos).length;
-  const hist    = (e) => (e && Array.isArray(e.historial)) ? e.historial : null;
-  const subio   = Object.values(pesos).some(e => { const h = hist(e); return h && h.length >= 2 && Math.max(...h.map(x => Number(x.peso) || 0)) > (Number(h[0].peso) || 0); });
-  const subio10 = Object.values(pesos).some(e => { const h = hist(e); return h && h.length >= 2 && Number(h[0].peso) > 0 && Math.max(...h.map(x => Number(x.peso) || 0)) >= Number(h[0].peso) * 1.10; });
+  const hist    = (e) => (e && Array.isArray(e.historial)) ? e.historial.filter(x => x && fechaValida(x.fecha, altaMs)) : [];
+  const pesosConHistorialValido = Object.values(pesos).filter(e => hist(e).length >= 1);
+  const nPesos  = pesosConHistorialValido.length;
+  const subio   = pesosConHistorialValido.some(e => { const h = hist(e); return h.length >= 2 && Math.max(...h.map(x => Number(x.peso) || 0)) > (Number(h[0].peso) || 0); });
+  const subio10 = pesosConHistorialValido.some(e => { const h = hist(e); return h.length >= 2 && Number(h[0].peso) > 0 && Math.max(...h.map(x => Number(x.peso) || 0)) >= Number(h[0].peso) * 1.10; });
 
   const numNotas = Array.isArray(u.notas) ? u.notas.length : 0;
 
-  // Kilos hacia el objetivo (mismo criterio que la web)
+  // Kilos hacia el objetivo: antes salía de u.peso/u.pesoActual, dos números
+  // sueltos sin ningún histórico -- se podían fijar a cualquier valor con un
+  // solo UPDATE. Ahora sale de historialPeso (registrado en cada check-in
+  // semanal, ver index.html), acotado a entradas con fecha válida: el primer
+  // y el último valor verificado marcan el "antes" y el "después".
   const kilos = (() => {
-    const ini = parseFloat(u.peso), act = parseFloat(u.pesoActual || u.peso);
-    if (!ini || !act) return 0;
+    const histPeso = (Array.isArray(u.historialPeso) ? u.historialPeso : [])
+      .filter(x => x && Number(x.peso) > 0 && fechaValida(x.fecha, altaMs))
+      .sort((a, b) => Date.parse(a.fecha) - Date.parse(b.fecha));
+    if (histPeso.length < 2) return 0;
+    const ini = Number(histPeso[0].peso), act = Number(histPeso[histPeso.length - 1].peso);
     const o = u.objetivo || '';
     if (o.includes('Perder') || o.includes('grasa')) return ini - act;
     if (o.includes('Ganar') || o.includes('músculo')) return act - ini;

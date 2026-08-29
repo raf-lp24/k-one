@@ -1,6 +1,7 @@
 const {
   getStripe, getSupabaseAdmin, getPriceId, getAuthUser,
-  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod
+  getActiveSubscriptionId, assertSubscriptionOwnership, getSubscriptionPeriod,
+  adquirirCandadoSuscripcion
 } = require('./_stripeHelpers');
 const { canjearNivelHitos } = require('./_hitosReward');
 const { capturarError } = require('./_sentry');
@@ -48,6 +49,11 @@ module.exports = async (req, res) => {
     const newPriceId = getPriceId(tipoPlan, periodicidad);
     if (!newPriceId) {
       return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
+    }
+
+    // Candado compartido con cancel/reactivate-subscription (ver cancel-subscription.js).
+    if (!(await adquirirCandadoSuscripcion(supabaseAdmin, user.id))) {
+      return res.status(429).json({ error: 'Hay otra operación sobre tu suscripción en curso. Espera unos segundos e inténtalo de nuevo.' });
     }
 
     const { data: sub } = await supabaseAdmin
