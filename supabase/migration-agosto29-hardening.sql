@@ -84,6 +84,24 @@ grant execute on function public.check_rate_limit(text, int, timestamptz) to ser
 alter view public.admin_clientes set (security_invoker = on);
 revoke all on public.admin_clientes from anon, authenticated;
 
+-- 5. Índice que faltaba en referidos.referrer_id (solo referido_id tenía
+--    índice implícito por su unique) -- toda consulta "mis referidos" y el
+--    propio filtro RLS de referidos_select_own hacía seq scan. No va en
+--    schema.sql porque esa tabla no vive ahí (la crea migration-
+--    referidos.sql) y schema.sql debe poder ejecutarse solo sin fallar.
+create index if not exists referidos_referrer_id_idx on public.referidos (referrer_id);
+
+-- 6. Tope inferior en descuento_referidos a nivel de BD, defensa en
+--    profundidad barata: hoy no es explotable desde el cliente (el trigger
+--    del punto 1 ya protege la columna), pero evita que un futuro bug de
+--    servidor deje un saldo negativo real aplicándose en Stripe.
+do $$
+begin
+  alter table public.profiles
+    add constraint profiles_descuento_referidos_no_negativo check (descuento_referidos >= 0);
+exception when duplicate_object then null;
+end $$;
+
 -- Verificación rápida después de ejecutar:
 --   select proname from pg_proc where proname in ('protect_profile_sensitive_cols','check_rate_limit');
 --   select conname from pg_constraint where conname = 'testimonios_estrellas_range';

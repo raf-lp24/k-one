@@ -58,6 +58,17 @@ alter table public.profiles add column if not exists beta_expires timestamptz;
 -- y dos tablas más con políticas huérfanas: invitaciones_premium y referidos).
 alter table public.profiles add column if not exists descuento_referidos numeric not null default 0;
 
+-- Defensa en profundidad barata: el trigger de más abajo ya impide que un
+-- usuario normal toque esta columna, pero un tope >= 0 a nivel de BD evita
+-- que un futuro bug de servidor (no del cliente) deje un saldo negativo
+-- aplicándose como descuento real en Stripe.
+do $$
+begin
+  alter table public.profiles
+    add constraint profiles_descuento_referidos_no_negativo check (descuento_referidos >= 0);
+exception when duplicate_object then null;
+end $$;
+
 -- Notas internas del admin sobre el cliente (CRM en Jarvis) y heartbeat de última
 -- actividad. Añadidas originalmente por migration-last-seen.sql; se repiten aquí
 -- porque el trigger de más abajo referencia nota_admin -- sin esta columna, ese
@@ -113,6 +124,10 @@ create policy "profiles_update_own" on public.profiles
 drop policy if exists "profiles_insert_own" on public.profiles;
 create policy "profiles_insert_own" on public.profiles
   for insert with check (auth.uid() = id);
+
+-- Usada por el panel admin (búsqueda/filtrado de clientes) y por la vista
+-- admin_clientes; sin índice cada consulta por email hace seq scan.
+create index if not exists profiles_email_idx on public.profiles (email);
 
 -- Mantiene updated_at al día en cada UPDATE.
 create or replace function public.set_updated_at()
