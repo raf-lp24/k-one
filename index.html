@@ -177,7 +177,7 @@
      <script> real ya lo tiene en caché, así que la pausa que queda es solo la
      de ejecutarlo (rápida), no la de ida y vuelta de red (lenta en 4G). -->
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
 <script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
 <!-- Google Analytics: NO se carga aquí a ciegas. Antes se ejecutaba en cuanto
      cargaba la página, sin esperar a que el usuario aceptara o rechazara
@@ -521,32 +521,12 @@
   .btn-primary:hover { background: var(--brasa-oscura); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(209,66,14,0.25); }
   .btn-primary:active { transform: translateY(0); box-shadow: none; }
 
-  /* ===== JARVIS: consola de operador, no "panel bonito reciclado" =====
-     Tokens propios (no comparten los de la web pública): fondo más frío/
-     azulado que --negro, tipografía monoespaciada (JetBrains Mono) para
-     todo lo que sea dato/etiqueta -- Inter queda solo para texto largo de
-     lectura (notas, mensajes). El naranja de marca (--brasa) se mantiene
-     como acento único para que siga siendo "K-ONE" y no otra herramienta. */
-  #modalAdmin, #modalJarvisCliente {
-    --jv-bg: #0A0B0D;
-    --jv-surface: #131418;
-    --jv-surface-2: #1B1D22;
-    --jv-line: #2A2D34;
-    --jv-line-soft: #1D1F24;
-    --jv-text: #ECEDEF;
-    --jv-text-dim: #8B909C;
-    --jv-text-faint: #52565F;
-    --jv-mono: 'JetBrains Mono', 'DM Mono', monospace;
-  }
-  #modalAdmin { background: var(--jv-bg) !important; }
-
-  /* Mismo patrón que .dash-sidebar/.dash-nav-item del panel de cliente
-     (sidebar fija + item con borde izq. en brasa al activarse), pero con
-     look de consola: monoespaciada, esquinas más cerradas, sin curvas
-     "amigables" de app de consumo. */
+  /* Jarvis: mismo patrón que .dash-sidebar/.dash-nav-item del panel de cliente
+     (sidebar fija + item con borde izq. en brasa al activarse), en vez del
+     panel de admin genérico de pestañas arriba que tenía antes. */
   .jarvis-sidebar {
     position: fixed; top: 0; left: 0; bottom: 0; width: 224px;
-    background: var(--jv-surface); border-right: 1px solid var(--jv-line);
+    background: var(--carbon); border-right: 1px solid var(--humo);
     padding: 20px 14px; display: flex; flex-direction: column;
     overflow-y: auto; z-index: 20;
   }
@@ -561,46 +541,34 @@
     background: transparent;
     border: none;
     border-left: 3px solid transparent;
-    color: var(--jv-text-dim);
-    font-family: var(--jv-mono);
-    font-size: 12px;
+    color: var(--metal);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: .3px;
     padding: 10px 12px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: all 0.2s;
     white-space: nowrap;
     margin-bottom: 2px;
   }
-  .jarvis-tab:hover { color: var(--jv-text); background: var(--jv-bg); }
-  .jarvis-tab-active { color: var(--jv-text) !important; background: rgba(255,90,38,.12) !important; border-left-color: var(--brasa) !important; }
+  .jarvis-tab:hover { color: var(--blanco); background: var(--negro); }
+  .jarvis-tab-active { color: var(--blanco) !important; background: rgba(209,66,14,.12) !important; border-left-color: var(--brasa) !important; }
 
   .jarvis-filtro {
-    background: var(--jv-bg); color: var(--jv-text-dim); border: 1px solid var(--jv-line);
-    padding: 5px 11px; border-radius: 4px; font-size: 11px; cursor: pointer;
-    font-family: var(--jv-mono); letter-spacing: .3px; transition: all .15s;
+    background: var(--negro); color: var(--metal); border: 1px solid var(--humo);
+    padding: 5px 11px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    font-family: 'DM Mono', monospace; letter-spacing: .3px; transition: all .15s;
   }
-  .jarvis-filtro:hover { border-color: var(--brasa); color: var(--jv-text); }
-  .jarvis-filtro-active { border-color: var(--brasa) !important; color: var(--jv-text) !important; background: rgba(255,90,38,.12) !important; }
+  .jarvis-filtro:hover { border-color: var(--brasa); color: var(--blanco); }
+  .jarvis-filtro-active { border-color: var(--brasa) !important; color: var(--blanco) !important; background: rgba(209,66,14,.12) !important; }
   #adminBuscador:focus { border-color: var(--brasa); }
   #modalJarvisCliente { display: none; }
   #modalJarvisCliente.visible { display: flex; }
-  .jc-row { background:var(--jv-bg); border:1px solid var(--jv-line); border-radius:6px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .jc-label { font-size:10px; color:var(--jv-text-dim); text-transform:uppercase; letter-spacing:.5px; font-family:var(--jv-mono); margin-bottom:3px; }
-  .jc-val { font-size:13px; color:var(--jv-text); font-weight:500; font-variant-numeric: tabular-nums; }
-
-  /* Eyebrow de sección con motivo de corchetes -- lectura de "esto es un
-     dato de sistema", no una etiqueta decorativa. La regla del rail que
-     se extiende hasta el borde derecho es lo único memorable que se repite
-     en toda la consola: convierte cada cabecera en una línea de estado. */
-  .jv-eyebrow {
-    display: flex; align-items: center; gap: 10px;
-    font-family: var(--jv-mono); font-size: 10px; font-weight: 700;
-    color: var(--brasa); letter-spacing: 1.5px; white-space: nowrap;
-    margin-bottom: 12px;
-  }
-  .jv-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--jv-line); }
+  .jc-row { background:var(--negro); border:1px solid var(--humo); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .jc-label { font-size:10px; color:var(--metal); text-transform:uppercase; letter-spacing:.5px; font-family:'DM Mono',monospace; margin-bottom:3px; }
+  .jc-val { font-size:13px; color:var(--blanco); font-weight:500; }
 
   @media (max-width: 900px) {
     /* Antes era una sola fila (marca + pestañas + acciones) con las 4
@@ -5919,29 +5887,25 @@
   <!-- Sidebar: mismo patrón que .dash-sidebar del panel de cliente -->
   <div class="jarvis-sidebar">
     <div class="jarvis-sidebar-brand" style="margin-bottom:20px">
-      <div class="logo" style="font-size:20px;letter-spacing:3px;user-select:none;margin-bottom:14px">K-<span>ONE</span></div>
-      <div style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:22px;letter-spacing:1px;color:var(--jv-text);line-height:1">JARVIS_</div>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--jv-text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;margin-top:5px">Centro de control</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:10px">
-        <span style="width:6px;height:6px;border-radius:50%;background:#34D399;box-shadow:0 0 6px #34D399;flex-shrink:0"></span>
-        <span style="font-size:10px;color:#34D399;font-family:'JetBrains Mono',monospace;letter-spacing:.5px">EN LÍNEA</span>
-      </div>
-      <div id="adminTimestamp" style="font-size:10px;color:var(--jv-text-faint);font-family:'JetBrains Mono',monospace;margin-top:4px"></div>
+      <div class="logo" style="font-size:20px;letter-spacing:3px;user-select:none;margin-bottom:10px">K-<span>ONE</span></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:23px;letter-spacing:2px;color:var(--blanco);line-height:1">JARVIS</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--brasa);font-family:'Inter',sans-serif;text-transform:uppercase;margin-top:4px">Centro de control</div>
+      <div id="adminTimestamp" style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace;margin-top:8px"></div>
     </div>
 
     <div class="jarvis-sidebar-nav" style="flex:1;display:flex;flex-direction:column" id="jarvisTabs">
       <button class="jarvis-tab jarvis-tab-active" onclick="jarvisTab('dashboard')">Dashboard</button>
       <button class="jarvis-tab" onclick="jarvisTab('clientes')">Clientes</button>
-      <button class="jarvis-tab" onclick="jarvisTab('buzon')">Buzón <span id="jarvisBuzonBadge" style="background:var(--brasa);color:#ECEDEF;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:6px;display:none">0</span></button>
+      <button class="jarvis-tab" onclick="jarvisTab('buzon')">Buzón <span id="jarvisBuzonBadge" style="background:var(--brasa);color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:6px;display:none">0</span></button>
       <button class="jarvis-tab" onclick="jarvisTab('leads')">Leads</button>
       <button class="jarvis-tab" onclick="jarvisTab('emails')">Emails</button>
     </div>
 
     <div class="jarvis-sidebar-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--humo)">
-      <button onclick="mostrarFormAltaCliente()" style="background:#34D399;border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#ECEDEF;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:600">+ Añadir cliente</button>
+      <button onclick="mostrarFormAltaCliente()" style="background:#27ae60;border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#fff;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">+ Añadir cliente</button>
       <button onclick="exportarAdminCSV()" class="btn-ghost" style="padding:9px 14px;font-size:11px;letter-spacing:.5px;text-transform:none;text-align:center">Exportar CSV</button>
       <button onclick="abrirPanelAdmin()" class="btn-ghost" style="padding:9px 14px;font-size:11px;letter-spacing:.5px;text-transform:none;text-align:center">Actualizar datos</button>
-      <button onclick="cerrarPanelAdmin()" style="background:var(--brasa);border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#ECEDEF;cursor:pointer;font-weight:600">Cerrar Jarvis</button>
+      <button onclick="cerrarPanelAdmin()" style="background:var(--brasa);border:none;border-radius:8px;padding:9px 14px;font-size:12px;color:#fff;cursor:pointer;font-weight:600">Cerrar Jarvis</button>
     </div>
   </div>
 
@@ -5952,44 +5916,44 @@
       <!-- Estado operativo: los interruptores de negocio que se tocan desde fuera
            del panel (Stripe, Supabase) y que se olvidan con el tiempo. Son valores
            fijos del código actual, no una comprobación en vivo — por eso el aviso. -->
-      <div style="background:#131418;border:1px solid #2A2D34;border-left:3px solid var(--brasa);border-radius:6px;padding:14px 16px;margin-bottom:20px">
-        <div class="jv-eyebrow" style="margin-bottom:10px">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--brasa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span>[ ESTADO OPERATIVO ]</span>
+      <div style="background:#151515;border:1px solid #2a2a2a;border-left:3px solid var(--brasa);border-radius:10px;padding:14px 16px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--brasa)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px">ESTADO OPERATIVO</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:12.5px;color:var(--metal-claro)">
-          <div><strong style="color:#ECEDEF">Primer mes:</strong> gratis automático para todo cliente nuevo, cualquier plan (desde 19 ago 2026)</div>
-          <div><strong style="color:#ECEDEF">Códigos promocionales:</strong> retirados (2026-08). Ya no existen códigos de mes gratis ni de % de descuento — el único beneficio es el mes gratis automático de arriba. El campo de código en el registro ahora es solo para invitaciones de amigos.</div>
-          <div><strong style="color:#ECEDEF">Incentivo referidos:</strong> pausado (5€/amigo, en espera de nueva mecánica)</div>
+          <div><strong style="color:#fff">Primer mes:</strong> gratis automático para todo cliente nuevo, cualquier plan (desde 19 ago 2026)</div>
+          <div><strong style="color:#fff">Códigos promocionales:</strong> retirados (2026-08). Ya no existen códigos de mes gratis ni de % de descuento — el único beneficio es el mes gratis automático de arriba. El campo de código en el registro ahora es solo para invitaciones de amigos.</div>
+          <div><strong style="color:#fff">Incentivo referidos:</strong> pausado (5€/amigo, en espera de nueva mecánica)</div>
         </div>
       </div>
       <div id="adminAccion" style="margin-bottom:24px"></div>
       <div id="adminMetricsBiz" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
         <div>
-          <div class="jv-eyebrow">[ ESTA SEMANA ]</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px">ESTA SEMANA</div>
           <div id="adminMetricsTrend" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
         </div>
         <div>
-          <div class="jv-eyebrow">[ ENGAGEMENT ]</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px">ENGAGEMENT</div>
           <div id="adminMetricsEng" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
         </div>
       </div>
-      <div class="jv-eyebrow">[ ALERTAS ]</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px">ALERTAS</div>
       <div id="adminMetricsAlt" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px"></div>
-      <div class="jv-eyebrow" style="margin-bottom:14px">[ DISTRIBUCIÓN ]</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:14px">DISTRIBUCIÓN</div>
       <div id="adminDist" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px"></div>
     </div>
 
     <!-- TAB: Clientes -->
     <div class="jarvis-panel" id="jarvisPanel-clientes" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
-        <div style="font-size:16px;font-weight:700;color:#ECEDEF">
+        <div style="font-size:16px;font-weight:700;color:#fff">
           <span id="adminTotalFiltro">0</span> de <span id="adminTotalClientes">0</span> clientes
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           <input id="adminBuscador" type="text" placeholder="Buscar..." aria-label="Buscar clientes" oninput="buscarAdmin(this.value)"
-            style="background:#131418;border:1px solid #2A2D34;border-radius:8px;padding:8px 14px;font-size:12px;color:#ECEDEF;width:180px;outline:none">
+            style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px;font-size:12px;color:#fff;width:180px;outline:none">
           <div style="display:flex;gap:4px" id="adminFiltrosBtns">
             <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('alertas')">Alertas</button>
@@ -5999,14 +5963,14 @@
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('nuevos')">Nuevos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('bajas')">Bajas</button>
           </div>
-          <div class="jv-eyebrow" style="color:var(--jv-text-dim);margin-top:8px">[ ESTUDIO DE MERCADO ]</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);letter-spacing:0.5px;margin-top:8px">ESTUDIO DE MERCADO</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
-            <select id="adminFiltroPlan" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:6px 10px;font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace;cursor:pointer">
+            <select id="adminFiltroPlan" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Plan: todos</option>
               <option value="completo">Completo</option>
               <option value="nutricion">Solo nutrición</option>
             </select>
-            <select id="adminFiltroDeporte" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:6px 10px;font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace;cursor:pointer">
+            <select id="adminFiltroDeporte" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Deporte: todos</option>
               <option value="Gimnasio">Gimnasio</option>
               <option value="Running">Running</option>
@@ -6014,19 +5978,19 @@
               <option value="Hyrox">Hyrox</option>
               <option value="Híbrido">Híbrido</option>
             </select>
-            <select id="adminFiltroObjetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:6px 10px;font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace;cursor:pointer">
+            <select id="adminFiltroObjetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Objetivo: todos</option>
               <option value="Perder">Perder grasa</option>
               <option value="músculo">Ganar músculo</option>
               <option value="mejor">Sentirme mejor</option>
             </select>
-            <select id="adminFiltroEntrenos" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:6px 10px;font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace;cursor:pointer">
+            <select id="adminFiltroEntrenos" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Entrenos: todos</option>
               <option value="0">0 entrenos</option>
               <option value="1-5">1-5 entrenos</option>
               <option value="6+">6+ entrenos</option>
             </select>
-            <select id="adminFiltroPrecio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:6px 10px;font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace;cursor:pointer">
+            <select id="adminFiltroPrecio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:6px 10px;font-size:11px;color:#888;font-family:'DM Mono',monospace;cursor:pointer">
               <option value="">Precio: todos</option>
               <option value="Oferta 1,99">Oferta 1,99€</option>
               <option value="Mensual 7,99">Mensual 7,99€</option>
@@ -6039,7 +6003,7 @@
           </div>
         </div>
       </div>
-      <div style="overflow-x:auto;border:1px solid #1B1D22;border-radius:8px">
+      <div style="overflow-x:auto;border:1px solid #1a1a1a;border-radius:12px">
         <table id="adminTabla" style="width:100%;border-collapse:collapse;font-size:13px;color:var(--blanco);min-width:1050px"></table>
       </div>
     </div>
@@ -6048,15 +6012,15 @@
     <div class="jarvis-panel" id="jarvisPanel-buzon" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#FF5A26,#FF8B5A);display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ECEDEF" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           </div>
           <div>
-            <div style="font-size:16px;font-weight:700;color:#ECEDEF">Buzón de mensajes</div>
-            <div style="font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace">Contactos de clientes</div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Buzón de mensajes</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Contactos de clientes</div>
           </div>
         </div>
-        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#FF5A2615;color:var(--brasa);font-family:'JetBrains Mono',monospace;font-weight:600"></span>
+        <span id="adminMensajesCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
@@ -6065,15 +6029,15 @@
     <div class="jarvis-panel" id="jarvisPanel-leads" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#FF5A26,#FF8B5A);display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ECEDEF" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
           <div>
-            <div style="font-size:16px;font-weight:700;color:#ECEDEF">Leads interesados</div>
-            <div style="font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace">Emails que pidieron información</div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Leads interesados</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Emails que pidieron información</div>
           </div>
         </div>
-        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#FF5A2615;color:var(--brasa);font-family:'JetBrains Mono',monospace;font-weight:600"></span>
+        <span id="adminLeadsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px"></div>
     </div>
@@ -6082,24 +6046,24 @@
     <div class="jarvis-panel" id="jarvisPanel-emails" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#FF5A26,#FF8B5A);display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ECEDEF" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#D1420E,#ff6b2b);display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
           <div>
-            <div style="font-size:16px;font-weight:700;color:#ECEDEF">Correos enviados</div>
-            <div style="font-size:11px;color:#8B909C;font-family:'JetBrains Mono',monospace">Historial completo con contenido</div>
+            <div style="font-size:16px;font-weight:700;color:#fff">Correos enviados</div>
+            <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace">Historial completo con contenido</div>
           </div>
         </div>
-        <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#FF5A2615;color:var(--brasa);font-family:'JetBrains Mono',monospace;font-weight:600"></span>
+        <span id="adminEmailsCount" style="font-size:11px;padding:4px 10px;border-radius:6px;background:#D1420E15;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:600"></span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">
-        <input id="emailFiltroTexto" type="text" placeholder="Buscar email, asunto o contenido..." oninput="renderAdminEmails()" style="flex:1;min-width:180px;background:#131418;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:8px 12px;font-family:inherit">
-        <select id="emailFiltroTipo" onchange="renderAdminEmails()" style="background:#131418;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:8px 10px;font-family:inherit;cursor:pointer"><option value="">Todos los tipos</option></select>
-        <select id="emailFiltroEstado" onchange="renderAdminEmails()" style="background:#131418;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:8px 10px;font-family:inherit;cursor:pointer"><option value="">Vistos y sin ver</option><option value="pendiente">Solo sin ver</option><option value="gestionado">Solo vistos</option></select>
-        <input id="emailFiltroDesde" type="date" onchange="renderAdminEmails()" title="Desde esta fecha" style="background:#131418;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
-        <input id="emailFiltroHasta" type="date" onchange="renderAdminEmails()" title="Hasta esta fecha" style="background:#131418;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
-        <button onclick="limpiarFiltrosEmail()" style="background:#1B1D22;border:1px solid #2A2D34;border-radius:8px;color:#8B909C;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'JetBrains Mono',monospace">Limpiar</button>
-        <button onclick="eliminarEmailsFiltrados()" title="Elimina todos los emails que coinciden con los filtros de arriba (útil para vaciar de golpe los digests acumulados)" style="background:none;border:1px solid #FB493440;border-radius:8px;color:#FB4934;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'JetBrains Mono',monospace">Eliminar filtrados</button>
+        <input id="emailFiltroTexto" type="text" placeholder="Buscar email, asunto o contenido..." oninput="renderAdminEmails()" style="flex:1;min-width:180px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:8px 12px;font-family:inherit">
+        <select id="emailFiltroTipo" onchange="renderAdminEmails()" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:8px 10px;font-family:inherit;cursor:pointer"><option value="">Todos los tipos</option></select>
+        <select id="emailFiltroEstado" onchange="renderAdminEmails()" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:8px 10px;font-family:inherit;cursor:pointer"><option value="">Vistos y sin ver</option><option value="pendiente">Solo sin ver</option><option value="gestionado">Solo vistos</option></select>
+        <input id="emailFiltroDesde" type="date" onchange="renderAdminEmails()" title="Desde esta fecha" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
+        <input id="emailFiltroHasta" type="date" onchange="renderAdminEmails()" title="Hasta esta fecha" style="background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:7px 10px;font-family:inherit;color-scheme:dark">
+        <button onclick="limpiarFiltrosEmail()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;color:#888;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'DM Mono',monospace">Limpiar</button>
+        <button onclick="eliminarEmailsFiltrados()" title="Elimina todos los emails que coinciden con los filtros de arriba (útil para vaciar de golpe los digests acumulados)" style="background:none;border:1px solid #e74c3c40;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 14px;cursor:pointer;font-family:'DM Mono',monospace">Eliminar filtrados</button>
       </div>
       <div id="adminEmailsList" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -6153,18 +6117,18 @@
 
 <!-- MODAL DETALLE DE CLIENTE (Jarvis) -->
 <div id="modalJarvisCliente" style="position:fixed;inset:0;z-index:10100;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)cerrarDetalleCliente()">
-  <div style="background:#131418;border:1px solid #2A2D34;border-radius:6px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:28px">
+  <div style="background:#111;border:1px solid #2a2a2a;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:28px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px;color:var(--brasa);letter-spacing:1.5px;margin-bottom:6px">[ DETALLE DE CLIENTE ]</div>
-        <div id="jcNombre" style="font-size:20px;font-weight:700;color:var(--jv-text)"></div>
-        <div id="jcEmail" style="font-size:12px;color:var(--jv-text-dim);margin-top:2px;font-family:'JetBrains Mono',monospace"></div>
+        <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;margin-bottom:4px">DETALLE DE CLIENTE</div>
+        <div id="jcNombre" style="font-size:20px;font-weight:700;color:var(--blanco)"></div>
+        <div id="jcEmail" style="font-size:12px;color:var(--metal);margin-top:2px"></div>
       </div>
       <button onclick="cerrarDetalleCliente()" style="background:none;border:none;color:var(--metal);font-size:20px;cursor:pointer;padding:4px">✕</button>
     </div>
     <div id="jcBody" style="display:grid;gap:10px"></div>
     <div style="margin-top:20px;text-align:right">
-      <a id="jcMailto" href="#" style="display:inline-block;background:var(--brasa);color:#ECEDEF;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none">✉ Enviar email</a>
+      <a id="jcMailto" href="#" style="display:inline-block;background:var(--brasa);color:#fff;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none">✉ Enviar email</a>
     </div>
   </div>
 </div>
@@ -19984,19 +19948,19 @@
     const sinResponder = (data.mensajes || []).filter(m => !m.respuesta).length;
 
     const items = [
-      { n: clientes.filter(_accPagoFallido).length,   label: 'Pago fallido',        sub: 'Reintentando cobro',      color: '#FB4934', tipo: 'past_due' },
-      { n: clientes.filter(_accCancela).length,        label: 'Cancela al vencer',   sub: 'Se van al renovar',       color: '#FB923C', tipo: 'cancela' },
-      { n: clientes.filter(_accPremiumCaduca).length,  label: 'Premium por caducar', sub: 'Próximos 7 días',         color: '#FBBF24', tipo: 'premiumcaduca' },
-      { n: clientes.filter(_accInactivo).length,       label: 'Inactivos +14 días',  sub: 'Sin abrir la web',        color: '#FB923C', tipo: 'inactivos' },
-      { n: clientes.filter(_accSinEntrenar).length,    label: 'Activos sin entrenar',sub: '0 entrenos, pagando',     color: '#FBBF24', tipo: 'sinentrenar' },
-      { n: clientes.filter(_accRenueva7).length,       label: 'Renuevan en 7 días',  sub: 'Cobro próximo',           color: '#4FA8E8', tipo: 'renueva7' },
-      { n: sinResponder,                               label: 'Mensajes sin responder', sub: 'En el buzón',          color: '#A78BFA', tipo: '__buzon' },
+      { n: clientes.filter(_accPagoFallido).length,   label: 'Pago fallido',        sub: 'Reintentando cobro',      color: '#e74c3c', tipo: 'past_due' },
+      { n: clientes.filter(_accCancela).length,        label: 'Cancela al vencer',   sub: 'Se van al renovar',       color: '#e67e22', tipo: 'cancela' },
+      { n: clientes.filter(_accPremiumCaduca).length,  label: 'Premium por caducar', sub: 'Próximos 7 días',         color: '#f0a500', tipo: 'premiumcaduca' },
+      { n: clientes.filter(_accInactivo).length,       label: 'Inactivos +14 días',  sub: 'Sin abrir la web',        color: '#e67e22', tipo: 'inactivos' },
+      { n: clientes.filter(_accSinEntrenar).length,    label: 'Activos sin entrenar',sub: '0 entrenos, pagando',     color: '#f0a500', tipo: 'sinentrenar' },
+      { n: clientes.filter(_accRenueva7).length,       label: 'Renuevan en 7 días',  sub: 'Cobro próximo',           color: '#3498db', tipo: 'renueva7' },
+      { n: sinResponder,                               label: 'Mensajes sin responder', sub: 'En el buzón',          color: '#9b59b6', tipo: '__buzon' },
     ].filter(it => it.n > 0);
 
     if (items.length === 0) {
-      cont.innerHTML = `<div style="background:linear-gradient(135deg,#0D2018,#122A1F);border:1px solid #1F4531;border-radius:8px;padding:18px 20px;display:flex;align-items:center;gap:12px">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#34D399" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <div><div style="color:#ECEDEF;font-weight:600;font-size:14px">Todo en orden</div><div style="color:var(--metal);font-size:12px">Ningún cliente requiere atención urgente ahora mismo.</div></div>
+      cont.innerHTML = `<div style="background:linear-gradient(135deg,#0d1f14,#14231a);border:1px solid #1e3a28;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:12px">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div><div style="color:#fff;font-weight:600;font-size:14px">Todo en orden</div><div style="color:var(--metal);font-size:12px">Ningún cliente requiere atención urgente ahora mismo.</div></div>
       </div>`;
       return;
     }
@@ -20004,19 +19968,18 @@
     const total = items.reduce((a, it) => a + it.n, 0);
     const cards = items.map(it => {
       const onclick = it.tipo === '__buzon' ? "jarvisTab('buzon')" : `accionIrClientes('${it.tipo}')`;
-      return `<button onclick="${onclick}" style="text-align:left;background:#131418;border:1px solid ${it.color}40;border-left:3px solid ${it.color};border-radius:6px;padding:12px 14px;cursor:pointer;transition:transform .12s,background .15s;min-width:0" onmouseenter="this.style.transform='translateY(-2px)';this.style.background='#1B1D22'" onmouseleave="this.style.transform='none';this.style.background='#131418'">
+      return `<button onclick="${onclick}" style="text-align:left;background:#151515;border:1px solid ${it.color}40;border-left:3px solid ${it.color};border-radius:10px;padding:12px 14px;cursor:pointer;transition:transform .12s,background .15s;min-width:0" onmouseenter="this.style.transform='translateY(-2px)';this.style.background='#1a1a1a'" onmouseleave="this.style.transform='none';this.style.background='#151515'">
         <div style="font-size:26px;font-weight:800;color:${it.color};line-height:1">${it.n}</div>
-        <div style="font-size:12px;color:#ECEDEF;font-weight:600;margin-top:4px">${it.label}</div>
-        <div style="font-size:10px;color:var(--metal);font-family:'JetBrains Mono',monospace">${it.sub}</div>
+        <div style="font-size:12px;color:#fff;font-weight:600;margin-top:4px">${it.label}</div>
+        <div style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace">${it.sub}</div>
       </button>`;
     }).join('');
 
     cont.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brasa)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px;color:var(--brasa);letter-spacing:1.5px">[ REQUIERE TU ATENCIÓN HOY ]</span>
-        <span style="flex:1;height:1px;background:var(--jv-line)"></span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--jv-text-dim);flex-shrink:0">${total} en total</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px">REQUIERE TU ATENCIÓN HOY</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);margin-left:auto">${total} en total</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${cards}</div>`;
   }
@@ -20030,7 +19993,7 @@
       const el = document.getElementById(id);
       if (!el) return;
       el.innerHTML = cards.map(c => `
-        <div style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:14px 16px">
+        <div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:14px 16px">
           <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${c.label}</div>
           <div style="font-size:22px;font-weight:700;color:${c.color};line-height:1.1">${c.valor}</div>
           ${c.sub ? `<div style="font-size:11px;color:var(--metal);margin-top:4px">${c.sub}</div>` : ''}
@@ -20040,34 +20003,34 @@
     // — Negocio —
     renderCards('adminMetricsBiz', [
       { label: 'Ingresos est./mes (MRR)', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2) : '0') + '€', color: 'var(--brasa)' },
-      { label: 'Activos de pago', valor: mt.activosPago || 0, color: '#34D399', sub: `${mt.tasaConversion || 0}% conversión` },
-      { label: 'En oferta 1,99€', valor: mt.enOferta || 0, color: '#FBBF24' },
+      { label: 'Activos de pago', valor: mt.activosPago || 0, color: '#27ae60', sub: `${mt.tasaConversion || 0}% conversión` },
+      { label: 'En oferta 1,99€', valor: mt.enOferta || 0, color: '#f0a500' },
       { label: 'Total registrados', valor: mt.registrados || 0, color: 'var(--blanco)' },
     ]);
 
     // — Esta semana vs anterior —
-    const trendColor = (n, p) => n > p ? '#34D399' : n < p ? '#FB4934' : 'var(--metal)';
+    const trendColor = (n, p) => n > p ? '#27ae60' : n < p ? '#e74c3c' : 'var(--metal)';
     const trendArrow = (n, p) => n > p ? ' ↑' : n < p ? ' ↓' : '';
     const nReg = mt.nuevosEstaSemana || 0, pReg = mt.nuevosSemanaPasada || 0;
     renderCards('adminMetricsTrend', [
       { label: 'Nuevos registros', valor: nReg + trendArrow(nReg, pReg), color: trendColor(nReg, pReg), sub: `${pReg} semana anterior` },
-      { label: 'Nuevos pagos', valor: mt.nuevosPagosEstaSemana || 0, color: (mt.nuevosPagosEstaSemana || 0) > 0 ? '#34D399' : 'var(--metal)' },
+      { label: 'Nuevos pagos', valor: mt.nuevosPagosEstaSemana || 0, color: (mt.nuevosPagosEstaSemana || 0) > 0 ? '#27ae60' : 'var(--metal)' },
     ]);
 
     // — Embudo & Engagement —
     renderCards('adminMetricsEng', [
       { label: 'Completaron onboarding', valor: mt.onboardingCompletado || 0, color: 'var(--blanco)', sub: `de ${mt.registrados || 0} registrados` },
       { label: 'Tiempo medio hasta pago', valor: mt.tiempoMedioPago != null ? mt.tiempoMedioPago + ' días' : '—', color: 'var(--blanco)' },
-      { label: 'Media entrenos (activos)', valor: mt.mediaEntrenos || 0, color: '#34D399' },
-      { label: 'Activos sin entrenar', valor: mt.ceroEntrenosActivos || 0, color: mt.ceroEntrenosActivos > 0 ? '#FB923C' : 'var(--metal)' },
+      { label: 'Media entrenos (activos)', valor: mt.mediaEntrenos || 0, color: '#27ae60' },
+      { label: 'Activos sin entrenar', valor: mt.ceroEntrenosActivos || 0, color: mt.ceroEntrenosActivos > 0 ? '#e67e22' : 'var(--metal)' },
     ]);
 
     // — Alertas operativas —
     renderCards('adminMetricsAlt', [
-      { label: 'Pago fallido', valor: mt.pagoFallido || 0, color: mt.pagoFallido > 0 ? '#FB4934' : 'var(--metal)' },
-      { label: 'Cancelan al final', valor: mt.cancelanAlFinal || 0, color: mt.cancelanAlFinal > 0 ? '#FB923C' : 'var(--metal)' },
-      { label: 'Renuevan en 7 días', valor: mt.renovacionProximos7d || 0, color: mt.renovacionProximos7d > 0 ? '#FBBF24' : 'var(--metal)' },
-      { label: '+14 días sin onboarding', valor: mt.sinOnboarding14d || 0, color: mt.sinOnboarding14d > 0 ? '#FB4934' : 'var(--metal)' },
+      { label: 'Pago fallido', valor: mt.pagoFallido || 0, color: mt.pagoFallido > 0 ? '#e74c3c' : 'var(--metal)' },
+      { label: 'Cancelan al final', valor: mt.cancelanAlFinal || 0, color: mt.cancelanAlFinal > 0 ? '#e67e22' : 'var(--metal)' },
+      { label: 'Renuevan en 7 días', valor: mt.renovacionProximos7d || 0, color: mt.renovacionProximos7d > 0 ? '#f0a500' : 'var(--metal)' },
+      { label: '+14 días sin onboarding', valor: mt.sinOnboarding14d || 0, color: mt.sinOnboarding14d > 0 ? '#e74c3c' : 'var(--metal)' },
       { label: 'Sin suscripción', valor: mt.sinSuscripcion || 0, color: 'var(--metal)' },
       { label: 'Cancelados total', valor: mt.cancelados || 0, color: 'var(--metal)' },
     ]);
@@ -20085,12 +20048,12 @@
               <span>${_esc(it.label)}</span>
               <span style="color:var(--metal)">${it.count} · ${pct}%</span>
             </div>
-            <div style="background:#24262C;border-radius:4px;height:5px;overflow:hidden">
+            <div style="background:#222;border-radius:4px;height:5px;overflow:hidden">
               <div style="background:var(--brasa);height:100%;width:${pct}%;border-radius:4px"></div>
             </div>
           </div>`;
         }).join('');
-        return `<div style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:16px">
+        return `<div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:16px">
           <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">${titulo}</div>
           ${barras}</div>`;
       };
@@ -20106,17 +20069,17 @@
       ];
       const retBarras = retItems.map(it => {
         const pct = totalRet > 0 ? Math.round((it.count / totalRet) * 100) : 0;
-        const col = it.label === 'Semana 4+' ? '#34D399' : 'var(--brasa)';
+        const col = it.label === 'Semana 4+' ? '#27ae60' : 'var(--brasa)';
         return `<div style="margin-bottom:9px">
           <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
             <span>${it.label}</span><span style="color:var(--metal)">${it.count} · ${pct}%</span>
           </div>
-          <div style="background:#24262C;border-radius:4px;height:5px;overflow:hidden">
+          <div style="background:#222;border-radius:4px;height:5px;overflow:hidden">
             <div style="background:${col};height:100%;width:${pct}%;border-radius:4px"></div>
           </div>
         </div>`;
       }).join('');
-      const retCard = `<div style="background:#131418;border:1px solid #2A2D34;border-radius:6px;padding:16px">
+      const retCard = `<div style="background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:16px">
         <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Retención por semana</div>
         <div style="font-size:11px;color:var(--metal);margin-bottom:12px">Los activos en semana 4+ rara vez cancelan</div>
         ${retBarras}</div>`;
@@ -20161,44 +20124,44 @@
           const motivoIcons = {'Sugerencia':'💡','Alimento':'🥗','Ejercicio':'🏋️','Mi plan':'📋','Pago':'💳','Otro':'💬'};
           const motivoIcon = motivoIcons[m.asunto] || '💬';
           return `
-          <div style="background:#131418;border:1px solid ${pendiente ? '#FF5A2630' : '#1D1F24'};border-radius:8px;overflow:hidden;transition:all .15s">
+          <div style="background:#111;border:1px solid ${pendiente ? '#D1420E30' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .15s">
             <div style="padding:16px 18px">
               <div style="display:flex;align-items:flex-start;gap:14px">
-                <div style="width:40px;height:40px;border-radius:6px;background:${pendiente ? 'linear-gradient(135deg,#FF5A26,#FF8B5A)' : '#1B1D22'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
-                  ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ECEDEF" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#34D399" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
+                <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,#D1420E,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
+                  ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
                 </div>
                 <div style="flex:1;min-width:0">
                   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
                     <span style="font-size:14px;font-weight:600;color:var(--blanco)">${_esc(m.nombre)}</span>
-                    <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#FF5A2618' : '#34D39918'};color:${pendiente ? '#FF5A26' : '#34D399'};font-family:'JetBrains Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
+                    <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${pendiente ? '#D1420E18' : '#27ae6018'};color:${pendiente ? '#D1420E' : '#27ae60'};font-family:'DM Mono',monospace;font-weight:600">${pendiente ? 'PENDIENTE' : 'GESTIONADO'}</span>
                   </div>
-                  <div style="font-size:11px;color:#8B909C;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace">
+                  <div style="font-size:11px;color:#888;display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace">
                     <span>${_esc(m.email)}</span>
-                    <span style="color:#3A3D45">·</span>
+                    <span style="color:#333">·</span>
                     <span>${_fmtFecha(m.created_at)}</span>
-                    <span style="color:#3A3D45">·</span>
+                    <span style="color:#333">·</span>
                     <span>${fmtMsgHora(m.created_at)}</span>
                   </div>
                 </div>
               </div>
               <div style="margin:12px 0 0 54px">
-                <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:8px;background:#FF5A2610;padding:3px 10px;border-radius:6px">
+                <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--brasa);font-weight:600;margin-bottom:8px;background:#D1420E10;padding:3px 10px;border-radius:6px">
                   <span>${motivoIcon}</span> ${_esc(m.asunto)}
                 </div>
-                <div style="background:#0A0B0D;border:1px solid #1D1F24;border-radius:8px;padding:12px 14px;font-size:13px;color:var(--metal-claro);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(m.mensaje)}</div>
+                <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:12px 14px;font-size:13px;color:var(--metal-claro);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(m.mensaje)}</div>
               </div>
             </div>
-            <div style="border-top:1px solid #1D1F24;padding:10px 18px;display:flex;align-items:center;gap:8px;background:#101114">
+            <div style="border-top:1px solid #1e1e1e;padding:10px 18px;display:flex;align-items:center;gap:8px;background:#0d0d0d">
               ${pendiente ? `
-                <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.asunto + ' — K-ONE')}&body=${encodeURIComponent('Hola ' + m.nombre + ',\n\n')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;background:var(--brasa);color:#ECEDEF;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
+                <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.asunto + ' — K-ONE')}&body=${encodeURIComponent('Hola ' + m.nombre + ',\n\n')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;background:var(--brasa);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;font-family:'DM Mono',monospace;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                   Responder
                 </a>
-                <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:#34D399;border:none;border-radius:8px;color:#ECEDEF;font-size:11px;padding:7px 14px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
+                <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform='scale(1.03)'" onmouseleave="this.style.transform='none'">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                   Gestionado
                 </button>` : ''}
-              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #24262C;border-radius:8px;color:#8B909C;font-size:11px;padding:6px 12px;cursor:pointer;font-family:'JetBrains Mono',monospace;margin-left:auto;transition:all .15s" onmouseenter="this.style.borderColor='#FB4934';this.style.color='#FB4934'" onmouseleave="this.style.borderColor='#24262C';this.style.color='#6B7280'">
+              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #222;border-radius:8px;color:#888;font-size:11px;padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:auto;transition:all .15s" onmouseenter="this.style.borderColor='#e74c3c';this.style.color='#e74c3c'" onmouseleave="this.style.borderColor='#222';this.style.color='#555'">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 Eliminar
               </button>
@@ -20221,21 +20184,21 @@
           const horasDesde = Math.floor((ahora - new Date(l.created_at).getTime()) / 3600000);
           const esReciente = horasDesde < 24;
           return `
-          <div style="background:#131418;border:1px solid ${esReciente ? '#FF5A2630' : '#1D1F24'};border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='#1B1D22';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='#131418';this.style.transform='none'">
-            <div style="width:36px;height:36px;border-radius:6px;background:${esReciente ? 'linear-gradient(135deg,#FF5A26,#FF8B5A)' : '#1B1D22'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? '#ECEDEF' : '#6B7280'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div style="background:#111;border:1px solid ${esReciente ? '#D1420E30' : '#1e1e1e'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='#1a1a1a';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='#111';this.style.transform='none'">
+            <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,#D1420E,#ff6b2b)' : '#1a1a1a'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? '#fff' : '#666'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;color:var(--blanco);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(l.email)}</div>
-              <div style="font-size:10px;color:#8B909C;font-family:'JetBrains Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px">
+              <div style="font-size:10px;color:#888;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:6px">
                 <span>${_fmtFecha(l.created_at)}</span>
-                <span style="color:#3A3D45">·</span>
+                <span style="color:#333">·</span>
                 <span>${fmtLeadHora(l.created_at)}</span>
-                ${esReciente ? '<span style="color:#FF5A26;font-weight:600">· NUEVO</span>' : ''}
+                ${esReciente ? '<span style="color:#D1420E;font-weight:600">· NUEVO</span>' : ''}
               </div>
             </div>
             <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(l.email)}&su=${encodeURIComponent('Tu plan personalizado — K-ONE')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="width:32px;height:32px;border-radius:8px;background:var(--brasa);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='none'">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ECEDEF" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             </a>
           </div>`;
         }).join('');
@@ -20320,16 +20283,16 @@
       ? (_adminSort.dir === 1 ? ' ↑' : ' ↓') : '';
 
     const thS = (t, col) => {
-      const base = 'text-align:left;padding:10px 12px;font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2A2D34;white-space:nowrap;cursor:pointer;user-select:none';
+      const base = 'text-align:left;padding:10px 12px;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap;cursor:pointer;user-select:none';
       const act  = _adminSort.col === col ? ';color:var(--brasa)' : '';
       return `<th style="${base}${act}" onclick="ordenarAdminCol('${col}')">${t}${sortIcon(col)}</th>`;
     };
-    const thN = (t) => `<th style="text-align:left;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2A2D34;white-space:nowrap">${t}</th>`;
-    const td  = (c) => `<td style="padding:10px 12px;border-bottom:1px solid #1D1F24;white-space:nowrap">${c}</td>`;
+    const thN = (t) => `<th style="text-align:left;padding:10px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a2a;white-space:nowrap">${t}</th>`;
+    const td  = (c) => `<td style="padding:10px 12px;border-bottom:1px solid #1c1c1c;white-space:nowrap">${c}</td>`;
 
     const alertaDot = (c) => {
-      const cols = { red:'#FB4934', orange:'#FB923C', yellow:'#FBBF24', green:'#34D399', none:'#2A2D34' };
-      return `<span title="${_esc(c.alertaRazon)}" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cols[c.alerta]||'#2A2D34'};cursor:help"></span>`;
+      const cols = { red:'#e74c3c', orange:'#e67e22', yellow:'#f0a500', green:'#27ae60', none:'#2a2a2a' };
+      return `<span title="${_esc(c.alertaRazon)}" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cols[c.alerta]||'#2a2a2a'};cursor:help"></span>`;
     };
 
     const cabecera = `<thead><tr>
@@ -20353,27 +20316,27 @@
       ? `<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--metal);font-size:13px">No hay clientes que coincidan con el filtro.</td></tr>`
       : lista.map((c, idx) => {
           const rowBg = c.isBeta ? 'background:rgba(212,165,0,.06)' : c.alerta==='red' ? 'background:rgba(231,76,60,.05)' : c.alerta==='orange' ? 'background:rgba(230,126,34,.04)' : '';
-          const badgeNuevo = c.esNuevo ? '<span style="background:#1F140D;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'JetBrains Mono\',monospace;font-weight:600">NUEVO</span>' : '';
-          const badgePremium = c.isBeta ? '<span style="background:#241C08;border:1px solid #E8B930;color:#F5CB5C;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'JetBrains Mono\',monospace;font-weight:600">★ PREMIUM</span>' : '';
+          const badgeNuevo = c.esNuevo ? '<span style="background:#1a0d06;border:1px solid var(--brasa);color:var(--brasa);font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">NUEVO</span>' : '';
+          const badgePremium = c.isBeta ? '<span style="background:#2a2006;border:1px solid #d4a500;color:#ffd700;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">★ PREMIUM</span>' : '';
           const isBaja = ['canceled','unpaid'].includes(c.estado);
           const realIdx = clientes.indexOf(c);
-          return `<tr style="${rowBg};cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#131418'" onmouseleave="this.style.background='${rowBg.replace('background:','') || 'transparent'}'" onclick="verDetalleCliente(${realIdx})">
+          return `<tr style="${rowBg};cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#151515'" onmouseleave="this.style.background='${rowBg.replace('background:','') || 'transparent'}'" onclick="verDetalleCliente(${realIdx})">
             ${td(alertaDot(c))}
-            ${td('<strong' + (isBaja ? ' style="opacity:.5"' : '') + '>' + _esc(c.nombre) + '</strong>' + badgePremium + badgeNuevo + (isBaja ? '<span style="background:#FB493418;color:#FB4934;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'JetBrains Mono\',monospace;font-weight:600">BAJA</span>' : ''))}
+            ${td('<strong' + (isBaja ? ' style="opacity:.5"' : '') + '>' + _esc(c.nombre) + '</strong>' + badgePremium + badgeNuevo + (isBaja ? '<span style="background:#e74c3c18;color:#e74c3c;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:5px;font-family:\'DM Mono\',monospace;font-weight:600">BAJA</span>' : ''))}
             ${td('<span style="color:var(--metal);font-size:12px">' + _esc(c.email) + '</span>')}
             ${td('<span style="color:var(--metal)">' + _fmtFecha(c.alta) + '</span>')}
             ${td(_estadoLegible(c))}
-            ${td('<span style="color:var(--metal)">' + _esc(c.tipoPlan) + '</span>' + (c.planPrecio && c.planPrecio !== '—' ? '<br><span style="font-size:10px;color:' + (c.enOferta ? '#FBBF24' : '#34D399') + ';font-family:\'JetBrains Mono\',monospace">' + _esc(c.planPrecio) + '</span>' : ''))}
+            ${td('<span style="color:var(--metal)">' + _esc(c.tipoPlan) + '</span>' + (c.planPrecio && c.planPrecio !== '—' ? '<br><span style="font-size:10px;color:' + (c.enOferta ? '#f0a500' : '#27ae60') + ';font-family:\'DM Mono\',monospace">' + _esc(c.planPrecio) + '</span>' : ''))}
             ${td(_esc(c.objetivo))}
             ${td(_esc(c.deporte))}
             ${td(c.entrenosTotal > 0
-              ? '<span style="color:#34D399;font-weight:600">' + c.entrenosTotal + '</span>'
+              ? '<span style="color:#27ae60;font-weight:600">' + c.entrenosTotal + '</span>'
               : '<span style="color:var(--metal)">0</span>')}
             ${td('<span style="color:var(--metal)">Sem. ' + (c.semanaActual || 1) + '</span>')}
             ${td(_fmtFecha(c.renovacion))}
             ${td('<span style="color:' + _colorConexion(c.ultimaConexion) + ';font-size:12px" title="' + (c.ultimaConexion ? _fmtFecha(c.ultimaConexion) : 'Sin registro') + '">' + _fmtRelativo(c.ultimaConexion) + '</span>')}
             ${td(c.lesion
-              ? '<span style="color:#FB923C;font-size:11px">⚠ Lesión</span>'
+              ? '<span style="color:#e67e22;font-size:11px">⚠ Lesión</span>'
               : '<span style="color:var(--metal)">—</span>')}
             ${td('<a href="mailto:' + _esc(c.email) + '" onclick="event.stopPropagation()" title="Enviar email" style="color:var(--brasa);text-decoration:none;font-size:14px;transition:transform .15s;display:inline-block" onmouseenter="this.style.transform=\'scale(1.2)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>')}
           </tr>`;
@@ -20472,8 +20435,8 @@
         <div><div class="jc-label">${_esc(label)}</div><div class="jc-val" style="${color?'color:'+color:''}">${val ? _esc(String(val)) : '—'}</div></div>
       </div>`;
 
-    const estadoColor = c.enOferta ? '#FBBF24' : c.estado==='past_due' ? '#FB4934' :
-      ['active','trialing'].includes(c.estado) ? '#34D399' : 'var(--metal)';
+    const estadoColor = c.enOferta ? '#f0a500' : c.estado==='past_due' ? '#e74c3c' :
+      ['active','trialing'].includes(c.estado) ? '#27ae60' : 'var(--metal)';
     const estadoTexto = c.enOferta ? 'Oferta 1,99€' : c.cancelaAlFinal ? 'Cancela al final' :
       c.estado === 'past_due' ? 'Pago fallido' :
       c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
@@ -20481,12 +20444,12 @@
 
     const hs = _healthScore(c);
     document.getElementById('jcBody').innerHTML = `
-      <div style="background:#131418;border:1px solid ${hs.color}40;border-radius:6px;padding:12px 14px;margin-bottom:10px">
+      <div style="background:#151515;border:1px solid ${hs.color}40;border-radius:10px;padding:12px 14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <span style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px">Salud del cliente</span>
           <span style="font-size:12px;font-weight:700;color:${hs.color}">${hs.score}/100 · ${hs.label}</span>
         </div>
-        <div style="background:#0A0B0D;border-radius:6px;height:8px;overflow:hidden">
+        <div style="background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
           <div style="height:100%;width:${hs.score}%;background:${hs.color};border-radius:6px;transition:width .3s"></div>
         </div>
       </div>
@@ -20508,26 +20471,26 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Semana', c.semanaActual || 1)}
-        ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? '#34D399' : null)}
+        ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? '#27ae60' : null)}
         ${row('Peso actual', c.peso ? c.peso + ' kg' : '—')}
       </div>
-      ${c.lesion ? row('Lesión', c.lesionDetalle || 'Sí', '#FB923C') : ''}
+      ${c.lesion ? row('Lesión', c.lesionDetalle || 'Sí', '#e67e22') : ''}
       ${c.alergia && c.alergia !== 'No' ? row('Alergia', c.alergiaOtra || c.alergia) : ''}
       ${c.medicacion && c.medicacion !== 'No' ? row('Medicación', c.medicacion) : ''}
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
-        c.alerta==='red' ? '#FB4934' : c.alerta==='orange' ? '#FB923C' : '#FBBF24') : ''}
-      ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#34D399' : 'var(--metal)')}
-      ${row('Premium gratuito', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#34D399' : 'var(--metal)')}
-      ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? '#FB4934' : '#FBBF24') : ''}
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2A2D34">
+        c.alerta==='red' ? '#e74c3c' : c.alerta==='orange' ? '#e67e22' : '#f0a500') : ''}
+      ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? '#27ae60' : 'var(--metal)')}
+      ${row('Premium gratuito', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? '#27ae60' : 'var(--metal)')}
+      ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? '#e74c3c' : '#f0a500') : ''}
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a2a2a">
         <div style="font-size:10px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Nota privada (solo la ves tú)</div>
-        <textarea id="jcNota" style="width:100%;box-sizing:border-box;background:#0A0B0D;border:1px solid #2A2D34;border-radius:8px;color:#ECEDEF;font-size:12px;padding:10px;font-family:inherit;resize:vertical;min-height:58px" placeholder="Ej: llamó por lesión de rodilla · prefiere cenas rápidas · reactivar en enero...">${_esc(c.notaAdmin || '')}</textarea>
+        <textarea id="jcNota" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:12px;padding:10px;font-family:inherit;resize:vertical;min-height:58px" placeholder="Ej: llamó por lesión de rodilla · prefiere cenas rápidas · reactivar en enero...">${_esc(c.notaAdmin || '')}</textarea>
         <div style="display:flex;justify-content:flex-end;margin-top:6px">
-          <button onclick="guardarNotaCliente('${c.id}', this)" style="background:#34D399;border:none;border-radius:8px;color:#ECEDEF;font-size:11px;padding:7px 16px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:600">Guardar nota</button>
+          <button onclick="guardarNotaCliente('${c.id}', this)" style="background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 16px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">Guardar nota</button>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid #2A2D34">
-        <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;background:${c.isBeta ? '#FB4934' : 'var(--brasa)'}" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
+      <div style="display:flex;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid #2a2a2a">
+        <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;background:${c.isBeta ? '#e74c3c' : 'var(--brasa)'}" onclick="togglePremiumCliente('${c.id}', ${!c.isBeta}, this)">
           ${c.isBeta ? 'Quitar premium' : 'Dar premium (1 año)'}
         </button>
         <a href="mailto:${_esc(c.email)}" class="btn-ghost" style="flex:1;padding:10px;font-size:12px;text-align:center;text-decoration:none">
@@ -20535,7 +20498,7 @@
         </a>
       </div>
       <div style="margin-top:12px;text-align:center">
-        <button onclick="borrarCliente('${c.id}','${_esc((c.nombre || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}','${_esc((c.email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}',this)" style="background:none;border:1px solid #3A3D45;border-radius:8px;color:#FB4934;font-size:11px;padding:8px 20px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s">
+        <button onclick="borrarCliente('${c.id}','${_esc((c.nombre || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}','${_esc((c.email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}',this)" style="background:none;border:1px solid #333;border-radius:8px;color:#e74c3c;font-size:11px;padding:8px 20px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           Eliminar cliente
         </button>
@@ -20574,9 +20537,9 @@
 
   // ===== PANEL DE EMAILS: tipos, filtros y render =====
   const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario' };
-  const _emailTipoColor = { lead: '#FF5A26', bienvenida: '#34D399', opinion: '#FBBF24', mensaje: '#4FA8E8', resumen_semanal: '#A78BFA', retencion_dia3: '#FB923C', retencion_dia8: '#F0653D', reenganche_7d: '#FB4934', reenganche_14d: '#E0392A', reenganche_21d: '#B8291D', renovacion: '#2DD4BF', digest_admin: '#8B909C' };
+  const _emailTipoColor = { lead: '#D1420E', bienvenida: '#27ae60', opinion: '#f0a500', mensaje: '#3498db', resumen_semanal: '#9b59b6', retencion_dia3: '#e67e22', retencion_dia8: '#d35400', reenganche_7d: '#e74c3c', reenganche_14d: '#c0392b', reenganche_21d: '#922b21', renovacion: '#1abc9c', digest_admin: '#7f8c8d' };
   function _emailIcon(tipo) {
-    const c = _emailTipoColor[tipo] || '#8B909C';
+    const c = _emailTipoColor[tipo] || '#888';
     const iconos = {
       lead: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>`,
       bienvenida: `<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
@@ -20658,7 +20621,7 @@
     }
 
     list.innerHTML = filtrados.map((e, i) => {
-      const color = _emailTipoColor[e.tipo] || '#8B909C';
+      const color = _emailTipoColor[e.tipo] || '#888';
       const icon = _emailIcon(e.tipo);
       const d = parseDatos(e);
       let cuerpoPreview = '';
@@ -20670,49 +20633,49 @@
       const esGestionado = !!d.gestionado;
       const gestionadoId = e.id || i;
       return `
-      <div id="email-row-${gestionadoId}" style="background:#131418;border:1px solid ${esGestionado ? '#34D39938' : '#1D1F24'};border-radius:8px;overflow:hidden;transition:all .2s;opacity:${esGestionado ? '0.72' : '1'}">
-        <div onclick="this.parentElement.querySelector('.email-body').classList.toggle('email-body-open');this.querySelector('.email-chevron').classList.toggle('email-chevron-open')" style="padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s;border-left:3px solid ${esGestionado ? '#34D399' : 'transparent'}" onmouseenter="this.style.background='#1B1D22'" onmouseleave="this.style.background='transparent'">
-          <div style="width:36px;height:36px;border-radius:6px;background:${color}15;border:1px solid ${color}30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <div id="email-row-${gestionadoId}" style="background:#111;border:1px solid ${esGestionado ? '#27ae6038' : '#1e1e1e'};border-radius:12px;overflow:hidden;transition:all .2s;opacity:${esGestionado ? '0.72' : '1'}">
+        <div onclick="this.parentElement.querySelector('.email-body').classList.toggle('email-body-open');this.querySelector('.email-chevron').classList.toggle('email-chevron-open')" style="padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s;border-left:3px solid ${esGestionado ? '#27ae60' : 'transparent'}" onmouseenter="this.style.background='#1a1a1a'" onmouseleave="this.style.background='transparent'">
+          <div style="width:36px;height:36px;border-radius:10px;background:${color}15;border:1px solid ${color}30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             ${icon}
           </div>
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
               <span style="font-size:13px;color:var(--blanco);font-weight:600">${_esc(_emailTipoLabel[e.tipo] || e.tipo)}</span>
-              <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:${color}18;color:${color};font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.5px">${_esc(e.tipo)}</span>
-              ${esGestionado ? '<span style="font-size:9px;padding:2px 7px;border-radius:4px;background:#34D39918;color:#34D399;font-family:\'JetBrains Mono\',monospace;font-weight:600">✓ VISTO</span>' : ''}
+              <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:${color}18;color:${color};font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px">${_esc(e.tipo)}</span>
+              ${esGestionado ? '<span style="font-size:9px;padding:2px 7px;border-radius:4px;background:#27ae6018;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600">✓ VISTO</span>' : ''}
             </div>
             <div style="font-size:12px;color:var(--metal);display:flex;align-items:center;gap:6px">
               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
               <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(e.destinatario)}</span>
-              ${e.asunto ? '<span style="color:#3A3D45">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _esc(e.asunto) + '</span>' : ''}
+              ${e.asunto ? '<span style="color:#333">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _esc(e.asunto) + '</span>' : ''}
             </div>
           </div>
           <div style="flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--metal)">${_fmtFecha(e.created_at)}</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#8B909C">${fmtHora(e.created_at)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--metal)">${_fmtFecha(e.created_at)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#888">${fmtHora(e.created_at)}</div>
           </div>
-          <svg class="email-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6B7280" stroke-width="2" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+          <svg class="email-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#555" stroke-width="2" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="email-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
           <div style="padding:0 18px 16px;font-size:12px;color:var(--metal-claro);line-height:1.6">
-            <div style="border-top:1px solid #1D1F24;padding-top:14px">
-              <div style="font-size:10px;color:var(--brasa);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">${e.html ? 'Email tal como se envió' : 'Contenido del email'}</div>
+            <div style="border-top:1px solid #1e1e1e;padding-top:14px">
+              <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">${e.html ? 'Email tal como se envió' : 'Contenido del email'}</div>
               ${e.html
-                ? '<iframe srcdoc="' + _esc(e.html) + '" sandbox="" style="width:100%;height:520px;border:1px solid #1D1F24;border-radius:8px;background:#0A0B0D" title="Vista previa del email"></iframe>'
+                ? '<iframe srcdoc="' + _esc(e.html) + '" sandbox="" style="width:100%;height:520px;border:1px solid #1e1e1e;border-radius:8px;background:#0b0b0b" title="Vista previa del email"></iframe>'
                 : cuerpoPreview
-                ? '<div style="background:#0A0B0D;border:1px solid #1D1F24;border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--metal-claro)">' + _esc(cuerpoPreview) + '</div>'
-                : '<div style="background:#0A0B0D;border:1px solid #1D1F24;border-radius:8px;padding:14px 16px;color:#8B909C;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
+                ? '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--metal-claro)">' + _esc(cuerpoPreview) + '</div>'
+                : '<div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px;color:#888;font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
               <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-                <div style="display:flex;gap:14px;font-size:10px;color:#8B909C;font-family:'JetBrains Mono',monospace">
+                <div style="display:flex;gap:14px;font-size:10px;color:#888;font-family:'DM Mono',monospace">
                   <span>Tipo: ${_esc(e.tipo)}</span>
                   <span>Destino: ${_esc(e.destinatario)}</span>
                   <span>${_fmtFecha(e.created_at)} ${fmtHora(e.created_at)}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
                   ${esGestionado
-                    ? '<span style="font-size:10px;color:#34D399;font-family:\'JetBrains Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>'
-                    : '<button onclick="event.stopPropagation();marcarEmailGestionado(\'' + String(gestionadoId).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:#34D399;border:none;border-radius:8px;color:#ECEDEF;font-size:11px;padding:7px 14px;cursor:pointer;font-family:\'JetBrains Mono\',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar como visto</button>'}
-                  ${e.id ? '<button onclick="event.stopPropagation();eliminarEmail(\'' + String(e.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #2A2D34;border-radius:8px;color:#8B909C;font-size:11px;padding:7px 12px;cursor:pointer;font-family:\'JetBrains Mono\',monospace;transition:all .15s" onmouseenter="this.style.borderColor=\'#FB4934\';this.style.color=\'#FB4934\'" onmouseleave="this.style.borderColor=\'#2A2D34\';this.style.color=\'#8B909C\'"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Eliminar</button>' : ''}
+                    ? '<span style="font-size:10px;color:#27ae60;font-family:\'DM Mono\',monospace;font-weight:600;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Gestionado</span>'
+                    : '<button onclick="event.stopPropagation();marcarEmailGestionado(\'' + String(gestionadoId).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:#27ae60;border:none;border-radius:8px;color:#fff;font-size:11px;padding:7px 14px;cursor:pointer;font-family:\'DM Mono\',monospace;font-weight:600;transition:transform .15s" onmouseenter="this.style.transform=\'scale(1.03)\'" onmouseleave="this.style.transform=\'none\'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar como visto</button>'}
+                  ${e.id ? '<button onclick="event.stopPropagation();eliminarEmail(\'' + String(e.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this)" style="display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #2a2a2a;border-radius:8px;color:#888;font-size:11px;padding:7px 12px;cursor:pointer;font-family:\'DM Mono\',monospace;transition:all .15s" onmouseenter="this.style.borderColor=\'#e74c3c\';this.style.color=\'#e74c3c\'" onmouseleave="this.style.borderColor=\'#2a2a2a\';this.style.color=\'#888\'"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Eliminar</button>' : ''}
                 </div>
               </div>
             </div>
