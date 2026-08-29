@@ -250,6 +250,7 @@ module.exports = async (req, res) => {
         objetivo:     ud.objetivo     || '—',
         deporte:      ud.deporte      || '—',
         tipoPlan:     ud.tipoPlan     || '—',
+        rotacionMenu: ud.rotacionMenu || 'mensual',
         lesion:       ud.lesion === 'Sí' || ud.lesion === 'si' || ud.lesion === true,
         lesionDetalle: ud.lesionDetalle || null,
         alergia:      ud.alergia      || null,

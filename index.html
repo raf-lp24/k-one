@@ -20585,12 +20585,13 @@
   }
   function exportarAdminCSV() {
     if (!_adminDatos) return;
-    const cols = ['Nombre','Email','Edad','Alta','Estado','Plan','Objetivo','Deporte','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
+    const cols = ['Nombre','Email','Edad','Alta','Estado','Plan','Objetivo','Deporte','Renovación dieta','Entrenos','Semana','Renovación','Última conexión','Lesión','Alerta'];
     const fila = (c) => [
       c.nombre, c.email, c.edad || '',
       c.alta ? new Date(c.alta).toLocaleDateString('es-ES') : '',
       c.enOferta ? 'Oferta 1,99€' : c.estado,
       c.tipoPlan, c.objetivo, c.deporte,
+      { semanal: 'Semanal', mensual: 'Mensual', fija: 'Fija' }[c.rotacionMenu] || 'Mensual',
       c.entrenosTotal, c.semanaActual,
       c.renovacion ? new Date(c.renovacion).toLocaleDateString('es-ES') : '',
       c.ultimaConexion ? new Date(c.ultimaConexion).toLocaleString('es-ES') : 'Nunca',
@@ -20666,6 +20667,9 @@
         ${row('Objetivo', c.objetivo)}
         ${row('Deporte', c.deporte)}
         ${row('Edad', c.edad ? c.edad + ' años' : '—')}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:10px">
+        ${row('Renovación de dieta', { semanal: 'Semanal', mensual: 'Mensual', fija: 'Fija' }[c.rotacionMenu] || 'Mensual')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Semana', c.semanaActual || 1)}
