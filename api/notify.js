@@ -309,7 +309,7 @@ async function handleCronRetencion(req, res) {
               <div style="background:#0A0A0A;border:1px solid #232323;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 20px">
                 <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">La diferencia entre querer y hacer es empezar.</span> Tu plan ya está hecho — solo falta que lo actives.</p>
               </div>
-              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">Primer mes a <span style="color:#E8490F;font-weight:600;font-size:16px">1,99 €</span> · Sin permanencia · Cancela cuando quieras</p>
+              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">Primer mes <span style="color:#E8490F;font-weight:600;font-size:16px">gratis</span> · Sin código · Sin permanencia · Cancela cuando quieras</p>
             </div>
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTIVAR MI PLAN</a>
@@ -322,7 +322,7 @@ async function handleCronRetencion(req, res) {
           subject: `${esc(primerNombre)}, ya sabes qué quieres. Ahora toca ir a por ello.`,
           html: htmlDia8
         });
-        await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', html: htmlDia8, datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA 1,99€.` }) });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia8', destinatario: email, asunto: 'Ya sabes qué quieres. Ahora toca ir a por ello.', html: htmlDia8, datos: JSON.stringify({ nombre, deporte, objetivo, resumen: `Retención día 8: plan personalizado (${deporte}, ${objetivo}), CTA primer mes gratis.` }) });
         enviados8++;
       }
 
@@ -872,8 +872,8 @@ async function handlePost(req, res) {
                 </table>
               </td></tr>
               <tr><td style="padding:26px 28px;text-align:center">
-                <a href="${APP_URL}?go=registro" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:15px 40px;font-size:14px;font-weight:700;letter-spacing:0.5px;border-radius:10px">EMPEZAR POR 1,99€ →</a>
-                <p style="color:#5A5A5A;font-size:11px;margin:12px 0 0">Primer mes completo. Después 7,99€/mes (o 4,99€/mes solo nutrición). Cancelas cuando quieras.</p>
+                <a href="${APP_URL}?go=registro" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:15px 40px;font-size:14px;font-weight:700;letter-spacing:0.5px;border-radius:10px">EMPEZAR GRATIS →</a>
+                <p style="color:#5A5A5A;font-size:11px;margin:12px 0 0">Primer mes completo, gratis. Después 7,99€/mes (o 4,99€/mes solo nutrición). Cancelas cuando quieras.</p>
               </td></tr>
               <tr><td style="padding:0 28px 22px;text-align:center">
                 <p style="color:#444;font-size:10px;line-height:1.6;margin:0;border-top:1px solid #232323;padding-top:16px">Recibes este email porque dejaste tu dirección en k-one.fit</p>
@@ -916,8 +916,8 @@ async function handlePost(req, res) {
                       <div style="width:36px;height:36px;background:#E8490F;color:#fff;font-size:16px;font-weight:800;text-align:center;line-height:36px;border-radius:50%">2</div>
                     </td>
                     <td style="vertical-align:top;padding:16px 0;border-bottom:1px solid #232323">
-                      <p style="margin:0 0 3px;font-weight:700;color:#F0EDE8;font-size:15px">Activa tu primer mes — 1,99€</p>
-                      <p style="margin:0;color:#8A8A8A;font-size:13px;line-height:1.5">Acceso completo. Después 7,99€/mes (o 4,99€/mes solo nutrición). Sin permanencia: cancelas con un clic.</p>
+                      <p style="margin:0 0 3px;font-weight:700;color:#F0EDE8;font-size:15px">Activa tu primer mes — gratis</p>
+                      <p style="margin:0;color:#8A8A8A;font-size:13px;line-height:1.5">Acceso completo, sin coste ni código. Después 7,99€/mes (o 4,99€/mes solo nutrición). Sin permanencia: cancelas con un clic.</p>
                     </td>
                   </tr>
                   <tr>
@@ -978,7 +978,7 @@ async function handlePost(req, res) {
               </td></tr>
               <tr><td style="padding:28px;text-align:center">
                 <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:15px 40px;font-size:14px;font-weight:700;letter-spacing:0.5px;border-radius:10px">EMPEZAR AHORA →</a>
-                <p style="color:#5A5A5A;font-size:12px;margin:12px 0 0">Primer mes completo por 1,99€</p>
+                <p style="color:#5A5A5A;font-size:12px;margin:12px 0 0">Primer mes completo, gratis. Sin código, automático.</p>
               </td></tr>
             </table>
           `, 'NO HAY ATAJOS. HAY PASOS.')
@@ -1137,12 +1137,12 @@ async function handlePost(req, res) {
       if (tipo === 'lead') {
         destinatario = datos.email;
         asunto = 'Esto es lo que tendrías dentro de K-ONE';
-        resumen = 'Email al lead con preview del área de clientes: entrenamiento (press banca, remo, press militar), nutrición (pollo con arroz y brócoli, 520 kcal), y las 6 funciones del área de cliente. CTA: Empezar por 1,99€.';
+        resumen = 'Email al lead con preview del área de clientes: entrenamiento (press banca, remo, press militar), nutrición (pollo con arroz y brócoli, 520 kcal), y las 6 funciones del área de cliente. CTA: Empezar gratis.';
       } else if (tipo === 'bienvenida') {
         const primerNombre = (datos.nombre || '').split(' ')[0] || 'Cliente';
         destinatario = datos.email;
         asunto = `${primerNombre}, tu plan te está esperando — K-ONE`;
-        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes 1,99€, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y lista de la compra.`;
+        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes gratis, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y lista de la compra.`;
       } else if (tipo === 'mensaje') {
         destinatario = ADMIN_EMAIL;
         asunto = `Mensaje de ${datos.nombre}: ${datos.asunto}`;
