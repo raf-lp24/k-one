@@ -25,6 +25,21 @@ module.exports = async (req, res) => {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
       if (e) { console.error('[admin-mensaje] eliminar error:', e.message); return res.status(500).json({ error: 'Error eliminando mensaje' }); }
+    } else if (accion === 'mensajes_masivo_gestionado') {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
+      if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
+      const { error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).in('id', ids);
+      if (e) { console.error('[admin-mensaje] mensajes_masivo_gestionado error:', e.message); return res.status(500).json({ error: 'Error actualizando mensajes' }); }
+    } else if (accion === 'eliminar_mensajes_masivo') {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
+      if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
+      const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().in('id', ids);
+      if (e) { console.error('[admin-mensaje] eliminar_mensajes_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando mensajes' }); }
+    } else if (accion === 'eliminar_leads_masivo') {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
+      if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
+      const { error: e } = await supabaseAdmin.from('leads').delete().in('id', ids);
+      if (e) { console.error('[admin-mensaje] eliminar_leads_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando leads' }); }
     } else if (accion === 'eliminar_email') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { error: e } = await supabaseAdmin.from('email_log').delete().eq('id', id);

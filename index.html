@@ -6207,6 +6207,20 @@
         </div>
         <span id="adminMensajesCount" class="jv-chip" style="background:rgba(255,95,46,.13);color:var(--jv-accent-2);border:1px solid rgba(255,95,46,.25);text-transform:none;letter-spacing:0;font-size:11.5px"></span>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--jv-dim);font-family:var(--jv-ui);font-weight:600;cursor:pointer;user-select:none">
+          <input type="checkbox" id="mensajesSeleccionarTodos" onchange="toggleSeleccionarTodosMensajes(this.checked)" style="accent-color:var(--jv-accent);width:15px;height:15px;cursor:pointer">
+          Seleccionar todos
+        </label>
+      </div>
+      <div id="mensajesSeleccionBar" style="display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:rgba(255,95,46,.08);border:1px solid rgba(255,95,46,.25);border-radius:12px;padding:10px 16px;margin-bottom:10px">
+        <span id="mensajesSeleccionCount" style="font-size:12.5px;color:var(--jv-text);font-family:var(--jv-ui);font-weight:600"></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="btnMarcarMensajesSeleccionados" onclick="marcarSeleccionadosMensajesGestionados()" style="display:inline-flex;align-items:center;gap:5px;background:var(--jv-ok);border:none;border-radius:8px;color:var(--jv-text);font-size:12px;padding:8px 14px;cursor:pointer;font-family:var(--jv-ui);font-weight:600">Marcar como gestionados</button>
+          <button id="btnEliminarMensajesSeleccionados" onclick="eliminarMensajesSeleccionados()" style="display:inline-flex;align-items:center;gap:5px;background:var(--jv-bad);border:none;border-radius:8px;color:#fff;font-size:12px;padding:8px 14px;cursor:pointer;font-family:var(--jv-ui);font-weight:600">Eliminar seleccionados</button>
+          <button onclick="cancelarSeleccionMensajes()" style="background:none;border:1px solid var(--jv-line);border-radius:8px;color:var(--jv-faint);font-size:12px;padding:8px 12px;cursor:pointer;font-family:var(--jv-ui);font-weight:600">Cancelar</button>
+        </div>
+      </div>
       <div id="adminMensajesList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
@@ -6223,6 +6237,19 @@
           </div>
         </div>
         <span id="adminLeadsCount" class="jv-chip" style="background:rgba(255,95,46,.13);color:var(--jv-accent-2);border:1px solid rgba(255,95,46,.25);text-transform:none;letter-spacing:0;font-size:11.5px"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--jv-dim);font-family:var(--jv-ui);font-weight:600;cursor:pointer;user-select:none">
+          <input type="checkbox" id="leadsSeleccionarTodos" onchange="toggleSeleccionarTodosLeads(this.checked)" style="accent-color:var(--jv-accent);width:15px;height:15px;cursor:pointer">
+          Seleccionar todos
+        </label>
+      </div>
+      <div id="leadsSeleccionBar" style="display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:rgba(255,95,46,.08);border:1px solid rgba(255,95,46,.25);border-radius:12px;padding:10px 16px;margin-bottom:10px">
+        <span id="leadsSeleccionCount" style="font-size:12.5px;color:var(--jv-text);font-family:var(--jv-ui);font-weight:600"></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="btnEliminarLeadsSeleccionados" onclick="eliminarLeadsSeleccionados()" style="display:inline-flex;align-items:center;gap:5px;background:var(--jv-bad);border:none;border-radius:8px;color:#fff;font-size:12px;padding:8px 14px;cursor:pointer;font-family:var(--jv-ui);font-weight:600">Eliminar seleccionados</button>
+          <button onclick="cancelarSeleccionLeads()" style="background:none;border:1px solid var(--jv-line);border-radius:8px;color:var(--jv-faint);font-size:12px;padding:8px 12px;cursor:pointer;font-family:var(--jv-ui);font-weight:600">Cancelar</button>
+        </div>
       </div>
       <div id="adminLeadsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px"></div>
     </div>
@@ -20049,9 +20076,15 @@
   let _adminFiltro = { texto: '', tipo: 'todos' };
   let _adminSort   = { col: 'alta', dir: -1 };
   let _adminEmailLog = [];
-  // Selección múltiple en la pestaña Emails (marcar/eliminar varios a la vez).
+  // Selección múltiple en las pestañas Emails/Buzón/Leads (marcar/eliminar varios a la vez).
   let _emailsSeleccionados = new Set();
   let _adminEmailsFiltradosIds = [];
+  let _adminMensajes = [];
+  let _mensajesSeleccionados = new Set();
+  let _adminMensajesIds = [];
+  let _adminLeads = [];
+  let _leadsSeleccionados = new Set();
+  let _adminLeadsIds = [];
 
   const _fmtFecha = (iso) => iso
     ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -20337,8 +20370,17 @@
     poblarFiltroTipoEmail();
     renderAdminEmails();
 
-    // Mensajes de clientes
-    const mensajes = data.mensajes || [];
+    // Mensajes de clientes y leads: se guardan y se renderizan aparte (ver
+    // renderAdminMensajes/renderAdminLeads) para poder refrescar solo esa
+    // lista tras una acción en bloque, igual que ya hacía renderAdminEmails.
+    _adminMensajes = data.mensajes || [];
+    renderAdminMensajes();
+    _adminLeads = data.leads || [];
+    renderAdminLeads();
+  }
+
+  function renderAdminMensajes() {
+    const mensajes = _adminMensajes;
     const sinResponder = mensajes.filter(m => !m.respuesta).length;
     const mensajesCount = document.getElementById('adminMensajesCount');
     if (mensajesCount) {
@@ -20349,6 +20391,9 @@
       buzonBadge.style.display = sinResponder > 0 ? '' : 'none';
       buzonBadge.textContent = sinResponder;
     }
+    _adminMensajesIds = mensajes.filter(m => m.id != null).map(m => String(m.id));
+    const _mIdsSet = new Set(_adminMensajesIds);
+    _mensajesSeleccionados.forEach(id => { if (!_mIdsSet.has(id)) _mensajesSeleccionados.delete(id); });
     const mensajesList = document.getElementById('adminMensajesList');
     if (mensajesList) {
       const fmtMsgHora = (iso) => iso ? new Date(iso).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}) : '';
@@ -20358,10 +20403,15 @@
           const pendiente = !m.respuesta;
           const motivoIcons = {'Sugerencia':'💡','Alimento':'🥗','Ejercicio':'🏋️','Mi plan':'📋','Pago':'💳','Otro':'💬'};
           const motivoIcon = motivoIcons[m.asunto] || '💬';
+          const seleccionable = m.id != null;
+          const seleccionado = seleccionable && _mensajesSeleccionados.has(String(m.id));
           return `
-          <div style="background:var(--jv-glass);border:1px solid ${pendiente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;overflow:hidden;transition:all .15s">
+          <div id="mensaje-row-${m.id}" style="background:var(--jv-glass);border:1px solid ${seleccionado ? 'var(--jv-accent)' : pendiente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;overflow:hidden;transition:all .15s">
             <div style="padding:16px 18px">
               <div style="display:flex;align-items:flex-start;gap:14px">
+                ${seleccionable
+                  ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'onchange="toggleSeleccionMensaje(\'' + String(m.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:12px;accent-color:var(--jv-accent);cursor:pointer">'
+                  : '<span style="width:16px;flex-shrink:0"></span>'}
                 <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,var(--jv-accent),var(--jv-accent-2))' : 'var(--jv-glass-hi)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
                   ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--jv-text)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--jv-ok)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
                 </div>
@@ -20404,11 +20454,16 @@
           </div>`;
         }).join('');
     }
+    _actualizarBarraSeleccionMensajes();
+  }
 
-    // Leads
-    const leads = data.leads || [];
+  function renderAdminLeads() {
+    const leads = _adminLeads;
     const leadsCount = document.getElementById('adminLeadsCount');
     if (leadsCount) leadsCount.textContent = leads.length + ' leads';
+    _adminLeadsIds = leads.filter(l => l.id != null).map(l => String(l.id));
+    const _lIdsSet = new Set(_adminLeadsIds);
+    _leadsSeleccionados.forEach(id => { if (!_lIdsSet.has(id)) _leadsSeleccionados.delete(id); });
     const leadsList = document.getElementById('adminLeadsList');
     if (leadsList) {
       const fmtLeadHora = (iso) => iso ? new Date(iso).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}) : '';
@@ -20418,8 +20473,13 @@
         : leads.map(l => {
           const horasDesde = Math.floor((ahora - new Date(l.created_at).getTime()) / 3600000);
           const esReciente = horasDesde < 24;
+          const seleccionable = l.id != null;
+          const seleccionado = seleccionable && _leadsSeleccionados.has(String(l.id));
           return `
-          <div style="background:var(--jv-glass);border:1px solid ${esReciente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='var(--jv-glass-hi)';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='var(--jv-glass)';this.style.transform='none'">
+          <div id="lead-row-${l.id}" style="background:var(--jv-glass);border:1px solid ${seleccionado ? 'var(--jv-accent)' : esReciente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='var(--jv-glass-hi)';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='var(--jv-glass)';this.style.transform='none'">
+            ${seleccionable
+              ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'onchange="toggleSeleccionLead(\'' + String(l.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--jv-accent);cursor:pointer">'
+              : '<span style="width:16px;flex-shrink:0"></span>'}
             <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,var(--jv-accent),var(--jv-accent-2))' : 'var(--jv-glass-hi)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? 'var(--jv-text)' : 'var(--jv-faint)'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
@@ -20438,6 +20498,7 @@
           </div>`;
         }).join('');
     }
+    _actualizarBarraSeleccionLeads();
   }
 
   // Renderiza solo la tabla (filtros + orden sin volver a la API)
@@ -21052,6 +21113,165 @@
       _emailsSeleccionados.clear();
       renderAdminEmails();
       showToast(`${ids.length} email(s) eliminados`);
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = txtOriginal || 'Eliminar seleccionados'; }
+    }
+  }
+
+  // ===== SELECCIÓN MÚLTIPLE DE MENSAJES (BUZÓN) =====
+  function _actualizarBarraSeleccionMensajes() {
+    const n = _mensajesSeleccionados.size;
+    const bar = document.getElementById('mensajesSeleccionBar');
+    if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
+    const countEl = document.getElementById('mensajesSeleccionCount');
+    if (countEl) countEl.textContent = `${n} mensaje${n === 1 ? '' : 's'} seleccionado${n === 1 ? '' : 's'}`;
+    const todos = document.getElementById('mensajesSeleccionarTodos');
+    if (todos) {
+      const total = _adminMensajesIds.length;
+      const marcados = _adminMensajesIds.filter(id => _mensajesSeleccionados.has(id)).length;
+      todos.checked = total > 0 && marcados === total;
+      todos.indeterminate = marcados > 0 && marcados < total;
+    }
+  }
+
+  function toggleSeleccionMensaje(id, checked) {
+    const idStr = String(id);
+    if (checked) _mensajesSeleccionados.add(idStr);
+    else _mensajesSeleccionados.delete(idStr);
+    const row = document.getElementById('mensaje-row-' + idStr);
+    if (row) row.style.borderColor = checked ? 'var(--jv-accent)' : 'var(--jv-line)';
+    _actualizarBarraSeleccionMensajes();
+  }
+
+  function toggleSeleccionarTodosMensajes(checked) {
+    if (checked) _adminMensajesIds.forEach(id => _mensajesSeleccionados.add(id));
+    else _mensajesSeleccionados.clear();
+    renderAdminMensajes();
+  }
+
+  function cancelarSeleccionMensajes() {
+    _mensajesSeleccionados.clear();
+    renderAdminMensajes();
+  }
+
+  async function marcarSeleccionadosMensajesGestionados() {
+    const ids = [..._mensajesSeleccionados];
+    if (!ids.length) return;
+    const btn = document.getElementById('btnMarcarMensajesSeleccionados');
+    const txtOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = 'Marcando...'; }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'mensajes_masivo_gestionado', ids })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      ids.forEach(id => {
+        const rec = _adminMensajes.find(x => String(x.id) === id);
+        if (rec) rec.respuesta = 'Gestionado';
+      });
+      _mensajesSeleccionados.clear();
+      renderAdminMensajes();
+      showToast(`${ids.length} mensaje(s) marcados como gestionados`);
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = txtOriginal || 'Marcar como gestionados'; }
+    }
+  }
+
+  async function eliminarMensajesSeleccionados() {
+    const ids = [..._mensajesSeleccionados];
+    if (!ids.length) return;
+    if (!confirm(`¿Eliminar ${ids.length} mensaje(s) seleccionados? Esta acción no se puede deshacer.`)) return;
+    const btn = document.getElementById('btnEliminarMensajesSeleccionados');
+    const txtOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'eliminar_mensajes_masivo', ids })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const idsSet = new Set(ids);
+      _adminMensajes = _adminMensajes.filter(x => !idsSet.has(String(x.id)));
+      _mensajesSeleccionados.clear();
+      renderAdminMensajes();
+      showToast(`${ids.length} mensaje(s) eliminados`);
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = txtOriginal || 'Eliminar seleccionados'; }
+    }
+  }
+
+  // ===== SELECCIÓN MÚLTIPLE DE LEADS =====
+  // Los leads no tienen estado "gestionado" (la tabla solo guarda email +
+  // fecha), así que la única acción en bloque real es eliminar.
+  function _actualizarBarraSeleccionLeads() {
+    const n = _leadsSeleccionados.size;
+    const bar = document.getElementById('leadsSeleccionBar');
+    if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
+    const countEl = document.getElementById('leadsSeleccionCount');
+    if (countEl) countEl.textContent = `${n} lead${n === 1 ? '' : 's'} seleccionado${n === 1 ? '' : 's'}`;
+    const todos = document.getElementById('leadsSeleccionarTodos');
+    if (todos) {
+      const total = _adminLeadsIds.length;
+      const marcados = _adminLeadsIds.filter(id => _leadsSeleccionados.has(id)).length;
+      todos.checked = total > 0 && marcados === total;
+      todos.indeterminate = marcados > 0 && marcados < total;
+    }
+  }
+
+  function toggleSeleccionLead(id, checked) {
+    const idStr = String(id);
+    if (checked) _leadsSeleccionados.add(idStr);
+    else _leadsSeleccionados.delete(idStr);
+    const row = document.getElementById('lead-row-' + idStr);
+    if (row) row.style.borderColor = checked ? 'var(--jv-accent)' : 'var(--jv-line)';
+    _actualizarBarraSeleccionLeads();
+  }
+
+  function toggleSeleccionarTodosLeads(checked) {
+    if (checked) _adminLeadsIds.forEach(id => _leadsSeleccionados.add(id));
+    else _leadsSeleccionados.clear();
+    renderAdminLeads();
+  }
+
+  function cancelarSeleccionLeads() {
+    _leadsSeleccionados.clear();
+    renderAdminLeads();
+  }
+
+  async function eliminarLeadsSeleccionados() {
+    const ids = [..._leadsSeleccionados];
+    if (!ids.length) return;
+    if (!confirm(`¿Eliminar ${ids.length} lead(s) seleccionados? Esta acción no se puede deshacer.`)) return;
+    const btn = document.getElementById('btnEliminarLeadsSeleccionados');
+    const txtOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'eliminar_leads_masivo', ids })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const idsSet = new Set(ids);
+      _adminLeads = _adminLeads.filter(x => !idsSet.has(String(x.id)));
+      _leadsSeleccionados.clear();
+      renderAdminLeads();
+      showToast(`${ids.length} lead(s) eliminados`);
     } catch (e) {
       showToast('Error: ' + e.message, 4000);
     } finally {
