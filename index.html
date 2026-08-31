@@ -21001,7 +21001,14 @@
                 </div>
               </div>
               ${e.html
-                ? '<iframe srcdoc="' + _esc(e.html) + '" sandbox="" style="width:100%;height:520px;border:1px solid var(--jv-line);border-radius:8px;background:rgba(0,0,0,.3)" title="Vista previa del email"></iframe>'
+                // sandbox="allow-same-origin" (sin allow-scripts, así que sigue sin poder
+                // ejecutar nada): sin esto, el iframe tiene un origen opaco para el
+                // navegador y la cabecera Cross-Origin-Resource-Policy: same-origin de
+                // vercel.json bloquea la imagen de cabecera del email (y cualquier otra
+                // imagen propia que use la plantilla) -- se veía bien en el email real
+                // (un cliente de correo no aplica las cabeceras de seguridad de la web),
+                // pero no en esta vista previa dentro de Jarvis.
+                ? '<iframe srcdoc="' + _esc(e.html) + '" sandbox="allow-same-origin" style="width:100%;height:520px;border:1px solid var(--jv-line);border-radius:8px;background:rgba(0,0,0,.3)" title="Vista previa del email"></iframe>'
                 : cuerpoPreview
                 ? '<div style="background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:8px;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.7;color:var(--jv-dim)">' + _esc(cuerpoPreview) + '</div>'
                 : '<div style="background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:8px;padding:14px 16px;color:var(--jv-faint);font-style:italic">Los emails anteriores a esta actualización no tienen contenido guardado. Los nuevos sí lo mostrarán.</div>'}
