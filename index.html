@@ -707,10 +707,19 @@
 
   /* ---- Controles: selects, fechas y botones ----
      Antes eran <select>/<input>/<button> nativos con solo el fondo oscuro
-     cambiado -- el desplegable del select seguía saliendo blanco (el fondo
-     oscuro del control no hace que el navegador pinte el listado nativo en
-     oscuro, hace falta color-scheme) y los botones eran rellenos planos sin
-     ninguna relación con el resto del cristal/acento del panel. */
+     cambiado -- los botones eran rellenos planos sin ninguna relación con
+     el resto del cristal/acento del panel.
+     El <select> en sí (control cerrado) se puede restylear con CSS, pero el
+     LISTADO desplegado es una ventana nativa del sistema operativo -- en
+     Windows, Chrome no la repinta con color-scheme (a diferencia de macOS),
+     así que seguía saliendo blanca pese a poner color-scheme:dark. La única
+     forma de controlar de verdad su aspecto es no usar el listado nativo:
+     _mejorarSelects() (más abajo, en el script) sustituye cada <select
+     class="jv-select"> por un botón + lista propia con este mismo estilo de
+     cristal, dejando el <select> original oculto como fuente de verdad del
+     valor (así ningún otro código que lea/escriba su .value tiene que
+     cambiar). input[type=date] si es una ventana propia de Chrome, así que
+     ahí color-scheme:dark sí funciona en todos los sistemas. */
   #modalAdmin select, #modalAdmin input[type="date"] { color-scheme: dark; }
 
   .jv-select {
@@ -723,6 +732,33 @@
   }
   .jv-select:hover  { border-color: var(--jv-line-hi); color: var(--jv-text); background-color: var(--jv-glass-hi); }
   .jv-select:focus  { border-color: rgba(255,95,46,.5); }
+
+  /* Botón que sustituye visualmente al <select> (mismo look que .jv-select,
+     pero es un <button> real -- así el listado que abre es HTML nuestro). */
+  .jv-select-wrap { position: relative; display: inline-block; }
+  .jv-select-btn {
+    appearance: none; -webkit-appearance: none; display: inline-flex; align-items: center; gap: 8px;
+    background: var(--jv-glass); border: 1px solid var(--jv-line); border-radius: 999px;
+    color: var(--jv-dim); font-family: var(--jv-ui); font-weight: 600; font-size: 12.5px;
+    padding: 9px 14px 9px 15px; cursor: pointer; outline: none; white-space: nowrap;
+    transition: border-color .15s, background-color .15s, color .15s;
+  }
+  .jv-select-btn svg { flex-shrink: 0; opacity: .75; transition: transform .15s; }
+  .jv-select-btn:hover { border-color: var(--jv-line-hi); color: var(--jv-text); background-color: var(--jv-glass-hi); }
+  .jv-select-wrap-open .jv-select-btn { border-color: rgba(255,95,46,.5); color: var(--jv-text); }
+  .jv-select-wrap-open .jv-select-btn svg { transform: rotate(180deg); }
+
+  .jv-select-list {
+    position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; z-index: 50;
+    background: #14151B; border: 1px solid var(--jv-line-hi); border-radius: 12px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.45); padding: 5px; max-height: 240px; overflow-y: auto;
+  }
+  .jv-select-opt {
+    padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+    color: var(--jv-dim); font-family: var(--jv-ui); white-space: nowrap; cursor: pointer;
+  }
+  .jv-select-opt:hover { background: var(--jv-glass-hi); color: var(--jv-text); }
+  .jv-select-opt-active { color: var(--jv-text); background: rgba(255,95,46,.13); }
 
   .jv-date {
     background: var(--jv-glass); border: 1px solid var(--jv-line); border-radius: 999px;
@@ -20946,11 +20982,12 @@
     sel.innerHTML = '<option value="">Todos los tipos</option>' +
       tipos.map(t => `<option value="${_esc(t)}">${_esc(_emailTipoLabel[t] || t)}</option>`).join('');
     if (tipos.includes(actual)) sel.value = actual;
+    sel._jvSync && sel._jvSync(); // sincroniza la etiqueta del botón (ver _mejorarSelects)
   }
 
   function limpiarFiltrosEmail() {
     ['emailFiltroTexto', 'emailFiltroDesde', 'emailFiltroHasta', 'emailFiltroTipo', 'emailFiltroEstado']
-      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      .forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el._jvSync && el._jvSync(); } });
     renderAdminEmails();
   }
 
@@ -22583,10 +22620,79 @@
     e.preventDefault();
     el.click();
   });
+  // Sustituye cada <select class="jv-select"> por un botón + lista propia
+  // con nuestro estilo de cristal: el listado nativo de un <select> es una
+  // ventana del sistema operativo, y en Windows Chrome no la repinta con
+  // color-scheme (a diferencia de macOS) -- seguía saliendo blanca pasara lo
+  // que pasara con el CSS del control cerrado. El <select> original queda
+  // oculto (display:none) como única fuente de verdad de su valor: todo el
+  // código que ya hacía document.getElementById(id).value o escuchaba
+  // "change" sigue funcionando sin tocar nada más.
+  function _mejorarSelects(raiz) {
+    (raiz || document).querySelectorAll('select.jv-select:not([data-mejorado])').forEach(sel => {
+      sel.setAttribute('data-mejorado', '1');
+      const wrap = document.createElement('span');
+      wrap.className = 'jv-select-wrap';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'jv-select-btn';
+      const list = document.createElement('div');
+      list.className = 'jv-select-list';
+      list.style.display = 'none';
+      const chevron = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+      const pintarBoton = () => {
+        const opt = sel.options[sel.selectedIndex];
+        btn.innerHTML = '<span>' + (opt ? _esc(opt.textContent) : '') + '</span>' + chevron;
+      };
+      const cerrar = () => { list.style.display = 'none'; wrap.classList.remove('jv-select-wrap-open'); };
+      const abrir = () => {
+        document.querySelectorAll('.jv-select-wrap-open').forEach(w => {
+          w.classList.remove('jv-select-wrap-open');
+          const l = w.querySelector('.jv-select-list'); if (l) l.style.display = 'none';
+        });
+        list.innerHTML = [...sel.options].map((o, i) =>
+          '<div class="jv-select-opt' + (i === sel.selectedIndex ? ' jv-select-opt-active' : '') + '" data-i="' + i + '">' + _esc(o.textContent) + '</div>'
+        ).join('');
+        list.style.display = 'block';
+        wrap.classList.add('jv-select-wrap-open');
+      };
+
+      pintarBoton();
+      sel._jvSync = pintarBoton;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (list.style.display === 'none') abrir(); else cerrar();
+      });
+      list.addEventListener('click', (e) => {
+        const opt = e.target.closest('.jv-select-opt');
+        if (!opt) return;
+        sel.selectedIndex = Number(opt.dataset.i);
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        pintarBoton();
+        cerrar();
+      });
+
+      sel.style.display = 'none';
+      sel.parentNode.insertBefore(wrap, sel);
+      wrap.appendChild(sel);
+      wrap.appendChild(btn);
+      wrap.appendChild(list);
+    });
+  }
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.jv-select-wrap-open').forEach(w => {
+      w.classList.remove('jv-select-wrap-open');
+      const l = w.querySelector('.jv-select-list'); if (l) l.style.display = 'none';
+    });
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.jv-select-list').forEach(l => l.style.display = 'none'); });
+
   _marcarOperablesTeclado();
+  _mejorarSelects();
   new MutationObserver((mutaciones) => {
     for (const m of mutaciones) {
-      if (m.addedNodes.length) { _marcarOperablesTeclado(); break; }
+      if (m.addedNodes.length) { _marcarOperablesTeclado(); _mejorarSelects(); break; }
     }
   }).observe(document.body, { childList: true, subtree: true });
 
