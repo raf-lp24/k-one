@@ -280,7 +280,7 @@ module.exports = async (req, res) => {
     let leads = [];
     try {
       const { data: leadsData } = await supabaseAdmin
-        .from('leads').select('email, created_at').order('created_at', { ascending: false }).limit(50);
+        .from('leads').select('id, email, created_at').order('created_at', { ascending: false }).limit(50);
       leads = leadsData || [];
     } catch (e) { console.warn('[admin-clientes] leads query error:', e.message); }
 
