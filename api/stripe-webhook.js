@@ -238,19 +238,40 @@ module.exports = async (req, res) => {
               refUserId = sub?.user_id;
             }
             if (refUserId) {
-              const { data: prof } = await supabaseAdmin.from('profiles')
-                .select('descuento_referidos')
-                .eq('id', refUserId)
-                .maybeSingle();
-              const descuento = prof?.descuento_referidos || 0;
-              if (descuento > 0) {
-                await stripe.customers.createBalanceTransaction(subscription.customer, {
-                  amount: -Math.round(descuento * 100), // negativo = crédito a favor del cliente
-                  currency: 'eur',
-                  description: `Descuento referidos K-ONE (${descuento}€)`
-                });
-                await supabaseAdmin.from('profiles').update({ descuento_referidos: 0 }).eq('id', refUserId);
-                console.log(`[stripe-webhook] Crédito referidos ${descuento}€ aplicado al saldo de ${subscription.customer}`);
+              // reclamar_descuento_referidos() bloquea la fila (SELECT ... FOR
+              // UPDATE) y la pone a 0 en la MISMA llamada atómica -- antes se
+              // leía el descuento, se llamaba a Stripe, y SOLO DESPUÉS se
+              // ponía a 0 (leer-decidir-escribir sin candado). Dos eventos de
+              // Stripe para el mismo cliente casi a la vez podían leer ambos
+              // el mismo descuento > 0 antes de que ninguno lo consumiera, y
+              // aplicar el crédito dos veces en el saldo real de Stripe.
+              // Ver supabase/migration-atomico-descuento-referidos.sql.
+              const { data: descuentoReclamado, error: errReclamo } = await supabaseAdmin
+                .rpc('reclamar_descuento_referidos', { p_user_id: refUserId });
+              if (errReclamo) {
+                console.error('[stripe-webhook] Error reclamando descuento referidos:', errReclamo.message);
+                capturarError(new Error('reclamar_descuento_referidos falló: ' + errReclamo.message), { fn: 'stripe-webhook-referidos', refUserId });
+              } else {
+                const descuento = Number(descuentoReclamado) || 0;
+                if (descuento > 0) {
+                  try {
+                    await stripe.customers.createBalanceTransaction(subscription.customer, {
+                      amount: -Math.round(descuento * 100), // negativo = crédito a favor del cliente
+                      currency: 'eur',
+                      description: `Descuento referidos K-ONE (${descuento}€)`
+                    });
+                    console.log(`[stripe-webhook] Crédito referidos ${descuento}€ aplicado al saldo de ${subscription.customer}`);
+                  } catch (stripeErr) {
+                    // El descuento ya se puso a 0 en Supabase (a propósito, para
+                    // que no se pueda duplicar) -- si ESTA llamada a Stripe
+                    // falla, el cliente se queda sin su crédito sin que quede
+                    // reflejado en ningún sitio salvo aquí. Hay que avisar alto
+                    // y claro (Sentry) para reaplicarlo a mano si hace falta,
+                    // en vez de perderlo en silencio.
+                    console.error('[stripe-webhook] Crédito referidos RECLAMADO pero Stripe falló -- revisar a mano:', stripeErr.message);
+                    capturarError(stripeErr, { fn: 'stripe-webhook-referidos-credito-perdido', refUserId, customer: subscription.customer, descuento });
+                  }
+                }
               }
             }
           } catch (discErr) {

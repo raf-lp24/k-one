@@ -1,6 +1,9 @@
 // Envía emails de notificación (leads, opiniones, bienvenida, renovación, retención).
 // Usa Resend (resend.com) — gratis hasta 100 emails/día.
-// POST: envío individual (lead, bienvenida, opinion, mensaje, renovacion)
+// POST: envío individual (lead, bienvenida, opinion, mensaje) -- 'renovacion'
+// se quitó de aquí (auditoría 2 sept 2026): era un tipo válido sin ningún
+// llamador legítimo (el email real lo manda stripe-webhook.js aparte) y
+// funcionaba como relay de email abierto para cualquier usuario autenticado.
 // GET:  cron de retención (día 3 sin cuestionario, día 8 sin pagar) — protegido por CRON_SECRET
 // Variables de entorno: RESEND_API_KEY, CRON_SECRET
 
@@ -803,9 +806,21 @@ async function handleCronRetencion(req, res) {
     // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
     let backupOk = false;
     try {
-      const { data: allProfiles } = await supa.from('profiles').select('*');
-      const { data: allSubs } = await supa.from('subscriptions').select('*');
-      const { data: allEmails } = await supa.from('email_log').select('id, tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(500);
+      // Ninguna de las 3 comprobaba `error` explícitamente (supabase-js no
+      // lanza) -- si cualquiera fallaba de forma transitoria, `data` quedaba
+      // `undefined`, caía al `|| []`, y el backup se subía igual con arrays
+      // vacíos. `uploadErr` sí se comprobaba, pero el upload en sí no falla
+      // por subir un JSON vacío -- así que `backupOk` se reportaba `true`
+      // (log: "backup: OK") con un backup del día inservible, sin que nadie
+      // se enterase.
+      const rProfiles = await supa.from('profiles').select('*');
+      const rSubs = await supa.from('subscriptions').select('*');
+      const rEmails = await supa.from('email_log').select('id, tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(500);
+      const erroresBackup = [rProfiles, rSubs, rEmails].map(r => r.error).filter(Boolean);
+      if (erroresBackup.length) {
+        throw new Error('Consulta fallida al preparar el backup: ' + erroresBackup.map(e => e.message).join(' | '));
+      }
+      const allProfiles = rProfiles.data, allSubs = rSubs.data, allEmails = rEmails.data;
       const backup = {
         fecha: ahora.toISOString(),
         totalClientes: (allProfiles || []).length,
@@ -874,11 +889,24 @@ async function handlePost(req, res) {
     if (!tipo || !datos) {
       return res.status(400).json({ error: 'tipo y datos son obligatorios' });
     }
-    const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje', 'renovacion'];
+    // 'renovacion' quitado de aquí (auditoría 2 sept 2026): el email real de
+    // renovación lo manda api/stripe-webhook.js con su propia plantilla
+    // inline, sin pasar nunca por este endpoint -- nada legítimo llamaba a
+    // POST /api/notify con tipo:'renovacion'. Pero SÍ era un tipo válido y
+    // "protegido" (tiposProtegidos exigía sesión, sin más), así que
+    // cualquier usuario autenticado (cualquier cliente, no hacía falta ser
+    // admin) podía mandar `datos.email` arbitrario y K-ONE reenviaba un
+    // email con remitente oficial a quien quisiera, sin límite de tasa
+    // (estaLimitadoPorTasa solo cubre lead/mensaje/bienvenida) -- relay de
+    // spam/phishing real con la reputación del dominio, y forma de agotar la
+    // cuota diaria de Resend. Si algún día hace falta volver a exponer este
+    // tipo por API, hay que resolver el email/nombre del PERFIL del usuario
+    // autenticado, nunca del body de la petición.
+    const tiposValidos = ['lead', 'bienvenida', 'opinion', 'mensaje'];
     if (!tiposValidos.includes(tipo)) {
       return res.status(400).json({ error: 'Tipo no válido' });
     }
-    const tiposProtegidos = ['opinion', 'renovacion'];
+    const tiposProtegidos = ['opinion'];
     if (tiposProtegidos.includes(tipo)) {
       const supa = getSupabaseAdmin();
       const user = await getAuthUser(req, supa);
@@ -1200,61 +1228,6 @@ async function handlePost(req, res) {
       };
       emails.push(enviarEmail(apiKey, optsOpinion));
       htmlParaLog = optsOpinion.html;
-    } else if (tipo === 'renovacion') {
-      const primerNombre = (datos.nombre || '').split(' ')[0] || 'Crack';
-      const entrenos = datos.entrenos || 0;
-      const racha = datos.racha || 0;
-      const semana = datos.semana || 1;
-      const optsRenovacion = {
-        from: 'K-ONE <equipo@k-one.fit>',
-        reply_to: ADMIN_EMAIL,
-        to: datos.email,
-        subject: `${esc(primerNombre)}, la constancia es tu mejor ejercicio — K-ONE`,
-        html: emailWrapper(`
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
-              <tr><td style="padding:26px 28px 0;text-align:center">
-                <h1 style="color:#F0EDE8;font-size:21px;font-weight:700;margin:0 0 18px">La constancia es tu mejor ejercicio</h1>
-              </td></tr>
-              <tr><td style="padding:0 28px;text-align:left">
-                <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
-                <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Tu suscripción se ha renovado y eso dice mucho de ti. La mayoría abandona después del primer mes — <span style="color:#F0EDE8;font-weight:500">tú has decidido seguir</span>. Esa disciplina vale más que cualquier plan de entrenamiento.</p>
-                <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Mira lo que has conseguido hasta ahora:</p>
-              </td></tr>
-              <tr><td style="padding:0 28px">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
-                  <tr>
-                    <td width="33.33%" style="padding:0 4px 0 0;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
-                      <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#27ae60;line-height:1;font-family:Arial,Helvetica,sans-serif">${entrenos}</div>
-                      <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Entrenos</div></div>
-                    </td>
-                    <td width="6" style="font-size:0;line-height:0">&nbsp;</td>
-                    <td width="33.33%" style="padding:0 4px;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
-                      <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#E8490F;line-height:1;font-family:Arial,Helvetica,sans-serif">${racha}</div>
-                      <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Mejor racha</div></div>
-                    </td>
-                    <td width="6" style="font-size:0;line-height:0">&nbsp;</td>
-                    <td width="33.33%" style="padding:0 0 0 4px;background:#0A0A0A;border:1px solid #232323;border-radius:12px;text-align:center">
-                      <div style="padding:16px 6px"><div style="font-size:27px;font-weight:900;color:#F0EDE8;line-height:1;font-family:Arial,Helvetica,sans-serif">S${semana}</div>
-                      <div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:6px">Semana</div></div>
-                    </td>
-                  </tr>
-                </table>
-              </td></tr>
-              <tr><td style="padding:20px 28px 0">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#0A0A0A;border-left:3px solid #E8490F;border-radius:0 10px 10px 0">
-                  <tr><td style="padding:14px 18px">
-                    <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">Nuevo mes, nuevo reto.</span> Tu plan se ha actualizado según tu progreso — entrenamiento y nutrición recalculados. No entrenas como el primer día porque ya no eres el del primer día.</p>
-                  </td></tr>
-                </table>
-              </td></tr>
-              <tr><td style="padding:24px 28px 28px;text-align:center">
-                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:13px 34px;font-size:13px;font-weight:700;letter-spacing:1px;border-radius:10px">VER MI NUEVO PLAN →</a>
-              </td></tr>
-            </table>
-          `)
-      };
-      emails.push(enviarEmail(apiKey, optsRenovacion));
-      htmlParaLog = optsRenovacion.html;
     } else {
       const optsGenerico = {
         from: 'K-ONE <equipo@k-one.fit>',
@@ -1305,10 +1278,6 @@ async function handlePost(req, res) {
         destinatario = ADMIN_EMAIL;
         asunto = `Nueva opinión de ${datos.nombre} (${datos.estrellas}★)`;
         resumen = `Opinión de ${datos.nombre || 'Anónimo'}: ${'★'.repeat(datos.estrellas || 0)}${'☆'.repeat(5-(datos.estrellas||0))}\n\n${datos.texto || '(sin texto)'}`;
-      } else if (tipo === 'renovacion') {
-        destinatario = datos.email;
-        asunto = `${(datos.nombre || '').split(' ')[0]}, la constancia es tu mejor ejercicio`;
-        resumen = `Email de renovación a ${datos.nombre} (${datos.email}). Progreso: ${datos.entrenos || 0} entrenos, racha ${datos.racha || 0}, semana ${datos.semana || 1}. Motivacional sobre constancia y disciplina.`;
       } else {
         destinatario = ADMIN_EMAIL;
         asunto = `Notificación: ${tipo}`;

@@ -174,7 +174,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://rfdrqbnzceudwclagjvp.supabase.co">
-<link rel="preconnect" href="https://js.stripe.com">
 <!-- El <script src=".../supabase-js@2"> de más abajo bloquea el render mientras
      se descarga: no lleva defer a propósito, porque el <script> inline que va
      justo detrás usa supabase.createClient(...) en su primera línea y depende
@@ -833,6 +832,24 @@
   @media (prefers-reduced-motion: reduce) {
     #modalAdmin .jarvis-panel > * { animation: none; }
     .jv-action:hover { transform: none; }
+  }
+
+  /* Antes esto solo cubría el panel de admin (Jarvis) -- la app del CLIENTE
+     (confeti a pantalla completa al conseguir un hito, spinner de "generando
+     tu plan", fundidos, shimmer de skeletons...) se quedaba sin ninguna
+     protección, así que alguien con un trastorno vestibular que activa
+     "reducir movimiento" en su sistema seguía recibiendo todo el movimiento
+     igual, justo donde SÍ hay clientes de pago viéndolo. Regla global
+     estándar: no intenta enumerar cada animación por nombre (se rompería en
+     cuanto se añada una nueva), corta duración/iteración de cualquier
+     animation/transition existente o futura. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   #modalJarvisCliente { display: none; font-family: var(--jv-ui); }
@@ -7719,7 +7736,7 @@
             <span class="field-hint">Pedimos esto para evitar ejercicios que puedan agravar tu lesión y adaptar tu plan de forma segura.</span>
           </div>
           <div class="field field-conditional" id="lesionExtra" style="display:none">
-            <label>Cuéntanos más sobre esta lesión <span class="optional">Opcional</span></label>
+            <label for="lesionDetalle">Cuéntanos más sobre esta lesión <span class="optional">Opcional</span></label>
             <input type="text" id="lesionDetalle" placeholder="¿Desde cuándo? ¿Tienes diagnóstico médico?">
           </div>
           <div class="field">
@@ -7733,15 +7750,15 @@
             </div>
           </div>
           <div class="field field-conditional" id="alergiaExtra" style="display:none">
-            <label>¿Cuál? <span class="optional">Opcional</span></label>
+            <label for="alergiaOtra">¿Cuál? <span class="optional">Opcional</span></label>
             <input type="text" id="alergiaOtra" placeholder="Cuéntanos a qué eres alérgico/a">
           </div>
           <div class="field">
-            <label>¿Has sido operado de algo relevante? <span class="optional">Opcional</span></label>
+            <label for="operacion">¿Has sido operado de algo relevante? <span class="optional">Opcional</span></label>
             <input type="text" id="operacion" placeholder="Menisco, hernia discal... o déjalo en blanco">
           </div>
           <div class="field">
-            <label>¿Tomas medicación habitual? <span class="optional">Opcional</span></label>
+            <label for="medicacion">¿Tomas medicación habitual? <span class="optional">Opcional</span></label>
             <input type="text" id="medicacion" placeholder="Si tomas algo que pueda afectar al ejercicio...">
           </div>
         </div>
@@ -8987,8 +9004,9 @@
 
   // ===== FORMULARIO =====
   function selectRadio(el, group) {
-    document.querySelectorAll(`#${group} .radio-opt, #${group} .check-opt`).forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll(`#${group} .radio-opt, #${group} .check-opt`).forEach(o => { o.classList.remove('selected'); o.setAttribute('aria-checked', 'false'); });
     el.classList.add('selected');
+    el.setAttribute('aria-checked', 'true');
     document.getElementById(group)?.classList.remove('error');
     if (group === 'deporte') updateLugarOptions(el.textContent.trim(), 'lugar');
     if (group === 'cp-deporte') updateLugarOptions(el.textContent.trim(), 'cp-lugar');
@@ -9260,7 +9278,10 @@
     el?.addEventListener(f.type === 'select' ? 'change' : 'input', () => el.classList.remove('error'));
   });
 
-  function validateBlock(blockIndex) {
+  // `silent`: no muestra el toast ni hace scroll -- se usa para comprobar un
+  // bloque que no es el visible ahora mismo (ver generatePlan()), donde
+  // desplazarse a un campo oculto por CSS no serviría de nada.
+  function validateBlock(blockIndex, silent) {
     const fields = (blockIndex === 5 && esSoloDieta())
       ? requiredFieldsBlock5SoloDieta
       : (requiredFieldsByBlock[blockIndex] || []);
@@ -9291,9 +9312,11 @@
     });
 
     if (firstInvalid) {
-      const rangeErrors = { edad: 'Introduce una edad entre 14 y 80 años.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
-      showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
-      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!silent) {
+        const rangeErrors = { edad: 'Introduce una edad entre 14 y 80 años.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
+        showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return false;
     }
     return true;
@@ -9547,7 +9570,23 @@
 
   // ===== GENERAR PLAN LOCAL (sin API externa) =====
   function generatePlan() {
-    if (!validateBlock(currentBlock)) return;
+    // goToBlock() (los indicadores de paso de la barra de progreso) nunca
+    // llama a validateBlock() -- solo comprueba el bloque ACTUAL, no los ya
+    // visitados. Un usuario podía volver al bloque 0 con el indicador de
+    // paso, escribir a mano un peso/edad fuera de rango en un campo con
+    // stepper (que no bloquea teclear un valor absurdo), y saltar de vuelta
+    // al último paso: nada volvía a revalidar el bloque 0, y ese dato
+    // entraba intacto en buildPlanFromData() (TDEE/BMR, kcal, macros).
+    // Se valida CADA bloque ya visitado, no solo el que se ve ahora mismo.
+    for (let b = 0; b <= maxBlockReached; b++) {
+      if (b === currentBlock) {
+        if (!validateBlock(b)) return;
+      } else if (!validateBlock(b, /* silent */ true)) {
+        goToBlock(b);
+        validateBlock(b); // repite ya visible, para el aviso y el scroll
+        return;
+      }
+    }
     userData = collectFormData();
     // Primer punto del historial de peso: sin esto, el check-in semanal no
     // tiene contra qué comparar y nunca podría detectar un estancamiento.
@@ -13087,14 +13126,19 @@
 
     const tdee = Math.round(bmr * factorAct * factorNeat);
 
-    // Objetivo calórico según meta
+    // Objetivo calórico según meta. Mismo suelo de seguridad en los 3 casos
+    // (antes solo lo tenía "Perder grasa") -- defensa en profundidad: con la
+    // validación del cuestionario ya cerrada (edad/peso/altura no pueden
+    // colarse fuera de rango), esto no debería activarse nunca, pero si
+    // llegase un TDEE anómalo por cualquier otra vía, mejor un mínimo
+    // biológico que un objetivo calórico negativo o absurdo.
     let kcalObj;
     if (perdidaGrasa) {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - 450);
     } else if (ganarMusculo) {
-      kcalObj = tdee + 350;
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + 350);
     } else {
-      kcalObj = tdee; // equilibrio = TDEE real calculado, no valor fijo
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee); // equilibrio = TDEE real calculado, no valor fijo
     }
 
     // Recalibración por tendencia real de peso (evaluarYAjustarCalorias, en el
@@ -15763,7 +15807,7 @@
     .back{display:inline-block;margin-bottom:16px;color:#D1420E;text-decoration:none;font-size:14px}
     @media print{.back,.no-print{display:none !important}}</style></head><body>
     <a href="https://k-one.fit" class="back">← Volver a K-ONE</a>
-    <h1>Plan de nutrición — ${user?.nombre || 'K-ONE'}</h1>
+    <h1>Plan de nutrición — ${_esc(user?.nombre || 'K-ONE')}</h1>
     ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal/día · ${generatedPlan.protObj || ''}g proteína</p>`}
     <button onclick="window.print()" class="no-print" style="background:#D1420E;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
     generatedPlan.nutricion.forEach(meal => {
@@ -17169,8 +17213,9 @@
 
   // ===== RATINGS CHECK-IN =====
   function selectRating(btn, group) {
-    document.querySelectorAll(`#rating-${group} .rating-btn`).forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll(`#rating-${group} .rating-btn`).forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
     btn.classList.add('selected');
+    btn.setAttribute('aria-pressed', 'true');
   }
 
   // ===== SUBMIT CHECK-IN =====
@@ -17184,7 +17229,13 @@
   // Ajuste moderado (150 kcal) y no en cada check-in: hace falta tendencia de
   // 3 semanas, no un solo pesaje (agua, digestión, ciclo... meten ruido).
   function evaluarYAjustarCalorias(pesoActual) {
-    if (!pesoActual || isNaN(pesoActual)) return null;
+    // Mismo rango biológico que ya usa guardarCambioPlan() para el peso --
+    // el input del check-in tiene min/max en el HTML, pero eso no bloquea
+    // escribir un valor a mano fuera de rango (0 y negativos son "truthy" en
+    // JS salvo el propio 0, así que solo el !isNaN de antes no los paraba).
+    // Un peso corrupto contamina el gráfico de evolución, la tendencia de
+    // abajo, y los hitos de peso (kilo1/kilo5/kilo10).
+    if (!pesoActual || isNaN(pesoActual) || pesoActual < 30 || pesoActual > 300) return null;
     if (!userData.historialPeso) userData.historialPeso = [];
     userData.historialPeso.push({ fecha: new Date().toISOString(), peso: pesoActual, semana: getSemanaActual() });
     if (userData.historialPeso.length > 26) userData.historialPeso = userData.historialPeso.slice(-26);
@@ -17193,7 +17244,18 @@
     if (hist.length < 3) return null;
 
     const ultimos3 = hist.slice(-3);
-    const semanas = Math.max(1, ultimos3.length - 1);
+    // "semanas" tiene que salir del tiempo REAL transcurrido entre el primer
+    // y el último de estos 3 registros, no de "cuántos registros hay menos
+    // uno" (eso daba siempre exactamente 2, sin importar si esos 3 check-ins
+    // se hicieron con semanas de diferencia o con minutos -- un cliente que
+    // hiciera 2-3 check-ins seguidos el mismo día, por curiosidad o doble
+    // clic, veía el ruido normal de la báscula (hidratación, hora del día)
+    // tratado como "tendencia semanal" real y disparaba un ajuste de
+    // calorías de ±150 basado en minutos, no en semanas).
+    const diasTranscurridos = (new Date(ultimos3[ultimos3.length - 1].fecha).getTime() - new Date(ultimos3[0].fecha).getTime()) / 86400000;
+    if (diasTranscurridos < 4) return null; // no hay tendencia real que medir todavía
+    const semanas = Math.max(1, diasTranscurridos / 7);
+    const semanasTexto = Math.round(semanas); // solo para el mensaje al cliente, no para el cálculo
     const cambioSemanal = (ultimos3[ultimos3.length - 1].peso - ultimos3[0].peso) / semanas;
     const cambioPct = (cambioSemanal / ultimos3[0].peso) * 100;
 
@@ -17208,7 +17270,7 @@
     if (perdidaGrasa) {
       if (cambioPct > -0.15) {
         nuevoAjuste = Math.max(actual - PASO, -TOPE);
-        mensaje = `Llevas ${semanas} semanas prácticamente sin bajar de peso. Hemos reducido tus calorías objetivo en ${PASO} kcal/día para reactivar la pérdida.`;
+        mensaje = `Llevas ${semanasTexto} semanas prácticamente sin bajar de peso. Hemos reducido tus calorías objetivo en ${PASO} kcal/día para reactivar la pérdida.`;
       } else if (cambioPct < -1.0) {
         nuevoAjuste = Math.min(actual + PASO, TOPE);
         mensaje = `Estás perdiendo peso muy rápido (más del 1% de tu peso a la semana), lo que suele significar perder también masa muscular. Hemos subido tus calorías objetivo en ${PASO} kcal/día.`;
@@ -17216,7 +17278,7 @@
     } else if (ganarMusculo) {
       if (cambioPct < 0.1) {
         nuevoAjuste = Math.min(actual + PASO, TOPE);
-        mensaje = `Llevas ${semanas} semanas sin ganar peso. Hemos subido tus calorías objetivo en ${PASO} kcal/día para asegurar el superávit.`;
+        mensaje = `Llevas ${semanasTexto} semanas sin ganar peso. Hemos subido tus calorías objetivo en ${PASO} kcal/día para asegurar el superávit.`;
       } else if (cambioPct > 0.7) {
         nuevoAjuste = Math.max(actual - PASO, -TOPE);
         mensaje = `Estás ganando peso muy rápido (más del 0.7% de tu peso a la semana), lo que suele significar ganar más grasa que músculo. Hemos bajado tus calorías objetivo en ${PASO} kcal/día.`;
@@ -18834,7 +18896,12 @@
   function descargarPlanPDF() {
     if (!generatedPlan) { showToast('No hay plan generado'); return; }
     const user = getCurrentUser();
-    const nombre = user?.nombre || 'Cliente';
+    // El nombre lo escribió el propio usuario en el registro (solo se
+    // comprueba nº de palabras/longitud, no que no lleve '<'/'>'/'"') y este
+    // HTML se escribe con doc.write() en un iframe del mismo origen sin
+    // sandbox -- sin escapar, un nombre tipo "<img src=x onerror=...>"
+    // ejecutaría JS real con acceso al DOM/localStorage de k-one.fit.
+    const nombre = _esc(user?.nombre || 'Cliente');
     const semana = userData.progreso?.semana || 1;
     const dias = DIAS_SEMANA;
     if (!comidasSemana.length) inicializarComidasSemana();
@@ -19528,7 +19595,7 @@
             <div style="font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:12px;color:var(--blanco)">K-<span style="color:var(--brasa)">ONE</span></div>
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <p style="margin:0 0 8px;font-weight:600;color:var(--blanco);font-size:15px">Revisa tu correo</p>
-            <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color:var(--brasa)">${email}</strong></p>
+            <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color:var(--brasa)">${_esc(email)}</strong></p>
             <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí.</p>
           `;
           loginCard.insertBefore(aviso, loginCard.children[2]);
@@ -22080,7 +22147,7 @@
 
   // ===== NOTIFICACIÓN AL ADMIN POR EMAIL =====
   async function notificarAdmin(tipo, datos) {
-    // /api/notify exige sesión solo para 'opinion'/'renovacion' (tiposProtegidos);
+    // /api/notify exige sesión solo para 'opinion' (tiposProtegidos);
     // 'bienvenida' se envía justo tras signUp(), cuando todavía no hay sesión
     // (el proyecto exige confirmar email), así que va sin token -- protegido en
     // el servidor con rate-limit por IP en vez de auth. Para los tipos que sí
@@ -23016,6 +23083,25 @@
       el.setAttribute('tabindex', '0');
       if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
     });
+    // Auditoría de accesibilidad (2 sept 2026): las opciones tipo radio
+    // (enfermedad, alergia, valoración por estrellas, tipo de plan...) ya
+    // eran operables por teclado gracias al bloque de arriba, pero con
+    // role="button" -- un lector de pantalla las anunciaba como botones
+    // sueltos, sin decir que forman parte de un grupo de elección única ni
+    // cuál está marcada. selectRadio() mantiene aria-checked al día cuando
+    // cambia la selección; esto solo pone el rol/estado inicial.
+    (raiz || document).querySelectorAll('.radio-opt').forEach(el => {
+      el.setAttribute('role', 'radio');
+      el.setAttribute('aria-checked', el.classList.contains('selected') ? 'true' : 'false');
+      const grupo = el.parentElement;
+      if (grupo && !grupo.hasAttribute('role')) grupo.setAttribute('role', 'radiogroup');
+    });
+    // Mismo motivo que .radio-opt de arriba, para el grupo de botones del
+    // check-in semanal (días entrenados, cómo fue físicamente...) --
+    // selectRating() mantiene esto al día cuando cambia la selección.
+    (raiz || document).querySelectorAll('.rating-btn:not([aria-pressed])').forEach(el => {
+      el.setAttribute('aria-pressed', el.classList.contains('selected') ? 'true' : 'false');
+    });
   }
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -23172,9 +23258,10 @@
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
   });
+  const _SELECTOR_MODALES_ABIERTOS = '.modal-overlay.visible, .onboarding-modal.visible, #modalJarvisCliente.visible';
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    const abiertos = [...document.querySelectorAll('.modal-overlay.visible, .onboarding-modal.visible, #modalJarvisCliente.visible')];
+    const abiertos = [...document.querySelectorAll(_SELECTOR_MODALES_ABIERTOS)];
     if (!abiertos.length) return;
     const ultimo = abiertos[abiertos.length - 1];
     // Prioriza el botón "✕" real del modal (el mismo que ya usa cada uno para
@@ -23185,6 +23272,54 @@
     if (boton) boton.click();
     else ultimo.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
   });
+
+  // Auditoría de accesibilidad (2 sept 2026): aria-modal="true" es solo una
+  // pista semántica -- no bloquea el Tab real. Sin esto, seguir pulsando Tab
+  // dentro de un modal abierto (paywall, cuestionario, editar nota...) paseaba
+  // el foco por elementos visualmente tapados detrás del overlay. Atrapa el
+  // Tab dentro del ÚLTIMO modal abierto (mismo criterio que ya usa Escape) y
+  // cicla entre sus elementos focuseables sin salir nunca de él.
+  function _elementosFocuseables(contenedor) {
+    return [...contenedor.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )].filter(el => el.offsetParent !== null); // visible de verdad, no solo presente en el DOM
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const abiertos = [...document.querySelectorAll(_SELECTOR_MODALES_ABIERTOS)];
+    if (!abiertos.length) return;
+    const ultimo = abiertos[abiertos.length - 1];
+    if (!ultimo.contains(document.activeElement)) return; // el foco ya se salió por otra vía, no forzarlo
+    const focuseables = _elementosFocuseables(ultimo);
+    if (!focuseables.length) return;
+    const primero = focuseables[0], last = focuseables[focuseables.length - 1];
+    if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); primero.focus(); }
+  });
+
+  // Foco inicial al abrir un modal: sin esto, en móvil o pantallas ≤768px
+  // (el único sitio que ya movía el foco -- buscador de alimento/ejercicio --
+  // lo hacía solo si window.innerWidth > 768) el foco se quedaba donde
+  // estuviera antes de abrir, fuera de la vista, y Tab paseaba por detrás del
+  // overlay antes de llegar al modal.
+  new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
+      const el = m.target;
+      if (!el.matches?.('.modal-overlay, .onboarding-modal, #modalJarvisCliente')) continue;
+      if (!el.classList.contains('visible')) continue;
+      // Ya tenía el foco dentro (p.ej. lo puso el propio código del modal) --
+      // no pisarlo.
+      if (el.contains(document.activeElement) && document.activeElement !== document.body) continue;
+      const focuseables = _elementosFocuseables(el);
+      if (focuseables.length) {
+        focuseables[0].focus();
+      } else {
+        el.setAttribute('tabindex', '-1');
+        el.focus();
+      }
+    }
+  }).observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
 
   window.onload = async () => {
     _sincronizarPrecios();
@@ -23414,15 +23549,23 @@
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
         const json = sub.toJSON();
-        const { error } = await supa.from('push_subscriptions').insert({
-          user_id: _supaUserId,
-          endpoint: json.endpoint,
-          p256dh: json.keys.p256dh,
-          auth_key: json.keys.auth
+        // reclamar_push_subscription() (RPC, no insert directo): un mismo
+        // endpoint push es único por NAVEGADOR, no por usuario -- en un
+        // dispositivo compartido (tablet familiar, portátil de gimnasio), si
+        // otro cliente ya había activado avisos antes en este mismo
+        // navegador, un insert directo chocaba contra ese endpoint (23505) y
+        // el error se descartaba en silencio: parecía que "ya estaba
+        // suscrito", pero la fila seguía apuntando al OTRO cliente, que
+        // seguía recibiendo el push en vez de ti. La función libera el
+        // endpoint (lo borra, sea de quien sea) y lo vuelve a dar de alta a
+        // tu nombre -- necesita permisos elevados que un insert normal
+        // protegido por RLS no tiene.
+        const { error } = await supa.rpc('reclamar_push_subscription', {
+          p_endpoint: json.endpoint,
+          p_p256dh: json.keys.p256dh,
+          p_auth_key: json.keys.auth
         });
-        // 23505 = unique_violation en "endpoint" -- ya estaba suscrito con este
-        // mismo navegador (p.ej. recargó la página tras activar), no es un fallo.
-        if (error && error.code !== '23505') throw error;
+        if (error) throw error;
         showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);

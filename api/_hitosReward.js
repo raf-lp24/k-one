@@ -75,6 +75,21 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
     return { status: 404, body: { error: 'No se encontró una suscripción activa' } };
   }
 
+  // getActiveSubscriptionId() devuelve sub.stripe_subscription_id tal cual
+  // si ya existe en Supabase, SIN comprobar su status real en Stripe (eso
+  // solo pasa en su fallback, cuando esa columna está vacía) -- a diferencia
+  // de cancel/reactivate/update-subscription.js, que siempre hacen un
+  // retrieve() + comprueban active/trialing antes de actuar. Sin este mismo
+  // chequeo aquí, un cliente cuya suscripción ya terminó (columna en
+  // Supabase apuntando a un ID muerto, como es normal) podía canjear un
+  // hito, quemar el cerrojo de un solo uso, e intentar aplicar el cupón a
+  // una suscripción cancelada -- perdiendo la recompensa para siempre sin
+  // haber recibido ningún beneficio real.
+  const subscription = await stripe.subscriptions.retrieve(subId);
+  if (!['active', 'trialing'].includes(subscription.status)) {
+    return { status: 404, body: { error: 'No se encontró una suscripción activa' } };
+  }
+
   // Cerrojo atómico contra doble canje: la clave primaria (user_id, nivel) de
   // hitos_canjes solo deja ganar a la primera petición. Si dos peticiones
   // casi simultáneas (doble clic, dos pestañas) llegan aquí, la segunda choca

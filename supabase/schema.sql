@@ -27,6 +27,24 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+-- El cliente escribe userdata/plan directo desde el navegador (su propia
+-- fila, sin pasar por ningún endpoint que valide forma o tamaño). Sin tope,
+-- una sola fila inflada a varios MB ralentiza para TODO el mundo el panel de
+-- admin (api/admin-clientes.js) y el cron diario (api/notify.js), que cargan
+-- esta columna para todos los usuarios en una sola consulta cada vez.
+do $$
+begin
+  alter table public.profiles
+    add constraint profiles_userdata_tamano check (pg_column_size(userdata) < 2 * 1024 * 1024);
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter table public.profiles
+    add constraint profiles_plan_tamano check (pg_column_size(plan) < 2 * 1024 * 1024);
+exception when duplicate_object then null;
+end $$;
+
 -- Columna para marcar beta testers (acceso completo sin pago). Es SENSIBLE: concede
 -- acceso gratuito, así que el usuario NO debe poder cambiarla. La política RLS de update
 -- permite al usuario modificar su propia fila y Postgres no restringe por columna, por lo
@@ -96,6 +114,21 @@ alter table public.profiles enable row level security;
 -- que un usuario podía poner su propio email igual al de una invitación premium ajena
 -- (supabase.from('profiles').update({email:'victima@x.com'})) y afectar de rebote a
 -- api/admin-mensaje.js (borrar_cliente), que resuelve la invitación a borrar por email.
+-- `codigo_referido`/`referido_por` añadidas en la auditoría del 2 sept 2026:
+-- profiles_update_own permite auth.uid()=id sin restricción de columna, así
+-- que un usuario podía cambiar su propio código de referido a voluntad
+-- (squatting de códigos "bonitos" libres, o invalidar en silencio el que ya
+-- había compartido). El único escritor legítimo de estas dos columnas
+-- (registrar_referido(), generar_codigo_referido()/handle_new_user()) es
+-- SECURITY DEFINER y no pasa por aquí como 'authenticated'/'anon', así que
+-- protegerlas no rompe ningún flujo real.
+-- OJO: estas dos columnas las AÑADE migration-referidos.sql (sección 8c más
+-- abajo), no este bloque -- si alguna vez se ejecuta schema.sql en una base
+-- realmente nueva SIN correr después migration-referidos.sql, cualquier
+-- UPDATE real sobre profiles fallará aquí con "column does not exist" (el
+-- cuerpo de la función no se valida contra el esquema hasta que se invoca,
+-- así que el CREATE FUNCTION en sí no avisa). Mismo requisito de orden que
+-- ya documenta la sección 8c.
 create or replace function public.protect_profile_sensitive_cols()
 returns trigger
 language plpgsql
@@ -107,6 +140,8 @@ begin
     new.descuento_referidos := old.descuento_referidos;
     new.nota_admin := old.nota_admin;
     new.email := old.email;
+    new.codigo_referido := old.codigo_referido;
+    new.referido_por := old.referido_por;
   end if;
   return new;
 end;
@@ -418,6 +453,36 @@ create table if not exists public.leads (
   created_at timestamptz not null default now()
 );
 
+-- El insert es público a propósito (with check (true), ver política más
+-- abajo) y sin límite de longitud cualquiera podía mandar directo por REST
+-- un email de varios MB. El UNIQUE es igual de importante por otro motivo:
+-- index.html ya está preparado para un error 23505 en el insert (formulario
+-- reenviado), pero sin esta constraint ese chequeo era código muerto y
+-- "leads" podía acumular el mismo email sin límite (el único freno real era
+-- un timeout de 60s en localStorage, trivial de saltar con incógnito/curl).
+do $$
+begin
+  alter table public.leads
+    add constraint leads_email_longitud check (char_length(email) <= 254);
+exception when duplicate_object then null;
+end $$;
+do $$
+declare
+  v_duplicados int;
+begin
+  select count(*) into v_duplicados from (
+    select email from public.leads group by email having count(*) > 1
+  ) t;
+  if v_duplicados = 0 then
+    begin
+      alter table public.leads add constraint leads_email_unique unique (email);
+    exception when duplicate_object then null;
+    end;
+  else
+    raise notice 'leads.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+  end if;
+end $$;
+
 alter table public.leads enable row level security;
 
 drop policy if exists "leads_insert" on public.leads;
@@ -601,6 +666,50 @@ drop policy if exists "push_subscriptions_delete_own" on public.push_subscriptio
 create policy "push_subscriptions_delete_own" on public.push_subscriptions
   for delete using (auth.uid() = user_id);
 
+-- Un mismo "endpoint" push es único a nivel de NAVEGADOR, no de usuario -- en
+-- un dispositivo compartido (tablet familiar, portátil de gimnasio) el
+-- cliente B que active avisos después de que A ya lo hiciera chocaba contra
+-- el UNIQUE de endpoint, y el insert normal (protegido por RLS a "solo mis
+-- filas") no puede borrar la fila ajena de A para liberarlo -- necesita
+-- permisos elevados. Esta función SECURITY DEFINER hace exactamente eso:
+-- borra la fila vieja (sea de quien sea) e inserta la nueva a nombre de
+-- quien llama. Ver supabase/migration-auditoria-integral-septiembre.sql
+-- (2 sept 2026) y activarNotificaciones() en index.html, que la usa en vez
+-- de un insert directo.
+create or replace function public.reclamar_push_subscription(p_endpoint text, p_p256dh text, p_auth_key text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.push_subscriptions where endpoint = p_endpoint;
+  insert into public.push_subscriptions (user_id, endpoint, p256dh, auth_key)
+  values (auth.uid(), p_endpoint, p_p256dh, p_auth_key);
+end;
+$$;
+revoke execute on function public.reclamar_push_subscription(text, text, text) from public;
+grant execute on function public.reclamar_push_subscription(text, text, text) to authenticated;
+
+-- ============================================================
+-- 8b-4. TABLA: email_log (fuera de este repositorio, igual que
+-- mensajes_cliente más arriba -- creada por migration-email-log-html.sql y
+-- ampliada desde entonces. Columnas conocidas por el código que la usa:
+-- id, tipo, destinatario, asunto, html, datos, created_at.
+--
+-- El cron diario (api/notify.js) hace varios SELECT sobre TODA la tabla sin
+-- filtro de fecha (dedupe de retención/reenganche/push diario, resumen
+-- semanal, digest admin), y la tabla no tiene retención/purga -- crece para
+-- siempre. Índices añadidos en la auditoría del 2 sept 2026 (ver
+-- supabase/migration-auditoria-integral-septiembre.sql): compuesto
+-- (tipo, destinatario) para los dedupe checks, y uno en created_at para las
+-- consultas por fecha (resumen semanal, digest admin, paginación en Jarvis).
+-- ============================================================
+create index if not exists email_log_tipo_destinatario_idx
+  on public.email_log (tipo, destinatario);
+create index if not exists email_log_created_at_idx
+  on public.email_log (created_at);
+
 -- ============================================================
 -- 8c. TABLAS: invitaciones_premium y referidos
 -- CORRECCIÓN (auditoría 29 ago 2026): esta nota decía que "tampoco viven en
@@ -609,7 +718,27 @@ create policy "push_subscriptions_delete_own" on public.push_subscriptions
 -- Si se reconstruye una base nueva, hay que ejecutar esa migración Y DESPUÉS
 -- migration-fix-rls-referidos-y-otros.sql (que borra "referidos_insert_self",
 -- ver más abajo) -- ejecutar solo la primera deja el hueco de seguridad
--- reabierto. Lo que sigue describe el estado ya cerrado en producción:
+-- reabierto.
+--
+-- CORRECCIÓN (auditoría 2 sept 2026): esta lista de migraciones necesarias
+-- también se había quedado corta -- falta migration-fix-invitacion-
+-- premium.sql, que crea aplicar_invitacion_premium() (RPC que llama
+-- index.html:19554 al registrarse con una invitación). Sin ella, el trigger
+-- protect_profile_sensitive_cols() (ya en este schema.sql más arriba, y que
+-- SÍ es imprescindible) bloquea en silencio cualquier intento de aplicar el
+-- premium con un UPDATE directo del cliente -- y sin la función que hace
+-- ESO bien (con permisos elevados), nadie recibe nunca el premium prometido
+-- por invitación. Orden completo para reconstruir desde cero:
+--   1. migration-referidos.sql
+--   2. migration-fix-rls-referidos-y-otros.sql
+--   3. migration-fix-invitacion-premium.sql
+-- Mismo aviso de orden para codigos_promo/canjes_promo, documentado en la
+-- cabecera de migration-codigos-promo.sql (esa migración + migration-fix-
+-- criticos-agosto.sql + migration-fix-canjear-codigo-promo.sql, en ese
+-- orden) -- no se repite aquí porque esas dos tablas no están foldeadas en
+-- este schema.sql, viven solo en sus migraciones sueltas.
+--
+-- Lo que sigue describe el estado ya cerrado en producción:
 -- tenían RLS activado pero con políticas huérfanas -- de una versión
 -- anterior, probablemente de cuando se estaba depurando el feature -- que
 -- dejaban la tabla abierta a cualquiera pese a que las políticas correctas
