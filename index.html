@@ -5871,6 +5871,43 @@
   }
   .logout-btn:hover { border-color: var(--metal); color: var(--blanco); }
 
+  /* Avisos de entreno: un interruptor de verdad en vez de un botón de texto
+     que cambia -- se ve el estado de un vistazo y es el patrón que la gente
+     ya conoce de cualquier ajuste on/off, no hay que leer para saber qué toca. */
+  .push-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--metal);
+    letter-spacing: 0.5px;
+  }
+  .push-toggle-label { display: flex; align-items: center; gap: 10px; }
+  .push-toggle-switch { position: relative; width: 34px; height: 20px; flex-shrink: 0; }
+  .push-toggle-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+  .push-toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--humo);
+    border-radius: 999px;
+    transition: background 0.2s;
+    pointer-events: none;
+  }
+  .push-toggle-slider::before {
+    content: '';
+    position: absolute; top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    background: var(--blanco);
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .push-toggle-switch input:checked ~ .push-toggle-slider { background: var(--brasa); }
+  .push-toggle-switch input:checked ~ .push-toggle-slider::before { transform: translateX(14px); }
+  .push-toggle-switch input:disabled ~ .push-toggle-slider { opacity: 0.4; }
+  .push-toggle-switch input:focus-visible ~ .push-toggle-slider { outline: 2px solid var(--brasa); outline-offset: 2px; }
+
   .confetti-piece { position:fixed; z-index:9999; width:8px; height:8px; border-radius:2px; pointer-events:none; animation:confettiFall 1.5s ease-out forwards; }
   @keyframes confettiFall { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(100vh) rotate(720deg)} }
 
@@ -7378,7 +7415,7 @@
     <div style="width:36px;height:36px;border-radius:8px;background:#0a0a0a;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
     </div>
-    <p style="margin:0;font-size:12px;color:#ccc;line-height:1.5;font-family:'DM Mono',monospace">Activa los avisos y te recordamos cuando te toque entrenar.</p>
+    <p style="margin:0;font-size:12px;color:#ccc;line-height:1.5;font-family:'DM Mono',monospace">Activa los avisos: solo te escribimos los días que no hayas entrenado. Lo puedes apagar cuando quieras desde el menú.</p>
   </div>
   <button onclick="activarNotificaciones()" style="background:var(--brasa);border:none;color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Activar avisos</button>
 </div>
@@ -8003,12 +8040,19 @@
         <button class="logout-btn" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Gestionar suscripción
         </button>
-        <!-- Oculto hasta que actualizarBotonNotificaciones() decide si toca
-             "Activar" o "Desactivar" (o lo esconde del todo si el navegador
-             no soporta push o el usuario lo bloqueó desde su configuración). -->
-        <button class="logout-btn" id="btnToggleNotificaciones" onclick="activarNotificaciones()" style="display:none;border:none;border-radius:8px;padding:10px 14px;font-size:12px">
-          <span>⬡</span> Activar avisos
-        </button>
+        <!-- Oculto hasta que actualizarBotonNotificaciones() sepa el estado
+             real (activado/desactivado/no disponible). Si el navegador
+             bloqueó el permiso, se deja visible pero deshabilitado con una
+             pista -- desaparecer del todo sin explicar nada es más confuso
+             que mostrar por qué no se puede tocar. -->
+        <div class="push-toggle-row" id="pushToggleRow" style="display:none">
+          <span class="push-toggle-label"><span>⬡</span> Avisos de entreno</span>
+          <label class="push-toggle-switch">
+            <input type="checkbox" id="pushToggleInput" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día">
+            <span class="push-toggle-slider"></span>
+          </label>
+        </div>
+        <p id="pushToggleHint" style="display:none;margin:-2px 16px 4px;font-size:10.5px;color:var(--metal);line-height:1.4"></p>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
         </button>
@@ -23325,7 +23369,7 @@
         // 23505 = unique_violation en "endpoint" -- ya estaba suscrito con este
         // mismo navegador (p.ej. recargó la página tras activar), no es un fallo.
         if (error && error.code !== '23505') throw error;
-        showToast('Avisos activados. Te avisaremos cuando te toque entrenar.');
+        showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
         showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
@@ -23353,30 +23397,48 @@
       await actualizarBotonNotificaciones();
     };
 
-    // Decide qué toca mostrar en el botón de la barra lateral: "Activar avisos"
-    // si el navegador aún no tiene suscripción, "Desactivar avisos" si ya la
-    // tiene, o directamente ocultarlo si el navegador no soporta push o el
-    // usuario bloqueó el permiso desde su configuración (Notification.permission
-    // === 'denied' no se puede revertir por código, solo desde el navegador).
+    // El interruptor de la barra lateral llama aquí en cuanto cambia -- el
+    // checkbox ya refleja lo que el cliente quiso (marcado/desmarcado) antes
+    // de que esto se ejecute, así que basta con leer checkbox.checked.
+    window.onPushToggleChange = async function(checkbox) {
+      checkbox.disabled = true;
+      if (checkbox.checked) await activarNotificaciones();
+      else await desactivarNotificaciones();
+      checkbox.disabled = false;
+    };
+
+    // Decide qué mostrar en el interruptor de la barra lateral: marcado si el
+    // navegador ya tiene suscripción activa, desmarcado si no, o deshabilitado
+    // con una pista si el propio usuario bloqueó el permiso desde el
+    // navegador (Notification.permission === 'denied' no se puede revertir
+    // por código, solo desde ahí -- mejor explicarlo que esconder el
+    // interruptor sin más, que deja "¿y esto dónde se activa?" sin respuesta).
     window.actualizarBotonNotificaciones = async function() {
-      const btn = document.getElementById('btnToggleNotificaciones');
-      if (!btn) return;
-      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window) || Notification.permission === 'denied') {
-        btn.style.display = 'none';
+      const row = document.getElementById('pushToggleRow');
+      const input = document.getElementById('pushToggleInput');
+      const hint = document.getElementById('pushToggleHint');
+      if (!row || !input || !hint) return;
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        row.style.display = 'none';
+        hint.style.display = 'none';
         return;
       }
+      row.style.display = '';
+      if (Notification.permission === 'denied') {
+        input.checked = false;
+        input.disabled = true;
+        hint.textContent = 'Los bloqueaste desde el navegador. Actívalos desde los ajustes de notificaciones del sitio para volver a recibirlos aquí.';
+        hint.style.display = '';
+        return;
+      }
+      input.disabled = false;
       try {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
-        if (sub) {
-          btn.innerHTML = '<span>⬡</span> Desactivar avisos';
-          btn.onclick = desactivarNotificaciones;
-        } else {
-          btn.innerHTML = '<span>⬡</span> Activar avisos';
-          btn.onclick = activarNotificaciones;
-        }
-        btn.style.display = '';
-      } catch (e) { btn.style.display = 'none'; }
+        input.checked = !!sub;
+        hint.textContent = sub ? 'Te avisamos a media mañana los días que no hayas marcado ningún entreno.' : '';
+        hint.style.display = sub ? '' : 'none';
+      } catch (e) { row.style.display = 'none'; }
     };
 
     if ('serviceWorker' in navigator) {

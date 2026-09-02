@@ -700,10 +700,24 @@ async function handleCronRetencion(req, res) {
             const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
             if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
 
+            // Con nombre y variado, no el mismo aviso robótico cada día --
+            // mismo criterio que ya usan los mensajes de racha en index.html.
+            const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
+            const frasesPush = primerNombrePush ? [
+              `${primerNombrePush}, tu plan de hoy te está esperando.`,
+              `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
+              `Hoy toca, ${primerNombrePush}. Un paso más.`
+            ] : [
+              'Tu plan de hoy te está esperando.',
+              '¿Entrenas hoy? Tienes el plan listo.',
+              'Hoy toca. Un paso más.'
+            ];
+            const cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
+
             try {
               await webpush.sendNotification(
                 { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-                JSON.stringify({ title: 'K-ONE', body: '¿Entrenas hoy? Tu plan te está esperando.', url: '/' })
+                JSON.stringify({ title: 'K-ONE', body: cuerpoPush, url: '/' })
               );
               await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
               pushEnviados++;
