@@ -20835,6 +20835,12 @@
       <div class="jc-row">
         <div><div class="jc-label">${_esc(label)}</div><div class="jc-val" style="${color?'color:'+color:''}">${val ? _esc(String(val)) : '—'}</div></div>
       </div>`;
+    // Varios campos del cuestionario vienen del helper getRadio() del
+    // formulario, que devuelve el texto literal "No especificado" cuando el
+    // cliente no marcó nada -- hay que tratarlo como vacío, no como un valor real.
+    const _valido = (v) => !!v && v !== 'No especificado' && v !== 'No';
+    // Divisor de sección con el mismo estilo que ya usaba "Nota privada".
+    const seccion = (titulo) => `<div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--jv-line)"><div class="jc-label" style="margin-bottom:10px">${_esc(titulo)}</div></div>`;
 
     const estadoColor = c.enOferta ? 'var(--jv-warn)' : c.estado==='past_due' ? 'var(--jv-bad)' :
       ['active','trialing'].includes(c.estado) ? 'var(--jv-ok)' : 'var(--jv-dim)';
@@ -20919,9 +20925,19 @@
         ${row('Deporte', c.deporte)}
         ${row('Edad', c.edad ? c.edad + ' años' : '—')}
       </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        ${row('Sexo', _valido(c.sexo) ? c.sexo : null)}
+        ${row('Altura', c.altura ? c.altura + ' cm' : null)}
+        ${row('Nivel', _valido(c.nivel) ? c.nivel : null)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${row('Días de entreno', _valido(c.diasEntreno) ? c.diasEntreno : null)}
+        ${row('Dónde entrena', _valido(c.lugar) ? c.lugar : null)}
+      </div>
       <div style="display:grid;grid-template-columns:1fr;gap:10px">
         ${row('Renovación de dieta', { semanal: 'Semanal', mensual: 'Mensual', fija: 'Fija' }[c.rotacionMenu] || 'Mensual')}
       </div>
+      ${_valido(c.evento) ? row('Evento objetivo', c.evento + (c.eventoFecha ? ' · ' + c.eventoFecha : '')) : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Semana', c.semanaActual || 1)}
         ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? 'var(--jv-ok)' : null)}
@@ -20950,8 +20966,24 @@
         </div>
       </div>` : ''}
       ${c.lesion ? row('Lesión', c.lesionDetalle || 'Sí', '#FF9556') : ''}
+      ${_valido(c.enfermedad) ? row('Enfermedad diagnosticada', c.enfermedadOtra || c.enfermedad, '#FF9556') : ''}
       ${c.alergia && c.alergia !== 'No' ? row('Alergia', c.alergiaOtra || c.alergia) : ''}
       ${c.medicacion && c.medicacion !== 'No' ? row('Medicación', c.medicacion) : ''}
+      ${_valido(c.operacion) ? row('Operación reciente', c.operacion, '#FF9556') : ''}
+      ${(_valido(c.dieta) || _valido(c.comidas)) ? `
+      ${seccion('Nutrición')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${row('Tipo de dieta', _valido(c.dieta) ? c.dieta : null)}
+        ${row('Comidas al día', _valido(c.comidas) ? c.comidas : null)}
+      </div>` : ''}
+      ${_valido(c.noComida) ? row('Alimentos que evita', c.noComida) : ''}
+      ${(_valido(c.jornada) || _valido(c.estres) || _valido(c.sueno)) ? `
+      ${seccion('Estilo de vida')}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        ${row('Jornada', _valido(c.jornada) ? c.jornada : null)}
+        ${row('Estrés', _valido(c.estres) ? c.estres : null)}
+        ${row('Sueño', _valido(c.sueno) ? c.sueno : null)}
+      </div>` : ''}
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
         c.alerta==='red' ? 'var(--jv-bad)' : c.alerta==='orange' ? '#FF9556' : 'var(--jv-warn)') : ''}
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? 'var(--jv-ok)' : 'var(--jv-faint)')}
