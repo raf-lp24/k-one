@@ -90,6 +90,16 @@ as $$
   limit 1;
 $$;
 
+-- A diferencia de canjear_codigo_promo() (que solo debe llamar el backend),
+-- esta función SÍ la llama el frontend directamente al escribir un código de
+-- invitación en el registro (index.html, supa.rpc('buscar_referrer_por_codigo')),
+-- así que el grant a anon/authenticated es intencional, no un descuido. Hoy
+-- funciona solo porque Postgres concede EXECUTE a PUBLIC por defecto al crear
+-- la función -- esto lo deja explícito para que sobreviva si algún día se
+-- añade un "revoke execute on all functions from public" a nivel de proyecto
+-- (patrón que ya se aplicó a canjear_codigo_promo/crear_codigo_promo).
+grant execute on function public.buscar_referrer_por_codigo(text) to anon, authenticated;
+
 -- 6. TABLA referidos -----------------------------------------
 create table if not exists public.referidos (
   id            uuid primary key default gen_random_uuid(),

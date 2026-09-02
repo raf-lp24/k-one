@@ -39,6 +39,22 @@ function diasEntre(fechaA, fechaB) {
   return Math.round((new Date(fechaB) - new Date(fechaA)) / 86400000);
 }
 
+// Vercel corre las funciones en UTC, pero "hoy" para calcular semanas de
+// entreno tiene que ser el calendario de España (todos los clientes son de
+// España) -- si no, entre las 00:00 y la 01:00-02:00 hora local (según
+// horario de verano/invierno) el servidor todavía cree que es "ayer" y un
+// entreno recién marcado por el cliente a esa hora se descarta como "del
+// futuro" o cae en el día equivocado de la semana. Truco: reformatear la
+// hora actual en huso de Madrid y volver a parsear -- el objeto Date
+// resultante, leído con los getters normales (getDate/getDay/...), da el
+// calendario de Madrid sin importar en qué huso corra el proceso. Solo vale
+// para bucketing por fecha de calendario -- NUNCA usar para comparar contra
+// timestamps absolutos reales (created_at, current_period_end...), ahí sigue
+// haciendo falta el `ahora` de verdad.
+function ahoraMadrid() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+}
+
 function distribucion(arr, campo) {
   const mapa = {};
   arr.forEach(item => {
@@ -190,9 +206,10 @@ module.exports = async (req, res) => {
       // para no tener que mandar el historial completo de fechas solo por
       // esto -- historialEntrenos sí viaja además, pero ya acotado más abajo.
       const diasEntrenoSemana = (() => {
+        const hoyMadrid = ahoraMadrid();
         const historial = new Set(Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : []);
-        const diaISO = (ahora.getDay() + 6) % 7; // 0 = lunes
-        const lunes = new Date(ahora); lunes.setDate(ahora.getDate() - diaISO);
+        const diaISO = (hoyMadrid.getDay() + 6) % 7; // 0 = lunes
+        const lunes = new Date(hoyMadrid); lunes.setDate(hoyMadrid.getDate() - diaISO);
         const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         return Array.from({ length: 7 }, (_, i) => {
           const d = new Date(lunes); d.setDate(lunes.getDate() + i);
@@ -203,19 +220,24 @@ module.exports = async (req, res) => {
       // esta semana al final): para ver si el cliente va a más o a menos, no
       // solo si entrenó esta semana concreta. No cuenta días futuros dentro
       // de la semana en curso (si hoy es martes, no resta los 5 días que
-      // faltan de esta semana).
+      // faltan de esta semana). diasTranscurridosSemanaActual (1-7) viaja
+      // aparte para que el frontend pueda proyectar esa última semana
+      // parcial a equivalente-semana-completa antes de comparar tendencias.
+      let diasTranscurridosSemanaActual = 7;
       const entrenosUltimasSemanas = (() => {
+        const hoyMadrid = ahoraMadrid();
         const historial = new Set(Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : []);
         const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const diaISO = (ahora.getDay() + 6) % 7;
-        const lunesActual = new Date(ahora); lunesActual.setDate(ahora.getDate() - diaISO);
+        const diaISO = (hoyMadrid.getDay() + 6) % 7;
+        const lunesActual = new Date(hoyMadrid); lunesActual.setDate(hoyMadrid.getDate() - diaISO);
+        diasTranscurridosSemanaActual = diaISO + 1;
         const semanas = [];
         for (let s = 3; s >= 0; s--) {
           const lunes = new Date(lunesActual); lunes.setDate(lunesActual.getDate() - s * 7);
           let dias = 0;
           for (let i = 0; i < 7; i++) {
             const d = new Date(lunes); d.setDate(lunes.getDate() + i);
-            if (d > ahora) continue;
+            if (d > hoyMadrid) continue;
             if (historial.has(fmt(d))) dias++;
           }
           semanas.push(dias);
@@ -317,6 +339,7 @@ module.exports = async (req, res) => {
         entrenosTotal,
         diasEntrenoSemana,
         entrenosUltimasSemanas,
+        diasTranscurridosSemanaActual,
         // Progreso de peso y de fuerza para la ficha del cliente en Jarvis.
         // Acotados (no son ilimitados en origen, pero por defensa se recortan
         // aquí también) para no inflar la respuesta de 50 clientes con

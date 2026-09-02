@@ -759,6 +759,11 @@
   }
   .jv-select-opt:hover { background: var(--jv-glass-hi); color: var(--jv-text); }
   .jv-select-opt-active { color: var(--jv-text); background: rgba(255,95,46,.13); }
+  /* Foco visible: el botón y las opciones quitan el outline nativo para el
+     look de cristal, pero necesitan su propio indicador -- sin esto, quien
+     navega solo con teclado no ve dónde está el foco al llegar aquí. */
+  .jv-select-btn:focus-visible { outline: 2px solid var(--jv-accent); outline-offset: 2px; }
+  .jv-select-opt:focus-visible, .jv-select-opt:focus { outline: 2px solid var(--jv-accent); outline-offset: -2px; background: var(--jv-glass-hi); color: var(--jv-text); }
 
   .jv-date {
     background: var(--jv-glass); border: 1px solid var(--jv-line); border-radius: 999px;
@@ -20510,7 +20515,7 @@
             <div style="padding:16px 18px">
               <div style="display:flex;align-items:flex-start;gap:14px">
                 ${seleccionable
-                  ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'onchange="toggleSeleccionMensaje(\'' + String(m.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:12px;accent-color:var(--jv-accent);cursor:pointer">'
+                  ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'aria-label="Seleccionar mensaje de ' + _esc(m.nombre || m.email || '') + '" onchange="toggleSeleccionMensaje(\'' + String(m.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:12px;accent-color:var(--jv-accent);cursor:pointer">'
                   : '<span style="width:16px;flex-shrink:0"></span>'}
                 <div style="width:40px;height:40px;border-radius:10px;background:${pendiente ? 'linear-gradient(135deg,var(--jv-accent),var(--jv-accent-2))' : 'var(--jv-glass-hi)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">
                   ${pendiente ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--jv-text)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--jv-ok)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
@@ -20578,7 +20583,7 @@
           return `
           <div id="lead-row-${l.id}" style="background:var(--jv-glass);border:1px solid ${seleccionado ? 'var(--jv-accent)' : esReciente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .2s" onmouseenter="this.style.background='var(--jv-glass-hi)';this.style.transform='translateY(-1px)'" onmouseleave="this.style.background='var(--jv-glass)';this.style.transform='none'">
             ${seleccionable
-              ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'onchange="toggleSeleccionLead(\'' + String(l.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--jv-accent);cursor:pointer">'
+              ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'aria-label="Seleccionar lead ' + _esc(l.email || '') + '" onchange="toggleSeleccionLead(\'' + String(l.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--jv-accent);cursor:pointer">'
               : '<span style="width:16px;flex-shrink:0"></span>'}
             <div style="width:36px;height:36px;border-radius:10px;background:${esReciente ? 'linear-gradient(135deg,var(--jv-accent),var(--jv-accent-2))' : 'var(--jv-glass-hi)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${esReciente ? 'var(--jv-text)' : 'var(--jv-faint)'}" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -20855,15 +20860,16 @@
 
     // Días entrenados esta semana (Lun-Dom), calculado en el servidor
     // (admin-clientes.js) a partir de historialEntrenos -- aquí solo se pinta.
+    const _diasSemanaNombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const _diasSemanaHTML = (() => {
       const dias = c.diasEntrenoSemana || [false, false, false, false, false, false, false];
       const letras = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       const hoyIdx = (new Date().getDay() + 6) % 7;
       return dias.map((hecho, i) => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
-          <span style="font-size:10px;color:var(--jv-faint);font-weight:700">${letras[i]}</span>
-          <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${hecho ? 'linear-gradient(135deg,var(--jv-accent-2),var(--jv-accent))' : 'var(--jv-glass)'};border:1px solid ${hecho ? 'transparent' : (i === hoyIdx ? 'rgba(255,95,46,.5)' : 'var(--jv-line)')}">
-            ${hecho ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+          <span aria-hidden="true" style="font-size:10px;color:var(--jv-faint);font-weight:700">${letras[i]}</span>
+          <div role="img" aria-label="${_diasSemanaNombres[i]}: ${hecho ? 'entrenado' : 'sin entrenar'}" style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${hecho ? 'linear-gradient(135deg,var(--jv-accent-2),var(--jv-accent))' : 'var(--jv-glass)'};border:1px solid ${hecho ? 'transparent' : (i === hoyIdx ? 'rgba(255,95,46,.5)' : 'var(--jv-line)')}">
+            ${hecho ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
           </div>
         </div>`).join('');
     })();
@@ -20885,10 +20891,18 @@
           </div>
           <span style="font-size:9px;color:var(--jv-faint);font-weight:600;text-align:center">${etiquetas[i]}</span>
         </div>`).join('');
-      const antes = semanas[0] + semanas[1], despues = semanas[2] + semanas[3];
-      const tendencia = despues > antes
+      // La semana actual casi nunca está completa (normalmente se mira a
+      // media semana), así que compararla en bruto contra semanas ya
+      // cerradas sesga la tendencia hacia "Bajando" casi siempre. Se
+      // proyecta a equivalente-semana-completa antes de comparar, y un
+      // margen de ruido evita que una diferencia mínima cambie la etiqueta.
+      const diasTranscurridos = Math.min(7, Math.max(1, c.diasTranscurridosSemanaActual || 7));
+      const semana4Proyectada = semanas[3] * 7 / diasTranscurridos;
+      const antes = semanas[0] + semanas[1], despues = semanas[2] + semana4Proyectada;
+      const margenRuido = Math.max(1, antes * 0.15);
+      const tendencia = despues > antes + margenRuido
         ? { texto: 'Mejorando', color: 'var(--jv-ok)', flecha: '↑' }
-        : despues < antes
+        : despues < antes - margenRuido
         ? { texto: 'Bajando', color: 'var(--jv-bad)', flecha: '↓' }
         : { texto: 'Estable', color: 'var(--jv-dim)', flecha: '→' };
       return `
@@ -20905,6 +20919,11 @@
     // historialPeso (se registra en cada check-in semanal real, no un valor
     // suelto). El color depende del objetivo: perder grasa y bajar es verde,
     // ganar músculo y subir es verde; "sentirme mejor" no juzga dirección.
+    // El servidor manda como mucho las últimas 26 entradas (admin-clientes.js)
+    // para no viajar el historial completo -- para un cliente veterano eso ya
+    // NO es "desde el principio", así que la ficha tiene que dejarlo claro
+    // (fecha del primer registro mostrado) en vez de dar a entender que
+    // "ini" es el peso con el que empezó de verdad.
     const _progresoPeso = (() => {
       const hist = (c.historialPeso || []).filter(x => x && Number(x.peso) > 0)
         .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
@@ -20913,16 +20932,18 @@
       const delta = Math.round((fin - ini) * 10) / 10;
       const obj = c.objetivo || '';
       const buena = obj.includes('Perder') ? delta < 0 : obj.includes('músculo') ? delta > 0 : null;
-      return { ini, fin, delta, color: buena === true ? 'var(--jv-ok)' : buena === false ? 'var(--jv-warn)' : 'var(--jv-dim)' };
+      return { ini, fin, delta, desde: hist[0].fecha, truncado: (c.historialPeso || []).length >= 26, color: buena === true ? 'var(--jv-ok)' : buena === false ? 'var(--jv-warn)' : 'var(--jv-dim)' };
     })();
 
     // Ejercicios con progresión registrada: los 5 actualizados más
-    // recientemente, ordenados por fecha del último registro.
+    // recientemente, ordenados por fecha del último registro. Se exige al
+    // menos 2 puntos -- con 1 solo no hay progresión real que enseñar, y
+    // si se cuela ocupa un hueco de los 5 que sí tienen algo que contar.
     const _ejerciciosProgreso = Object.values(c.pesosEjercicios || {})
       .map(e => {
         const h = (e.historial || []).filter(x => x && Number(x.peso) > 0).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-        if (!h.length) return null;
-        return { nombre: e.nombre, ini: Number(h[0].peso), fin: Number(h[h.length - 1].peso), ultima: h[h.length - 1].fecha };
+        if (h.length < 2) return null;
+        return { nombre: e.nombre, ini: Number(h[0].peso), fin: Number(h[h.length - 1].peso), ultima: h[h.length - 1].fecha, truncado: (e.historial || []).length >= 8 };
       })
       .filter(Boolean)
       .sort((a, b) => new Date(b.ultima) - new Date(a.ultima))
@@ -20984,13 +21005,13 @@
       ${_progresoPeso ? `
       <div class="jc-row">
         <div>
-          <div class="jc-label">Progreso de peso</div>
+          <div class="jc-label">Progreso de peso${_progresoPeso.truncado ? ` <span style="font-weight:500;color:var(--jv-faint)">(desde ${_fmtFecha(_progresoPeso.desde)})</span>` : ''}</div>
           <div class="jc-val">${_progresoPeso.ini} kg → ${_progresoPeso.fin} kg <span style="color:${_progresoPeso.color};font-weight:800">(${_progresoPeso.delta > 0 ? '+' : ''}${_progresoPeso.delta} kg)</span></div>
         </div>
       </div>` : ''}
       ${_ejerciciosProgreso.length ? `
       <div>
-        <div class="jc-label" style="margin-bottom:8px">Ejercicios con progresión</div>
+        <div class="jc-label" style="margin-bottom:8px">Ejercicios con progresión ${_ejerciciosProgreso.some(e => e.truncado) ? '<span style="font-weight:500;color:var(--jv-faint)">(últimos registros)</span>' : ''}</div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${_ejerciciosProgreso.map(e => `
           <div style="display:flex;align-items:center;justify-content:space-between;background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:8px 12px">
@@ -21197,7 +21218,7 @@
       <div id="email-row-${gestionadoId}" style="background:var(--jv-glass);border:1px solid ${seleccionado ? 'var(--jv-accent)' : esGestionado ? 'rgba(61,220,151,0.22)' : 'var(--jv-line)'};border-radius:12px;overflow:hidden;transition:all .2s;opacity:${esGestionado ? '0.72' : '1'}">
         <div onclick="this.parentElement.querySelector('.email-body').classList.toggle('email-body-open');this.querySelector('.email-chevron').classList.toggle('email-chevron-open')" style="padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s;border-left:3px solid ${esGestionado ? 'var(--jv-ok)' : 'transparent'}" onmouseenter="this.style.background='var(--jv-glass-hi)'" onmouseleave="this.style.background='transparent'">
           ${seleccionable
-            ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'onclick="event.stopPropagation()" onchange="toggleSeleccionEmail(\'' + String(e.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--jv-accent);cursor:pointer">'
+            ? '<input type="checkbox" ' + (seleccionado ? 'checked ' : '') + 'aria-label="Seleccionar ' + _esc(_emailTipoLabel[e.tipo] || e.tipo) + ' a ' + _esc(e.destinatario || '') + '" onclick="event.stopPropagation()" onchange="toggleSeleccionEmail(\'' + String(e.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',this.checked)" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--jv-accent);cursor:pointer">'
             : '<span style="width:16px;flex-shrink:0"></span>'}
           <div style="width:36px;height:36px;border-radius:10px;background:${color}15;border:1px solid ${color}30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             ${icon}
@@ -22759,52 +22780,111 @@
   // oculto (display:none) como única fuente de verdad de su valor: todo el
   // código que ya hacía document.getElementById(id).value o escuchaba
   // "change" sigue funcionando sin tocar nada más.
+  // Auditoría de accesibilidad (2 sept 2026): la primera versión de esto
+  // ocultaba el <select> con display:none -- eso lo saca por completo del
+  // árbol de accesibilidad, así que para alguien con lector de pantalla o
+  // que navega solo con teclado dejó de existir un desplegable operable: el
+  // botón no decía que abría una lista, la lista no tenía ningún rol y no
+  // había forma de moverse por las opciones salvo con el ratón. Reescrito
+  // como un combobox ARIA real: aria-haspopup/aria-expanded en el botón,
+  // role="listbox"/"option"+aria-selected en la lista, flechas arriba/abajo
+  // + Home/End + Enter/Escape, y foco visible.
+  let _jvSelectSeq = 0;
   function _mejorarSelects(raiz) {
     (raiz || document).querySelectorAll('select.jv-select:not([data-mejorado])').forEach(sel => {
       sel.setAttribute('data-mejorado', '1');
+      const idBase = 'jv-select-' + (++_jvSelectSeq);
       const wrap = document.createElement('span');
       wrap.className = 'jv-select-wrap';
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'jv-select-btn';
+      btn.id = idBase + '-btn';
+      btn.setAttribute('role', 'combobox');
+      btn.setAttribute('aria-haspopup', 'listbox');
+      btn.setAttribute('aria-expanded', 'false');
       const list = document.createElement('div');
       list.className = 'jv-select-list';
+      list.id = idBase + '-list';
+      list.setAttribute('role', 'listbox');
+      list.tabIndex = -1;
       list.style.display = 'none';
+      btn.setAttribute('aria-controls', list.id);
       const chevron = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 
+      let opts = [];
       const pintarBoton = () => {
         const opt = sel.options[sel.selectedIndex];
         btn.innerHTML = '<span>' + (opt ? _esc(opt.textContent) : '') + '</span>' + chevron;
       };
-      const cerrar = () => { list.style.display = 'none'; wrap.classList.remove('jv-select-wrap-open'); };
+      const cerrar = (devolverFoco) => {
+        list.style.display = 'none';
+        wrap.classList.remove('jv-select-wrap-open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.removeAttribute('aria-activedescendant');
+        if (devolverFoco) btn.focus();
+      };
+      const enfocarOpcion = (idx) => {
+        opts.forEach(o => o.tabIndex = -1);
+        const el = opts[idx];
+        if (!el) return;
+        el.tabIndex = 0;
+        el.focus();
+        btn.setAttribute('aria-activedescendant', el.id);
+      };
       const abrir = () => {
         document.querySelectorAll('.jv-select-wrap-open').forEach(w => {
+          if (w === wrap) return;
           w.classList.remove('jv-select-wrap-open');
           const l = w.querySelector('.jv-select-list'); if (l) l.style.display = 'none';
+          const b = w.querySelector('.jv-select-btn'); if (b) b.setAttribute('aria-expanded', 'false');
         });
         list.innerHTML = [...sel.options].map((o, i) =>
-          '<div class="jv-select-opt' + (i === sel.selectedIndex ? ' jv-select-opt-active' : '') + '" data-i="' + i + '">' + _esc(o.textContent) + '</div>'
+          '<div class="jv-select-opt' + (i === sel.selectedIndex ? ' jv-select-opt-active' : '') + '" id="' + idBase + '-opt-' + i + '" role="option" aria-selected="' + (i === sel.selectedIndex) + '" tabindex="-1" data-i="' + i + '">' + _esc(o.textContent) + '</div>'
         ).join('');
+        opts = [...list.querySelectorAll('.jv-select-opt')];
         list.style.display = 'block';
         wrap.classList.add('jv-select-wrap-open');
+        btn.setAttribute('aria-expanded', 'true');
+        enfocarOpcion(sel.selectedIndex >= 0 ? sel.selectedIndex : 0);
+      };
+      const elegir = (idx) => {
+        sel.selectedIndex = idx;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        pintarBoton();
+        cerrar(true);
       };
 
       pintarBoton();
       sel._jvSync = pintarBoton;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (list.style.display === 'none') abrir(); else cerrar();
+        if (list.style.display === 'none') abrir(); else cerrar(false);
+      });
+      btn.addEventListener('keydown', (e) => {
+        if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && list.style.display === 'none') {
+          e.preventDefault();
+          abrir();
+        }
       });
       list.addEventListener('click', (e) => {
         const opt = e.target.closest('.jv-select-opt');
-        if (!opt) return;
-        sel.selectedIndex = Number(opt.dataset.i);
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        pintarBoton();
-        cerrar();
+        if (opt) elegir(Number(opt.dataset.i));
+      });
+      list.addEventListener('keydown', (e) => {
+        const actual = opts.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); enfocarOpcion(Math.min(opts.length - 1, actual < 0 ? 0 : actual + 1)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); enfocarOpcion(Math.max(0, actual < 0 ? 0 : actual - 1)); }
+        else if (e.key === 'Home') { e.preventDefault(); enfocarOpcion(0); }
+        else if (e.key === 'End') { e.preventDefault(); enfocarOpcion(opts.length - 1); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (actual >= 0) elegir(actual); }
+        else if (e.key === 'Escape') { e.preventDefault(); cerrar(true); }
+        else if (e.key === 'Tab') { cerrar(false); }
       });
 
       sel.style.display = 'none';
+      sel.setAttribute('aria-hidden', 'true');
+      sel.tabIndex = -1;
       sel.parentNode.insertBefore(wrap, sel);
       wrap.appendChild(sel);
       wrap.appendChild(btn);
@@ -22815,6 +22895,7 @@
     document.querySelectorAll('.jv-select-wrap-open').forEach(w => {
       w.classList.remove('jv-select-wrap-open');
       const l = w.querySelector('.jv-select-list'); if (l) l.style.display = 'none';
+      const b = w.querySelector('.jv-select-btn'); if (b) b.setAttribute('aria-expanded', 'false');
     });
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.jv-select-list').forEach(l => l.style.display = 'none'); });

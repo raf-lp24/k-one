@@ -134,6 +134,11 @@ create policy "profiles_insert_own" on public.profiles
 -- admin_clientes; sin índice cada consulta por email hace seq scan.
 create index if not exists profiles_email_idx on public.profiles (email);
 
+-- Usado por api/admin-clientes.js para ordenar/paginar la lista de clientes
+-- de Jarvis (order by created_at) -- sin índice, cada página hace seq scan
+-- y un sort completo de toda la tabla.
+create index if not exists profiles_created_at_idx on public.profiles (created_at);
+
 -- UNIQUE solo si no hay ya duplicados -- si los hay (dato histórico), no
 -- rompe la ejecución de este archivo: avisa con RAISE NOTICE y se queda sin
 -- aplicar hasta que se resuelvan a mano.
@@ -212,6 +217,32 @@ create table if not exists public.subscriptions (
 -- la base solo con este archivo los dejaba sin efecto en silencio.
 alter table public.subscriptions add column if not exists checkout_lock_until timestamptz;
 alter table public.subscriptions add column if not exists sub_action_lock_until timestamptz;
+
+-- api/stripe-webhook.js busca la suscripción por stripe_customer_id en cada
+-- evento (varios puntos del archivo) -- sin índice, seq scan en cada webhook.
+-- UNIQUE solo si no hay ya duplicados (mismo patrón que profiles.email más
+-- arriba): dos filas con el mismo Customer de Stripe romperían en silencio
+-- cualquier .maybeSingle() que busque por esta columna.
+create index if not exists subscriptions_stripe_customer_id_idx
+  on public.subscriptions (stripe_customer_id);
+
+do $$
+declare
+  v_duplicados int;
+begin
+  select count(*) into v_duplicados from (
+    select stripe_customer_id from public.subscriptions
+    where stripe_customer_id is not null group by stripe_customer_id having count(*) > 1
+  ) t;
+  if v_duplicados = 0 then
+    begin
+      alter table public.subscriptions add constraint subscriptions_stripe_customer_id_unique unique (stripe_customer_id);
+    exception when duplicate_object then null;
+    end;
+  else
+    raise notice 'subscriptions.stripe_customer_id: % duplicados -- no se añadió UNIQUE.', v_duplicados;
+  end if;
+end $$;
 
 alter table public.subscriptions enable row level security;
 

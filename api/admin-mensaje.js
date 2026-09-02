@@ -17,38 +17,50 @@ module.exports = async (req, res) => {
     const { id, accion, userId } = req.body || {};
     if (!accion) return res.status(400).json({ error: 'accion requerida' });
 
+    // supabase-js no lanza en errores de query (devuelve {data, error}), y un
+    // eq()/in() que no coincide con ninguna fila también devuelve {error:null}
+    // -- sin comprobar el número de filas afectadas (.select('id') + longitud),
+    // un id/ids ya borrado o mal escrito devolvía igualmente {ok:true} y el
+    // admin creía haber actualizado o borrado algo que en realidad no existía.
     if (accion === 'gestionado') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
-      const { error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id);
+      const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id).select('id');
       if (e) { console.error('[admin-mensaje] gestionado error:', e.message); return res.status(500).json({ error: 'Error actualizando mensaje' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ese mensaje' });
     } else if (accion === 'eliminar') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
-      const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id);
+      const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id).select('id');
       if (e) { console.error('[admin-mensaje] eliminar error:', e.message); return res.status(500).json({ error: 'Error eliminando mensaje' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ese mensaje' });
     } else if (accion === 'mensajes_masivo_gestionado') {
       const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
       if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
-      const { error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).in('id', ids);
+      const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).in('id', ids).select('id');
       if (e) { console.error('[admin-mensaje] mensajes_masivo_gestionado error:', e.message); return res.status(500).json({ error: 'Error actualizando mensajes' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ninguno de esos mensajes' });
     } else if (accion === 'eliminar_mensajes_masivo') {
       const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
       if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
-      const { error: e } = await supabaseAdmin.from('mensajes_cliente').delete().in('id', ids);
+      const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').delete().in('id', ids).select('id');
       if (e) { console.error('[admin-mensaje] eliminar_mensajes_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando mensajes' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ninguno de esos mensajes' });
     } else if (accion === 'eliminar_leads_masivo') {
       const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
       if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
-      const { error: e } = await supabaseAdmin.from('leads').delete().in('id', ids);
+      const { data, error: e } = await supabaseAdmin.from('leads').delete().in('id', ids).select('id');
       if (e) { console.error('[admin-mensaje] eliminar_leads_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando leads' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ninguno de esos leads' });
     } else if (accion === 'eliminar_email') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
-      const { error: e } = await supabaseAdmin.from('email_log').delete().eq('id', id);
+      const { data, error: e } = await supabaseAdmin.from('email_log').delete().eq('id', id).select('id');
       if (e) { console.error('[admin-mensaje] eliminar_email error:', e.message); return res.status(500).json({ error: 'Error eliminando email' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ese email' });
     } else if (accion === 'eliminar_emails_masivo') {
       const ids = Array.isArray(req.body?.ids) ? req.body.ids.slice(0, 500) : [];
       if (!ids.length) return res.status(400).json({ error: 'ids requerido' });
-      const { error: e } = await supabaseAdmin.from('email_log').delete().in('id', ids);
+      const { data, error: e } = await supabaseAdmin.from('email_log').delete().in('id', ids).select('id');
       if (e) { console.error('[admin-mensaje] eliminar_emails_masivo error:', e.message); return res.status(500).json({ error: 'Error eliminando emails' }); }
+      if (!data || !data.length) return res.status(404).json({ error: 'No existe ninguno de esos emails' });
     } else if (accion === 'email_gestionado') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { data: row } = await supabaseAdmin.from('email_log').select('datos').eq('id', id).single();

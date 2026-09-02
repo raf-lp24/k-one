@@ -15,6 +15,15 @@
 -- IMPORTANTE: el "mes gratis" se aplica como PERIODO DE PRUEBA de Stripe
 -- (30 días). Así el cliente recibe exactamente un mes, sea su plan mensual,
 -- trimestral o anual. Un cupón del 100% le habría regalado el año entero.
+--
+-- IMPORTANTE 2: este fichero por sí solo deja canjear_codigo_promo() y
+-- crear_codigo_promo() ejecutables por PUBLIC (el "revoke ... from anon,
+-- authenticated" de más abajo NO quita el EXECUTE que Postgres concede a
+-- PUBLIC al crear la función). Este fichero SIEMPRE debe ir seguido de:
+--   1. migration-fix-criticos-agosto.sql   (revoke real de PUBLIC en crear_codigo_promo)
+--   2. migration-fix-canjear-codigo-promo.sql (mismo fix, para canjear_codigo_promo)
+-- Mismo patrón de riesgo que ya costó una ronda de auditoría con
+-- migration-referidos.sql -- no reconstruir la base solo con este archivo.
 -- ============================================================
 
 -- 1. TABLA DE CÓDIGOS ----------------------------------------
