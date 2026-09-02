@@ -55,20 +55,26 @@ begin
 exception when duplicate_object then null;
 end $$;
 
+-- OJO: "alter table add constraint UNIQUE" con nombre repetido lanza 42P07
+-- (duplicate_table, por el índice que crea por debajo), NO 42710
+-- (duplicate_object) -- distinto del resto de constraints de este archivo
+-- (todo CHECK, que sí lanza duplicate_object). Comprobar contra pg_constraint
+-- primero evita depender de adivinar el SQLSTATE exacto.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select email from public.leads group by email having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'leads_email_unique' and conrelid = 'public.leads'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select email from public.leads group by email having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.leads add constraint leads_email_unique unique (email);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'leads.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    else
+      raise notice 'leads.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    end if;
   end if;
 end $$;
 

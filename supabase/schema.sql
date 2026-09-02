@@ -177,20 +177,28 @@ create index if not exists profiles_created_at_idx on public.profiles (created_a
 -- UNIQUE solo si no hay ya duplicados -- si los hay (dato histórico), no
 -- rompe la ejecución de este archivo: avisa con RAISE NOTICE y se queda sin
 -- aplicar hasta que se resuelvan a mano.
+-- CORRECCIÓN (auditoría 2 sept 2026): "add constraint ... unique" con nombre
+-- repetido lanza 42P07 (duplicate_table, por el índice que crea por debajo),
+-- NO 42710 (duplicate_object) -- el exception handler de abajo nunca lo
+-- atrapaba de verdad. Como el SQL Editor de Supabase ejecuta el script
+-- pegado como una única transacción, un error sin atrapar aquí podía
+-- deshacer TODO lo demás del archivo, no solo este bloque. Comprobar contra
+-- pg_constraint primero evita depender de adivinar el SQLSTATE exacto.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select email from public.profiles where email is not null group by email having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'profiles_email_unique' and conrelid = 'public.profiles'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select email from public.profiles where email is not null group by email having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.profiles add constraint profiles_email_unique unique (email);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    else
+      raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    end if;
   end if;
 end $$;
 
@@ -261,21 +269,25 @@ alter table public.subscriptions add column if not exists sub_action_lock_until 
 create index if not exists subscriptions_stripe_customer_id_idx
   on public.subscriptions (stripe_customer_id);
 
+-- CORRECCIÓN (auditoría 2 sept 2026): mismo motivo que profiles_email_unique
+-- más arriba -- "add constraint UNIQUE" repetido lanza 42P07, no 42710, así
+-- que el exception handler original nunca lo atrapaba de verdad.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select stripe_customer_id from public.subscriptions
-    where stripe_customer_id is not null group by stripe_customer_id having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'subscriptions_stripe_customer_id_unique' and conrelid = 'public.subscriptions'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select stripe_customer_id from public.subscriptions
+      where stripe_customer_id is not null group by stripe_customer_id having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.subscriptions add constraint subscriptions_stripe_customer_id_unique unique (stripe_customer_id);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'subscriptions.stripe_customer_id: % duplicados -- no se añadió UNIQUE.', v_duplicados;
+    else
+      raise notice 'subscriptions.stripe_customer_id: % duplicados -- no se añadió UNIQUE.', v_duplicados;
+    end if;
   end if;
 end $$;
 
@@ -466,20 +478,23 @@ begin
     add constraint leads_email_longitud check (char_length(email) <= 254);
 exception when duplicate_object then null;
 end $$;
+-- CORRECCIÓN (auditoría 2 sept 2026): mismo motivo que profiles_email_unique
+-- más arriba -- "add constraint UNIQUE" repetido lanza 42P07, no 42710.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select email from public.leads group by email having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'leads_email_unique' and conrelid = 'public.leads'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select email from public.leads group by email having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.leads add constraint leads_email_unique unique (email);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'leads.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    else
+      raise notice 'leads.email: % emails duplicados -- no se añadió UNIQUE.', v_duplicados;
+    end if;
   end if;
 end $$;
 
