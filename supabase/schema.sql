@@ -538,6 +538,37 @@ create policy "mensajes_respuestas_insert_own" on public.mensajes_respuestas
   );
 
 -- ============================================================
+-- 8b-3. TABLA: push_subscriptions (recordatorio diario de entreno)
+-- Guarda la suscripción push del navegador (endpoint + claves de cifrado)
+-- de cada cliente que activa notificaciones. El envío lo hace el cron
+-- diario (api/notify.js, mismo cron que ya manda los emails de retención),
+-- con el service role, así que no hace falta política de select: nadie
+-- del lado cliente necesita leer estos endpoints, solo darlos de alta/baja.
+-- Ver supabase/migration-push-notificaciones.sql (2 sept 2026).
+-- ============================================================
+create table if not exists public.push_subscriptions (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  endpoint   text not null unique,
+  p256dh     text not null,
+  auth_key   text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists push_subscriptions_user_id_idx
+  on public.push_subscriptions (user_id);
+
+alter table public.push_subscriptions enable row level security;
+
+drop policy if exists "push_subscriptions_insert_own" on public.push_subscriptions;
+create policy "push_subscriptions_insert_own" on public.push_subscriptions
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "push_subscriptions_delete_own" on public.push_subscriptions;
+create policy "push_subscriptions_delete_own" on public.push_subscriptions
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================
 -- 8c. TABLAS: invitaciones_premium y referidos
 -- CORRECCIÓN (auditoría 29 ago 2026): esta nota decía que "tampoco viven en
 -- este repositorio", pero SÍ viven -- las crea supabase/migration-

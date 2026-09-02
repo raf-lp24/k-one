@@ -7371,6 +7371,18 @@
   </div>
 </div>
 
+<!-- BANNER ACTIVAR NOTIFICACIONES (recordatorio diario de entreno) -->
+<div id="pushInstallBanner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9996;background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:14px 40px 14px 16px;max-width:360px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:pwaBannerFadeIn 0.4s ease">
+  <button onclick="cerrarPushBanner()" style="position:absolute;top:0;right:0;background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:13px;line-height:1" aria-label="Cerrar">&times;</button>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+    <div style="width:36px;height:36px;border-radius:8px;background:#0a0a0a;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    </div>
+    <p style="margin:0;font-size:12px;color:#ccc;line-height:1.5;font-family:'DM Mono',monospace">Activa los avisos y te recordamos cuando te toque entrenar.</p>
+  </div>
+  <button onclick="activarNotificaciones()" style="background:var(--brasa);border:none;color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Activar avisos</button>
+</div>
+
 <!-- ==================== LEGAL ==================== -->
 <div class="screen" id="legal">
   <div class="legal-wrap">
@@ -8743,6 +8755,11 @@
   // id del usuario autenticado en Supabase; null si no hay sesión. Se usa para
   // sincronizar getUserData/saveUserData con la tabla profiles.
   let _supaUserId = null;
+
+  // Clave pública VAPID para las notificaciones push (recordatorio diario de
+  // entreno). Es pública a propósito -- el navegador la necesita para crear
+  // la suscripción push -- la privada solo vive en el backend (Vercel env).
+  const VAPID_PUBLIC_KEY = 'BNPZsFblhmjuPKFKRXvCGCZtPeUkXBpQhUmSV7xXTimtvmf8j4MbhF72JWa70VSAhIlKvDaBypdlzDzNo5qxh7E';
 
   // ===== STATE =====
   let currentBlock = 0;
@@ -14849,6 +14866,7 @@
     // Progreso: fotos mensuales e hitos
     renderProgresoSection();
     cargarReferidos();
+    if (typeof mostrarBannerNotificaciones === 'function') mostrarBannerNotificaciones();
 
     // Semana / Plan del mes (4 semanas)
     renderWeekTabs(progreso.semana);
@@ -23241,6 +23259,70 @@
       const b = document.getElementById('pwaInstallBanner');
       if (b) b.style.display = 'none';
       localStorage.setItem('kone_pwa_dismissed', '1');
+    };
+
+    // ===== NOTIFICACIONES PUSH: recordatorio diario de entreno =====
+    // Llamado desde buildDashboard() (después de cargarReferidos()) -- así se
+    // sabe seguro que hay sesión (_supaUserId) y que el dashboard ya existe.
+    window.mostrarBannerNotificaciones = function() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+      if (Notification.permission !== 'default') return; // ya concedido o denegado antes
+      if (localStorage.getItem('kone_push_dismissed')) return;
+      if (!_supaUserId) return;
+      const intentar = () => {
+        // No amontonar con el banner de instalar PWA, que ocupa el mismo hueco.
+        const pwaBanner = document.getElementById('pwaInstallBanner');
+        if (pwaBanner && pwaBanner.style.display !== 'none') { setTimeout(intentar, 6000); return; }
+        const banner = document.getElementById('pushInstallBanner');
+        if (banner) banner.style.display = '';
+      };
+      setTimeout(intentar, 4000);
+    };
+
+    window.cerrarPushBanner = function() {
+      const b = document.getElementById('pushInstallBanner');
+      if (b) b.style.display = 'none';
+      localStorage.setItem('kone_push_dismissed', '1');
+    };
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+      return outputArray;
+    }
+
+    // Pide permiso, se suscribe al push del navegador y guarda la suscripción
+    // en Supabase (insert directo protegido por RLS -- push_subscriptions_
+    // insert_own -- sin gastar ninguna función serverless nueva). El envío
+    // real lo hace el cron diario de api/notify.js con el service role.
+    window.activarNotificaciones = async function() {
+      cerrarPushBanner();
+      try {
+        const permiso = await Notification.requestPermission();
+        if (permiso !== 'granted') { showToast('No hemos podido activar los avisos.'); return; }
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+        const json = sub.toJSON();
+        const { error } = await supa.from('push_subscriptions').insert({
+          user_id: _supaUserId,
+          endpoint: json.endpoint,
+          p256dh: json.keys.p256dh,
+          auth_key: json.keys.auth
+        });
+        // 23505 = unique_violation en "endpoint" -- ya estaba suscrito con este
+        // mismo navegador (p.ej. recargó la página tras activar), no es un fallo.
+        if (error && error.code !== '23505') throw error;
+        showToast('Avisos activados. Te avisaremos cuando te toque entrenar.');
+      } catch (e) {
+        console.warn('[push] Error activando notificaciones:', e.message);
+        showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
+      }
     };
 
     if ('serviceWorker' in navigator) {

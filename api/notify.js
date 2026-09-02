@@ -6,8 +6,19 @@
 
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
+
+// Vercel corre esta función en UTC, pero "hoy" para decidir si alguien ya
+// entrenó tiene que ser el calendario de España (mismo truco que
+// ahoraMadrid() en admin-clientes.js): relabela la hora actual al huso de
+// Madrid antes de leer año/mes/día, así entre las 00:00 y la 1-2h locales
+// (según horario) no se cree que "hoy" sigue siendo "ayer" en UTC.
+function _hoyMadridISO() {
+  const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 // OJO con `reply_to`: 14 de las llamadas de este fichero lo pasaban y la función
 // no lo recogía, así que se descartaba en silencio. Resultado: las respuestas de
@@ -201,6 +212,12 @@ async function handleCronRetencion(req, res) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
+  // Nota: esto también deja sin correr el bloque de push de más abajo, no
+  // solo los emails -- ambos comparten este único cron diario. Hoy no es un
+  // problema real (RESEND_API_KEY está configurada en producción), pero si
+  // algún día se quita esa key sin querer, el push diario se apagaría con
+  // ella aunque las claves VAPID sigan puestas. Si eso llega a pasar, mover
+  // el bloque de push antes de este `if` para desacoplarlos.
   if (!apiKey) return res.status(200).json({ ok: true, skipped: true });
 
   try {
@@ -652,6 +669,59 @@ async function handleCronRetencion(req, res) {
       }
     } catch (digestErr) { console.error('[notify] digest admin error:', digestErr.message); }
 
+    // RECORDATORIO PUSH DIARIO: "¿entrenas hoy?" a quien tenga la suscripción
+    // activada y todavía no haya marcado ningún entreno hoy. No depende de
+    // RESEND_API_KEY -- si no hay claves VAPID configuradas, simplemente no
+    // se manda nada (igual que el resto del cron cuando falta una env var).
+    let pushEnviados = 0;
+    const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+    const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+    if (vapidPublic && vapidPrivate) {
+      try {
+        webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
+        const { data: subsPush } = await supa.from('push_subscriptions').select('id, user_id, endpoint, p256dh, auth_key');
+        if (subsPush && subsPush.length) {
+          const hoyMadrid = _hoyMadridISO();
+          const perfilPorId = {};
+          (perfiles || []).forEach(p => { perfilPorId[p.id] = p; });
+
+          const hoyStr = ahora.toISOString().slice(0, 10);
+          const { data: yaPush } = await supa.from('email_log')
+            .select('destinatario').eq('tipo', 'push_recordatorio_diario').gte('created_at', hoyStr + 'T00:00:00');
+          const yaAvisadoHoy = new Set((yaPush || []).map(e => e.destinatario));
+
+          for (const sub of subsPush) {
+            const p = perfilPorId[sub.user_id];
+            if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
+            const ud = p.userdata || {};
+            if (!ud.onboardingCompletado) continue;
+            const s = subByUser[p.id];
+            if (!s || !['active', 'trialing'].includes(s.status)) continue;
+            const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
+            if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
+
+            try {
+              await webpush.sendNotification(
+                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+                JSON.stringify({ title: 'K-ONE', body: '¿Entrenas hoy? Tu plan te está esperando.', url: '/' })
+              );
+              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
+              pushEnviados++;
+            } catch (pushErr) {
+              // 404/410 = el navegador anuló la suscripción (desinstaló, borró
+              // datos del sitio...) -- limpiarla para no reintentar cada día
+              // contra un endpoint que ya no existe.
+              if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
+                await supa.from('push_subscriptions').delete().eq('id', sub.id);
+              } else {
+                console.warn('[notify-cron] push error:', pushErr.message);
+              }
+            }
+          }
+        }
+      } catch (pushBlockErr) { console.error('[notify-cron] push diario error:', pushBlockErr.message); }
+    }
+
     // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
     let backupOk = false;
     try {
@@ -679,8 +749,8 @@ async function handleCronRetencion(req, res) {
       console.error('[notify-cron] backup error:', bErr.message);
     }
 
-    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosResumen, backupOk });
+    console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosResumen, pushEnviados, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     capturarError(err, { fn: 'notify-cron' });
