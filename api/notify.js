@@ -12,11 +12,14 @@ const APP_URL = 'https://k-one.fit';
 
 // Vercel corre esta función en UTC, pero "hoy" para decidir si alguien ya
 // entrenó tiene que ser el calendario de España (mismo truco que
-// ahoraMadrid() en admin-clientes.js): relabela la hora actual al huso de
-// Madrid antes de leer año/mes/día, así entre las 00:00 y la 1-2h locales
-// (según horario) no se cree que "hoy" sigue siendo "ayer" en UTC.
-function _hoyMadridISO() {
-  const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+// ahoraMadrid() en admin-clientes.js): relabela la hora dada (o la actual)
+// al huso de Madrid antes de leer año/mes/día, así entre las 00:00 y la
+// 1-2h locales (según horario) no se cree que "hoy" sigue siendo "ayer" en
+// UTC. Acepta una fecha opcional para poder clasificar timestamps pasados
+// (p.ej. el created_at de una fila) con el mismo criterio, no solo "ahora".
+function _hoyMadridISO(fecha) {
+  const base = fecha ? new Date(fecha) : new Date();
+  const d = new Date(base.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
@@ -55,6 +58,7 @@ async function enviarPushAAdmins({ title, body, url }) {
           await supaAdmin.from('push_subscriptions').delete().eq('id', sub.id);
         } else {
           console.warn('[notify] push a admin error:', pushErr.message);
+          capturarError(pushErr, { fn: 'notify-push-admin', endpoint: sub.endpoint });
         }
       }
     }
@@ -726,10 +730,19 @@ async function handleCronRetencion(req, res) {
           const perfilPorId = {};
           (perfiles || []).forEach(p => { perfilPorId[p.id] = p; });
 
-          const hoyStr = ahora.toISOString().slice(0, 10);
+          // Margen de sobra en UTC (las últimas 30h cubren cualquier desfase
+          // entre huso UTC y Madrid) y luego se filtra fino por calendario de
+          // Madrid en JS -- así el dedupe usa el MISMO criterio de "hoy" que
+          // el check de "ya entrenó" de un poco más abajo, en vez de mezclar
+          // un límite en UTC con una comprobación en huso de Madrid.
           const { data: yaPush } = await supa.from('email_log')
-            .select('destinatario').eq('tipo', 'push_recordatorio_diario').gte('created_at', hoyStr + 'T00:00:00');
-          const yaAvisadoHoy = new Set((yaPush || []).map(e => e.destinatario));
+            .select('destinatario, created_at').eq('tipo', 'push_recordatorio_diario')
+            .gte('created_at', new Date(ahora.getTime() - 30 * 3600000).toISOString());
+          const yaAvisadoHoy = new Set(
+            (yaPush || [])
+              .filter(e => _hoyMadridISO(e.created_at) === hoyMadrid)
+              .map(e => e.destinatario)
+          );
 
           for (const sub of subsPush) {
             const p = perfilPorId[sub.user_id];
@@ -761,15 +774,25 @@ async function handleCronRetencion(req, res) {
                 JSON.stringify({ title: 'K-ONE', body: cuerpoPush, url: '/' })
               );
               await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
+              // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
+              // portátil) recibía el push una vez POR DISPOSITIVO en la misma
+              // pasada del cron -- yaAvisadoHoy solo se rellenaba una vez al
+              // principio, antes del bucle, así que la segunda vuelta para el
+              // mismo email todavía no lo veía como "ya avisado".
+              yaAvisadoHoy.add(p.email);
               pushEnviados++;
             } catch (pushErr) {
               // 404/410 = el navegador anuló la suscripción (desinstaló, borró
               // datos del sitio...) -- limpiarla para no reintentar cada día
-              // contra un endpoint que ya no existe.
+              // contra un endpoint que ya no existe. Cualquier otro código (400
+              // por claves corruptas, 413...) se manda a Sentry -- si no, una
+              // suscripción rota reintenta en silencio cada día para siempre,
+              // sin que nadie se entere salvo mirando logs de Vercel a mano.
               if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
                 await supa.from('push_subscriptions').delete().eq('id', sub.id);
               } else {
                 console.warn('[notify-cron] push error:', pushErr.message);
+                capturarError(pushErr, { fn: 'notify-cron-push', endpoint: sub.endpoint });
               }
             }
           }

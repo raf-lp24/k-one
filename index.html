@@ -17100,7 +17100,11 @@
         const respuestas = [...(hilo.mensajes_respuestas || [])].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         const burbujas = [
           `<div class="conv-msg conv-msg-cliente"><div class="conv-msg-autor">Tú</div>${_escConv(hilo.mensaje)}<div class="conv-msg-hora">${_fmtFechaHora(hilo.created_at)}</div></div>`,
-          ...respuestas.map(r => `<div class="conv-msg conv-msg-${r.autor}"><div class="conv-msg-autor">${r.autor === 'admin' ? 'K-ONE' : 'Tú'}</div>${_escConv(r.texto)}<div class="conv-msg-hora">${_fmtFechaHora(r.created_at)}</div></div>`)
+          // Whitelist explícito de la clase (no interpolar r.autor tal cual)
+          // -- aunque la política de insert ya obliga autor='cliente' del
+          // lado servidor, esto es la vista del propio cliente: no hay
+          // motivo para confiar el valor crudo dentro de un atributo HTML.
+          ...respuestas.map(r => `<div class="conv-msg ${r.autor === 'admin' ? 'conv-msg-admin' : 'conv-msg-cliente'}"><div class="conv-msg-autor">${r.autor === 'admin' ? 'K-ONE' : 'Tú'}</div>${_escConv(r.texto)}<div class="conv-msg-hora">${_fmtFechaHora(r.created_at)}</div></div>`)
         ].join('');
         return `
         <div class="conv-hilo">
@@ -20735,6 +20739,11 @@
           const motivoIcon = motivoIcons[m.asunto] || '💬';
           const seleccionable = m.id != null;
           const seleccionado = seleccionable && _mensajesSeleccionados.has(String(m.id));
+          // Mismo escapado que ya usa el checkbox de más abajo -- m.id es un
+          // uuid de Supabase, así que hoy no hay ningún valor real que rompa
+          // el atributo, pero es defensa en profundidad barata si esa
+          // columna dejara de ser una PK estricta.
+          const mIdJs = String(m.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
           return `
           <div id="mensaje-row-${m.id}" style="background:var(--jv-glass);border:1px solid ${seleccionado ? 'var(--jv-accent)' : pendiente ? 'rgba(255,95,46,0.19)' : 'var(--jv-line)'};border-radius:12px;overflow:hidden;transition:all .15s">
             <div style="padding:16px 18px">
@@ -20777,24 +20786,24 @@
             <div id="responderBox-${m.id}" style="display:none;border-top:1px solid var(--jv-line);padding:14px 18px;background:rgba(0,0,0,.2)">
               <textarea id="responderTexto-${m.id}" placeholder="Escribe tu respuesta... se guarda en la app y se envía por email" aria-label="Respuesta a ${_esc(m.nombre)}" style="width:100%;min-height:80px;background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:8px;padding:10px 12px;color:var(--jv-text);font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
               <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="responderBtn-${m.id}" onclick="event.stopPropagation();enviarRespuestaJarvis('${m.id}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
+                <button id="responderBtn-${m.id}" onclick="event.stopPropagation();enviarRespuestaJarvis('${mIdJs}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                   Enviar
                 </button>
-                <button onclick="event.stopPropagation();toggleResponderJarvis('${m.id}')" class="jv-btn jv-btn-ghost" style="padding:7px 14px;font-size:11px">Cancelar</button>
+                <button onclick="event.stopPropagation();toggleResponderJarvis('${mIdJs}')" class="jv-btn jv-btn-ghost" style="padding:7px 14px;font-size:11px">Cancelar</button>
               </div>
             </div>
             <div style="border-top:1px solid var(--jv-line);padding:10px 18px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.28)">
-              <button onclick="event.stopPropagation();toggleResponderJarvis('${m.id}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
+              <button onclick="event.stopPropagation();toggleResponderJarvis('${mIdJs}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                 Responder
               </button>
               ${pendiente ? `
-                <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" class="jv-btn jv-btn-success" style="padding:7px 14px;font-size:11px">
+                <button onclick="event.stopPropagation();marcarGestionado('${mIdJs}')" class="jv-btn jv-btn-success" style="padding:7px 14px;font-size:11px">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                   Gestionado
                 </button>` : ''}
-              <button onclick="event.stopPropagation();eliminarMensaje('${m.id}')" class="jv-btn jv-btn-danger" style="padding:6px 12px;font-size:11px;margin-left:auto">
+              <button onclick="event.stopPropagation();eliminarMensaje('${mIdJs}')" class="jv-btn jv-btn-danger" style="padding:6px 12px;font-size:11px;margin-left:auto">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 Eliminar
               </button>
@@ -23344,17 +23353,33 @@
     // ===== NOTIFICACIONES PUSH: recordatorio diario de entreno =====
     // Llamado desde buildDashboard() (después de cargarReferidos()) -- así se
     // sabe seguro que hay sesión (_supaUserId) y que el dashboard ya existe.
+    // buildDashboard() se llama muchas veces por sesión (cada check-in,
+    // regeneración de plan...) -- sin esta bandera, cada llamada arrancaba su
+    // PROPIA cadena de reintentos independiente, y podían acabar varias
+    // corriendo en paralelo si el banner de PWA se quedaba mucho tiempo visible.
+    let _pushBannerChainActiva = false;
     window.mostrarBannerNotificaciones = function() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
       if (Notification.permission !== 'default') return; // ya concedido o denegado antes
       if (localStorage.getItem('kone_push_dismissed')) return;
       if (!_supaUserId) return;
+      if (_pushBannerChainActiva) return;
+      _pushBannerChainActiva = true;
       const intentar = () => {
+        // Revalidar en cada intento, no solo al programar el primero -- si
+        // durante la espera el usuario ya activó/bloqueó los avisos desde el
+        // interruptor, o cerró sesión, no tiene sentido enseñar el banner con
+        // un estado que ya quedó obsoleto.
+        if (Notification.permission !== 'default' || localStorage.getItem('kone_push_dismissed') || !_supaUserId) {
+          _pushBannerChainActiva = false;
+          return;
+        }
         // No amontonar con el banner de instalar PWA, que ocupa el mismo hueco.
         const pwaBanner = document.getElementById('pwaInstallBanner');
         if (pwaBanner && pwaBanner.style.display !== 'none') { setTimeout(intentar, 6000); return; }
         const banner = document.getElementById('pushInstallBanner');
         if (banner) banner.style.display = '';
+        _pushBannerChainActiva = false;
       };
       setTimeout(intentar, 4000);
     };
@@ -23402,8 +23427,14 @@
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
         showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
+      } finally {
+        // finally, no al final del todo: el `return` de arriba cuando el
+        // permiso se deniega salía de la función entera sin pasar por aquí
+        // -- el interruptor se quedaba marcado y sin la pista de "bloqueado",
+        // contradiciendo lo que de verdad pasó (bug real, encontrado
+        // probando el flujo de denegar el permiso antes de este fix).
+        await actualizarBotonNotificaciones();
       }
-      await actualizarBotonNotificaciones();
     };
 
     // Cancela la suscripción del navegador Y borra la fila en Supabase --
@@ -23422,18 +23453,39 @@
       } catch (e) {
         console.warn('[push] Error desactivando notificaciones:', e.message);
         showToast('No se pudieron desactivar los avisos. Inténtalo de nuevo.', 4000);
+      } finally {
+        // finally por el mismo motivo que en activarNotificaciones: que el
+        // interruptor siempre acabe reflejando el estado real, pase lo que
+        // pase dentro del try (hoy no hay ningún `return` temprano aquí,
+        // pero así queda a prueba de que se añada uno en el futuro).
+        await actualizarBotonNotificaciones();
       }
-      await actualizarBotonNotificaciones();
     };
 
-    // El interruptor de la barra lateral llama aquí en cuanto cambia -- el
-    // checkbox ya refleja lo que el cliente quiso (marcado/desmarcado) antes
-    // de que esto se ejecute, así que basta con leer checkbox.checked.
+    // Puede haber DOS interruptores en pantalla a la vez (barra del dashboard
+    // de cliente + barra de Jarvis, si el admin tiene Jarvis abierto encima
+    // de su propio dashboard) apuntando a la MISMA suscripción real del
+    // navegador. Sin este candado, activar uno y desactivar el otro casi a
+    // la vez podía intercalar subscribe()/insert con getSubscription()/
+    // delete()/unsubscribe() y dejar el navegador suscrito sin fila en
+    // Supabase (o una fila sin suscripción real) -- se deshabilitan TODOS
+    // los interruptores mientras uno está en marcha, no solo el que se tocó.
+    let _pushToggleBusy = false;
     window.onPushToggleChange = async function(checkbox) {
-      checkbox.disabled = true;
+      if (_pushToggleBusy) {
+        checkbox.checked = !checkbox.checked; // revierte el clic, no se procesa
+        return;
+      }
+      _pushToggleBusy = true;
+      document.querySelectorAll('[data-push-toggle] .push-toggle-input').forEach(i => { i.disabled = true; });
+      // No se fuerza a "false" al terminar: actualizarBotonNotificaciones()
+      // (llamada con await dentro de activar/desactivarNotificaciones) es la
+      // única que decide el estado final de "disabled" -- si el navegador
+      // acaba de bloquear el permiso, tiene que quedar deshabilitado con su
+      // pista, no reactivarse a ciegas contradiciendo lo que el texto dice.
       if (checkbox.checked) await activarNotificaciones();
       else await desactivarNotificaciones();
-      checkbox.disabled = false;
+      _pushToggleBusy = false;
     };
 
     // Decide qué mostrar en CADA interruptor de avisos que haya en la página

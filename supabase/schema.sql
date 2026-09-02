@@ -513,6 +513,17 @@ create table if not exists public.mensajes_respuestas (
 create index if not exists mensajes_respuestas_mensaje_id_idx
   on public.mensajes_respuestas (mensaje_id);
 
+-- Sin esto, un cliente autenticado puede llamar directo al endpoint REST de
+-- Supabase (RLS solo comprueba propiedad del hilo, no tamaño) y mandar un
+-- texto de varios MB, saltándose el maxlength del navegador -- eso es solo
+-- la UI. Ver supabase/migration-limites-conversacion-push.sql.
+do $$
+begin
+  alter table public.mensajes_respuestas
+    add constraint mensajes_respuestas_texto_longitud check (char_length(texto) <= 5000);
+exception when duplicate_object then null;
+end $$;
+
 alter table public.mensajes_respuestas enable row level security;
 
 drop policy if exists "mensajes_respuestas_select_own" on public.mensajes_respuestas;
@@ -557,6 +568,28 @@ create table if not exists public.push_subscriptions (
 
 create index if not exists push_subscriptions_user_id_idx
   on public.push_subscriptions (user_id);
+
+-- Mismo motivo que mensajes_respuestas_texto_longitud más arriba: sin tope,
+-- un insert directo desde el navegador podía mandar columnas arbitrariamente
+-- grandes. Ver supabase/migration-limites-conversacion-push.sql.
+do $$
+begin
+  alter table public.push_subscriptions
+    add constraint push_subscriptions_endpoint_longitud check (char_length(endpoint) <= 2000);
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter table public.push_subscriptions
+    add constraint push_subscriptions_p256dh_longitud check (char_length(p256dh) <= 500);
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter table public.push_subscriptions
+    add constraint push_subscriptions_auth_key_longitud check (char_length(auth_key) <= 500);
+exception when duplicate_object then null;
+end $$;
 
 alter table public.push_subscriptions enable row level security;
 

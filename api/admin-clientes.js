@@ -391,10 +391,27 @@ module.exports = async (req, res) => {
 
     let mensajes = [];
     try {
-      const { data: msgData } = await supabaseAdmin
+      // supabase-js no lanza en errores de query (devuelve {data, error}) -- si
+      // mensajes_respuestas todavía no existe (migración pendiente de correr a
+      // mano en Supabase, ver migration-conversacion-mensajes.sql), PostgREST
+      // falla al resolver el embed y ESTA query entera devuelve error, no solo
+      // el sub-select. Sin comprobar `error` explícitamente, `mensajes` se
+      // quedaba en [] en silencio y Jarvis mostraba "sin mensajes" aunque
+      // hubiera cientos -- mismo patrón de fallback que ya usa notify.js con
+      // `last_seen` cuando esa columna no existe todavía.
+      const r = await supabaseAdmin
         .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at, mensajes_respuestas(id, autor, texto, created_at)')
         .order('created_at', { ascending: false }).limit(50);
-      mensajes = msgData || [];
+      if (r.error) {
+        console.warn('[admin-clientes] mensajes_respuestas no disponible todavía, reintentando sin el hilo:', r.error.message);
+        const r2 = await supabaseAdmin
+          .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at')
+          .order('created_at', { ascending: false }).limit(50);
+        if (r2.error) { console.warn('[admin-clientes] mensajes query error:', r2.error.message); }
+        mensajes = r2.data || [];
+      } else {
+        mensajes = r.data || [];
+      }
     } catch (e) { console.warn('[admin-clientes] mensajes query error:', e.message); }
 
     return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog, mensajes });

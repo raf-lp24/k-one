@@ -63,11 +63,19 @@ module.exports = async (req, res) => {
       const apiKey = process.env.RESEND_API_KEY;
       if (apiKey) {
         try {
+          // "asunto" lo escribe el cliente desde un desplegable en la UI, pero
+          // el insert real es un supabase.insert() directo desde el navegador
+          // (RLS solo comprueba user_id, no el contenido) -- a diferencia de
+          // "texto" (acotado arriba con .slice(0,5000)), esto viajaba tal
+          // cual al Subject del email. Quita saltos de línea (por higiene,
+          // aunque Resend recibe JSON y no texto crudo de cabeceras) y lo
+          // acota a una longitud razonable para un asunto.
+          const asuntoSeguro = (mensaje.asunto || '').replace(/[\r\n]+/g, ' ').slice(0, 150);
           await enviarEmail(apiKey, {
             from: 'K-ONE <equipo@k-one.fit>',
             reply_to: 'k.one.fit26@gmail.com',
             to: mensaje.email,
-            subject: `Re: ${mensaje.asunto} — K-ONE`,
+            subject: `Re: ${asuntoSeguro} — K-ONE`,
             html: `
               <div style="background:#0b0b0b;padding:32px 20px;font-family:Arial,sans-serif;color:#e0e0e0">
                 <div style="max-width:520px;margin:0 auto">
