@@ -20,6 +20,47 @@ function _hoyMadridISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+// Push instantáneo al admin (no espera al cron diario) -- usa la misma
+// suscripción push_subscriptions que ya tienen los clientes, solo que aquí
+// el "cliente" es la cuenta del propio admin (misma tabla, mismo RLS: se
+// suscribe con el interruptor de Jarvis igual que un cliente se suscribe
+// desde el dashboard). No revienta la petición si falla -- captura su
+// propio error, es un extra sobre el email, no un requisito para que
+// notify.js responda ok.
+async function enviarPushAAdmins({ title, body, url }) {
+  const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  if (!vapidPublic || !vapidPrivate) return;
+  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  if (!adminEmails.length) return;
+  try {
+    webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
+    const supaAdmin = getSupabaseAdmin();
+    // auth.users (no profiles) porque es la fuente real del email de login --
+    // profiles.email es un espejo protegido, pero listUsers() es lo mismo que
+    // ya usa handleCronRetencion para resolver "último acceso" por admin.
+    const { data: { users } } = await supaAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const idsAdmin = (users || []).filter(u => adminEmails.includes((u.email || '').toLowerCase())).map(u => u.id);
+    if (!idsAdmin.length) return;
+    const { data: subsAdmin } = await supaAdmin.from('push_subscriptions').select('id, endpoint, p256dh, auth_key').in('user_id', idsAdmin);
+    if (!subsAdmin || !subsAdmin.length) return;
+    for (const sub of subsAdmin) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+          JSON.stringify({ title, body, url: url || '/' })
+        );
+      } catch (pushErr) {
+        if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
+          await supaAdmin.from('push_subscriptions').delete().eq('id', sub.id);
+        } else {
+          console.warn('[notify] push a admin error:', pushErr.message);
+        }
+      }
+    }
+  } catch (e) { console.warn('[notify] enviarPushAAdmins error:', e.message); }
+}
+
 // OJO con `reply_to`: 14 de las llamadas de este fichero lo pasaban y la función
 // no lo recogía, así que se descartaba en silencio. Resultado: las respuestas de
 // los clientes a cualquier email de K-ONE iban a equipo@k-one.fit (el remitente
@@ -1082,6 +1123,12 @@ async function handlePost(req, res) {
           <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}</p>
         `
       }));
+      // 3) Push instantáneo al admin, si tiene los avisos activados desde
+      // Jarvis. Con await a propósito -- Vercel puede congelar la función en
+      // cuanto se manda la respuesta, así que sin esperar aquí el push
+      // podría no llegar a salir nunca (enviarPushAAdmins ya atrapa sus
+      // propios errores, así que esto no puede romper la respuesta).
+      await enviarPushAAdmins({ title: 'K-ONE · Nuevo registro', body: `${datos.nombre || 'Alguien'} (${datos.email}) acaba de registrarse.`, url: '/' });
 
     } else if (tipo === 'mensaje') {
       const optsMensaje = {

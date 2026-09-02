@@ -798,6 +798,16 @@
   .jv-btn-danger { background: var(--jv-glass); border-color: var(--jv-line); color: var(--jv-faint); }
   .jv-btn-danger:hover:not(:disabled) { border-color: rgba(255,94,94,.45); color: var(--jv-bad); background: rgba(255,94,94,.08); }
 
+  /* Interruptor de avisos push del propio admin en la barra lateral de Jarvis. */
+  .jv-toggle-switch { position: relative; width: 34px; height: 20px; flex-shrink: 0; }
+  .jv-toggle-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+  .jv-toggle-slider { position: absolute; inset: 0; background: var(--jv-line); border-radius: 999px; transition: background .2s; pointer-events: none; }
+  .jv-toggle-slider::before { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: var(--jv-text); border-radius: 50%; transition: transform .2s; }
+  .jv-toggle-switch input:checked ~ .jv-toggle-slider { background: var(--jv-accent); }
+  .jv-toggle-switch input:checked ~ .jv-toggle-slider::before { transform: translateX(14px); }
+  .jv-toggle-switch input:disabled ~ .jv-toggle-slider { opacity: .4; }
+  .jv-toggle-switch input:focus-visible ~ .jv-toggle-slider { outline: 2px solid var(--jv-accent); outline-offset: 2px; }
+
   .jv-btn-danger-solid {
     background: linear-gradient(135deg, #FF8C82, var(--jv-bad)); color: #2B0808;
     box-shadow: 0 3px 12px rgba(255,94,94,.22);
@@ -6252,6 +6262,22 @@
     </div>
 
     <div class="jarvis-sidebar-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--jv-line)">
+      <!-- Mismo mecanismo de push que usan los clientes (push_subscriptions,
+           activarNotificaciones/desactivarNotificaciones/actualizarBotonNotificaciones
+           en index.html) -- aquí el "cliente" es la propia cuenta del admin.
+           Oculto hasta saber el estado real; ver el bloque gemelo del
+           dashboard de cliente para el porqué de dejarlo deshabilitado (no
+           escondido) si el navegador bloqueó el permiso. -->
+      <div data-push-toggle style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px">
+          <span style="font-family:var(--jv-ui);font-size:12.5px;color:var(--jv-dim);font-weight:600">Avisos de registro</span>
+          <label class="jv-toggle-switch">
+            <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos push cuando se registra un cliente nuevo" data-hint-on="Te avisamos al momento cuando se registre un cliente nuevo.">
+            <span class="jv-toggle-slider"></span>
+          </label>
+        </div>
+        <p class="push-toggle-hint" style="display:none;margin:2px 0 0;font-size:10.5px;color:var(--jv-faint);line-height:1.4;font-family:var(--jv-ui)"></p>
+      </div>
       <button onclick="mostrarFormAltaCliente()" style="background:rgba(61,220,151,.13);border:1px solid rgba(61,220,151,.3);border-radius:11px;padding:10px 14px;font-size:12.5px;color:var(--jv-ok);cursor:pointer;font-family:var(--jv-ui);font-weight:700;letter-spacing:-.01em;transition:background .15s" onmouseenter="this.style.background='rgba(61,220,151,.2)'" onmouseleave="this.style.background='rgba(61,220,151,.13)'">+ Añadir cliente</button>
       <button onclick="exportarAdminCSV()" style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:11px;padding:10px 14px;font-size:12.5px;color:var(--jv-dim);cursor:pointer;font-family:var(--jv-ui);font-weight:600;letter-spacing:-.01em;transition:all .15s" onmouseenter="this.style.color='var(--jv-text)';this.style.borderColor='var(--jv-line-hi)'" onmouseleave="this.style.color='var(--jv-dim)';this.style.borderColor='var(--jv-line)'">Exportar CSV</button>
       <button onclick="abrirPanelAdmin()" style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:11px;padding:10px 14px;font-size:12.5px;color:var(--jv-dim);cursor:pointer;font-family:var(--jv-ui);font-weight:600;letter-spacing:-.01em;transition:all .15s" onmouseenter="this.style.color='var(--jv-text)';this.style.borderColor='var(--jv-line-hi)'" onmouseleave="this.style.color='var(--jv-dim)';this.style.borderColor='var(--jv-line)'">Actualizar datos</button>
@@ -8045,14 +8071,16 @@
              bloqueó el permiso, se deja visible pero deshabilitado con una
              pista -- desaparecer del todo sin explicar nada es más confuso
              que mostrar por qué no se puede tocar. -->
-        <div class="push-toggle-row" id="pushToggleRow" style="display:none">
-          <span class="push-toggle-label"><span>⬡</span> Avisos de entreno</span>
-          <label class="push-toggle-switch">
-            <input type="checkbox" id="pushToggleInput" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día">
-            <span class="push-toggle-slider"></span>
-          </label>
+        <div data-push-toggle style="display:none">
+          <div class="push-toggle-row">
+            <span class="push-toggle-label"><span>⬡</span> Avisos de entreno</span>
+            <label class="push-toggle-switch">
+              <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día" data-hint-on="Te avisamos a media mañana los días que no hayas marcado ningún entreno.">
+              <span class="push-toggle-slider"></span>
+            </label>
+          </div>
+          <p class="push-toggle-hint" style="display:none;margin:-2px 16px 4px;font-size:10.5px;color:var(--metal);line-height:1.4"></p>
         </div>
-        <p id="pushToggleHint" style="display:none;margin:-2px 16px 4px;font-size:10.5px;color:var(--metal);line-height:1.4"></p>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
         </button>
@@ -20434,6 +20462,7 @@
   async function abrirPanelAdmin() {
     const m = document.getElementById('modalAdmin');
     if (m) m.style.display = 'block';
+    if (typeof actualizarBotonNotificaciones === 'function') actualizarBotonNotificaciones();
     const estado = document.getElementById('adminEstado');
     if (estado) estado.textContent = 'Cargando datos...';
     ['adminAccion','adminMetricsBiz','adminMetricsTrend','adminMetricsEng','adminMetricsAlt','adminDist','adminTabla']
@@ -23407,38 +23436,52 @@
       checkbox.disabled = false;
     };
 
-    // Decide qué mostrar en el interruptor de la barra lateral: marcado si el
-    // navegador ya tiene suscripción activa, desmarcado si no, o deshabilitado
-    // con una pista si el propio usuario bloqueó el permiso desde el
-    // navegador (Notification.permission === 'denied' no se puede revertir
-    // por código, solo desde ahí -- mejor explicarlo que esconder el
-    // interruptor sin más, que deja "¿y esto dónde se activa?" sin respuesta).
+    // Decide qué mostrar en CADA interruptor de avisos que haya en la página
+    // (el del dashboard de cliente y/o el de la barra lateral de Jarvis --
+    // ambos leen la MISMA suscripción real del navegador, así que da igual
+    // desde cuál se active/desactive, el otro se refleja solo la próxima vez
+    // que se llame esto). Marcado si ya hay suscripción activa, desmarcado si
+    // no, o deshabilitado con una pista si el propio usuario bloqueó el
+    // permiso desde el navegador (Notification.permission === 'denied' no se
+    // puede revertir por código, solo desde ahí -- mejor explicarlo que
+    // esconder el interruptor sin más, que deja "¿y esto dónde se activa?"
+    // sin respuesta).
     window.actualizarBotonNotificaciones = async function() {
-      const row = document.getElementById('pushToggleRow');
-      const input = document.getElementById('pushToggleInput');
-      const hint = document.getElementById('pushToggleHint');
-      if (!row || !input || !hint) return;
-      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
-        row.style.display = 'none';
-        hint.style.display = 'none';
-        return;
+      const contenedores = document.querySelectorAll('[data-push-toggle]');
+      if (!contenedores.length) return;
+      const soportado = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+      let sub = null, denegado = false, hayError = false;
+      if (soportado) {
+        denegado = Notification.permission === 'denied';
+        if (!denegado) {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            sub = await reg.pushManager.getSubscription();
+          } catch (e) { hayError = true; }
+        }
       }
-      row.style.display = '';
-      if (Notification.permission === 'denied') {
-        input.checked = false;
-        input.disabled = true;
-        hint.textContent = 'Los bloqueaste desde el navegador. Actívalos desde los ajustes de notificaciones del sitio para volver a recibirlos aquí.';
-        hint.style.display = '';
-        return;
-      }
-      input.disabled = false;
-      try {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
+      contenedores.forEach(cont => {
+        const input = cont.querySelector('.push-toggle-input');
+        const hint = cont.querySelector('.push-toggle-hint');
+        if (!input) return;
+        if (!soportado || hayError) { cont.style.display = 'none'; return; }
+        cont.style.display = '';
+        if (denegado) {
+          input.checked = false;
+          input.disabled = true;
+          if (hint) {
+            hint.textContent = 'Los bloqueaste desde el navegador. Actívalos desde los ajustes de notificaciones del sitio para volver a recibirlos aquí.';
+            hint.style.display = '';
+          }
+          return;
+        }
+        input.disabled = false;
         input.checked = !!sub;
-        hint.textContent = sub ? 'Te avisamos a media mañana los días que no hayas marcado ningún entreno.' : '';
-        hint.style.display = sub ? '' : 'none';
-      } catch (e) { row.style.display = 'none'; }
+        if (hint) {
+          hint.textContent = sub ? (input.dataset.hintOn || '') : '';
+          hint.style.display = sub ? '' : 'none';
+        }
+      });
     };
 
     if ('serviceWorker' in navigator) {
