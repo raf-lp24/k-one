@@ -1,5 +1,13 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+// require('./notify') es solo un import de módulo (reutiliza enviarEmail),
+// no crea una función serverless nueva -- no cuenta para el límite de
+// Vercel (ya en 12/12), igual que ya hace stripe-webhook.js.
+const { enviarEmail } = require('./notify');
+
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
@@ -27,6 +35,63 @@ module.exports = async (req, res) => {
       const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id).select('id');
       if (e) { console.error('[admin-mensaje] gestionado error:', e.message); return res.status(500).json({ error: 'Error actualizando mensaje' }); }
       if (!data || !data.length) return res.status(404).json({ error: 'No existe ese mensaje' });
+    } else if (accion === 'responder_mensaje') {
+      // Guarda la respuesta como un mensaje más del hilo (mensajes_respuestas)
+      // -- así el cliente la ve dentro de la app, como conversación -- y
+      // ADEMÁS manda el email de siempre, en paralelo. Antes el botón
+      // "Responder" solo abría Gmail con un correo suelto que nunca quedaba
+      // guardado en ningún sitio.
+      if (!id) return res.status(400).json({ error: 'id requerido' });
+      const texto = (req.body?.texto ?? '').toString().trim().slice(0, 5000);
+      if (!texto) return res.status(400).json({ error: 'texto requerido' });
+
+      const { data: mensaje, error: eGet } = await supabaseAdmin
+        .from('mensajes_cliente').select('id, nombre, email, asunto').eq('id', id).maybeSingle();
+      if (eGet) { console.error('[admin-mensaje] responder_mensaje get error:', eGet.message); return res.status(500).json({ error: 'Error leyendo el mensaje' }); }
+      if (!mensaje) return res.status(404).json({ error: 'No existe ese mensaje' });
+
+      const { error: eIns } = await supabaseAdmin
+        .from('mensajes_respuestas').insert({ mensaje_id: id, autor: 'admin', texto });
+      if (eIns) { console.error('[admin-mensaje] responder_mensaje insert error:', eIns.message); return res.status(500).json({ error: 'Error guardando la respuesta' }); }
+
+      // Marca el hilo como gestionado igual que el botón "Gestionado" -- una
+      // respuesta real siempre cuenta como gestionado, no hace falta pulsar
+      // los dos botones para que desaparezca de "pendientes".
+      const { error: eUpd } = await supabaseAdmin.from('mensajes_cliente').update({ respuesta: 'Gestionado' }).eq('id', id);
+      if (eUpd) console.warn('[admin-mensaje] responder_mensaje: no se pudo marcar gestionado:', eUpd.message);
+
+      const apiKey = process.env.RESEND_API_KEY;
+      if (apiKey) {
+        try {
+          await enviarEmail(apiKey, {
+            from: 'K-ONE <equipo@k-one.fit>',
+            reply_to: 'k.one.fit26@gmail.com',
+            to: mensaje.email,
+            subject: `Re: ${mensaje.asunto} — K-ONE`,
+            html: `
+              <div style="background:#0b0b0b;padding:32px 20px;font-family:Arial,sans-serif;color:#e0e0e0">
+                <div style="max-width:520px;margin:0 auto">
+                  <div style="margin-bottom:20px">
+                    <span style="font-size:22px;font-weight:800;color:#fff">K-<span style="color:#E8490F">ONE</span></span>
+                  </div>
+                  <p style="margin:0 0 16px;color:#e0e0e0">Hola ${escHtml(mensaje.nombre)},</p>
+                  <div style="background:#141414;border-left:3px solid #E8490F;padding:18px 22px;margin-bottom:16px">
+                    <p style="margin:0;color:#e0e0e0;line-height:1.6;font-size:14px;white-space:pre-wrap">${escHtml(texto)}</p>
+                  </div>
+                  <p style="color:#888;font-size:12px;margin:0 0 4px">También puedes ver y seguir esta conversación desde la app, en Contacto.</p>
+                  <p style="color:#555;font-size:11px;margin:0">Responde a este email si quieres contestarnos directamente.</p>
+                </div>
+              </div>
+            `
+          });
+        } catch (mailErr) {
+          console.error('[admin-mensaje] responder_mensaje email error:', mailErr.message);
+          // No es un fallo del "responder": la respuesta ya quedó guardada y
+          // visible en la app aunque el email fallase. Se avisa sin romper.
+        }
+      } else {
+        console.warn('[admin-mensaje] RESEND_API_KEY no configurada, email de respuesta no enviado');
+      }
     } else if (accion === 'eliminar') {
       if (!id) return res.status(400).json({ error: 'id requerido' });
       const { data, error: e } = await supabaseAdmin.from('mensajes_cliente').delete().eq('id', id).select('id');

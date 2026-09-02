@@ -493,6 +493,51 @@ create policy "testimonios_select" on public.testimonios
 -- ============================================================
 
 -- ============================================================
+-- 8b-2. TABLA: mensajes_respuestas (hilo de conversación de Contacto)
+-- Antes, la respuesta del admin a un mensaje de "Contacto" salía por un
+-- enlace que abría Gmail y escribía un correo suelto -- nunca se guardaba,
+-- así que el cliente solo la veía en su bandeja de entrada, nunca dentro
+-- de la app. Esta tabla guarda cada mensaje del hilo (de admin o del
+-- propio cliente) para reconstruir la conversación completa en la web,
+-- además del correo que se sigue enviando en paralelo.
+-- Ver supabase/migration-conversacion-mensajes.sql (2 sept 2026).
+-- ============================================================
+create table if not exists public.mensajes_respuestas (
+  id         uuid primary key default gen_random_uuid(),
+  mensaje_id uuid not null references public.mensajes_cliente(id) on delete cascade,
+  autor      text not null check (autor in ('admin','cliente')),
+  texto      text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists mensajes_respuestas_mensaje_id_idx
+  on public.mensajes_respuestas (mensaje_id);
+
+alter table public.mensajes_respuestas enable row level security;
+
+drop policy if exists "mensajes_respuestas_select_own" on public.mensajes_respuestas;
+create policy "mensajes_respuestas_select_own" on public.mensajes_respuestas
+  for select using (
+    exists (
+      select 1 from public.mensajes_cliente m
+      where m.id = mensaje_id and m.user_id = auth.uid()
+    )
+  );
+
+-- El cliente puede seguir la conversación, pero el check "autor = 'cliente'"
+-- le impide insertar como si fuera 'admin' aunque manipule la petición
+-- desde la consola del navegador.
+drop policy if exists "mensajes_respuestas_insert_own" on public.mensajes_respuestas;
+create policy "mensajes_respuestas_insert_own" on public.mensajes_respuestas
+  for insert with check (
+    autor = 'cliente'
+    and exists (
+      select 1 from public.mensajes_cliente m
+      where m.id = mensaje_id and m.user_id = auth.uid()
+    )
+  );
+
+-- ============================================================
 -- 8c. TABLAS: invitaciones_premium y referidos
 -- CORRECCIÓN (auditoría 29 ago 2026): esta nota decía que "tampoco viven en
 -- este repositorio", pero SÍ viven -- las crea supabase/migration-

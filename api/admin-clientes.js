@@ -392,7 +392,7 @@ module.exports = async (req, res) => {
     let mensajes = [];
     try {
       const { data: msgData } = await supabaseAdmin
-        .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at')
+        .from('mensajes_cliente').select('id, nombre, email, asunto, mensaje, respuesta, created_at, mensajes_respuestas(id, autor, texto, created_at)')
         .order('created_at', { ascending: false }).limit(50);
       mensajes = msgData || [];
     } catch (e) { console.warn('[admin-clientes] mensajes query error:', e.message); }

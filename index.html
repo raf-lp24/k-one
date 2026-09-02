@@ -4958,6 +4958,30 @@
      frase que ya está en el pie del formulario. */
   .contacto-trust { justify-content: flex-start; margin-top: 0; }
 
+  /* Hilos de conversación de "Contacto": la respuesta del admin (email +
+     guardada aquí) y las réplicas del propio cliente, como un chat. */
+  .conv-list { display: flex; flex-direction: column; gap: 14px; margin: 0 0 24px; }
+  .conv-hilo { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; overflow: hidden; }
+  .conv-hilo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--humo); }
+  .conv-hilo-asunto { font-size: 11px; font-weight: 700; color: var(--brasa); text-transform: uppercase; letter-spacing: .03em; }
+  .conv-hilo-fecha { font-size: 11px; color: var(--metal); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .conv-hilo-msgs { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .conv-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.5; box-sizing: border-box; white-space: pre-wrap; word-break: break-word; }
+  .conv-msg-cliente { align-self: flex-end; background: rgba(209,66,14,0.12); border: 1px solid rgba(209,66,14,0.25); color: var(--blanco); border-bottom-right-radius: 3px; }
+  .conv-msg-admin { align-self: flex-start; background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); border-bottom-left-radius: 3px; }
+  .conv-msg-autor { font-size: 10px; font-weight: 700; opacity: .6; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .03em; }
+  .conv-msg-hora { font-size: 10px; color: var(--metal); margin-top: 4px; text-align: right; }
+  .conv-hilo-reply { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--humo); background: rgba(0,0,0,.15); }
+  .conv-hilo-reply input { flex: 1; min-width: 0; background: transparent; border: 1px solid var(--humo); border-radius: 10px; padding: 9px 12px; color: var(--blanco); font-size: 13px; font-family: inherit; outline: none; }
+  .conv-hilo-reply input:focus { border-color: var(--brasa); }
+  .conv-hilo-reply button { background: var(--brasa); border: none; color: #fff; width: 38px; flex-shrink: 0; border-radius: 10px; cursor: pointer; font-size: 16px; }
+  .conv-hilo-reply button:disabled { opacity: .5; cursor: default; }
+  [data-theme="light"] .conv-hilo { background: #fff; border-color: #E0DCD5; }
+  [data-theme="light"] .conv-msg-admin { background: #F0ECE6; border-color: #E0DCD5; color: #262421; }
+  [data-theme="light"] .conv-msg-cliente { color: #262421; }
+  [data-theme="light"] .conv-hilo-reply { background: #FAF8F5; }
+  [data-theme="light"] .conv-hilo-reply input { color: #262421; }
+
   .notes-form {
     background: var(--carbon);
     padding: 24px;
@@ -8636,6 +8660,14 @@
             <h2 class="dash-title">Contacto</h2>
             <p class="dash-subtitle">Estamos al otro lado. Escríbenos y te respondemos personalmente.</p>
           </div>
+        </div>
+
+        <!-- Conversaciones ya iniciadas: la respuesta del admin llega por email
+             pero también queda guardada aquí, como un hilo, para no depender
+             solo del correo. Oculto hasta que haya al menos un mensaje. -->
+        <div id="contactoHistorialWrap" style="display:none">
+          <div class="informe-eyebrow">Tus conversaciones</div>
+          <div class="conv-list" id="contactoHistorial"></div>
         </div>
 
         <!-- Motivos rápidos, como tarjetas de icono (mismo lenguaje que los
@@ -15481,6 +15513,7 @@
       if (typeof renderGraficoPeso === 'function') renderGraficoPeso();
       if (typeof renderGraficoFuerza === 'function') renderGraficoFuerza();
     }
+    if (id === 'contacto' && typeof cargarConversaciones === 'function') cargarConversaciones();
   }
 
   function mostrarGuiaSeccion(id) {
@@ -16943,8 +16976,68 @@
       showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
       if (btn) { btn.disabled = false; btn.textContent = 'Enviar →'; }
     }
+    cargarConversaciones();
   }
 
+  const _fmtFechaHora = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return `${fmtFechaCorta(iso)} · ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+  const _escConv = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+
+  // Trae los hilos del cliente (RLS ya limita a los suyos: mensajes_select_own)
+  // junto con sus respuestas (mensajes_respuestas, select embebido por la FK).
+  async function cargarConversaciones() {
+    const wrap = document.getElementById('contactoHistorialWrap');
+    const cont = document.getElementById('contactoHistorial');
+    if (!wrap || !cont || !_supaUserId) return;
+    try {
+      const { data, error } = await supa.from('mensajes_cliente')
+        .select('id, asunto, mensaje, created_at, mensajes_respuestas(id, autor, texto, created_at)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (!data || !data.length) { wrap.style.display = 'none'; return; }
+      wrap.style.display = '';
+      cont.innerHTML = data.map(hilo => {
+        const respuestas = [...(hilo.mensajes_respuestas || [])].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const burbujas = [
+          `<div class="conv-msg conv-msg-cliente"><div class="conv-msg-autor">Tú</div>${_escConv(hilo.mensaje)}<div class="conv-msg-hora">${_fmtFechaHora(hilo.created_at)}</div></div>`,
+          ...respuestas.map(r => `<div class="conv-msg conv-msg-${r.autor}"><div class="conv-msg-autor">${r.autor === 'admin' ? 'K-ONE' : 'Tú'}</div>${_escConv(r.texto)}<div class="conv-msg-hora">${_fmtFechaHora(r.created_at)}</div></div>`)
+        ].join('');
+        return `
+        <div class="conv-hilo">
+          <div class="conv-hilo-head">
+            <span class="conv-hilo-asunto">${_escConv(hilo.asunto)}</span>
+            <span class="conv-hilo-fecha">${_fmtFechaHora(hilo.created_at)}</span>
+          </div>
+          <div class="conv-hilo-msgs">${burbujas}</div>
+          <div class="conv-hilo-reply">
+            <input type="text" id="convReply-${hilo.id}" placeholder="Responder..." aria-label="Responder en esta conversación" maxlength="2000" onkeydown="if(event.key==='Enter')responderHilo('${hilo.id}')">
+            <button onclick="responderHilo('${hilo.id}')" aria-label="Enviar respuesta">→</button>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) { console.warn('[contacto] Error cargando conversaciones:', e.message); }
+  }
+
+  async function responderHilo(mensajeId) {
+    const input = document.getElementById('convReply-' + mensajeId);
+    const texto = (input?.value || '').trim();
+    if (!texto) return;
+    input.disabled = true;
+    try {
+      const { error } = await supa.from('mensajes_respuestas').insert({ mensaje_id: mensajeId, autor: 'cliente', texto });
+      if (error) throw error;
+      if (input) input.value = '';
+      await cargarConversaciones();
+    } catch (e) {
+      showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
+    } finally {
+      const freshInput = document.getElementById('convReply-' + mensajeId);
+      if (freshInput) freshInput.disabled = false;
+    }
+  }
 
   function addNota() {
     const input = document.getElementById('notaInput');
@@ -20102,6 +20195,40 @@
     } catch (e) { showToast('Error: ' + e.message, 4000); }
   }
 
+  function toggleResponderJarvis(msgId) {
+    const box = document.getElementById('responderBox-' + msgId);
+    if (!box) return;
+    const abrir = box.style.display === 'none';
+    box.style.display = abrir ? '' : 'none';
+    if (abrir) document.getElementById('responderTexto-' + msgId)?.focus();
+  }
+
+  // Guarda la respuesta en mensajes_respuestas (visible en la app para el
+  // cliente, como conversación) y manda el email en el mismo paso -- antes
+  // "Responder" solo abría Gmail con un correo suelto que nunca se guardaba.
+  async function enviarRespuestaJarvis(msgId) {
+    const textarea = document.getElementById('responderTexto-' + msgId);
+    const texto = (textarea?.value || '').trim();
+    if (!texto) { showToast('Escribe una respuesta'); return; }
+    const btn = document.getElementById('responderBtn-' + msgId);
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-mensaje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ id: msgId, accion: 'responder_mensaje', texto })
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || 'Error enviando la respuesta');
+      showToast('Respuesta enviada — visible en la app y por email');
+      abrirPanelAdmin();
+    } catch (e) {
+      showToast('Error: ' + e.message, 4000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; }
+    }
+  }
+
   async function eliminarMensaje(msgId) {
     if (!confirm('¿Eliminar este mensaje?')) return;
     try {
@@ -20539,14 +20666,32 @@
                   <span>${motivoIcon}</span> ${_esc(m.asunto)}
                 </div>
                 <div style="background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--jv-dim);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(m.mensaje)}</div>
+                ${(m.mensajes_respuestas || []).length ? `
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                  ${[...m.mensajes_respuestas].sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(r => `
+                  <div style="background:${r.autor === 'admin' ? 'rgba(255,95,46,0.06)' : 'rgba(0,0,0,.3)'};border:1px solid var(--jv-line);border-radius:8px;padding:10px 14px">
+                    <div style="font-size:10px;font-weight:700;color:${r.autor === 'admin' ? 'var(--jv-accent)' : 'var(--jv-faint)'};text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px">${r.autor === 'admin' ? 'Tú (K-ONE)' : _esc(m.nombre)} · ${_fmtFecha(r.created_at)}</div>
+                    <div style="font-size:12.5px;color:var(--jv-dim);line-height:1.6;white-space:pre-wrap;word-break:break-word">${_esc(r.texto)}</div>
+                  </div>`).join('')}
+                </div>` : ''}
+              </div>
+            </div>
+            <div id="responderBox-${m.id}" style="display:none;border-top:1px solid var(--jv-line);padding:14px 18px;background:rgba(0,0,0,.2)">
+              <textarea id="responderTexto-${m.id}" placeholder="Escribe tu respuesta... se guarda en la app y se envía por email" aria-label="Respuesta a ${_esc(m.nombre)}" style="width:100%;min-height:80px;background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:8px;padding:10px 12px;color:var(--jv-text);font-family:inherit;font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="responderBtn-${m.id}" onclick="event.stopPropagation();enviarRespuestaJarvis('${m.id}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                  Enviar
+                </button>
+                <button onclick="event.stopPropagation();toggleResponderJarvis('${m.id}')" class="jv-btn jv-btn-ghost" style="padding:7px 14px;font-size:11px">Cancelar</button>
               </div>
             </div>
             <div style="border-top:1px solid var(--jv-line);padding:10px 18px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.28)">
+              <button onclick="event.stopPropagation();toggleResponderJarvis('${m.id}')" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                Responder
+              </button>
               ${pendiente ? `
-                <a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.asunto + ' — K-ONE')}&body=${encodeURIComponent('Hola ' + m.nombre + ',\n\n')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="jv-btn jv-btn-accent" style="padding:7px 14px;font-size:11px">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                  Responder
-                </a>
                 <button onclick="event.stopPropagation();marcarGestionado('${m.id}')" class="jv-btn jv-btn-success" style="padding:7px 14px;font-size:11px">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                   Gestionado
