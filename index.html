@@ -20846,6 +20846,49 @@
     // La salud del cliente abre la ficha con la cifra en grande: es el
     // resumen de "¿este cliente está bien o se me va?" en un solo golpe.
     const hs = _healthScore(c);
+
+    // Días entrenados esta semana (Lun-Dom), calculado en el servidor
+    // (admin-clientes.js) a partir de historialEntrenos -- aquí solo se pinta.
+    const _diasSemanaHTML = (() => {
+      const dias = c.diasEntrenoSemana || [false, false, false, false, false, false, false];
+      const letras = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+      const hoyIdx = (new Date().getDay() + 6) % 7;
+      return dias.map((hecho, i) => `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+          <span style="font-size:10px;color:var(--jv-faint);font-weight:700">${letras[i]}</span>
+          <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${hecho ? 'linear-gradient(135deg,var(--jv-accent-2),var(--jv-accent))' : 'var(--jv-glass)'};border:1px solid ${hecho ? 'transparent' : (i === hoyIdx ? 'rgba(255,95,46,.5)' : 'var(--jv-line)')}">
+            ${hecho ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+          </div>
+        </div>`).join('');
+    })();
+
+    // Progreso de peso corporal: primera y última entrada válida de
+    // historialPeso (se registra en cada check-in semanal real, no un valor
+    // suelto). El color depende del objetivo: perder grasa y bajar es verde,
+    // ganar músculo y subir es verde; "sentirme mejor" no juzga dirección.
+    const _progresoPeso = (() => {
+      const hist = (c.historialPeso || []).filter(x => x && Number(x.peso) > 0)
+        .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      if (hist.length < 2) return null;
+      const ini = Number(hist[0].peso), fin = Number(hist[hist.length - 1].peso);
+      const delta = Math.round((fin - ini) * 10) / 10;
+      const obj = c.objetivo || '';
+      const buena = obj.includes('Perder') ? delta < 0 : obj.includes('músculo') ? delta > 0 : null;
+      return { ini, fin, delta, color: buena === true ? 'var(--jv-ok)' : buena === false ? 'var(--jv-warn)' : 'var(--jv-dim)' };
+    })();
+
+    // Ejercicios con progresión registrada: los 5 actualizados más
+    // recientemente, ordenados por fecha del último registro.
+    const _ejerciciosProgreso = Object.values(c.pesosEjercicios || {})
+      .map(e => {
+        const h = (e.historial || []).filter(x => x && Number(x.peso) > 0).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        if (!h.length) return null;
+        return { nombre: e.nombre, ini: Number(h[0].peso), fin: Number(h[h.length - 1].peso), ultima: h[h.length - 1].fecha };
+      })
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.ultima) - new Date(a.ultima))
+      .slice(0, 5);
+
     document.getElementById('jcBody').innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(${hs.rgb},.10),var(--jv-glass));border:1px solid rgba(${hs.rgb},.26);border-radius:14px;padding:15px 17px;margin-bottom:12px">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px">
@@ -20884,6 +20927,28 @@
         ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? 'var(--jv-ok)' : null)}
         ${row('Peso actual', c.peso ? c.peso + ' kg' : '—')}
       </div>
+      <div class="jc-row" style="flex-direction:column;align-items:stretch;gap:0">
+        <div class="jc-label" style="margin-bottom:10px">Esta semana</div>
+        <div style="display:flex;justify-content:space-between;gap:4px">${_diasSemanaHTML}</div>
+      </div>
+      ${_progresoPeso ? `
+      <div class="jc-row">
+        <div>
+          <div class="jc-label">Progreso de peso</div>
+          <div class="jc-val">${_progresoPeso.ini} kg → ${_progresoPeso.fin} kg <span style="color:${_progresoPeso.color};font-weight:800">(${_progresoPeso.delta > 0 ? '+' : ''}${_progresoPeso.delta} kg)</span></div>
+        </div>
+      </div>` : ''}
+      ${_ejerciciosProgreso.length ? `
+      <div>
+        <div class="jc-label" style="margin-bottom:8px">Ejercicios con progresión</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${_ejerciciosProgreso.map(e => `
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:8px 12px">
+            <span style="font-size:12.5px;color:var(--jv-text);font-weight:600">${_esc(e.nombre)}</span>
+            <span style="font-size:12.5px;font-family:var(--jv-display);font-weight:700;color:${e.fin > e.ini ? 'var(--jv-ok)' : e.fin < e.ini ? 'var(--jv-bad)' : 'var(--jv-faint)'}">${e.ini} → ${e.fin} kg</span>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
       ${c.lesion ? row('Lesión', c.lesionDetalle || 'Sí', '#FF9556') : ''}
       ${c.alergia && c.alergia !== 'No' ? row('Alergia', c.alergiaOtra || c.alergia) : ''}
       ${c.medicacion && c.medicacion !== 'No' ? row('Medicación', c.medicacion) : ''}

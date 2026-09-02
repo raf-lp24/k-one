@@ -185,6 +185,20 @@ module.exports = async (req, res) => {
       const entrenosTotal = Array.isArray(ud.historialEntrenos)
         ? ud.historialEntrenos.length
         : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
+      // Lunes..domingo de la semana en curso: para el resumen "esta semana" de
+      // la ficha del cliente en Jarvis. Se calcula aquí (no en el frontend)
+      // para no tener que mandar el historial completo de fechas solo por
+      // esto -- historialEntrenos sí viaja además, pero ya acotado más abajo.
+      const diasEntrenoSemana = (() => {
+        const historial = new Set(Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : []);
+        const diaISO = (ahora.getDay() + 6) % 7; // 0 = lunes
+        const lunes = new Date(ahora); lunes.setDate(ahora.getDate() - diaISO);
+        const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(lunes); d.setDate(lunes.getDate() + i);
+          return historial.has(fmt(d));
+        });
+      })();
       const refSemana = (activo && !p.is_beta && s?.current_period_start)
         ? s.current_period_start : p.created_at;
       const semanaActual = refSemana
@@ -260,6 +274,21 @@ module.exports = async (req, res) => {
         edad:         ud.edad || null,
         onboarding:   !!ud.onboardingCompletado,
         entrenosTotal,
+        diasEntrenoSemana,
+        // Progreso de peso y de fuerza para la ficha del cliente en Jarvis.
+        // Acotados (no son ilimitados en origen, pero por defensa se recortan
+        // aquí también) para no inflar la respuesta de 50 clientes con
+        // historiales de meses.
+        historialPeso: (Array.isArray(ud.historialPeso) ? ud.historialPeso : []).slice(-26),
+        pesosEjercicios: (() => {
+          const pesos = (ud.pesosEjercicios && typeof ud.pesosEjercicios === 'object') ? ud.pesosEjercicios : {};
+          const out = {};
+          for (const [key, e] of Object.entries(pesos)) {
+            if (!e) continue;
+            out[key] = { nombre: e.nombre || key, historial: (Array.isArray(e.historial) ? e.historial : []).slice(-8) };
+          }
+          return out;
+        })(),
         semanaActual,
         ultimaConexion: lastSeenMap[p.id] || authLastSignIn[p.id] || null,
         notaAdmin: notaMap[p.id] || '',
