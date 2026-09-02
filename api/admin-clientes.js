@@ -199,6 +199,29 @@ module.exports = async (req, res) => {
           return historial.has(fmt(d));
         });
       })();
+      // Entrenos por semana de las últimas 4 semanas (más antigua primero,
+      // esta semana al final): para ver si el cliente va a más o a menos, no
+      // solo si entrenó esta semana concreta. No cuenta días futuros dentro
+      // de la semana en curso (si hoy es martes, no resta los 5 días que
+      // faltan de esta semana).
+      const entrenosUltimasSemanas = (() => {
+        const historial = new Set(Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : []);
+        const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const diaISO = (ahora.getDay() + 6) % 7;
+        const lunesActual = new Date(ahora); lunesActual.setDate(ahora.getDate() - diaISO);
+        const semanas = [];
+        for (let s = 3; s >= 0; s--) {
+          const lunes = new Date(lunesActual); lunes.setDate(lunesActual.getDate() - s * 7);
+          let dias = 0;
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(lunes); d.setDate(lunes.getDate() + i);
+            if (d > ahora) continue;
+            if (historial.has(fmt(d))) dias++;
+          }
+          semanas.push(dias);
+        }
+        return semanas;
+      })();
       const refSemana = (activo && !p.is_beta && s?.current_period_start)
         ? s.current_period_start : p.created_at;
       const semanaActual = refSemana
@@ -293,6 +316,7 @@ module.exports = async (req, res) => {
         onboarding:   !!ud.onboardingCompletado,
         entrenosTotal,
         diasEntrenoSemana,
+        entrenosUltimasSemanas,
         // Progreso de peso y de fuerza para la ficha del cliente en Jarvis.
         // Acotados (no son ilimitados en origen, pero por defensa se recortan
         // aquí también) para no inflar la respuesta de 50 clientes con

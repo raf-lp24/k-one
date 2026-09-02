@@ -20868,6 +20868,39 @@
         </div>`).join('');
     })();
 
+    // Consistencia de las últimas 4 semanas (más antigua a la izquierda, esta
+    // semana a la derecha): "esta semana" sola no dice si el cliente va a más
+    // o a menos, solo si esta semana concreta entrenó. Comparando las 2
+    // semanas más recientes contra las 2 más antiguas se saca una tendencia.
+    const _consistenciaHTML = (() => {
+      const semanas = c.entrenosUltimasSemanas || [0, 0, 0, 0];
+      if (!semanas.some(n => n > 0)) return '';
+      const etiquetas = ['Hace 3 sem.', 'Hace 2 sem.', 'Hace 1 sem.', 'Esta semana'];
+      const max = Math.max(7, ...semanas);
+      const barras = semanas.map((n, i) => `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">
+          <span style="font-size:11px;color:var(--jv-text);font-weight:700;font-family:var(--jv-display)">${n}</span>
+          <div style="width:100%;max-width:34px;height:44px;display:flex;align-items:flex-end;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden">
+            <div style="width:100%;height:${Math.round((n / max) * 100)}%;background:${i === 3 ? 'linear-gradient(180deg,var(--jv-accent-2),var(--jv-accent))' : 'var(--jv-glass-hi)'};transition:height .4s"></div>
+          </div>
+          <span style="font-size:9px;color:var(--jv-faint);font-weight:600;text-align:center">${etiquetas[i]}</span>
+        </div>`).join('');
+      const antes = semanas[0] + semanas[1], despues = semanas[2] + semanas[3];
+      const tendencia = despues > antes
+        ? { texto: 'Mejorando', color: 'var(--jv-ok)', flecha: '↑' }
+        : despues < antes
+        ? { texto: 'Bajando', color: 'var(--jv-bad)', flecha: '↓' }
+        : { texto: 'Estable', color: 'var(--jv-dim)', flecha: '→' };
+      return `
+      <div class="jc-row" style="flex-direction:column;align-items:stretch;gap:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="jc-label" style="margin-bottom:0">Consistencia (últimas 4 semanas)</div>
+          <span style="font-size:11px;font-weight:800;color:${tendencia.color}">${tendencia.flecha} ${tendencia.texto}</span>
+        </div>
+        <div style="display:flex;gap:8px">${barras}</div>
+      </div>`;
+    })();
+
     // Progreso de peso corporal: primera y última entrada válida de
     // historialPeso (se registra en cada check-in semanal real, no un valor
     // suelto). El color depende del objetivo: perder grasa y bajar es verde,
@@ -20947,6 +20980,7 @@
         <div class="jc-label" style="margin-bottom:10px">Esta semana</div>
         <div style="display:flex;justify-content:space-between;gap:4px">${_diasSemanaHTML}</div>
       </div>
+      ${_consistenciaHTML}
       ${_progresoPeso ? `
       <div class="jc-row">
         <div>
