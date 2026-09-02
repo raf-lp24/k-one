@@ -8003,6 +8003,12 @@
         <button class="logout-btn" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Gestionar suscripción
         </button>
+        <!-- Oculto hasta que actualizarBotonNotificaciones() decide si toca
+             "Activar" o "Desactivar" (o lo esconde del todo si el navegador
+             no soporta push o el usuario lo bloqueó desde su configuración). -->
+        <button class="logout-btn" id="btnToggleNotificaciones" onclick="activarNotificaciones()" style="display:none;border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+          <span>⬡</span> Activar avisos
+        </button>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
         </button>
@@ -14867,6 +14873,7 @@
     renderProgresoSection();
     cargarReferidos();
     if (typeof mostrarBannerNotificaciones === 'function') mostrarBannerNotificaciones();
+    if (typeof actualizarBotonNotificaciones === 'function') actualizarBotonNotificaciones();
 
     // Semana / Plan del mes (4 semanas)
     renderWeekTabs(progreso.semana);
@@ -23323,6 +23330,53 @@
         console.warn('[push] Error activando notificaciones:', e.message);
         showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
       }
+      await actualizarBotonNotificaciones();
+    };
+
+    // Cancela la suscripción del navegador Y borra la fila en Supabase --
+    // solo con lo primero, el navegador ya no llamaría a nuestro sw.js, pero
+    // la fila se quedaría huérfana y el cron seguiría intentando mandarle
+    // push a un endpoint que ya nadie escucha hasta que fallase con 404/410.
+    window.desactivarNotificaciones = async function() {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await supa.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+          await sub.unsubscribe();
+        }
+        showToast('Avisos desactivados.');
+      } catch (e) {
+        console.warn('[push] Error desactivando notificaciones:', e.message);
+        showToast('No se pudieron desactivar los avisos. Inténtalo de nuevo.', 4000);
+      }
+      await actualizarBotonNotificaciones();
+    };
+
+    // Decide qué toca mostrar en el botón de la barra lateral: "Activar avisos"
+    // si el navegador aún no tiene suscripción, "Desactivar avisos" si ya la
+    // tiene, o directamente ocultarlo si el navegador no soporta push o el
+    // usuario bloqueó el permiso desde su configuración (Notification.permission
+    // === 'denied' no se puede revertir por código, solo desde el navegador).
+    window.actualizarBotonNotificaciones = async function() {
+      const btn = document.getElementById('btnToggleNotificaciones');
+      if (!btn) return;
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window) || Notification.permission === 'denied') {
+        btn.style.display = 'none';
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          btn.innerHTML = '<span>⬡</span> Desactivar avisos';
+          btn.onclick = desactivarNotificaciones;
+        } else {
+          btn.innerHTML = '<span>⬡</span> Activar avisos';
+          btn.onclick = activarNotificaciones;
+        }
+        btn.style.display = '';
+      } catch (e) { btn.style.display = 'none'; }
     };
 
     if ('serviceWorker' in navigator) {
