@@ -3461,13 +3461,25 @@
     color: var(--blanco-puro);
   }
   .nutri-dia.has-selection { box-shadow: inset 0 -3px 0 var(--brasa); }
-  .rotacion-opt {
+  .rotacion-opt, .ciclo-opt {
     background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
     border-radius: 999px; padding: 7px 16px; font-size: 12px; font-weight: 600;
     cursor: pointer; font-family: inherit; transition: all .2s;
   }
-  .rotacion-opt:hover { border-color: var(--brasa); color: var(--blanco); }
-  .rotacion-opt.active { background: rgba(209,66,14,.15); border-color: var(--brasa); color: var(--blanco); }
+  .rotacion-opt:hover, .ciclo-opt:hover { border-color: var(--brasa); color: var(--blanco); }
+  .rotacion-opt.active, .ciclo-opt.active { background: rgba(209,66,14,.15); border-color: var(--brasa); color: var(--blanco); }
+
+  /* Aviso del día en Nutrición: entreno (sube hidratos) o descanso (los baja) */
+  .ciclo-aviso {
+    display: flex; align-items: flex-start; gap: 9px;
+    border: 1px solid var(--humo); border-left: 3px solid var(--brasa);
+    border-radius: 9px; padding: 10px 13px; margin-bottom: 14px;
+    background: rgba(209,66,14,.06);
+  }
+  .ciclo-aviso.descanso { border-left-color: var(--metal); background: rgba(255,255,255,.03); }
+  .ciclo-aviso svg { flex-shrink: 0; margin-top: 1px; }
+  .ciclo-aviso-txt { font-size: 12.5px; color: var(--metal-claro); line-height: 1.55; }
+  .ciclo-aviso-txt strong { color: var(--blanco); font-weight: 700; }
   .musculo-chip {
     background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
     border-radius: 999px; padding: 5px 14px; font-size: 12px; font-weight: 600;
@@ -3807,6 +3819,49 @@
   .em-k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
   .em-v { font-size: 17px; font-weight: 600; }
   .em-peso .ejercicio-fila-controls { justify-content: flex-start; gap: 12px; }
+
+  /* PROGRESIÓN AUTORREGULADA: carga sugerida + valoración de las series.
+     Vive dentro de .ejercicio-card, separada del bloque de métricas por una
+     línea, para que se lea como "lo que viene después de apuntar el peso". */
+  .prog-wrap {
+    margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--humo);
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .prog-sug-zone:empty { display: none; }
+  .prog-sug { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 7px; }
+  .prog-sug-chip {
+    display: inline-flex; align-items: baseline; gap: 8px;
+    background: rgba(209,66,14,.12); border: 1px solid rgba(209,66,14,.45);
+    border-radius: 999px; padding: 5px 14px;
+  }
+  .prog-sug-k {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--metal-claro);
+  }
+  .prog-sug-v {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .5px;
+    color: var(--brasa); line-height: 1;
+  }
+  .prog-usar {
+    background: transparent; border: 1px solid var(--humo); color: var(--metal-claro);
+    border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .prog-usar:hover { border-color: var(--brasa); color: var(--brasa); }
+  .prog-motivo { font-size: 11.5px; color: var(--metal); line-height: 1.55; }
+  .prog-feedback { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .prog-feedback-k {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--metal); margin-right: 2px;
+  }
+  .prog-opt {
+    background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
+    border-radius: 999px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: all .2s;
+  }
+  .prog-opt:hover { border-color: var(--brasa); color: var(--blanco); }
+  .prog-opt.active { background: rgba(209,66,14,.15); border-color: var(--brasa); color: var(--blanco); }
+
   /* Fallback de renderEjercicioSimple cuando no se pudo separar nombre y cifra
      (texto de tramo sin forma reconocible): línea simple, sin tarjeta. */
   .ejercicio-fila-simple {
@@ -3874,6 +3929,11 @@
     .ejercicio-metrics { gap: 14px; padding-top: 10px; }
     .ejercicio-nombre { font-size: 18px; }
     .ejercicio-rpe .v { font-size: 20px; }
+    .prog-wrap { margin-top: 11px; padding-top: 11px; }
+    /* La etiqueta de la pregunta ocupa su propia línea: si comparte fila con
+       las tres opciones en una pantalla estrecha, los botones se parten. */
+    .prog-feedback-k { flex-basis: 100%; margin-bottom: 2px; }
+    .prog-opt { padding: 6px 11px; }
   }
 
   .ejercicio-fila {
@@ -6196,6 +6256,7 @@
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
       <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
+      <div id="recetarioNotaCiclo" style="display:none;font-size:12px;color:var(--metal-claro);background:rgba(209,66,14,.07);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:14px;line-height:1.5"></div>
       <input type="text" id="recetarioBuscador" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
     <div id="recetarioContenido"></div>
@@ -8366,7 +8427,7 @@
               <div><span>Carb</span><b id="railCarbs">—</b></div>
               <div><span>Grasa</span><b id="railGrasa">—</b></div>
             </div>
-            <div class="rail-sub">objetivo diario</div>
+            <div class="rail-sub" id="railKcalSub">objetivo diario</div>
           </div>
 
           <div class="rail-card">
@@ -8455,6 +8516,19 @@
               <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
             </div>
           </div>
+          <!-- Ciclado de carbohidratos: solo aparece si el plan lo aplica de
+               verdad (hace falta tener días de entreno Y días de descanso). -->
+          <div id="cicloCarbsBox" style="display:none;margin:14px 0;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">CARBOHIDRATOS SEGÚN EL DÍA</span>
+            </div>
+            <div id="cicloCarbsTexto" style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="ciclo-opt" data-ciclo="auto" onclick="cambiarCicladoCarbs('auto')">Ajustar por día</button>
+              <button class="ciclo-opt" data-ciclo="off" onclick="cambiarCicladoCarbs('off')">Los 7 días iguales</button>
+            </div>
+          </div>
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">Lun</button>
@@ -8495,6 +8569,8 @@
         </div>
         <div class="nutri-resumen" id="nutriResumen">
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
+          <!-- Por qué el día que estás mirando lleva más o menos hidratos -->
+          <div id="cicloCarbsAviso" style="display:none"></div>
           <div class="nutri-resumen-label">Total de hoy, según tus elecciones</div>
           <div class="stats-row">
             <div class="stat-card">
@@ -9672,6 +9748,7 @@
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', title: 'Hoy', text: 'Aquí tienes tu entrenamiento de hoy explicado paso a paso. Cuando lo termines, márcalo como completado: eso es lo que empieza tu racha.' },
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>', title: '¿No sabes hacer un ejercicio?', text: 'Junto a cada ejercicio tienes el botón "Cómo se hace". Ábrelo y verás fotos de la posición inicial y final, qué músculos trabajas y las instrucciones paso a paso, además del vídeo de técnica. Si dudas, míralo: hacerlo bien importa más que el peso.' },
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9.5h4.5M17.5 9.5H22M2 14.5h4.5M17.5 14.5H22"/></svg>', title: 'Apunta tus pesos', text: 'En cada ejercicio hay un contador de kilos con botones + y −. Apunta lo que levantas: la app recuerda el peso anterior y te dibuja tu progresión. Es lo que convierte "ir al gimnasio" en progresar de verdad.' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>', title: 'Nosotros te decimos cuánto peso poner', text: 'Después de apuntar el peso, dinos cómo fueron las series: "me sobró", "justo" o "no llegué". Con eso calculamos la carga de tu próxima sesión y te la enseñamos en la propia tarjeta, con un botón para ponerla de un toque. Ya no tienes que decidir tú cuándo subir: si te sobran repeticiones, subimos; si vas justo, consolidamos; si no llegas, bajamos. Y en la semana de descarga nunca te va a decir que subas.' },
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>', title: 'Añade tus propios ejercicios', text: 'Si te apetece meter uno que no está en tu plan, pulsa "+ Añadir ejercicio" al final del día (en Hoy y en Tu entrenamiento). Se guarda con sus series y repeticiones, como uno más de tu sesión.' },
     { section: 'semana', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title: 'Plan semanal', text: 'Consulta toda tu semana de un vistazo, y las próximas semanas de tu plan, que se irán ajustando según tu progreso.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Nutrición', text: 'Elige tus comidas día a día (lunes a domingo). Para cada toma tienes 5 opciones. Confirma cada día y pasa al siguiente.' },
@@ -10647,6 +10724,10 @@
             </div>
           </div>
         </div>
+        <div class="prog-wrap" data-ejercicio="${keyAttr}">
+          <div class="prog-sug-zone">${_progresionSugHTML(key, nombre)}</div>
+          <div class="prog-feedback">${_progresionFeedbackHTML(key, nombre)}</div>
+        </div>
       </div>
     </div>`;
   }
@@ -10988,6 +11069,16 @@
     guardarMarcaEjercicio(input);
   }
 
+  // Todas las copias en pantalla de un mismo ejercicio (aparece a la vez en
+  // "Hoy" y en "Plan semanal"). Se filtra comparando el dataset en JS en vez de
+  // meter la clave dentro de un selector CSS: desde que el cliente puede añadir
+  // sus propios ejercicios, el nombre es texto libre, y uno con comillas
+  // (`Press "banca"`) hacía que querySelectorAll lanzara SyntaxError y se
+  // abortara el guardado entero del peso -- error real reproducido al probar.
+  function _elementosDeEjercicio(clase, key) {
+    return [...document.querySelectorAll('.' + clase)].filter(el => el.dataset.ejercicio === key);
+  }
+
   function guardarMarcaEjercicio(input) {
     const key = input.dataset.ejercicio;
     if (!key) return;
@@ -11023,13 +11114,13 @@
     const entryActual = userData.marcasEjercicios[key];
     const historial = entryActual?.historial;
     const marcaUltimoTexto = entryActual?.valorAnterior != null ? `Anterior: ${entryActual.valorAnterior} ${etiqueta}` : '';
-    document.querySelectorAll(`.marca-input[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('marca-input', key).forEach(el => {
       if (el !== input) el.value = input.value;
     });
-    document.querySelectorAll(`.marca-mini-historial[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('marca-mini-historial', key).forEach(el => {
       el.innerHTML = renderMiniHistorialHTML(historial, 'valor', etiqueta);
     });
-    document.querySelectorAll(`.marca-ultimo[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('marca-ultimo', key).forEach(el => {
       el.textContent = marcaUltimoTexto;
     });
 
@@ -11081,21 +11172,244 @@
     const entryActual = userData.pesosEjercicios[key];
     const historial = entryActual?.historial;
     const pesoUltimoTexto = entryActual?.pesoAnterior != null ? `Anterior: ${entryActual.pesoAnterior} kg` : '';
-    document.querySelectorAll(`.peso-input[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('peso-input', key).forEach(el => {
       if (el !== input) el.value = input.value;
     });
-    document.querySelectorAll(`.peso-mini-historial[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('peso-mini-historial', key).forEach(el => {
       el.innerHTML = renderMiniHistorialHTML(historial);
     });
-    document.querySelectorAll(`.peso-ultimo[data-ejercicio="${key}"]`).forEach(el => {
+    _elementosDeEjercicio('peso-ultimo', key).forEach(el => {
       el.textContent = pesoUltimoTexto;
     });
+    // El peso de hoy es una de las dos entradas de la progresión autorregulada
+    // (la otra es la valoración de las series), así que la carga sugerida se
+    // recalcula aquí mismo en vez de esperar a que se repinte la vista entera.
+    _actualizarProgresionUI(key, nombre);
 
     const user = getCurrentUser();
     if (user) {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     }
 
+  }
+
+  // ===== PROGRESIÓN AUTORREGULADA DE CARGA =====
+  // Hasta aquí el registro de pesos era solo un cuaderno: guardaba lo que el
+  // cliente levantaba y le enseñaba el histórico, pero nunca le decía qué
+  // poner la próxima vez. Quien no sabe programar se queda semanas con el
+  // mismo peso, o sube a ojo y se pasa. Esto cierra el ciclo con la doble
+  // progresión de toda la vida: el cliente dice cuánto margen de repeticiones
+  // le sobró y de ahí sale la carga sugerida para la siguiente sesión.
+  //
+  //   "Me sobró"  (RIR >= 3) -> subir el incremento completo.
+  //   "Justo"     (RIR 1-2)  -> mantener; a la 2ª sesión seguida igual, medio
+  //                             incremento (el peso ya está consolidado).
+  //   "No llegué" (no cerró las series) -> repetir; a la 2ª seguida, -10%.
+  //
+  // En la 4ª semana de cada mesociclo (la de descarga) NUNCA se sugiere subir:
+  // se propone bajar un 10%, que es literalmente lo que ya dice la nota de
+  // descarga del propio generador de planes ("baja las cargas un 10-15%").
+  // Sin esto, la sugerencia contradiría al plan justo la semana que el plan
+  // pide recuperar.
+  const _fmtKg = kg => (Math.round(kg * 10) / 10).toString().replace('.', ',');
+
+  // El salto razonable depende del ejercicio: 5 kg en una sentadilla con barra
+  // es un escalón normal, en un curl de bíceps es subir casi un 20% de golpe.
+  function _incrementoProgresion(nombre) {
+    const n = (nombre || '').toLowerCase();
+    // Unilaterales y goblet se cargan con mancuerna o kettlebell: ahí no hay
+    // discos de 2,5 kg por lado que repartir, el salto real es mucho menor.
+    const unilateral = /búlgara|bulgara|a una pierna|a un brazo|unilateral|goblet|zancada/.test(n);
+    if (!unilateral && /(sentadilla|peso muerto|prensa|hip thrust)/.test(n)) return 5;
+    if (/(curl|elevacion|elevación|extensión|extension|pájaro|pajaro|face pull|femoral|gemelo|apertura|encogimiento|pullover|patada|copa)/.test(n)) return 2;
+    return 2.5;
+  }
+
+  // Quita la basura de coma flotante (62,5 + 2,5 tiene que dar 65, no 64,999…).
+  const _kg1 = kg => Math.max(0, Math.round(kg * 10) / 10);
+
+  // Bajar "un 10%" suena bien en una hoja de cálculo y es inmontable en un
+  // gimnasio: el 10% de 70 kg son 63 kg, que en una barra pediría 0,75 kg por
+  // lado. Se baja un número ENTERO de incrementos de ese ejercicio, que es lo
+  // único que se puede cargar de verdad. Subir no necesita esto: peso+incremento
+  // siempre es montable si el peso de partida ya lo era.
+  function _bajarCarga(peso, inc) {
+    const escalones = Math.round((peso * 0.1) / inc);
+    if (escalones < 1) return peso; // tan ligero que un solo escalón pasaría del 10%
+    return Math.max(inc, _kg1(peso - escalones * inc));
+  }
+
+  // Devuelve {peso, motivo, cuando} o null si todavía no hay con qué decidir.
+  // `cuando` es 'hoy' (la última valoración es de un día anterior, así que la
+  // sugerencia es para la sesión que está haciendo ahora) o 'proxima' (ya ha
+  // valorado hoy, así que lo que se le enseña es para la siguiente vez).
+  function sugerenciaProgresion(key, nombre) {
+    const hist = userData.pesosEjercicios?.[key]?.historial;
+    if (!hist || !hist.length) return null;
+
+    let idx = -1;
+    for (let i = hist.length - 1; i >= 0; i--) {
+      if (hist[i].sensacion && hist[i].peso > 0) { idx = i; break; }
+    }
+    if (idx === -1) return null; // hay pesos apuntados, pero ninguno valorado
+
+    const ultima = hist[idx];
+    const cuando = ultima.fecha === getFechaHoyISO() ? 'proxima' : 'hoy';
+
+    const inc = _incrementoProgresion(nombre);
+
+    // Semana de descarga del mesociclo (la 4ª de cada bloque de 4). Solo aplica
+    // a la sesión de HOY: si ya ha entrenado y valorado hoy, lo que se muestra
+    // es la referencia para la próxima sesión, que puede caer ya fuera de la
+    // descarga -- ahí manda la regla normal.
+    const semanaCiclo = ((Math.max(1, getSemanaActual()) - 1) % 4) + 1;
+    if (semanaCiclo === 4 && cuando === 'hoy') {
+      const bajado = _bajarCarga(ultima.peso, inc);
+      return {
+        peso: bajado,
+        motivo: bajado < ultima.peso
+          ? `Semana de descarga: baja a ${_fmtKg(bajado)} kg y quédate a 3-4 repeticiones del fallo. Esta semana no se busca estímulo, se busca llegar fresco al bloque siguiente.`
+          : 'Semana de descarga: mantén el peso pero quédate a 3-4 repeticiones del fallo. Esta semana no se busca estímulo, se busca llegar fresco al bloque siguiente.',
+        cuando
+      };
+    }
+
+    // Sesiones seguidas (hacia atrás) repitiendo la MISMA valoración con el
+    // MISMO peso: es lo que distingue "un mal día" de "aquí me he estancado".
+    let seguidas = 0;
+    for (let i = idx; i >= 0; i--) {
+      if (hist[i].sensacion === ultima.sensacion && hist[i].peso === ultima.peso) seguidas++;
+      else break;
+    }
+
+    if (ultima.sensacion === 'facil') {
+      return {
+        peso: _kg1(ultima.peso + inc),
+        motivo: `Te sobraron repeticiones con ${_fmtKg(ultima.peso)} kg. Súbele ${_fmtKg(inc)} kg y busca terminar a 1-2 repeticiones del fallo.`,
+        cuando
+      };
+    }
+    if (ultima.sensacion === 'justo') {
+      // Dos sesiones cerrando las series al mismo peso = consolidado. Sube el
+      // incremento entero, no medio: medio salto (61,25 kg en una barra) no se
+      // puede montar, y un peso que el cliente no puede poner no es un consejo.
+      if (seguidas >= 2) {
+        return {
+          peso: _kg1(ultima.peso + inc),
+          motivo: `Llevas ${seguidas} sesiones cerrando las series con ${_fmtKg(ultima.peso)} kg. Ya está consolidado: súbele ${_fmtKg(inc)} kg.`,
+          cuando
+        };
+      }
+      return {
+        peso: _kg1(ultima.peso),
+        motivo: `${_fmtKg(ultima.peso)} kg es tu peso justo ahora mismo. Repítelo y consolídalo: a la segunda sesión seguida, subimos.`,
+        cuando
+      };
+    }
+    if (ultima.sensacion === 'duro') {
+      if (seguidas >= 2) {
+        const bajado = _bajarCarga(ultima.peso, inc);
+        return {
+          peso: bajado,
+          motivo: bajado < ultima.peso
+            ? `Dos sesiones sin cerrar las series con ${_fmtKg(ultima.peso)} kg. Baja a ${_fmtKg(bajado)} kg, recupera la técnica y vuelve a subir desde ahí.`
+            : `Dos sesiones sin cerrar las series con ${_fmtKg(ultima.peso)} kg. Con este peso, bajar un escalón ya sería un salto demasiado grande: quita una repetición por serie antes que quitar kilos.`,
+          cuando
+        };
+      }
+      return {
+        peso: _kg1(ultima.peso),
+        motivo: `No completaste las series con ${_fmtKg(ultima.peso)} kg. Repite el mismo peso: la próxima suele salir.`,
+        cuando
+      };
+    }
+    return null;
+  }
+
+  // Zona de la sugerencia (se repinta sola). Los tres botones de valoración NO
+  // se repintan nunca: si se reemplazaran mientras el cliente está haciendo
+  // clic en uno, el navegador se quedaría a medias (el elemento desaparece
+  // entre el mousedown y el click) y el clic se perdería en silencio. Pasa de
+  // verdad: teclear el peso y pulsar directamente una valoración dispara antes
+  // el onchange del input, que es justo quien manda repintar esta zona.
+  function _progresionSugHTML(key, nombre) {
+    const sug = sugerenciaProgresion(key, nombre);
+    if (!sug) return '';
+    const keyJs = _esc(String(key).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    const etiqueta = sug.cuando === 'hoy' ? 'Sugerido hoy' : 'Próxima sesión';
+    const usarBtn = sug.cuando === 'hoy'
+      ? `<button type="button" class="prog-usar" onclick="event.stopPropagation();usarSugerenciaProgresion(this,'${keyJs}',${sug.peso})">Usar ${_fmtKg(sug.peso)} kg</button>`
+      : '';
+    return `<div class="prog-sug">
+        <span class="prog-sug-chip"><span class="prog-sug-k">${etiqueta}</span><span class="prog-sug-v">${_fmtKg(sug.peso)} kg</span></span>
+        ${usarBtn}
+      </div>
+      <div class="prog-motivo">${_esc(sug.motivo)}</div>`;
+  }
+
+  function _progresionFeedbackHTML(key, nombre) {
+    const sensHoy = userData.pesosEjercicios?.[key]?.historial?.find(h => h.fecha === getFechaHoyISO())?.sensacion || '';
+    const keyJs = _esc(String(key).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    const nombreJs = _esc(String(nombre).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+    const opt = (val, txt, ayuda) =>
+      `<button type="button" class="prog-opt${sensHoy === val ? ' active' : ''}" data-sens="${val}" aria-pressed="${sensHoy === val}" title="${ayuda}" onclick="event.stopPropagation();guardarSensacionEjercicio('${keyJs}','${nombreJs}','${val}')">${txt}</button>`;
+    return `<span class="prog-feedback-k">¿Cómo fueron las series?</span>
+      ${opt('facil', 'Me sobró', 'Terminé con 3 o más repeticiones de margen')}
+      ${opt('justo', 'Justo', 'Terminé a 1-2 repeticiones del fallo')}
+      ${opt('duro', 'No llegué', 'No completé las repeticiones que pedía el plan')}`;
+  }
+
+  // El mismo ejercicio puede estar en pantalla dos veces (Hoy y Plan semanal),
+  // igual que ya pasa con el stepper de peso: se actualizan todas sus copias.
+  // Se comparan los dataset en JS en vez de meter la clave en un selector CSS
+  // porque el cliente puede añadir ejercicios con el nombre que quiera, comillas
+  // incluidas, y eso rompería el querySelector.
+  function _actualizarProgresionUI(key, nombre) {
+    const sensHoy = userData.pesosEjercicios?.[key]?.historial?.find(h => h.fecha === getFechaHoyISO())?.sensacion || '';
+    document.querySelectorAll('.prog-wrap').forEach(wrap => {
+      if (wrap.dataset.ejercicio !== key) return;
+      const zona = wrap.querySelector('.prog-sug-zone');
+      if (zona) zona.innerHTML = _progresionSugHTML(key, nombre);
+      wrap.querySelectorAll('.prog-opt').forEach(b => {
+        const activo = b.dataset.sens === sensHoy;
+        b.classList.toggle('active', activo);
+        b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+      });
+    });
+  }
+
+  function guardarSensacionEjercicio(key, nombre, sensacion) {
+    if (!['facil', 'justo', 'duro'].includes(sensacion)) return;
+    const entry = userData.pesosEjercicios?.[key];
+    const hoy = getFechaHoyISO();
+    const hoyEntry = entry?.historial?.find(h => h.fecha === hoy);
+    // Sin peso apuntado hoy no hay nada que autorregular: una valoración suelta
+    // no sirve para calcular la carga de la próxima sesión.
+    if (!hoyEntry || !(hoyEntry.peso > 0)) {
+      showToast('Apunta primero el peso que has usado hoy y luego dinos cómo te fueron las series.', 4500);
+      return;
+    }
+    // Volver a pulsar la opción ya marcada la quita (se equivocó al valorar).
+    // La valoración vive SOLO dentro de su entrada del historial, no copiada
+    // también en el nivel de arriba: guardarPesoEjercicio() rehace la entrada
+    // de hoy cada vez que cambia el peso (y con razón, porque una valoración
+    // hecha con 60 kg no dice nada de 70 kg), y una copia suelta fuera del
+    // historial sobreviviría a ese borrado quedándose desfasada.
+    if (hoyEntry.sensacion === sensacion) delete hoyEntry.sensacion;
+    else hoyEntry.sensacion = sensacion;
+    _actualizarProgresionUI(key, nombre);
+    const user = getCurrentUser();
+    if (user) {
+      saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+  }
+
+  function usarSugerenciaProgresion(btn, key, peso) {
+    const input = btn.closest('.ejercicio-card')?.querySelector('.peso-input');
+    if (!input) return;
+    input.value = peso;
+    guardarPesoEjercicio(input); // guarda, sincroniza copias y repinta la sugerencia
+    showToast(`Peso de hoy fijado en ${_fmtKg(peso)} kg.`);
   }
 
   // Divide por comas ignorando las que caen dentro de un paréntesis.
@@ -14493,6 +14807,92 @@
       }
     }
 
+    // ── CICLADO DE CARBOHIDRATOS: día de entreno vs día de descanso ──────────
+    // Hasta aquí los 7 días llevaban exactamente las mismas calorías y los
+    // mismos carbohidratos, entrenara ese día o no. Pero el gasto no es el
+    // mismo: el glucógeno que se vacía en una sesión de fuerza o una tirada
+    // larga hay que reponerlo, y un domingo de sofá no lo necesita. Se suben
+    // los carbohidratos los días que SÍ hay entreno y se bajan los que no.
+    //
+    // Regla que lo hace seguro: la MEDIA SEMANAL no se mueve ni un gramo. Todo
+    // el plan (déficit, superávit, la recalibración del check-in) está calculado
+    // sobre esa media, así que el ciclado solo redistribuye — nunca añade ni
+    // quita. Matemáticamente: nEntreno·(1+a) + nDescanso·(1−a·nEntreno/nDescanso)
+    // = 7, sea cual sea el reparto de días.
+    //
+    // Solo se mueven los carbohidratos. La proteína se mantiene idéntica todos
+    // los días a propósito (es el macro que sostiene la masa muscular y no tiene
+    // sentido recortarlo en descanso) y la grasa tampoco se toca.
+    const kcalObjPorDia = new Array(7).fill(kcalObj);
+    const carbsObjPorDia = new Array(7).fill(carbsObj);
+    let cicloCarbs = null;
+    // Factor de carbohidratos de cada día. 1 = ese día no se toca, que es lo que
+    // queda si el cliente desactiva el ciclado o si su plan no lo permite.
+    let factorPorDia = new Array(7).fill(1);
+
+    const cicladoActivo = (u.cicladoCarbs || 'auto') !== 'off';
+    if (cicladoActivo && !soloDieta && semana.length === 7) {
+      const esDiaEntreno = semana.map(d => d.tipo === 'Entrenamiento');
+      const nEntreno = esDiaEntreno.filter(Boolean).length;
+      const nDescanso = 7 - nEntreno;
+      // Sin los dos tipos de día no hay nada que ciclar (ni 7 días de entreno
+      // ni 7 de descanso permiten redistribuir sin cambiar la media).
+      if (nEntreno > 0 && nDescanso > 0) {
+        const amplitud = ganarMusculo ? 0.20 : perdidaGrasa ? 0.15 : 0.10;
+        let factorEntreno = 1 + amplitud;
+        let factorDescanso = 1 - (amplitud * nEntreno) / nDescanso;
+        // Con muchos días de entreno y pocos de descanso, toda la subida hay
+        // que compensarla en muy pocos días: con 5 y 2 el descuento salía del
+        // 30%, y con 6 y 1 el factor se iba directamente a negativo. Se pone un
+        // suelo: un día de descanso nunca baja más de un 25% de los
+        // carbohidratos objetivo. Por debajo de ahí deja de ser "hoy no hace
+        // falta tanto glucógeno" y empieza a ser un día de pasar hambre, que es
+        // justo lo que hace que la gente abandone una dieta. La subida de los
+        // días de entreno se recalcula hacia atrás desde ese suelo, para que la
+        // media semanal siga cuadrando exactamente.
+        if (factorDescanso < 0.75) {
+          factorDescanso = 0.75;
+          factorEntreno = 1 + ((1 - factorDescanso) * nDescanso) / nEntreno;
+        }
+        factorPorDia = esDiaEntreno.map(e => (e ? factorEntreno : factorDescanso));
+        cicloCarbs = {
+          dias: esDiaEntreno,
+          pctEntreno: Math.round((factorEntreno - 1) * 100),
+          pctDescanso: Math.round((1 - factorDescanso) * 100),
+          nEntreno,
+          nDescanso,
+        };
+      }
+    }
+
+    // CLONAR LAS RECETAS POR DÍA. Se hace SIEMPRE, haya ciclado o no, y es la
+    // pieza que sostiene todo lo de arriba: hasta aquí una misma receta era el
+    // MISMO objeto en varios días de la semana (por eso los dos bloques de
+    // corrección anteriores llevan su Set de "ya tocada"). Con objetos
+    // compartidos es imposible que dos días tengan cantidades distintas, y
+    // también es imposible cuadrar cada día con su propio objetivo calórico:
+    // la normalización de más abajo solo podía calcular el factor del lunes y
+    // dejar que llegara al resto de rebote, lo que dejaba días reales hasta un
+    // 9% fuera de su objetivo. Clonando, cada día es independiente de verdad.
+    nutricionPorDia.forEach((dia, i) => {
+      const f = factorPorDia[i];
+      carbsObjPorDia[i] = Math.round(carbsObj * f);
+      kcalObjPorDia[i] = Math.round(kcalObj + 4 * (carbsObjPorDia[i] - carbsObj));
+      dia.forEach(m => {
+        m.opciones = (m.opciones || []).map(o => {
+          if (f === 1) return { ...o };
+          const c = parseInt(o.carbs) || 0;
+          const cNuevo = Math.max(0, Math.round(c * f));
+          return {
+            ...o,
+            carbs: `${cNuevo}g carbs`,
+            kcal: `${Math.max(0, (parseInt(o.kcal) || 0) + 4 * (cNuevo - c))} kcal`,
+            ingredientes: escalarIngredientesPorMacro(o.ingredientes, 1, f),
+          };
+        });
+      });
+    });
+
     // El plan base guarda el día 0 (lunes) como referencia
     nutricion = nutricionPorDia[0];
 
@@ -14502,6 +14902,12 @@
     // Sin este caso aparte, un cliente de solo dieta veía "bebe entre series" o
     // "post-WOD", que no tienen sentido si no tiene plan de entreno.
     const notasDeporte = [];
+    // Explicación del ciclado (solo si de verdad se ha aplicado). Va la primera
+    // porque es lo que más cambia respecto a lo que el cliente espera ver: si
+    // no se le cuenta, un miércoles con más arroz que un domingo parece un fallo.
+    if (cicloCarbs) {
+      notasDeporte.push(`Carbohidratos por día: tus ${cicloCarbs.nEntreno} días de entreno llevan un ${cicloCarbs.pctEntreno}% más de carbohidratos y tus ${cicloCarbs.nDescanso} días de descanso un ${cicloCarbs.pctDescanso}% menos. No comes ni más ni menos a la semana — el total es exactamente el mismo —, se reparte hacia los días en que tu cuerpo vacía el glucógeno y lo aprovecha. La proteína no se mueve ningún día: esa sostiene tu masa muscular entrenes o no. Si prefieres los 7 días iguales, puedes desactivarlo arriba en Nutrición.`);
+    }
     if (soloDieta) {
       notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
       notasDeporte.push('Suplementación: si entrenas fuerza por tu cuenta, la creatina monohidrato (5g/día, todos los días) es el suplemento con más evidencia científica. Si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
@@ -14658,11 +15064,30 @@
     // única variable libre para cuadrar las kcal es la grasa (el único macro
     // sin objetivo propio), igual que un nutricionista ajustaría grasa en la
     // dieta antes que tocar la proteína ya pautada.
-    const totalBase = nutricion.reduce((s, m) => s + (parseInt(m.opciones[0]?.kcal) || 0), 0);
-    if (totalBase > 0 && Math.abs(totalBase - kcalObj) > kcalObj * 0.05) {
-      const factorNorm = kcalObj / totalBase;
-      nutricion.forEach(m => {
+    // Este paso recorre los 7 DÍAS, no solo el lunes. Antes se calculaba el
+    // factor mirando únicamente `nutricion` (que es nutricionPorDia[0]) y
+    // llegaba al resto de la semana "de rebote", porque una misma receta era el
+    // mismo objeto en varios días. Desde que el ciclado de carbohidratos clona
+    // las recetas por día (tiene que hacerlo: si no, el factor del lunes se
+    // aplicaría también al domingo), ese rebote ya no existe -- normalizando
+    // solo el lunes, los otros seis días se quedaban sin corregir y sus kcal se
+    // iban cientos de calorías por debajo del objetivo. Comprobado en vivo:
+    // lunes 746 kcal en el desayuno frente a 454 el sábado, con la misma receta.
+    //
+    // El Set es la misma protección que usan los dos bloques de corrección de
+    // arriba: cuando el ciclado está desactivado las recetas SIGUEN compartidas
+    // entre días, y sin él se les aplicaría un factor distinto una vez por cada
+    // día, multiplicándose entre sí.
+    const _yaNormalizadas = new Set();
+    nutricionPorDia.forEach((tomasDia, iDia) => {
+      const objetivoDia = kcalObjPorDia[iDia] || kcalObj;
+      const totalBase = tomasDia.reduce((s, m) => s + (parseInt(m.opciones[0]?.kcal) || 0), 0);
+      if (!(totalBase > 0) || Math.abs(totalBase - objetivoDia) <= objetivoDia * 0.05) return;
+      const factorNorm = objetivoDia / totalBase;
+      tomasDia.forEach(m => {
         m.opciones.forEach(o => {
+          if (_yaNormalizadas.has(o)) return;
+          _yaNormalizadas.add(o);
           const k = parseInt(o.kcal) || 0;
           const p = parseInt(o.prot) || 0;
           const c = parseInt(o.carbs) || 0;
@@ -14673,9 +15098,9 @@
           o.grasa = `${grasaNueva}g grasa`;
         });
       });
-    }
+    });
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
 
@@ -14745,6 +15170,74 @@
     aplicarOcultarKcal(on);
   }
 
+  // ===== CICLADO DE CARBOHIDRATOS (día de entreno vs día de descanso) =====
+  // El motor lo aplica en buildPlanFromData(); aquí solo va la parte visible:
+  // el control para activarlo/desactivarlo y el aviso de por qué el día que
+  // estás mirando lleva más o menos hidratos que otro.
+  const DIAS_SEMANA_LARGO = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+
+  function _reflejarCicladoCarbs() {
+    const box = document.getElementById('cicloCarbsBox');
+    if (!box) return;
+    const ciclo = generatedPlan?.cicloCarbs;
+    const pref = userData.cicladoCarbs || 'auto';
+    // La caja solo se enseña si el ciclado es POSIBLE para este cliente: con
+    // plan de solo nutrición, o con una semana sin días de descanso, no hay
+    // nada que repartir y un interruptor que no hace nada solo confunde. Si
+    // está desactivado a mano, sí se enseña -- si no, no habría forma de
+    // volver a activarlo.
+    const posible = pref === 'off'
+      ? !generatedPlan?.soloDieta && (generatedPlan?.semana || []).length === 7
+      : !!ciclo;
+    box.style.display = posible ? '' : 'none';
+    if (!posible) return;
+
+    const txt = document.getElementById('cicloCarbsTexto');
+    if (txt) {
+      txt.textContent = ciclo
+        ? `Tus ${ciclo.nEntreno} días de entreno llevan un ${ciclo.pctEntreno}% más de carbohidratos y tus ${ciclo.nDescanso} de descanso un ${ciclo.pctDescanso}% menos. El total de la semana es exactamente el mismo: solo se reparte hacia los días en que lo aprovechas.`
+        : 'Ahora mismo tus 7 días llevan los mismos carbohidratos. Si lo activas, subimos los hidratos los días que entrenas y los bajamos los de descanso, sin cambiar el total de la semana.';
+    }
+    document.querySelectorAll('.ciclo-opt').forEach(b => {
+      b.classList.toggle('active', b.dataset.ciclo === pref);
+      b.setAttribute('aria-pressed', b.dataset.ciclo === pref ? 'true' : 'false');
+    });
+  }
+
+  function _actualizarAvisoCiclo(dia) {
+    const el = document.getElementById('cicloCarbsAviso');
+    if (!el) return;
+    const ciclo = generatedPlan?.cicloCarbs;
+    if (!ciclo || !ciclo.dias || dia < 0 || dia > 6) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    const entreno = !!ciclo.dias[dia];
+    const carbsDia = generatedPlan.carbsObjPorDia?.[dia];
+    const nombreDia = DIAS_SEMANA_LARGO[dia];
+    const icono = entreno
+      ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9.5h4.5M17.5 9.5H22M2 14.5h4.5M17.5 14.5H22"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--metal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    const texto = entreno
+      ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${ciclo.pctEntreno}% más de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''} para reponer el glucógeno que vas a gastar.`
+      : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''}. La proteína no baja: sigue igual que cualquier otro día.`;
+    el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>`;
+    el.style.display = '';
+  }
+
+  function cambiarCicladoCarbs(pref) {
+    if (!['auto', 'off'].includes(pref)) return;
+    if ((userData.cicladoCarbs || 'auto') === pref) return;
+    userData.cicladoCarbs = pref;
+    generatedPlan = buildPlanFromData(userData);
+    // A diferencia del cambio de rotación de menú, aquí NO se resetea la semana:
+    // las recetas y su orden son las mismas, lo único que cambia son las
+    // cantidades. Perder las 7 elecciones del cliente por esto sería absurdo.
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    buildDashboard();
+    showToast(pref === 'auto'
+      ? 'Listo: tus carbohidratos se ajustan según entrenes o descanses ese día.'
+      : 'Listo: tus 7 días llevan los mismos carbohidratos.');
+  }
+
   function cambiarRotacionMenu(pref) {
     if (!['semanal','mensual','fija'].includes(pref)) return;
     const antes = userData.rotacionMenu || 'mensual';
@@ -14794,6 +15287,22 @@
         generatedPlan.carbsObj = _obj.carbsObj;
         generatedPlan.tdee = _obj.tdee;
       } catch (e) { /* perfil incompleto: se deja sin objetivos, los KPIs muestran — */ }
+    }
+
+    // Migración al ciclado de carbohidratos: los planes guardados ANTES de esta
+    // función no traen el campo (undefined; cuando el ciclado no aplica es null,
+    // que sí es un valor). Aquí no vale con rellenar los objetivos por día como
+    // hace el backfill de arriba: las cantidades de cada receta también cambian,
+    // así que el plan hay que rehacerlo entero -- si no, la ficha diría "+20% de
+    // hidratos los días de entreno" mientras los platos siguen todos iguales.
+    // Regenerar es seguro y ya se hace en _refrescarMenuNutricion(): las
+    // elecciones de comidas del cliente van por índice y no se pierden.
+    if (generatedPlan.cicloCarbs === undefined && userData && userData.peso && userData.altura && userData.edad) {
+      try {
+        generatedPlan = buildPlanFromData(userData);
+        const _u = getCurrentUser();
+        if (_u) saveUserData(_u.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      } catch (e) { /* si falla, se sigue mostrando el plan guardado tal cual */ }
     }
 
     actualizarBtnCancelar();
@@ -14869,6 +15378,12 @@
     // Kcal objetivo
     const statKcalEl = document.getElementById('statKcal');
     if (statKcalEl) statKcalEl.textContent = generatedPlan.kcalObj ? `${generatedPlan.kcalObj}` : '—';
+    // Con el ciclado activo esta cifra es la MEDIA de la semana, no el objetivo
+    // de hoy: cada día tiene el suyo (lo enseña la barra "KCAL HOY" en
+    // Nutrición). Dejar el rótulo en "objetivo diario" haría que el cliente
+    // viera dos números distintos llamados igual.
+    const railKcalSubEl = document.getElementById('railKcalSub');
+    if (railKcalSubEl) railKcalSubEl.textContent = generatedPlan.cicloCarbs ? 'media al día' : 'objetivo diario';
 
     // ── Panel de trazabilidad IA ──────────────────────────────────────────────
     (function() {
@@ -15015,6 +15530,7 @@
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
     renderNutritionGrid(0);
     _reflejarRotacionMenu();
+    _reflejarCicladoCarbs();
 
     // Tarjeta resumen del día (entreno + comida de un vistazo)
     renderTodayHero();
@@ -15264,6 +15780,7 @@
     const meals = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
     generatedPlan._nutricionActiva = meals;
     _inyectarComidasExtraDia(dia, meals);
+    _actualizarAvisoCiclo(dia);
     meals.forEach((meal, mealIdx) => {
       const previewHTML = meal.opciones.map((opt, optIdx) => `
         <div class="meal-preview-pill ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="event.stopPropagation(); selectMealOptionPreview(${mealIdx}, ${optIdx})">
@@ -15335,7 +15852,15 @@
     if (nutriSubEl && generatedPlan.kcalObj) {
       const numTomas = (generatedPlan.nutricion || []).length || 5;
       const numOpciones = generatedPlan.nutricion?.[0]?.opciones?.length || 5;
-      nutriSubEl.innerHTML = `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes ${numTomas} toma${numTomas !== 1 ? 's' : ''} con ${numOpciones} opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
+      // Con el ciclado activo ya no hay UN objetivo diario, hay siete: llamarlo
+      // "tu objetivo diario" mientras la barra de abajo enseña otra cifra
+      // distinta según el día es contradictorio. Se presenta como media semanal,
+      // que es lo que ese número es de verdad.
+      const ciclo = generatedPlan.cicloCarbs;
+      const objetivoTxt = ciclo
+        ? `Tu objetivo: <strong>${generatedPlan.kcalObj} kcal de media al día</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Repartido por días: más carbohidratos cuando entrenas, menos cuando descansas, sin cambiar el total de la semana.`
+        : `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad.`;
+      nutriSubEl.innerHTML = `${objetivoTxt} Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes ${numTomas} toma${numTomas !== 1 ? 's' : ''} con ${numOpciones} opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -15808,7 +16333,7 @@
     @media print{.back,.no-print{display:none !important}}</style></head><body>
     <a href="https://k-one.fit" class="back">← Volver a K-ONE</a>
     <h1>Plan de nutrición — ${_esc(user?.nombre || 'K-ONE')}</h1>
-    ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal/día · ${generatedPlan.protObj || ''}g proteína</p>`}
+    ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal${generatedPlan.cicloCarbs ? ' de media al día' : '/día'} · ${generatedPlan.protObj || ''}g proteína${generatedPlan.cicloCarbs ? `<br>Las cantidades de esta hoja son las de un ${generatedPlan.cicloCarbs.dias[0] ? 'día de entreno' : 'día de descanso'}. Los días de entreno llevan un ${generatedPlan.cicloCarbs.pctEntreno}% más de carbohidratos y los de descanso un ${generatedPlan.cicloCarbs.pctDescanso}% menos; el plan semanal de la app ya lo trae ajustado día a día.` : ''}</p>`}
     <button onclick="window.print()" class="no-print" style="background:#D1420E;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
     generatedPlan.nutricion.forEach(meal => {
       html += `<h2>${meal.momento} · ${meal.hora}</h2>`;
@@ -15857,10 +16382,22 @@
         totalGrasa += parseInt(opt.grasa) || 0;
       }
     });
-    const objetivo = generatedPlan.kcalObj || 2000;
-    const pct = Math.min(100, Math.round((totalKcal / objetivo) * 100));
+    // Objetivo DEL DÍA que se está mirando: con el ciclado de carbohidratos, un
+    // día de entreno y uno de descanso ya no tienen el mismo objetivo calórico
+    // (la media de la semana sí sigue siendo kcalObj). Sin esto, la barra medía
+    // los 7 días contra el mismo número y marcaba "te pasas" los días de entreno
+    // y "te quedas corto" los de descanso, cuando ambos van exactamente donde
+    // deben.
+    const objetivo = generatedPlan.kcalObjPorDia?.[diaNutriActual] || generatedPlan.kcalObj || 2000;
+    // El porcentaje real y el ancho de la barra son cosas distintas: el ancho se
+    // topa en 100% (no puede desbordar la caja), pero el porcentaje que se lee y
+    // el color tienen que poder pasar de ahí. Antes se calculaba uno solo, ya
+    // recortado a 100, así que la rama de "te has pasado" (>110%) era código
+    // muerto: quien comía de más nunca veía el aviso rojo.
+    const pct = objetivo > 0 ? Math.round((totalKcal / objetivo) * 100) : 0;
+    const pctBarra = Math.min(100, pct);
     document.getElementById('kcalDiarioTexto').textContent = `${totalKcal} / ${objetivo} kcal (${pct}%)`;
-    document.getElementById('kcalDiarioFill').style.width = pct + '%';
+    document.getElementById('kcalDiarioFill').style.width = pctBarra + '%';
     document.getElementById('kcalDiarioFill').style.background = pct > 110 ? '#e74c3c' : pct > 90 ? '#27ae60' : 'var(--brasa)';
     document.getElementById('kcalDiarioProt').textContent = `Prot: ${totalProt}g`;
     document.getElementById('kcalDiarioCarbs').textContent = `Carbs: ${totalCarbs}g`;
@@ -18133,6 +18670,20 @@
 
   function abrirRecetario() {
     if (!generatedPlan || !generatedPlan.nutricion) return;
+    // El recetario enseña UN día de referencia (el lunes) con todas sus
+    // opciones. Con el ciclado activo las cantidades cambian según el día, así
+    // que hay que decir de qué día son estas -- si no, el cliente compara este
+    // gramaje con el del miércoles y parece que algo falla.
+    const notaCiclo = document.getElementById('recetarioNotaCiclo');
+    if (notaCiclo) {
+      const c = generatedPlan.cicloCarbs;
+      if (c) {
+        notaCiclo.textContent = `Las cantidades que ves aquí son las de un ${c.dias[0] ? 'día de entreno' : 'día de descanso'}. Tus días de entreno llevan un ${c.pctEntreno}% más de carbohidratos y los de descanso un ${c.pctDescanso}% menos: en la pestaña de cada día tienes el gramaje exacto que te toca.`;
+        notaCiclo.style.display = '';
+      } else {
+        notaCiclo.style.display = 'none';
+      }
+    }
     const contenido = document.getElementById('recetarioContenido');
     contenido.innerHTML = generatedPlan.nutricion.map((meal, mealIdx) => {
       const cards = meal.opciones.map((opt, i) => {
@@ -18952,11 +19503,28 @@
 
     html += `<div class="section"><h2>Nutrición semanal</h2>`;
     if (generatedPlan.kcalObj && !ocultarKcal) {
-      html += `<p style="font-size:11px;color:#999;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal · ${generatedPlan.protObj}g proteína</p>`;
+      const _ciclo = generatedPlan.cicloCarbs;
+      html += `<p style="font-size:11px;color:#999;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal${_ciclo ? ' de media al día' : ''} · ${generatedPlan.protObj}g proteína`
+        + (_ciclo ? ` · Los días de entreno llevan un ${_ciclo.pctEntreno}% más de carbohidratos y los de descanso un ${_ciclo.pctDescanso}% menos (el total de la semana no cambia).` : '')
+        + `</p>`;
     }
     dias.forEach((dia, diaIdx) => {
-      html += `<div class="nutri-day"><div class="nutri-day-title">${dia}</div>`;
-      generatedPlan.nutricion.forEach((meal, mealIdx) => {
+      // BUG REAL: este bucle recorría los 7 días pero sacaba los platos SIEMPRE
+      // de generatedPlan.nutricion, que es el lunes. Cada día tiene su propia
+      // rotación de 5 opciones, así que "la opción 3 del jueves" que eligió el
+      // cliente se imprimía como "la opción 3 del lunes" -- un plato distinto
+      // del que había elegido. Con el ciclado de carbohidratos además se
+      // imprimían las cantidades del lunes en los siete días. Se usa el día
+      // real, igual que ya hace generarListaCompra().
+      const tomasDia = generatedPlan.nutricionPorDia?.[diaIdx] || generatedPlan.nutricion;
+      // Las comidas que el cliente se ha añadido por su cuenta también son
+      // parte de su semana: sin esto, el PDF se las dejaba fuera.
+      try { _inyectarComidasExtraDia(diaIdx, tomasDia); } catch (e) {}
+      const etiquetaDia = generatedPlan.cicloCarbs
+        ? `${dia} <span style="font-weight:400;color:#999;font-size:10px">· ${generatedPlan.cicloCarbs.dias[diaIdx] ? 'entreno' : 'descanso'}</span>`
+        : dia;
+      html += `<div class="nutri-day"><div class="nutri-day-title">${etiquetaDia}</div>`;
+      tomasDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[diaIdx]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
@@ -19096,7 +19664,13 @@
         const el = document.getElementById(id)?.closest('.stat-card')?.querySelector('.stat-card-sub');
         if (el) el.textContent = txt;
       };
-      sub('resumenKcal', `kcal · obj. ${generatedPlan.kcalObj}`);
+      // El objetivo que se compara aquí es el DEL DÍA que se está mirando, no
+      // la media semanal: con el ciclado, un día de entreno que va exactamente
+      // donde debe se leía como "3527 frente a un objetivo de 3287", o sea
+      // como si el cliente se hubiera pasado 240 kcal cuando no es cierto.
+      // La proteína sí usa el objetivo de siempre: no se cicla ningún día.
+      const objKcalDia = generatedPlan.kcalObjPorDia?.[diaNutriActual] || generatedPlan.kcalObj;
+      sub('resumenKcal', `kcal · obj. ${objKcalDia}`);
       sub('resumenProt', `g · obj. ${generatedPlan.protObj}g`);
     }
   }
