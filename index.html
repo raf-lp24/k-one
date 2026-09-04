@@ -8604,10 +8604,11 @@
           <div style="background:var(--grafito);height:8px;border-radius:4px;overflow:hidden">
             <div id="kcalDiarioFill" style="height:100%;background:var(--brasa);border-radius:4px;transition:width 0.5s;width:0%"></div>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <div style="display:flex;justify-content:space-between;margin-top:6px;flex-wrap:wrap;gap:4px">
             <span style="font-size:11px;color:var(--metal)" id="kcalDiarioProt">Prot: 0g</span>
             <span style="font-size:11px;color:var(--metal)" id="kcalDiarioCarbs">Carbs: 0g</span>
             <span style="font-size:11px;color:var(--metal)" id="kcalDiarioGrasa">Grasa: 0g</span>
+            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioFibra" title="La fibra manda en la saciedad y en la digestión. Objetivo: 14 g por cada 1.000 kcal.">Fibra: 0g</span>
           </div>
         </div>
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
@@ -13629,6 +13630,10 @@
       'ensalada verde': '80g', 'ensalada variada': '80g', 'rúcula': '30g',
       'champiñones': '80g', 'judías verdes': '120g', 'judía verde': '120g',
       'alcachofa': '100g', 'espárragos verdes': '100g', 'apio': '50g', 'puerro': '60g',
+      // Faltaban y salían "al gusto" en la lista de ingredientes aunque sí
+      // aportan (y son fuentes de fibra, que ahora sí se cuenta).
+      'espárragos': '100g', 'espárragos trigueros': '100g', 'berenjena': '120g',
+      'zanahoria al vapor': '80g', 'pepino rallado': '60g', 'leche de coco light': '80ml',
       'patata': '150g', 'aguacate': '50g', 'edamame': '60g', 'tofu sedoso': '100g',
       // Fruta
       'frutos rojos': '80g', 'frutos rojos por encima': '60g', 'fresas laminadas': '80g',
@@ -14766,9 +14771,54 @@
       'tortitas de maiz': 80, 'bulgur': 19, 'granola': 60, 'muesli': 65, 'garbanzos': 27,
       'lentejas': 20,
     };
+    // FIBRA por 100 g (USDA FoodData Central, dominio público — la misma fuente
+    // que data/alimentos.json). Hasta ahora la fibra no se contaba en ninguna
+    // parte del plan: ni en las recetas ni como objetivo, cuando es el nutriente
+    // que más manda en la saciedad (justo lo que necesita quien está en déficit)
+    // y el que peor se cubre en dietas altas en proteína. Solo están las fuentes
+    // que de verdad aparecen en el recetario, no una base de datos completa.
+    const MACROS_FIBRA_POR_100G = {
+      // Cereales y derivados
+      'avena': 10.6, 'harina de avena': 10.6, 'muesli': 7.7, 'granola': 7,
+      'pan integral': 7, 'pan centeno': 5.8, 'centeno': 5.8, 'tosta integral': 7,
+      'tostada integral': 7, 'tostadas integrales': 7, 'pan de centeno': 5.8,
+      'tortitas de arroz': 4.2, 'tortitas de maíz': 6.5, 'tortitas de maiz': 6.5,
+      'arroz integral': 1.8, 'arroz': 0.4, 'pasta integral': 4.5, 'pasta': 1.8,
+      'quinoa': 2.8, 'cuscús': 1.4, 'cuscus': 1.4, 'bulgur': 4.5, 'wasa': 16,
+      'pan rallado': 2.9, 'tortilla de trigo': 3.5, 'panecillo integral': 6,
+      // Legumbres
+      'garbanzos': 7.6, 'lentejas': 7.9, 'alubias': 6.4, 'judías blancas': 6.3,
+      'edamame': 5.2, 'guisantes': 5.7, 'hummus': 6, 'soja texturizada': 13,
+      // Fruta
+      'plátano': 2.6, 'platano': 2.6, 'manzana': 2.4, 'pera': 3.1, 'naranja': 2.4,
+      'mandarina': 1.8, 'kiwi': 3, 'fresas': 2, 'fresas laminadas': 2,
+      'frutos rojos': 4.5, 'arándanos': 2.4, 'arandanos': 2.4, 'frambuesas': 6.5,
+      'melocotón': 1.5, 'granada': 4, 'higos': 2.9, 'dátiles': 8, 'datiles': 8,
+      'uvas': 0.9, 'piña': 1.4, 'mango': 1.6, 'cerezas': 2.1, 'ciruelas': 1.4,
+      // Verduras y hortalizas
+      'aguacate': 6.7, 'brócoli': 2.6, 'brocoli': 2.6, 'espinacas': 2.2,
+      'zanahoria': 2.8, 'tomate': 1.2, 'tomate cherry': 1.2, 'tomate rallado': 1.2,
+      'pimiento': 1.7, 'cebolla': 1.7, 'calabacín': 1, 'calabacin': 1,
+      'lechuga': 1.3, 'ensalada verde': 1.3, 'ensalada variada': 1.3, 'rúcula': 1.6,
+      'canónigos': 1.8, 'pepino': 0.5, 'champiñones': 1, 'setas': 1,
+      'judías verdes': 2.7, 'judía verde': 2.7, 'alcachofa': 5.4,
+      'coles de bruselas': 3.8, 'espárragos': 2.1, 'esparragos': 2.1,
+      'berenjena': 3, 'calabaza': 0.5, 'puerro': 1.8, 'apio': 1.6, 'col': 2.5,
+      'col lombarda': 2.1, 'patata': 2.1, 'boniato': 3, 'maíz': 2, 'remolacha': 2.8,
+      // Frutos secos y semillas
+      'nueces': 6.7, 'almendras': 12.5, 'anacardos': 3.3, 'pistachos': 10.3,
+      'avellanas': 9.7, 'cacahuetes': 8.5, 'crema de cacahuete': 6,
+      'semillas de chía': 34.4, 'semillas de chia': 34.4, 'chía': 34.4,
+      'semillas de lino': 27.3, 'lino': 27.3, 'sésamo': 11.8, 'sesamo': 11.8,
+      'semillas de calabaza': 6, 'pipas de girasol': 8.6, 'coco rallado': 16.3,
+      // Otros
+      'cacao': 33.2, 'cacao puro': 33.2, 'salvado de trigo': 42.8,
+      'bebida de avena': 0.8, 'aceitunas': 3.2, 'mermelada sin azúcar': 1,
+    };
     const _clavesPorLongitud = tabla => Object.keys(tabla).sort((a, b) => b.length - a.length);
     const _clavesProt = _clavesPorLongitud(MACROS_PROT_POR_100G);
     const _clavesCarbs = _clavesPorLongitud(MACROS_CARBS_POR_100G);
+    const _clavesFibra = _clavesPorLongitud(MACROS_FIBRA_POR_100G);
     // Suma el macro real de TODAS las cláusulas reconocidas (no solo la
     // primera): un plato puede tener más de una fuente ("2 huevos + 100g pavo").
     const _macroRealTotal = (texto, tabla, claves) => {
@@ -14979,6 +15029,45 @@
       });
     });
 
+    // FIBRA DE CADA PLATO. Se calcula aquí, y no junto a la verificación de
+    // proteína/carbohidratos de más arriba, porque el gramaje de los
+    // ingredientes todavía cambia después: primero la calibración al objetivo y
+    // luego el ciclado por día. Calculada antes, la fibra del lunes no
+    // coincidiría con el arroz y el pan que de verdad pone la receta ese día.
+    // La normalización calórica que viene después solo toca grasa y kcal, así
+    // que no invalida este número.
+    const fibraObj = Math.max(20, Math.round((kcalObj / 1000) * 14)); // 14 g/1000 kcal (guías USDA/IOM)
+    // No se puede reutilizar _macroRealTotal tal cual: solo entiende cantidades
+    // en gramos, y buena parte de la fruta del recetario va en unidades ("1
+    // manzana", "1/2 plátano", "2 kiwis"). Con la versión de gramos, un
+    // desayuno de yogur con manzana daba 0 g de fibra teniendo una pieza de
+    // fruta entera dentro. Aquí se aceptan las dos formas, reutilizando la
+    // tabla de pesos por unidad que ya usa la ficha de "Ver macros".
+    const _fibraDeIngredientes = (texto) => {
+      let total = 0;
+      (texto || '').split(',').forEach(x => {
+        const t = x.trim().toLowerCase();
+        if (!t) return;
+        const key = _clavesFibra.find(k => t.includes(k));
+        if (!key) return;
+        let gramos = 0;
+        const mg = t.match(/(\d+(?:[.,]\d+)?)\s*(?:g|ml)\b/);
+        if (mg) gramos = parseFloat(mg[1].replace(',', '.'));
+        else {
+          const u = _gramosDeUnidad(t);
+          if (u) gramos = u.gramos;
+        }
+        if (!gramos) return;
+        total += (gramos * MACROS_FIBRA_POR_100G[key]) / 100;
+      });
+      return Math.round(total);
+    };
+    nutricionPorDia.forEach(dia => {
+      dia.forEach(m => {
+        (m.opciones || []).forEach(o => { o.fibra = `${_fibraDeIngredientes(o.ingredientes)}g fibra`; });
+      });
+    });
+
     // El plan base guarda el día 0 (lunes) como referencia
     nutricion = nutricionPorDia[0];
 
@@ -15114,6 +15203,7 @@
     // vacías (7 kcal/g) — reduce la síntesis de proteína muscular hasta 24h
     // después y empeora la calidad del sueño, justo cuando más se necesita
     // para recuperar.
+    notasDeporte.push(`Fibra: tu objetivo son unos ${fibraObj} g al día (14 g por cada 1.000 kcal, la referencia de las guías oficiales). Es el nutriente que más manda en la saciedad: si vas con hambre entre comidas, casi siempre falta aquí y no en las calorías. Junto a las calorías del día tienes cuánta llevas. Para subirla sin tocar tus macros: cambia el arroz o la pasta por su versión integral (suma 3-5 g), añade una pieza de fruta con piel (2-3 g), mete 150 g de verdura de más en la comida o la cena (3-4 g), o 30 g de legumbre cocida (2 g). Con dos de esos cambios ya cubres la diferencia.`);
     notasDeporte.push('Alcohol: si bebes, que sea la excepción y no la norma. Además de sumar calorías vacías, reduce la síntesis de proteína muscular hasta 24h y empeora la calidad del sueño — justo lo que más necesitas para recuperar.');
     // Omega-3 y vitamina D: antes solo aparecían atados a casos concretos (runner
     // que entrena en interior). Se añaden como nota general porque aplican a
@@ -15186,7 +15276,7 @@
       });
     });
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, fibraObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
 
@@ -16458,7 +16548,7 @@
     if (!bar) return;
     bar.style.display = 'block';
     const sel = comidasSeleccionadas || nutriActiva.map(() => 0);
-    let totalKcal = 0, totalProt = 0, totalCarbs = 0, totalGrasa = 0;
+    let totalKcal = 0, totalProt = 0, totalCarbs = 0, totalGrasa = 0, totalFibra = 0;
     nutriActiva.forEach((meal, i) => {
       const opt = meal.opciones[sel[i] || 0];
       if (opt) {
@@ -16466,6 +16556,7 @@
         totalProt += parseInt(opt.prot) || 0;
         totalCarbs += parseInt(opt.carbs) || 0;
         totalGrasa += parseInt(opt.grasa) || 0;
+        totalFibra += parseInt(opt.fibra) || 0;
       }
     });
     // Objetivo DEL DÍA que se está mirando: con el ciclado de carbohidratos, un
@@ -16488,6 +16579,14 @@
     document.getElementById('kcalDiarioProt').textContent = `Prot: ${totalProt}g`;
     document.getElementById('kcalDiarioCarbs').textContent = `Carbs: ${totalCarbs}g`;
     document.getElementById('kcalDiarioGrasa').textContent = `Grasa: ${totalGrasa}g`;
+    // La fibra sí lleva su objetivo al lado: es el único de los cuatro donde
+    // quedarse corto es lo habitual, así que el número solo no dice nada.
+    const elFibra = document.getElementById('kcalDiarioFibra');
+    if (elFibra) {
+      const objFibra = generatedPlan.fibraObj;
+      elFibra.textContent = objFibra ? `Fibra: ${totalFibra}g / ${objFibra}g` : `Fibra: ${totalFibra}g`;
+      elFibra.style.color = (objFibra && totalFibra >= objFibra) ? '#27ae60' : 'var(--metal)';
+    }
   }
 
   // ===== COMPARTIR PROGRESO =====
