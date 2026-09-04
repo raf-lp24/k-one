@@ -124,22 +124,29 @@ alter table public.subscriptions add column if not exists sub_action_lock_until 
 --    que se resuelvan a mano). Cierra del todo el hueco del punto 1: antes
 --    dos usuarios podían compartir el mismo email en `profiles` sin que la
 --    BD lo impidiera.
+-- CORRECCIÓN (auditoría 2 sept 2026): "add constraint ... unique" con nombre
+-- repetido lanza 42P07 (duplicate_table), no 42710 (duplicate_object) -- el
+-- exception handler original nunca lo atrapaba de verdad, y como el SQL
+-- Editor de Supabase ejecuta el script pegado como una única transacción, un
+-- error sin atrapar aquí podía deshacer TODO lo demás del archivo. Comprobar
+-- contra pg_constraint primero evita depender de adivinar el SQLSTATE exacto.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select email from public.profiles
-    where email is not null
-    group by email having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'profiles_email_unique' and conrelid = 'public.profiles'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select email from public.profiles
+      where email is not null
+      group by email having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.profiles add constraint profiles_email_unique unique (email);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE. Resuélvelos y vuelve a correr este bloque.', v_duplicados;
+    else
+      raise notice 'profiles.email: % emails duplicados -- no se añadió UNIQUE. Resuélvelos y vuelve a correr este bloque.', v_duplicados;
+    end if;
   end if;
 end $$;
 

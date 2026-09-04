@@ -27,21 +27,26 @@ create index if not exists profiles_created_at_idx on public.profiles (created_a
 create index if not exists subscriptions_stripe_customer_id_idx
   on public.subscriptions (stripe_customer_id);
 
+-- CORRECCIÓN (auditoría 2 sept 2026): "add constraint ... unique" con nombre
+-- repetido lanza 42P07 (duplicate_table), no 42710 (duplicate_object) -- el
+-- exception handler original nunca lo atrapaba de verdad. Comprobar contra
+-- pg_constraint primero evita depender de adivinar el SQLSTATE exacto.
 do $$
 declare
   v_duplicados int;
 begin
-  select count(*) into v_duplicados from (
-    select stripe_customer_id from public.subscriptions
-    where stripe_customer_id is not null group by stripe_customer_id having count(*) > 1
-  ) t;
-  if v_duplicados = 0 then
-    begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'subscriptions_stripe_customer_id_unique' and conrelid = 'public.subscriptions'::regclass
+  ) then
+    select count(*) into v_duplicados from (
+      select stripe_customer_id from public.subscriptions
+      where stripe_customer_id is not null group by stripe_customer_id having count(*) > 1
+    ) t;
+    if v_duplicados = 0 then
       alter table public.subscriptions add constraint subscriptions_stripe_customer_id_unique unique (stripe_customer_id);
-    exception when duplicate_object then null;
-    end;
-  else
-    raise notice 'subscriptions.stripe_customer_id: % duplicados -- no se añadió UNIQUE.', v_duplicados;
+    else
+      raise notice 'subscriptions.stripe_customer_id: % duplicados -- no se añadió UNIQUE.', v_duplicados;
+    end if;
   end if;
 end $$;
 
