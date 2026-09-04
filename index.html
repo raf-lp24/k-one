@@ -10020,6 +10020,11 @@
     return texto
       // "con mancuernas con mancuernas" → "con mancuernas"
       .replace(/\b((?:con|en|de)\s+[a-záéíóúüñ]+)\s+\1\b/gi, '$1')
+      // Igual pero cuando solo cambia el singular/plural: "zancadas con
+      // mancuernas con mancuerna" (bug real: la plantilla escribe el material
+      // en plural y el reemplazo de la rotación lo trae en singular, así que la
+      // regla de arriba, que exige repetición literal, no lo cazaba).
+      .replace(/\b((?:con|en|de)\s+([a-záéíóúüñ]{4,}?))s?\s+(?:con|en|de)\s+\2s?\b/gi, '$1')
       // "mancuernas mancuernas" / "rumano rumano" → una sola vez. Mínimo 4
       // letras para no tocar números, series ("3×10 10") ni palabras cortas.
       .replace(/\b([a-záéíóúüñ]{4,})(?:\s+\1\b)+/gi, '$1');
@@ -10789,12 +10794,16 @@
   // Además de las palabras de coaching, las UNIDADES sueltas: cuando el texto
   // dice "15 min a ritmo suave", el extractor se queda con "min" y montaba una
   // tarjeta titulada "Min" con su stepper de peso.
-  const _PROSA_INICIO = /^(ritmo|cadencia|total|objetivo|postura|hidratacion|alternar|calentamiento|cierre|enfriamiento|recuperacion|descanso|anota|prioriza|manten|evita|deberias|empieza|termina|acaba|busca|controla|respira|apoya|baja|sube|luego|despues|antes|durante|hasta|si|no|al|cada|en|por|para|pero|y|o|min|mins|minutos|seg|segundos|km|metros|rondas?|reps?|series|veces)\b/;
+  const _PROSA_INICIO = /^(ritmo|cadencia|total|objetivo|postura|hidratacion|alternar|calentamiento|cierre|enfriamiento|recuperacion|descanso|anota|prioriza|manten|evita|deberias|empieza|termina|acaba|busca|controla|respira|apoya|baja|sube|luego|despues|antes|durante|hasta|si|no|al|cada|en|por|para|pero|y|o|min|mins|minutos|seg|segundos|km|metros|rondas?|reps?|series|veces|cierra|aprieta|aguanta|alterna|corre|camina|suelta|aprovecha|trabaja|intenta|procura|brazos|piernas|pasos|hombros)\b/;
+  // Ningún ejercicio se llama terminando en preposición o artículo: cuando eso
+  // pasa es que el troceado ha cortado una frase por la mitad ("brazos
+  // relajados a", de "...brazos relajados a 90°").
+  const _PROSA_FINAL = /\b(a|de|con|en|por|para|sin|sobre|tras|hasta|el|la|los|las|un|una|unos|unas|y|o|que|del|al)$/;
   function _pareceNombreEjercicio(nombre) {
     if (!nombre) return false;
     const limpio = nombre.trim();
     if (limpio.length < 3) return false;
-    if (/[:;]$/.test(limpio)) return false;            // "Alternar:", "Cierre:" — etiqueta, no ejercicio
+    if (/[:;]/.test(limpio)) return false;             // "Alternar:", "Sin parar: ski erg" — etiqueta, no ejercicio
     if (/\.\s/.test(limpio)) return false;             // punto y seguido: es una frase
     if (/^\d/.test(limpio)) return false;              // "15 min" — eso es una cifra, no un nombre
     // El tope son 8 palabras, no 6: hay ejercicios reales de siete ("Remo en
@@ -10802,7 +10811,9 @@
     // con 6 se quedaban fuera. La prosa larga ya la cazan las reglas de arriba.
     if (limpio.split(/\s+/).length > 8) return false;
     if (!/[a-záéíóúñ]/i.test(limpio)) return false;    // sin letras no hay nombre
-    return !_PROSA_INICIO.test(normalizarEjercicio(limpio));
+    const norm = normalizarEjercicio(limpio);
+    if (_PROSA_FINAL.test(norm)) return false;
+    return !_PROSA_INICIO.test(norm);
   }
 
   function renderEjercicioSimple(texto, capitalizar, diaNombre) {
