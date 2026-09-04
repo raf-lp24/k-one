@@ -10042,6 +10042,39 @@
     tabla.forEach(([, reemplazo], i) => { out = out.split(`@@ROT${i}@@`).join(reemplazo); });
     return _limpiarDuplicadosRotacion(out);
   };
+
+  // La rotación solo puede tocar TRAMOS QUE SEAN UN EJERCICIO, nunca la prosa de
+  // coaching que va en el mismo texto. Aplicada al detalle entero, la regla de
+  // "zancadas" reescribía el consejo de carrera "pasos cortos y frecuentes, no
+  // zancadas largas" y lo dejaba en "no Sentadilla búlgara largas" — bug real,
+  // reproducido en los planes de Running para principiantes. Un tramo es un
+  // ejercicio si trae una cifra de series/reps, distancia o tiempo; el resto se
+  // deja intacto, igual que la cabecera de grupos musculares (lo que va antes
+  // del primer "·"), que tampoco es un ejercicio.
+  const _TRAMO_CON_CANTIDAD = /\d\s*[x×]\s*\d|\d+\s*(m|km|s|seg|min|rondas?|reps?)\b|[x×]\s*m[áa]x/i;
+  // Segundo cinturón: aunque el tramo lleve cifra, no se rota una palabra que
+  // viene detrás de una negación o de un verbo de consejo. Ahí el término no
+  // nombra un ejercicio, describe una técnica ("no alargues el paso", "evita
+  // rebotar"), y algunas palabras se usan para las dos cosas: "zancadas" es a
+  // la vez un ejercicio de pierna y el paso al correr.
+  const _NEGACION_PREVIA = /\b(no|sin|evita|nada de|cuidado con|olvídate de|jamás)\s+[^,.;·]{0,25}$/i;
+  const _rotarSoloEjercicios = (texto, tabla) => {
+    if (!tabla.length || !texto) return texto;
+    const partes = texto.split('·');
+    return partes.map((parte, i) => {
+      if (i === 0 && partes.length > 1) return parte;
+      return splitRespetandoParentesis(parte)
+        .map(fr => {
+          if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
+          const tablaSegura = tabla.filter(([regex]) => {
+            const m = fr.match(regex);
+            return !(m && _NEGACION_PREVIA.test(fr.slice(0, m.index)));
+          });
+          return _aplicarRotacionAutomatica(fr, tablaSegura);
+        })
+        .join(',');
+    }).join('·');
+  };
   const _escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   // Aplica las sustituciones que el cliente eligió para un día concreto (guardadas
@@ -10587,7 +10620,16 @@
     [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
     [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
     [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
-    [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200], [/pieza|unidad/i, 100]
+    [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200],
+    // Añadidos al medir la fibra: sin ellos, "2 zanahorias en bastones" o "1
+    // mandarina" se quedaban sin peso y contaban como cero, tanto en la fibra
+    // como en la ficha de "Ver macros", que los marcaba "al gusto".
+    [/zanahorias?/i, 80], [/mandarinas?/i, 90], [/berenjenas?/i, 250],
+    [/calabac[íi]n(es)?/i, 200], [/mangos?\b/i, 200], [/boniatos?/i, 150],
+    [/pimientos?/i, 120], [/champi[ñn]on(es)?/i, 20], [/rama de apio|ramas de apio/i, 40],
+    [/tortillas? (integral|de trigo|de ma[íi]z)/i, 40], [/d[áa]tiles?/i, 8],
+    [/higos?\b/i, 50], [/ciruelas?/i, 60], [/melocot[óo]n(es)?/i, 150], [/granadas?/i, 180],
+    [/pieza|unidad/i, 100]
   ];
   // "2 huevos" -> 110 · "1/2 plátano" -> 60 · "1 cda miel" -> 15
   function _gramosDeUnidad(texto) {
@@ -10804,7 +10846,23 @@
     if (!nombre) return false;
     const limpio = nombre.trim();
     if (limpio.length < 3) return false;
-    if (/[:;]/.test(limpio)) return false;             // "Alternar:", "Sin parar: ski erg" — etiqueta, no ejercicio
+    // Una etiqueta corta delante NO convierte el fragmento en prosa: las
+    // estaciones de Hyrox se escriben "R2: sled push 4×12.5m" y hay tramos
+    // "Sin parar: ski erg 3×350m". El ejercicio de verdad va detrás de los dos
+    // puntos, y la búsqueda de ficha lo encuentra igual porque compara por
+    // subcadena, así que se evalúa lo que sigue. Solo se descarta cuando detrás
+    // no queda nada ("WOD Diane For Time:") o lo que queda tampoco es un
+    // ejercicio ("Calentamiento: 5 min caminata"). Sin esto se perdían las
+    // fichas de sled push, rowing, farmer carry, sandbag lunges y wall balls
+    // en todos los días de simulacro.
+    const dosPuntos = limpio.indexOf(':');
+    if (dosPuntos !== -1) {
+      const etiqueta = limpio.slice(0, dosPuntos).trim();
+      const resto = limpio.slice(dosPuntos + 1).trim();
+      if (!resto || etiqueta.split(/\s+/).length > 3) return false;
+      return _pareceNombreEjercicio(resto);
+    }
+    if (/;/.test(limpio)) return false;
     if (/\.\s/.test(limpio)) return false;             // punto y seguido: es una frase
     if (/^\d/.test(limpio)) return false;              // "15 min" — eso es una cifra, no un nombre
     // El tope son 8 palabras, no 6: hay ejercicios reales de siete ("Remo en
@@ -12225,7 +12283,7 @@
       if (esPrincipiante) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Run/walk · Base aeróbica",
-           detalle:`Run/walk progresivo · Alternar: 2 min corriendo (conversacional, RPE 3-4) / 1 min caminando × 8-10 rondas. Total ~30 min. Pasos cortos y frecuentes, no zancadas largas. Calentamiento: 5 min caminata + balanceos de piernas`,
+           detalle:`Run/walk progresivo · Alternar: 2 min corriendo (conversacional, RPE 3-4) / 1 min caminando × 8-10 rondas. Total ~30 min. Pasos cortos y frecuentes, no alargues el paso. Calentamiento: 5 min caminata + balanceos de piernas`,
            etiqueta:"Cardio"},
           {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
@@ -13462,7 +13520,7 @@
       : 'gimnasio';
     const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot);
     if (mapaRotacion.length) {
-      semana = semana.map(d => d.detalle ? { ...d, detalle: _aplicarRotacionAutomatica(d.detalle, mapaRotacion) } : d);
+      semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion) } : d);
     }
 
     // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
@@ -14814,6 +14872,19 @@
       // Otros
       'cacao': 33.2, 'cacao puro': 33.2, 'salvado de trigo': 42.8,
       'bebida de avena': 0.8, 'aceitunas': 3.2, 'mermelada sin azúcar': 1,
+      // Huecos detectados escaneando las 340 recetas del pool: llevaban
+      // cantidad pero ninguna clave los reconocía, así que sumaban cero. El más
+      // llamativo, "Palitos de zanahoria con guacamole", marcaba 0 g de fibra
+      // teniendo unos 10 g de verdad.
+      'guacamole': 5, 'semillas de girasol': 8.6, 'judías pintas': 9,
+      'judias pintas': 9, 'yogur de soja': 0.6, 'bebida de soja': 0.6,
+      'leche de coco light': 0.5, 'leche coco light': 0.5,
+      'crema cacahuete': 6, 'crema de almendra': 10.3, 'crema de anacardos': 3.3,
+      'salsa de anacardos': 3.3, 'pan blanco': 2.7, 'pan multicereal': 7,
+      'pan tostado': 4, 'tosta': 3.5, 'tostas': 3.5, 'tostada': 3.5,
+      'panecillo': 3, 'base integral': 6, 'pepinillos': 1.2, 'salsa soja': 0.8,
+      'brotes de soja': 1.8, 'germinados': 1.8, 'pipas de calabaza': 6,
+      'nueces y avellanas': 8, 'maíz': 2, 'maiz': 2,
     };
     const _clavesPorLongitud = tabla => Object.keys(tabla).sort((a, b) => b.length - a.length);
     const _clavesProt = _clavesPorLongitud(MACROS_PROT_POR_100G);
@@ -15036,7 +15107,41 @@
     // coincidiría con el arroz y el pan que de verdad pone la receta ese día.
     // La normalización calórica que viene después solo toca grasa y kcal, así
     // que no invalida este número.
-    const fibraObj = Math.max(20, Math.round((kcalObj / 1000) * 14)); // 14 g/1000 kcal (guías USDA/IOM)
+    // VERSIÓN INTEGRAL DONDE TIENE SENTIDO. Medido sobre el pool real, las
+    // dietas se quedaban en el 63-74% de la fibra recomendada. La palanca más
+    // limpia es el cereal: mismo plato, mismas calorías (integral y refinado
+    // andan a la par), 2-4 g más de fibra por ración.
+    //
+    // NO es un cambio general a propósito. Se excluyen:
+    //  · Las recetas de repostaje (pre/post entreno): ahí el carbohidrato
+    //    refinado es la elección correcta, se digiere más rápido.
+    //  · Los platos donde el arroz es el plato: un risotto pide arborio, un
+    //    arroz con leche pide arroz redondo y un poké, arroz de sushi. Poner
+    //    "integral" ahí no es más sano, es una receta que nadie va a cocinar.
+    const _NO_INTEGRAL = /pre-?entreno|post-?entreno|antes de entrenar|despu[ée]s de entrenar|pre-?wod|post-?wod|pre-?carrera|post-?carrera|antes de correr|recuperaci[óo]n|arborio|rissotto|risotto|pok[ée]|sushi|arroz con leche|tortitas? de arroz|crema de arroz|basmati/i;
+    const _aIntegral = (o) => {
+      if (_NO_INTEGRAL.test(`${o.nombre} ${o.ingredientes} ${o.prep || ''}`)) return o;
+      const ing = o.ingredientes
+        .replace(/\barroz\b(?! integral)/gi, 'arroz integral')
+        .replace(/\bpasta\b(?! integral)/gi, 'pasta integral')
+        .replace(/\bmacarrones\b(?! integrales)/gi, 'macarrones integrales')
+        .replace(/\bespaguetis\b(?! integrales)/gi, 'espaguetis integrales')
+        .replace(/\bcusc[úu]s\b(?! integral)/gi, 'cuscús integral')
+        .replace(/\bpan blanco\b/gi, 'pan integral')
+        .replace(/\bpan de molde\b(?! integral)/gi, 'pan de molde integral');
+      return ing === o.ingredientes ? o : { ...o, ingredientes: ing };
+    };
+    nutricionPorDia.forEach(dia => {
+      dia.forEach(m => { m.opciones = (m.opciones || []).map(_aIntegral); });
+    });
+
+    // 14 g por cada 1.000 kcal es la regla de escalado de las guías, pero
+    // extrapolarla sin tope da cifras que no son un objetivo, son un problema:
+    // en un plan de ganancia de 3.300 kcal pedía 46 g/día, por encima de
+    // cualquier recomendación real y con molestias digestivas casi garantizadas.
+    // Se topa en 38 g, que es la ingesta adecuada del IOM para un hombre adulto
+    // y el techo habitual de las recomendaciones.
+    const fibraObj = Math.min(38, Math.max(20, Math.round((kcalObj / 1000) * 14)));
     // No se puede reutilizar _macroRealTotal tal cual: solo entiende cantidades
     // en gramos, y buena parte de la fruta del recetario va en unidades ("1
     // manzana", "1/2 plátano", "2 kiwis"). Con la versión de gramos, un

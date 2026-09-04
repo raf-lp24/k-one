@@ -788,8 +788,13 @@ async function handleCronRetencion(req, res) {
 
             // Qué le toca HOY según su propio plan. semana[] va de lunes (0) a
             // domingo (6), igual que idxDiaHoy.
-            const diaPlan = planPorId[p.id]?.semana?.[idxDiaHoy] || null;
+            const planCliente = planPorId[p.id] || null;
+            const diaPlan = planCliente?.semana?.[idxDiaHoy] || null;
             const esDescanso = diaPlan ? diaPlan.tipo === 'Descanso' : false;
+            // "Solo nutrición" no tiene rutina: su plan viene con semana vacía.
+            // Sin esto caía en el aviso genérico y le preguntaba "¿entrenas
+            // hoy?" a quien no ha contratado entrenamiento.
+            const soloNutricion = !!planCliente?.soloDieta || (!!planCliente && !(planCliente.semana || []).length);
 
             // Con nombre y variado, no el mismo aviso robótico cada día --
             // mismo criterio que ya usan los mensajes de racha en index.html.
@@ -797,7 +802,14 @@ async function handleCronRetencion(req, res) {
             const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
 
             let cuerpoPush;
-            if (esDescanso) {
+            if (soloNutricion) {
+              const frasesNutri = [
+                `Tus comidas de hoy ya están listas${coma}.`,
+                `Hoy toca cuidar la alimentación${coma}. Tienes tu menú preparado.`,
+                `Tu plan de comidas de hoy te espera${coma}.`
+              ];
+              cuerpoPush = frasesNutri[Math.floor(Math.random() * frasesNutri.length)];
+            } else if (esDescanso) {
               // Antes se mandaba "¿entrenas hoy?" TODOS los días, también en los
               // de descanso programado: el aviso contradecía al propio plan y
               // empujaba justo el día que toca recuperar.
