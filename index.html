@@ -9903,7 +9903,14 @@
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
     [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas']],
     [/curl femoral|leg curl( tumbado| sentado)?/i, ['Peso muerto rumano', 'Hip thrust']],
-    [/\bgemelos\b/i, ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
+    // La regex tiene que comerse el nombre ENTERO del ejercicio, no solo la
+    // palabra "gemelos": la plantilla escribe "elevación de gemelos de pie" o
+    // "gemelos en prensa o máquina", y cazar solo "gemelos" dejaba el resto
+    // colgando delante y detrás del reemplazo -- salía "elevación de Elevación
+    // de gemelos sentado de pie" (nombre duplicado y contradictorio a la vez).
+    // Bug real reproducido en Gimnasio/Principiante/4 días, semanas 2, 3, 5 y 9.
+    [/(elevaci[oó]n de )?gemelos( de pie| sentados?)?( en escal[oó]n con mancuerna| en escal[oó]n| en prensa o m[aá]quina| en prensa| con carga| con mancuernas?)?/i,
+      ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
     // "Suspensión activa en barra" (nombre inventado, nadie lo busca así) quitado:
     // "dead hang" es el término real, usado tal cual hasta en medios en español
@@ -9954,14 +9961,35 @@
   // la protección). Las sustituciones manuales del cliente (ejerciciosSustituidos)
   // siempre tienen la última palabra sobre esto -- se aplican después, en
   // formatearSesion, y pisan lo que decida la rotación automática.
-  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso) => {
+  // Material que hace falta para cada alternativa, en dos niveles:
+  //  · Solo gimnasio: poleas, máquinas, prensa, multipower, trineo. En un salón
+  //    no hay nada de esto ni con material ni sin él.
+  //  · Peso libre: mancuernas, barra, kettlebell, balón. Vale en "casa con
+  //    material", no en "casa sin material" ni al aire libre.
+  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b/i;
+  const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad/i;
+  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
+      // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
+      // ejercicios de gimnasio a quien entrena en casa y, encima, con el material
+      // original colgando detrás. Bugs reales reproducidos: "Remo en polea baja
+      // en barra puerta" y "Jalón al pecho en polea en barra puerta" (casa sin
+      // material), "Remo en polea con agarre ancho con banda elástica" y "Curl en
+      // polea baja con banda elástica" (casa con material). Si tras filtrar no
+      // queda ninguna alternativa viable, se deja el ejercicio original, que la
+      // plantilla ya eligió pensando en dónde entrena.
+      const viables = alternativas.filter(a => {
+        if (_ALT_SOLO_GIMNASIO.test(a) && entorno !== 'gimnasio') return false;
+        if (_ALT_PESO_LIBRE.test(a) && entorno === 'sinMaterial') return false;
+        return true;
+      });
+      if (!viables.length) return null;
       // Cardio y accesorios (esPrincipal=false) rotan cada semana; el ejercicio
       // principal de fuerza (esPrincipal=true) se queda fijo todo el bloque.
       const cicloClave = (cardio || !esPrincipal) ? semanaActual : bloqueMeso;
-      const opciones = alternativas.length + 1; // +1 = mantener el original
+      const opciones = viables.length + 1; // +1 = mantener el original
       const idx = _hashRotacion(regex.source + semilla + cicloClave) % opciones;
-      return idx === 0 ? null : [regex, alternativas[idx - 1]];
+      return idx === 0 ? null : [regex, viables[idx - 1]];
     }).filter(Boolean);
   };
   // Aplica la tabla de rotación en DOS pasadas en vez de encadenar los
@@ -10655,6 +10683,15 @@
     const mCuePrevio = nombre.match(/^(.*?)\s*\([^)]+\)\s*$/);
     if (mCuePrevio) nombre = mCuePrevio[1].trim();
 
+    // Mismo filtro que en renderEjercicioSimple: los WODs traen frases enteras
+    // que casualmente contienen un "N×M" ("...HSPU (kipping ok). Cronometra.
+    // Cierre: 3×10..."), y de ahí salía una tarjeta con stepper de peso
+    // titulada "HSPU o flexiones pique. Cronometra. Cierre:". Si el nombre no
+    // parece un ejercicio, se muestra el texto como línea y no como tarjeta.
+    if (!_pareceNombreEjercicio(nombre)) {
+      return `<div class="ejercicio-fila"><span class="ejercicio-fila-texto">· ${_esc(textoCap)}</span></div>`;
+    }
+
     const key = normalizarEjercicio(nombre);
     const entry = userData.pesosEjercicios?.[key];
     const valorAttr = entry?.peso != null ? ` value="${entry.peso}"` : '';
@@ -10739,6 +10776,35 @@
   // con una frase explicándolo escrita a mano; mejor apoyarse en la ficha real
   // (fotos + instrucciones, o vídeo si no hay ficha) que ya usan los demás
   // ejercicios — es más claro que cualquier párrafo que se pueda escribir aquí.
+  // ¿Ese texto es de verdad el nombre de un ejercicio, o es prosa de coaching?
+  // Los tramos de cardio y WOD salen de un párrafo troceado por comas, así que
+  // muchos fragmentos no son un movimiento: son indicaciones ("ritmo
+  // conversacional", "cadencia 170-180 spm") o etiquetas de sección
+  // ("Alternar:", "Calentamiento:"). La extracción de nombre se queda con lo
+  // que haya antes de la primera cifra, y eso los convertía en tarjetas con su
+  // botón de "Cómo se hace" -- verificado sobre los planes reales de Running
+  // para principiantes, que mostraban tarjetas tituladas "Alternar:" y
+  // "Deberías poder hablar con frases cortas. Cierre:". No se pierde
+  // información: el texto se sigue mostrando, pero como línea, que es lo que es.
+  // Además de las palabras de coaching, las UNIDADES sueltas: cuando el texto
+  // dice "15 min a ritmo suave", el extractor se queda con "min" y montaba una
+  // tarjeta titulada "Min" con su stepper de peso.
+  const _PROSA_INICIO = /^(ritmo|cadencia|total|objetivo|postura|hidratacion|alternar|calentamiento|cierre|enfriamiento|recuperacion|descanso|anota|prioriza|manten|evita|deberias|empieza|termina|acaba|busca|controla|respira|apoya|baja|sube|luego|despues|antes|durante|hasta|si|no|al|cada|en|por|para|pero|y|o|min|mins|minutos|seg|segundos|km|metros|rondas?|reps?|series|veces)\b/;
+  function _pareceNombreEjercicio(nombre) {
+    if (!nombre) return false;
+    const limpio = nombre.trim();
+    if (limpio.length < 3) return false;
+    if (/[:;]$/.test(limpio)) return false;            // "Alternar:", "Cierre:" — etiqueta, no ejercicio
+    if (/\.\s/.test(limpio)) return false;             // punto y seguido: es una frase
+    if (/^\d/.test(limpio)) return false;              // "15 min" — eso es una cifra, no un nombre
+    // El tope son 8 palabras, no 6: hay ejercicios reales de siete ("Remo en
+    // máquina con apoyo de pecho", "Elevación de gemelos de pie en escalón") y
+    // con 6 se quedaban fuera. La prosa larga ya la cazan las reglas de arriba.
+    if (limpio.split(/\s+/).length > 8) return false;
+    if (!/[a-záéíóúñ]/i.test(limpio)) return false;    // sin letras no hay nombre
+    return !_PROSA_INICIO.test(normalizarEjercicio(limpio));
+  }
+
   function renderEjercicioSimple(texto, capitalizar, diaNombre) {
     const textoCap = capitalizar(texto);
     let nombre, resto;
@@ -10756,7 +10822,7 @@
       nombre = match ? match[1].trim().replace(/[·,]+$/, '').trim() : '';
       resto = match ? (match[2] || '').trim() : '';
     }
-    if (!nombre) return `<div class="ejercicio-fila-simple">· ${_esc(textoCap)}</div>`;
+    if (!_pareceNombreEjercicio(nombre)) return `<div class="ejercicio-fila-simple">· ${_esc(textoCap)}</div>`;
 
     // Mismo motivo que en renderEjercicioConPeso: nombre puede venir de un
     // ejercicio añadido por el cliente, texto libre sin garantías.
@@ -13373,7 +13439,16 @@
     // (para no romper la referencia de progresión). Va DESPUÉS de lesión/material
     // a propósito, mismo motivo que ellos: si fuera antes, esas reglas dejarían
     // de encontrar el nombre original y perderían la protección.
-    const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso);
+    // Dónde entrena, para que la rotación no proponga material que no tiene.
+    // "Al aire libre" cuenta como sin material igual que "en casa sin material":
+    // en un parque tampoco hay poleas (mismo criterio que ya usa el bloque de
+    // running con rSinMat). "En casa con material" sí admite peso libre, pero
+    // no poleas ni máquinas.
+    const _lugarTxt = u.lugar || '';
+    const _entornoRot = /sin material|aire libre/i.test(_lugarTxt) ? 'sinMaterial'
+      : /casa/i.test(_lugarTxt) ? 'casa'
+      : 'gimnasio';
+    const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot);
     if (mapaRotacion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: _aplicarRotacionAutomatica(d.detalle, mapaRotacion) } : d);
     }

@@ -26,6 +26,16 @@ function _hoyMadridISO(fecha) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+// Día de la semana en Madrid con lunes = 0, que es el orden en que el plan
+// guarda `semana[]` (semana[0] siempre es lunes). getDay() devuelve 0=domingo,
+// de ahí el desplazamiento -- mismo criterio que getIndiceDiaHoy() en el front.
+const DIAS_SEMANA_PUSH = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+function _indiceDiaMadrid(fecha) {
+  const base = fecha ? new Date(fecha) : new Date();
+  const d = new Date(base.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+  return (d.getDay() + 6) % 7;
+}
+
 // Push instantáneo al admin (no espera al cron diario) -- usa la misma
 // suscripción push_subscriptions que ya tienen los clientes, solo que aquí
 // el "cliente" es la cuenta del propio admin (misma tabla, mismo RLS: se
@@ -730,8 +740,27 @@ async function handleCronRetencion(req, res) {
         const { data: subsPush } = await supa.from('push_subscriptions').select('id, user_id, endpoint, p256dh, auth_key');
         if (subsPush && subsPush.length) {
           const hoyMadrid = _hoyMadridISO();
+          const idxDiaHoy = _indiceDiaMadrid();
+          const nombreDiaHoy = DIAS_SEMANA_PUSH[idxDiaHoy];
           const perfilPorId = {};
           (perfiles || []).forEach(p => { perfilPorId[p.id] = p; });
+
+          // El plan de cada cliente (para poder decirle QUÉ le toca hoy, no solo
+          // "entrena"). Se pide aparte y SOLO para quien tiene push activado, en
+          // vez de añadir `plan` al select general de profiles: ese select trae
+          // TODOS los perfiles y la columna admite hasta 2 MB por fila, así que
+          // meterla ahí multiplicaría por mucho lo que descarga el cron diario.
+          const idsPush = [...new Set(subsPush.map(s => s.user_id).filter(Boolean))];
+          const planPorId = {};
+          if (idsPush.length) {
+            const rPlanes = await supa.from('profiles').select('id, plan').in('id', idsPush);
+            if (rPlanes.error) {
+              // Sin planes seguimos: el aviso sale en su versión genérica.
+              console.warn('[notify-cron] no se pudieron cargar los planes para el push:', rPlanes.error.message);
+            } else {
+              (rPlanes.data || []).forEach(r => { planPorId[r.id] = r.plan; });
+            }
+          }
 
           // Margen de sobra en UTC (las últimas 30h cubren cualquier desfase
           // entre huso UTC y Madrid) y luego se filtra fino por calendario de
@@ -757,24 +786,45 @@ async function handleCronRetencion(req, res) {
             const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
             if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
 
+            // Qué le toca HOY según su propio plan. semana[] va de lunes (0) a
+            // domingo (6), igual que idxDiaHoy.
+            const diaPlan = planPorId[p.id]?.semana?.[idxDiaHoy] || null;
+            const esDescanso = diaPlan ? diaPlan.tipo === 'Descanso' : false;
+
             // Con nombre y variado, no el mismo aviso robótico cada día --
             // mismo criterio que ya usan los mensajes de racha en index.html.
             const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
-            const frasesPush = primerNombrePush ? [
-              `${primerNombrePush}, tu plan de hoy te está esperando.`,
-              `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
-              `Hoy toca, ${primerNombrePush}. Un paso más.`
-            ] : [
-              'Tu plan de hoy te está esperando.',
-              '¿Entrenas hoy? Tienes el plan listo.',
-              'Hoy toca. Un paso más.'
-            ];
-            const cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
+            const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
+
+            let cuerpoPush;
+            if (esDescanso) {
+              // Antes se mandaba "¿entrenas hoy?" TODOS los días, también en los
+              // de descanso programado: el aviso contradecía al propio plan y
+              // empujaba justo el día que toca recuperar.
+              cuerpoPush = `Hoy toca descanso${coma}. Recuperar también es entrenar.`;
+            } else if (diaPlan && diaPlan.resumen) {
+              cuerpoPush = `Hoy toca: ${diaPlan.resumen}.`;
+            } else {
+              // Sin plan cargado (cliente antiguo, plan aún sin generar): aviso
+              // genérico de siempre.
+              const frasesPush = primerNombrePush ? [
+                `${primerNombrePush}, tu plan de hoy te está esperando.`,
+                `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
+                `Hoy toca${coma}. Un paso más.`
+              ] : [
+                'Tu plan de hoy te está esperando.',
+                '¿Entrenas hoy? Tienes el plan listo.',
+                'Hoy toca. Un paso más.'
+              ];
+              cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
+            }
 
             try {
               await webpush.sendNotification(
                 { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-                JSON.stringify({ title: 'K-ONE', body: cuerpoPush, url: '/' })
+                // El día de la semana va en el título: es lo primero que se lee
+                // en la notificación, antes de desplegarla.
+                JSON.stringify({ title: `K-ONE · ${nombreDiaHoy}`, body: cuerpoPush, url: '/' })
               );
               await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
               // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
