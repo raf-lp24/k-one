@@ -13732,10 +13732,46 @@
 
     // Carbohidratos por deporte: runners, Hyrox, CrossFit e Híbrido necesitan más glucógeno
     const carbsAltos = esRunner || esMixto;
+    // CORRECCIÓN (auditoría 5 sept 2026). La grasa no se pide: es lo que queda
+    // después de la proteína y los carbohidratos. Con los carbohidratos de
+    // gimnasio en 2-4 g/kg, ese resto se disparaba y las dietas de fuerza salían
+    // con un 42-50% de las calorías en grasa -- medido: hombre de 80 kg en
+    // mantenimiento, 50%; en pérdida de grasa, 46%. El rango recomendado es
+    // 20-35%, y para entrenamiento de fuerza los carbohidratos van en 4-7 g/kg
+    // (ISSN/ACSM), no en 2. El cliente había elegido "Equilibrado": la dieta le
+    // salía baja en carbohidratos y muy alta en grasa sin haberlo pedido.
+    // Se suben los multiplicadores de gimnasio, que baja la grasa al 28-33% sin
+    // tocar ni las calorías ni la proteína. Los deportes de resistencia ya
+    // estaban bien (25-38%) y no se tocan.
     const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
-      : (perdidaGrasa ? 2.0 : ganarMusculo ? 4.0 : 3.0)) * (enfoqueBajoCarbo ? 0.65 : 1);
-    const carbsObj = Math.round(pesoKg * carbsMultiplier);
+      : (perdidaGrasa ? 3.0 : ganarMusculo ? 5.0 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
+    let carbsObj = Math.round(pesoKg * carbsMultiplier);
+
+    // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
+    // que queda tras la proteína y los carbohidratos, y en los extremos de peso
+    // se descontrolaba. Medido sobre 144 combinaciones de peso, sexo, deporte,
+    // objetivo y enfoque:
+    //   · Hombre de 100 kg, híbrido, ganar músculo -> 10% de las kcal en grasa
+    //     (0,4 g/kg). Por debajo de ~0,5 g/kg se compromete la producción
+    //     hormonal; ninguna guía baja de ahí.
+    //   · Mujer de 50 kg, gimnasio, ganar músculo -> 40%, porque su proteína y
+    //     sus carbohidratos por kg no llegan a cubrir el superávit.
+    // Se acota la grasa y se deja que la absorban los carbohidratos, que es el
+    // macro flexible: las calorías y la proteína no se tocan, que son las dos
+    // anclas del plan. Si el cliente eligió "Bajo en carbohidratos", el techo
+    // sube: ahí la grasa alta es justo lo que ha pedido.
+    {
+      const kcalProt = protObj * 4;
+      const grasaG = (kcalObj - kcalProt - carbsObj * 4) / 9;
+      const grasaMin = Math.max(0.6 * pesoKg, (kcalObj * 0.18) / 9);
+      const grasaMax = (kcalObj * (enfoqueBajoCarbo ? 0.55 : 0.35)) / 9;
+      if (grasaG < grasaMin) {
+        carbsObj = Math.max(0, Math.round((kcalObj - kcalProt - grasaMin * 9) / 4));
+      } else if (grasaG > grasaMax) {
+        carbsObj = Math.round((kcalObj - kcalProt - grasaMax * 9) / 4);
+      }
+    }
 
     // Factor de escala: ajusta kcal/macros del plan base al objetivo personal
     const baseKcalPlan = perdidaGrasa ? 1480 : ganarMusculo ? 2570 : 1550;
@@ -15064,7 +15100,13 @@
       const refProtSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'prot'), 0) / nutricionPorDia.length;
       const refCarbsSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'carbs'), 0) / nutricionPorDia.length;
       const corrProt = refProtSemana > 0 ? _clamp(protObj / refProtSemana, 0.5, 2.0) : 1;
-      const corrCarbs = refCarbsSemana > 0 ? _clamp(carbsObj / refCarbsSemana, 0.45, 1.6) : 1;
+      // Techo subido de 1,6 a 1,9 (auditoría 5 sept 2026): con 1,6 el recetario
+      // no alcanzaba el objetivo de carbohidratos de los clientes más grandes
+      // -- hombre de 100 kg en ganancia, 336 g reales frente a 500 de objetivo,
+      // un 33% corto. Las calorías del día sí cuadraban, así que ese hueco lo
+      // acababa rellenando la grasa en la normalización final: el plan entregado
+      // no era el que decía su propia ficha de macros.
+      const corrCarbs = refCarbsSemana > 0 ? _clamp(carbsObj / refCarbsSemana, 0.45, 1.9) : 1;
       if (Math.abs(corrProt - 1) > 0.03 || Math.abs(corrCarbs - 1) > 0.03) {
         // rotar() reordena el mismo array con .slice(), no clona las recetas:
         // una misma opción (mismo objeto) puede aparecer en varios días de la
