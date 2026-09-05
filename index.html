@@ -9853,7 +9853,11 @@
   // Formato: [regex, alternativas[], cardio?, esPrincipal?]
   const ALTERNATIVAS_EJERCICIO = [
     [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet'], false, true],
-    [/sentadilla goblet/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
+    // "( con mancuernas?)?" consume el material que trae el nombre en la
+    // plantilla ("sentadilla goblet con mancuerna"): sin esto quedaba colgando
+    // en el reemplazo -- "Prensa de piernas con mancuerna", que es una máquina
+    // y un peso libre a la vez.
+    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
     [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
     [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
     [/peso muerto rumano( con mancuernas?)?/i, ['Hip thrust', 'Extensión lumbar en máquina']],
@@ -9883,7 +9887,14 @@
     // baja apoyado en banco").
     [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
     [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
-    [/hip thrust/i, ['Peso muerto rumano', 'Puente de glúteo']],
+    // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
+    // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
+    // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
+    // "Peso muerto rumano en banco" y "Puente de glúteo en banco" (36 casos
+    // reales). "a una pierna" NO se consume a propósito: "Peso muerto rumano a
+    // una pierna" y "Puente de glúteo a una pierna" sí son ejercicios reales, y
+    // conservarlo mantiene el carácter unilateral que buscaba la plantilla.
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo']],
     [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
@@ -10089,6 +10100,14 @@
           const despues = _nombreDeTramo(rotado);
           // Si el cambio duplicaría un ejercicio de esta misma sesión, se deja
           // el original: repetir es peor que no rotar.
+          //
+          // La comparación es por nombre EXACTO a propósito. Probé a contar
+          // también como duplicado que un nombre fuera el principio del otro,
+          // para cazar "Peso muerto rumano" junto a "Peso muerto rumano a una
+          // pierna", y se lleva por delante parejas que son ejercicios
+          // distintos y que tiene todo el sentido programar juntos: sentadilla
+          // y sentadilla búlgara, flexiones y flexiones con pies elevados.
+          // Medido: 534 falsos positivos frente a un puñado de casos reales.
           if (despues !== antes && despues.length > 3 && presentes.has(despues)) return fr;
           if (despues !== antes) { presentes.delete(antes); presentes.add(despues); }
           return rotado;
@@ -12854,14 +12873,30 @@
           // Principiante + 4-5 días → Upper/Lower: 2× frecuencia, volumen moderado, foco en técnica
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Upper A · Empuje + tirón",
-             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press de hombro con mancuernas (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo con mancuerna a una mano 3×10/lado, fondos en banco (tríceps, codos pegados al cuerpo) 3×15, curl bíceps alterno 3×12 (controlado en la subida y bajada, sin balanceo), plancha 3×30s${finisher3}`,
+             // REEQUILIBRIO (auditoría 5 sept 2026). Medido sobre los 72 perfiles
+             // con entrenamiento: en principiante 4-5 días el pecho se quedaba en
+             // 6 series/semana y los hombros en 6, mientras los brazos llevaban
+             // 12 -- al revés de lo razonable, porque bíceps y tríceps ya reciben
+             // trabajo indirecto en todos los presses y jalones, y el pecho no
+             // recibe nada indirecto. Se cambia el curl de bíceps de este día por
+             // aperturas: mismo número de ejercicios y misma duración de sesión,
+             // pero el pecho sube a 9 series/semana. El bíceps conserva su curl
+             // martillo del Upper B más todo el trabajo de los tirones.
+             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press de hombro con mancuernas (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo con mancuerna a una mano 3×10/lado, aperturas con mancuernas en banco 3×12 (codos algo flexionados y fijos, abre hasta notar el pecho), fondos en banco (tríceps, codos pegados al cuerpo) 3×15, plancha 3×30s${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
              detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
              etiqueta:"Piernas"},
             {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa · movilidad 10-15 min", detalle:"10-15 min de movilidad: cadera (90/90), tobillo, hombros (band pull-apart), columna torácica. Opcional: 10-15 min caminar suave", etiqueta:"Descanso"},
             {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Variante",
-             detalle:`Pecho, espalda, hombros, brazos · Press inclinado con mancuernas 3×10, dominadas asistidas o jalón 3×8, elevaciones laterales con mancuernas 3×15 (sin balanceo, aguanta 1s arriba), remo en máquina o polea baja 3×12, extensión tríceps en polea 3×15 (baja completo, aprieta 1s abajo, sube resistiendo), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
+             // Este día no tenía NINGÚN press vertical: el hombro solo recibía
+             // las elevaciones laterales, que son un aislamiento. Entra el press
+             // militar con mancuernas en el sitio de la extensión de tríceps
+             // (que ya se trabaja en los dos presses de este día y en los fondos
+             // del Upper A). Hombros pasan de 6 a 9 series/semana y el día queda
+             // con los cuatro patrones: empuje horizontal, empuje vertical,
+             // tirón vertical y tirón horizontal.
+             detalle:`Pecho, espalda, hombros, brazos · Press inclinado con mancuernas 3×10, dominadas asistidas o jalón 3×8, press militar con mancuernas 3×10 (aprieta el abdomen, no arquees la espalda), remo en máquina o polea baja 3×12, elevaciones laterales con mancuernas 3×15 (sin balanceo, aguanta 1s arriba), curl martillo 3×12 (control en subida y bajada), plancha lateral 3×30s/lado${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Lower B · Isquios + glúteos",
              detalle:`Piernas y glúteos · Prensa de piernas 3×12, peso muerto sumo con mancuernas 3×12, hip thrust a una pierna 3×10/pierna, femoral tumbado en máquina 3×12, step-ups controlados 3×10/pierna, gemelos en prensa o máquina 3×20${finisher3}`,
@@ -15300,11 +15335,28 @@
         const GRUPOS_MUSCULARES = {
           'Brazos': /curl b[ií]ceps|curl de b[ií]ceps|curl de biceps|curl martillo|curl en polea|curl predicador|b[ií]ceps|press franc[eé]s|extensi[oó]n de tr[ií]ceps|tr[ií]ceps|fondos en banco|press cerrado|copa de tr[ií]ceps|patada de tr[ií]ceps/i,
           'Hombros': /press militar|press de hombro|overhead press|push press|thrusters?|elevaciones laterales|elevaciones en polea|elevaciones frontales|p[aá]jaros|press arnold|face pull|retracci[oó]n escapular|encogimiento/i,
-          'Pecho': /press banca|press inclinado|press con mancuernas|aperturas|aperturas en polea|fondos en paralelas|cruces en polea|cruces de polea|flexiones/i,
-          'Espalda': /remo|dominadas|jal[oó]n|peso muerto|pull[- ]?ups?|suspensi[oó]n activa|dead hang/i,
-          'Piernas': /sentadilla|front squat|back squat|prensa de piernas|zancadas|reverse lunge|hip thrust|puente de gl[uú]teo|gemelos|curl femoral|leg curl|step-?ups?|extensi[oó]n lumbar|extensi[oó]n de cu[áa]driceps/i,
+          // CORRECCIONES (auditoría 5 sept 2026), medidas sobre 72 perfiles:
+          //  · "peso muerto" estaba en Espalda. Un peso muerto (y más el rumano)
+          //    es una bisagra de cadera: lo mueven isquios y glúteo. Contarlo
+          //    como espalda inflaba ese grupo hasta 29 series/semana y dejaba
+          //    piernas artificialmente bajo, así que el aviso de volumen que lee
+          //    el cliente describía un plan que no era el suyo.
+          //  · Faltaban formas que la plantilla SÍ escribe: "press de banca"
+          //    (con "de"), "femoral tumbado", "archer push-ups", "flexiones
+          //    pique". Sin ellas no sumaban a ningún grupo: solo el press de
+          //    pecho del Upper A de principiante eran 6 series/semana invisibles.
+          //  · Core no existía como grupo. Plancha, dead bug, rueda abdominal y
+          //    pallof press son de los ejercicios más repetidos del plan y no
+          //    aparecían en ninguna cuenta.
+          'Pecho': /press banca|press de banca|press inclinado|press con mancuernas|press de pecho|aperturas|aperturas en polea|fondos en paralelas|cruces en polea|cruces de polea|flexiones|archer push-?ups?|push-?ups?/i,
+          'Espalda': /remo|dominadas|jal[oó]n|pull[- ]?ups?|suspensi[oó]n activa|dead hang|retracci[oó]n escapular/i,
+          'Piernas': /sentadilla|front squat|back squat|prensa de piernas|zancadas|reverse lunge|split squat|hip thrust|puente de gl[uú]teo|gemelos|curl femoral|femoral tumbado|leg curl|step-?ups?|extensi[oó]n lumbar|extensi[oó]n de cu[áa]driceps|peso muerto|nordic curl/i,
+          'Core': /plancha|dead bug|rueda abdominal|pallof|russian twist|hollow|abdominal|sit-?ups?|toes[- ]to[- ]bar|v-?ups?|copenhagen/i,
         };
-        const volumenSemanal = { Pecho: 0, Espalda: 0, Piernas: 0, Hombros: 0, Brazos: 0 };
+        // Derivados de GRUPOS_MUSCULARES para que añadir un grupo (Core, por
+        // ejemplo) no obligue a acordarse de tocar también estos dos objetos.
+        const volumenSemanal = {}; const presenciaEnTexto = {};
+        Object.keys(GRUPOS_MUSCULARES).forEach(g => { volumenSemanal[g] = 0; presenciaEnTexto[g] = false; });
         // El conteo de series solo ve lo que viene en formato "4×10". En los días
         // de metcon/complejo (sobre todo en Híbrido) el trabajo se escribe como
         // "5 rondas: 8 RDL + 8 push press + ...", sin ese formato, así que no
@@ -15314,13 +15366,20 @@
         // falsos solo entre Gimnasio e Híbrido. Se registra aparte si el grupo
         // aparece en el texto en cualquier forma, para no acusar de "ausente"
         // algo que el cliente sí está entrenando.
-        const presenciaEnTexto = { Pecho: false, Espalda: false, Piernas: false, Hombros: false, Brazos: false };
         semana.forEach(d => {
           if (!d.detalle) return;
           Object.keys(GRUPOS_MUSCULARES).forEach(g => {
             if (GRUPOS_MUSCULARES[g].test(d.detalle)) presenciaEnTexto[g] = true;
           });
-          d.detalle.split(',').forEach(clausula => {
+          // splitRespetandoParentesis y no split(','): media plantilla lleva el
+          // consejo técnico entre paréntesis, y ahí dentro hay comas ("press de
+          // hombro con mancuernas (agarre neutro, baja hasta formar una L a
+          // 90°) 3×12"). Partiendo por toda coma, el nombre del ejercicio se
+          // queda en un trozo y las series en el siguiente, así que no sumaban
+          // a ningún grupo: el aviso decía "hombros 3 series" en un plan que
+          // tenía 6, y por debajo del umbral de 6 llegaba a acusar de falta de
+          // volumen a un plan correcto.
+          splitRespetandoParentesis(d.detalle).forEach(clausula => {
             const m = clausula.match(/(\d+)\s*[x×]\s*\d+/);
             if (!m) return;
             const series = parseInt(m[1], 10);
@@ -15332,11 +15391,17 @@
         // Umbral de mínimo efectivo: ~6 series/semana por grupo es el suelo
         // habitual citado para mantener/progresar en hipertrofia (por debajo,
         // el estímulo semanal es insuficiente para ese grupo concreto).
-        const gruposBajos = Object.entries(volumenSemanal).filter(([, s]) => s > 0 && s < 6).map(([g]) => g);
+        // Core queda fuera de los avisos de volumen: el suelo de 6 series y el
+        // rango de hipertrofia están pensados para grupos que se entrenan con
+        // series y cargas, no para plancha o dead bug, que se miden en segundos
+        // aguantados. Sí se cuenta y se enseña, pero no dispara avisos.
+        const _gruposConAviso = ([g]) => g !== 'Core';
+        const gruposBajos = Object.entries(volumenSemanal).filter(_gruposConAviso).filter(([, s]) => s > 0 && s < 6).map(([g]) => g);
         // Solo cuenta como ausente si NO aparece por ningún lado: si sale en un
         // circuito sin formato de series, se está entrenando igual y avisar de
         // que "falta" sería sencillamente falso.
         const gruposAusentes = Object.entries(volumenSemanal)
+          .filter(_gruposConAviso)
           .filter(([g, s]) => s === 0 && !presenciaEnTexto[g])
           .map(([g]) => g);
         if (gruposAusentes.length) {
@@ -15344,7 +15409,7 @@
         } else if (gruposBajos.length) {
           notasDeporte.push(`Volumen semanal: ${gruposBajos.map(g => `${g.toLowerCase()} (${volumenSemanal[g]} series)`).join(', ')} está por debajo de las ~6 series/semana recomendadas como mínimo para progresar. El resto de grupos está en rango.`);
         } else {
-          notasDeporte.push(`Volumen semanal por grupo: Pecho ${volumenSemanal.Pecho}, Espalda ${volumenSemanal.Espalda}, Piernas ${volumenSemanal.Piernas}, Hombros ${volumenSemanal.Hombros}, Brazos ${volumenSemanal.Brazos} series — todos los grupos dentro del rango mínimo recomendado.`);
+          notasDeporte.push(`Volumen semanal por grupo: Pecho ${volumenSemanal.Pecho}, Espalda ${volumenSemanal.Espalda}, Piernas ${volumenSemanal.Piernas}, Hombros ${volumenSemanal.Hombros}, Brazos ${volumenSemanal.Brazos}${volumenSemanal.Core ? `, Core ${volumenSemanal.Core}` : ''} series — todos los grupos dentro del rango mínimo recomendado.`);
         }
       }
     }
