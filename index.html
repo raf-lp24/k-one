@@ -10058,19 +10058,40 @@
   // rebotar"), y algunas palabras se usan para las dos cosas: "zancadas" es a
   // la vez un ejercicio de pierna y el paso al correr.
   const _NEGACION_PREVIA = /\b(no|sin|evita|nada de|cuidado con|olvídate de|jamás)\s+[^,.;·]{0,25}$/i;
+  // Nombre del ejercicio de un tramo ("Peso muerto rumano 4×10" -> "peso muerto
+  // rumano"), para poder comparar tramos entre sí dentro de la misma sesión.
+  const _nombreDeTramo = (fr) => {
+    const t = (fr || '').trim();
+    const m = t.match(/^([^0-9(]+?)\s*[\d(]/);
+    return normalizarEjercicio((m ? m[1] : t).trim());
+  };
   const _rotarSoloEjercicios = (texto, tabla) => {
     if (!tabla.length || !texto) return texto;
     const partes = texto.split('·');
     return partes.map((parte, i) => {
       if (i === 0 && partes.length > 1) return parte;
-      return splitRespetandoParentesis(parte)
+      const fragmentos = splitRespetandoParentesis(parte);
+      // Qué ejercicios hay ya en esta sesión. La rotación cambia cada tramo por
+      // su cuenta, sin mirar a los demás, así que podía meter un ejercicio que
+      // ya estaba unas comas más allá: salían sesiones con "Peso muerto rumano
+      // 5×8, Peso muerto rumano 4×10" o dos veces el press inclinado. Medido
+      // sobre 8.532 sesiones reales: pasaba en el 3%.
+      const presentes = new Set(fragmentos.map(_nombreDeTramo).filter(n => n && n.length > 3));
+      return fragmentos
         .map(fr => {
           if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
           const tablaSegura = tabla.filter(([regex]) => {
             const m = fr.match(regex);
             return !(m && _NEGACION_PREVIA.test(fr.slice(0, m.index)));
           });
-          return _aplicarRotacionAutomatica(fr, tablaSegura);
+          const rotado = _aplicarRotacionAutomatica(fr, tablaSegura);
+          const antes = _nombreDeTramo(fr);
+          const despues = _nombreDeTramo(rotado);
+          // Si el cambio duplicaría un ejercicio de esta misma sesión, se deja
+          // el original: repetir es peor que no rotar.
+          if (despues !== antes && despues.length > 3 && presentes.has(despues)) return fr;
+          if (despues !== antes) { presentes.delete(antes); presentes.add(despues); }
+          return rotado;
         })
         .join(',');
     }).join('·');
@@ -12062,7 +12083,17 @@
   }
 
   function buildPlanFromData(u) {
-    const soloDieta = (u.tipoPlan || '').includes('Solo nutrición');
+    // Hyrox y CrossFit se venden SOLO como nutrición: el entrenamiento lo hace
+    // el cliente en su box. El formulario ya oculta esos dos deportes cuando el
+    // tipo de plan es completo (updateDeporteOptionsPorPlan), pero eso es una
+    // barrera de interfaz, no del motor: con un userdata guardado que traiga
+    // "Entrenamiento + nutrición" con deporte CrossFit -- un cliente anterior a
+    // esa regla, o uno cuyo tipoPlan se perdiera -- buildPlanFromData generaba
+    // igualmente 4 días de WODs. Comprobado: salían sesiones completas tipo
+    // "Squat Strength + Sprint WOD". Se cierra aquí, que es por donde pasan
+    // todos los planes, en vez de fiarlo a la pantalla.
+    const _deporteSoloNutricion = /hyrox|crossfit/i.test(u.deporte || '');
+    const soloDieta = (u.tipoPlan || '').includes('Solo nutrición') || _deporteSoloNutricion;
     const deporte = u.deporte || 'Gimnasio / Fuerza';
     const nivel = u.nivel || 'Principiante, empiezo desde cero';
     const objetivo = u.objetivo || 'Sentirme mejor en general';
@@ -12430,7 +12461,11 @@
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior + pliometría",
            detalle: sm
              ? `Piernas · Sentadilla búlgara ${vv}×8/pierna, hip thrust a una pierna ${vv}×10/lado, nordic curl asistido 3×6, box jumps 3×6, sentadilla con salto 3×8, copenhagen plank 3×15s/lado, plancha ${v}×45s`
-             : `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, sled push 4×20m`,
+             // El trineo solo existe en un gimnasio: en "en casa con material"
+             // (mancuernas y bandas) esta plantilla mandaba igualmente "sled
+             // push 4×20m". Se cambia por zancadas cargadas, que trabajan lo
+             // mismo con lo que sí tiene en casa.
+             : `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, ${lugarComb.includes('casa') ? 'zancadas cargadas con mancuernas 4×12/pierna' : 'sled push 4×20m'}`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Complejo + EMOM",
            detalle: sm
@@ -12459,7 +12494,10 @@
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
            detalle: sm
              ? `Piernas · Sentadilla búlgara ${v}×10/pierna, hip thrust suelo ${v}×15, zancadas ${v}×10/pierna, puente a una pierna ${v}×12/lado, gemelos en escalón 3×20, plancha ${v}×45s`
-             : `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10/pierna, gemelos en escalón 3×15, sled push 3×20m o farmer carry 3×30m`,
+             // Mismo motivo que la plantilla de arriba: quien entrena en casa no
+             // tiene trineo. Aquí ya había alternativa, pero encabezaba con el
+             // sled, así que en casa se le da la vuelta y manda el farmer carry.
+             : `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10/pierna, gemelos en escalón 3×15, ${lugarComb.includes('casa') ? 'farmer carry 3×30m' : 'sled push 3×20m o farmer carry 3×30m'}`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Circuito fuerza + cardio",
            detalle: sm
@@ -13563,7 +13601,14 @@
       : actividadSoloLower.includes('moderado') ? 1.55
       : actividadSoloLower.includes('ligero') ? 1.375
       : actividadSoloLower.includes('no entreno') ? 1.2
-      : 1.375; // sin responder (dato antiguo o cuestionario incompleto): fallback conservador, igual que antes
+      // Sin responder (dato antiguo o cuestionario incompleto). El fallback
+      // conservador de 1.375 vale para quien no dice qué hace, pero no para
+      // quien SÍ nos ha dicho que hace CrossFit o Hyrox: ese entrena fuerte en
+      // su box por definición, y dejarlo en "actividad ligera" le recortaría
+      // cientos de calorías. Es justo el caso que aparece al forzar estos dos
+      // deportes a solo nutrición.
+      : _deporteSoloNutricion ? 1.725
+      : 1.375;
     const factorAct = soloDieta ? factorActSolo
       : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 5) ? 1.9
       : ((esHyrox || esCrossfit || esRunner) && numDias >= 4)   ? 1.725
