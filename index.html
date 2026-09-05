@@ -13190,6 +13190,19 @@
         // lesión reescribiera el nombre — mismo problema que con press banca.
         [/[Ee]levaciones laterales( con mancuernas)?/g, 'Elevaciones laterales por debajo del hombro (rango corto)'],
         [/[Ff]lexiones pique \(pike push-ups\)|[Ff]lexiones pique/g, 'flexiones normales'],
+        // LAGUNAS ENCONTRADAS EN LA AUDITORÍA (5 sept 2026): dos ejercicios que
+        // el plan sí prescribe se quedaban sin adaptar en una lesión de hombro.
+        //  · "press de hombro con mancuernas" es un empuje sobre cabeza como el
+        //    press militar, pero la regla de arriba solo cazaba "press militar".
+        //  · Las aperturas llevan el hombro a abducción horizontal con rotación
+        //    externa, que es justo la posición que provoca dolor en una
+        //    inestabilidad anterior o un manguito tocado.
+        // El material que puede venir detrás se consume dentro de la propia
+        // regex ("en polea", "en banco"...), o quedaría colgando del reemplazo.
+        [/[Pp]ress de hombro( con mancuernas| con barra| en m[áa]quina| mancuernas)?/g,
+          eq('Elevaciones frontales ligeras', 'Elevaciones frontales ligeras', 'Elevaciones frontales sin peso (solo rango)')],
+        [/[Aa]perturas( con mancuernas| en polea| en m[áa]quina)?( en banco)?( inclinado| declinado)?/g,
+          eq('Press en máquina (rango corto)', 'Press con mancuernas (rango corto)', 'Flexiones con manos juntas (sin dolor)')],
       ]);
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención al hombro en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios de empuje vertical o rango completo (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
@@ -15551,6 +15564,21 @@
     // vacías (7 kcal/g) — reduce la síntesis de proteína muscular hasta 24h
     // después y empeora la calidad del sueño, justo cuando más se necesita
     // para recuperar.
+    // AVISO DE RACIONES ENORMES (auditoría 5 sept 2026). El plan reparte las
+    // calorías entre las tomas que el cliente dice que hace, así que con pocas
+    // tomas cada una se lleva un porrón: medido, un cliente de 110 kg en
+    // ganancia que come 2 veces al día recibe 1.891 kcal por comida y raciones
+    // de 1,3 kg de un solo ingrediente. El plan es correcto en macros pero
+    // nadie se lo come. No se le cambia lo que ha elegido -- es su vida -- pero
+    // sí se le dice, que es lo que haría cualquier nutricionista delante.
+    {
+      const _tomas = (nutricion || []).length || 5;
+      const _kcalPorToma = Math.round(kcalObj / _tomas);
+      if (_kcalPorToma > 900) {
+        notasDeporte.push(`Tamaño de las raciones: repartes ${kcalObj} kcal en ${_tomas} tomas, así que a cada una le tocan unas ${_kcalPorToma} kcal. Es mucha comida de una sentada y vas a ver platos con raciones muy grandes. Si te cuesta terminarlos, no comas menos: reparte lo mismo en una toma más. Puedes cambiarlo en "Cambiar plan" → ¿cuántas veces comes al día?, y el menú se recalcula solo.`);
+      }
+    }
+
     notasDeporte.push(`Fibra: tu objetivo son unos ${fibraObj} g al día (14 g por cada 1.000 kcal, la referencia de las guías oficiales). Es el nutriente que más manda en la saciedad: si vas con hambre entre comidas, casi siempre falta aquí y no en las calorías. Junto a las calorías del día tienes cuánta llevas. Para subirla sin tocar tus macros: cambia el arroz o la pasta por su versión integral (suma 3-5 g), añade una pieza de fruta con piel (2-3 g), mete 150 g de verdura de más en la comida o la cena (3-4 g), o 30 g de legumbre cocida (2 g). Con dos de esos cambios ya cubres la diferencia.`);
     notasDeporte.push('Alcohol: si bebes, que sea la excepción y no la norma. Además de sumar calorías vacías, reduce la síntesis de proteína muscular hasta 24h y empeora la calidad del sueño — justo lo que más necesitas para recuperar.');
     // Omega-3 y vitamina D: antes solo aparecían atados a casos concretos (runner
