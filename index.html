@@ -12008,6 +12008,21 @@
     return [texto, ...extra].filter(Boolean).join(', ');
   }
 
+  // Arregla la concordancia después de sustituir un alimento por otro. El
+  // problema: los huevos se cuentan por unidades ("2 huevos") y el tofu se mide
+  // en raciones, así que al sustituir la palabra suelta salían cosas como
+  // "2 ración de tofu firme", "3 ración de tofu firme" o "2 tofu revuelto" —
+  // 24 platos afectados con alergia al huevo, comprobado. El número que
+  // acompañaba al alimento original se queda huérfano si el nuevo no se cuenta
+  // igual, así que aquí se le devuelve una unidad que sí tiene sentido.
+  const _concordarSustitucion = (texto) => (texto || '')
+    // "2 tofu revuelto" / "3 hummus" -> "2 raciones de tofu revuelto"
+    .replace(/\b(\d+)\s+(tofu(?:\s+\w+)?|hummus|tempeh|seit[aá]n)\b(?!\s+de\b)/gi,
+      (_, n, item) => `${n} ${n === '1' ? 'ración' : 'raciones'} de ${item.trim()}`)
+    // "2 ración de X" -> "2 raciones de X"  ·  "1 raciones de X" -> "1 ración de X"
+    .replace(/\b(\d+)\s+ración de\b/gi, (m, n) => (n === '1' ? m : `${n} raciones de`))
+    .replace(/\b1\s+raciones de\b/gi, '1 ración de');
+
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
@@ -12061,8 +12076,13 @@
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
-        nuevoIng = limpiar(nuevoIng);
-        nuevoNombre = nuevoNombre.replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+        nuevoIng = _concordarSustitucion(limpiar(nuevoIng));
+        nuevoNombre = _concordarSustitucion(nuevoNombre)
+          .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+        // El nombre puede quedar empezando en minúscula si la palabra sustituida
+        // era la primera ("Huevos revueltos con champiñones" -> "tofu revuelto
+        // con champiñones").
+        if (nuevoNombre) nuevoNombre = nuevoNombre.charAt(0).toUpperCase() + nuevoNombre.slice(1);
         if (!nuevoNombre) return null;
         const aun = regexes.some(re => { re.lastIndex = 0; return re.test(nuevoNombre + ' ' + nuevoIng); });
         if (aun) return null;
@@ -14786,7 +14806,29 @@
     // filtro para cuentas antiguas que la tuvieran guardada. Los fallbacks nunca
     // devuelven carne/pescado a alguien que eligió una dieta vegetariana/vegana.
     if (esVegetariano) {
-      const carneRegex = /pollo|pechuga|pavo|ternera|solomillo|cerdo|cordero|jamón|jamon|salmón|salmon|atún|atun|merluza|bacalao|lubina|dorada|gambas|langostino|calamar|sepia|anchoa|sardina|caballa|rape|mero/i;
+      // AMPLIADA (auditoría 5 sept 2026). Faltaban embutidos y varios pescados y
+      // mariscos, así que se colaban en dietas vegetarianas: bug real,
+      // "Lomo embuchado con tortas de arroz" aparecía 24 veces en el menú
+      // vegetariano de mantenimiento. La causa de fondo es que 7 tomas del
+      // recetario no tienen versión vegetariana propia y dependen enteramente de
+      // este filtro, así que aquí no puede faltar nada.
+      const carneRegex = new RegExp([
+        // Carnes y aves
+        'pollo', 'pechuga', 'pavo', 'ternera', 'solomillo', 'cerdo', 'cordero', 'conejo', 'pato',
+        'entrecot', 'costillas?', 'alitas', 'carne picada', 'hamburguesa de (ternera|pollo|pavo)',
+        'cinta de lomo', 'lomo (embuchado|de cerdo|adobado)', 'magro de cerdo', 'chuleta', 'redondo de ternera',
+        // Embutidos y fiambres
+        'jamón', 'jamon', 'cecina', 'chorizo', 'salchich', 'bacon', 'beicon', 'panceta',
+        'morcilla', 'sobrasada', 'fuet', 'salchichón', 'salchichon', 'mortadela', 'lacón', 'lacon',
+        'fiambre', 'butifarra', 'sobreasada', 'york',
+        // Pescados
+        'salmón', 'salmon', 'atún', 'atun', 'merluza', 'bacalao', 'lubina', 'dorada', 'sardina',
+        'caballa', 'rape', 'mero', 'trucha', 'boquerón', 'boqueron', 'bonito', 'emperador',
+        'pez espada', 'lenguado', 'panga', 'tilapia', 'rodaballo', 'besugo', 'corvina', 'abadejo',
+        // Mariscos
+        'gambas', 'langostino', 'calamar', 'sepia', 'anchoa', 'pulpo', 'mejill', 'almeja',
+        'berberecho', 'cigala', 'nécora', 'necora', 'marisco', 'surimi', 'palitos de cangrejo', 'vieira',
+      ].join('|'), 'i');
       const esVegano = u.dieta && u.dieta.includes('Vegano');
       const veganRegex = /huevo|claras|clara de|tortilla|yogur|queso|requesón|requeson|cottage|kéfir|kefir|skyr|leche(?! de )|whey|miel\b/i;
       nutricion = nutricion.map(m => {
