@@ -184,7 +184,15 @@
      <script> real ya lo tiene en caché, así que la pausa que queda es solo la
      de ejecutarlo (rápida), no la de ida y vuelta de red (lenta en 4G). -->
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<!-- Sora y Plus Jakarta Sans (9 variantes de grosor entre las dos) NO van aquí
+     a propósito: solo las usa el panel de administración (Jarvis, variables
+     --jv-display/--jv-ui), que ningún cliente ve nunca. Cargarlas para todo
+     el mundo era pedirle a cada visitante que descargara 2 familias de fuente
+     enteras solo para que las use el admin. Se cargan aparte, bajo demanda,
+     en cuanto el backend confirma que el usuario es admin (ver
+     _cargarFuentesAdmin, llamada desde actualizarBtnAdmin) — con margen de
+     sobra antes de que le dé tiempo a pulsar el botón y abrir el panel. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
 <script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
 <!-- Google Analytics: NO se carga aquí a ciegas. Antes se ejecutaba en cuanto
      cargaba la página, sin esperar a que el usuario aceptara o rechazara
@@ -21344,6 +21352,23 @@
   function actualizarBtnAdmin() {
     const btn = document.getElementById('btnPanelAdmin');
     if (btn) btn.style.display = _adminVerificado ? '' : 'none';
+    if (_adminVerificado) _cargarFuentesAdmin();
+  }
+
+  // Sora y Plus Jakarta Sans, solo para quien de verdad es admin (confirmado
+  // por el backend, no por este check). Se llama aquí -- en cuanto se sabe que
+  // es admin, antes de que le dé tiempo a pulsar "Actualizar datos" -- para
+  // que la fuente ya esté cargada o cargándose cuando se abra el panel, sin
+  // parpadeo de fuente de reserva. Idempotente: si el usuario cierra sesión y
+  // vuelve a entrar como admin, no duplica el <link>.
+  let _fuentesAdminCargadas = false;
+  function _cargarFuentesAdmin() {
+    if (_fuentesAdminCargadas) return;
+    _fuentesAdminCargadas = true;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap';
+    document.head.appendChild(link);
   }
 
   async function verificarAdminSilencioso() {
