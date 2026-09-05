@@ -13743,9 +13743,15 @@
     // Se suben los multiplicadores de gimnasio, que baja la grasa al 28-33% sin
     // tocar ni las calorías ni la proteína. Los deportes de resistencia ya
     // estaban bien (25-38%) y no se tocan.
+    //
+    // Ganancia se queda en 4,5 y no en 5: con 5, un cliente de 100 kg recibía un
+    // objetivo de 500 g de carbohidratos que el recetario no puede servir sin
+    // raciones absurdas, y la ficha prometía 500 mientras el plan entregaba 384.
+    // Un objetivo que no se cumple no es un objetivo. Con 4,5 el número que se
+    // muestra es el que se sirve, y sigue dentro del rango de la ISSN.
     const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
-      : (perdidaGrasa ? 3.0 : ganarMusculo ? 5.0 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
+      : (perdidaGrasa ? 3.0 : ganarMusculo ? 4.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
     let carbsObj = Math.round(pesoKg * carbsMultiplier);
 
     // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
@@ -14109,7 +14115,13 @@
             op("Sándwich de pavo, queso y huevo", "3 rebanadas pan integral, 60g pavo, 30g queso, 1 huevo a la plancha", "560 kcal", "38g prot", "48g carbs", "22g grasa", "Fácil · 10 min"),
             op("Tostadas con salmón, queso crema y huevo", "3 rebanadas centeno, 80g salmón ahumado, 30g queso crema, 1 huevo pochado", "580 kcal", "36g prot", "42g carbs", "26g grasa", "Fácil · 10 min"),
             op("Bol de skyr con granola y frutos rojos", "200g skyr natural, 40g granola, 80g frutos rojos, 10g semillas de chía, miel", "560 kcal", "28g prot", "64g carbs", "18g grasa", "Sin cocción · 3 min"),
-            op("Huevos revueltos con queso, jamón y pan integral", "3 huevos, 30g queso, 40g jamón cocido, 2 rebanadas pan integral", "550 kcal", "38g prot", "40g carbs", "24g grasa", "Fácil · 10 min")
+            op("Huevos revueltos con queso, jamón y pan integral", "3 huevos, 30g queso, 40g jamón cocido, 2 rebanadas pan integral", "550 kcal", "38g prot", "40g carbs", "24g grasa", "Fácil · 10 min"),
+            // Desayunos densos en carbohidratos: es la toma donde más fácil
+            // resulta meterlos sin que el plato se haga enorme, porque la avena
+            // y la fruta concentran mucho por gramo.
+            op("Bol de avena con plátano, dátiles y crema de cacahuete", "120g avena, 250ml leche entera, 1 plátano, 4 dátiles, 25g crema de cacahuete, canela", "776 kcal", "30g prot", "119g carbs", "20g grasa", "Fácil · 5 min"),
+            op("Tortitas de avena con claras, plátano y miel", "100g harina de avena, 6 claras, 1 plátano, 20g miel, canela", "608 kcal", "35g prot", "99g carbs", "8g grasa", "Fácil · 10 min"),
+            op("Tostadas integrales con huevo, pavo y plátano", "4 rebanadas pan integral, 2 huevos, 60g pavo en lonchas, 1 plátano, 10g AOVE", "700 kcal", "44g prot", "88g carbs", "20g grasa", "Fácil · 10 min")
           ]
         },
         {
@@ -14130,7 +14142,15 @@
             op("Tostadas de queso cottage con miel y nueces", "2 rebanadas pan integral, 150g queso cottage, miel, 15g nueces", "420 kcal", "32g prot", "44g carbs", "14g grasa", "Sin cocción · 3 min"),
             op("Barrita proteica con plátano y leche", "1 barrita proteica, 1 plátano, 200ml leche entera", "400 kcal", "28g prot", "50g carbs", "10g grasa", "Sin cocción · 2 min"),
             op("Batido de caseína con plátano y avena", "30g caseína, 1 plátano, 30g avena, leche", "410 kcal", "32g prot", "50g carbs", "8g grasa", "Fácil · 3 min"),
-            op("Tortitas de arroz con crema de cacahuete y plátano", "4 tortitas de arroz, 25g crema de cacahuete, 1 plátano", "380 kcal", "12g prot", "50g carbs", "16g grasa", "Sin cocción · 2 min")
+            op("Tortitas de arroz con crema de cacahuete y plátano", "4 tortitas de arroz, 25g crema de cacahuete, 1 plátano", "380 kcal", "12g prot", "50g carbs", "16g grasa", "Sin cocción · 2 min"),
+            // Tentempiés densos en carbohidratos. Son la toma que más arrastraba
+            // la media del día hacia abajo (40-50 g frente a los 60-80 de las
+            // comidas principales), y por eso el motor tenía que estirar las
+            // raciones de comida y cena para compensar. Con estos, el día llega
+            // al objetivo sin platos enormes.
+            op("Bocadillo de pavo y queso fresco con fruta", "1 panecillo integral, 80g pavo en lonchas, 60g queso fresco, tomate, 1 plátano", "520 kcal", "42g prot", "72g carbs", "10g grasa", "Sin cocción · 5 min"),
+            op("Bol de avena rápida con miel y frutos rojos", "70g avena, 200ml leche entera, 20g miel, 80g frutos rojos, canela", "500 kcal", "20g prot", "78g carbs", "12g grasa", "Fácil · 3 min"),
+            op("Sándwich de crema de cacahuete, plátano y miel", "3 rebanadas pan integral, 25g crema de cacahuete, 1 plátano, 15g miel", "540 kcal", "18g prot", "82g carbs", "16g grasa", "Sin cocción · 3 min")
           ]
         },
         {
@@ -14150,7 +14170,14 @@
             op("Falafel casero con arroz y salsa yogur", "6 falafel al horno, 100g arroz, salsa de yogur, pepino", "620 kcal", "26g prot", "80g carbs", "20g grasa", "Medio · 30 min"),
             op("Bowl de tempeh con boniato y edamame", "180g tempeh, 150g boniato asado, 100g edamame, AOVE", "610 kcal", "36g prot", "62g carbs", "20g grasa", "Medio · 25 min"),
             op("Pasta con tofu y salsa de anacardos", "120g pasta integral, 150g tofu, salsa de anacardos, espinacas", "630 kcal", "30g prot", "76g carbs", "22g grasa", "Fácil · 20 min"),
-            op("Chili sin carne con arroz", "180g alubias rojas, 100g arroz, tomate, pimiento, comino, maíz", "600 kcal", "26g prot", "90g carbs", "12g grasa", "Fácil · 25 min")
+            op("Chili sin carne con arroz", "180g alubias rojas, 100g arroz, tomate, pimiento, comino, maíz", "600 kcal", "26g prot", "90g carbs", "12g grasa", "Fácil · 25 min"),
+            // Versiones vegetarianas densas en carbohidratos (mismo motivo que
+            // las de abajo): en dieta vegetariana el problema es doble, porque
+            // las fuentes de proteína vegetal traen menos proteína por ración y
+            // el motor tiene que estirar todavía más.
+            op("Arroz con garbanzos al curry y tofu", "200g arroz cocido, 180g garbanzos cocidos, 100g tofu firme, 80ml leche de coco light, curry, cilantro", "710 kcal", "34g prot", "124g carbs", "14g grasa", "Medio · 25 min"),
+            op("Pasta integral con lentejas y tomate casero", "200g pasta integral cocida, 180g lentejas cocidas, 100g tomate frito casero, albahaca, 10g AOVE", "656 kcal", "30g prot", "110g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Bol de quinoa con edamame y boniato", "200g quinoa cocida, 250g boniato asado, 150g edamame cocido, 10g sésamo, salsa tamari", "640 kcal", "28g prot", "100g carbs", "12g grasa", "Medio · 30 min")
           ] : [
             op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja, sésamo", "560 kcal", "48g prot", "52g carbs", "12g grasa", "Medio · 25 min"),
             op("Pasta boloñesa casera con ternera", "180g ternera picada, 100g pasta integral, tomate frito casero, zanahoria, cebolla, orégano", "620 kcal", "42g prot", "64g carbs", "18g grasa", "Medio · 25 min"),
@@ -14166,7 +14193,21 @@
             op("Espaguetis con almejas y gambas", "150g espaguetis, 150g almejas, 100g gambas, ajo, perejil, AOVE", "580 kcal", "38g prot", "70g carbs", "14g grasa", "Medio · 20 min"),
             op("Pechuga rellena de jamón y queso con patatas", "200g pechuga de pollo rellena, 150g patatas al horno, AOVE", "600 kcal", "48g prot", "48g carbs", "22g grasa", "Medio · 30 min"),
             op("Cuscús con pollo y verduras", "150g cuscús, 200g pollo especiado, calabacín, pimiento, pasas", "610 kcal", "44g prot", "66g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Rissotto de champiñones con pollo", "150g arroz arborio, 180g pollo, champiñones, caldo, parmesano", "630 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min")
+            op("Rissotto de champiñones con pollo", "150g arroz arborio, 180g pollo, champiñones, caldo, parmesano", "630 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
+            // PLATOS DENSOS EN CARBOHIDRATOS (auditoría 5 sept 2026). El pool de
+            // ganancia se movía en 38-70 g de carbohidratos por comida, y a un
+            // cliente grande (100 kg en superávit, objetivo ~500 g/día) no se
+            // llegaba: el motor tenía que estirar las raciones hasta cosas como
+            // 840 g de patata en un plato. Estos rondan los 80-100 g de
+            // carbohidratos de partida, así que cubren el objetivo con raciones
+            // que una persona se come de verdad. Gramajes escritos para que
+            // cuadren con las tablas por 100 g del propio motor (arroz cocido
+            // 28 g, pasta 25 g, avena 60 g, boniato 20 g, lentejas 20 g).
+            op("Arroz a la cubana con pollo", "200g arroz cocido, 180g pollo, 2 huevos, 80g tomate frito casero, 1 plátano", "800 kcal", "60g prot", "100g carbs", "18g grasa", "Medio · 25 min"),
+            op("Paella de pollo y verduras", "220g arroz cocido, 200g pollo, 120g judías verdes, 100g pimiento, azafrán, 15g AOVE", "706 kcal", "54g prot", "82g carbs", "18g grasa", "Medio · 35 min"),
+            op("Macarrones integrales con pollo y tomate", "200g macarrones integrales cocidos, 200g pollo, 100g tomate frito casero, orégano, 10g AOVE", "692 kcal", "54g prot", "83g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Lentejas con arroz y pollo", "220g lentejas cocidas, 120g arroz cocido, 120g pollo, 80g zanahoria, 60g cebolla, pimentón", "692 kcal", "54g prot", "92g carbs", "12g grasa", "Medio · 30 min"),
+            op("Fideuá de pollo y gambas", "200g fideos cocidos, 150g pollo, 100g gambas, 100g pimiento, ajo, azafrán, 10g AOVE", "662 kcal", "64g prot", "70g carbs", "14g grasa", "Medio · 30 min")
           ]
         },
         {
@@ -14187,7 +14228,10 @@
             op("Batido de proteína con leche y crema de cacahuete", "1 scoop proteína, 300ml leche entera, 15g crema de cacahuete", "420 kcal", "40g prot", "34g carbs", "16g grasa", "Fácil · 2 min"),
             op("Tostadas con miel y queso fresco", "2 rebanadas pan integral, 60g queso fresco, miel", "360 kcal", "18g prot", "48g carbs", "10g grasa", "Sin cocción · 3 min"),
             op("Batido de caseína con plátano y cacao", "30g caseína, 1 plátano, 1 cda cacao puro, leche", "400 kcal", "32g prot", "46g carbs", "8g grasa", "Fácil · 2 min"),
-            op("Wrap de pavo, queso y aguacate", "1 tortilla integral, 60g pavo, 20g queso, 1/4 aguacate", "420 kcal", "28g prot", "36g carbs", "18g grasa", "Sin cocción · 5 min")
+            op("Wrap de pavo, queso y aguacate", "1 tortilla integral, 60g pavo, 20g queso, 1/4 aguacate", "420 kcal", "28g prot", "36g carbs", "18g grasa", "Sin cocción · 5 min"),
+            // Merienda densa, mismo motivo que la de media mañana.
+            op("Tostadas integrales con plátano, miel y crema de cacahuete", "3 rebanadas pan integral, 1 plátano, 15g miel, 20g crema de cacahuete", "520 kcal", "18g prot", "80g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Batido de avena, plátano, dátiles y leche", "60g avena, 1 plátano, 3 dátiles, 300ml leche entera, canela", "540 kcal", "22g prot", "82g carbs", "12g grasa", "Fácil · 3 min")
           ]
         },
         {
@@ -14223,7 +14267,11 @@
             op("Merluza con patatas panadera", "200g merluza, 200g patata panadera, cebolla, AOVE", "480 kcal", "38g prot", "48g carbs", "16g grasa", "Medio · 25 min"),
             op("Pechuga rellena de espinacas y queso con arroz", "200g pechuga rellena, 100g arroz, espinacas", "580 kcal", "46g prot", "50g carbs", "20g grasa", "Medio · 30 min"),
             op("Costillas al horno con puré de patata", "220g costillas de cerdo, 200g puré de patata, especias", "660 kcal", "40g prot", "48g carbs", "32g grasa", "Medio · 35 min"),
-            op("Wok de ternera con tallarines de arroz y verduras", "180g ternera en tiras, 100g tallarines de arroz, pimiento, brócoli, soja", "600 kcal", "40g prot", "62g carbs", "20g grasa", "Medio · 20 min")
+            op("Wok de ternera con tallarines de arroz y verduras", "180g ternera en tiras, 100g tallarines de arroz, pimiento, brócoli, soja", "600 kcal", "40g prot", "62g carbs", "20g grasa", "Medio · 20 min"),
+            // Cenas densas en carbohidratos, mismo motivo que las comidas.
+            op("Pollo teriyaki con tallarines de arroz y verduras", "200g tallarines de arroz cocidos, 180g pollo, 120g brócoli, 80g zanahoria, salsa teriyaki, 5g sésamo", "598 kcal", "49g prot", "78g carbs", "10g grasa", "Medio · 25 min"),
+            op("Salmón con boniato asado y quinoa", "180g salmón al horno, 250g boniato asado, 100g quinoa cocida, espárragos, 10g AOVE", "660 kcal", "49g prot", "71g carbs", "20g grasa", "Medio · 35 min"),
+            op("Espaguetis integrales con pavo y tomate", "200g espaguetis integrales cocidos, 180g pavo picado, 100g tomate frito casero, albahaca, 10g AOVE", "672 kcal", "52g prot", "78g carbs", "16g grasa", "Fácil · 20 min")
           ]
         }
       ];
@@ -15100,13 +15148,14 @@
       const refProtSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'prot'), 0) / nutricionPorDia.length;
       const refCarbsSemana = nutricionPorDia.reduce((acc, dia) => acc + _sumarMacroDia(dia, 'carbs'), 0) / nutricionPorDia.length;
       const corrProt = refProtSemana > 0 ? _clamp(protObj / refProtSemana, 0.5, 2.0) : 1;
-      // Techo subido de 1,6 a 1,9 (auditoría 5 sept 2026): con 1,6 el recetario
+      // El techo se queda en 1,6. Se probó a subirlo a 1,9 porque el recetario
       // no alcanzaba el objetivo de carbohidratos de los clientes más grandes
-      // -- hombre de 100 kg en ganancia, 336 g reales frente a 500 de objetivo,
-      // un 33% corto. Las calorías del día sí cuadraban, así que ese hueco lo
-      // acababa rellenando la grasa en la normalización final: el plan entregado
-      // no era el que decía su propia ficha de macros.
-      const corrCarbs = refCarbsSemana > 0 ? _clamp(carbsObj / refCarbsSemana, 0.45, 1.9) : 1;
+      // (hombre de 100 kg en ganancia: 336 g reales frente a 500 de objetivo),
+      // pero estirar más no era la solución: sacaba raciones de 900 g de pasta.
+      // El problema no era el multiplicador sino el pool, que se movía en 38-70 g
+      // de carbohidratos por comida. Con los platos densos añadidos (80-120 g de
+      // partida) el objetivo se cubre con 1,6 y raciones normales.
+      const corrCarbs = refCarbsSemana > 0 ? _clamp(carbsObj / refCarbsSemana, 0.45, 1.6) : 1;
       if (Math.abs(corrProt - 1) > 0.03 || Math.abs(corrCarbs - 1) > 0.03) {
         // rotar() reordena el mismo array con .slice(), no clona las recetas:
         // una misma opción (mismo objeto) puede aparecer en varios días de la
@@ -15240,7 +15289,7 @@
     //  · Los platos donde el arroz es el plato: un risotto pide arborio, un
     //    arroz con leche pide arroz redondo y un poké, arroz de sushi. Poner
     //    "integral" ahí no es más sano, es una receta que nadie va a cocinar.
-    const _NO_INTEGRAL = /pre-?entreno|post-?entreno|antes de entrenar|despu[ée]s de entrenar|pre-?wod|post-?wod|pre-?carrera|post-?carrera|antes de correr|recuperaci[óo]n|arborio|rissotto|risotto|pok[ée]|sushi|arroz con leche|tortitas? de arroz|crema de arroz|basmati/i;
+    const _NO_INTEGRAL = /pre-?entreno|post-?entreno|antes de entrenar|despu[ée]s de entrenar|pre-?wod|post-?wod|pre-?carrera|post-?carrera|antes de correr|recuperaci[óo]n|arborio|rissotto|risotto|pok[ée]|sushi|arroz con leche|tortitas? de arroz|crema de arroz|basmati|paella|a la cubana/i;
     const _aIntegral = (o) => {
       if (_NO_INTEGRAL.test(`${o.nombre} ${o.ingredientes} ${o.prep || ''}`)) return o;
       const ing = o.ingredientes
