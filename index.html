@@ -9859,7 +9859,7 @@
   // la referencia de progresión donde más importa.
   // Formato: [regex, alternativas[], cardio?, esPrincipal?]
   const ALTERNATIVAS_EJERCICIO = [
-    [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet'], false, true],
+    [/sentadilla trasera|sentadilla con barra|back squat/i, ['Prensa de piernas', 'Sentadilla goblet', 'Sentadilla hack'], false, true],
     // "( con mancuernas?)?" consume el material que trae el nombre en la
     // plantilla ("sentadilla goblet con mancuerna"): sin esto quedaba colgando
     // en el reemplazo -- "Prensa de piernas con mancuerna", que es una máquina
@@ -9873,7 +9873,7 @@
     // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
     // mancuernas" -- dos materiales contradictorios en el mismo nombre).
     [/peso muerto( convencional| sumo| rumano)?( con mancuernas?)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
-    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas'], false, true],
+    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
     // "(?!...)" evita que esta regla vuelva a tocar el texto que ya dejó la
     // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
     // "press inclinado en máquina/multipower": sin esto quedaba colgando
@@ -9884,8 +9884,8 @@
     // ("dominadas asistidas o jalón", "dominadas lastradas", "dominadas
     // australianas en mesa", "dominadas o jalón"): sin esto quedaba colgando
     // ("Remo en polea baja asistidas o jalón" -- bug real encontrado ago 2026).
-    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja'], false, true],
-    [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna'], false, true],
+    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja', 'Pullover en polea alta'], false, true],
+    [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna', 'Remo en T en máquina'], false, true],
     // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
     // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
     // polea baja a una mano").
@@ -9902,7 +9902,7 @@
     // una pierna" y "Puente de glúteo a una pierna" sí son ejercicios reales, y
     // conservarlo mantiene el carácter unilateral que buscaba la plantilla.
     [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo']],
-    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas']],
+    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
     // ellos quedaba colgando el material que trae esa opción por su cuenta
@@ -9915,13 +9915,20 @@
     // banco scott" (con una "s" de más). "bíceps" en español no tiene
     // singular sin ella, así que exigirla no pierde ningún caso real.
     [/curl b[ií]ceps(?! con barra z| en banco scott)|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
-    [/press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza)/i, ['Fondos en banco', 'Press cerrado']],
+    // El grupo de material del final consume lo que deja detrás la plantilla o
+    // la rotación de accesorios: el pool escribe "extensión de tríceps en polea"
+    // y esta regla solo se comía el nombre, así que el material quedaba colgando
+    // detrás del reemplazo -- "Fondos en banco EN POLEA", "Press cerrado EN
+    // MÁQUINA", "Press cerrado CON MANCUERNAS" (bugs reales, encontrados al
+    // ampliar el catálogo el 5 sept). Misma cautela que ya usan las reglas de
+    // sentadilla goblet y hip thrust de más arriba.
+    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra)?/i, ['Fondos en banco', 'Press cerrado']],
     [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Press Arnold']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
-    [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas']],
-    [/curl femoral|leg curl( tumbado| sentado)?/i, ['Peso muerto rumano', 'Hip thrust']],
+    [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas', 'Contractor de pecho en máquina']],
+    [/curl femoral|leg curl( tumbado| sentado)?|femoral tumbado( en m[aá]quina)?/i, ['Peso muerto rumano', 'Hip thrust', 'Curl femoral sentado en máquina']],
     // La regex tiene que comerse el nombre ENTERO del ejercicio, no solo la
     // palabra "gemelos": la plantilla escribe "elevación de gemelos de pie" o
     // "gemelos en prensa o máquina", y cazar solo "gemelos" dejaba el resto
@@ -9985,9 +9992,23 @@
   //    no hay nada de esto ni con material ni sin él.
   //  · Peso libre: mancuernas, barra, kettlebell, balón. Vale en "casa con
   //    material", no en "casa sin material" ni al aire libre.
-  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b/i;
+  // "hack" va explícito porque es el único nombre de máquina que no lleva la
+  // palabra "máquina" ni "polea" dentro ("Sentadilla hack"): sin él se colaba
+  // en planes de casa, que es justo el bug que este filtro existe para evitar.
+  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b/i;
   const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad/i;
-  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno) => {
+  // BUG REAL (5 sept 2026): la rotación se aplica DESPUÉS de las sustituciones
+  // por lesión —a propósito, para que la regex de lesión encuentre el nombre
+  // original— pero no sabía nada de lesiones, así que podía volver a meter por
+  // la puerta de atrás justo el ejercicio que la adaptación acababa de quitar.
+  // Reproducido con 756 planes de cliente lesionado: a alguien con la rodilla
+  // tocada le llegaban "Zancadas" y "Prensa", y con el hombro tocado,
+  // "Aperturas". Mismo criterio que el filtro de material de arriba: si una
+  // alternativa está contraindicada para su lesión, no entra en el sorteo.
+  const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto/i;
+  const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press/i;
+  const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n/i;
+  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
       // ejercicios de gimnasio a quien entrena en casa y, encima, con el material
@@ -10000,6 +10021,11 @@
       const viables = alternativas.filter(a => {
         if (_ALT_SOLO_GIMNASIO.test(a) && entorno !== 'gimnasio') return false;
         if (_ALT_PESO_LIBRE.test(a) && entorno === 'sinMaterial') return false;
+        if (lesiones) {
+          if (lesiones.rodilla && _ALT_RIESGO_RODILLA.test(a)) return false;
+          if (lesiones.hombro && _ALT_RIESGO_HOMBRO.test(a)) return false;
+          if (lesiones.espalda && _ALT_RIESGO_ESPALDA.test(a)) return false;
+        }
         return true;
       });
       if (!viables.length) return null;
@@ -12814,7 +12840,6 @@
     const _enCasa = (u.lugar || '').includes('casa');
     const eq = (gimnasio, conMaterial, sinMaterial) =>
       _sinMat ? sinMaterial : (_enCasa ? conMaterial : gimnasio);
-    if (!soloDieta) {
     // Cuando la lesión es "Otra" (sin categoría concreta), se busca en el texto
     // libre que el usuario escribió alguna palabra clave de rodilla/espalda/
     // hombro para aplicar el mismo filtro de seguridad de forma preventiva --
@@ -12825,6 +12850,11 @@
     const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
     const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
     const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
+    // Las tres constantes de zona se declaran FUERA de este if a propósito: el
+    // filtro de lesiones de la rotación automática (más abajo, ya fuera de este
+    // bloque) las necesita, y duplicar allí la detección era garantizar que las
+    // dos copias se separasen con el tiempo. Una sola fuente de verdad.
+    if (!soloDieta) {
     // Thrusters, wall balls y snatch tocan a la vez rodilla/espalda Y hombro (un
     // "Otra" que mencione las dos zonas activa ambos bloques). Como mapaLesion
     // aplica un .replace() detrás de otro, la primera zona en tocar el texto se
@@ -12851,6 +12881,14 @@
       // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
       // ("Press inclinado en máquina (rango controlado) mancuernas 4×10").
       mapaLesion = mapaLesion.concat([
+        // La prensa NO se sustituye: con la rodilla tocada es de los pocos
+        // ejercicios de cuádriceps que sí valen, y de hecho es el reemplazo que
+        // usan varias reglas de aquí abajo. Lo que faltaba era el aviso de
+        // rango: la plantilla "Lower B" la prescribe a secas ("Prensa de
+        // piernas 3×12") y sin esa señal el cliente baja hasta el final, que es
+        // justo el tramo que hay que evitar. El lookahead evita volver a marcar
+        // la que ya viene con su aviso puesto por otra regla.
+        [/[Pp]rensa de piernas(?! \(rango)/g, 'Prensa de piernas (rango sin dolor, sin bajar del todo)'],
         [/[Ss]entadilla goblet( con mancuerna)?/g, 'Step-ups controlados (sin salto)'],
         [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'elevaciones de cadera (hip thrust)'],
         // "Burpees box jump over" tiene que ir ANTES que la regla suelta de "box
@@ -13421,7 +13459,8 @@
     const _entornoRot = /sin material|aire libre/i.test(_lugarTxt) ? 'sinMaterial'
       : /casa/i.test(_lugarTxt) ? 'casa'
       : 'gimnasio';
-    const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot);
+    const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot,
+      { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda });
     if (mapaRotacion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion) } : d);
     }
@@ -15957,7 +15996,13 @@
       [/sentadilla|prensa|zancada|extensi[óo]n de cu[áa]driceps|hack|step[- ]?up|b[úu]lgara|pistol/i, ['Cuádriceps','Glúteos']],
       [/femoral|nordic/i, ['Isquios']],
       [/gemelo/i, ['Gemelos']],
-      [/press banca|press inclinado|aperturas|fondos|flexion|pullover|cruce|dips/i, ['Pecho','Tríceps']],
+      // El pullover va ANTES que la línea de pecho y cuenta para los dos grupos:
+      // trabaja dorsal y pectoral a la vez, y aquí se prescribe en día de
+      // espalda (alternativa de dominadas). Con la clasificación anterior
+      // ("pullover" dentro de la línea de pecho, que corta el bucle con break)
+      // un día de espalda con pullover sumaba volumen de PECHO y no de espalda.
+      [/pullover/i, ['Espalda','Pecho']],
+      [/press banca|press inclinado|press declinado|declinado|aperturas|contractor|fondos|flexion|cruce|dips/i, ['Pecho','Tríceps']],
       [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales|push press|face pull/i, ['Hombros']],
       [/dominadas|jal[óo]n|remo|pull[- ]?up|muscle[- ]?up/i, ['Espalda','Bíceps']],
       [/curl|b[íi]ceps|martillo|banco scott|barra z/i, ['Bíceps']],
