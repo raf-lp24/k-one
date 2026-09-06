@@ -6003,6 +6003,66 @@
   .push-toggle-switch input:disabled ~ .push-toggle-slider { opacity: 0.4; }
   .push-toggle-switch input:focus-visible ~ .push-toggle-slider { outline: 2px solid var(--brasa); outline-offset: 2px; }
 
+  /* ─── MÓVIL: zonas de toque y rejillas ────────────────────────────────
+     Medido sobre un iPhone de 375px con el dashboard montado: el interruptor
+     de avisos daba 34x20 px de zona táctil y varios botones se quedaban en
+     30-36 px de alto. Apple (HIG) y Google (Material) piden 44 px como mínimo
+     para algo que se toca con el dedo; por debajo de eso el dedo tapa el
+     control y se falla el toque. Solo se toca el ÁREA TÁCTIL, no el tamaño
+     visual: el interruptor se sigue viendo igual de fino. */
+  @media (max-width: 1024px) {
+    /* El input invisible se estira por fuera del interruptor: la zona táctil
+       pasa de 34x20 a 58x44 sin mover ni un píxel de lo que se ve. */
+    .push-toggle-switch input {
+      top: -12px; left: -12px;
+      width: calc(100% + 24px);
+      height: calc(100% + 24px);
+    }
+    .push-toggle-row { padding: 12px 16px; }
+    /* Botones de la barra lateral y de acción: alto mínimo cómodo. */
+    .dash-sidebar .logout-btn,
+    .dash-sidebar .nav-item { min-height: 44px; }
+    .dash-menu-btn { min-width: 44px; min-height: 44px; }
+    /* El avatar es a la vez foto de perfil y botón para cambiarla. */
+    .user-avatar { min-width: 44px; min-height: 44px; }
+
+    /* 4 columnas en 375px dejaban cada hueco por debajo de 80px y el texto
+       interno ('+ Añadir foto') forzaba el desbordamiento: la rejilla se salía
+       7px por la derecha. Con 3 columnas cabe, y min-width:0 impide que el
+       contenido vuelva a estirar la celda. */
+    .photos-grid { grid-template-columns: repeat(3, 1fr); }
+    .photo-slot { min-width: 0; }
+    .photo-slot-hint { overflow-wrap: anywhere; }
+
+    /* Botones de contenido: se quedaban en 30-40 px de alto. Se sube solo el
+       alto mínimo (no el tipo de letra ni el ancho), así que el diseño no
+       cambia de aspecto: simplemente deja de fallarse el toque. Medidos uno a
+       uno sobre el dashboard real en 375 px, no a ojo. */
+    .btn-primary,
+    .btn-ghost,
+    .btn-recetario,
+    .link-recetario,
+    .rotacion-opt,
+    .ciclo-opt,
+    .nutri-dia,
+    .fotos-nav-btn {
+      min-height: 44px;
+    }
+    /* El enlace del recetario va DENTRO de un párrafo: no puede volverse
+       inline-flex de 44px sin romper el renglón. El padding vertical sobre un
+       elemento en línea sí amplía la zona pulsable aunque no cambie el flujo. */
+    .link-recetario { padding: 12px 2px; }
+    /* Campos numéricos del check-in (peso, medidas): 40px -> 44px. */
+    .checkin-q input[type=number], .checkin-q input[type=text] { min-height: 44px; }
+    /* Los chips de día y de opción son cuadrados pequeños: además del alto,
+       necesitan que el contenido siga centrado al crecer. */
+    .rotacion-opt, .ciclo-opt, .nutri-dia, .fotos-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
   .confetti-piece { position:fixed; z-index:9999; width:8px; height:8px; border-radius:2px; pointer-events:none; animation:confettiFall 1.5s ease-out forwards; }
   @keyframes confettiFall { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(100vh) rotate(720deg)} }
 
@@ -8298,7 +8358,7 @@
               <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6" id="avisoRenovacionDesc">Si quieres, puedes elegir ya tu plan y no esperar al último día. Sin prisa: tu acceso sigue activo hasta entonces.</div>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn-primary" id="avisoRenovacionBtn" style="padding:9px 20px;font-size:13px" onclick="continuarRenovacion()">Continuar con mi plan →</button>
-                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="cerrarAvisoRenovacion()">Ahora no, gracias</button>
               </div>
             </div>
           </div>
@@ -8318,7 +8378,7 @@
                   <span style="font-size:13px;color:#aaa">kg</span>
                 </div>
                 <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="confirmarRecalculoPeso()">Actualizar plan →</button>
-                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerRecalculo()">Ahora no</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="cerrarBannerRecalculo()">Ahora no</button>
               </div>
             </div>
           </div>
@@ -8335,7 +8395,7 @@
               <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">Cuéntanoslo — leemos cada sugerencia y muchas se acaban metiendo en el producto.</div>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="showSection('contacto')">Enviar sugerencia →</button>
-                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:8px" onclick="cerrarBannerFeedback()">Ahora no, gracias</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="cerrarBannerFeedback()">Ahora no, gracias</button>
               </div>
             </div>
           </div>
@@ -16159,7 +16219,7 @@
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
         notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div></details>`;
       }
-      notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
+      notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline;padding:12px 2px" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
       nutricionNotas.innerHTML = notasHTML;
     }
 
@@ -24522,6 +24582,16 @@
       const contenedores = document.querySelectorAll('[data-push-toggle]');
       if (!contenedores.length) return;
       const soportado = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+      // iPhone/iPad: Safari solo expone PushManager si la web esta INSTALADA en la
+      // pantalla de inicio (iOS 16.4+). En el navegador normal 'soportado' es
+      // false, y hasta ahora eso escondia el bloque entero sin decir nada -- el
+      // cliente de iPhone no veia los avisos por ninguna parte y no habia forma
+      // de saber por que. Ahora se muestra con la instruccion concreta.
+      const _esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const _instalada = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || navigator.standalone === true;
+      const _iosSinInstalar = !soportado && _esIOS && !_instalada;
       let sub = null, denegado = false, hayError = false;
       if (soportado) {
         denegado = Notification.permission === 'denied';
@@ -24536,6 +24606,16 @@
         const input = cont.querySelector('.push-toggle-input');
         const hint = cont.querySelector('.push-toggle-hint');
         if (!input) return;
+        if (_iosSinInstalar) {
+          cont.style.display = '';
+          input.checked = false;
+          input.disabled = true;
+          if (hint) {
+            hint.textContent = 'En iPhone los avisos solo funcionan con la app instalada: pulsa Compartir y luego «Añadir a pantalla de inicio». Después vuelve aquí y actívalos.';
+            hint.style.display = '';
+          }
+          return;
+        }
         if (!soportado || hayError) { cont.style.display = 'none'; return; }
         cont.style.display = '';
         if (denegado) {
