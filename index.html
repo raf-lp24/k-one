@@ -9966,7 +9966,7 @@
     // plantilla ("sentadilla goblet con mancuerna"): sin esto quedaba colgando
     // en el reemplazo -- "Prensa de piernas con mancuerna", que es una máquina
     // y un peso libre a la vez.
-    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas']],
+    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Sentadilla isométrica en pared']],
     [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
     [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
     [/peso muerto rumano( con mancuernas?)?/i, ['Hip thrust', 'Extensión lumbar en máquina']],
@@ -9995,7 +9995,7 @@
     // de poolsEjercicio, más abajo): sin esto quedaba colgando ("Remo en polea
     // baja apoyado en banco").
     [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Farmer carry con mancuernas']],
-    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara', 'Zancada inversa con mancuernas']],
+    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara', 'Zancada inversa con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás']],
     // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
     // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
     // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
@@ -10058,8 +10058,8 @@
     [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro'], true],
     [/kettlebell swings?|\bKB swings?\b/i, ['Hip thrust con mancuerna', 'Peso muerto rumano con kettlebell'], true],
     [/russian twist/i, ['Plancha lateral', 'Rueda abdominal'], true],
-    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal'], true],
-    [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores'], true],
+    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal', 'Plancha invertida', 'Tijeras'], true],
+    [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
     [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano'], true],
     [/sled push/i, ['Farmer carry', 'Zancadas cargadas con mancuernas'], true],
@@ -10097,7 +10097,14 @@
   // "hack" va explícito porque es el único nombre de máquina que no lleva la
   // palabra "máquina" ni "polea" dentro ("Sentadilla hack"): sin él se colaba
   // en planes de casa, que es justo el bug que este filtro existe para evitar.
-  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b/i;
+  // Las MÁQUINAS DE CARDIO entran también en esta lista: cinta, bici estática,
+  // elíptica y assault bike. Sin ellas, la rotación las colaba en planes de
+  // casa — medido el 6 sept 2026: "Cinta con inclinación a paso rápido 3×20"
+  // dentro de una sesión titulada "Sin material", y "Remo suave 5 min" con el
+  // paréntesis del ejercicio original detrás ("saltando a la comba").
+  // Al corredor de cinta no le afecta: el lugar "Cinta / Interior" se resuelve
+  // como entorno de gimnasio, así que sigue pudiendo recibirlas.
+  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
   const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad/i;
   // BUG REAL (5 sept 2026): la rotación se aplica DESPUÉS de las sustituciones
   // por lesión —a propósito, para que la regex de lesión encuentre el nombre
@@ -12720,10 +12727,25 @@
         { nombre: 'Burpees', accion: 'burpees seguidos al máximo, sin parar' },
         { nombre: 'Comba', accion: 'saltando a la comba' },
       ];
-      // Si el cliente ha elegido una modalidad concreta (según lo que tenga su
-      // gimnasio) desde "Cambiar plan", se respeta esa en vez de rotar sola.
-      const prefFinisher = modalidadesInterval.find(m => m.nombre === u.preferenciaCardioFinisher);
-      const modInterval = prefFinisher || modalidadesInterval[(semilla + bloqueMeso) % modalidadesInterval.length];
+      // BUG REAL (6 sept 2026): esta lista se escribió pensando en "lo que de
+      // verdad hay en un gimnasio normal" —lo dice el comentario de arriba— pero
+      // el remate se añadía IGUAL a los planes de casa. Resultado medido: 80
+      // sesiones tituladas "Sin material" que mandaban "Assault bike 15 min
+      // interválico (en la bici de aire)" a alguien que entrena en el salón.
+      // En casa solo quedan las modalidades que no necesitan máquina.
+      const enCasa = lugar.includes('casa');
+      const modalidadesDisponibles = enCasa
+        ? modalidadesInterval
+            .filter(m => /Sprints|Burpees|Comba/.test(m.nombre))
+            .map(m => m.nombre === 'Sprints'
+              ? { nombre: 'Sprints', accion: 'corriendo al aire libre, con algo de cuesta si puedes' }
+              : m)
+        : modalidadesInterval;
+      // Si el cliente ha elegido una modalidad concreta desde "Cambiar plan", se
+      // respeta — salvo que no exista donde entrena, y entonces se rota entre las
+      // que sí tiene.
+      const prefFinisher = modalidadesDisponibles.find(m => m.nombre === u.preferenciaCardioFinisher);
+      const modInterval = prefFinisher || modalidadesDisponibles[(semilla + bloqueMeso) % modalidadesDisponibles.length];
       const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : '';
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
