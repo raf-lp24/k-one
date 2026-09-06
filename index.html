@@ -12579,8 +12579,19 @@
           {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
            detalle: numDias >= 4 ? fuerzaCorredor : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Fartlek o series · Calidad",
-           detalle:`Calentamiento: 10 min trote + drills (A-skips, balanceos de piernas). ${sesionCorta ? 'Fartlek: 8×(1 min fuerte / 2 min suave)' : 'Escalera: 200m-400m-800m-1000m-800m-400m-200m con recuperación proporcional al esfuerzo (mitad del tiempo de trabajo)'}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). Cronometra y anota. Enfriamiento: 5-10 min trote`,
+          {dia:"Miércoles", tipo:"Entrenamiento", resumen: sesionCorta || bloqueMeso % 2 === 0 ? "Fartlek o series · Calidad" : "Cuestas · Calidad",
+           // Cuestas no estaba en ningun sitio del catalogo de running -- solo
+           // habia escalera y fartlek, siempre los mismos. Rota por bloqueMeso
+           // (mismo patron que plioVariantesAv, mas arriba) para que no sea
+           // siempre la misma sesion de calidad cada semana. Funciona igual en
+           // cinta que al aire libre: solo cambia si la cuesta es real o de
+           // inclinacion.
+           detalle:`Calentamiento: 10 min trote + drills (A-skips, balanceos de piernas). ${sesionCorta
+             ? 'Fartlek: 8×(1 min fuerte / 2 min suave)'
+             : (bloqueMeso % 2 === 0
+               ? 'Escalera: 200m-400m-800m-1000m-800m-400m-200m con recuperación proporcional al esfuerzo (mitad del tiempo de trabajo)'
+               : 'Cuestas: 8-10 repeticiones de 200-300m subiendo fuerte (RPE 8-9) — cuesta real de 4-6% o cinta con inclinación alta si entrenas en interior. Bajas trotando de vuelta como recuperación')
+           }. Ritmo fuerte = incómodo pero controlado (RPE 7-8). Cronometra y anota. Enfriamiento: 5-10 min trote`,
            etiqueta:"Intensidad"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y recuperación", detalle:"Estiramientos: cuádriceps, flexores de cadera, gemelos, isquiotibiales, piramidal — 30s cada uno. Foam rolling opcional", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
@@ -15032,6 +15043,20 @@
       notasDeporte.push('Hidratación: bebe 5-7 ml/kg de peso 2-4h antes de correr. Durante sesiones de +60 min, 150-250 ml cada 20 min con electrolitos.');
       notasDeporte.push('Tus carbohidratos están ajustados al alza para mantener el glucógeno muscular. Los días de tirada larga (>10 km), prioriza la comida rica en hidratos 3h antes.');
       notasDeporte.push('Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
+      // Nutricion DURANTE la carrera: hasta ahora el plan solo cubria antes
+      // (fuelingPreCarrera) y despues (fuelingPostCarrera) de la tirada larga,
+      // nada de que hacer en los 60+ minutos de en medio -- justo donde mas
+      // falla la gente en carreras largas de verdad. Evidencia (revision de
+      // nutricion en maraton): 30-60 g de carbohidrato por hora a partir de
+      // los primeros 45-60 min, con geles/bebida isotonica/gominolas -- no
+      // hace falta comida solida corriendo.
+      notasDeporte.push('Nutrición durante la carrera: en sesiones de más de 60-75 min (tirada larga, maratón), a partir de los primeros 45-60 min toma 30-60g de carbohidrato por hora — un gel, bebida isotónica o gominolas energéticas, lo que mejor toleres. No esperes a notar el bajón: para entonces ya vas tarde.');
+      // Carga de hidratos antes de una carrera concreta: solo tiene sentido
+      // avisar en la ventana real (2-3 dias antes), no meses antes cuando el
+      // evento esta lejos y el aviso no sirve para nada todavia.
+      if (tieneEvento && diasParaEvento !== null && diasParaEvento <= 3) {
+        notasDeporte.push(`Carga de hidratos para "${u.evento}": los 2-3 días antes de tu carrera, sube los carbohidratos a 8-10g/kg de tu peso al día (con tu plan actual de calorías, no hace falta comer más en total — cambia grasa por más arroz, pasta o pan) y baja algo la fibra para no ir pesado a la salida.`);
+      }
     } else if (esCrossfit) {
       notasDeporte.push('Hidratación: 500-700 ml en las 2h previas al WOD. Durante el WOD no sueles poder beber — hidrata bien antes y después.');
       notasDeporte.push('Tu plan prioriza proteína y carbohidratos para soportar el volumen alto de CrossFit. Post-WOD: come en los 45 min siguientes, priorizando proteína + carbohidrato rápido.');
