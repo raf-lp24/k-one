@@ -6851,7 +6851,6 @@
           <div class="radio-group" id="cp-lugar">
             <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">Gimnasio</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa con material</div>
-            <div class="radio-opt" onclick="selectRadio(this,'cp-lugar')">En casa sin material</div>
           </div>
         </div>
         <div class="field">
@@ -8189,7 +8188,6 @@
             <div class="radio-group" id="lugar">
               <div class="radio-opt" onclick="selectRadio(this,'lugar')">Gimnasio</div>
               <div class="radio-opt" onclick="selectRadio(this,'lugar')">En casa con material</div>
-              <div class="radio-opt" onclick="selectRadio(this,'lugar')">En casa sin material</div>
             </div>
           </div>
         </div>
@@ -9305,13 +9303,20 @@
     } else if (deporte.includes('Hyrox')) {
       opciones = ['Box / Gimnasio con material'];
     } else if (deporte.includes('CrossFit')) {
-      opciones = ['Box CrossFit', 'Al aire libre'];
+      // "Al aire libre" retirado (decisión de negocio, 6 sept 2026): no se ofrece
+      // ya para CrossFit. No afecta al motor -- CrossFit es solo-nutrición
+      // (soloDieta forzado en buildPlanFromData), así que "lugar" no genera nada.
+      opciones = ['Box CrossFit'];
     } else if (deporte.includes('Gimnasio') || deporte.includes('Fuerza')) {
-      opciones = ['Gimnasio', 'En casa con material', 'En casa sin material'];
+      // "En casa sin material" retirado del formulario (decisión de negocio, 6
+      // sept 2026). El motor SIGUE soportando la rama bodyweight -- no se toca --
+      // porque hay cuentas con ese lugar ya guardado; si se regenera su plan,
+      // debe seguir saliendo igual que siempre. Mismo patrón que "Vegetariano/a".
+      opciones = ['Gimnasio', 'En casa con material'];
     } else if (deporte.includes('Híbrido')) {
-      opciones = ['Gimnasio + exterior', 'En casa con material', 'En casa sin material'];
+      opciones = ['Gimnasio + exterior', 'En casa con material'];
     } else {
-      opciones = ['Gimnasio', 'En casa con material', 'En casa sin material'];
+      opciones = ['Gimnasio', 'En casa con material'];
     }
     container.innerHTML = opciones.map(op =>
       `<div class="radio-opt${op === currentSel ? ' selected' : ''}" onclick="selectRadio(this,'${grupoId}')">${op}</div>`
