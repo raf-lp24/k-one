@@ -6054,6 +6054,35 @@
     .link-recetario { padding: 12px 2px; }
     /* Campos numéricos del check-in (peso, medidas): 40px -> 44px. */
     .checkin-q input[type=number], .checkin-q input[type=text] { min-height: 44px; }
+
+    /* Banner de cookies en móvil. Medido en 375px: ocupaba 182px (el 22% de la
+       pantalla) con el texto legal a 11px y los botones a 10px — ilegible de un
+       vistazo, que es justo lo que un banner de consentimiento NO puede
+       permitirse: si no se lee, el consentimiento no es informado. Se sube el
+       tamaño de letra y se compensa el alto apretando interlineado y relleno
+       lateral, para que no crezca todavía más. */
+    .cookie-banner {
+      padding: 14px 16px !important;
+      gap: 12px !important;
+    }
+    .cookie-banner-texto {
+      font-size: 12.5px !important;
+      line-height: 1.5 !important;
+    }
+    /* El enlace legal daba 14px de alto pulsable. El relleno vertical lo amplía
+       sin romper el renglón (sigue siendo un elemento en línea). */
+    .cookie-banner-link { padding: 10px 2px; }
+    /* 10px en mayúsculas con 1.5px de espaciado se leía como un borrón. Se sube
+       la letra y se recorta el espaciado. Los botones se reparten la fila. */
+    .cookie-banner-btn {
+      font-size: 12px !important;
+      letter-spacing: 0.5px !important;
+      /* El min-height:44px del estilo en línea ya garantiza la zona táctil;
+         con 13px de relleno los botones se iban a 60px y el banner crecía de
+         más. Con 11px quedan en 44 justos y el banner baja de 214 a ~198px. */
+      padding: 11px 16px !important;
+      flex: 1;
+    }
     /* Los chips de día y de opción son cuadrados pequeños: además del alto,
        necesitan que el contenido siga centrado al crecer. */
     .rotacion-opt, .ciclo-opt, .nutri-dia, .fotos-nav-btn {
@@ -6069,6 +6098,17 @@
   .skeleton { background:var(--carbon); border-radius:8px; overflow:hidden; position:relative; }
   .skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation:skeletonShimmer 1.5s infinite; }
   @keyframes skeletonShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+  /* El banner de cookies se apila SOLO en móvil. En una fila de 343px útiles,
+     el texto legal y los dos botones se pelean por el espacio: el párrafo se
+     quedaba en una columna de 86px y el banner llegaba al 61% de la pantalla.
+     A partir de 561px (tablets) vuelve a caber en fila, que ocupa menos alto. */
+  @media (max-width: 560px) {
+    .cookie-banner { flex-direction: column !important; align-items: stretch !important; }
+    /* Apilado, el párrafo no debe estirarse en el eje vertical (flex:1 en
+       columna crece a lo alto, no a lo ancho). */
+    .cookie-banner-texto { flex: none !important; }
+  }
 
   /* Ninguna de las reglas @media de arriba (todas entre las líneas 563 y
      4863) cubre el cuestionario, el login/registro ni NINGÚN modal (paywall,
@@ -7561,11 +7601,11 @@
 </div>
 
 <!-- BANNER DE COOKIES (RGPD) -->
-<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
-  <p style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica se usan de forma anónima. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" style="color:var(--brasa);text-decoration:none">Más información</a></p>
+<div id="cookieBanner" class="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
+  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica se usan de forma anónima. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color:var(--brasa);text-decoration:none">Más información</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0">
-    <button onclick="rechazarCookies()" style="padding:14px 20px;min-height:44px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
-    <button onclick="aceptarCookies()" style="padding:14px 20px;min-height:44px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
+    <button onclick="rechazarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
+    <button onclick="aceptarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
   </div>
 </div>
 
