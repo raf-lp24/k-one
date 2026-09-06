@@ -9986,7 +9986,7 @@
     // ("dominadas asistidas o jalón", "dominadas lastradas", "dominadas
     // australianas en mesa", "dominadas o jalón"): sin esto quedaba colgando
     // ("Remo en polea baja asistidas o jalón" -- bug real encontrado ago 2026).
-    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja', 'Pullover en polea alta'], false, true],
+    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja', 'Pullover en polea alta', 'Jalón en polea con agarre cerrado'], false, true],
     [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna', 'Remo en T en máquina'], false, true],
     // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
     // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
@@ -9994,8 +9994,8 @@
     // "(?! apoyado)" evita tocar "remo con mancuerna apoyado en banco" (opción
     // de poolsEjercicio, más abajo): sin esto quedaba colgando ("Remo en polea
     // baja apoyado en banco").
-    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
-    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara']],
+    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Farmer carry con mancuernas']],
+    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara', 'Zancada inversa con mancuernas']],
     // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
     // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
     // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
@@ -10003,8 +10003,8 @@
     // reales). "a una pierna" NO se consume a propósito: "Peso muerto rumano a
     // una pierna" y "Puente de glúteo a una pierna" sí son ejercicios reales, y
     // conservarlo mantiene el carácter unilateral que buscaba la plantilla.
-    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo']],
-    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack']],
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Abductores en máquina']],
+    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack', 'Aductores en máquina']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
     // ellos quedaba colgando el material que trae esa opción por su cuenta
@@ -10016,7 +10016,7 @@
     // scott" pegado) y colaba el match igual -- salía "Curl martillos en
     // banco scott" (con una "s" de más). "bíceps" en español no tiene
     // singular sin ella, así que exigirla no pierde ningún caso real.
-    [/curl b[ií]ceps(?! con barra z| en banco scott)|curl de biceps/i, ['Curl martillo', 'Curl en polea baja']],
+    [/curl b[ií]ceps(?! con barra z| en banco scott)|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
     // El grupo de material del final consume lo que deja detrás la plantilla o
     // la rotación de accesorios: el pool escribe "extensión de tríceps en polea"
     // y esta regla solo se comía el nombre, así que el material quedaba colgando
@@ -10024,8 +10024,8 @@
     // MÁQUINA", "Press cerrado CON MANCUERNAS" (bugs reales, encontrados al
     // ampliar el catálogo el 5 sept). Misma cautela que ya usan las reglas de
     // sentadilla goblet y hip thrust de más arriba.
-    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra)?/i, ['Fondos en banco', 'Press cerrado']],
-    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Press Arnold']],
+    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna']],
+    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Press Arnold', 'Elevaciones frontales con mancuernas']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
@@ -13145,7 +13145,12 @@
         [/[Pp]ress de hombro( con mancuernas| con barra| en m[áa]quina| mancuernas)?/g,
           eq('Elevaciones frontales ligeras', 'Elevaciones frontales ligeras', 'Elevaciones frontales sin peso (solo rango)')],
         [/[Aa]perturas( con mancuernas| en polea| en m[áa]quina)?( en banco)?( inclinado| declinado)?/g,
-          eq('Press en máquina (rango corto)', 'Press con mancuernas (rango corto)', 'Flexiones con manos juntas (sin dolor)')],
+          // NO puede mandar al mismo sitio que la regla de 'press banca' de arriba:
+          // un dia de pecho con press Y aperturas acababa con 'Press en maquina'
+          // dos veces en la misma sesion (844 sesiones medidas). Ademas, con el
+          // hombro tocado la apertura no hay que prohibirla, hay que limitarle el
+          // rango: el problema es pasar la linea del hombro, no el ejercicio.
+          eq('Contractor de pecho en máquina (rango corto)', 'Aperturas con mancuernas (rango corto, sin pasar la línea del hombro)', 'Flexiones con manos juntas (sin dolor)')],
       ]);
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención al hombro en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios de empuje vertical o rango completo (press militar, press de banca, fondos, dominadas y levantamientos por encima de la cabeza). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
@@ -13571,6 +13576,41 @@
       { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda });
     if (mapaRotacion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion) } : d);
+    }
+
+
+    // ─── RED DE SEGURIDAD: ningún ejercicio repetido en la misma sesión ──────
+    // Las sustituciones por lesión y por material aplican un .replace() detrás
+    // de otro, y dos reglas distintas pueden mandar al MISMO reemplazo: un día
+    // de pecho con "press banca" y "aperturas" acababa, con el hombro tocado,
+    // con "Press en máquina" dos veces (844 sesiones medidas el 6 sept).
+    // Arreglada la colisión concreta que lo provocaba, esto queda como red para
+    // que una regla nueva no lo repita: si un nombre ya está en la sesión, se
+    // quita la segunda aparición en vez de enseñar el mismo ejercicio dos veces.
+    // Se ejecuta DESPUÉS de lesión, material y rotación, que es cuando el texto
+    // ya es definitivo.
+    if (!soloDieta && semana.length) {
+      semana = semana.map(d => {
+        if (!d.detalle || d.tipo !== 'Entrenamiento') return d;
+        const partes = d.detalle.split('·');
+        if (partes.length < 2) return d;
+        const cabecera = partes[0];
+        const frs = splitRespetandoParentesis(partes.slice(1).join('·')).map(x => x.trim()).filter(Boolean);
+        // Igual que en la sesión exprés: si el día no es una lista de ejercicios
+        // (una tirada de carrera, un circuito en prosa) no se toca.
+        if (frs.filter(f => /\d+\s*[x×]\s*\d+/.test(f)).length < 2) return d;
+        const vistos = new Set();
+        const limpio = frs.filter(f => {
+          const m = f.match(/^([^0-9(]+?)\s*[\d(]/);
+          const nombre = normalizarEjercicio((m ? m[1] : f).trim());
+          if (!nombre || nombre.length < 4) return true;
+          if (vistos.has(nombre)) return false;
+          vistos.add(nombre);
+          return true;
+        });
+        if (limpio.length === frs.length) return d;
+        return { ...d, detalle: cabecera + '· ' + limpio.join(', ') };
+      });
     }
 
     // ─── SESIÓN EXPRÉS (15-20 min) ──────────────────────────────────────────
@@ -16136,6 +16176,10 @@
       [/peso muerto|hip thrust|puente|buenos d[íi]as|rdl/i, ['Glúteos','Isquios','Lumbar']],
       [/sentadilla|prensa|zancada|extensi[óo]n de cu[áa]driceps|hack|step[- ]?up|b[úu]lgara|pistol/i, ['Cuádriceps','Glúteos']],
       [/femoral|nordic/i, ['Isquios']],
+      // Maquinas de cadera y paseos cargados: no los reconocia ninguna linea, asi
+      // que no sumaban volumen a ningun grupo (se contaban como si no existieran).
+      [/abductor|aductor/i, ['Glúteos']],
+      [/farmer carry|suitcase carry|overhead carry|paseo del granjero/i, ['Espalda','Core']],
       [/gemelo/i, ['Gemelos']],
       // El pullover va ANTES que la línea de pecho y cuenta para los dos grupos:
       // trabaja dorsal y pectoral a la vez, y aquí se prescribe en día de
