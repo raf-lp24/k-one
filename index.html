@@ -15191,6 +15191,23 @@
     }
 
     notasDeporte.push('Alcohol: si bebes, que sea la excepción y no la norma. Además de sumar calorías vacías, reduce la síntesis de proteína muscular hasta 24h y empeora la calidad del sueño — justo lo que más necesitas para recuperar.');
+    // Reparto de proteina a lo largo del dia: no habia ninguna nota sobre esto,
+    // aunque el motor SI reparte proteina en cada toma (cada opcion del
+    // recetario lleva su gramaje). Evidencia (revision ISSN/JISSN, "How much
+    // protein can the body use in a single meal"): ~0,4 g/kg por toma satura
+    // la sintesis proteica; repartida en al menos 4 tomas al dia se aprovecha
+    // mejor que concentrada en una sola comida.
+    {
+      const _tomasProt = (nutricion || []).length || 5;
+      // Con 2 tomas el "reparto" ya no es tal -- 100g+ en una sola comida no es
+      // lo que dice esta nota, es justo el caso contrario. Se calla en vez de
+      // decir algo que se contradice a sí mismo con los propios números del
+      // cliente.
+      if (_tomasProt >= 3) {
+        const _protPorToma = Math.round(protObj / _tomasProt);
+        notasDeporte.push(`Reparto de proteína: tu objetivo son ${protObj}g al día repartidos en ${_tomasProt} tomas, unos ${_protPorToma}g por toma. El cuerpo aprovecha mejor la proteína repartida así que concentrada toda en una sola comida (la cena, típicamente) — si algún día cambias una opción por tu cuenta, procura no dejar ninguna toma a cero.`);
+      }
+    }
     // Omega-3 y vitamina D: antes solo aparecían atados a casos concretos (runner
     // que entrena en interior). Se añaden como nota general porque aplican a
     // cualquier perfil, no solo a corredores.
