@@ -19,6 +19,9 @@ $mimeMap = @{
   ".jpeg" = "image/jpeg"
   ".svg"  = "image/svg+xml"
   ".ico"  = "image/x-icon"
+  ".webp" = "image/webp"
+  ".pdf"  = "application/pdf"
+  ".woff2"= "font/woff2"
 }
 
 while ($listener.IsListening) {

@@ -15036,10 +15036,20 @@
     if (cicloCarbs) {
       notasDeporte.push(`Carbohidratos por día: tus ${cicloCarbs.nEntreno} días de entreno llevan un ${cicloCarbs.pctEntreno}% más de carbohidratos y tus ${cicloCarbs.nDescanso} días de descanso un ${cicloCarbs.pctDescanso}% menos. No comes ni más ni menos a la semana — el total es exactamente el mismo —, se reparte hacia los días en que tu cuerpo vacía el glucógeno y lo aprovecha. La proteína no se mueve ningún día: esa sostiene tu masa muscular entrenes o no. Si prefieres los 7 días iguales, puedes desactivarlo arriba en Nutrición.`);
     }
-    if (soloDieta) {
-      notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
-      notasDeporte.push('Suplementación: si entrenas fuerza por tu cuenta, la creatina monohidrato (5g/día, todos los días) es el suplemento con más evidencia científica. Si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
-    } else if (esRunner) {
+    // BUG REAL (encontrado 7 sept 2026, verificando las notas nuevas de Hyrox):
+    // este bloque decidía las notas de hidratación/suplementación mirando
+    // "soloDieta" ANTES que el deporte. Como soloDieta es true para CUALQUIER
+    // "Solo nutrición" (no solo CrossFit/Hyrox, que lo fuerzan) y para
+    // CrossFit/Hyrox siempre, la rama generica se comia TODOS los solo-dieta,
+    // sin importar que "deporte" viniera bien puesto desde deporteSolo (el
+    // formulario ya lo copia ahí a proposito, ver comentario en getFormData).
+    // Un runner de "solo nutrición" nunca veía sus notas de hidratación de
+    // carrera ni las de "durante la carrera" que se acaban de añadir; un
+    // cliente de Hyrox, nunca las suyas. Se reordena: el deporte manda
+    // siempre que se sepa, y la nota genérica queda de último recurso, solo
+    // para quien no especificó ninguno (deporte='No especificado', el único
+    // caso real que no encaja en ningún esXxx de abajo).
+    if (esRunner) {
       notasDeporte.push('Hidratación: bebe 5-7 ml/kg de peso 2-4h antes de correr. Durante sesiones de +60 min, 150-250 ml cada 20 min con electrolitos.');
       notasDeporte.push('Tus carbohidratos están ajustados al alza para mantener el glucógeno muscular. Los días de tirada larga (>10 km), prioriza la comida rica en hidratos 3h antes.');
       notasDeporte.push('Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
@@ -15065,12 +15075,27 @@
       notasDeporte.push('Hidratación: como Hyrox mezcla carrera y estaciones, bebe 400-600 ml con electrolitos 2h antes. En competición, aprovecha las transiciones para beber.');
       notasDeporte.push('Tu plan tiene carbohidratos altos para mantener el rendimiento en las 8 estaciones + 8 km de carrera. Los días de simulacro, carga hidratos la noche anterior.');
       notasDeporte.push('Suplementación útil para Hyrox: cafeína pre-competición (3-6 mg/kg), creatina diaria (5g), beta-alanina (3-6g/día) para mejorar tolerancia al ácido láctico.');
+      // Nutricion DURANTE la competicion: igual que le faltaba a running, aqui
+      // tampoco habia nada sobre que hacer en la propia carrera (60-90+ min
+      // para la mayoria de atletas). Evidencia (guias de nutricion Hyrox):
+      // 30-60g de carbohidrato por hora via geles, con el primero sobre el
+      // minuto 35-40 y el segundo sobre el 60-65 para un ritmo de 1h15-1h45.
+      notasDeporte.push('Nutrición durante la competición: apunta a 30-60g de carbohidrato por hora. Para un ritmo de 1h15-1h45, un gel sobre el minuto 35-40 y otro sobre el 60-65 suele bastar. Nunca pruebes un gel nuevo el día de la carrera — entrénalo antes en un simulacro, por si te sienta mal.');
+      if (tieneEvento && diasParaEvento !== null && diasParaEvento <= 3) {
+        notasDeporte.push(`Carga de hidratos para "${u.evento}": los 3 días antes, sube tus carbohidratos un 20-30% sobre lo habitual (más arroz, pasta o pan, no más grasa) sin cambiar mucho el total de calorías. 60-90 min antes de competir, algo bajo en fibra y grasa (tostada con miel, tortitas de arroz); 15 min antes, un gel si lo tienes entrenado.`);
+      }
     } else if (esGimnasio) {
       notasDeporte.push('Hidratación: bebe 400-600 ml en la hora previa al entreno. Durante la sesión, 150-200 ml entre series (no esperes a tener sed).');
       notasDeporte.push('Suplementación útil para fuerza: creatina monohidrato (5g/día, el suplemento con más evidencia científica), proteína whey si no llegas a tu objetivo proteico con comida.');
     } else if (esCombinacion) {
       notasDeporte.push('Hidratación: al combinar fuerza y cardio, necesitas más hidratación que solo gimnasio. 500-700 ml pre-entreno, 200 ml cada 15-20 min durante.');
       notasDeporte.push('Suplementación útil para entrenamiento híbrido: creatina monohidrato (5g/día), cafeína pre-entreno (200-400 mg), proteína post si la sesión es larga.');
+    } else {
+      // Único caso real que llega aquí: solo-dieta que marcó "No entreno,
+      // llevo una vida sedentaria" (deporte='No especificado' desde el
+      // formulario), asi que ningún esXxx de arriba encaja.
+      notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
+      notasDeporte.push('Suplementación: si entrenas fuerza por tu cuenta, la creatina monohidrato (5g/día, todos los días) es el suplemento con más evidencia científica. Si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
     }
     if (!soloDieta) {
       notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
