@@ -1,0 +1,24 @@
+# Archivos que viven en el repo pero NO deben publicarse en k-one.fit.
+#
+# Ninguno esta enlazado desde el sitio, pero Vercel sirve por defecto todo lo
+# que hay en la raiz: cualquiera que acertara la URL (o la encontrara indexada)
+# podia leer las notas internas de desarrollo y el analisis de competencia.
+# Se quedan en git -- solo dejan de desplegarse.
+
+# Documentacion interna y de negocio
+ESTADO-ACTUAL.md
+ANALISIS-DAFO-VIABILIDAD.md
+prompt-diseno-referencia-kone.md
+*.docx
+
+# Herramientas de desarrollo, no forman parte del producto
+tests.html
+og-generator.html
+fragua-fitness.html
+serve.ps1
+
+# Generadores de video/marketing: se ejecutan en local, no en el servidor
+marketing/
+
+# Fuentes de imagenes sin optimizar
+IMAGEN K-one.png

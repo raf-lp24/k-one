@@ -6831,6 +6831,7 @@
         <div class="field">
           <label>¿Cuánto tiempo por sesión?</label>
           <div class="radio-group" id="cp-tiempoSesion">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">15-20 min (exprés)</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">30-45 min</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">45-60 min</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-tiempoSesion')">60-90 min</div>
@@ -8161,6 +8162,7 @@
           <div class="field">
             <label>¿Cuánto tiempo por sesión? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="tiempoSesion">
+              <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">15-20 min (exprés)</div>
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">30-45 min</div>
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">45-60 min</div>
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">60-90 min</div>
@@ -12296,7 +12298,13 @@
       return dias >= 0 ? dias : null;
     })();
     const tiempoSesion = u.tiempoSesion || '45-60 min';
-    const sesionCorta = tiempoSesion.includes('30-45');
+    // 15-20 min: la barrera de entrada mas baja. No es 'medio plan', es un plan
+    // distinto -- se recorta a los ejercicios que mas rinden por minuto (los
+    // basicos, que en estas plantillas van siempre primero) y se acortan los
+    // descansos. Cuenta tambien como sesionCorta para todo lo que ya dependia
+    // de ella (duraciones de carrera, etc.).
+    const sesionExpres = tiempoSesion.includes('15-20');
+    const sesionCorta = tiempoSesion.includes('30-45') || sesionExpres;
     const sesionLarga = tiempoSesion.includes('90') || tiempoSesion.includes('Más');
 
     // OBJETIVO — se declaran aquí para que los planes de entrenamiento (más abajo)
@@ -13564,6 +13572,39 @@
     if (mapaRotacion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion) } : d);
     }
+
+    // ─── SESIÓN EXPRÉS (15-20 min) ──────────────────────────────────────────
+    // Va al final del todo, después de la rotación y de las adaptaciones por
+    // lesión y material: así se recorta lo que el cliente va a ver de verdad,
+    // no una versión intermedia que luego cambia.
+    //
+    // No se recorta al azar ni por la mitad: estas plantillas ya ordenan los
+    // ejercicios de más a menos importantes (primero los básicos que mueven
+    // varias articulaciones, al final el aislamiento), así que quedarse con
+    // los tres primeros conserva el trabajo que de verdad estimula. Las series
+    // se topan en 3: tres ejercicios por tres series con 45-60s de descanso
+    // son unos 15-18 minutos reales, que es lo que el cliente ha dicho tener.
+    if (!soloDieta && sesionExpres && semana.length) {
+      const _EXPRES_MAX_EJERCICIOS = 3;
+      semana = semana.map(d => {
+        if (!d.detalle || d.tipo !== 'Entrenamiento') return d;
+        const partes = d.detalle.split('·');
+        if (partes.length < 2) return d;
+        const cabecera = partes[0];
+        const cuerpo = partes.slice(1).join('·');
+        const frs = splitRespetandoParentesis(cuerpo).map(x => x.trim()).filter(Boolean);
+        // Si el día no es una lista de ejercicios (una tirada de carrera, un
+        // circuito descrito en prosa) no se toca: recortarlo por comas lo
+        // rompería. Se reconoce por las piezas con formato N×M.
+        const conSeries = frs.filter(f => /\d+\s*[x×]\s*\d+/.test(f)).length;
+        if (conSeries < 2) return d;
+        const recortado = frs.slice(0, _EXPRES_MAX_EJERCICIOS)
+          .map(f => f.replace(/(\d+)(\s*[x×]\s*)(\d+)/g, (m, s, x, r) => (parseInt(s, 10) > 3 ? '3' : s) + x + r));
+        return { ...d, detalle: cabecera + '· ' + recortado.join(', ') };
+      });
+      notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
+    }
+
 
     // ENTRENAMIENTO HOY = el día de la semana que toca hoy según el calendario real,
     // con el mismo formato y nivel de detalle que se usa en "Plan semanal"
