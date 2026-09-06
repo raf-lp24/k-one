@@ -10002,7 +10002,7 @@
     // reales). "a una pierna" NO se consume a propósito: "Peso muerto rumano a
     // una pierna" y "Puente de glúteo a una pierna" sí son ejercicios reales, y
     // conservarlo mantiene el carácter unilateral que buscaba la plantilla.
-    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Abductores en máquina']],
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Abductores en máquina', 'Patada de glúteo en polea', 'Patada de glúteo en cuadrupedia']],
     [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack', 'Aductores en máquina']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
@@ -10104,7 +10104,12 @@
   // Al corredor de cinta no le afecta: el lugar "Cinta / Interior" se resuelve
   // como entorno de gimnasio, así que sigue pudiendo recibirlas.
   const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
-  const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad/i;
+  // La BANDA ELÁSTICA cuenta como material: quien elige "en casa sin material"
+  // no tiene una. Medido el 6 sept 2026: "pallof press con banda" y "clamshells
+  // con banda" llegaban a planes sin material (128 casos), desde las plantillas
+  // de running e híbrido. Corregidas esas plantillas y añadida aquí la palabra
+  // para que la rotación tampoco pueda colarlas por detrás.
+  const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad|\bbandas?\b|goma el[áa]stica|tobillera/i;
   // BUG REAL (5 sept 2026): la rotación se aplica DESPUÉS de las sustituciones
   // por lesión —a propósito, para que la regex de lesión encuentre el nombre
   // original— pero no sabía nada de lesiones, así que podía volver a meter por
@@ -12487,14 +12492,14 @@
       const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
-          ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells con banda 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
+          ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
           : 'Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, lateral band walks 3×12/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s'
         : esAvanzado
           ? rSinMat
             ? `Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, ${plioAv}, copenhagen plank 3×15s/lado, A-skips 3×20m`
             : `Fuerza + pliometría · Peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, ${plioAv}, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
-            ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells con banda 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
+            ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
             : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15';
 
       if (esPrincipiante) {
@@ -12598,7 +12603,7 @@
            etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Cardio · Run/walk + core" : "Movilidad",
-           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${sm ? '' : ', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, pallof press con banda 3×10/lado` : "",
+           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${sm ? '' : ', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, ${sm ? 'plancha lateral dinámica 3×10/lado' : 'pallof press con banda 3×10/lado'}` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
