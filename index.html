@@ -12578,9 +12578,6 @@
     } else if (esCombinacion) {
       // ── HÍBRIDO — fuerza + cardio concurrente: complejos, carries, metcons, zona 2
       const lugarComb   = u.lugar || 'Gimnasio';
-      const combSinMat  = lugarComb.includes('sin material');
-      const combAireLib = lugarComb.includes('aire libre');
-      const sm = combSinMat;
       const v = ganarMusculo ? '4' : '3';
       // Alternancia de énfasis por bloque de mesociclo: en entrenamiento concurrente
       // (fuerza + resistencia a la vez) exigir el máximo de ambas cualidades cada
@@ -12598,47 +12595,41 @@
       if (esPrincipiante) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body · Fuerza base",
-           detalle: sm
-             ? `Fuerza full body · Sentadilla aérea 3×12, flexiones 3×8 (rodillas ok), puente de glúteo 3×15, dominadas australianas en mesa 3×8, zancadas 3×10/pierna, plancha 3×30s. Finisher: 3 rondas sin descanso de 10 sentadillas + 8 flexiones + 6 burpees`
-             : `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry 3×20m con mancuernas, plancha 3×30s`,
+           detalle: `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry 3×20m con mancuernas, plancha 3×30s`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Cardio suave · Zona 2" : "Recuperación",
-           detalle: numDias >= 5 ? `Zona 2 · 20-25 min ${sm ? 'carrera o marcha rápida' : 'bici, remo o carrera'} a ritmo conversacional (RPE 3). Movilidad 10 min: cadera, hombros, tobillos` : "",
+           detalle: numDias >= 5 ? `Zona 2 · 20-25 min ${'bici, remo o carrera'} a ritmo conversacional (RPE 3). Movilidad 10 min: cadera, hombros, tobillos` : "",
            etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Cardio · Run/walk + core" : "Movilidad",
-           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${sm ? '' : ', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, ${sm ? 'plancha lateral dinámica 3×10/lado' : 'pallof press con banda 3×10/lado'}` : "",
+           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, ${'pallof press con banda 3×10/lado'}` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Circuito combinado · Fuerza + cardio" : "Descanso",
-           detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${sm ? '10 sentadillas, 8 flexiones, 12 zancadas/pierna, 30s mountain climbers, 200m carrera' : '10 goblet squats, 8 push press con mancuernas, 10 remo con mancuerna a una mano/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
+           detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${'10 goblet squats, 8 push press con mancuernas, 10 remo con mancuerna a una mano/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
            etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
           {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Sesión larga · Fuerza + zona 2" : "Descanso",
-           detalle: numDias >= 4 ? `Combinado · ${sm ? '25 min carrera zona 2 + sentadilla aérea 3×15 + flexiones 3×12 + hip thrust suelo 3×15' : '20 min remo/bici zona 2 + sentadilla goblet 3×12 + press banca con mancuernas 3×10 + remo con mancuerna a una mano 3×10/lado'}. Cierre: plancha 3×30s` : "",
+           detalle: numDias >= 4 ? `Combinado · ${'20 min remo/bici zona 2 + sentadilla goblet 3×12 + press banca con mancuernas 3×10 + remo con mancuerna a una mano 3×10/lado'}. Cierre: plancha 3×30s` : "",
            etiqueta: numDias >= 4 ? "Híbrido" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else if (numDias <= 3) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Full body + finisher",
-           detalle: sm
-             ? `Fuerza · Sentadilla búlgara ${v}×10/pierna, flexiones ${v}×12, hip thrust suelo ${v}×15, dominadas australianas ${v}×10, plancha lateral ${v}×25s/lado. Finisher metabólico: Tabata 4 min (20s trabajo/10s descanso × 8): alternando burpees y sentadillas con salto`
-             : `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo con barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
+           detalle: `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo con barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 2 ? "Zona 2 · Cardio aeróbico" : "Movilidad",
-           detalle: numDias >= 2 ? `Zona 2 · ${sesionCorta ? '25-30 min' : '35-45 min'} ${sm ? 'carrera a ritmo conversacional' : 'rota cada 10 min entre remo, bici y carrera a zona 2 (RPE 3-4)'}. Al acabar: 4 strides de 60m` : "",
+           detalle: numDias >= 2 ? `Zona 2 · ${sesionCorta ? '25-30 min' : '35-45 min'} ${'rota cada 10 min entre remo, bici y carrera a zona 2 (RPE 3-4)'}. Al acabar: 4 strides de 60m` : "",
            etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
           {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad", detalle:"Movilidad general 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
           {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 3 ? "Metcon · Complejo + cardio" : "Descanso",
-           detalle: numDias >= 3 ? (sm
-             ? `AMRAP 20 min: 10 sentadillas con salto, 8 flexiones explosivas, 12 zancadas/pierna, 200m carrera, 10 burpees. Ritmo sostenible. Anota rondas`
-             : `Complejo con mancuernas 5 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Anota tiempos`) : "",
+           detalle: numDias >= 3 ? (`Complejo con mancuernas 5 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Anota tiempos`) : "",
            etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
           {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -12646,65 +12637,47 @@
       } else if (esAvanzado) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior + carries",
-           detalle: sm
-             ? `Push/Pull · Flexiones ${vv}×15, flexiones con pies elevados ${vv}×12, dominadas australianas ${v}×12, dips en sillas ${v}×12, archer push-ups 3×8/lado, plancha lateral ${v}×30s/lado. Loaded carry: suitcase carry con mochila pesada 4×30m/lado`
-             : `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
+           detalle: `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Cardio calidad · Series + zona 2",
            detalle:`${sesionCorta ? '25 min total' : (enfasisFuerza ? '35-40 min total' : '45-50 min total')}: 15 min zona 2 calentamiento + ${sesionCorta ? '5×400m con 90s rec' : (enfasisFuerza ? '4×800m con 2 min rec a ritmo umbral (RPE 7-8)' : '6×800m con 90s rec a ritmo umbral (RPE 7-8)')}. Cronometra cada rep. Enfriamiento: 10 min zona 1 + 4 strides de 80m`,
            etiqueta:"Intensidad"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle: "Recovery run opcional: 20 min zona 1 muy suave, o descanso total", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior + pliometría",
-           detalle: sm
-             ? `Piernas · Sentadilla búlgara ${vv}×8/pierna, hip thrust a una pierna ${vv}×10/lado, nordic curl asistido 3×6, box jumps 3×6, sentadilla con salto 3×8, copenhagen plank 3×15s/lado, plancha ${v}×45s`
-             // El trineo solo existe en un gimnasio: en "en casa con material"
-             // (mancuernas y bandas) esta plantilla mandaba igualmente "sled
-             // push 4×20m". Se cambia por zancadas cargadas, que trabajan lo
-             // mismo con lo que sí tiene en casa.
-             : `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, ${lugarComb.includes('casa') ? 'zancadas cargadas con mancuernas 4×12/pierna' : 'sled push 4×20m'}`,
+           // El trineo solo existe en un gimnasio: en "en casa con material"
+           // (mancuernas y bandas) se cambia por zancadas cargadas, que
+           // trabajan lo mismo con lo que sí tiene en casa.
+           detalle: `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, ${lugarComb.includes('casa') ? 'zancadas cargadas con mancuernas 4×12/pierna' : 'sled push 4×20m'}`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Complejo + EMOM",
-           detalle: sm
-             ? `EMOM ${enfasisFuerza ? 20 : 28} min (${enfasisFuerza ? 5 : 7} rondas de 4 min): min1: 15 sentadillas con salto · min2: 12 flexiones explosivas + 12 mountain climbers · min3: 10 burpees · min4: descanso. Post: 3 rondas sin descanso de 10 V-ups + 20 russian twists + 15s hollow hold`
-             : `Complejo con barra "The Bear" ${enfasisFuerza ? 4 : 6} rondas: power clean + front squat + push press + back squat + behind-neck press × 5 reps ininterrumpidas. Sube peso cada ronda. Post: EMOM ${enfasisFuerza ? 10 : 15} min: min1: 12 KB swings · min2: 8 burpees · min3: 500m remo o 200m carrera`,
+           detalle: `Complejo con barra "The Bear" ${enfasisFuerza ? 4 : 6} rondas: power clean + front squat + push press + back squat + behind-neck press × 5 reps ininterrumpidas. Sube peso cada ronda. Post: EMOM ${enfasisFuerza ? 10 : 15} min: min1: 12 KB swings · min2: 8 burpees · min3: 500m remo o 200m carrera`,
            etiqueta:"Híbrido"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Sesión larga · Híbrido aeróbico" : "Descanso",
-           detalle: numDias >= 5 ? (sm
-             ? `Sesión larga ${enfasisFuerza ? '40-50' : '55-70'} min: ${enfasisFuerza ? 12 : 18} min carrera zona 2 + circuito 4 rondas (12 sentadillas, 10 flexiones, 8 burpees, 15 hip thrusts) + ${enfasisFuerza ? 12 : 18} min carrera zona 2. Cardio-fuerza-cardio sandwich. Anota tiempos`
-             : `Sesión larga ${enfasisFuerza ? '45-55' : '60-75'} min: ${enfasisFuerza ? '1.5' : '2.5'}km carrera zona 2 + complejo DB 3 rondas (8 RDL + 8 clean + 8 thruster + 8 lunges) + 1000m remo + 3 rondas (farmer carry 40m + 15 wall balls + 10 box jumps) + 1km carrera. Anota tiempo total`) : "",
+           detalle: numDias >= 5 ? (`Sesión larga ${enfasisFuerza ? '45-55' : '60-75'} min: ${enfasisFuerza ? '1.5' : '2.5'}km carrera zona 2 + complejo DB 3 rondas (8 RDL + 8 clean + 8 thruster + 8 lunges) + 1000m remo + 3 rondas (farmer carry 40m + 15 wall balls + 10 box jumps) + 1km carrera. Anota tiempo total`) : "",
            etiqueta: numDias >= 5 ? "Híbrido" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
       } else {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior",
-           detalle: sm
-             ? `Push/Pull · Flexiones ${v}×12, flexiones con pies elevados ${v}×10, dominadas australianas ${v}×10, dips en sillas 3×10, plancha lateral 3×30s/lado. Finisher: 3 rondas de 8 burpees + 10 mountain climbers sin descanso`
-             : `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m. Finisher: EMOM 6 min: 5 thrusters con mancuernas + 5 burpees`,
+           detalle: `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m. Finisher: EMOM 6 min: 5 thrusters con mancuernas + 5 burpees`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Cardio multimodal",
-           detalle:`Zona 2 · ${sesionCorta ? '25-30 min' : '35-40 min'} ${sm ? 'carrera a ritmo conversacional + 4 strides de 60m al final' : 'rotar cada 8-10 min entre remo, bici y carrera a zona 2 (RPE 3-4). Al acabar: 4 strides de 60m'}`,
+           detalle:`Zona 2 · ${sesionCorta ? '25-30 min' : '35-40 min'} ${'rotar cada 8-10 min entre remo, bici y carrera a zona 2 (RPE 3-4). Al acabar: 4 strides de 60m'}`,
            etiqueta:"Cardio"},
           {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
           {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
-           detalle: sm
-             ? `Piernas · Sentadilla búlgara ${v}×10/pierna, hip thrust suelo ${v}×15, zancadas ${v}×10/pierna, puente a una pierna ${v}×12/lado, gemelos en escalón 3×20, plancha ${v}×45s`
-             // Mismo motivo que la plantilla de arriba: quien entrena en casa no
-             // tiene trineo. Aquí ya había alternativa, pero encabezaba con el
-             // sled, así que en casa se le da la vuelta y manda el farmer carry.
-             : `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10/pierna, gemelos en escalón 3×15, ${lugarComb.includes('casa') ? 'farmer carry 3×30m' : 'sled push 3×20m o farmer carry 3×30m'}`,
+           // Mismo motivo que la plantilla de arriba: quien entrena en casa no
+           // tiene trineo, así que ahí se manda el farmer carry.
+           detalle: `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10/pierna, gemelos en escalón 3×15, ${lugarComb.includes('casa') ? 'farmer carry 3×30m' : 'sled push 3×20m o farmer carry 3×30m'}`,
            etiqueta:"Fuerza"},
           {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Circuito fuerza + cardio",
-           detalle: sm
-             ? `Circuito 5 rondas (descanso 90s): 10 sentadillas con salto, 8 flexiones, 12 zancadas/pierna, 200m carrera, 10 burpees. Anota tiempo total`
-             : `Complejo con mancuernas 4 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Cronometra`,
+           detalle: `Complejo con mancuernas 4 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Cronometra`,
            etiqueta:"Híbrido"},
           {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Sesión larga · Cardio + fuerza" : "Descanso",
-           detalle: numDias >= 5 ? (sm
-             ? `Sesión larga 40-50 min: 10 min carrera zona 2 + 4 rondas (12 sentadillas, 10 flexiones, 8 burpees, 15 hip thrusts en suelo) + 10 min carrera zona 2`
-             : `Sesión larga 45-55 min: 15 min remo/bici zona 2 + circuito 4 rondas (10 KB swings, 10 goblet squats, 10 push press, 200m carrera) + 10 min bici zona 2`) : "",
+           detalle: numDias >= 5 ? (`Sesión larga 45-55 min: 15 min remo/bici zona 2 + circuito 4 rondas (10 KB swings, 10 goblet squats, 10 push press, 200m carrera) + 10 min bici zona 2`) : "",
            etiqueta: numDias >= 5 ? "Híbrido" : "Descanso"},
           {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
         ];
@@ -12720,7 +12693,6 @@
     } else {
       // Gimnasio / Fuerza — bifurcado por lugar de entrenamiento, nivel y objetivo
       const lugar = u.lugar || 'Gimnasio';
-      const sinMaterial = lugar.includes('sin material');
       // "con material" y "Gimnasio" comparten la misma lógica de pesos libres/máquinas
 
       const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : '';
@@ -12760,74 +12732,6 @@
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
 
-      if (sinMaterial) {
-        // ── EN CASA SIN MATERIAL → Bodyweight puro adaptado por nivel ──
-        // ≤2 días (cualquier nivel) o principiante con 3 días → Full Body bodyweight
-        if (numDias <= 2 || (esPrincipiante && numDias === 3)) {
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body A · Sin material",
-             detalle:`Sin material · Sentadilla ${sVol}×15, flexiones ${sVol}×10 (rodillas ok si necesitas), puente de glúteo ${sVol}×20, plancha ${sVol}×30s, mountain climbers ${sVol}×20${finisher3}`,
-             etiqueta:"Fuerza"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-            {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 2 ? "Full Body B · Variantes" : "Movilidad",
-             detalle: numDias >= 2 ? `Variantes · Hip thrust en suelo ${sVol}×20, flexiones pique (pike push-ups) ${sVol}×10, sentadilla sumo ${sVol}×15, zancadas ${sVol}×10 por pierna, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
-             etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
-            {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 3 ? "Full Body B · Variantes" : "Descanso activo",
-             detalle: numDias >= 3 ? `Variantes · Hip thrust en suelo ${sVol}×20, flexiones pique (pike push-ups) ${sVol}×10, sentadilla sumo ${sVol}×15, zancadas ${sVol}×10 por pierna, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
-             etiqueta: numDias >= 3 ? "Fuerza" : "Descanso"},
-            {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 4 ? "Full Body A · Sube el ritmo" : "Descanso activo",
-             detalle: numDias >= 4 ? `Sin material · Sentadilla ${sVol}×15, flexiones ${sVol}×10, puente de glúteo ${sVol}×20, plancha ${sVol}×30s, mountain climbers ${sVol}×20${finisher3}` : "",
-             etiqueta: numDias >= 4 ? "Fuerza" : "Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        } else if (numDias === 3) {
-          // Intermedio/Avanzado 3 días sin material → Push/Pull/Legs bodyweight
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Empuje bodyweight",
-             detalle:`Pecho, hombros, tríceps · Flexiones ${volP}×15, flexiones con pies elevados ${volP}×12, flexiones pique ${volP}×10, fondos en sillas ${volA}×12, archer push-ups ${volA}×8 por lado${finisher3}`,
-             etiqueta:"Empuje"},
-            {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-            {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Tracción bodyweight",
-             detalle:`Espalda, bíceps · Remo bajo mesa (inverted rows) ${volP}×12, dominadas en barra puerta ${volP}×6 (con silla si necesitas), remo supino ${volA}×10, face pull con banda ${volA}×15, plancha 3×45s${finisher3}`,
-             etiqueta:"Tracción"},
-            {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
-            {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos bodyweight",
-             detalle:`Cuádriceps, isquios, glúteos · Sentadilla ${volP}×20, sentadilla búlgara en silla ${volP}×12 por pierna, hip thrust en suelo ${volA}×25, puente a una pierna ${volA}×15 por pierna, gemelos en escalón ${volA}×20${finisher3}`,
-             etiqueta:"Piernas"},
-            {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        } else {
-          // 4-5 días sin material → Upper/Lower bodyweight
-          semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Upper A · Pecho y tríceps bodyweight",
-             detalle:`Pectoral, tríceps · Flexiones ${volP}×15, archer push-ups ${volA}×8 por lado, flexiones con pies elevados ${volA}×12, fondos en sillas ${volA}×15, flexiones diamante ${volA}×10${finisher4}`,
-             etiqueta:"Empuje"},
-            {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Piernas y glúteos bodyweight",
-             detalle:`Cuádriceps, glúteos · Sentadilla ${volP}×20, sentadilla búlgara en silla ${volA}×12 por pierna, hip thrust en suelo ${volA}×25, sentadilla sumo ${volA}×20, gemelos en escalón ${volA}×25${finisher4}`,
-             etiqueta:"Piernas"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-            {dia:"Jueves", tipo:"Entrenamiento", resumen:"Upper B · Espalda y bíceps bodyweight",
-             detalle:`Dorsal, bíceps · Remo bajo mesa ${volP}×12, dominadas en barra puerta ${volP}×6 (asistidas si necesitas), remo supino ${volA}×10, face pull con banda ${volA}×15, plancha 4×45s${finisher4}`,
-             etiqueta:"Tracción"},
-            {dia:"Viernes", tipo:"Entrenamiento", resumen:"Lower B · Isquios y glúteos bodyweight",
-             detalle:`Isquiotibiales, glúteos, core · Peso muerto rumano ${volP}×12, puente de glúteo a una pierna ${volA}×15 por pierna, zancadas inversas ${volA}×12 por pierna, mountain climbers ${volA}×20, plancha lateral ${volA}×30s por lado${finisher4}`,
-             etiqueta:"Piernas"},
-            {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Full Body accesorios") : "Descanso",
-             detalle: numDias >= 5 ? (perdidaGrasa
-               ? "Metabólico · 5 rondas: 15 sentadillas con salto, 10 flexiones, 20 hip thrusts en suelo, 30s plancha. Descanso 60s entre rondas"
-               : `Accesorios · Pistol squat progresión 3×6 por pierna (asistido si necesitas), flexiones pique 3×12, remo bajo mesa 3×15, plancha lateral 3×30s`) : "",
-             etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
-            {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-          ];
-        }
-
-      } else {
         // ── GIMNASIO / EN CASA CON MATERIAL → pesos libres + máquinas ──
         // ≤2 días (cualquier nivel) o principiante con 3 días → Full Body, máxima frecuencia
         if (numDias <= 2 || (esPrincipiante && numDias === 3)) {
@@ -12954,7 +12858,6 @@
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         }
-      }
     }
     } // fin if (!soloDieta)
 
@@ -13293,14 +13196,6 @@
       notasSalud.push('Nos indicaste que duermes menos de 6 horas: dormir poco descontrola las hormonas del hambre (más grelina, menos leptina) y hace más difícil seguir cualquier plan de nutrición. Si puedes, prioriza el descanso — es tan importante como la comida.');
     }
 
-    // Vegetarianos: el plan cubre proteína en cantidad de sobra (tofu, tempeh,
-    // legumbre, huevo, lácteos, proteína vegetal en polvo), pero hay 3
-    // nutrientes que de verdad escasean más en dietas sin carne ni pescado y
-    // que ningún plan de comidas por sí solo garantiza sin analítica de por medio.
-    const esVegetarianoNota = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
-    if (esVegetarianoNota) {
-      notasSalud.push('Al no comer carne ni pescado, presta atención a vitamina B12, hierro y omega-3 — son los tres nutrientes que más cuesta cubrir solo con comida en una dieta vegetariana. Si tu analítica lo indica, tu médico puede recomendarte suplementación.');
-    }
     if (sinFrutosSecos) {
       notasSalud.push('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
     }
@@ -13689,10 +13584,6 @@
     }
 
     // NUTRICIÓN con 5 opciones por comida
-    const esVegetariano = u.dieta && (u.dieta.includes('Vegetariano') || u.dieta.includes('Vegano'));
-    if (esVegetariano) {
-      notasSalud.push('En dietas vegetarianas y veganas hay nutrientes difíciles de cubrir solo con comida: vitamina B12 (suplementación esencial, no negociable), creatina monohidrato (mejora el rendimiento muscular un 10-15% sin carne), omega-3 de algas (DHA+EPA), vitamina D3 y hierro en forma de bisglicinato. El hierro vegetal (no hemo) se absorbe mucho mejor tomándolo con un alimento rico en vitamina C. Consulta tus niveles con un profesional antes de suplementar.');
-    }
 
     // ── TDEE PERSONALIZADO (Mifflin-St Jeor) ─────────────────────────────────
     const pesoKg  = parseFloat(u.peso)   || 70;
@@ -13994,23 +13885,7 @@
         {
           momento: "Desayuno", hora: "7:30",
           porque: "Proteína desde primera hora para preservar músculo y controlar el apetito",
-          opciones: esVegetariano ? [
-            op("Porridge de avena con proteína y semillas", "60g avena, bebida de avena, 1 scoop proteína vegetal, semillas de chía, canela", "390 kcal", "28g prot", "44g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Smoothie bowl de açaí y plátano", "100g pulpa açaí, 1 plátano, bebida de avena, 30g granola, frutos rojos, coco rallado", "360 kcal", "8g prot", "52g carbs", "14g grasa", "Sin cocción · 3 min"),
-            op("Tofu revuelto estilo mexicano con tosta", "150g tofu, pimiento, cebolla, tomate, cilantro, cúrcuma, 1 tosta integral", "295 kcal", "30g prot", "18g carbs", "13g grasa", "Fácil · 10 min"),
-            op("Tostada de aguacate con tomate y sésamo", "2 rebanadas pan centeno, 1/2 aguacate, tomate cherry, semillas de sésamo, AOVE, limón", "380 kcal", "10g prot", "38g carbs", "22g grasa", "Fácil · 5 min"),
-            op("Tortitas de avena y plátano con frutos rojos", "60g harina de avena, 1 plátano maduro, bebida de avena, canela, frutos rojos por encima", "340 kcal", "10g prot", "58g carbs", "8g grasa", "Fácil · 10 min"),
-            op("Tostada de aguacate con huevo pochado", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos pochados, pimienta negra, tomate cherry", "437 kcal", "20g prot", "37g carbs", "24g grasa", "Fácil · 10 min"),
-            op("Yogur griego con granola casera y arándanos", "200g yogur griego 0%, 30g granola casera, 80g arándanos, miel, canela", "320 kcal", "20g prot", "38g carbs", "8g grasa", "Sin cocción · 2 min"),
-            op("Bol de skyr con muesli y granada", "200g skyr natural, 30g muesli, 50g granada, canela", "300 kcal", "24g prot", "40g carbs", "4g grasa", "Sin cocción · 2 min"),
-            op("Tostada de hummus y tomate con pipas", "2 rebanadas pan centeno, 60g hummus, tomate laminado, pipas de girasol, orégano", "360 kcal", "14g prot", "42g carbs", "14g grasa", "Sin cocción · 5 min"),
-            op("Bol de yogur de soja con avena y manzana", "200g yogur de soja, 40g avena, 1 manzana troceada, canela", "340 kcal", "14g prot", "50g carbs", "8g grasa", "Sin cocción · 3 min"),
-            op("Tortilla de claras con espinacas y queso fresco", "4 claras de huevo, 1 huevo entero, espinacas, 30g queso fresco, tomate", "260 kcal", "24g prot", "8g carbs", "12g grasa", "Fácil · 8 min"),
-            op("Tostada de queso cottage con fresas", "2 rebanadas pan centeno, 100g queso cottage, fresas laminadas, miel", "330 kcal", "22g prot", "38g carbs", "8g grasa", "Sin cocción · 3 min"),
-            op("Batido verde de proteína vegetal y espinacas", "1 scoop proteína vegetal, espinacas, 1/2 plátano, bebida de almendra, hielo", "280 kcal", "26g prot", "30g carbs", "6g grasa", "Fácil · 3 min"),
-            op("Gachas de avena con manzana y canela", "60g avena, bebida de avena, 1 manzana rallada, canela, nueces", "360 kcal", "12g prot", "54g carbs", "10g grasa", "Fácil · 8 min"),
-            op("Tostada de tofu revuelto con champiñones", "1 tosta integral, 120g tofu, champiñones, cúrcuma, cebollino", "300 kcal", "20g prot", "24g carbs", "14g grasa", "Fácil · 8 min")
-          ] : [
+          opciones: [
             op("Tostada de aguacate con huevo pochado", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos pochados, tomate cherry, pimienta", "380 kcal", "20g prot", "30g carbs", "20g grasa", "Fácil · 10 min"),
             op("Crepes de avena con yogur y fruta", "40g harina de avena, 1 huevo, leche, 100g yogur griego 0%, fresas laminadas, canela", "330 kcal", "22g prot", "34g carbs", "10g grasa", "Fácil · 10 min"),
             op("Porridge de avena con frutos rojos y miel", "60g avena, leche semidesnatada, 100g frutos rojos, 1 cda miel, canela", "340 kcal", "12g prot", "56g carbs", "6g grasa", "Fácil · 5 min"),
@@ -14031,23 +13906,7 @@
         {
           momento: "Media mañana", hora: "10:30",
           porque: "Snack pequeño para estabilizar la glucosa y llegar sin hambre a la comida",
-          opciones: esVegetariano ? [
-            op("Hummus con palitos de zanahoria y pepino", "100g hummus casero, zanahoria y pepino en bastones, pimentón", "180 kcal", "8g prot", "18g carbs", "10g grasa", "Sin cocción · 2 min"),
-            op("Tostada de crema de cacahuete y plátano", "1 tosta integral, 20g crema de cacahuete, 1/2 plátano, canela", "250 kcal", "8g prot", "30g carbs", "12g grasa", "Sin cocción · 2 min"),
-            op("Edamame con sal marina y limón", "150g edamame cocido, sal marina, zumo de limón", "190 kcal", "16g prot", "12g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Smoothie de plátano y avena", "1 plátano, 30g avena, 200ml bebida de avena, canela", "280 kcal", "8g prot", "48g carbs", "6g grasa", "Fácil · 2 min"),
-            op("Yogur de soja con frutos secos y arándanos", "150g yogur de soja, 15g nueces, 15g arándanos secos", "220 kcal", "12g prot", "18g carbs", "12g grasa", "Sin cocción · 1 min"),
-            op("Skyr con fruta de temporada y canela", "150g skyr natural, 1 pieza de fruta, canela al gusto", "190 kcal", "18g prot", "22g carbs", "2g grasa", "Sin cocción · 2 min"),
-            op("Queso batido con manzana y pipas de calabaza", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "195 kcal", "18g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min"),
-            op("Barrita proteica con mandarina", "1 barrita proteica, 1 mandarina", "220 kcal", "17g prot", "26g carbs", "6g grasa", "Sin cocción · 1 min"),
-            op("Palitos de apio con hummus y pipas", "2 ramas de apio, 80g hummus, pipas de calabaza", "190 kcal", "8g prot", "16g carbs", "11g grasa", "Sin cocción · 2 min"),
-            op("Yogur de soja con arándanos", "150g yogur de soja, 60g arándanos, canela", "170 kcal", "8g prot", "22g carbs", "6g grasa", "Sin cocción · 1 min"),
-            op("Tostada de queso fresco con tomate cherry", "1 tosta integral pequeña, 40g queso fresco, tomate cherry, orégano", "180 kcal", "12g prot", "18g carbs", "6g grasa", "Sin cocción · 2 min"),
-            op("Batido de proteína vegetal con fresas", "1 scoop proteína vegetal, 80g fresas, agua, hielo", "150 kcal", "22g prot", "12g carbs", "1g grasa", "Fácil · 2 min"),
-            op("Almendras con orejones", "20g almendras, 3 orejones de albaricoque", "195 kcal", "6g prot", "18g carbs", "12g grasa", "Sin cocción · 1 min"),
-            op("Tofu marinado en cubos con soja", "100g tofu firme en dados, salsa de soja, sésamo", "160 kcal", "14g prot", "6g carbs", "9g grasa", "Sin cocción · 3 min"),
-            op("Pera con requesón y canela", "1 pera, 80g requesón, canela", "175 kcal", "10g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min")
-          ] : [
+          opciones: [
             op("Yogur griego con miel y nueces", "150g yogur griego 0%, 10g nueces, 1 cda miel, canela", "210 kcal", "14g prot", "22g carbs", "8g grasa", "Sin cocción · 1 min"),
             op("Tostada de salmón ahumado y queso fresco", "1 tosta de centeno, 40g salmón ahumado, 30g queso fresco, eneldo", "195 kcal", "16g prot", "14g carbs", "8g grasa", "Sin cocción · 2 min"),
             op("Queso batido con manzana y canela", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "195 kcal", "18g prot", "22g carbs", "5g grasa", "Sin cocción · 2 min"),
@@ -14068,22 +13927,7 @@
         {
           momento: "Comida", hora: "14:00",
           porque: "Comida principal: proteína magra, verdura abundante e hidratos moderados",
-          opciones: esVegetariano ? [
-            op("Bol de tofu con garbanzos, arroz y pimentón", "180g tofu a la plancha, 100g garbanzos, 50g arroz integral, espinacas, tomate, limón", "410 kcal", "30g prot", "36g carbs", "14g grasa", "Medio · 20 min"),
-            op("Curry verde de garbanzos con arroz basmati", "180g garbanzos, leche coco light, espinacas, curry verde, 60g arroz basmati, cilantro", "420 kcal", "18g prot", "52g carbs", "14g grasa", "Fácil · 20 min"),
-            op("Lentejas estofadas con verduras", "200g lentejas cocidas, zanahoria, apio, puerro, tomate, AOVE, pimentón", "390 kcal", "20g prot", "58g carbs", "8g grasa", "Fácil · 30 min"),
-            op("Ensalada de quinoa con aguacate y edamame", "100g quinoa cocida, 150g edamame, 1/4 aguacate, pepino, tomate cherry, limón", "390 kcal", "22g prot", "36g carbs", "15g grasa", "Prep anterior · 10 min"),
-            op("Wok de seitán con verduras y salsa teriyaki", "150g seitán, brócoli, pimiento, zanahoria, 60g quinoa, salsa teriyaki", "400 kcal", "34g prot", "40g carbs", "8g grasa", "Medio · 20 min"),
-            op("Ensalada de bulgur con habas, feta y rúcula", "80g bulgur cocido, 120g habas cocidas, 40g queso feta, rúcula, limón, AOVE", "420 kcal", "20g prot", "48g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Berenjena rellena de garbanzos y verduras", "1 berenjena, 120g garbanzos, tomate, cebolla, pimentón, AOVE", "380 kcal", "18g prot", "48g carbs", "12g grasa", "Medio · 30 min"),
-            op("Ensalada de lentejas con feta y pepino", "180g lentejas cocidas, 40g queso feta, pepino, tomate, AOVE, limón", "400 kcal", "22g prot", "44g carbs", "14g grasa", "Sin cocción · 10 min"),
-            op("Wok de tofu con brócoli y arroz integral", "160g tofu, brócoli, 60g arroz integral, salsa soja, jengibre", "390 kcal", "24g prot", "40g carbs", "13g grasa", "Fácil · 20 min"),
-            op("Espinacas con garbanzos a la andaluza", "200g espinacas, 150g garbanzos, comino, pimentón, ajo, AOVE", "370 kcal", "18g prot", "44g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Ensalada templada de quinoa con champiñones", "100g quinoa cocida, champiñones salteados, rúcula, parmesano, AOVE", "400 kcal", "16g prot", "42g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Tempeh a la plancha con puré de boniato", "150g tempeh, 150g boniato, espinacas salteadas, AOVE", "410 kcal", "26g prot", "38g carbs", "16g grasa", "Medio · 20 min"),
-            op("Fajitas vegetales con alubias", "2 tortillas de trigo pequeñas, 120g alubias, pimiento, cebolla, especias", "400 kcal", "18g prot", "50g carbs", "13g grasa", "Fácil · 15 min"),
-            op("Coliflor asada con garbanzos especiados y tahini", "200g coliflor asada, 120g garbanzos, salsa tahini, comino", "380 kcal", "16g prot", "40g carbs", "16g grasa", "Medio · 25 min")
-          ] : [
+          opciones: [
             op("Poké bowl de salmón con arroz y aguacate", "150g salmón fresco en dados, 80g arroz, 1/4 aguacate, pepino, edamame, salsa soja, sésamo", "520 kcal", "36g prot", "40g carbs", "22g grasa", "Sin cocción · 10 min"),
             op("Pollo al limón con patata asada y ensalada", "180g pollo al horno, 150g patata asada, ensalada verde, AOVE, limón", "480 kcal", "42g prot", "32g carbs", "14g grasa", "Fácil · 25 min"),
             op("Tacos de pollo con guacamole y pico de gallo", "2 tortillas de maíz, 180g pollo especiado, 40g guacamole, tomate, cebolla, cilantro, lima", "440 kcal", "38g prot", "30g carbs", "16g grasa", "Medio · 20 min"),
@@ -14130,22 +13974,7 @@
         {
           momento: "Cena", hora: "21:00",
           porque: "Cena ligera: proteína para recuperar, mínimos hidratos, digestión fácil",
-          opciones: esVegetariano ? [
-            op("Crema de calabaza con huevo pochado y semillas", "300ml crema calabaza, 2 huevos pochados, semillas de calabaza, AOVE", "340 kcal", "18g prot", "28g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Ensalada thai de tofu con cacahuetes", "200g tofu firme, rúcula, zanahoria rallada, pepino, salsa de lima, cacahuetes", "300 kcal", "22g prot", "10g carbs", "16g grasa", "Sin cocción · 10 min"),
-            op("Sopa de miso con tofu y edamame", "300ml caldo miso, 100g edamame, tofu sedoso, sésamo, cebollino", "280 kcal", "20g prot", "18g carbs", "12g grasa", "Fácil · 10 min"),
-            op("Wok de verduras con tempeh y sésamo", "150g tempeh, brócoli, zanahoria, pimiento, salsa tamari, sésamo", "310 kcal", "24g prot", "16g carbs", "14g grasa", "Fácil · 15 min"),
-            op("Tortilla francesa con champiñones y espinacas", "3 huevos, 150g champiñones, espinacas, 30g queso fresco, AOVE", "300 kcal", "24g prot", "6g carbs", "18g grasa", "Fácil · 10 min"),
-            op("Sopa de miso con tofu y coles de Bruselas", "300ml caldo miso, 150g tofu firme, 100g coles de Bruselas al vapor, sésamo", "280 kcal", "22g prot", "14g carbs", "14g grasa", "Fácil · 15 min"),
-            op("Ensalada de garbanzos con pepino y menta", "150g garbanzos, pepino, menta, yogur, limón", "320 kcal", "16g prot", "36g carbs", "10g grasa", "Sin cocción · 10 min"),
-            op("Tortilla de calabacín con ensalada verde", "3 huevos, calabacín rallado, cebolla, ensalada verde, AOVE", "310 kcal", "22g prot", "10g carbs", "20g grasa", "Fácil · 12 min"),
-            op("Crema de brócoli con queso fresco", "300ml crema de brócoli casera, 60g queso fresco", "280 kcal", "18g prot", "20g carbs", "14g grasa", "Fácil · 15 min"),
-            op("Tofu a la plancha con espinacas salteadas", "180g tofu firme, espinacas, ajo, AOVE, limón", "290 kcal", "22g prot", "8g carbs", "18g grasa", "Fácil · 12 min"),
-            op("Ensalada de edamame con aguacate y sésamo", "150g edamame, 1/4 aguacate, tomate cherry, sésamo, salsa soja", "310 kcal", "20g prot", "18g carbs", "18g grasa", "Sin cocción · 8 min"),
-            op("Champiñones rellenos de queso de cabra", "6 champiñones grandes, 60g queso de cabra, ajo, perejil", "300 kcal", "18g prot", "12g carbs", "20g grasa", "Medio · 20 min"),
-            op("Sopa de lentejas rojas con espinacas", "180g lentejas rojas, espinacas, comino, caldo vegetal", "300 kcal", "18g prot", "40g carbs", "6g grasa", "Fácil · 20 min"),
-            op("Wok de setas con tofu y sésamo", "150g setas variadas, 120g tofu, salsa tamari, sésamo, jengibre", "310 kcal", "22g prot", "14g carbs", "18g grasa", "Fácil · 15 min")
-          ] : [
+          opciones: [
             op("Salmón al horno con verduras mediterráneas", "200g salmón, calabacín, pimiento, tomate cherry, AOVE, hierbas provenzales", "380 kcal", "38g prot", "8g carbs", "22g grasa", "Fácil · 25 min"),
             op("Ensalada César con pollo a la plancha", "200g pollo, lechuga romana, parmesano rallado, croutons, salsa de yogur", "380 kcal", "42g prot", "14g carbs", "16g grasa", "Fácil · 15 min"),
             op("Gambas al ajillo con ensalada", "200g gambas peladas, 3 dientes de ajo, guindilla, AOVE, ensalada verde", "290 kcal", "34g prot", "4g carbs", "14g grasa", "Fácil · 10 min"),
@@ -14170,21 +13999,7 @@
         {
           momento: "Desayuno", hora: "7:30",
           porque: "Hidratos + proteína desde primera hora para cargar glucógeno y arrancar la síntesis muscular",
-          opciones: esVegetariano ? [
-            op("Porridge de avena con crema de cacahuete y plátano", "80g avena, 200ml bebida de avena, 1 plátano, 15g crema cacahuete, 1 scoop proteína vegetal, canela", "680 kcal", "34g prot", "82g carbs", "22g grasa", "Fácil · 8 min"),
-            op("Tostadas con crema de cacahuete, cottage y plátano", "3 rebanadas centeno, 1.5 cdas crema cacahuete, 150g queso cottage, 1 plátano en rodajas", "560 kcal", "30g prot", "70g carbs", "18g grasa", "Sin cocción · 3 min"),
-            op("Smoothie bowl de mango y proteína", "1 mango, 1 scoop proteína vegetal, 100g quinoa cocida, kiwi, 20g nueces, coco rallado", "530 kcal", "34g prot", "66g carbs", "16g grasa", "Sin cocción · 5 min"),
-            op("Pancakes de avena con arándanos y sirope", "80g avena, 1 plátano, 1 scoop proteína vegetal, bebida de avena, arándanos, sirope de arce", "540 kcal", "32g prot", "72g carbs", "12g grasa", "Medio · 15 min"),
-            op("Tostadas con hummus, huevo y aguacate", "3 rebanadas centeno, 50g hummus, 2 huevos, 1/4 aguacate, pimentón", "500 kcal", "26g prot", "54g carbs", "20g grasa", "Fácil · 8 min"),
-            op("Porridge de avena con proteína vegetal, granada y semillas de girasol", "70g avena, 200ml bebida de soja, 1 scoop proteína vegetal, 50g granada, 15g semillas de girasol", "600 kcal", "38g prot", "68g carbs", "18g grasa", "Fácil · 8 min"),
-            op("Batido de avena, proteína vegetal, coco y frutos rojos", "60g avena, 1 scoop proteína vegetal, 10g coco rallado, 80g frutos rojos, bebida de avena", "600 kcal", "34g prot", "70g carbs", "18g grasa", "Fácil · 3 min"),
-            op("Tostadas de boniato con hummus y semillas", "150g boniato asado en rodajas, 60g hummus, semillas de calabaza, AOVE", "520 kcal", "18g prot", "68g carbs", "20g grasa", "Medio · 20 min"),
-            op("Bol de quinoa con leche, plátano y frutos secos", "80g quinoa cocida, 200ml bebida de soja, 1 plátano, 20g nueces, canela", "560 kcal", "24g prot", "72g carbs", "18g grasa", "Fácil · 10 min"),
-            op("Tostadas de aguacate con huevo y queso cottage", "3 rebanadas centeno, 1/2 aguacate, 2 huevos, 100g queso cottage", "580 kcal", "34g prot", "50g carbs", "26g grasa", "Fácil · 10 min"),
-            op("Porridge de avena con tahini y plátano", "80g avena, bebida de avena, 20g tahini, 1 plátano, canela", "620 kcal", "22g prot", "80g carbs", "22g grasa", "Fácil · 8 min"),
-            op("Batido de proteína vegetal con avena y cacao", "1 scoop proteína vegetal, 50g avena, 1 cda cacao puro, bebida de soja, plátano", "580 kcal", "36g prot", "68g carbs", "14g grasa", "Fácil · 3 min"),
-            op("Tostadas con crema de almendra y plátano", "3 rebanadas pan integral, 25g crema de almendra, 1 plátano, canela", "540 kcal", "18g prot", "70g carbs", "20g grasa", "Sin cocción · 3 min")
-          ] : [
+          opciones: [
             op("Porridge de avena con huevos y plátano", "80g avena, 200ml leche entera, 2 huevos revueltos, 1 plátano, miel", "650 kcal", "32g prot", "80g carbs", "20g grasa", "Fácil · 10 min"),
             op("Tostadas con salmón ahumado, aguacate y queso", "3 rebanadas centeno, 100g salmón ahumado, 1/2 aguacate, queso fresco, eneldo", "560 kcal", "34g prot", "44g carbs", "22g grasa", "Sin cocción · 5 min"),
             op("Batido de chocolate con avena y plátano", "60g avena, 200ml leche entera, 1 plátano, 1 cda cacao puro, 1 scoop proteína, miel", "660 kcal", "40g prot", "74g carbs", "16g grasa", "Fácil · 3 min"),
@@ -14240,29 +14055,7 @@
         {
           momento: "Comida", hora: "14:00",
           porque: "La comida más importante del día. Abundante en todo: proteína, hidratos y grasas buenas",
-          opciones: esVegetariano ? [
-            op("Wok de tempeh con arroz y verduras", "200g tempeh, 120g arroz integral, pimiento, brócoli, salsa tamari, sésamo", "620 kcal", "36g prot", "72g carbs", "18g grasa", "Medio · 25 min"),
-            op("Pasta con lentejas rojas y tomate casero", "120g pasta integral, 150g lentejas, tomate frito casero, albahaca, AOVE", "580 kcal", "28g prot", "88g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Buddha bowl con garbanzos especiados", "180g garbanzos al horno con especias, 100g quinoa, 1/4 aguacate, zanahoria, tahini", "640 kcal", "26g prot", "76g carbs", "22g grasa", "Medio · 30 min"),
-            op("Curry rojo de tofu con arroz basmati", "200g tofu firme, 120g arroz basmati, leche coco light, curry rojo, espinacas, cilantro", "600 kcal", "34g prot", "70g carbs", "18g grasa", "Fácil · 25 min"),
-            op("Bowl de tofu teriyaki con arroz y edamame", "200g tofu firme, 120g arroz integral, 100g edamame, salsa teriyaki, sésamo, cebollino", "620 kcal", "38g prot", "74g carbs", "18g grasa", "Medio · 25 min"),
-            op("Bulgur con garbanzos, feta y semillas de calabaza", "150g bulgur cocido, 150g garbanzos cocidos, 50g queso feta, semillas de calabaza, AOVE", "640 kcal", "30g prot", "80g carbs", "20g grasa", "Fácil · 20 min"),
-            op("Bowl de tofu al sésamo con quinoa y verduras salteadas", "200g tofu, 100g quinoa, brócoli, zanahoria, salsa de soja, sésamo", "620 kcal", "32g prot", "78g carbs", "18g grasa", "Medio · 25 min"),
-            op("Pasta con garbanzos y pesto", "120g pasta integral, 150g garbanzos, pesto de albahaca, tomate cherry", "600 kcal", "28g prot", "82g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Bowl de seitán con quinoa y verduras asadas", "180g seitán, 100g quinoa, calabacín, pimiento, AOVE", "610 kcal", "38g prot", "68g carbs", "16g grasa", "Medio · 25 min"),
-            op("Lentejas con arroz y verduras (moros y cristianos vegetal)", "150g lentejas, 100g arroz, cebolla, pimiento, comino", "590 kcal", "26g prot", "94g carbs", "10g grasa", "Fácil · 30 min"),
-            op("Falafel casero con arroz y salsa yogur", "6 falafel al horno, 100g arroz, salsa de yogur, pepino", "620 kcal", "26g prot", "80g carbs", "20g grasa", "Medio · 30 min"),
-            op("Bowl de tempeh con boniato y edamame", "180g tempeh, 150g boniato asado, 100g edamame, AOVE", "610 kcal", "36g prot", "62g carbs", "20g grasa", "Medio · 25 min"),
-            op("Pasta con tofu y salsa de anacardos", "120g pasta integral, 150g tofu, salsa de anacardos, espinacas", "630 kcal", "30g prot", "76g carbs", "22g grasa", "Fácil · 20 min"),
-            op("Chili sin carne con arroz", "180g alubias rojas, 100g arroz, tomate, pimiento, comino, maíz", "600 kcal", "26g prot", "90g carbs", "12g grasa", "Fácil · 25 min"),
-            // Versiones vegetarianas densas en carbohidratos (mismo motivo que
-            // las de abajo): en dieta vegetariana el problema es doble, porque
-            // las fuentes de proteína vegetal traen menos proteína por ración y
-            // el motor tiene que estirar todavía más.
-            op("Arroz con garbanzos al curry y tofu", "200g arroz cocido, 180g garbanzos cocidos, 100g tofu firme, 80ml leche de coco light, curry, cilantro", "710 kcal", "34g prot", "124g carbs", "14g grasa", "Medio · 25 min"),
-            op("Pasta integral con lentejas y tomate casero", "200g pasta integral cocida, 180g lentejas cocidas, 100g tomate frito casero, albahaca, 10g AOVE", "656 kcal", "30g prot", "110g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Bol de quinoa con edamame y boniato", "200g quinoa cocida, 250g boniato asado, 150g edamame cocido, 10g sésamo, salsa tamari", "640 kcal", "28g prot", "100g carbs", "12g grasa", "Medio · 30 min")
-          ] : [
+          opciones: [
             op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja, sésamo", "560 kcal", "48g prot", "52g carbs", "12g grasa", "Medio · 25 min"),
             op("Pasta boloñesa casera con ternera", "180g ternera picada, 100g pasta integral, tomate frito casero, zanahoria, cebolla, orégano", "620 kcal", "42g prot", "64g carbs", "18g grasa", "Medio · 25 min"),
             op("Salmón con patata asada y ensalada grande", "200g salmón al horno, 200g patata asada con romero, ensalada verde, limón", "610 kcal", "44g prot", "42g carbs", "28g grasa", "Medio · 30 min"),
@@ -14325,22 +14118,7 @@
         {
           momento: "Cena", hora: "21:00",
           porque: "Cena abundante en proteína para la recuperación y reparación muscular nocturna",
-          opciones: esVegetariano ? [
-            op("Curry de garbanzos y tofu con arroz", "180g garbanzos, 150g tofu firme, 80g arroz basmati, leche coco light, curry, cilantro", "580 kcal", "38g prot", "72g carbs", "16g grasa", "Fácil · 25 min"),
-            op("Tortilla de verduras con queso y pan", "4 huevos, pimiento, cebolla, champiñones, 40g queso, 1 rebanada centeno", "460 kcal", "30g prot", "28g carbs", "26g grasa", "Fácil · 15 min"),
-            op("Tofu a la plancha con patata y espinacas", "200g tofu firme, 150g patata cocida, espinacas salteadas con ajo, AOVE", "480 kcal", "28g prot", "44g carbs", "18g grasa", "Medio · 20 min"),
-            op("Bowl de edamame con patata y pesto vegano", "150g edamame, 150g patata cocida, pesto de albahaca, tomate cherry, AOVE", "430 kcal", "24g prot", "46g carbs", "14g grasa", "Fácil · 15 min"),
-            op("Pasta con tofu y verduras salteadas", "100g pasta integral, 200g tofu, calabacín, pimiento, salsa de tomate, albahaca", "520 kcal", "32g prot", "60g carbs", "16g grasa", "Medio · 20 min"),
-            op("Tofu con habas y boniato asado al comino", "200g tofu firme, 150g habas cocidas, 200g boniato asado, comino, AOVE", "620 kcal", "34g prot", "72g carbs", "20g grasa", "Fácil · 30 min"),
-            op("Arroz con tofu, edamame y salsa teriyaki", "120g arroz, 180g tofu, 100g edamame, salsa teriyaki", "580 kcal", "34g prot", "68g carbs", "16g grasa", "Medio · 20 min"),
-            op("Pasta con garbanzos y espinacas", "120g pasta integral, 150g garbanzos, espinacas, ajo, AOVE", "560 kcal", "26g prot", "76g carbs", "14g grasa", "Fácil · 20 min"),
-            op("Tortilla de patatas con queso y ensalada", "4 huevos, 200g patata, 40g queso, ensalada verde", "580 kcal", "30g prot", "44g carbs", "30g grasa", "Medio · 25 min"),
-            op("Boniato relleno de alubias y queso", "1 boniato grande, 150g alubias, 40g queso rallado", "550 kcal", "26g prot", "78g carbs", "16g grasa", "Medio · 30 min"),
-            op("Curry de lentejas con arroz basmati", "180g lentejas, 100g arroz basmati, leche coco light, curry", "590 kcal", "26g prot", "88g carbs", "14g grasa", "Fácil · 25 min"),
-            op("Wok de tempeh con arroz y anacardos", "150g tempeh, 100g arroz, pimiento, anacardos, salsa tamari", "600 kcal", "34g prot", "66g carbs", "20g grasa", "Medio · 20 min"),
-            op("Pizza casera vegetal integral", "base integral, tomate, mozzarella, champiñones, pimiento, aceitunas", "570 kcal", "26g prot", "62g carbs", "22g grasa", "Medio · 25 min"),
-            op("Ensalada de quinoa con garbanzos y feta", "150g quinoa, 150g garbanzos, 50g queso feta, aceitunas, AOVE", "600 kcal", "28g prot", "68g carbs", "22g grasa", "Sin cocción · 15 min")
-          ] : [
+          opciones: [
             op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral, 200g brócoli al vapor, limón, AOVE", "620 kcal", "46g prot", "34g carbs", "34g grasa", "Fácil · 20 min"),
             op("Solomillo de ternera con patata y ensalada", "180g solomillo a la plancha, 150g patata cocida, ensalada verde, AOVE", "560 kcal", "44g prot", "36g carbs", "22g grasa", "Medio · 25 min"),
             op("Tortilla de huevos con jamón, queso y pan", "4 huevos, 50g jamón cocido, 40g queso, 2 rebanadas pan centeno", "640 kcal", "44g prot", "30g carbs", "36g grasa", "Fácil · 10 min"),
@@ -14369,22 +14147,7 @@
         {
           momento: "Desayuno", hora: "7:30",
           porque: "Energía sostenida para la mañana sin picos de glucosa",
-          opciones: esVegetariano ? [
-            op("Porridge de avena con kiwi y semillas", "70g avena, leche vegetal, 1 kiwi, semillas de lino, canela, miel", "420 kcal", "14g prot", "68g carbs", "10g grasa", "Fácil · 5 min"),
-            op("Tostadas con aguacate, tomate y queso fresco", "2 rebanadas centeno, 1/4 aguacate, tomate rallado, 80g queso fresco, AOVE", "447 kcal", "16g prot", "35g carbs", "28g grasa", "Sin cocción · 5 min"),
-            op("Smoothie bowl de plátano con granola", "1 plátano, 200g yogur soja, 40g granola, frutos rojos, 15g semillas cáñamo", "390 kcal", "18g prot", "54g carbs", "12g grasa", "Sin cocción · 3 min"),
-            op("Crepes de trigo sarraceno con fresas y miel", "80g harina trigo sarraceno, bebida de avena, fresas laminadas, miel, canela", "350 kcal", "10g prot", "62g carbs", "8g grasa", "Medio · 15 min"),
-            op("Yogur griego con avena, fruta y nueces", "200g yogur griego, 40g avena, 1 fruta de temporada, 15g nueces, miel", "420 kcal", "20g prot", "52g carbs", "14g grasa", "Sin cocción · 3 min"),
-            op("Tostadas con queso de cabra, granada y nueces", "2 rebanadas pan de centeno, 50g queso de cabra, 40g granada, 10g nueces", "400 kcal", "20g prot", "32g carbs", "20g grasa", "Sin cocción · 5 min"),
-            op("Tostadas de queso fresco con miel y nueces", "2 rebanadas pan centeno, 60g queso fresco, miel, 10g nueces", "380 kcal", "16g prot", "42g carbs", "16g grasa", "Sin cocción · 3 min"),
-            op("Porridge de avena con manzana y canela", "60g avena, bebida de avena, 1 manzana rallada, canela", "380 kcal", "10g prot", "64g carbs", "8g grasa", "Fácil · 8 min"),
-            op("Yogur de soja con muesli y plátano", "200g yogur de soja, 40g muesli, 1/2 plátano", "380 kcal", "14g prot", "56g carbs", "10g grasa", "Sin cocción · 2 min"),
-            op("Tostadas con hummus y pepino", "2 rebanadas pan centeno, 60g hummus, pepino, pimentón", "350 kcal", "12g prot", "42g carbs", "14g grasa", "Sin cocción · 3 min"),
-            op("Bol de quinoa con leche y fruta", "60g quinoa cocida, 200ml leche vegetal, 1 pieza de fruta, canela", "360 kcal", "12g prot", "56g carbs", "10g grasa", "Fácil · 8 min"),
-            op("Tortilla de calabacín pequeña con pan", "2 huevos, calabacín, 1 rebanada pan centeno", "340 kcal", "18g prot", "26g carbs", "18g grasa", "Fácil · 10 min"),
-            op("Smoothie de mango y yogur de soja", "1 mango, 150g yogur de soja, leche vegetal, hielo", "340 kcal", "10g prot", "58g carbs", "8g grasa", "Sin cocción · 3 min"),
-            op("Tostadas de aguacate y huevo duro", "2 rebanadas pan centeno, 1/4 aguacate, 1 huevo duro", "390 kcal", "16g prot", "34g carbs", "22g grasa", "Fácil · 10 min")
-          ] : [
+          opciones: [
             op("Tostadas con huevo revuelto y tomate", "2 rebanadas centeno, 2 huevos revueltos, tomate, AOVE, orégano", "405 kcal", "18g prot", "31g carbs", "23g grasa", "Fácil · 8 min"),
             op("Porridge de avena con yogur y plátano", "60g avena, 150g yogur griego 0%, 1 plátano, miel, canela", "461 kcal", "26g prot", "72g carbs", "6g grasa", "Sin cocción · 3 min"),
             op("Tostadas con jamón serrano, tomate y AOVE", "2 tostas de pan, 40g jamón serrano, tomate rallado, AOVE", "330 kcal", "16g prot", "38g carbs", "12g grasa", "Sin cocción · 5 min"),
@@ -14426,23 +14189,7 @@
         {
           momento: "Comida", hora: "14:00",
           porque: "Plato equilibrado: proteína moderada, hidratos de calidad y verdura sin límite",
-          opciones: esVegetariano ? [
-            op("Lentejas estofadas con verduras y pimentón", "200g lentejas, patata, zanahoria, puerro, tomate, AOVE, pimentón ahumado", "460 kcal", "22g prot", "68g carbs", "10g grasa", "Fácil · 35 min"),
-            op("Pasta con tofu y salsa de tomate casera", "100g pasta, 150g tofu, tomate frito casero, albahaca, AOVE", "480 kcal", "24g prot", "62g carbs", "14g grasa", "Fácil · 20 min"),
-            op("Paella de verduras con garbanzos", "100g arroz, 120g garbanzos, pimiento, judía verde, alcachofa, tomate, azafrán", "490 kcal", "20g prot", "78g carbs", "10g grasa", "Medio · 35 min"),
-            op("Pisto manchego con huevos y pan", "calabacín, pimiento, tomate, cebolla salteados, 2 huevos, 1 rebanada centeno", "390 kcal", "16g prot", "42g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Curry de garbanzos con arroz y espinacas", "180g garbanzos, leche coco light, curry, espinacas, 70g arroz, cilantro", "470 kcal", "20g prot", "68g carbs", "12g grasa", "Fácil · 25 min"),
-            op("Trigo sarraceno con habas, feta y rúcula", "120g trigo sarraceno cocido, 120g habas cocidas, 40g queso feta, rúcula, AOVE, limón", "460 kcal", "22g prot", "54g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Arroz tres delicias vegetal", "100g arroz, huevo, guisantes, zanahoria, maíz, soja", "440 kcal", "16g prot", "68g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Ensalada de pasta con tomate y mozzarella", "100g pasta integral, tomate cherry, 60g mozzarella, albahaca, AOVE", "460 kcal", "18g prot", "56g carbs", "18g grasa", "Sin cocción · 15 min"),
-            op("Judías verdes con patata y huevo", "200g judías verdes, 150g patata, 1 huevo duro, AOVE", "380 kcal", "16g prot", "42g carbs", "16g grasa", "Fácil · 25 min"),
-            op("Buddha bowl de quinoa, garbanzos y verduras", "80g quinoa, 100g garbanzos, zanahoria, pepino, tahini", "440 kcal", "18g prot", "56g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Menestra de verduras con huevo", "300g menestra de verduras, 1 huevo duro, AOVE", "350 kcal", "16g prot", "34g carbs", "14g grasa", "Fácil · 25 min"),
-            op("Arroz con setas y verduras", "100g arroz, setas variadas, pimiento, cebolla, caldo vegetal", "420 kcal", "12g prot", "70g carbs", "10g grasa", "Fácil · 25 min"),
-            op("Ensalada de garbanzos, maíz y aguacate", "150g garbanzos, maíz, 1/4 aguacate, tomate, limón", "420 kcal", "18g prot", "50g carbs", "16g grasa", "Sin cocción · 10 min"),
-            op("Wok de tofu con verduras variadas", "150g tofu, brócoli, zanahoria, pimiento, salsa soja", "380 kcal", "22g prot", "32g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Potaje de garbanzos con espinacas y huevo", "200g garbanzos cocidos, 150g espinacas, 2 huevos duros, AOVE, ajo, pimentón", "545 kcal", "31g prot", "56g carbs", "22g grasa", "Medio · 30 min"),
-          ] : [
+          opciones: [
             op("Marmitako de atún con patata", "180g atún fresco, 200g patata, pimiento, cebolla, tomate, AOVE, pimentón", "518 kcal", "48g prot", "42g carbs", "17g grasa", "Medio · 30 min"),
             op("Potaje de garbanzos con espinacas y bacalao", "200g garbanzos cocidos, 150g bacalao desalado, 150g espinacas, AOVE, ajo", "573 kcal", "48g prot", "58g carbs", "16g grasa", "Medio · 30 min"),
             op("Albóndigas de pavo en salsa con arroz", "180g pavo picado, 80g arroz, salsa de tomate casera, cebolla, AOVE", "615 kcal", "51g prot", "68g carbs", "15g grasa", "Medio · 30 min"),
@@ -14493,23 +14240,7 @@
         {
           momento: "Cena", hora: "21:00",
           porque: "Cena ligera pero nutritiva para cerrar el día y favorecer el descanso",
-          opciones: esVegetariano ? [
-            op("Crema de calabaza con huevo pochado y semillas", "300ml crema calabaza, 2 huevos pochados, semillas de calabaza, crostones", "360 kcal", "18g prot", "38g carbs", "14g grasa", "Fácil · 15 min"),
-            op("Ensalada completa con garbanzos y aguacate", "Lechuga, tomate, pepino, 120g garbanzos, 1/4 aguacate, AOVE, limón", "340 kcal", "14g prot", "36g carbs", "14g grasa", "Sin cocción · 8 min"),
-            op("Tortilla de champiñones con ensalada", "3 huevos, 150g champiñones, cebolla, AOVE, ensalada verde", "300 kcal", "20g prot", "8g carbs", "20g grasa", "Fácil · 12 min"),
-            op("Gazpacho con huevo duro y tostada", "300ml gazpacho casero, 2 huevos duros, 1 rebanada pan tostado", "280 kcal", "14g prot", "24g carbs", "14g grasa", "Sin cocción · 5 min"),
-            op("Crema de calabacín con queso fresco y nueces", "300ml crema calabacín, 80g queso fresco, 10g nueces, AOVE", "300 kcal", "14g prot", "22g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Ensalada de garbanzos con queso feta y coles de Bruselas", "150g garbanzos cocidos, 40g queso feta, 100g coles de Bruselas al vapor, AOVE, limón", "380 kcal", "20g prot", "38g carbs", "16g grasa", "Fácil · 15 min"),
-            op("Tortilla francesa con espárragos", "3 huevos, espárragos trigueros, AOVE", "300 kcal", "20g prot", "6g carbs", "20g grasa", "Fácil · 10 min"),
-            op("Crema de puerros con picatostes", "300ml crema de puerro casera, 1 rebanada pan tostado en dados, AOVE", "290 kcal", "8g prot", "38g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Ensalada de garbanzos con tomate y cebolla", "150g garbanzos, tomate, cebolla, AOVE, comino", "330 kcal", "16g prot", "36g carbs", "12g grasa", "Sin cocción · 8 min"),
-            op("Revuelto de espárragos y setas", "3 huevos, setas, espárragos, ajo, perejil, AOVE", "310 kcal", "20g prot", "8g carbs", "22g grasa", "Fácil · 10 min"),
-            op("Sopa de verduras con huevo escalfado", "300ml sopa de verduras casera, 1 huevo escalfado", "260 kcal", "14g prot", "26g carbs", "10g grasa", "Fácil · 20 min"),
-            op("Ensalada templada de coliflor asada y garbanzos", "200g coliflor asada, 120g garbanzos, tahini, limón", "340 kcal", "16g prot", "36g carbs", "14g grasa", "Medio · 25 min"),
-            op("Tostada de queso de cabra con tomate", "2 rebanadas pan centeno, 50g queso de cabra, tomate, orégano", "330 kcal", "18g prot", "30g carbs", "16g grasa", "Sin cocción · 5 min"),
-            op("Pisto con huevo escalfado", "calabacín, pimiento, tomate, cebolla, 1 huevo escalfado", "290 kcal", "12g prot", "28g carbs", "15g grasa", "Fácil · 20 min"),
-            op("Salmorejo con huevo duro y almendras", "300g salmorejo casero, 2 huevos duros, 15g almendras laminadas, AOVE", "375 kcal", "20g prot", "20g carbs", "25g grasa", "Sin cocción · 10 min"),
-          ] : [
+          opciones: [
             op("Salmorejo con huevo duro y jamón serrano", "300g salmorejo casero, 2 huevos duros, 30g jamón serrano, AOVE", "363 kcal", "25g prot", "17g carbs", "23g grasa", "Sin cocción · 10 min"),
             op("Sardinas a la plancha con ensalada y pan", "150g sardinas frescas, ensalada verde, tomate, 40g pan integral, AOVE, limón", "485 kcal", "43g prot", "22g carbs", "24g grasa", "Fácil · 12 min"),
             op("Salmón al horno con verduras mediterráneas", "200g salmón, calabacín, pimiento, tomate cherry, AOVE, hierbas provenzales", "420 kcal", "38g prot", "8g carbs", "26g grasa", "Fácil · 25 min"),
@@ -14611,11 +14342,7 @@
       });
     }
     if (esGimnasio || esCrossfit) {
-      const extrasProte = esVegetariano ? [
-        op("Tofu a la plancha con arroz y brócoli", "220g tofu firme, 100g arroz integral, 200g brócoli, AOVE", "440 kcal", "34g prot", "40g carbs", "16g grasa", "Fácil · 20 min"),
-        op("Garbanzos especiados con boniato", "200g garbanzos cocidos, 200g boniato asado, espinacas, AOVE, pimentón", "460 kcal", "20g prot", "60g carbs", "12g grasa", "Fácil · 25 min"),
-        op("Revuelto de claras con avena y espinacas", "200ml claras, 2 huevos, 30g avena, espinacas, tomate", "340 kcal", "36g prot", "28g carbs", "8g grasa", "Fácil · 10 min"),
-      ] : [
+      const extrasProte = [
         op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral, 200g brócoli, AOVE", "540 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
         op("Steak de ternera con patata asada", "180g ternera magra, 200g patata asada, ensalada verde, AOVE", "520 kcal", "44g prot", "38g carbs", "18g grasa", "Medio · 25 min"),
         op("Revuelto de claras con avena y pavo", "200ml claras, 2 huevos, 30g avena, 50g pavo, espinacas", "380 kcal", "42g prot", "28g carbs", "10g grasa", "Fácil · 10 min"),
@@ -14626,40 +14353,26 @@
       nutricion.forEach(m => {
         if (m.momento === 'Comida' || m.momento === 'Cena') m.opciones.push(...extrasProte.slice(0, 3));
         if (m.momento === 'Merienda') m.opciones.push(
-          esVegetariano
-            ? op("Batido de proteína vegetal con avena y plátano", "1 scoop proteína vegetal, 30g avena, 1 plátano, 250ml bebida de avena", "400 kcal", "28g prot", "54g carbs", "8g grasa", "Fácil · 3 min")
-            : op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
+          op("Batido de proteína con avena y plátano", "1 scoop whey, 30g avena, 1 plátano, 250ml leche", "420 kcal", "34g prot", "52g carbs", "8g grasa", "Fácil · 3 min"),
           op("Cottage con frutos rojos y nueces", "200g queso cottage, 80g frutos rojos, 15g nueces", "240 kcal", "26g prot", "18g carbs", "8g grasa", "Sin cocción · 2 min")
         );
         if (m.momento === 'Media mañana') m.opciones.push(
-          esVegetariano
-            ? op("Skyr con nueces y canela (snack proteico pre-entreno)", "150g skyr natural, 15g nueces, canela", "220 kcal", "19g prot", "14g carbs", "10g grasa", "Sin cocción · 1 min")
-            : op("Huevos duros con jamón serrano (snack proteico pre-entreno)", "2 huevos duros, 20g jamón serrano, pimienta", "220 kcal", "20g prot", "2g carbs", "14g grasa", "Fácil · 8 min"),
-          esVegetariano
-            ? op("Edamame con sal y pipas de calabaza (snack proteico pre-entreno)", "150g edamame cocido, sal marina, 10g pipas de calabaza", "210 kcal", "17g prot", "14g carbs", "9g grasa", "Fácil · 5 min")
-            : op("Rollitos de pavo y queso fresco (snack proteico pre-entreno)", "80g pavo en lonchas, 60g queso fresco, orégano", "190 kcal", "24g prot", "4g carbs", "8g grasa", "Sin cocción · 3 min")
+          op("Huevos duros con jamón serrano (snack proteico pre-entreno)", "2 huevos duros, 20g jamón serrano, pimienta", "220 kcal", "20g prot", "2g carbs", "14g grasa", "Fácil · 8 min"),
+          op("Rollitos de pavo y queso fresco (snack proteico pre-entreno)", "80g pavo en lonchas, 60g queso fresco, orégano", "190 kcal", "24g prot", "4g carbs", "8g grasa", "Sin cocción · 3 min")
         );
       });
     }
     if (esCombinacion) {
       nutricion.forEach(m => {
         if (m.momento === 'Comida') m.opciones.push(
-          esVegetariano
-            ? op("Bowl mediterráneo de garbanzos y quinoa", "200g garbanzos, 100g quinoa, tomate seco, rúcula, AOVE", "480 kcal", "22g prot", "58g carbs", "14g grasa", "Fácil · 15 min")
-            : op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "520 kcal", "42g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
-          esVegetariano
-            ? op("Tofu teriyaki con arroz y edamame", "200g tofu firme, 80g arroz, 80g edamame, salsa de soja, sésamo", "460 kcal", "32g prot", "42g carbs", "16g grasa", "Fácil · 20 min")
-            : op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "540 kcal", "42g prot", "38g carbs", "22g grasa", "Fácil · 20 min")
+          op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "520 kcal", "42g prot", "44g carbs", "16g grasa", "Fácil · 20 min"),
+          op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "540 kcal", "42g prot", "38g carbs", "22g grasa", "Fácil · 20 min")
         );
         if (m.momento === 'Cena') m.opciones.push(
-          esVegetariano
-            ? op("Poke bowl vegano de tofu", "180g tofu marinado, 80g arroz, aguacate, zanahoria, soja, sésamo", "420 kcal", "24g prot", "44g carbs", "16g grasa", "Sin cocción · 10 min")
-            : op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
+          op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "460 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
         );
         if (m.momento === 'Media mañana') m.opciones.push(
-          esVegetariano
-            ? op("Hummus con tostas de maíz (energía para el entreno híbrido)", "80g hummus, 2 tostas de maíz, pimentón", "220 kcal", "9g prot", "26g carbs", "9g grasa", "Sin cocción · 2 min")
-            : op("Wrap pequeño de atún y aguacate (energía para el entreno híbrido)", "1 tortilla integral pequeña, 1 lata atún, 1/4 aguacate, tomate", "260 kcal", "22g prot", "20g carbs", "10g grasa", "Sin cocción · 5 min")
+          op("Wrap pequeño de atún y aguacate (energía para el entreno híbrido)", "1 tortilla integral pequeña, 1 lata atún, 1/4 aguacate, tomate", "260 kcal", "22g prot", "20g carbs", "10g grasa", "Sin cocción · 5 min")
         );
       });
     }
@@ -14799,72 +14512,43 @@
       // llevan gluten, lácteos ni frutos secos por naturaleza (nunca se devuelve
       // el pool original: eso serviría el alérgeno).
       const platosSeguros = (momento) => {
-        const veg = esVegetariano;
         const pool = {
           'Desayuno': [
             op('Tortilla de tres huevos con espinacas y tomate', '3 huevos, 100g espinacas, 150g tomate, 10g AOVE', '320 kcal', '22g prot', '10g carbs', '22g grasa', 'Fácil · 8 min'),
             op('Huevos revueltos con boniato y aguacate', '3 huevos, 150g boniato asado, 1/2 aguacate', '430 kcal', '22g prot', '32g carbs', '24g grasa', 'Fácil · 15 min'),
             op('Bowl de fruta con semillas y miel', '1 plátano, 150g frutos rojos, 20g semillas de girasol, 15g miel', '330 kcal', '8g prot', '58g carbs', '10g grasa', 'Sin cocción · 3 min'),
-            veg
-              ? op('Revuelto de tofu con tomate y aguacate', '200g tofu firme, 150g tomate, 1/2 aguacate, cúrcuma, AOVE', '390 kcal', '24g prot', '14g carbs', '28g grasa', 'Fácil · 10 min')
-              : op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min'),
+            op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min'),
             op('Bol de yogur de coco con fruta y semillas de calabaza', '200g yogur de coco, 1 plátano, 15g semillas de calabaza', '350 kcal', '6g prot', '46g carbs', '17g grasa', 'Sin cocción · 3 min'),
-            veg
-              ? op('Batido de plátano y semillas de chía', '1 plátano, 250ml bebida de arroz, 15g semillas de chía, canela', '280 kcal', '7g prot', '46g carbs', '8g grasa', 'Fácil · 3 min')
-              : op('Salmón ahumado con aguacate y tomate', '80g salmón ahumado, 1/2 aguacate, 150g tomate', '340 kcal', '20g prot', '10g carbs', '25g grasa', 'Sin cocción · 5 min'),
+            op('Salmón ahumado con aguacate y tomate', '80g salmón ahumado, 1/2 aguacate, 150g tomate', '340 kcal', '20g prot', '10g carbs', '25g grasa', 'Sin cocción · 5 min'),
             op('Bol de arroz inflado con fruta y semillas de girasol', '40g arroz inflado, 1 plátano, 200ml bebida de arroz, 15g semillas de girasol', '310 kcal', '8g prot', '52g carbs', '9g grasa', 'Sin cocción · 3 min')
           ],
           'Media mañana': [
             op('Manzana con semillas de girasol', '1 manzana, 20g semillas de girasol', '190 kcal', '5g prot', '26g carbs', '9g grasa', 'Sin cocción · 1 min'),
             op('Tortitas de arroz con aguacate y tomate', '3 tortitas de arroz, 1/2 aguacate, 100g tomate, sal', '250 kcal', '5g prot', '30g carbs', '13g grasa', 'Sin cocción · 3 min'),
-            veg
-              ? op('Hummus con crudités de zanahoria', '80g hummus, 150g zanahoria en bastones', '220 kcal', '7g prot', '22g carbs', '12g grasa', 'Sin cocción · 3 min')
-              : op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min'),
-            veg
-              ? op('Batido verde de espinaca y plátano', '1 plátano, 100g espinacas, 200ml bebida de arroz, 10g semillas de chía', '220 kcal', '5g prot', '38g carbs', '6g grasa', 'Fácil · 3 min')
-              : op('Atún con tomate y aguacate', '1 lata de atún al natural, 150g tomate, 1/2 aguacate', '280 kcal', '24g prot', '10g carbs', '17g grasa', 'Sin cocción · 3 min'),
+            op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min'),
+            op('Atún con tomate y aguacate', '1 lata de atún al natural, 150g tomate, 1/2 aguacate', '280 kcal', '24g prot', '10g carbs', '17g grasa', 'Sin cocción · 3 min'),
             op('Fruta variada con semillas de calabaza', '1 pieza de fruta, 1 mandarina, 15g semillas de calabaza', '180 kcal', '5g prot', '24g carbs', '8g grasa', 'Sin cocción · 1 min')
           ],
           'Comida': [
-            veg
-              ? op('Lentejas guisadas con verduras y arroz', '200g lentejas cocidas, 80g arroz, zanahoria, pimiento, AOVE', '480 kcal', '22g prot', '68g carbs', '12g grasa', 'Fácil · 25 min')
-              : op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g verduras al vapor, 15g AOVE', '540 kcal', '48g prot', '52g carbs', '15g grasa', 'Fácil · 20 min'),
-            veg
-              ? op('Garbanzos con espinacas y quinoa', '200g garbanzos cocidos, 150g espinacas, 80g quinoa, AOVE, pimentón', '490 kcal', '22g prot', '62g carbs', '14g grasa', 'Fácil · 20 min')
-              : op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '540 kcal', '40g prot', '42g carbs', '24g grasa', 'Medio · 25 min'),
+            op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g verduras al vapor, 15g AOVE', '540 kcal', '48g prot', '52g carbs', '15g grasa', 'Fácil · 20 min'),
+            op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '540 kcal', '40g prot', '42g carbs', '24g grasa', 'Medio · 25 min'),
             op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '470 kcal', '20g prot', '40g carbs', '26g grasa', 'Medio · 25 min'),
-            veg
-              ? op('Quinoa con garbanzos, pimiento y espinacas', '80g quinoa, 150g garbanzos cocidos, pimiento, espinacas, AOVE', '500 kcal', '20g prot', '66g carbs', '16g grasa', 'Fácil · 25 min')
-              : op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g verduras, AOVE', '520 kcal', '44g prot', '44g carbs', '16g grasa', 'Fácil · 30 min'),
-            veg
-              ? op('Arroz con tofu, calabacín y zanahoria', '80g arroz, 180g tofu, calabacín, zanahoria, AOVE', '470 kcal', '24g prot', '58g carbs', '14g grasa', 'Fácil · 20 min')
-              : op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min')
+            op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g verduras, AOVE', '520 kcal', '44g prot', '44g carbs', '16g grasa', 'Fácil · 30 min'),
+            op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min')
           ],
           'Merienda': [
             op('Plátano con semillas de calabaza', '1 plátano, 20g semillas de calabaza', '220 kcal', '7g prot', '28g carbs', '10g grasa', 'Sin cocción · 1 min'),
-            veg
-              ? op('Batido de plátano con bebida de arroz', '1 plátano, 250ml bebida de arroz, canela, 10g semillas de lino', '260 kcal', '5g prot', '48g carbs', '6g grasa', 'Fácil · 3 min')
-              : op('Pavo en lonchas con tomate y aguacate', '100g pavo en lonchas, 150g tomate, 1/2 aguacate', '270 kcal', '24g prot', '10g carbs', '16g grasa', 'Sin cocción · 3 min'),
+            op('Pavo en lonchas con tomate y aguacate', '100g pavo en lonchas, 150g tomate, 1/2 aguacate', '270 kcal', '24g prot', '10g carbs', '16g grasa', 'Sin cocción · 3 min'),
             op('Bol de frutos rojos con semillas de girasol', '200g frutos rojos, 20g semillas de girasol, canela', '210 kcal', '6g prot', '24g carbs', '10g grasa', 'Sin cocción · 2 min'),
-            veg
-              ? op('Batido de fruta con bebida de arroz', '1 plátano, 100g frutos rojos, 200ml bebida de arroz', '210 kcal', '4g prot', '40g carbs', '4g grasa', 'Fácil · 3 min')
-              : op('Huevos cocidos con tomate y AOVE', '2 huevos cocidos, 150g tomate, 5g AOVE', '200 kcal', '14g prot', '8g carbs', '13g grasa', 'Sin cocción · 5 min'),
+            op('Huevos cocidos con tomate y AOVE', '2 huevos cocidos, 150g tomate, 5g AOVE', '200 kcal', '14g prot', '8g carbs', '13g grasa', 'Sin cocción · 5 min'),
             op('Tortitas de arroz con plátano y canela', '3 tortitas de arroz, 1 plátano, canela', '230 kcal', '4g prot', '48g carbs', '2g grasa', 'Sin cocción · 2 min')
           ],
           'Cena': [
-            veg
-              ? op('Revuelto de tofu con verduras y arroz', '200g tofu firme, 200g verduras salteadas, 60g arroz, AOVE', '440 kcal', '26g prot', '44g carbs', '18g grasa', 'Fácil · 20 min')
-              : op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '420 kcal', '38g prot', '38g carbs', '12g grasa', 'Fácil · 25 min'),
-            veg
-              ? op('Crema de verduras con huevos cocidos', '400ml crema de calabacín y puerro, 2 huevos cocidos, AOVE', '330 kcal', '18g prot', '22g carbs', '20g grasa', 'Fácil · 20 min')
-              : op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
+            op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '420 kcal', '38g prot', '38g carbs', '12g grasa', 'Fácil · 25 min'),
+            op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
             op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),
-            veg
-              ? op('Sopa de verduras con tofu', '400ml caldo de verduras, 150g tofu, zanahoria, puerro', '280 kcal', '18g prot', '16g carbs', '15g grasa', 'Fácil · 20 min')
-              : op('Rape a la plancha con calabacín y patata', '200g rape, 150g calabacín, 150g patata, AOVE', '380 kcal', '36g prot', '32g carbs', '12g grasa', 'Fácil · 20 min'),
-            veg
-              ? op('Tortilla de patata sin cebolla con ensalada', '3 huevos, 200g patata, ensalada, AOVE', '440 kcal', '20g prot', '36g carbs', '24g grasa', 'Medio · 25 min')
-              : op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')
+            op('Rape a la plancha con calabacín y patata', '200g rape, 150g calabacín, 150g patata, AOVE', '380 kcal', '36g prot', '32g carbs', '12g grasa', 'Fácil · 20 min'),
+            op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')
           ]
         };
         return pool[momento] || pool['Comida'];
@@ -14880,70 +14564,8 @@
       fuelingPostWod     = fuelingPostWod.filter(esSeguro);
     }
 
-    // FILTRO VEGETARIANO/VEGANO: eliminar opciones con ingredientes animales.
-    // NI "Vegano" NI "Vegetariano/a" se ofrecen ya en el formulario (el vegano se
-    // retiró antes; el vegetariano, el 6 sept 2026 por decisión de negocio). El
-    // filtro y las ramas veg del recetario SE MANTIENEN A PROPÓSITO: hay clientes
-    // con esa dieta ya guardada en su cuenta, y si se borrara el filtro empezarían
-    // a recibir carne y pescado en su plan sin haber cambiado nada. NO borrar esto
-    // sin comprobar antes que ninguna cuenta activa tiene dieta vegetariana.
-    // Los fallbacks nunca devuelven carne/pescado a quien la tenga guardada.
-    if (esVegetariano) {
-      // AMPLIADA (auditoría 5 sept 2026). Faltaban embutidos y varios pescados y
-      // mariscos, así que se colaban en dietas vegetarianas: bug real,
-      // "Lomo embuchado con tortas de arroz" aparecía 24 veces en el menú
-      // vegetariano de mantenimiento. La causa de fondo es que 7 tomas del
-      // recetario no tienen versión vegetariana propia y dependen enteramente de
-      // este filtro, así que aquí no puede faltar nada.
-      const carneRegex = new RegExp([
-        // Carnes y aves
-        'pollo', 'pechuga', 'pavo', 'ternera', 'solomillo', 'cerdo', 'cordero', 'conejo', 'pato',
-        'entrecot', 'costillas?', 'alitas', 'carne picada', 'hamburguesa de (ternera|pollo|pavo)',
-        'cinta de lomo', 'lomo (embuchado|de cerdo|adobado)', 'magro de cerdo', 'chuleta', 'redondo de ternera',
-        // Embutidos y fiambres
-        'jamón', 'jamon', 'cecina', 'chorizo', 'salchich', 'bacon', 'beicon', 'panceta',
-        'morcilla', 'sobrasada', 'fuet', 'salchichón', 'salchichon', 'mortadela', 'lacón', 'lacon',
-        'fiambre', 'butifarra', 'sobreasada', 'york',
-        // Pescados
-        'salmón', 'salmon', 'atún', 'atun', 'merluza', 'bacalao', 'lubina', 'dorada', 'sardina',
-        'caballa', 'rape', 'mero', 'trucha', 'boquerón', 'boqueron', 'bonito', 'emperador',
-        'pez espada', 'lenguado', 'panga', 'tilapia', 'rodaballo', 'besugo', 'corvina', 'abadejo',
-        // Mariscos
-        'gambas', 'langostino', 'calamar', 'sepia', 'anchoa', 'pulpo', 'mejill', 'almeja',
-        'berberecho', 'cigala', 'nécora', 'necora', 'marisco', 'surimi', 'palitos de cangrejo', 'vieira',
-      ].join('|'), 'i');
-      const esVegano = u.dieta && u.dieta.includes('Vegano');
-      const veganRegex = /huevo|claras|clara de|tortilla|yogur|queso|requesón|requeson|cottage|kéfir|kefir|skyr|leche(?! de )|whey|miel\b/i;
-      nutricion = nutricion.map(m => {
-        // Paso 1: fuera carne y pescado (base vegetariana).
-        const sinCarne = m.opciones.filter(o => !carneRegex.test(o.nombre + ' ' + o.ingredientes));
-        let filtradas = sinCarne;
-        if (esVegano) {
-          // Paso 2 (vegano): fuera también lácteos/huevos/miel. Si esto vaciara la
-          // lista, se cae a la base vegetariana (sin carne), NUNCA a la original.
-          const sinAnimal = sinCarne.filter(o => !veganRegex.test(o.nombre + ' ' + o.ingredientes));
-          filtradas = sinAnimal.length > 0 ? sinAnimal : sinCarne;
-        }
-        return { ...m, opciones: filtradas.length > 0 ? filtradas : m.opciones.slice(0, 1) };
-      });
-      // BUG REAL encontrado verificando este cambio: los pools de "fueling"
-      // (antes/después de entrenar/WOD/carrera) NUNCA pasaban por este filtro,
-      // así que un usuario vegetariano podía recibir "Arroz blanco con pollo y
-      // miel" en su comida forzada de pre-entreno — el filtro de arriba solo
-      // tocaba `nutricion`, no estos 4 arrays aparte. Ya existía para Running/
-      // Hyrox/CrossFit, pero al añadir el "fueling" a Gimnasio/Fuerza esta
-      // sesión se volvió mucho más probable que le tocara a algún vegetariano
-      // de verdad. Si el filtro vacía una lista, forzar() ya tiene guard
-      // (`if (!lista.length) return`) y simplemente no fuerza nada ese día —
-      // no hace falta un fallback aparte, el resto del menú ya es vegetariano.
-      const _sinCarne = arr => arr.filter(o => !carneRegex.test(o.nombre + ' ' + o.ingredientes));
-      const _sinAnimal = arr => { const f = arr.filter(o => !veganRegex.test(o.nombre + ' ' + o.ingredientes)); return f.length > 0 ? f : arr; };
-      const _filtrarVeg = arr => { const sc = _sinCarne(arr); return esVegano ? _sinAnimal(sc) : sc; };
-      fuelingPreCarrera  = _filtrarVeg(fuelingPreCarrera);
-      fuelingPostCarrera = _filtrarVeg(fuelingPostCarrera);
-      fuelingPreWod      = _filtrarVeg(fuelingPreWod);
-      fuelingPostWod     = _filtrarVeg(fuelingPostWod);
-    }
+    // El filtro vegetariano/vegano se retiró (decisión de negocio, 6 sept 2026):
+    // ni la dieta ni sus ramas del recetario se ofrecen ya en ningún sitio.
 
     // FILTRAR ALIMENTOS NO DESEADOS + ALERGIA "OTRA" (texto libre)
     // OJO: cuando la alergia es "Otra", u.alergiaOtra NO pasaba por ningún
@@ -15547,11 +15169,7 @@
     // Omega-3 y vitamina D: antes solo aparecían atados a casos concretos (runner
     // que entrena en interior). Se añaden como nota general porque aplican a
     // cualquier perfil, no solo a corredores.
-    if (!esVegetariano) {
-      notasDeporte.push('Omega-3: si no comes pescado azul (salmón, sardina, caballa) al menos 2 veces por semana, un suplemento de omega-3 (1-2g/día de EPA+DHA) cubre ese hueco — es de los pocos suplementos con evidencia real fuera del rendimiento deportivo.');
-    } else {
-      notasDeporte.push('Omega-3: en dieta vegetariana/vegana cuesta más llegar a los niveles de EPA/DHA que da el pescado azul. Las semillas de lino/chía y las nueces aportan ALA, pero la conversión a EPA/DHA es limitada — un suplemento de omega-3 de origen algal es la opción más fiable si no comes pescado.');
-    }
+    notasDeporte.push('Omega-3: si no comes pescado azul (salmón, sardina, caballa) al menos 2 veces por semana, un suplemento de omega-3 (1-2g/día de EPA+DHA) cubre ese hueco — es de los pocos suplementos con evidencia real fuera del rendimiento deportivo.');
     notasDeporte.push('Vitamina D: la sintetizas con la exposición solar directa a la piel, así que en meses de poco sol o si pasas la mayor parte del día en interior es habitual estar por debajo — un análisis de sangre lo confirma, y si hace falta, un suplemento de vitamina D3 es barato y efectivo.');
     // Variedad de verdura/fruta: nota calculada de verdad sobre el pool de
     // recetas de ESTE usuario (variedadVegetalCount, calculado más arriba justo
