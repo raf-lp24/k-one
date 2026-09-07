@@ -11061,7 +11061,14 @@
   // Además de las palabras de coaching, las UNIDADES sueltas: cuando el texto
   // dice "15 min a ritmo suave", el extractor se queda con "min" y montaba una
   // tarjeta titulada "Min" con su stepper de peso.
-  const _PROSA_INICIO = /^(ritmo|cadencia|total|objetivo|postura|hidratacion|alternar|calentamiento|cierre|enfriamiento|recuperacion|descanso|anota|prioriza|manten|evita|deberias|empieza|termina|acaba|busca|controla|respira|apoya|baja|sube|luego|despues|antes|durante|hasta|si|no|al|cada|en|por|para|pero|y|o|min|mins|minutos|seg|segundos|km|metros|rondas?|reps?|series|veces|cierra|aprieta|aguanta|alterna|corre|camina|suelta|aprovecha|trabaja|intenta|procura|brazos|piernas|pasos|hombros)\b/;
+  // "Circuito"/"Sesión larga"/"Tobillos"/"Cadera" salían como si fueran el
+  // nombre de un ejercicio real (con botón "Cómo se hace" a un vídeo sin
+  // sentido) cuando en realidad son la etiqueta de un bloque de circuito
+  // ("Circuito 4 rondas (...): 10 goblet squats...") o una lista de zonas
+  // para movilidad ("Movilidad 10 min: cadera, hombros, tobillos") cortada
+  // por el trocado genérico de comas. Ningún ejercicio real de este motor se
+  // llama así a secas, así que se tratan igual que "hombros"/"piernas".
+  const _PROSA_INICIO = /^(ritmo|cadencia|total|objetivo|postura|hidratacion|alternar|calentamiento|cierre|enfriamiento|recuperacion|descanso|anota|prioriza|manten|evita|deberias|empieza|termina|acaba|busca|controla|respira|apoya|baja|sube|luego|despues|antes|durante|hasta|si|no|al|cada|en|por|para|pero|y|o|min|mins|minutos|seg|segundos|km|metros|rondas?|reps?|series|veces|cierra|aprieta|aguanta|alterna|corre|camina|suelta|aprovecha|trabaja|intenta|procura|brazos|piernas|pasos|hombros|cadera|caderas|rodillas?|tobillos?|munecas?|circuito|sesion)\b/;
   // Ningún ejercicio se llama terminando en preposición o artículo: cuando eso
   // pasa es que el troceado ha cortado una frase por la mitad ("brazos
   // relajados a", de "...brazos relajados a 90°").
