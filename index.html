@@ -15283,6 +15283,24 @@
     // cualquier perfil, no solo a corredores.
     notasDeporte.push('Omega-3: si no comes pescado azul (salmón, sardina, caballa) al menos 2 veces por semana, un suplemento de omega-3 (1-2g/día de EPA+DHA) cubre ese hueco — es de los pocos suplementos con evidencia real fuera del rendimiento deportivo.');
     notasDeporte.push('Vitamina D: la sintetizas con la exposición solar directa a la piel, así que en meses de poco sol o si pasas la mayor parte del día en interior es habitual estar por debajo — un análisis de sangre lo confirma, y si hace falta, un suplemento de vitamina D3 es barato y efectivo.');
+    // El sexo solo se usaba para calcular calorías y masa magra: ni una sola
+    // nota era específica para mujeres, cuando el déficit de hierro es la
+    // carencia nutricional más frecuente en mujeres que entrenan y su síntoma
+    // (cansancio, entrenos sin chispa) se confunde con sobreentrenamiento.
+    // Fuentes públicas: fisiologiadelejercicio.com (López Chicharro), g-se.com,
+    // crownsportnutrition.com. Nunca se recomienda suplementar hierro sin
+    // análisis: en exceso es contraproducente, no inocuo.
+    if (esMujer) {
+      notasDeporte.push('Hierro: si menstrúas, tus necesidades de hierro son bastante más altas, y el déficit es la carencia nutricional más común entre mujeres que entrenan. Engaña porque su síntoma — cansancio y entrenos sin chispa — se parece mucho al de estar sobreentrenada. Buenas fuentes en tu plan: carne roja, legumbres, espinacas y marisco; acompáñalas de vitamina C (cítrico, pimiento o tomate crudo) para absorber más, y separa el café y el té de esas comidas porque lo bloquean. Si el cansancio persiste, un análisis con ferritina lo aclara — pero no te suplementes hierro por tu cuenta sin ese análisis.');
+      // La evidencia sobre periodizar el entreno por fases del ciclo es
+      // inconsistente (los propios estudios no se ponen de acuerdo ni en
+      // cuántas fases hay), así que la nota NO prescribe un calendario: dice
+      // la verdad y remite a las sensaciones. Solo para quien entrena.
+      const _entrenaAlgo = !soloDieta || !/no especificado/i.test(deporte);
+      if (_entrenaAlgo) {
+        notasDeporte.push('Ciclo menstrual y entreno: es normal que tu energía y tu fuerza no sean iguales todas las semanas del mes. Dicho esto, la evidencia sobre planificar el entrenamiento por fases del ciclo es inconsistente — no hay una regla que valga para todas —, así que lo honesto es no cambiar el plan por calendario sino por sensaciones: si te toca sesión dura y llegas sin chispa, baja la carga y cuida la técnica; ya apretarás en la siguiente. Si tienes reglas muy abundantes, léete la nota del hierro de arriba.');
+      }
+    }
     // Variedad de verdura/fruta: nota calculada de verdad sobre el pool de
     // recetas de ESTE usuario (variedadVegetalCount, calculado más arriba justo
     // tras cerrar el filtrado de nutrición), no un texto genérico igual para todos.
