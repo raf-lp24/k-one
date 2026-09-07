@@ -14385,12 +14385,21 @@
     let fuelingPreCarrera = [
       op('Tostadas con miel y plátano (antes de tirada larga o series)', '2 rebanadas de pan blanco, 20g miel, 1 plátano', '330 kcal', '6g prot', '73g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Arroz con leche ligero y canela (antes de tirada larga o series)', '200g arroz blanco cocido, 200ml leche semidesnatada, canela, 10g miel', '350 kcal', '9g prot', '70g carbs', '3g grasa', 'Fácil · 10 min'),
-      op('Tortitas de plátano sin grasa (antes de tirada larga o series)', '1 plátano maduro, 2 claras, 40g harina de avena, canela', '320 kcal', '15g prot', '58g carbs', '3g grasa', 'Fácil · 8 min')
+      op('Tortitas de plátano sin grasa (antes de tirada larga o series)', '1 plátano maduro, 2 claras, 40g harina de avena, canela', '320 kcal', '15g prot', '58g carbs', '3g grasa', 'Fácil · 8 min'),
+      // Ampliado de 3 a 6 opciones (7 sept 2026): con 4-5 días de entreno el
+      // cliente veía siempre las mismas tres, y desde que Híbrido también
+      // fuelea sus días de fuerza estos pools se usan bastantes días más.
+      op('Pan con mermelada y café (antes de tirada larga o series)', '3 rebanadas pan blanco, 30g mermelada, café', '310 kcal', '8g prot', '62g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Copos de maíz con leche desnatada (antes de tirada larga o series)', '60g copos de maíz, 250ml leche desnatada', '300 kcal', '13g prot', '63g carbs', '1g grasa', 'Sin cocción · 2 min'),
+      op('Tortitas de arroz con miel y plátano (antes de tirada larga o series)', '4 tortitas de arroz, 15g miel, 1 plátano', '295 kcal', '4g prot', '69g carbs', '2g grasa', 'Sin cocción · 3 min')
     ];
     let fuelingPostCarrera = [
       op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min'),
       op('Tosta de mermelada y queso batido (recarga tras tirada larga)', '2 tostadas pan blanco, 20g mermelada, 150g queso batido 0%', '290 kcal', '16g prot', '48g carbs', '3g grasa', 'Sin cocción · 3 min'),
-      op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min')
+      op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min'),
+      op('Sándwich de pavo y miel (recarga tras tirada larga)', '2 rebanadas pan blanco, 60g pavo en lonchas, 10g miel', '260 kcal', '19g prot', '40g carbs', '3g grasa', 'Sin cocción · 3 min'),
+      op('Batido de leche con cacao y miel (recarga tras tirada larga)', '300ml leche semidesnatada, 10g cacao puro, 20g miel', '235 kcal', '12g prot', '37g carbs', '7g grasa', 'Fácil · 2 min'),
+      op('Arroz con atún y tomate (recarga tras tirada larga)', '150g arroz blanco cocido, 1 lata atún al natural, 100g tomate', '305 kcal', '24g prot', '46g carbs', '2g grasa', 'Fácil · 5 min')
     ];
     // El nombre dice "antes/después de entrenar" (no "del WOD") a propósito: este
     // mismo pool se usa también para Gimnasio/Fuerza, no solo Hyrox/CrossFit —
@@ -14399,12 +14408,18 @@
     let fuelingPreWod = [
       op('Arroz blanco con pollo y miel (90 min antes de entrenar)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
       op('Tortitas de arroz con pavo y miel (90 min antes de entrenar)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
-      op('Boniato asado con huevo y jamón cocido (90 min antes de entrenar)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min')
+      op('Boniato asado con huevo y jamón cocido (90 min antes de entrenar)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min'),
+      op('Pasta con pavo y tomate (90 min antes de entrenar)', '100g pasta cocida, 100g pavo, 50g tomate frito casero', '310 kcal', '30g prot', '34g carbs', '3g grasa', 'Fácil · 15 min'),
+      op('Bocadillo pequeño de pavo y tomate (90 min antes de entrenar)', '1 panecillo integral, 80g pavo en lonchas, 60g tomate', '265 kcal', '23g prot', '31g carbs', '5g grasa', 'Sin cocción · 4 min'),
+      op('Yogur griego con avena y miel (90 min antes de entrenar)', '200g yogur griego 0%, 30g avena, 15g miel', '280 kcal', '24g prot', '40g carbs', '3g grasa', 'Sin cocción · 2 min')
     ];
     let fuelingPostWod = [
       op('Batido de proteína con plátano y avena (recuperación post-entreno)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
       op('Queso batido con miel y tortitas de arroz (recuperación post-entreno)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
-      op('Skyr con plátano y canela (recuperación post-entreno)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min')
+      op('Skyr con plátano y canela (recuperación post-entreno)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min'),
+      op('Bocadillo de atún y tomate (recuperación post-entreno)', '1 panecillo integral, 1 lata atún al natural, 60g tomate', '270 kcal', '26g prot', '29g carbs', '5g grasa', 'Sin cocción · 4 min'),
+      op('Requesón con miel y arándanos (recuperación post-entreno)', '200g requesón, 15g miel, 80g arándanos', '295 kcal', '25g prot', '31g carbs', '9g grasa', 'Sin cocción · 2 min'),
+      op('Tortilla de claras con pan y mermelada (recuperación post-entreno)', '250ml claras, 2 rebanadas pan integral, 20g mermelada', '330 kcal', '35g prot', '40g carbs', '3g grasa', 'Fácil · 8 min')
     ];
     // OJO: estas 4 listas NO se añaden aquí al pool general de Desayuno/Comida/
     // Merienda. Antes sí se añadían (con `nutriMomento(...).opciones.push(...)`),
@@ -14528,6 +14543,16 @@
           [/panecillos? integral(es)?( pequeños?)?/gi, 'panecillo sin gluten'],
           [/pan (centeno|integral|multicereal|blanco|de trigo|de espelta)/gi, 'pan sin gluten'],
           [/barra de pan/gi, 'pan sin gluten'],
+          // Los croutons/picatostes son pan tostado en cubos: se colaban enteros
+          // en la Ensalada César de cualquiera con alergia al gluten o dieta sin
+          // gluten (bug real encontrado auditando el filtro de alérgenos el 7
+          // sept 2026, 248 apariciones en 576 planes). No entraban en la red
+          // final de abajo porque esa lista no los nombraba.
+          [/\b(croutons?|picatostes)\b(?![^,]*sin gluten)/gi, 'croutons sin gluten'],
+          // El maíz no tiene gluten, pero los copos de maíz comerciales llevan
+          // casi siempre extracto de malta de CEBADA — trampa clásica para
+          // celíacos. Se marca para que se compre la versión certificada.
+          [/\bcopos de ma[íi]z\b(?![^,]*sin gluten)/gi, 'copos de maíz sin gluten'],
           // Red final: cualquier forma de pan/bollería que siga suelta se marca.
           [/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|granola|muesli|barritas?)\b(?![^,]*sin gluten)(?!\s+de\s+(?:arroz|maíz))/gi, '$1 sin gluten']
         );
@@ -14795,7 +14820,13 @@
         const forzar = (comidas, momento, lista) => {
           if (!lista.length) return;
           const m = comidas.find(x => x.momento === momento);
-          if (m) m.opciones = [lista[(semilla + i) % lista.length], ...m.opciones].slice(0, 5);
+          // `semanaActual` entra en el índice porque sin él la comida de
+          // repostaje NO rotaba nunca: la semilla es fija por usuario y el día
+          // duro cae siempre en el mismo hueco de la semana, así que un
+          // corredor veía el mismo desayuno cada miércoles y el mismo cada
+          // sábado, semana tras semana (comprobado 6 semanas seguidas, 7 sept
+          // 2026). Con la semana dentro, el pool entero acaba rotando.
+          if (m) m.opciones = [lista[(semilla + i + Math.max(1, semanaActual)) % lista.length], ...m.opciones].slice(0, 5);
         };
         if (esRunner && diaEsDuroCorredor(d)) {
           forzar(dm, 'Desayuno', fuelingPreCarrera);
