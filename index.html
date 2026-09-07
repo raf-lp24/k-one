@@ -13315,6 +13315,23 @@
       } else if (deltaCheck > 0 && !esDescarga) {
         notasSalud.push('Además, tu último check-in vino bien: sumamos algo de reto.');
       }
+      // El cuestionario pregunta por sueño y estrés, pero hasta ahora solo se
+      // usaban para dos notas de NUTRICIÓN (y la de estrés solo si el objetivo
+      // era perder grasa). Son los dos factores que más condicionan la
+      // recuperación y el riesgo de lesión: dormir menos de 8h se asocia a
+      // ~1,7x más lesiones, y el riesgo casi se dobla si además se entrena
+      // fuerte (Milewski et al.; recogido por Sanitas y Barça Innovation Hub).
+      // No se recorta volumen por una respuesta del formulario -- esa decisión
+      // es del cliente y ya tiene el check-in para pedirlo -- pero sí se le
+      // dice, que es justo lo que una app de entrenamiento debería saber.
+      if (sueno.includes('menos de 6h')) {
+        notasSalud.push('Duermes menos de 6h y eso pesa más que cualquier detalle del plan: dormir poco se asocia a bastante más riesgo de lesión, y el riesgo casi se dobla cuando encima se entrena fuerte. No te quitamos volumen por ello (si lo quieres, pídelo en "¿Cómo va el entreno?"), pero en semanas de malas noches quédate a 2-3 repeticiones del fallo en los ejercicios pesados y prioriza técnica antes que subir carga.');
+      } else if (sueno.includes('6-7')) {
+        notasSalud.push('Duermes 6-7h: es suficiente para entrenar, pero justo. Si una semana notas que las mismas cargas te cuestan más de lo normal, mira primero cuánto has dormido antes de pensar que has perdido forma.');
+      }
+      if (estres.includes('alto')) {
+        notasSalud.push('Nos indicaste estrés alto: el estrés crónico gasta de la misma bolsa de recuperación que el entrenamiento, así que en semanas cargadas el mismo plan te va a costar más. No es que vayas hacia atrás, es acumulación — si se alarga, usa "¿Cómo va el entreno?" para aflojar y el plan baja el volumen hasta que le digas que ya estás bien.');
+      }
     }
 
     // Variantes de ejercicio elegidas en "¿Cómo va el entreno?" -- BUG REAL
