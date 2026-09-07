@@ -12606,6 +12606,24 @@
             ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
             : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15';
 
+      // EL OBJETIVO NO CAMBIABA NADA DEL PLAN DE RUNNING (comprobado 7 sept
+      // 2026: los cuatro objetivos daban un plan idéntico, carácter a carácter,
+      // mientras que Gimnasio e Híbrido sí se adaptaban). Se aplica la misma
+      // idea que ya usa Gimnasio, pero con criterio de corredor:
+      //  · Perder grasa: NO se añade más impacto (ya corre); se ofrece trabajo
+      //    opcional de bajo impacto, que suma gasto sin cargar más las piernas.
+      //  · Ganar músculo: una serie más en el día de fuerza (tope 5), que es
+      //    donde de verdad se construye músculo en un plan de carrera. El resto
+      //    de la semana no se toca: más carrera iría en contra del objetivo.
+      const _extraCorredor = perdidaGrasa
+        ? (rSinMat
+            ? ', opcional al final: 10-15 min caminando a paso vivo (suma gasto sin cargar más las piernas)'
+            : ', opcional al final: 10-15 min de remo o bici suave (bajo impacto, suma gasto sin cargar más las piernas)')
+        : '';
+      const fuerzaCorredorObjetivo = (ganarMusculo
+        ? fuerzaCorredor.replace(/(\d)×/g, (m, s) => `${Math.min(5, parseInt(s, 10) + 1)}×`)
+        : fuerzaCorredor) + _extraCorredor;
+
       if (esPrincipiante) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Run/walk · Base aeróbica",
@@ -12613,7 +12631,7 @@
            etiqueta:"Cardio"},
           {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredor : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
+           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
           {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Fartlek suave · Juego de ritmos",
            detalle:`Fartlek introductorio · 5 min trote suave de calentamiento. Luego: 6-8 × (1 min a ritmo alegre + 1.5 min caminando/trote suave). Ritmo alegre = ligeramente por encima de conversacional, deberías poder hablar con frases cortas. Cierre: 5 min trote + 4 strides de 50m (aceleración progresiva, no sprint)`,
            etiqueta:"Intensidad"},
@@ -12635,7 +12653,7 @@
            etiqueta:"Cardio"},
           {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Fuerza + pliometría corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredor : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
+           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
           {dia:"Miércoles", tipo:"Entrenamiento", resumen:"VO2máx · Intervalos cortos",
            detalle:`Calentamiento: 15 min progresivo + drills (A-skips, high knees, butt kicks) + 3 strides. Series: ${sesionCorta ? '6×400m con 90s rec trote' : '5×800m (Yasso 800s) con recuperación igual al tiempo de trabajo'}. Ritmo 5K (RPE 9, 93-97% FCmáx). Anota cada split. Si caen más de 5s, para. Enfriamiento: 10 min trote suave`,
            etiqueta:"Intensidad"},
@@ -12657,7 +12675,7 @@
            etiqueta:"Cardio"},
           {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredor : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
+           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
           {dia:"Miércoles", tipo:"Entrenamiento", resumen: sesionCorta || bloqueMeso % 2 === 0 ? "Fartlek o series · Calidad" : "Cuestas · Calidad",
            // Cuestas no estaba en ningun sitio del catalogo de running -- solo
            // habia escalera y fartlek, siempre los mismos. Rota por bloqueMeso
@@ -13411,6 +13429,14 @@
         notasSalud.push('Duermes menos de 6h y eso pesa más que cualquier detalle del plan: dormir poco se asocia a bastante más riesgo de lesión, y el riesgo casi se dobla cuando encima se entrena fuerte. No te quitamos volumen por ello (si lo quieres, pídelo en "¿Cómo va el entreno?"), pero en semanas de malas noches quédate a 2-3 repeticiones del fallo en los ejercicios pesados y prioriza técnica antes que subir carga.');
       } else if (sueno.includes('6-7')) {
         notasSalud.push('Duermes 6-7h: es suficiente para entrenar, pero justo. Si una semana notas que las mismas cargas te cuestan más de lo normal, mira primero cuánto has dormido antes de pensar que has perdido forma.');
+      }
+      // Corredor que quiere ganar músculo: se le sube una serie el día de
+      // fuerza (arriba, en la plantilla), pero conviene decirle la verdad sobre
+      // el techo que tiene ese objetivo mientras mantiene volumen de carrera —
+      // es el "efecto de interferencia", bien documentado. Nada de prometer
+      // hipertrofia de gimnasio con un plan de running.
+      if (esRunner && ganarMusculo) {
+        notasSalud.push('Ganar músculo corriendo tiene un techo: el volumen de carrera compite con la ganancia de masa (lo que se conoce como efecto de interferencia). Te hemos subido una serie el día de fuerza, que es donde de verdad se construye, y hemos dejado la carrera como estaba a propósito — sumar kilómetros iría en contra. Lo que más te va a rendir es no saltarte ese día y cubrir bien la proteína.');
       }
       if (estres.includes('alto')) {
         notasSalud.push('Nos indicaste estrés alto: el estrés crónico gasta de la misma bolsa de recuperación que el entrenamiento, así que en semanas cargadas el mismo plan te va a costar más. No es que vayas hacia atrás, es acumulación — si se alarga, usa "¿Cómo va el entreno?" para aflojar y el plan baja el volumen hasta que le digas que ya estás bien.');
