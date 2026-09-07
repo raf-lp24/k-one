@@ -9997,7 +9997,16 @@
     // en el reemplazo -- "Prensa de piernas con mancuerna", que es una máquina
     // y un peso libre a la vez.
     [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Sentadilla isométrica en pared']],
-    [/sentadilla b[uú]lgara/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas']],
+    // Las tres últimas alternativas van sin material a propósito: las dos
+    // primeras llevan mancuerna, así que _ALT_PESO_LIBRE las descarta para quien
+    // entrena sin peso y el ejercicio se quedaba FIJO 12 semanas seguidas. Es lo
+    // que pasaba en el día de fuerza del corredor al aire libre, el perfil con
+    // menos variedad tras arreglar el avanzado (medido 7 sept 2026).
+    [/sentadilla b[uú]lgara( en silla)?/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás', 'Split squat']],
+    // "Sentadilla aérea" queda fuera de la regla genérica de sentadilla (que la
+    // excluye en su lookahead) y no tenía ninguna propia: el principiante la
+    // veía las 12 semanas. Alternativas todas sin material y con ficha.
+    [/sentadillas? a[ée]reas?/i, ['Sentadilla isométrica en pared', 'Split squat', 'Zancada lateral']],
     [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
     [/peso muerto rumano( con mancuernas?)?/i, ['Hip thrust', 'Extensión lumbar en máquina']],
     // "( sumo)?( con mancuernas?)?" consume el material/variante que puede ir
@@ -14061,7 +14070,15 @@
             op("Batido de proteína whey con agua y hielo", "1 scoop proteína whey, agua, hielo, canela", "130 kcal", "25g prot", "4g carbs", "1g grasa", "Fácil · 2 min"),
             op("Yogur griego con pepino y menta (estilo tzatziki)", "150g yogur griego, pepino rallado, menta, ajo, AOVE", "170 kcal", "14g prot", "10g carbs", "8g grasa", "Sin cocción · 3 min"),
             op("Lonchas de pavo con pepinillos", "60g pavo en lonchas, pepinillos, mostaza", "140 kcal", "16g prot", "6g carbs", "5g grasa", "Sin cocción · 1 min"),
-            op("Sardinillas en lata con tomate", "1 lata pequeña sardinillas, tomate en rodajas, AOVE", "210 kcal", "18g prot", "6g carbs", "14g grasa", "Sin cocción · 2 min")
+            op("Sardinillas en lata con tomate", "1 lata pequeña sardinillas, tomate en rodajas, AOVE", "210 kcal", "18g prot", "6g carbs", "14g grasa", "Sin cocción · 2 min"),
+            // "Media mañana" era la toma más corta (17 opciones, medido sobre 20
+            // semanas) y la comparten tres objetivos, así que ampliarla aquí
+            // llega a casi todos los clientes de 4-5 comidas.
+            op("Requesón con tomate cherry y orégano", "150g requesón, 100g tomate cherry, orégano, pimienta", "170 kcal", "19g prot", "9g carbs", "7g grasa", "Sin cocción · 2 min"),
+            op("Edamame con sal y limón", "150g edamame, sal, limón", "180 kcal", "18g prot", "13g carbs", "8g grasa", "Fácil · 5 min"),
+            op("Lata de atún con tomate y AOVE", "1 lata atún al natural, 100g tomate, 5g AOVE, orégano", "155 kcal", "21g prot", "4g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Queso cottage con pepino y eneldo", "200g queso cottage, 100g pepino, eneldo", "175 kcal", "21g prot", "13g carbs", "5g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de arroz con queso fresco y pavo", "3 tortitas de arroz, 40g queso fresco, 40g pavo en lonchas", "250 kcal", "20g prot", "23g carbs", "8g grasa", "Sin cocción · 3 min")
           ]
         },
         {
@@ -14138,7 +14155,15 @@
             op("Tortilla de claras con jamón y espárragos", "5 claras, 1 huevo, 30g jamón cocido, espárragos", "260 kcal", "30g prot", "6g carbs", "13g grasa", "Fácil · 10 min"),
             op("Merluza al vapor con verduras", "200g merluza, brócoli, zanahoria al vapor, AOVE, limón", "280 kcal", "36g prot", "12g carbs", "10g grasa", "Fácil · 15 min"),
             op("Pechuga de pavo a la plancha con ensalada César ligera", "180g pavo, lechuga romana, parmesano, salsa yogur", "310 kcal", "40g prot", "10g carbs", "12g grasa", "Fácil · 12 min"),
-            op("Sepia salteada con ajo y perejil", "220g sepia, ajo, perejil, limón, AOVE", "270 kcal", "36g prot", "4g carbs", "12g grasa", "Fácil · 10 min")
+            op("Sepia salteada con ajo y perejil", "220g sepia, ajo, perejil, limón, AOVE", "270 kcal", "36g prot", "4g carbs", "12g grasa", "Fácil · 10 min"),
+            // La cena de "Perder grasa" era la segunda toma más corta (19) y
+            // estaba muy cargada de pescado/ave a la plancha. Se añade una
+            // legumbre, una crema, un pescado blanco al horno y una tortilla,
+            // que son formatos que no había.
+            op("Crema de calabacín con dados de pavo", "300g calabacín, 100g cebolla, 150g pavo, 10g AOVE", "350 kcal", "40g prot", "19g carbs", "13g grasa", "Medio · 25 min"),
+            op("Ensalada de garbanzos con huevo y atún", "120g garbanzos cocidos, 1 huevo duro, 1 lata atún al natural, 100g tomate, 50g cebolla, 10g AOVE", "495 kcal", "38g prot", "42g carbs", "19g grasa", "Sin cocción · 8 min"),
+            op("Bacalao al horno con pisto de verduras", "220g bacalao, 150g calabacín, 120g pimiento, 150g tomate, 80g cebolla, 10g AOVE", "385 kcal", "42g prot", "24g carbs", "12g grasa", "Medio · 30 min"),
+            op("Tortilla de calabacín y cebolla con ensalada", "2 huevos, 3 claras, 200g calabacín, 80g cebolla, 100g ensalada verde, 10g AOVE", "380 kcal", "28g prot", "17g carbs", "21g grasa", "Fácil · 15 min")
           ]
         }
       ];
@@ -14197,7 +14222,17 @@
             // al objetivo sin platos enormes.
             op("Bocadillo de pavo y queso fresco con fruta", "1 panecillo integral, 80g pavo en lonchas, 60g queso fresco, tomate, 1 plátano", "520 kcal", "42g prot", "72g carbs", "10g grasa", "Sin cocción · 5 min"),
             op("Bol de avena rápida con miel y frutos rojos", "70g avena, 200ml leche entera, 20g miel, 80g frutos rojos, canela", "500 kcal", "20g prot", "78g carbs", "12g grasa", "Fácil · 3 min"),
-            op("Sándwich de crema de cacahuete, plátano y miel", "3 rebanadas pan integral, 25g crema de cacahuete, 1 plátano, 15g miel", "540 kcal", "18g prot", "82g carbs", "16g grasa", "Sin cocción · 3 min")
+            op("Sándwich de crema de cacahuete, plátano y miel", "3 rebanadas pan integral, 25g crema de cacahuete, 1 plátano, 15g miel", "540 kcal", "18g prot", "82g carbs", "16g grasa", "Sin cocción · 3 min"),
+            // Este pool de media mañana (el de mantenimiento, que usan "Mejorar
+            // resistencia" y "Sentirme mejor") era el más corto que quedaba (17)
+            // y además casi todo dulce, lácteo y con frutos secos: a quien tiene
+            // alergia a los frutos secos se le quedaba en nada. Estas cinco son
+            // saladas y sin frutos secos.
+            op("Requesón con tomate cherry y orégano", "200g requesón, 150g tomate cherry, orégano, pimienta", "230 kcal", "25g prot", "12g carbs", "9g grasa", "Sin cocción · 2 min"),
+            op("Edamame con sal y limón", "200g edamame, sal, limón", "240 kcal", "24g prot", "18g carbs", "10g grasa", "Fácil · 5 min"),
+            op("Lata de atún con tomate y AOVE", "1 lata atún al natural, 150g tomate, 10g AOVE, orégano", "220 kcal", "21g prot", "6g carbs", "12g grasa", "Sin cocción · 2 min"),
+            op("Queso cottage con pepino y eneldo", "250g queso cottage, 120g pepino, eneldo", "220 kcal", "26g prot", "16g carbs", "6g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de arroz con queso fresco y pavo", "4 tortitas de arroz, 60g queso fresco, 60g pavo en lonchas", "330 kcal", "26g prot", "30g carbs", "11g grasa", "Sin cocción · 3 min")
           ]
         },
         {
@@ -14336,7 +14371,17 @@
             op("Batido de plátano con leche", "1 plátano, 200ml leche semidesnatada, canela", "200 kcal", "8g prot", "34g carbs", "4g grasa", "Fácil · 2 min"),
             op("Queso fresco con tomate y orégano", "80g queso fresco, tomate en rodajas, orégano, AOVE", "180 kcal", "12g prot", "10g carbs", "10g grasa", "Sin cocción · 2 min"),
             op("Fruta de temporada con yogur", "1 pieza de fruta, 100g yogur natural", "150 kcal", "6g prot", "24g carbs", "3g grasa", "Sin cocción · 2 min"),
-            op("Tosta de pavo y queso pequeña", "1 tosta pequeña, 30g pavo, 15g queso", "180 kcal", "14g prot", "16g carbs", "7g grasa", "Sin cocción · 3 min")
+            op("Tosta de pavo y queso pequeña", "1 tosta pequeña, 30g pavo, 15g queso", "180 kcal", "14g prot", "16g carbs", "7g grasa", "Sin cocción · 3 min"),
+            // Tercer pool de media mañana (mantenimiento: lo usan "Mejorar
+            // resistencia" y "Sentirme mejor en general"). Era el más corto que
+            // quedaba (17 opciones) y flojo de proteína — varias opciones no
+            // llegan a 10 g. Estas cinco suman proteína real y son saladas, que
+            // en este pool casi todo era dulce o lácteo.
+            op("Requesón con tomate cherry y orégano", "150g requesón, 120g tomate cherry, orégano, pimienta", "185 kcal", "20g prot", "10g carbs", "7g grasa", "Sin cocción · 2 min"),
+            op("Edamame con sal y limón", "150g edamame, sal, limón", "180 kcal", "18g prot", "13g carbs", "8g grasa", "Fácil · 5 min"),
+            op("Lata de atún con tomate y AOVE", "1 lata atún al natural, 120g tomate, 5g AOVE, orégano", "165 kcal", "21g prot", "5g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Queso cottage con pepino y eneldo", "200g queso cottage, 100g pepino, eneldo", "175 kcal", "21g prot", "13g carbs", "5g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de arroz con queso fresco y pavo", "3 tortitas de arroz, 40g queso fresco, 40g pavo en lonchas", "250 kcal", "20g prot", "23g carbs", "8g grasa", "Sin cocción · 3 min")
           ]
         },
         {
@@ -18854,6 +18899,15 @@
     "Tostada de salmón ahumado y queso fresco": "Tuesta el pan de centeno. Unta el queso fresco, coloca el salmón ahumado encima y espolvorea eneldo. Sin cocción.",
     "Wrap integral de atún con verduras frescas": "Escurre el atún y mézclalo con la mostaza. Extiende sobre la tortilla, añade lechuga, zanahoria rallada y tomate. Enrolla y corta por la mitad.",
     "Muslo de pollo al horno con judías pintas y ensalada": "Precalienta el horno a 200°C y hornea el muslo de pollo sazonado 25-30 min. Calienta las judías pintas. Sirve con la ensalada aliñada con AOVE y limón.",
+    "Requesón con tomate cherry y orégano": "Pon el requesón en un bol. Añade los tomates cherry partidos por la mitad, orégano y pimienta. Sin cocción.",
+    "Edamame con sal y limón": "Hierve el edamame 4-5 min (o descongélalo si viene ya cocido). Escurre, sala y exprime limón por encima. Se comen sacando la vaina con los dientes.",
+    "Lata de atún con tomate y AOVE": "Escurre bien el atún y ponlo sobre el tomate en rodajas. Aliña con un hilo de aceite y orégano. Sin cocción.",
+    "Queso cottage con pepino y eneldo": "Mezcla el cottage con el pepino en dados pequeños. Espolvorea eneldo y pimienta. Sin cocción.",
+    "Tortitas de arroz con queso fresco y pavo": "Unta el queso fresco sobre las tortitas y coloca el pavo en lonchas encima. Sin cocción.",
+    "Crema de calabacín con dados de pavo": "Cuece el calabacín y la cebolla en agua o caldo 15 min y tritura hasta que quede fina. Aparte, saltea el pavo en dados con el AOVE 5-6 min y añádelo por encima al servir.",
+    "Ensalada de garbanzos con huevo y atún": "Escurre y enjuaga los garbanzos. Mézclalos con el atún, el tomate en dados y la cebolla en juliana. Corona con el huevo duro en cuartos y aliña con AOVE.",
+    "Bacalao al horno con pisto de verduras": "Pocha el calabacín, el pimiento, la cebolla y el tomate en el AOVE 15-20 min a fuego medio. Hornea el bacalao a 200°C 12-15 min. Sirve el pescado sobre el pisto.",
+    "Tortilla de calabacín y cebolla con ensalada": "Pocha el calabacín y la cebolla en el AOVE 8-10 min hasta que estén blandos. Bate los huevos con las claras, incorpora la verdura y cuaja la tortilla 3-4 min por lado. Acompaña con la ensalada.",
     "Porridge de avena con queso batido y frutos rojos": "Cuece la avena con agua o leche 4-5 min removiendo hasta que espese. Retira del fuego, deja templar un minuto y mezcla el queso batido (si lo añades hirviendo se corta). Corona con los frutos rojos y canela.",
     "Tostada de requesón con tomate y orégano": "Tuesta el pan. Unta el requesón, coloca el tomate en rodajas finas por encima y espolvorea orégano y un poco de pimienta. Sin cocción.",
     "Bol de yogur griego con manzana, avena y canela": "Vierte el yogur en un bol. Añade la manzana en dados, la avena en crudo por encima y espolvorea canela. Si lo dejas 10 min, la avena se ablanda y queda más cremoso.",
