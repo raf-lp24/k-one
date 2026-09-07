@@ -9997,7 +9997,13 @@
     // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
     // mancuernas" -- dos materiales contradictorios en el mismo nombre).
     [/peso muerto( convencional| sumo| rumano)?( con mancuernas?)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
-    [/press banca|bench press/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
+    // El material entra en el patrón por el mismo motivo que en zancadas y en
+    // el press francés de más abajo: "press banca con mancuernas" rotaba solo
+    // las dos primeras palabras y dejaba el material pegado al reemplazo, que
+    // además no lo usa -- salía "Fondos en paralelas con mancuernas" (unos
+    // fondos no se hacen con mancuernas). Visto midiendo la cobertura de
+    // fichas el 7 sept 2026.
+    [/(press banca|bench press)( con mancuernas?| con barra| plano)?/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
     // "(?!...)" evita que esta regla vuelva a tocar el texto que ya dejó la
     // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
     // "press inclinado en máquina/multipower": sin esto quedaba colgando
@@ -10017,7 +10023,14 @@
     // de poolsEjercicio, más abajo): sin esto quedaba colgando ("Remo en polea
     // baja apoyado en banco").
     [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Farmer carry con mancuernas']],
-    [/zancadas?( inversas)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara', 'Zancada inversa con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás']],
+    // "( cargadas? con mancuernas?)?" entra en el patrón por lo mismo que el
+    // material del hip thrust de abajo: la plantilla de Híbrido en casa escribe
+    // "zancadas cargadas con mancuernas" y, si la regla solo se comía
+    // "Zancadas", el adjetivo se quedaba pegado al reemplazo con la concordancia
+    // rota -- "Sentadilla búlgara cargadas con mancuernas", "Zancada lateral
+    // cargadas con mancuernas" (bug real visto al medir la cobertura de fichas
+    // el 7 sept 2026: esos nombres tampoco encontraban ficha, claro).
+    [/zancadas?( inversas)?( cargadas? con mancuernas?)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara con mancuernas', 'Zancada inversa con mancuernas', 'Zancada lateral con mancuernas', 'Zancada cruzada atrás']],
     // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
     // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
     // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
