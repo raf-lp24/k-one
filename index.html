@@ -10818,7 +10818,17 @@
   // Los que no llevan cantidad (AOVE, especias) no se pueden calcular y se marcan.
   function _buscarAlimento(texto) {
     if (!_alimentos) return null;
-    const t = _normTexto(texto.replace(/\(.*?\)/g, ''));
+    // "sin lactosa" no cambia los macros (es leche/queso/yogur normal con la
+    // lactosa hidrolizada), así que se ignora para buscar el alimento base.
+    // "sin gluten" SÍ se deja tal cual: el pan/pasta sin gluten tiene macros
+    // distintos y ya tiene sus propias entradas en la tabla. "pequeño/a"
+    // tampoco cambia los macros por 100g (solo el peso, que ya calcula
+    // _gramosDeUnidad aparte), así que también se ignora al buscar.
+    const limpio = texto.replace(/\(.*?\)/g, '')
+      .replace(/\bsin lactosa\b/gi, '')
+      .replace(/\bpequeñ[oa]s?\b/gi, '')
+      .replace(/\s+/g, ' ');
+    const t = _normTexto(limpio);
     const claves = Object.keys(_alimentos).sort((a, b) => b.length - a.length);
     const k = claves.find(c => t.includes(_normTexto(c)));
     return k ? _alimentos[k] : null;
@@ -10832,6 +10842,9 @@
     [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
     [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
     [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200],
+    // "1 lata atún" se quedaba sin peso (no había regla para "lata"), así que
+    // el atún en lata nunca sumaba a las kcal del plato pese a ser habitual.
+    [/latas?\b/i, 80],
     // Sin estas entradas, "2 zanahorias en bastones" o "1 mandarina" se quedaban
     // sin peso y la ficha de "Ver macros" los marcaba como "al gusto" (0 kcal),
     // cuando sí aportan.
