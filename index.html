@@ -10083,6 +10083,14 @@
     [/(elevaci[oó]n de )?gemelos( de pie| sentados?)?( en escal[oó]n con mancuerna| en escal[oó]n| en prensa o m[aá]quina| en prensa| con carga| con mancuernas?)?/i,
       ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
+    // El día de fuerza del corredor avanzado apenas rotaba: midiendo 12 semanas
+    // seguidas, el core (copenhagen plank) y el drill (A-skips) salían SIEMPRE
+    // iguales, y era el perfil con menos variedad de todos (11 ejercicios
+    // distintos en 12 semanas, frente a 18 del intermedio). Estas dos reglas le
+    // dan alternativas con ficha propia. El compuesto "A-skips + B-skips" va
+    // primero para que no se sustituya solo la mitad y quede "B-skips + B-skips".
+    [/copenhagen plank/i, ['Plancha lateral', 'Pallof press', 'Bird dog']],
+    [/a-skips \+ b-skips|a-skips|b-skips/i, ['A-skips + B-skips', 'B-skips', 'Comba']],
     // "Suspensión activa en barra" (nombre inventado, nadie lo busca así) quitado:
     // "dead hang" es el término real, usado tal cual hasta en medios en español
     // (verificado ago 2026) -- rotar a sí mismo no aporta nada.
@@ -10164,7 +10172,12 @@
   // tocada le llegaban "Zancadas" y "Prensa", y con el hombro tocado,
   // "Aperturas". Mismo criterio que el filtro de material de arriba: si una
   // alternativa está contraindicada para su lesión, no entra en el sorteo.
-  const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto/i;
+  // "comba" añadida el 7 sept 2026: la rotación corre DESPUÉS del mapa de
+  // lesiones, así que un salto que entre por aquí ya no lo filtra nadie. Se vio
+  // al dar alternativas al drill del corredor avanzado (A-skips → Comba): la
+  // comba empezó a aparecer en planes de rodilla lesionada pese a existir ya
+  // una regla en el mapa de lesiones, que para entonces ya había pasado.
+  const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto|comba/i;
   const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press/i;
   const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones) => {
@@ -12562,7 +12575,12 @@
           : 'Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, lateral band walks 3×12/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s'
         : esAvanzado
           ? rSinMat
-            ? `Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, ${plioAv}, copenhagen plank 3×15s/lado, A-skips 3×20m`
+            // Los gemelos faltaban SOLO en esta variante (avanzado al aire
+            // libre): el intermedio al aire libre sí los lleva y el avanzado en
+            // cinta también. El trabajo de gemelo/sóleo es de lo más
+            // documentado para aguantar volumen de carrera sin lesionarse, así
+            // que era un hueco raro justo en el perfil que más kilómetros hace.
+            ? `Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, ${plioAv}, copenhagen plank 3×15s/lado, A-skips 3×20m, gemelos en escalón a una pierna 4×12/lado`
             : `Fuerza + pliometría · Peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, ${plioAv}, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
             ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
@@ -13059,6 +13077,12 @@
         // front squat, justo debajo del ejercicio que se llama "(sin sentadilla)".
         [/técnica de front squat \+ lanzamiento/gi, 'empuja desde los hombros, sin bajar a sentadilla'],
         [/[Dd]ouble[- ]unders?/g, 'remo o bici (bajo impacto)'],
+        // La comba es salto repetido: ya estaba cubierta mientras solo salía por
+        // la rotación pliométrica, pero al darle alternativas al drill del
+        // corredor avanzado (A-skips → Comba) empezó a llegar por otra vía sin
+        // filtrar. Detectado en la verificación de esa misma ampliación, antes
+        // de subirla: 7 sept 2026.
+        [/\b[Cc]omba( \(saltos simples\))?/g, 'remo o bici (bajo impacto)'],
         [/[Aa]ir squats?/g, 'sentadillas parciales sin dolor'],
         // Variantes pliométricas del bloque "Fuerza + pliometría" de Running
         // avanzado (rotación por mesociclo, ver plioVariantesAv más arriba):
@@ -14003,6 +14027,15 @@
             op("Tosta de pavo picado especiado con tomate", "1 tosta integral, 100g pavo picado a la plancha, tomate, orégano", "300 kcal", "28g prot", "20g carbs", "10g grasa", "Fácil · 8 min"),
             op("Revuelto de claras con jamón cocido y tosta", "4 claras, 1 huevo, 40g jamón cocido, 1 tosta integral, tomate", "310 kcal", "28g prot", "22g carbs", "12g grasa", "Fácil · 8 min"),
             op("Bol de skyr con fresas y granola ligera", "200g skyr, fresas laminadas, 20g granola sin azúcar", "290 kcal", "24g prot", "34g carbs", "6g grasa", "Sin cocción · 2 min"),
+            // El desayuno de "Perder grasa" era el pool más corto de todos (15
+            // opciones frente a 20-21 del resto de objetivos), medido sobre 20
+            // semanas. Se amplía priorizando proteína y fibra, que es lo que
+            // sostiene la saciedad en déficit.
+            op("Porridge de avena con queso batido y frutos rojos", "40g avena, 200g queso batido 0%, 80g frutos rojos, canela", "320 kcal", "26g prot", "46g carbs", "3g grasa", "Fácil · 5 min"),
+            op("Tostada de requesón con tomate y orégano", "2 tostas integrales, 120g requesón, 100g tomate, orégano", "325 kcal", "25g prot", "38g carbs", "8g grasa", "Sin cocción · 5 min"),
+            op("Bol de yogur griego con manzana, avena y canela", "200g yogur griego 0%, 1 manzana, 30g avena, canela", "325 kcal", "25g prot", "52g carbs", "3g grasa", "Sin cocción · 3 min"),
+            op("Revuelto de champiñones y espinacas con pavo", "3 claras, 1 huevo, 100g champiñones, 100g espinacas, 60g pavo, 10g AOVE", "330 kcal", "38g prot", "7g carbs", "16g grasa", "Fácil · 10 min"),
+            op("Tostada de hummus con huevo y pavo", "1 tosta integral, 50g hummus, 1 huevo duro, 40g pavo en lonchas, rúcula", "340 kcal", "25g prot", "24g carbs", "16g grasa", "Sin cocción · 6 min"),
             op("Tostada de atún con tomate y aguacate", "1 tosta integral, 1 lata atún al natural, tomate, 1/4 aguacate", "320 kcal", "26g prot", "22g carbs", "14g grasa", "Sin cocción · 5 min"),
             op("Huevos poché con espárragos y jamón serrano", "2 huevos pochados, espárragos trigueros, 20g jamón serrano, AOVE", "320 kcal", "22g prot", "10g carbs", "22g grasa", "Fácil · 10 min"),
             op("Tortilla francesa de claras con pavo", "5 claras, 1 huevo, 40g pavo en tacos, cebollino", "260 kcal", "30g prot", "4g carbs", "12g grasa", "Fácil · 8 min"),
@@ -18821,6 +18854,11 @@
     "Tostada de salmón ahumado y queso fresco": "Tuesta el pan de centeno. Unta el queso fresco, coloca el salmón ahumado encima y espolvorea eneldo. Sin cocción.",
     "Wrap integral de atún con verduras frescas": "Escurre el atún y mézclalo con la mostaza. Extiende sobre la tortilla, añade lechuga, zanahoria rallada y tomate. Enrolla y corta por la mitad.",
     "Muslo de pollo al horno con judías pintas y ensalada": "Precalienta el horno a 200°C y hornea el muslo de pollo sazonado 25-30 min. Calienta las judías pintas. Sirve con la ensalada aliñada con AOVE y limón.",
+    "Porridge de avena con queso batido y frutos rojos": "Cuece la avena con agua o leche 4-5 min removiendo hasta que espese. Retira del fuego, deja templar un minuto y mezcla el queso batido (si lo añades hirviendo se corta). Corona con los frutos rojos y canela.",
+    "Tostada de requesón con tomate y orégano": "Tuesta el pan. Unta el requesón, coloca el tomate en rodajas finas por encima y espolvorea orégano y un poco de pimienta. Sin cocción.",
+    "Bol de yogur griego con manzana, avena y canela": "Vierte el yogur en un bol. Añade la manzana en dados, la avena en crudo por encima y espolvorea canela. Si lo dejas 10 min, la avena se ablanda y queda más cremoso.",
+    "Revuelto de champiñones y espinacas con pavo": "Saltea los champiñones laminados en el AOVE 4-5 min hasta que suelten el agua. Añade el pavo en tacos y las espinacas hasta que bajen. Incorpora las claras y el huevo batidos y remueve a fuego suave 2-3 min.",
+    "Tostada de hummus con huevo y pavo": "Tuesta el pan y unta el hummus. Coloca el huevo duro en rodajas, el pavo en lonchas y la rúcula por encima. Un hilo de aceite y pimienta. Sin cocción.",
     "Lentejas estofadas con pollo y verduras": "Pocha la cebolla, la zanahoria y el pimiento en el AOVE 6-8 min. Añade el pollo en tacos y dóralo 4-5 min. Incorpora las lentejas ya cocidas con un poco de agua o caldo y deja que dé un hervor 8-10 min para que coja sabor.",
     "Garbanzos salteados con espinacas, pavo y huevo": "Saltea el pavo en tacos con el AOVE 4-5 min. Añade los garbanzos escurridos y saltea 3-4 min hasta que se doren un poco. Incorpora las espinacas hasta que bajen y, al final, cuaja el huevo por encima o sírvelo a la plancha aparte.",
     "Ensalada de alubias blancas con atún y tomate": "Escurre y enjuaga las alubias. Mézclalas con el atún escurrido, el tomate en dados y la cebolla en juliana fina. Aliña con AOVE y deja reposar 5 min antes de comer, gana bastante.",
