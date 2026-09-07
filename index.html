@@ -14805,6 +14805,19 @@
           forzar(dm, 'Comida', fuelingPreWod);
           forzar(dm, 'Merienda', fuelingPostWod);
         }
+        // Híbrido recibía repostaje SOLO en días tipo WOD/metcon, así que sus
+        // días de fuerza y sus sesiones largas se quedaban sin comida previa ni
+        // de recuperación — la misma sesión de fuerza, en un plan de gimnasio,
+        // sí las lleva (bloque de abajo). Medido en un plan real de 5 días: el
+        // "Fuerza · Tren inferior" del jueves no tenía ninguna de las dos.
+        // Los días de Zona 2 suave se quedan fuera a propósito, igual que los
+        // rodajes fáciles del corredor: no justifican forzar carga previa ni
+        // batido de recuperación.
+        if (esCombinacion && d.tipo === 'Entrenamiento' && !diaEsWod(d) &&
+            /fuerza|sesi[óo]n larga/i.test(d.resumen || '')) {
+          forzar(dm, 'Comida', fuelingPreWod);
+          forzar(dm, 'Merienda', fuelingPostWod);
+        }
         // Gimnasio/Fuerza no tenía ninguna comida de repostaje ligada al día real
         // de entreno (antes solo corredores/Hyrox/CrossFit la recibían) — el
         // aviso de proteína+creatina en "Hoy" no toca el menú real del día.
