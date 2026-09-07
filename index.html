@@ -10020,7 +10020,10 @@
     // además no lo usa -- salía "Fondos en paralelas con mancuernas" (unos
     // fondos no se hacen con mancuernas). Visto midiendo la cobertura de
     // fichas el 7 sept 2026.
-    [/(press banca|bench press)( con mancuernas?| con barra| plano)?/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
+    // "Press declinado en máquina" es de gimnasio: en casa solo quedaban dos
+    // alternativas. Flexiones y press militar con mancuernas se pueden hacer en
+    // cualquier sitio, así que el empuje también rota para quien entrena en casa.
+    [/(press banca|bench press)( con mancuernas?| con barra| plano)?/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina', 'Flexiones', 'Press militar con mancuernas'], false, true],
     // "(?!...)" evita que esta regla vuelva a tocar el texto que ya dejó la
     // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
     // "press inclinado en máquina/multipower": sin esto quedaba colgando
@@ -10126,7 +10129,10 @@
     [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano'], true],
     [/sled push/i, ['Farmer carry', 'Zancadas cargadas con mancuernas'], true],
     [/sled pull/i, ['Farmer carry', 'Remo con banda de resistencia'], true],
-    [/farmer carry/i, ['Sled push', 'Suitcase carry a un lado'], true],
+    // "Sled push" es de gimnasio, así que a quien entrena en casa solo le
+    // quedaba UNA alternativa viable y el slot de carries se movía entre dos
+    // ejercicios en 12 semanas. Las dos nuevas se hacen con mancuernas.
+    [/farmer carry/i, ['Sled push', 'Suitcase carry a un lado', 'Overhead carry con mancuerna', 'Zancadas cargadas con mancuernas'], true],
     [/sandbag lunges/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas'], true],
   ];
   const alternativasParaEjercicio = nombre => {
@@ -10187,7 +10193,12 @@
   // comba empezó a aparecer en planes de rodilla lesionada pese a existir ya
   // una regla en el mapa de lesiones, que para entonces ya había pasado.
   const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto|comba/i;
-  const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press/i;
+  // "overhead" añadido el 7 sept 2026 por el mismo motivo de orden que "comba"
+  // en la lista de rodilla: la rotación corre DESPUÉS del mapa de lesiones, así
+  // que el `[/overhead carry/ → farmer carry]` que ya existía allí no protegía
+  // de un overhead carry METIDO por la propia rotación. Se vio al darle
+  // alternativas al slot de carries para quien entrena en casa.
+  const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
   const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
@@ -14193,7 +14204,16 @@
             // y la fruta concentran mucho por gramo.
             op("Bol de avena con plátano, dátiles y crema de cacahuete", "120g avena, 250ml leche entera, 1 plátano, 4 dátiles, 25g crema de cacahuete, canela", "776 kcal", "30g prot", "119g carbs", "20g grasa", "Fácil · 5 min"),
             op("Tortitas de avena con claras, plátano y miel", "100g harina de avena, 6 claras, 1 plátano, 20g miel, canela", "608 kcal", "35g prot", "99g carbs", "8g grasa", "Fácil · 10 min"),
-            op("Tostadas integrales con huevo, pavo y plátano", "4 rebanadas pan integral, 2 huevos, 60g pavo en lonchas, 1 plátano, 10g AOVE", "700 kcal", "44g prot", "88g carbs", "20g grasa", "Fácil · 10 min")
+            op("Tostadas integrales con huevo, pavo y plátano", "4 rebanadas pan integral, 2 huevos, 60g pavo en lonchas, 1 plátano, 10g AOVE", "700 kcal", "44g prot", "88g carbs", "20g grasa", "Fácil · 10 min"),
+            // Último pool por debajo de 20 opciones (18) tras las ampliaciones
+            // anteriores, y muy repetitivo de formato: casi todo avena, batido o
+            // tostada. Estas cinco meten salado caliente, patata, boniato y
+            // burrito, que no había en ninguna.
+            op("Tortilla de patata ligera con pan", "2 huevos, 200g patata cocida, 2 rebanadas pan integral, 10g AOVE", "570 kcal", "25g prot", "76g carbs", "23g grasa", "Medio · 25 min"),
+            op("Burrito de desayuno con huevo, pavo y queso", "1 tortilla de trigo, 2 huevos, 60g pavo, 30g queso, 60g tomate", "465 kcal", "39g prot", "25g carbs", "22g grasa", "Fácil · 12 min"),
+            op("Bol de queso batido con avena, plátano y miel", "250g queso batido 0%, 60g avena, 1 plátano, 15g miel", "560 kcal", "35g prot", "97g carbs", "4g grasa", "Sin cocción · 3 min"),
+            op("Revuelto de patata, huevo y jamón", "200g patata cocida, 3 huevos, 60g jamón cocido, 10g AOVE", "560 kcal", "34g prot", "42g carbs", "28g grasa", "Fácil · 15 min"),
+            op("Tostadas de boniato con huevo, pavo y aguacate", "200g boniato asado, 2 huevos, 40g pavo en lonchas, 1/4 aguacate", "465 kcal", "28g prot", "47g carbs", "19g grasa", "Medio · 25 min")
           ]
         },
         {
@@ -18899,6 +18919,11 @@
     "Tostada de salmón ahumado y queso fresco": "Tuesta el pan de centeno. Unta el queso fresco, coloca el salmón ahumado encima y espolvorea eneldo. Sin cocción.",
     "Wrap integral de atún con verduras frescas": "Escurre el atún y mézclalo con la mostaza. Extiende sobre la tortilla, añade lechuga, zanahoria rallada y tomate. Enrolla y corta por la mitad.",
     "Muslo de pollo al horno con judías pintas y ensalada": "Precalienta el horno a 200°C y hornea el muslo de pollo sazonado 25-30 min. Calienta las judías pintas. Sirve con la ensalada aliñada con AOVE y limón.",
+    "Tortilla de patata ligera con pan": "Cuece la patata en dados 12-15 min hasta que esté tierna. Bate los huevos, mezcla con la patata escurrida y cuaja la tortilla en la sartén con el AOVE, 3-4 min por lado. Acompaña con el pan tostado.",
+    "Burrito de desayuno con huevo, pavo y queso": "Revuelve los huevos a fuego suave 2-3 min. Calienta la tortilla 30 segundos, rellena con el huevo, el pavo, el queso y el tomate en dados, y enróllala doblando primero los lados.",
+    "Bol de queso batido con avena, plátano y miel": "Mezcla el queso batido con la avena en un bol. Añade el plátano en rodajas y un chorrito de miel. Si lo dejas 10 min, la avena se ablanda y queda tipo porridge frío.",
+    "Revuelto de patata, huevo y jamón": "Saltea la patata ya cocida en dados con el AOVE hasta que se dore. Añade el jamón en tacos, y después los huevos batidos. Remueve a fuego suave 2-3 min hasta que cuaje.",
+    "Tostadas de boniato con huevo, pavo y aguacate": "Corta el boniato en láminas de 1 cm y ásalas al horno a 200°C 20-25 min (o en tostadora si son finas). Monta encima el huevo a la plancha, el pavo y el aguacate aplastado.",
     "Requesón con tomate cherry y orégano": "Pon el requesón en un bol. Añade los tomates cherry partidos por la mitad, orégano y pimienta. Sin cocción.",
     "Edamame con sal y limón": "Hierve el edamame 4-5 min (o descongélalo si viene ya cocido). Escurre, sala y exprime limón por encima. Se comen sacando la vaina con los dientes.",
     "Lata de atún con tomate y AOVE": "Escurre bien el atún y ponlo sobre el tomate en rodajas. Aliña con un hilo de aceite y orégano. Sin cocción.",
