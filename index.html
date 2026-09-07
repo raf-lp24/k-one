@@ -13009,7 +13009,15 @@
         // vía de escape: entre "sentadilla" y una "s" que sigue pegada no hay
         // límite de palabra, así que obliga a incluir esa "s" en el match
         // antes de comprobar el lookahead.
-        [/[Ss]entadillas?\b(?! aérea| sumo| búlgara| a)/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
+        // " con salto" va en el lookahead por el MISMO motivo que " aérea" (bug
+        // real, 7 sept 2026): sin él la genérica se comía el "Sentadillas" de
+        // "sentadillas con salto" y dejaba el " con salto" colgando detrás del
+        // reemplazo — el plan acababa diciéndole a alguien con la rodilla
+        // lesionada "Step-ups controlados o prensa (rango sin dolor) con
+        // salto", justo el salto que se intentaba quitar. La regla específica
+        // de "sentadillas con salto" (unas líneas más abajo) existía desde
+        // siempre, pero no llegaba a dispararse nunca.
+        [/[Ss]entadillas?\b(?! aérea| sumo| búlgara| con salto| a)/g, eq('Step-ups controlados o prensa (rango sin dolor)', 'Step-ups controlados (rango sin dolor)', 'Step-ups controlados (rango sin dolor)')],
         // "Sentadillas con salto" y "sentadillas aéreas" van DESPUÉS de la
         // genérica de arriba a propósito, no antes: sus reemplazos ("sentadillas
         // sin salto...", "sentadillas parciales...") empiezan también por
@@ -13038,6 +13046,16 @@
         // de alto impacto que notasSalud dice haber eliminado.
         [/[Bb]road jumps?/g, 'step ups controlados (sin salto)'],
         [/[Ss]kater hops?/g, 'step lateral controlado (sin salto)'],
+        // Los jumping jacks del remate metabólico ("circuito al final: 3 rondas
+        // ... de 15 jumping jacks + ...") no tenían regla y se colaban en el
+        // plan de cualquiera con la rodilla tocada: es salto repetido con
+        // aterrizaje, exactamente lo que sí se quita en box jumps, burpees y
+        // sentadillas con salto. Se cambia por la versión sin impacto, que
+        // mantiene el propósito del remate (subir pulsaciones).
+        // Nombre en plural contable a propósito: el texto lleva delante el
+        // número de repeticiones ("15 jumping jacks"), así que un reemplazo en
+        // singular o incontable descuadraba la frase ("15 marcha rápida...").
+        [/[Jj]umping jacks?/g, 'pasos laterales con brazos (sin salto)'],
         [/[Ss]quat jumps?( con mancuernas( ligeras)?)?/g, 'sentadillas parciales sin dolor'],
         [/[Ss]ingle-leg hop lateral/g, 'step lateral a una pierna (sin salto)'],
       ]);
