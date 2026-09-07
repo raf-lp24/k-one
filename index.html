@@ -9957,7 +9957,15 @@
     'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
     'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
     'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
-    'Complemento': { calentamiento: '5-8 min de movilidad general y activación', vueltaCalma: '5 min de estiramientos generales + respiración' }
+    'Complemento': { calentamiento: '5-8 min de movilidad general y activación', vueltaCalma: '5 min de estiramientos generales + respiración' },
+    // Estas cuatro etiquetas se usan de verdad en los planes (Híbrido 312 veces,
+    // Fortalecimiento 144, Empuje+Tracción 96, Umbral 72, medido sobre 2.592
+    // sesiones) pero no tenían entrada propia y caían en el calentamiento
+    // genérico. Añadidas el 7 sept 2026.
+    'Híbrido': { calentamiento: '6-8 min de cardio progresivo (remo, bici o carrera suave) + movilidad de cadera y hombros + 1 serie ligera del primer ejercicio de fuerza', vueltaCalma: '5 min de cardio muy suave para bajar pulsaciones + estiramientos de piernas, espalda y hombros' },
+    'Fortalecimiento': { calentamiento: '8 min: movilidad de tobillo y cadera (círculos de tobillo, 90/90) + activación de glúteo (puente de glúteo, paseo lateral con banda) + 20 m de skipping suave', vueltaCalma: '5 min de estiramientos de glúteo, psoas, isquiotibiales y gemelo — las zonas que más se cargan corriendo' },
+    'Empuje+Tracción': { calentamiento: '8-10 min: movilidad de hombro y columna torácica + band pull-aparts + 1-2 series de aproximación con poco peso en el primer empuje', vueltaCalma: '5 min de estiramientos de pecho, dorsal, hombros y bíceps' },
+    'Umbral': { calentamiento: '10-12 min progresivos: empieza muy suave y sube hasta ritmo cómodo, + 3-4 rectas de 60-80 m acelerando', vueltaCalma: '8-10 min de trote muy suave hasta que la respiración vuelva a la normalidad + estiramientos de tren inferior' }
   };
   const SESION_EXTRAS_DEFAULT = { calentamiento: '8-10 min de movilidad general y activación progresiva', vueltaCalma: '5 min de estiramientos de los grupos trabajados hoy' };
 
@@ -14035,6 +14043,14 @@
             op("Solomillo de ternera con verduras al wok", "160g solomillo, pimiento, calabacín, cebolla, soja, sésamo, AOVE", "490 kcal", "44g prot", "12g carbs", "30g grasa", "Medio · 20 min"),
             op("Wrap integral de atún con verduras frescas", "1 tortilla integral, 2 latas atún al natural, lechuga, zanahoria rallada, tomate, mostaza", "380 kcal", "38g prot", "28g carbs", "10g grasa", "Sin cocción · 5 min"),
             op("Muslo de pollo al horno con judías pintas y ensalada", "200g muslo de pollo sin piel, 150g judías pintas cocidas, ensalada verde, AOVE, limón", "460 kcal", "44g prot", "36g carbs", "14g grasa", "Fácil · 25 min"),
+            // Legumbre en el pool de pérdida de grasa: es donde la fibra medida
+            // iba peor (87% del objetivo) y donde más importa la saciedad. Los
+            // platos con legumbre eran ya los de más fibra del recetario, así
+            // que se refuerza esa vía en vez de curar recetas una a una.
+            op("Lentejas estofadas con pollo y verduras", "150g lentejas cocidas, 150g pechuga de pollo, 80g zanahoria, 50g cebolla, 60g pimiento, 10g AOVE", "500 kcal", "48g prot", "42g carbs", "15g grasa", "Medio · 30 min"),
+            op("Garbanzos salteados con espinacas, pavo y huevo", "150g garbanzos cocidos, 100g espinacas, 100g pavo, 1 huevo, 10g AOVE", "550 kcal", "47g prot", "45g carbs", "21g grasa", "Fácil · 15 min"),
+            op("Ensalada de alubias blancas con atún y tomate", "150g alubias cocidas, 1 lata atún al natural, 150g tomate, 50g cebolla, 10g AOVE", "435 kcal", "37g prot", "48g carbs", "11g grasa", "Sin cocción · 8 min"),
+            op("Crema de lentejas con pollo desmechado", "120g lentejas cocidas, 150g pollo, 80g zanahoria, 50g cebolla, 10g AOVE", "460 kcal", "46g prot", "34g carbs", "15g grasa", "Medio · 30 min"),
             op("Pollo al horno con verduras asadas", "180g pechuga de pollo, calabacín, pimiento, berenjena, AOVE, hierbas", "400 kcal", "42g prot", "18g carbs", "18g grasa", "Fácil · 25 min"),
             op("Ensalada de atún fresco con patata y judías verdes", "150g atún fresco a la plancha, 100g patata cocida, judías verdes, AOVE, limón", "410 kcal", "38g prot", "28g carbs", "16g grasa", "Fácil · 15 min"),
             op("Rape a la plancha con verduras salteadas", "200g rape, calabacín, pimiento, cebolla, AOVE, limón", "320 kcal", "36g prot", "12g carbs", "14g grasa", "Fácil · 15 min"),
@@ -18805,6 +18821,10 @@
     "Tostada de salmón ahumado y queso fresco": "Tuesta el pan de centeno. Unta el queso fresco, coloca el salmón ahumado encima y espolvorea eneldo. Sin cocción.",
     "Wrap integral de atún con verduras frescas": "Escurre el atún y mézclalo con la mostaza. Extiende sobre la tortilla, añade lechuga, zanahoria rallada y tomate. Enrolla y corta por la mitad.",
     "Muslo de pollo al horno con judías pintas y ensalada": "Precalienta el horno a 200°C y hornea el muslo de pollo sazonado 25-30 min. Calienta las judías pintas. Sirve con la ensalada aliñada con AOVE y limón.",
+    "Lentejas estofadas con pollo y verduras": "Pocha la cebolla, la zanahoria y el pimiento en el AOVE 6-8 min. Añade el pollo en tacos y dóralo 4-5 min. Incorpora las lentejas ya cocidas con un poco de agua o caldo y deja que dé un hervor 8-10 min para que coja sabor.",
+    "Garbanzos salteados con espinacas, pavo y huevo": "Saltea el pavo en tacos con el AOVE 4-5 min. Añade los garbanzos escurridos y saltea 3-4 min hasta que se doren un poco. Incorpora las espinacas hasta que bajen y, al final, cuaja el huevo por encima o sírvelo a la plancha aparte.",
+    "Ensalada de alubias blancas con atún y tomate": "Escurre y enjuaga las alubias. Mézclalas con el atún escurrido, el tomate en dados y la cebolla en juliana fina. Aliña con AOVE y deja reposar 5 min antes de comer, gana bastante.",
+    "Crema de lentejas con pollo desmechado": "Cuece la zanahoria y la cebolla con las lentejas y agua o caldo 15 min. Tritura hasta que quede una crema fina. Aparte, cocina el pollo a la plancha y desmenúzalo por encima al servir, con un hilo de AOVE.",
     "Yogur griego con plátano y miel": "Vierte el yogur griego en un bol. Añade el plátano en rodajas y un chorrito de miel. Sin cocción.",
     "Tostada de pavo con queso fresco y tomate": "Tuesta el pan. Unta el queso fresco, añade el pavo en lonchas y el tomate cherry partido por encima.",
     "Hummus con bastones de zanahoria y pepino": "Corta la zanahoria y el pepino en bastones. Sirve el hummus en un bol y espolvorea pimentón por encima. Sin cocción.",
