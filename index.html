@@ -12421,6 +12421,11 @@
     // y la nutrición (también más abajo) puedan usarlos sin TDZ.
     const perdidaGrasa = objetivo.includes('Perder') || objetivo.includes('grasa');
     const ganarMusculo = objetivo.includes('músculo') || objetivo.includes('Ganar');
+    // Faltaba: en Gimnasio, quien pedía "Mejorar resistencia" recibía un plan de
+    // hipertrofia SIN una sola serie de trabajo aeróbico (medido 7 sept 2026: 0
+    // sesiones con cardio, frente a 4 de 4 en pérdida de grasa). Su objetivo era
+    // justo el único que no se estaba entrenando.
+    const mejorarResistencia = objetivo.includes('resistencia');
 
     // DATOS DE SALUD (lesiones, alergias, enfermedades, medicación) — se usan más abajo
     // para adaptar ejercicios y nutrición, no solo para mostrarlos.
@@ -12823,7 +12828,18 @@
       const lugar = u.lugar || 'Gimnasio';
       // "con material" y "Gimnasio" comparten la misma lógica de pesos libres/máquinas
 
-      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : '';
+      // Para "Mejorar resistencia" el remate NO es interválico (eso es lo que
+      // toca en pérdida de grasa) sino zona 2 sostenida, que es el estímulo que
+      // construye base aeróbica. Va en la misma variable que ya usan todas las
+      // plantillas, así que llega a todas sin tocarlas una a una.
+      // Sin comba en la versión de casa a propósito: es salto, así que el filtro
+      // de rodilla la sustituye por "remo o bici (bajo impacto)" y la frase
+      // quedaba torpe ("bici o remo o bici (bajo impacto) suave"). Caminar y
+      // bici ya son de bajo impacto y valen para cualquier lesión.
+      const _cardioZona2 = lugar.includes('casa')
+        ? ', cardio al final: 15-20 min en zona 2 (caminar rápido o bici; ritmo conversacional, RPE 3-4)'
+        : ', cardio al final: 15-20 min en zona 2 (remo, bici o cinta; ritmo conversacional, RPE 3-4)';
+      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : (mejorarResistencia ? _cardioZona2 : '');
       // El remate interválico rota entre lo que de verdad hay en un gimnasio
       // normal (mismo patrón que la rotación de accesorios: semilla+bloqueMeso).
       // Antes siempre decía "corre, pedalea o rema" en el texto pero la tarjeta
@@ -12855,7 +12871,7 @@
       // que sí tiene.
       const prefFinisher = modalidadesDisponibles.find(m => m.nombre === u.preferenciaCardioFinisher);
       const modInterval = prefFinisher || modalidadesDisponibles[(semilla + bloqueMeso) % modalidadesDisponibles.length];
-      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : '';
+      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : (mejorarResistencia ? _cardioZona2 : '');
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -13435,6 +13451,14 @@
       // el techo que tiene ese objetivo mientras mantiene volumen de carrera —
       // es el "efecto de interferencia", bien documentado. Nada de prometer
       // hipertrofia de gimnasio con un plan de running.
+      // "Sentirme mejor en general" es el otro objetivo que no recibía nada
+      // aeróbico en Gimnasio. Aquí NO se le fuerza un remate: mucha gente con
+      // ese objetivo ya camina, va en bici o juega a algo, y añadirle volumen
+      // sin saberlo sería presuponer. Se le dice la referencia (150 min/semana
+      // de actividad moderada, recomendación de la OMS) y que decida él.
+      if (esGimnasio && !perdidaGrasa && !mejorarResistencia && !ganarMusculo) {
+        notasSalud.push('Tu plan es de fuerza, que es la base para encontrarte mejor. Para redondearlo, la referencia de salud (OMS) son 150 min de actividad moderada a la semana: cuentan caminar a paso vivo, la bici o cualquier deporte que ya practiques. Si ya llegas por tu cuenta, no necesitas añadir nada al plan; si no, sumar dos paseos largos a la semana es la forma más fácil de cubrirlo.');
+      }
       if (esRunner && ganarMusculo) {
         notasSalud.push('Ganar músculo corriendo tiene un techo: el volumen de carrera compite con la ganancia de masa (lo que se conoce como efecto de interferencia). Te hemos subido una serie el día de fuerza, que es donde de verdad se construye, y hemos dejado la carrera como estaba a propósito — sumar kilómetros iría en contra. Lo que más te va a rendir es no saltarte ese día y cubrir bien la proteína.');
       }
