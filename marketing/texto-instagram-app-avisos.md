@@ -1,0 +1,71 @@
+# Reel · K-ONE ya es una app (novedades: pantalla de inicio + avisos)
+
+Archivo: `marketing/kone-app-avisos.mp4` — 1080×1920, ~21 s, sin audio
+(la música se le pone desde el propio Instagram al publicar).
+
+---
+
+## Pie de publicación
+
+**Opción A — directa**
+
+K-ONE ya se instala en tu móvil. 📲
+
+Sin pasar por ninguna tienda de apps: entras a k-one.fit, la añades a la
+pantalla de inicio y la abres como una app más.
+
+Y desde ahí te avisa. Solo los días que no hayas marcado ningún entreno, a
+media mañana. Ni spam ni notificaciones de relleno — y se apagan desde tu
+menú cuando quieras.
+
+Primer mes gratis. Sin permanencia.
+
+👉 k-one.fit
+
+---
+
+**Opción B — más corta, para Stories o si prefieres poco texto**
+
+Novedad: K-ONE ya se añade a tu pantalla de inicio y te avisa en el móvil
+los días que no has entrenado.
+
+Sin descargar nada. Sin permanencia. Primer mes gratis.
+
+k-one.fit
+
+---
+
+## Cómo se instala (por si alguien pregunta en comentarios)
+
+- **iPhone (Safari):** compartir → «Añadir a pantalla de inicio».
+  En iPhone los avisos SOLO funcionan con la app añadida a la pantalla de
+  inicio; es una limitación de Apple, no de K-ONE.
+- **Android (Chrome):** sale solo un aviso de «Instalar app», o desde el menú
+  de tres puntos → «Instalar aplicación».
+
+## Hashtags
+
+#kone #entrenamiento #nutricion #fitness #rutinapersonalizada #azuqueca
+#guadalajara #entrenamientopersonalizado #dietapersonalizada #gimnasio
+#perdergrasa #ganarmusculo
+
+## Notas de honestidad (no publicar, para ti)
+
+- Las capturas del vídeo son de la web real, no maquetas: el banner de
+  instalar, el de avisos y el interruptor del menú están tal cual salen.
+- El texto del aviso que se ve en el vídeo («K-ONE · Lunes / Tu plan de hoy
+  te está esperando.») es literalmente uno de los que manda el cron de
+  `api/notify.js`, no un texto inventado para el anuncio.
+- «Primer mes gratis» sigue siendo cierto (Stripe, trial de 30 días).
+
+## Cómo se hizo (para rehacerlo)
+
+`marketing/fuentes-app-avisos/` lleva los rótulos (`slides.html`, 1080×1920,
+un slide por `?s=N`) y el script de montaje (`montar.sh`). Las capturas de la
+app salen de Chrome headless por CDP con emulación de móvil — ver la nota
+`project_kone_capturas_demo_reales` en la memoria.
+
+Gotcha del montaje: `zoompan` emite `d` fotogramas **por cada fotograma de
+entrada**. Con `-loop 1 -t 4` la entrada ya son 100, así que `d=100` daba
+10.000 y un vídeo de 523 s en vez de 21. La entrada tiene que ser una sola
+imagen, sin `-loop`.

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  /* Mismos tokens que la web (index.html) para que el video no parezca de
+     otra marca: brasa #D1420E, carbon #141414, blanco #F0EDE8. */
+  :root{ --brasa:#D1420E; --carbon:#141414; --blanco:#F0EDE8; --metal:#8A8A8A; --humo:#3A3A3A; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:#0B0B0B; }
+  body{
+    font-family:'Inter',sans-serif; color:var(--blanco);
+    display:flex; flex-direction:column; align-items:center;
+    background:
+      radial-gradient(120% 70% at 50% -10%, rgba(209,66,14,.20) 0%, rgba(209,66,14,0) 55%),
+      radial-gradient(100% 60% at 50% 110%, rgba(209,66,14,.10) 0%, rgba(209,66,14,0) 60%),
+      #0B0B0B;
+    position:relative;
+  }
+  /* Grano fino: sin esto el degradado se ve bandeado al comprimir a MP4 */
+  body::after{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:.045;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  }
+  .slide{ display:none; width:1080px; height:1920px; flex-direction:column; align-items:center; }
+  body[data-s="1"] .s1, body[data-s="2"] .s2, body[data-s="3"] .s3,
+  body[data-s="4"] .s4, body[data-s="5"] .s5{ display:flex; }
+
+  .marca{ font-family:'Bebas Neue',sans-serif; font-size:64px; letter-spacing:10px; margin-top:96px; }
+  .marca b{ color:var(--brasa); font-weight:400; }
+  .etiqueta{
+    font-family:'DM Mono',monospace; font-size:26px; letter-spacing:7px;
+    text-transform:uppercase; color:var(--brasa); margin-bottom:34px;
+  }
+  .etiqueta.pill{
+    background:var(--brasa); color:#fff; padding:14px 28px; border-radius:6px;
+    letter-spacing:6px; font-weight:500;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif; font-weight:400; line-height:.86;
+    font-size:170px; letter-spacing:1px; text-align:center; text-wrap:balance;
+  }
+  h1 em{ color:var(--brasa); font-style:normal; }
+  .sub{
+    font-size:36px; line-height:1.45; color:#B5B2AD; text-align:center;
+    max-width:820px; margin-top:40px; font-weight:300;
+  }
+
+  /* Marco de movil: el borde y el brillo hacen que la captura se lea como
+     pantalla y no como una imagen pegada. */
+  .movil{
+    width:520px; border-radius:46px; padding:12px; background:#1A1A1A;
+    border:1px solid #333; box-shadow:0 40px 120px rgba(0,0,0,.85), 0 0 90px rgba(209,66,14,.18);
+    overflow:hidden;
+  }
+  .movil img{ display:block; width:100%; border-radius:36px; }
+  .movil.recorte{ height:900px; }
+  .tarjeta{
+    width:820px; border-radius:28px; background:#141414; border:1px solid #333;
+    padding:14px; box-shadow:0 40px 110px rgba(0,0,0,.85), 0 0 80px rgba(209,66,14,.16);
+  }
+  .tarjeta img{ display:block; width:100%; border-radius:18px; }
+  .movil.recorte img{ border-radius:36px 36px 0 0; }
+
+  /* Aviso de movil, con el texto REAL que manda el cron de api/notify.js */
+  .aviso{
+    width:760px; display:flex; gap:22px; align-items:flex-start;
+    background:rgba(28,28,28,.94); border:1px solid #3A3A3A; border-radius:28px;
+    padding:28px 30px; backdrop-filter:blur(20px);
+    box-shadow:0 30px 80px rgba(0,0,0,.7);
+  }
+  .aviso .icono{
+    width:72px; height:72px; border-radius:18px; background:var(--brasa);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:1px; color:#fff;
+  }
+  .aviso .txt{ flex:1; min-width:0; }
+  .aviso .tit{ font-size:30px; font-weight:600; margin-bottom:8px; }
+  .aviso .cuerpo{ font-size:29px; color:#B5B2AD; font-weight:300; line-height:1.35; }
+  .aviso .hora{ font-family:'DM Mono',monospace; font-size:22px; color:#7A7A7A; flex-shrink:0; }
+
+  .pie{ margin-top:auto; margin-bottom:110px; text-align:center; }
+  .web{ font-family:'DM Mono',monospace; font-size:40px; letter-spacing:6px; color:var(--blanco); }
+  .nota{ font-size:26px; color:var(--metal); margin-top:18px; font-weight:300; }
+  .col{ display:flex; flex-direction:column; align-items:center; }
+  .crece{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+</style>
+</head>
+<body data-s="1">
+
+<!-- 1 · portada -->
+<div class="slide s1">
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="crece col">
+    <div class="etiqueta pill">Novedad</div>
+    <h1>Ya es<br>una <em>app</em>.</h1>
+    <p class="sub">Sin descargar nada de ninguna tienda.<br>La misma web, en tu pantalla de inicio.</p>
+  </div>
+</div>
+
+<!-- 2 · instalar -->
+<div class="slide s2">
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="crece col">
+    <div class="etiqueta">01 · Instalar</div>
+    <h1>En tu pantalla<br>de <em>inicio</em>.</h1>
+    <div class="movil" style="margin-top:56px"><img src="02b-pwa.jpg" alt=""></div>
+  </div>
+</div>
+
+<!-- 3 · avisos -->
+<div class="slide s3">
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="crece col">
+    <div class="etiqueta">02 · Avisos</div>
+    <h1>Y te avisa<br>en el <em>móvil</em>.</h1>
+    <div class="aviso" style="margin-top:70px">
+      <div class="icono">K-1</div>
+      <div class="txt">
+        <div class="tit">K-ONE · Lunes</div>
+        <div class="cuerpo">Tu plan de hoy te está esperando.</div>
+      </div>
+      <div class="hora">ahora</div>
+    </div>
+    <p class="sub" style="margin-top:56px">Solo los días que no hayas entrenado.</p>
+  </div>
+</div>
+
+<!-- 4 · control -->
+<div class="slide s4">
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="crece col">
+    <div class="etiqueta">03 · Tú mandas</div>
+    <h1>Se apagan<br>cuando <em>quieras</em>.</h1>
+    <div class="tarjeta" style="margin-top:70px"><img src="04-toggle.png" alt=""></div>
+    <p class="sub" style="margin-top:56px">Un interruptor en tu menú. Nada más.</p>
+  </div>
+</div>
+
+<!-- 5 · cierre -->
+<div class="slide s5">
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="crece col">
+    <h1>Entrenamiento,<br>nutrición y<br><em>mentalidad</em>.</h1>
+    <p class="sub">Tu plan generado con tus datos reales.<br>Se adapta cada semana según tu progreso.</p>
+  </div>
+  <div class="pie">
+    <div class="web">k-one.fit</div>
+    <div class="nota">Primer mes gratis · sin permanencia</div>
+  </div>
+</div>
+
+<script>
+  const s = new URLSearchParams(location.search).get('s') || '1';
+  document.body.dataset.s = s;
+</script>
+</body>
+</html>
