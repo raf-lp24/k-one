@@ -24553,6 +24553,9 @@
     // signUp, antes de confirmar el email). Sin await: no debe retrasar el
     // arranque de la app.
     _reintentarNotificacionesPendientes();
+    // Y repara la suscripción push si el servidor perdió su fila (ver el
+    // comentario largo en _resincronizarPushSubscription). También sin await.
+    if (typeof _resincronizarPushSubscription === 'function') _resincronizarPushSubscription();
 
     // Restaura la sesión activa de Supabase (si la hay) y sincroniza el perfil.
     let session = null;
@@ -24841,6 +24844,48 @@
     // puede revertir por código, solo desde ahí -- mejor explicarlo que
     // esconder el interruptor sin más, que deja "¿y esto dónde se activa?"
     // sin respuesta).
+    // RECONCILIACIÓN DE LA SUSCRIPCIÓN PUSH (bug real, 7 sept 2026).
+    // El cron borra la fila de push_subscriptions en cuanto un envío falla con
+    // 404/410 -- algo NORMAL en iOS: Apple caduca o rota el endpoint si el
+    // móvil pasa un tiempo sin conexión. Pero el navegador conserva su
+    // suscripción, así que getSubscription() sigue devolviéndola y el
+    // interruptor de la app se queda marcado como ACTIVADO. Resultado: el
+    // usuario cree que tiene los avisos puestos, el servidor ya no tiene a
+    // quién mandárselos, y no vuelve a llegar ni un push -- sin ningún aviso
+    // de que algo se ha roto. Encaja con los dos síntomas reportados: los
+    // avisos de entreno "no llegan todos los días" y el push del alta nueva
+    // no llegó nunca.
+    // Con esto, cada vez que se abre la app se comprueba que la suscripción
+    // del navegador SIGA dada de alta en el servidor y, si no, se vuelve a
+    // reclamar con la misma RPC que usa el botón de activar.
+    async function _resincronizarPushSubscription() {
+      try {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+        const { data: { session } } = await supa.auth.getSession();
+        if (!session?.user) return;               // sin sesión no hay a quién asociarla
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (!sub) return;                          // el usuario no los tiene activados: nada que reparar
+        const json = sub.toJSON();
+        const { data: filas, error } = await supa
+          .from('push_subscriptions').select('id').eq('endpoint', json.endpoint).limit(1);
+        if (error) return;                         // ante la duda, no tocar nada
+        if (filas && filas.length) return;         // todo en orden
+        // La fila ya no está: se vuelve a reclamar el endpoint para este usuario.
+        const { error: errRpc } = await supa.rpc('reclamar_push_subscription', {
+          p_endpoint: json.endpoint,
+          p_p256dh: json.keys.p256dh,
+          p_auth_key: json.keys.auth
+        });
+        if (errRpc) console.warn('[push] no se pudo re-registrar la suscripción:', errRpc.message);
+        else console.log('[push] suscripción re-registrada (la fila del servidor se había perdido)');
+      } catch (e) {
+        console.warn('[push] resincronización fallida:', e.message);
+      }
+    }
+    window._resincronizarPushSubscription = _resincronizarPushSubscription;
+
     window.actualizarBotonNotificaciones = async function() {
       const contenedores = document.querySelectorAll('[data-push-toggle]');
       if (!contenedores.length) return;
