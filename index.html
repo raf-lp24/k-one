@@ -15777,24 +15777,48 @@
     // arriba: cuando el ciclado está desactivado las recetas SIGUEN compartidas
     // entre días, y sin él se les aplicaría un factor distinto una vez por cada
     // día, multiplicándose entre sí.
+    // Se normaliza CADA OPCION al presupuesto de SU toma, no el dia de golpe.
+    // Antes el total del dia se calculaba sumando `opciones[0]` y ese unico
+    // factor se aplicaba a todas: el dia solo cuadraba si el cliente elegia
+    // siempre la primera. Medido sobre 300 planes, eligiendo libremente el dia
+    // se iba entre el 0,68x y el 1,87x de su objetivo -- un hombre de 90 kg en
+    // perdida de grasa podia comer entre 1.269 y 4.160 kcal con su propio plan.
+    //
+    // El reparto entre tomas (desayuno mas grande que merienda) se conserva:
+    // se saca de `opciones[0]`, que es sobre lo que ya estaba calibrado todo.
+    // Lo que cambia es que dentro de cada toma las opciones pasan a ser
+    // intercambiables de verdad, que es lo que promete un "elige una".
     const _yaNormalizadas = new Set();
     nutricionPorDia.forEach((tomasDia, iDia) => {
       const objetivoDia = kcalObjPorDia[iDia] || kcalObj;
       const totalBase = tomasDia.reduce((s, m) => s + (parseInt(m.opciones[0]?.kcal) || 0), 0);
-      if (!(totalBase > 0) || Math.abs(totalBase - objetivoDia) <= objetivoDia * 0.05) return;
-      const factorNorm = objetivoDia / totalBase;
+      if (!(totalBase > 0)) return;
       tomasDia.forEach(m => {
+        const kcalRef = parseInt(m.opciones[0]?.kcal) || 0;
+        if (!kcalRef) return;
+        const objetivoToma = objetivoDia * (kcalRef / totalBase);
         m.opciones.forEach(o => {
           if (_yaNormalizadas.has(o)) return;
           _yaNormalizadas.add(o);
           const k = parseInt(o.kcal) || 0;
-          const p = parseInt(o.prot) || 0;
-          const c = parseInt(o.carbs) || 0;
-          const kcalNuevo = Math.round(k * factorNorm);
-          const kcalMacrosFijos = p * 4 + c * 4;
-          const grasaNueva = Math.max(0, Math.round((kcalNuevo - kcalMacrosFijos) / 9));
-          o.kcal = `${Math.max(kcalNuevo, kcalMacrosFijos)} kcal`;
-          o.grasa = `${grasaNueva}g grasa`;
+          if (!k) return;
+          // Tope al factor: una receta muy lejos del presupuesto de su toma se
+          // acerca, pero sin llegar a raciones absurdas (900 g de pasta o
+          // medio filete). Lo poco que quede sin cuadrar se prefiere a un
+          // plato que nadie va a cocinar.
+          const f = Math.min(1.9, Math.max(0.5, objetivoToma / k));
+          if (Math.abs(f - 1) < 0.04) return;
+          const p = Math.max(0, Math.round((parseInt(o.prot) || 0) * f));
+          const c = Math.max(0, Math.round((parseInt(o.carbs) || 0) * f));
+          const g = Math.max(0, Math.round((parseInt(o.grasa) || 0) * f));
+          o.prot = `${p}g prot`;
+          o.carbs = `${c}g carbs`;
+          o.grasa = `${g}g grasa`;
+          o.kcal = `${Math.round(p * 4 + c * 4 + g * 9)} kcal`;
+          // Los gramos del texto se mueven con la etiqueta. Sin esto la ficha
+          // de "Ver macros" volveria a no cuadrar con lo que pone el plato,
+          // que es justo lo que se acaba de arreglar en el recetario.
+          o.ingredientes = scaleIngredientes(o.ingredientes, f);
         });
       });
     });
