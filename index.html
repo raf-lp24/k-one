@@ -5574,6 +5574,18 @@
      left:50%) y fadeInUp lo pisaba con transform:none al terminar, dejando
      el banner descentrado y su botón de cerrar fuera de pantalla en móvil. */
   @keyframes pwaBannerFadeIn { from { opacity:0; } to { opacity:1; } }
+  /* Redes sociales: el enlace lleva el nombre de la cuenta al lado del icono.
+     Un icono suelto no dice a donde lleva ni de quien es la cuenta. */
+  .redes { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .red-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    border: 1px solid var(--humo); border-radius: 999px;
+    padding: 12px 18px; color: #B5B2AD;
+    font-size: 12.5px; text-decoration: none; background: rgba(20,20,20,.6);
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .red-btn:hover { border-color: var(--brasa); color: var(--blanco); background: rgba(209,66,14,.10); }
+  .red-btn b { font-weight: 600; letter-spacing: .2px; }
   /* Banner de "activar avisos": compacto y en una sola fila. Antes era un
      bloque de 141px de alto en móvil para una frase. */
   .push-banner {
@@ -7656,9 +7668,14 @@
       <a href="#" onclick="goToLegal('privacidad'); return false;">Privacidad</a>
       <a href="#" onclick="goToLegal('terminos'); return false;">Términos</a>
       <a href="#" onclick="goToLegal('cookies'); return false;">Cookies</a>
-      <a href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en Instagram" title="Síguenos en Instagram" style="display:inline-flex;align-items:center">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-      </a>
+    </div>
+
+    <!-- Las redes salen del renglon de enlaces legales: ahi el icono de
+         Instagram quedaba el ultimo de cinco y sin etiqueta, asi que no se
+         entendia ni que era un enlace a nuestra cuenta. -->
+    <div class="redes" style="margin:4px 0">
+      <a class="red-btn" href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en Instagram"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><b>@k.one.fit</b></a>
+      <a class="red-btn" href="https://www.tiktok.com/@k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97a9.4 9.4 0 0 1-1.62-.93c-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><b>@k.one.fit</b></a>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;text-align:right">
       <div class="footer-note">© 2026 K-One · Todos los derechos reservados</div>
@@ -8621,6 +8638,20 @@
             <button onclick="compartirCodigoReferido()" style="width:100%;background:var(--brasa);color:#fff;border:none;border-radius:9px;padding:11px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Compartir por WhatsApp</button>
             <div class="rail-sub" style="text-align:center"><span id="railRefPagados" style="color:var(--brasa);font-weight:700">0</span>/3 amigos · <span id="railRefDescuento">0€</span> ganados</div>
           </div>
+
+          <!-- Los clientes que pagan entran aqui todos los dias y son los mas
+               propensos a seguir y a compartir. Va al final del rail, debajo
+               de las metricas: presente, sin robarle sitio a lo importante. -->
+          <div class="rail-card">
+            <div class="rail-card-head"><span>Síguenos</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-9.6a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 5-7.5 9.6-7.5 9.6z"/></svg>
+            </div>
+            <div style="font-size:12.5px;color:var(--metal-claro);line-height:1.5;margin-bottom:13px">Rutinas, recetas y lo que vamos añadiendo a la web.</div>
+            <div class="redes" style="justify-content:flex-start">
+              <a class="red-btn" href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" style="padding:8px 14px;font-size:11.5px" aria-label="K-ONE en Instagram"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><b>Instagram</b></a>
+              <a class="red-btn" href="https://www.tiktok.com/@k.one.fit" target="_blank" rel="noopener noreferrer" style="padding:8px 14px;font-size:11.5px" aria-label="K-ONE en TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97a9.4 9.4 0 0 1-1.62-.93c-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><b>TikTok</b></a>
+            </div>
+          </div>
         </aside>
         </div><!-- /hoy-grid -->
       </div>
@@ -9075,6 +9106,17 @@
             <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
             Respuesta en menos de 24h
           </span>
+        </div>
+
+        <!-- Quien llega a Contacto ya quiere hablar con nosotros: es mejor
+             sitio para ofrecerle seguirnos que interrumpir en la landing a
+             alguien que iba a registrarse. -->
+        <div style="text-align:center;margin:30px 0 0">
+          <p style="font-size:11px;color:var(--metal);letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:14px">Síguenos</p>
+          <div class="redes">
+            <a class="red-btn" href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en Instagram"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><b>Instagram</b></a>
+            <a class="red-btn" href="https://www.tiktok.com/@k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97a9.4 9.4 0 0 1-1.62-.93c-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><b>TikTok</b></a>
+          </div>
         </div>
 
         <!-- El acceso al aviso legal y a la política de privacidad vivía en el
@@ -16824,7 +16866,7 @@
       titulo: 'Contacto directo',
       items: [
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>', label: 'Escríbenos', desc: 'Elige el motivo (sugerencia, alimento, ejercicio, plan, pago) y manda tu mensaje' },
-        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', label: 'Email directo', desc: 'También puedes escribirnos a equipo@k-one.fit. Respondemos en menos de 24h' }
+        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', label: 'Email directo', desc: 'También puedes escribirnos a k.one.fit26@gmail.com. Respondemos en menos de 24h' }
       ]
     }
   };
