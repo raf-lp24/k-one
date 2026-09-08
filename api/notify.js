@@ -492,14 +492,22 @@ async function handleCronRetencion(req, res) {
     for (const p of (sinEmail ? [] : (perfiles || []))) {
       const ud = p.userdata || {};
       const sub = subByUser[p.id];
+      // "Tiene acceso" no es solo pagar por Stripe: también cuenta el premium
+      // concedido a mano desde Jarvis (is_beta vigente). Sin esto, los emails de
+      // abajo trataban a un invitado o a un beta como si no fuera cliente:
+      // recibía los correos de "hazte cliente" (día 3 y día 8) y en cambio NO
+      // recibía ni el resumen semanal ni los avisos de reenganche. Mismo fallo
+      // que tenía el push diario, encontrado al mapear quién recibe qué (8 sept 2026).
       const tieneSubActiva = sub && ['active', 'trialing'].includes(sub.status);
+      const premiumConcedido = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > ahora.getTime());
+      const tieneAcceso = tieneSubActiva || premiumConcedido;
       const nombre = p.nombre || ud.nombre || '';
       const primerNombre = nombre.split(' ')[0] || 'Crack';
       const email = p.email;
       if (!email) continue;
 
       // DÍA 3: registrado hace 3-4 días, NO completó cuestionario, NO tiene sub activa
-      if (p.created_at >= hace4d && p.created_at < hace3d && !ud.onboardingCompletado && !tieneSubActiva) {
+      if (p.created_at >= hace4d && p.created_at < hace3d && !ud.onboardingCompletado && !tieneAcceso) {
         if (yaEnviado.has(`retencion_dia3:${email}`)) continue;
         const htmlDia3 = emailWrapper(`
             <div style="padding:28px 28px 0">
@@ -535,7 +543,7 @@ async function handleCronRetencion(req, res) {
       }
 
       // DÍA 8: registrado hace 8-9 días, SÍ completó cuestionario, NO tiene sub activa
-      if (p.created_at >= hace9d && p.created_at < hace8d && ud.onboardingCompletado && !tieneSubActiva) {
+      if (p.created_at >= hace9d && p.created_at < hace8d && ud.onboardingCompletado && !tieneAcceso) {
         if (yaEnviado.has(`retencion_dia8:${email}`)) continue;
         const deporte = ud.deporte || 'Tu deporte';
         const objetivo = ud.objetivo || 'Tu objetivo';
@@ -579,7 +587,7 @@ async function handleCronRetencion(req, res) {
       // RE-ENGAGEMENT: clientes ACTIVOS que llevan días sin abrir la web.
       // Usa last_seen (heartbeat del front) con fallback a last_sign_in_at (auth).
       // 3 niveles: 7d (suave), 14d (directo), 21d (urgente). Cada uno se envía una sola vez.
-      if (tieneSubActiva && ud.onboardingCompletado) {
+      if (tieneAcceso && ud.onboardingCompletado) {
         const ultimaVez = p.last_seen || authLastSignIn[p.id] || null;
         if (ultimaVez) {
           const diasInactivo = (ahora.getTime() - new Date(ultimaVez).getTime()) / 86400000;
@@ -701,7 +709,12 @@ async function handleCronRetencion(req, res) {
 
       for (const p of (perfiles || [])) {
         const sub = subByUser[p.id];
-        if (!sub || !['active', 'trialing'].includes(sub.status)) continue;
+        // Mismo criterio que el resto: pagar por Stripe O tener el premium
+        // concedido a mano. Antes, un invitado o un beta no recibía nunca su
+        // resumen de la semana pese a estar entrenando con el plan.
+        const pagaStripe = !!sub && ['active', 'trialing'].includes(sub.status);
+        const premiumOk = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > ahora.getTime());
+        if (!pagaStripe && !premiumOk) continue;
         if (!p.email || yaResumen.has(p.email)) continue;
         const ud = p.userdata || {};
         if (!ud.onboardingCompletado) continue;
