@@ -1,5 +1,9 @@
 const { getStripe, getSupabaseAdmin, getSubscriptionPeriod } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+// Push al móvil del admin para lo que de verdad urge (pago fallido, baja).
+// Hasta ahora el webhook solo mandaba emails AL CLIENTE: de un pago fallido
+// o una baja, el dueño solo se enteraba al día siguiente por el digest.
+const { enviarPushAAdmins } = require('./notify');
 
 // Vercel necesita el cuerpo de la petición sin parsear para verificar la firma de Stripe.
 module.exports.config = { api: { bodyParser: false } };
@@ -342,6 +346,7 @@ module.exports = async (req, res) => {
         // seguidos y el cliente recibiría el mismo aviso repetido.
         if (subscription.status === 'past_due' && prev?.status && prev.status !== 'past_due') {
           try {
+            await enviarPushAAdmins({ title: 'K-ONE · Pago fallido', body: 'Una suscripción ha pasado a pago pendiente. Míralo en Jarvis.', url: '/' });
             let prof = null;
             if (subscription.metadata?.supabase_user_id) {
               const { data } = await supabaseAdmin.from('profiles')
@@ -385,6 +390,7 @@ module.exports = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
+        try { await enviarPushAAdmins({ title: 'K-ONE · Baja de un cliente', body: 'Una suscripcion se ha cancelado. Míralo en Jarvis.', url: '/' }); } catch (e) {}
         break;
       }
       // Antes no se manejaba: una disputa/chargeback solo se veía si alguien

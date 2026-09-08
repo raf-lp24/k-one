@@ -980,6 +980,11 @@ module.exports = async (req, res) => {
 // una función serverless nueva, así que no cuenta para el límite de Vercel.
 module.exports.enviarEmail = enviarEmail;
 module.exports.ADMIN_EMAIL = ADMIN_EMAIL;
+// Se exporta para que el webhook de Stripe pueda avisar al móvil de lo que
+// de verdad urge (un pago fallido, una baja). No añade función serverless
+// nueva -- es un require entre ficheros del mismo despliegue, y el límite de
+// 12 funciones del plan Hobby ya está justo.
+module.exports.enviarPushAAdmins = enviarPushAAdmins;
 
 async function handlePost(req, res) {
 
@@ -1325,6 +1330,15 @@ async function handlePost(req, res) {
       };
       emails.push(enviarEmail(apiKey, optsMensaje));
       htmlParaLog = optsMensaje.html;
+      // Push además del email: un cliente escribiendo por el formulario de
+      // contacto es de lo más urgente que pasa en la app, y hasta ahora solo
+      // salía por correo. Con await por el mismo motivo que en 'bienvenida':
+      // Vercel puede congelar la función al responder.
+      await enviarPushAAdmins({
+        title: 'K-ONE · Mensaje de cliente',
+        body: `${datos.nombre || 'Alguien'}: ${datos.asunto || 'consulta'}`,
+        url: '/'
+      });
 
     } else if (tipo === 'opinion') {
       const nEstrellas = Math.min(Math.max(parseInt(datos.estrellas) || 0, 0), 5);
@@ -1344,6 +1358,13 @@ async function handlePost(req, res) {
       };
       emails.push(enviarEmail(apiKey, optsOpinion));
       htmlParaLog = optsOpinion.html;
+      // Push también: una opinión nueva es de las pocas cosas que conviene ver
+      // al momento (para contestar o para publicarla como testimonio real).
+      await enviarPushAAdmins({
+        title: `K-ONE · Nueva opinión (${datos.estrellas || "?"}★)`,
+        body: `${datos.nombre || "Anónimo"}: ${(datos.texto || "(sin texto)").slice(0, 90)}`,
+        url: '/'
+      });
     } else {
       const optsGenerico = {
         from: 'K-ONE <equipo@k-one.fit>',
