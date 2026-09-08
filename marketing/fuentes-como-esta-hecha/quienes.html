@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  :root{ --brasa:#D1420E; --blanco:#F0EDE8; --metal:#8A8A8A; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:transparent; }
+  body{ font-family:'Inter',sans-serif; color:var(--blanco); position:relative; }
+
+  #scrim{ position:absolute; inset:0; pointer-events:none; background:#080808; opacity:0; }
+  #vineta{ position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(78% 62% at 50% 45%, rgba(0,0,0,.30) 0%, rgba(0,0,0,.70) 55%, rgba(0,0,0,.92) 100%); }
+  #barra{ position:absolute; top:0; left:0; height:5px; background:var(--brasa); width:0; z-index:9; }
+
+  .marca{ position:absolute; top:88px; left:0; right:0; text-align:center;
+    font-family:'Bebas Neue',sans-serif; font-size:60px; letter-spacing:10px; z-index:8; }
+  .marca b{ color:var(--brasa); font-weight:400; }
+
+  .escena{ position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:0 64px; }
+
+  .etiqueta{ font-family:'DM Mono',monospace; font-size:26px; letter-spacing:7px;
+    text-transform:uppercase; color:var(--brasa); margin-bottom:30px; }
+  h1{ font-family:'Bebas Neue',sans-serif; font-weight:400; line-height:.86;
+    font-size:148px; letter-spacing:1px; text-align:center; }
+  h1.pequeno{ font-size:112px; }
+  h1 em{ color:var(--brasa); font-style:normal; }
+  h1 .ln{ display:block; overflow:hidden; padding-top:.20em; margin-top:-.20em; }
+  h1 .ln > span{ display:block; }
+  .sub{ font-size:34px; line-height:1.45; color:#B5B2AD; text-align:center;
+    max-width:880px; margin-top:38px; font-weight:300; }
+  .sub b{ color:var(--blanco); font-weight:600; }
+
+  /* Cifras: son las del propio codigo, contadas, no redondeadas al alza. */
+  .cifras{ display:flex; gap:20px; width:100%; max-width:940px; margin-top:52px; }
+  .cifra{ flex:1; background:rgba(18,18,18,.92); border:1px solid #333;
+    border-radius:22px; padding:30px 18px; text-align:center; }
+  .cifra .n{ font-family:'Bebas Neue',sans-serif; font-size:92px; color:var(--brasa); line-height:1; }
+  .cifra .q{ font-size:25px; color:#B5B2AD; font-weight:300; line-height:1.35; margin-top:12px; }
+
+  .datos{ display:flex; flex-direction:column; gap:20px; width:100%; max-width:900px; margin-top:48px; }
+  .dato{ display:flex; align-items:center; gap:24px;
+    background:rgba(18,18,18,.92); border:1px solid #333; border-radius:22px; padding:24px 30px; }
+  .dato .ico{ width:52px; height:52px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .dato .txt{ font-size:30px; line-height:1.35; font-weight:300; color:#DDD9D4; }
+  .dato .txt b{ font-weight:600; color:var(--blanco); }
+
+  .no-es{ width:100%; max-width:880px; margin-top:44px;
+    border-left:4px solid var(--brasa); background:rgba(209,66,14,.07); padding:30px 34px; text-align:left; }
+  .no-es p{ font-size:31px; line-height:1.5; color:#DDD9D4; font-weight:300; }
+  .no-es p b{ color:var(--blanco); font-weight:600; }
+
+  .pie{ position:absolute; bottom:118px; left:0; right:0; text-align:center; }
+  .web{ font-family:'DM Mono',monospace; font-size:42px; letter-spacing:6px; }
+  .nota{ font-size:26px; color:var(--metal); margin-top:18px; font-weight:300; }
+</style>
+</head>
+<body>
+<div id="scrim"></div>
+<div id="vineta"></div>
+<div id="barra"></div>
+<div class="marca">K-<b>ONE</b></div>
+
+<!-- 1 · gancho -->
+<div class="escena" id="e1">
+  <div class="etiqueta" data-a>Cómo está hecha</div>
+  <h1><span class="ln"><span data-a>Te cuento</span></span><span class="ln"><span data-a>cómo está <em>hecha</em>.</span></span></h1>
+  <p class="sub" data-a>Sin adornos y sin vender humo.</p>
+</div>
+
+<!-- 2 · si, con IA -->
+<div class="escena" id="e2">
+  <div class="etiqueta" data-a>01 · La verdad</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Sí, está hecha</span></span><span class="ln"><span data-a>con <em>IA</em>.</span></span></h1>
+  <p class="sub" data-a>La web, el recetario y las fichas de ejercicio se han construido
+    con inteligencia artificial. No lo escondo: es la herramienta que ha permitido
+    hacer en meses algo que de otra forma habría costado años.</p>
+</div>
+
+<!-- 3 · las cifras -->
+<div class="escena" id="e3">
+  <div class="etiqueta" data-a>02 · Lo que hay dentro</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Sobre datos,</span></span><span class="ln"><span data-a>no sobre <em>humo</em>.</span></span></h1>
+  <div class="cifras">
+    <div class="cifra" data-a><div class="n">386</div><div class="q">alimentos con sus macros</div></div>
+    <div class="cifra" data-a><div class="n">345</div><div class="q">opciones de comida con sus pasos</div></div>
+    <div class="cifra" data-a><div class="n">300</div><div class="q">fichas de ejercicio, 179 con foto</div></div>
+  </div>
+  <p class="sub" data-a>Cada plato lleva sus calorías y sus macros calculados ingrediente a ingrediente.</p>
+</div>
+
+<!-- 4 · metodologia -->
+<div class="escena" id="e4">
+  <div class="etiqueta" data-a>03 · Con qué criterio</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Metodología</span></span><span class="ln"><span data-a><em>pública</em>.</span></span></h1>
+  <div class="datos">
+    <div class="dato" data-a>
+      <div class="ico"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="12" x2="10" y2="12"/><line x1="14" y1="12" x2="16" y2="12"/><line x1="8" y1="17" x2="10" y2="17"/><line x1="14" y1="17" x2="16" y2="17"/></svg></div>
+      <div class="txt">Tus calorías, con <b>Mifflin-St Jeor</b>: la fórmula estándar.</div>
+    </div>
+    <div class="dato" data-a>
+      <div class="ico"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 5-7 4 5"/><line x1="3" y1="21" x2="21" y2="21"/></svg></div>
+      <div class="txt">El entreno, en <b>bloques de 4 semanas</b> con su descarga.</div>
+    </div>
+    <div class="dato" data-a>
+      <div class="ico"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="txt">Tus <b>lesiones y alergias</b> filtran: lo que te afecta no sale.</div>
+    </div>
+  </div>
+  <p class="sub" data-a><b>No es el plan de ningún entrenador copiado.</b> Es método conocido, aplicado a tus datos.</p>
+</div>
+
+<!-- 5 · segun tu deporte -->
+<div class="escena" id="e5">
+  <div class="etiqueta" data-a>04 · Tu plan</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Y cambia según</span></span><span class="ln"><span data-a>lo que <em>haces</em>.</span></span></h1>
+  <p class="sub" data-a>No es el mismo plan con otro nombre. Según tu edad, tu peso, tu
+    objetivo y tu deporte, el sistema monta una cosa u otra:
+    <b>gimnasio, running, híbrido</b>, o solo nutrición si ya entrenas
+    en tu box de CrossFit o Hyrox.</p>
+</div>
+
+<!-- 6 · quien hay detras -->
+<div class="escena" id="e6">
+  <div class="etiqueta" data-a>05 · Y detrás</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Hay <em>alguien</em></span></span><span class="ln"><span data-a>leyendo.</span></span></h1>
+  <p class="sub" data-a>Los mensajes que entran por Contacto los lee y los contesta una
+    persona, uno a uno. Ni un bot ni un centro de atención. <b>Si escribes, te contesto yo.</b></p>
+</div>
+
+<!-- 7 · lo que no es -->
+<div class="escena" id="e7">
+  <div class="etiqueta" data-a>Y lo que no es</div>
+  <h1 class="pequeno"><span class="ln"><span data-a>Esto no es</span></span><span class="ln"><span data-a>una <em>consulta</em>.</span></span></h1>
+  <div class="no-es" data-a>
+    <p>K-ONE <b>no sustituye a un médico ni a un dietista-nutricionista</b>.
+      Adapta el plan a tus condiciones, lesiones y alergias, pero ante cualquier
+      duda de salud, consulta con un profesional.</p>
+  </div>
+</div>
+
+<!-- 8 · cierre -->
+<div class="escena" id="e8">
+  <h1><span class="ln"><span data-a>Pruébalo</span></span><span class="ln"><span data-a>y <em>júzgalo</em>.</span></span></h1>
+  <div class="pie">
+    <div class="web" data-a>k-one.fit</div>
+    <div class="nota" data-a>Primer mes gratis · sin permanencia</div>
+  </div>
+</div>
+
+<script>
+// Misma tecnica que los otros dos videos: render(t) explicito, sin animaciones
+// CSS, para que cada fotograma salga igual siempre.
+const DUR = 37.0;
+const escenas = [
+  { el: 'e1', de: 0.0,  a: 4.2,  scrim: 0.18 },
+  { el: 'e2', de: 4.2,  a: 9.6,  scrim: 0.50 },
+  { el: 'e3', de: 9.6,  a: 16.4, scrim: 0.72 },
+  { el: 'e4', de: 16.4, a: 24.2, scrim: 0.76 },   // tres fichas: hace falta leer
+  { el: 'e5', de: 24.2, a: 29.4, scrim: 0.54 },
+  { el: 'e6', de: 29.4, a: 33.0, scrim: 0.40 },
+  { el: 'e7', de: 33.0, a: 35.4, scrim: 0.62 },
+  { el: 'e8', de: 35.4, a: DUR,  scrim: 0.20 }
+].map(e => ({ ...e, el: document.getElementById(e.el) }));
+escenas.forEach(e => e.piezas = [...e.el.querySelectorAll('[data-a]')]);
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const easeOut = x => 1 - Math.pow(1 - clamp(x), 3);
+
+function render(t) {
+  document.getElementById('barra').style.width = (clamp(t / DUR) * 1080) + 'px';
+  let scrim = 0.2;
+  for (let i = 0; i < escenas.length; i++) {
+    const e = escenas[i];
+    if (t >= e.de && t <= e.a) {
+      const sig = escenas[i + 1];
+      const mezcla = sig ? clamp((t - (e.a - 0.5)) / 0.5) : 0;
+      scrim = e.scrim + (sig ? (sig.scrim - e.scrim) * mezcla : 0);
+      break;
+    }
+  }
+  document.getElementById('scrim').style.opacity = scrim;
+
+  for (const e of escenas) {
+    const dentro = t >= e.de - 0.45 && t <= e.a + 0.05;
+    if (!dentro) { e.el.style.opacity = 0; e.el.style.visibility = 'hidden'; continue; }
+    e.el.style.visibility = 'visible';
+    const salida = clamp((t - (e.a - 0.45)) / 0.45);
+    e.el.style.opacity = 1 - salida;
+    const local = t - e.de;
+    e.el.style.transform = 'scale(' + (1 + local * 0.0030) + ') translateY(' + (-local * 2.0) + 'px)';
+    e.piezas.forEach((p, i) => {
+      const bloque = p.classList.contains('dato') || p.classList.contains('cifra');
+      const inicio = 0.12 + i * (bloque ? 0.50 : 0.20);
+      const k = easeOut((local - inicio) / 0.55);
+      p.style.opacity = k;
+      p.style.transform = 'translateY(' + ((1 - k) * 42) + 'px)';
+    });
+  }
+}
+window.render = render;
+render(0);
+</script>
+</body>
+</html>
