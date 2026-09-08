@@ -5574,6 +5574,55 @@
      left:50%) y fadeInUp lo pisaba con transform:none al terminar, dejando
      el banner descentrado y su botón de cerrar fuera de pantalla en móvil. */
   @keyframes pwaBannerFadeIn { from { opacity:0; } to { opacity:1; } }
+  /* Banner de "activar avisos": compacto y en una sola fila. Antes era un
+     bloque de 141px de alto en móvil para una frase. */
+  .push-banner {
+    /* Aparece con la PWA instalada y el <meta viewport> lleva
+       viewport-fit=cover: sin el inset, en un iPhone el borde inferior
+       queda por debajo del indicador de inicio. */
+    position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    left: 50%; transform: translateX(-50%);
+    z-index: 9996; display: flex; align-items: center; gap: 12px;
+    background: #1a1a1a; border: 1px solid #333; border-radius: 14px;
+    padding: 12px 14px; width: calc(100% - 24px); max-width: 420px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6); animation: pwaBannerFadeIn .4s ease;
+  }
+  .push-banner-icon {
+    width: 34px; height: 34px; border-radius: 9px; background: rgba(209,66,14,.12);
+    border: 1px solid rgba(209,66,14,.35); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .push-banner-body { flex: 1; min-width: 0; }
+  .push-banner-title {
+    display: block; font-family: 'DM Mono', monospace; font-size: 12px;
+    font-weight: 600; color: #F0EDE8; letter-spacing: .02em; line-height: 1.3;
+  }
+  .push-banner-sub {
+    display: block; font-size: 11.5px; color: #9a9a9a; line-height: 1.4; margin-top: 2px;
+  }
+  .push-banner-cta {
+    flex-shrink: 0; background: var(--brasa); border: none; color: #fff;
+    padding: 9px 16px; border-radius: 9px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+  }
+  .push-banner-cta:hover { filter: brightness(1.08); }
+  .push-banner-close {
+    flex-shrink: 0; background: none; border: none; color: #777; font-size: 20px;
+    line-height: 1; cursor: pointer; padding: 0;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  }
+  .push-banner-close:hover { color: #bbb; }
+  /* Móviles estrechos: el botón baja a su propia fila para que el texto no se
+     estruje en 4 líneas, que era justo el problema original. */
+  @media (max-width: 400px) {
+    .push-banner { flex-wrap: wrap; row-gap: 10px; }
+    .push-banner-cta { width: 100%; order: 3; }
+    .push-banner-close { order: 2; margin-left: auto; }
+  }
+  /* En pantalla ancha no se planta en mitad del centro: abajo a la derecha. */
+  @media (min-width: 900px) {
+    .push-banner { left: auto; right: 24px; transform: none; width: auto; min-width: 380px; }
+  }
 
   .auth-pass-strength {
     display: none; height: 3px; border-radius: 2px; margin-top: -14px; margin-bottom: 8px;
@@ -7639,15 +7688,16 @@
 </div>
 
 <!-- BANNER ACTIVAR NOTIFICACIONES (recordatorio diario de entreno) -->
-<div id="pushInstallBanner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9996;background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:14px 40px 14px 16px;max-width:360px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:pwaBannerFadeIn 0.4s ease">
-  <button onclick="cerrarPushBanner()" style="position:absolute;top:0;right:0;background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:13px;line-height:1" aria-label="Cerrar">&times;</button>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-    <div style="width:36px;height:36px;border-radius:8px;background:#0a0a0a;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-    </div>
-    <p style="margin:0;font-size:12px;color:#ccc;line-height:1.5;font-family:'DM Mono',monospace">Activa los avisos: solo te escribimos los días que no hayas entrenado. Lo puedes apagar cuando quieras desde el menú.</p>
+<div id="pushInstallBanner" class="push-banner" style="display:none" role="dialog" aria-label="Activar avisos de entreno">
+  <div class="push-banner-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
   </div>
-  <button onclick="activarNotificaciones()" style="background:var(--brasa);border:none;color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Activar avisos</button>
+  <div class="push-banner-body">
+    <span class="push-banner-title">Avisos de entreno</span>
+    <span class="push-banner-sub">Solo los días que no hayas entrenado. Se apagan cuando quieras.</span>
+  </div>
+  <button class="push-banner-close" onclick="cerrarPushBanner()" aria-label="Ahora no">&times;</button>
+  <button class="push-banner-cta" onclick="activarNotificaciones()">Activar</button>
 </div>
 
 <!-- ==================== LEGAL ==================== -->
