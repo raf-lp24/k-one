@@ -69,3 +69,28 @@ Gotcha del montaje: `zoompan` emite `d` fotogramas **por cada fotograma de
 entrada**. Con `-loop 1 -t 4` la entrada ya son 100, así que `d=100` daba
 10.000 y un vídeo de 523 s en vez de 21. La entrada tiene que ser una sola
 imagen, sin `-loop`.
+
+## v2 — con fondo generado (8 sept)
+
+El vídeo se rehizo con fondo de vídeo en vez de degradado plano:
+
+- **Dos planos generados con Higgsfield** (`seedance_2_0_mini`, 9:16, 5 s, 720p,
+  12,5 créditos cada uno): gimnasio industrial de noche con un haz de luz y
+  polvo de magnesio, y calle mojada de madrugada con farolas naranjas.
+  Sin personas, sin texto y sin marcas ajenas a propósito. Están en
+  `fuentes-app-avisos/bg-gimnasio.mp4` y `bg-calle.mp4`.
+- Se ralentizan ×2,3, se oscurecen y se desenfocan: el fondo da atmósfera, no
+  compite con el texto.
+- Los rótulos ya no son imágenes fijas: se renderizan **con canal alfa**
+  (`anim-overlay.html`) fotograma a fotograma y se superponen. Los textos
+  entran escalonados desde detrás de una máscara, y el interruptor de avisos
+  **se enciende solo** cruzando dos capturas reales (apagado → encendido).
+
+Gotchas que costaron un render cada uno:
+- La máscara de línea (`overflow:hidden`) recorta también lo que sobresale por
+  ARRIBA: en Bebas Neue la tilde de una mayúscula pasa de la altura de caja, y
+  salía «MOVIL» y «NUTRICION» sin acento. Se arregla con
+  `padding-top:.20em; margin-top:-.20em` en la línea.
+- Para capturar con transparencia hay que llamar a
+  `Emulation.setDefaultBackgroundColorOverride` con alfa 0 **y volver a
+  aplicarlo después de `Page.navigate`**, o Chrome pinta blanco debajo.

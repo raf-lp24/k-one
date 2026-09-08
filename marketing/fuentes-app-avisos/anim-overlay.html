@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  /* Mismos tokens que index.html: el video tiene que parecer de la misma marca. */
+  :root{ --brasa:#D1420E; --blanco:#F0EDE8; --metal:#8A8A8A; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:transparent; }
+  body{ font-family:'Inter',sans-serif; color:var(--blanco); position:relative; }
+
+  /* Resplandor que se desplaza: da vida al fondo sin distraer del texto. */
+  #glow{ position:absolute; inset:-30%; pointer-events:none;
+    background:radial-gradient(45% 30% at 50% 30%, rgba(209,66,14,.30) 0%, rgba(209,66,14,0) 70%); }
+  #grano{ position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>"); }
+  #vineta{ position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(78% 62% at 50% 45%, rgba(0,0,0,.35) 0%, rgba(0,0,0,.72) 55%, rgba(0,0,0,.92) 100%); }
+
+  /* Barra de progreso: en un reel ayuda a que la gente aguante hasta el final. */
+  #barra{ position:absolute; top:0; left:0; height:5px; background:var(--brasa); width:0; z-index:9; }
+
+  .marca{ position:absolute; top:92px; left:0; right:0; text-align:center;
+    font-family:'Bebas Neue',sans-serif; font-size:64px; letter-spacing:10px; z-index:8; }
+  .marca b{ color:var(--brasa); font-weight:400; }
+
+  .escena{ position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:0 70px; will-change:opacity; }
+
+  .etiqueta{ font-family:'DM Mono',monospace; font-size:26px; letter-spacing:7px;
+    text-transform:uppercase; color:var(--brasa); margin-bottom:34px; white-space:nowrap; overflow:hidden; }
+  .pill{ background:var(--brasa); color:#fff; padding:14px 30px; border-radius:6px;
+    letter-spacing:6px; font-weight:500; font-family:'DM Mono',monospace; font-size:26px;
+    text-transform:uppercase; margin-bottom:40px; }
+  h1{ font-family:'Bebas Neue',sans-serif; font-weight:400; line-height:.86;
+    font-size:168px; letter-spacing:1px; text-align:center; }
+  h1 em{ color:var(--brasa); font-style:normal; }
+  h1 .ln{ display:block; overflow:hidden; padding-top:.20em; margin-top:-.20em; }
+  h1 .ln > span{ display:block; }
+  .sub{ font-size:36px; line-height:1.45; color:#B5B2AD; text-align:center;
+    max-width:840px; margin-top:42px; font-weight:300; }
+
+  .movil{ width:520px; border-radius:46px; padding:12px; background:#1A1A1A;
+    border:1px solid #333; box-shadow:0 40px 120px rgba(0,0,0,.85), 0 0 90px rgba(209,66,14,.18);
+    margin-top:58px; }
+  .movil img{ display:block; width:100%; border-radius:36px; }
+
+  .aviso{ width:780px; display:flex; gap:22px; align-items:center; margin-top:66px;
+    background:rgba(28,28,28,.95); border:1px solid #3A3A3A; border-radius:28px;
+    padding:28px 30px; box-shadow:0 30px 80px rgba(0,0,0,.75); }
+  .aviso .icono{ width:74px; height:74px; border-radius:18px; background:var(--brasa);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Bebas Neue',sans-serif; font-size:31px; color:#fff; }
+  .aviso .txt{ flex:1; min-width:0; }
+  .aviso .tit{ font-size:31px; font-weight:600; margin-bottom:8px; }
+  .aviso .cuerpo{ font-size:29px; color:#B5B2AD; font-weight:300; line-height:1.35; }
+  .aviso .hora{ font-family:'DM Mono',monospace; font-size:22px; color:#7A7A7A; }
+
+  /* El interruptor son DOS capturas reales (apagado y encendido) superpuestas:
+     se cruza de una a otra, en vez de maquetar el control. */
+  .tarjeta{ position:relative; width:860px; border-radius:28px; background:#141414;
+    border:1px solid #333; padding:14px; margin-top:70px;
+    box-shadow:0 40px 110px rgba(0,0,0,.85), 0 0 80px rgba(209,66,14,.16); }
+  .tarjeta img{ display:block; width:100%; border-radius:18px; }
+  .tarjeta img.on{ position:absolute; top:14px; left:14px; width:calc(100% - 28px); }
+
+  .pie{ position:absolute; bottom:120px; left:0; right:0; text-align:center; }
+  .web{ font-family:'DM Mono',monospace; font-size:42px; letter-spacing:6px; }
+  .nota{ font-size:26px; color:var(--metal); margin-top:18px; font-weight:300; }
+</style>
+</head>
+<body>
+<div id="glow"></div>
+<div id="vineta"></div>
+<div id="barra"></div>
+<div class="marca">K-<b>ONE</b></div>
+
+<div class="escena" id="e1">
+  <div class="pill" data-a>Novedad</div>
+  <h1><span class="ln"><span data-a>Ya es</span></span><span class="ln"><span data-a>una <em>app</em>.</span></span></h1>
+  <p class="sub" data-a>Sin descargar nada de ninguna tienda.<br>La misma web, en tu pantalla de inicio.</p>
+</div>
+
+<div class="escena" id="e2">
+  <div class="etiqueta" data-a>01 · Instalar</div>
+  <h1><span class="ln"><span data-a>En tu pantalla</span></span><span class="ln"><span data-a>de <em>inicio</em>.</span></span></h1>
+  <div class="movil" data-a><img src="02b-pwa.png" alt=""></div>
+</div>
+
+<div class="escena" id="e3">
+  <div class="etiqueta" data-a>02 · Avisos</div>
+  <h1><span class="ln"><span data-a>Y te avisa</span></span><span class="ln"><span data-a>en el <em>móvil</em>.</span></span></h1>
+  <div class="aviso" data-a>
+    <div class="icono">K-1</div>
+    <div class="txt">
+      <div class="tit">K-ONE · Lunes</div>
+      <div class="cuerpo">Tu plan de hoy te está esperando.</div>
+    </div>
+    <div class="hora">ahora</div>
+  </div>
+  <p class="sub" data-a>Solo los días que no hayas entrenado.</p>
+</div>
+
+<div class="escena" id="e4">
+  <div class="etiqueta" data-a>03 · Tú mandas</div>
+  <h1><span class="ln"><span data-a>Se apagan</span></span><span class="ln"><span data-a>cuando <em>quieras</em>.</span></span></h1>
+  <div class="tarjeta" data-a>
+    <img src="04-toggle-off.png" alt="">
+    <img class="on" id="toggleOn" src="04-toggle.png" alt="">
+  </div>
+  <p class="sub" data-a>Un interruptor en tu menú. Nada más.</p>
+</div>
+
+<div class="escena" id="e5">
+  <h1><span class="ln"><span data-a>Entrenamiento,</span></span><span class="ln"><span data-a>nutrición y</span></span><span class="ln"><span data-a><em>mentalidad</em>.</span></span></h1>
+  <p class="sub" data-a>Tu plan generado con tus datos reales.<br>Se adapta cada semana según tu progreso.</p>
+  <div class="pie">
+    <div class="web" data-a>k-one.fit</div>
+    <div class="nota" data-a>Primer mes gratis · sin permanencia</div>
+  </div>
+</div>
+
+<script>
+// Animacion dirigida por una funcion render(t) explicita, NO por animaciones
+// CSS: asi cada fotograma del video se calcula igual siempre y el render por
+// CDP es determinista (con CSS puro el tiempo depende de cuando dispare la
+// captura y salen saltos).
+const DUR = 21.5;
+const escenas = [
+  { el: document.getElementById('e1'), de: 0.0,  a: 4.4 },
+  { el: document.getElementById('e2'), de: 4.4,  a: 9.4 },
+  { el: document.getElementById('e3'), de: 9.4,  a: 14.9 },
+  { el: document.getElementById('e4'), de: 14.9, a: 19.0 },
+  { el: document.getElementById('e5'), de: 19.0, a: DUR }
+];
+escenas.forEach(e => e.piezas = [...e.el.querySelectorAll('[data-a]')]);
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+// Salida suave: arranca rapido y frena. Es lo que hace que un texto entre
+// "con peso" en vez de deslizarse plano.
+const easeOut = x => 1 - Math.pow(1 - clamp(x), 3);
+const easeInOut = x => (x = clamp(x)) < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+function render(t) {
+  document.getElementById('barra').style.width = (clamp(t / DUR) * 1080) + 'px';
+  // El resplandor se mueve despacio de un lado a otro
+  const g = document.getElementById('glow');
+  g.style.transform = 'translate(' + (Math.sin(t * 0.35) * 90) + 'px,' + (Math.cos(t * 0.28) * 70) + 'px)';
+
+  for (const e of escenas) {
+    const dentro = t >= e.de - 0.45 && t <= e.a + 0.05;
+    if (!dentro) { e.el.style.opacity = 0; e.el.style.visibility = 'hidden'; continue; }
+    e.el.style.visibility = 'visible';
+    // Fundido de salida de la escena anterior mientras entra la siguiente
+    const salida = clamp((t - (e.a - 0.45)) / 0.45);
+    e.el.style.opacity = 1 - salida;
+    // Deriva lenta de toda la escena: sensacion de camara, no de PowerPoint
+    const local = t - e.de;
+    e.el.style.transform = 'scale(' + (1 + local * 0.0045) + ') translateY(' + (-local * 3) + 'px)';
+
+    e.piezas.forEach((p, i) => {
+      const inicio = 0.12 + i * 0.16;          // entrada escalonada
+      const k = easeOut((local - inicio) / 0.62);
+      p.style.opacity = k;
+      p.style.transform = 'translateY(' + ((1 - k) * 46) + 'px)';
+    });
+  }
+
+  // El interruptor se enciende a mitad de su escena: se cruza de la captura
+  // apagada a la encendida, las dos reales.
+  const on = document.getElementById('toggleOn');
+  on.style.opacity = easeInOut((t - 16.9) / 0.45);
+}
+window.render = render;
+render(0);
+</script>
+</body>
+</html>
