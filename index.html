@@ -6778,12 +6778,12 @@
         <div class="cp-peso-widget">
           <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">−</button>
           <div class="cp-peso-num">
-            <input type="number" id="cp-peso" placeholder="70" min="30" max="300" step="0.5" oninput="sincronizarPesoSlider()">
+            <input type="number" id="cp-peso" placeholder="70" min="40" max="180" step="0.5" oninput="sincronizarPesoSlider()">
             <span>kg</span>
           </div>
           <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">+</button>
         </div>
-        <input type="range" id="cp-pesoSlider" min="30" max="200" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()">
+        <input type="range" id="cp-pesoSlider" min="40" max="180" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()">
       </div>
       <div class="field">
         <label>¿Qué enfoque nutricional prefieres?</label>
@@ -8290,12 +8290,6 @@
         <button class="logout-btn" onclick="logout()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Cerrar sesión
         </button>
-        <!-- Antes el aviso legal/política de privacidad solo era accesible desde
-             la landing (pre-login) -- una vez dentro del dashboard no había
-             forma de volver a consultarlo sin cerrar sesión. -->
-        <button class="logout-btn" onclick="goToLegal()" style="border:none;border-radius:8px;padding:8px 14px;font-size:11px;color:var(--metal)">
-          <span>⬡</span> Aviso legal y privacidad
-        </button>
       </div>
     </aside>
 
@@ -9032,6 +9026,15 @@
             Respuesta en menos de 24h
           </span>
         </div>
+
+        <!-- El acceso al aviso legal y a la política de privacidad vivía en el
+             menú lateral, pero alargaba el menú hasta obligar a hacer scroll.
+             Se mueve aquí (Contacto es donde se buscan estas cosas) en vez de
+             quitarlo: dentro de la app tiene que seguir siendo consultable sin
+             cerrar sesión, porque se tratan datos de salud (art. 9 RGPD). -->
+        <p style="text-align:center;margin:22px 0 0;font-size:11px;color:var(--metal)">
+          <a onclick="goToLegal()" style="color:var(--metal);text-decoration:underline;cursor:pointer;padding:8px 4px;display:inline-block">Aviso legal y política de privacidad</a>
+        </p>
       </div>
 
     </main>
@@ -19306,7 +19309,9 @@
   function ajustarPesoCambiarPlan(delta) {
     const inp = document.getElementById('cp-peso');
     const val = parseFloat(inp.value) || 70;
-    const nuevo = Math.min(300, Math.max(30, Math.round((val + delta) * 2) / 2));
+    // Mismo rango que el alta (validateBlock): por debajo de 40 o por encima
+    // de 180 el cálculo de TMB deja de ser plausible.
+    const nuevo = Math.min(180, Math.max(40, Math.round((val + delta) * 2) / 2));
     inp.value = nuevo % 1 === 0 ? nuevo : nuevo.toFixed(1);
     sincronizarPesoSlider();
   }
@@ -19467,7 +19472,11 @@
     // Peso actual: si lo ha indicado, actualizarlo para que el recálculo de
     // calorías y proteína parta de su peso de hoy (TMB/TDEE dependen del peso).
     const _pesoNuevo = parseFloat((document.getElementById('cp-peso') || {}).value);
-    if (!isNaN(_pesoNuevo) && _pesoNuevo >= 30 && _pesoNuevo <= 300) {
+    // 40-180 es el MISMO rango que exige el alta (validateBlock). Antes aquí
+    // eran 30-300, así que un cliente podía meter desde "Cambiar plan" un peso
+    // que el cuestionario rechaza por implausible, y ese valor entra directo en
+    // Mifflin-St Jeor. Si se sale del rango, se deja el peso que ya tenía.
+    if (!isNaN(_pesoNuevo) && _pesoNuevo >= 40 && _pesoNuevo <= 180) {
       userData.peso = _pesoNuevo;
       userData.ultimoRecalculo = new Date().toISOString();
     }
