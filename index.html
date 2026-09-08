@@ -24914,9 +24914,20 @@
         denegado = Notification.permission === 'denied';
         if (!denegado) {
           try {
-            const reg = await navigator.serviceWorker.ready;
+            // `serviceWorker.ready` NO rechaza si no hay service worker activo:
+            // se queda pendiente para siempre. Sin el límite de abajo, esta
+            // función no llegaba nunca a la parte de pintar y el interruptor se
+            // quedaba oculto (su estado inicial) sin decir por qué -- que es lo
+            // que pasaba en el móvil aunque la app estuviera instalada.
+            const reg = await Promise.race([
+              navigator.serviceWorker.ready,
+              new Promise((_, rej) => setTimeout(() => rej(new Error('service worker no listo')), 4000))
+            ]);
             sub = await reg.pushManager.getSubscription();
-          } catch (e) { hayError = true; }
+          } catch (e) {
+            console.warn('[push] no se pudo leer la suscripción:', e.message);
+            hayError = true;
+          }
         }
       }
       contenedores.forEach(cont => {
@@ -24933,7 +24944,29 @@
           }
           return;
         }
-        if (!soportado || hayError) { cont.style.display = 'none'; return; }
+        // Si el navegador no soporta push, se esconde: no hay nada que ofrecer.
+        if (!soportado) { cont.style.display = 'none'; return; }
+        // Pero si SÍ lo soporta y solo es que el service worker aún no estaba
+        // listo, esconderlo era lo peor: el cliente no veía el interruptor por
+        // ninguna parte y no había forma de saber por qué. Se muestra
+        // deshabilitado, con la pista, y se reintenta solo en cuanto el service
+        // worker active (mismo criterio que el resto de estados de aquí).
+        if (hayError) {
+          cont.style.display = '';
+          input.checked = false;
+          input.disabled = true;
+          if (hint) {
+            hint.textContent = 'Preparando los avisos… si no se activa en unos segundos, cierra y vuelve a abrir la app.';
+            hint.style.display = '';
+          }
+          if (!window._reintentoPushProgramado) {
+            window._reintentoPushProgramado = true;
+            navigator.serviceWorker.ready
+              .then(() => { window._reintentoPushProgramado = false; actualizarBotonNotificaciones(); })
+              .catch(() => { window._reintentoPushProgramado = false; });
+          }
+          return;
+        }
         cont.style.display = '';
         if (denegado) {
           input.checked = false;
@@ -24954,11 +24987,27 @@
     };
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(r => r.unregister());
-      }).then(() => {
-        navigator.serviceWorker.register('/sw.js');
-      }).catch(() => {});
+      // BUG GORDO (encontrado 8 sept 2026): esto hacía unregister() de TODOS
+      // los service workers y volvía a registrar EN CADA CARGA de la página.
+      //
+      // La suscripción push pertenece al registro del service worker: al
+      // desregistrarlo, la PushSubscription del navegador muere con él. O sea
+      // que cada vez que el cliente abría la app se destruía su suscripción y
+      // se creaba un registro nuevo SIN suscripción. Consecuencias en cadena,
+      // todas reportadas por el usuario estos dos días:
+      //   · el interruptor de avisos aparecía apagado al volver a entrar
+      //     (getSubscription() ya no devolvía nada),
+      //   · la fila de push_subscriptions seguía apuntando al endpoint viejo,
+      //     ya muerto -> el servidor recibía 410 y BORRABA la fila -> no
+      //     volvía a llegar ni un push,
+      //   · y si actualizarBotonNotificaciones() corría en la ventana entre el
+      //     unregister y la activación del nuevo SW, `serviceWorker.ready` se
+      //     quedaba colgado y el interruptor no llegaba a mostrarse siquiera.
+      //
+      // No hace falta desregistrar para actualizar: sw.js se sirve con
+      // no-cache (ver vercel.json) y hace skipWaiting(), así que register()
+      // solo ya recoge cualquier versión nueva.
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
       // No borrar caches aquí — el SW gestiona su propio ciclo de vida con versiones
     }
   };
