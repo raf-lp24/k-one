@@ -55,7 +55,7 @@
   "functions": {
     "api/stripe-webhook.js":          { "maxDuration": 30 },
     "api/admin-clientes.js":          { "maxDuration": 30 },
-    "api/notify.js":                  { "maxDuration": 30 },
+    "api/notify.js":                  { "maxDuration": 60 },
     "api/create-checkout-session.js": { "maxDuration": 15 },
     "api/update-subscription.js":     { "maxDuration": 15 },
     "api/cancel-subscription.js":     { "maxDuration": 15 },

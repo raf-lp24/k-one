@@ -44,11 +44,22 @@ function _indiceDiaMadrid(fecha) {
 // propio error, es un extra sobre el email, no un requisito para que
 // notify.js responda ok.
 async function enviarPushAAdmins({ title, body, url }) {
+  // Estos tres "return" silenciosos hacían imposible diagnosticar por qué no
+  // llegaba un push al admin: sin claves VAPID, sin ADMIN_EMAILS o sin ninguna
+  // suscripción guardada, la función se rendía sin dejar ni una línea de log.
+  // Reportado el 7 sept 2026 (no llegó el push de un alta nueva). Ahora cada
+  // motivo se dice en claro y sale en los logs de Vercel.
   const vapidPublic = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
-  if (!vapidPublic || !vapidPrivate) return;
+  if (!vapidPublic || !vapidPrivate) {
+    console.warn('[notify] push admin OMITIDO: faltan VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY en el entorno');
+    return;
+  }
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
-  if (!adminEmails.length) return;
+  if (!adminEmails.length) {
+    console.warn('[notify] push admin OMITIDO: ADMIN_EMAILS vacío o sin definir');
+    return;
+  }
   try {
     webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
     const supaAdmin = getSupabaseAdmin();
@@ -57,9 +68,16 @@ async function enviarPushAAdmins({ title, body, url }) {
     // ya usa handleCronRetencion para resolver "último acceso" por admin.
     const { data: { users } } = await supaAdmin.auth.admin.listUsers({ perPage: 1000 });
     const idsAdmin = (users || []).filter(u => adminEmails.includes((u.email || '').toLowerCase())).map(u => u.id);
-    if (!idsAdmin.length) return;
+    if (!idsAdmin.length) {
+      console.warn(`[notify] push admin OMITIDO: ningún usuario de auth coincide con ADMIN_EMAILS (${adminEmails.join(', ')})`);
+      return;
+    }
     const { data: subsAdmin } = await supaAdmin.from('push_subscriptions').select('id, endpoint, p256dh, auth_key').in('user_id', idsAdmin);
-    if (!subsAdmin || !subsAdmin.length) return;
+    if (!subsAdmin || !subsAdmin.length) {
+      console.warn('[notify] push admin OMITIDO: el admin no tiene ninguna suscripción push guardada (hay que activar los avisos desde el móvil, con la app instalada)');
+      return;
+    }
+    console.log(`[notify] push admin: enviando a ${subsAdmin.length} dispositivo(s)`);
     for (const sub of subsAdmin) {
       try {
         await webpush.sendNotification(
@@ -311,6 +329,151 @@ async function handleCronRetencion(req, res) {
     const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
+
+    // ORDEN A PROPÓSITO: el push diario va PRIMERO. Antes estaba al final,
+    // detrás de las tandas de emails de retención, resumen semanal y digest
+    // (cada enviarEmail espera hasta 10s) y del backup, todo dentro del tope
+    // de la función. Si el cron se quedaba sin tiempo, lo que se perdía era
+    // justo esto: el aviso de "hoy te toca entrenar", que además es lo único
+    // con hora crítica del cron. Reportado por el usuario el 7 sept 2026: los
+    // avisos de entreno no llegaban todos los días.
+    // RECORDATORIO PUSH DIARIO: "¿entrenas hoy?" a quien tenga la suscripción
+    // activada y todavía no haya marcado ningún entreno hoy. No depende de
+    // RESEND_API_KEY -- si no hay claves VAPID configuradas, simplemente no
+    // se manda nada (igual que el resto del cron cuando falta una env var).
+    let pushEnviados = 0;
+    const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+    const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+    if (vapidPublic && vapidPrivate) {
+      try {
+        webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
+        const { data: subsPush } = await supa.from('push_subscriptions').select('id, user_id, endpoint, p256dh, auth_key');
+        if (subsPush && subsPush.length) {
+          const hoyMadrid = _hoyMadridISO();
+          const idxDiaHoy = _indiceDiaMadrid();
+          const nombreDiaHoy = DIAS_SEMANA_PUSH[idxDiaHoy];
+          const perfilPorId = {};
+          (perfiles || []).forEach(p => { perfilPorId[p.id] = p; });
+
+          // El plan de cada cliente (para poder decirle QUÉ le toca hoy, no solo
+          // "entrena"). Se pide aparte y SOLO para quien tiene push activado, en
+          // vez de añadir `plan` al select general de profiles: ese select trae
+          // TODOS los perfiles y la columna admite hasta 2 MB por fila, así que
+          // meterla ahí multiplicaría por mucho lo que descarga el cron diario.
+          const idsPush = [...new Set(subsPush.map(s => s.user_id).filter(Boolean))];
+          const planPorId = {};
+          if (idsPush.length) {
+            const rPlanes = await supa.from('profiles').select('id, plan').in('id', idsPush);
+            if (rPlanes.error) {
+              // Sin planes seguimos: el aviso sale en su versión genérica.
+              console.warn('[notify-cron] no se pudieron cargar los planes para el push:', rPlanes.error.message);
+            } else {
+              (rPlanes.data || []).forEach(r => { planPorId[r.id] = r.plan; });
+            }
+          }
+
+          // Margen de sobra en UTC (las últimas 30h cubren cualquier desfase
+          // entre huso UTC y Madrid) y luego se filtra fino por calendario de
+          // Madrid en JS -- así el dedupe usa el MISMO criterio de "hoy" que
+          // el check de "ya entrenó" de un poco más abajo, en vez de mezclar
+          // un límite en UTC con una comprobación en huso de Madrid.
+          const { data: yaPush } = await supa.from('email_log')
+            .select('destinatario, created_at').eq('tipo', 'push_recordatorio_diario')
+            .gte('created_at', new Date(ahora.getTime() - 30 * 3600000).toISOString());
+          const yaAvisadoHoy = new Set(
+            (yaPush || [])
+              .filter(e => _hoyMadridISO(e.created_at) === hoyMadrid)
+              .map(e => e.destinatario)
+          );
+
+          for (const sub of subsPush) {
+            const p = perfilPorId[sub.user_id];
+            if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
+            const ud = p.userdata || {};
+            if (!ud.onboardingCompletado) continue;
+            const s = subByUser[p.id];
+            if (!s || !['active', 'trialing'].includes(s.status)) continue;
+            const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
+            if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
+
+            // Qué le toca HOY según su propio plan. semana[] va de lunes (0) a
+            // domingo (6), igual que idxDiaHoy.
+            const planCliente = planPorId[p.id] || null;
+            const diaPlan = planCliente?.semana?.[idxDiaHoy] || null;
+            const esDescanso = diaPlan ? diaPlan.tipo === 'Descanso' : false;
+            // "Solo nutrición" no tiene rutina: su plan viene con semana vacía.
+            // Sin esto caía en el aviso genérico y le preguntaba "¿entrenas
+            // hoy?" a quien no ha contratado entrenamiento.
+            const soloNutricion = !!planCliente?.soloDieta || (!!planCliente && !(planCliente.semana || []).length);
+
+            // Con nombre y variado, no el mismo aviso robótico cada día --
+            // mismo criterio que ya usan los mensajes de racha en index.html.
+            const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
+            const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
+
+            let cuerpoPush;
+            if (soloNutricion) {
+              const frasesNutri = [
+                `Tus comidas de hoy ya están listas${coma}.`,
+                `Hoy toca cuidar la alimentación${coma}. Tienes tu menú preparado.`,
+                `Tu plan de comidas de hoy te espera${coma}.`
+              ];
+              cuerpoPush = frasesNutri[Math.floor(Math.random() * frasesNutri.length)];
+            } else if (esDescanso) {
+              // Antes se mandaba "¿entrenas hoy?" TODOS los días, también en los
+              // de descanso programado: el aviso contradecía al propio plan y
+              // empujaba justo el día que toca recuperar.
+              cuerpoPush = `Hoy toca descanso${coma}. Recuperar también es entrenar.`;
+            } else if (diaPlan && diaPlan.resumen) {
+              cuerpoPush = `Hoy toca: ${diaPlan.resumen}.`;
+            } else {
+              // Sin plan cargado (cliente antiguo, plan aún sin generar): aviso
+              // genérico de siempre.
+              const frasesPush = primerNombrePush ? [
+                `${primerNombrePush}, tu plan de hoy te está esperando.`,
+                `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
+                `Hoy toca${coma}. Un paso más.`
+              ] : [
+                'Tu plan de hoy te está esperando.',
+                '¿Entrenas hoy? Tienes el plan listo.',
+                'Hoy toca. Un paso más.'
+              ];
+              cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
+            }
+
+            try {
+              await webpush.sendNotification(
+                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+                // El día de la semana va en el título: es lo primero que se lee
+                // en la notificación, antes de desplegarla.
+                JSON.stringify({ title: `K-ONE · ${nombreDiaHoy}`, body: cuerpoPush, url: '/' })
+              );
+              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
+              // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
+              // portátil) recibía el push una vez POR DISPOSITIVO en la misma
+              // pasada del cron -- yaAvisadoHoy solo se rellenaba una vez al
+              // principio, antes del bucle, así que la segunda vuelta para el
+              // mismo email todavía no lo veía como "ya avisado".
+              yaAvisadoHoy.add(p.email);
+              pushEnviados++;
+            } catch (pushErr) {
+              // 404/410 = el navegador anuló la suscripción (desinstaló, borró
+              // datos del sitio...) -- limpiarla para no reintentar cada día
+              // contra un endpoint que ya no existe. Cualquier otro código (400
+              // por claves corruptas, 413...) se manda a Sentry -- si no, una
+              // suscripción rota reintenta en silencio cada día para siempre,
+              // sin que nadie se entere salvo mirando logs de Vercel a mano.
+              if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
+                await supa.from('push_subscriptions').delete().eq('id', sub.id);
+              } else {
+                console.warn('[notify-cron] push error:', pushErr.message);
+                capturarError(pushErr, { fn: 'notify-cron-push', endpoint: sub.endpoint });
+              }
+            }
+          }
+        }
+      } catch (pushBlockErr) { console.error('[notify-cron] push diario error:', pushBlockErr.message); }
+    }
 
     let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0;
 
@@ -727,143 +890,6 @@ async function handleCronRetencion(req, res) {
       }
     } catch (digestErr) { console.error('[notify] digest admin error:', digestErr.message); }
 
-    // RECORDATORIO PUSH DIARIO: "¿entrenas hoy?" a quien tenga la suscripción
-    // activada y todavía no haya marcado ningún entreno hoy. No depende de
-    // RESEND_API_KEY -- si no hay claves VAPID configuradas, simplemente no
-    // se manda nada (igual que el resto del cron cuando falta una env var).
-    let pushEnviados = 0;
-    const vapidPublic = process.env.VAPID_PUBLIC_KEY;
-    const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
-    if (vapidPublic && vapidPrivate) {
-      try {
-        webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
-        const { data: subsPush } = await supa.from('push_subscriptions').select('id, user_id, endpoint, p256dh, auth_key');
-        if (subsPush && subsPush.length) {
-          const hoyMadrid = _hoyMadridISO();
-          const idxDiaHoy = _indiceDiaMadrid();
-          const nombreDiaHoy = DIAS_SEMANA_PUSH[idxDiaHoy];
-          const perfilPorId = {};
-          (perfiles || []).forEach(p => { perfilPorId[p.id] = p; });
-
-          // El plan de cada cliente (para poder decirle QUÉ le toca hoy, no solo
-          // "entrena"). Se pide aparte y SOLO para quien tiene push activado, en
-          // vez de añadir `plan` al select general de profiles: ese select trae
-          // TODOS los perfiles y la columna admite hasta 2 MB por fila, así que
-          // meterla ahí multiplicaría por mucho lo que descarga el cron diario.
-          const idsPush = [...new Set(subsPush.map(s => s.user_id).filter(Boolean))];
-          const planPorId = {};
-          if (idsPush.length) {
-            const rPlanes = await supa.from('profiles').select('id, plan').in('id', idsPush);
-            if (rPlanes.error) {
-              // Sin planes seguimos: el aviso sale en su versión genérica.
-              console.warn('[notify-cron] no se pudieron cargar los planes para el push:', rPlanes.error.message);
-            } else {
-              (rPlanes.data || []).forEach(r => { planPorId[r.id] = r.plan; });
-            }
-          }
-
-          // Margen de sobra en UTC (las últimas 30h cubren cualquier desfase
-          // entre huso UTC y Madrid) y luego se filtra fino por calendario de
-          // Madrid en JS -- así el dedupe usa el MISMO criterio de "hoy" que
-          // el check de "ya entrenó" de un poco más abajo, en vez de mezclar
-          // un límite en UTC con una comprobación en huso de Madrid.
-          const { data: yaPush } = await supa.from('email_log')
-            .select('destinatario, created_at').eq('tipo', 'push_recordatorio_diario')
-            .gte('created_at', new Date(ahora.getTime() - 30 * 3600000).toISOString());
-          const yaAvisadoHoy = new Set(
-            (yaPush || [])
-              .filter(e => _hoyMadridISO(e.created_at) === hoyMadrid)
-              .map(e => e.destinatario)
-          );
-
-          for (const sub of subsPush) {
-            const p = perfilPorId[sub.user_id];
-            if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
-            const ud = p.userdata || {};
-            if (!ud.onboardingCompletado) continue;
-            const s = subByUser[p.id];
-            if (!s || !['active', 'trialing'].includes(s.status)) continue;
-            const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
-            if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
-
-            // Qué le toca HOY según su propio plan. semana[] va de lunes (0) a
-            // domingo (6), igual que idxDiaHoy.
-            const planCliente = planPorId[p.id] || null;
-            const diaPlan = planCliente?.semana?.[idxDiaHoy] || null;
-            const esDescanso = diaPlan ? diaPlan.tipo === 'Descanso' : false;
-            // "Solo nutrición" no tiene rutina: su plan viene con semana vacía.
-            // Sin esto caía en el aviso genérico y le preguntaba "¿entrenas
-            // hoy?" a quien no ha contratado entrenamiento.
-            const soloNutricion = !!planCliente?.soloDieta || (!!planCliente && !(planCliente.semana || []).length);
-
-            // Con nombre y variado, no el mismo aviso robótico cada día --
-            // mismo criterio que ya usan los mensajes de racha en index.html.
-            const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
-            const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
-
-            let cuerpoPush;
-            if (soloNutricion) {
-              const frasesNutri = [
-                `Tus comidas de hoy ya están listas${coma}.`,
-                `Hoy toca cuidar la alimentación${coma}. Tienes tu menú preparado.`,
-                `Tu plan de comidas de hoy te espera${coma}.`
-              ];
-              cuerpoPush = frasesNutri[Math.floor(Math.random() * frasesNutri.length)];
-            } else if (esDescanso) {
-              // Antes se mandaba "¿entrenas hoy?" TODOS los días, también en los
-              // de descanso programado: el aviso contradecía al propio plan y
-              // empujaba justo el día que toca recuperar.
-              cuerpoPush = `Hoy toca descanso${coma}. Recuperar también es entrenar.`;
-            } else if (diaPlan && diaPlan.resumen) {
-              cuerpoPush = `Hoy toca: ${diaPlan.resumen}.`;
-            } else {
-              // Sin plan cargado (cliente antiguo, plan aún sin generar): aviso
-              // genérico de siempre.
-              const frasesPush = primerNombrePush ? [
-                `${primerNombrePush}, tu plan de hoy te está esperando.`,
-                `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
-                `Hoy toca${coma}. Un paso más.`
-              ] : [
-                'Tu plan de hoy te está esperando.',
-                '¿Entrenas hoy? Tienes el plan listo.',
-                'Hoy toca. Un paso más.'
-              ];
-              cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
-            }
-
-            try {
-              await webpush.sendNotification(
-                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-                // El día de la semana va en el título: es lo primero que se lee
-                // en la notificación, antes de desplegarla.
-                JSON.stringify({ title: `K-ONE · ${nombreDiaHoy}`, body: cuerpoPush, url: '/' })
-              );
-              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
-              // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
-              // portátil) recibía el push una vez POR DISPOSITIVO en la misma
-              // pasada del cron -- yaAvisadoHoy solo se rellenaba una vez al
-              // principio, antes del bucle, así que la segunda vuelta para el
-              // mismo email todavía no lo veía como "ya avisado".
-              yaAvisadoHoy.add(p.email);
-              pushEnviados++;
-            } catch (pushErr) {
-              // 404/410 = el navegador anuló la suscripción (desinstaló, borró
-              // datos del sitio...) -- limpiarla para no reintentar cada día
-              // contra un endpoint que ya no existe. Cualquier otro código (400
-              // por claves corruptas, 413...) se manda a Sentry -- si no, una
-              // suscripción rota reintenta en silencio cada día para siempre,
-              // sin que nadie se entere salvo mirando logs de Vercel a mano.
-              if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
-                await supa.from('push_subscriptions').delete().eq('id', sub.id);
-              } else {
-                console.warn('[notify-cron] push error:', pushErr.message);
-                capturarError(pushErr, { fn: 'notify-cron-push', endpoint: sub.endpoint });
-              }
-            }
-          }
-        }
-      } catch (pushBlockErr) { console.error('[notify-cron] push diario error:', pushBlockErr.message); }
-    }
 
     // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
     let backupOk = false;
