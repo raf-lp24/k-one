@@ -14147,13 +14147,85 @@
       return def ? `${def} ${t}` : t;
     }).join(', ');
 
+    // Unidades que se cuentan por piezas. Se escalan igual que los gramos: si
+    // no, al escalar un plato la etiqueta se movia y "2 huevos" seguia siendo
+    // 2, dejando la ficha de "Ver macros" sin cuadrar con el propio plato.
+    // Medido: 87% de coherencia en el recetario sin escalar, 29% despues de
+    // que el motor ajustara las raciones.
+    const _UNIDAD_ENTERA = /^(huevos?|claras?|latas?|tostas?|tostadas?|rebanadas?|reba[ñn]adas?|panecillos?|tortitas?|tortas de arroz|scoops?|lonchas?|filetes?|panes wassa|kiwis?|mandarinas?|higos?|ciruelas?|d[áa]tiles?|puñados?|pu[ñn]ados?|cdas?|cdtas?|cucharadas?|cucharaditas?)\b/i;
+    const _UNIDAD_MEDIOS = /^(pl[áa]tanos?|aguacates?|manzanas?|peras?|naranjas?|tomates?|melocotones?|melocot[óo]n|mangos?|boniatos?|patatas?|berenjenas?|calabacines?|calabac[íi]n|pimientos?|zanahorias?|granadas?|piezas?|unidades?)\b/i;
+    // Concordancia: "2 huevo" no lo escribe nadie. Se pluraliza (o se vuelve
+    // al singular) la palabra del alimento cuando la cantidad cambia de lado.
+    // Los casos con tilde se listan aparte porque la pierden al pluralizar
+    // (melocotón -> melocotones) y la regla general no lo cubre.
+    const _PLURAL_IRREGULAR = { 'melocotón': 'melocotones', 'calabacín': 'calabacines', 'dátil': 'dátiles', 'unidad': 'unidades', 'filete': 'filetes' };
+    const _aPlural = (p) => {
+      if (_PLURAL_IRREGULAR[p.toLowerCase()]) return _PLURAL_IRREGULAR[p.toLowerCase()];
+      if (/[aeiouáéíóú]$/i.test(p)) return p + 's';
+      if (/z$/i.test(p)) return p.slice(0, -1) + 'ces';
+      return p + 'es';
+    };
+    const _aSingular = (p) => {
+      for (const [sing, plur] of Object.entries(_PLURAL_IRREGULAR)) if (plur === p.toLowerCase()) return sing;
+      if (/ces$/i.test(p)) return p.slice(0, -3) + 'z';
+      if (/es$/i.test(p) && !/[aeiou]es$/i.test(p)) return p.slice(0, -2);
+      if (/s$/i.test(p)) return p.slice(0, -1);
+      return p;
+    };
+    // Ajusta el numero de las 1-2 primeras palabras ("manzana o pera" lleva dos).
+    const _concordar = (resto, cantidad) => {
+      const plural = cantidad > 1;
+      return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)( o ([A-Za-zÁÉÍÓÚáéíóúÑñ]+))?/, (todo, p1, conO, p2) => {
+        const n1 = plural ? _aPlural(p1) : _aSingular(p1);
+        if (!conO) return n1;
+        return n1 + ' o ' + (plural ? _aPlural(p2) : _aSingular(p2));
+      });
+    };
+
+    // "3/4" se lee mejor que "0,75" en una lista de la compra.
+    const _FRACCIONES = [[0.25, '1/4'], [1 / 3, '1/3'], [0.5, '1/2'], [2 / 3, '2/3'], [0.75, '3/4']];
+    const _formatearCantidad = (n) => {
+      // Sin decimales: la lista se separa por comas y "1,5 plátano" se
+      // partiria en "1" y "5 plátano". Entero a partir de 1, fraccion debajo.
+      if (n >= 1) return String(Math.round(n));
+      let mejor = _FRACCIONES[0];
+      for (const f of _FRACCIONES) if (Math.abs(f[0] - n) < Math.abs(mejor[0] - n)) mejor = f;
+      return mejor[1];
+    };
     const scaleIngredientes = (texto, factor) => {
       if (Math.abs(factor - 1) < 0.05) return texto;
-      return texto.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
-        const raw = parseFloat(num.replace(',', '.')) * factor;
-        const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
-        return `${Math.max(5, rounded)}${unit}`;
-      });
+      return texto.split(',').map(trozo => {
+        // 1) gramos y mililitros
+        let t = trozo.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
+          const raw = parseFloat(num.replace(',', '.')) * factor;
+          const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
+          return `${Math.max(5, rounded)}${unit}`;
+        });
+        // 2) unidades contables al principio del ingrediente ("2 huevos",
+        //    "1/2 plátano"). Solo al principio: dentro del texto un numero
+        //    suele ser parte de una nota, no una cantidad.
+        t = t.replace(/^(\s*)(\d+(?:[.,]\d+)?|\d+\/\d+)\s+(?![0-9])(.+)$/, (todo, sp, cant, resto) => {
+          if (/^(g|ml|gr)\b/i.test(resto)) return todo;      // ya lo ha hecho el paso 1
+          const entera = _UNIDAD_ENTERA.test(resto);
+          const medios = _UNIDAD_MEDIOS.test(resto);
+          if (!entera && !medios) return todo;
+          let n = cant.includes('/')
+            ? (parseFloat(cant.split('/')[0]) / parseFloat(cant.split('/')[1]))
+            : parseFloat(cant.replace(',', '.'));
+          if (!(n > 0)) return todo;
+          let nuevo = n * factor;
+          if (entera) nuevo = Math.max(1, Math.round(nuevo));
+          // Por debajo de una pieza se usan fracciones (1/4, 1/2, 3/4); a
+          // partir de una, numeros enteros.
+          else nuevo = nuevo < 1 ? Math.max(0.25, Math.round(nuevo * 4) / 4) : Math.round(nuevo);
+          if (nuevo === n) return todo;
+          // Solo se toca el numero de la palabra si de verdad cruza el 1:
+          // de 2 a 3 no hay nada que cambiar.
+          const restoOk = ((n > 1) === (nuevo > 1)) ? resto : _concordar(resto, nuevo);
+          return sp + _formatearCantidad(nuevo) + ' ' + restoOk;
+        });
+        return t;
+      }).join(',');
     };
 
     // Clasificación aproximada por palabras clave de qué ingrediente de la
