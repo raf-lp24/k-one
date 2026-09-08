@@ -24959,6 +24959,21 @@
       const _instalada = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
         || navigator.standalone === true;
       const _iosSinInstalar = !soportado && _esIOS && !_instalada;
+
+      // Visibilidad ANTES de cualquier await. Si se espera a
+      // serviceWorker.ready para decidir si se enseña, el interruptor tarda
+      // hasta 4 segundos en aparecer y el cliente ve el menú sin él y luego
+      // con él. Lo que decide si hay algo que ofrecer es sincrono; el await
+      // de abajo solo sirve para saber si está encendido o apagado.
+      contenedores.forEach(cont => {
+        cont.style.display = (soportado || _iosSinInstalar) ? '' : 'none';
+        const inp = cont.querySelector('.push-toggle-input');
+        // Deshabilitado mientras no se sabe el estado, pero solo la primera
+        // vez: si ya se resolvió antes, dejarlo como está evita que parpadee
+        // a "apagado" en cada llamada posterior.
+        if (inp && !inp.dataset.estadoResuelto) inp.disabled = true;
+      });
+
       let sub = null, denegado = false, hayError = false;
       if (soportado) {
         denegado = Notification.permission === 'denied';
@@ -24985,6 +25000,7 @@
         const hint = cont.querySelector('.push-toggle-hint');
         if (!input) return;
         if (_iosSinInstalar) {
+          input.dataset.estadoResuelto = '1';
           cont.style.display = '';
           input.checked = false;
           input.disabled = true;
@@ -25018,6 +25034,7 @@
           return;
         }
         cont.style.display = '';
+        input.dataset.estadoResuelto = '1';
         if (denegado) {
           input.checked = false;
           input.disabled = true;
