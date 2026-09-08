@@ -12479,6 +12479,14 @@
     // sesiones con cardio, frente a 4 de 4 en pérdida de grasa). Su objetivo era
     // justo el único que no se estaba entrenando.
     const mejorarResistencia = objetivo.includes('resistencia');
+    // "Ganar fuerza" caia dentro de ganarMusculo (la condicion mira 'Ganar'),
+    // asi que recibia un plan de hipertrofia. Para la NUTRICION esta bien
+    // -- fuerza tambien pide superavit --, pero el entreno no es el mismo:
+    // fuerza son pocas repeticiones con carga alta y descansos largos.
+    const ganarFuerza = objetivo.includes('fuerza');
+    // "Sentirme mejor en general" no activaba ninguna bandera: le llegaba,
+    // letra por letra, el mismo plan que a quien quiere ganar musculo.
+    const sentirseMejor = objetivo.includes('Sentirme');
 
     // DATOS DE SALUD (lesiones, alergias, enfermedades, medicación) — se usan más abajo
     // para adaptar ejercicios y nutrición, no solo para mostrarlos.
@@ -12892,7 +12900,7 @@
       const _cardioZona2 = lugar.includes('casa')
         ? ', cardio al final: 15-20 min en zona 2 (caminar rápido o bici; ritmo conversacional, RPE 3-4)'
         : ', cardio al final: 15-20 min en zona 2 (remo, bici o cinta; ritmo conversacional, RPE 3-4)';
-      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : (mejorarResistencia ? _cardioZona2 : '');
+      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
       // El remate interválico rota entre lo que de verdad hay en un gimnasio
       // normal (mismo patrón que la rotación de accesorios: semilla+bloqueMeso).
       // Antes siempre decía "corre, pedalea o rema" en el texto pero la tarjeta
@@ -12924,7 +12932,7 @@
       // que sí tiene.
       const prefFinisher = modalidadesDisponibles.find(m => m.nombre === u.preferenciaCardioFinisher);
       const modInterval = prefFinisher || modalidadesDisponibles[(semilla + bloqueMeso) % modalidadesDisponibles.length];
-      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : (mejorarResistencia ? _cardioZona2 : '');
+      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -13470,6 +13478,36 @@
         return `${s}×${reps}`;
       });
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: ajustarSeries(d.detalle) } : d);
+    }
+
+    // GANAR FUERZA: los basicos van a series de pocas repeticiones con carga
+    // alta. Solo los DOS primeros ejercicios basicos de cada sesion -- los
+    // accesorios se quedan en su rango, que es donde tienen sentido.
+    // Se hace aqui, sobre el texto ya montado, para que llegue a todas las
+    // plantillas sin tocarlas una a una (mismo patron que ajustarSeries).
+    if (!soloDieta && ganarFuerza) {
+      const BASICOS = /(press de banca|press banca|sentadilla|peso muerto|press militar|press de hombro|dominadas|remo con barra|prensa|hip thrust|zancadas|fondos en paralelas|empuje de cadera)/i;
+      // Las series del basico siguen la periodizacion como todo lo demas: si
+      // toca descarga, tambien baja aqui. Sin esto el 5x5 fijo se comia la
+      // semana de descarga.
+      const seriesFuerza = Math.min(6, Math.max(3, 5 + deltaSeries));
+      const aFuerza = (texto) => {
+        // Los parentesis llevan comas dentro ("(agarre neutro, baja hasta...)")
+        // y romperian el trozo de texto sobre el que se decide si el ejercicio
+        // es un basico. Se apartan y se devuelven al final.
+        const notas = [];
+        let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return '\u0000' + (notas.length - 1) + '\u0000'; });
+        let cambiados = 0;
+        t = t.replace(/([^,·]*?)(\d+)×(\d+)(?!\s*(?:s|seg|min)\b)/g, (m, nombre, ser, reps) => {
+          if (cambiados >= 2 || !BASICOS.test(nombre) || parseInt(reps, 10) < 6) return m;
+          cambiados++;
+          return nombre + seriesFuerza + '×5';
+        });
+        t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
+        return t;
+      };
+      semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aFuerza(d.detalle) } : d);
+      notasSalud.push('Tu objetivo es fuerza, no tamaño: en los dos básicos de cada sesión vas a 5×5 con carga alta (deberías llegar justo a la quinta repetición) y descansas 2-3 minutos entre series. Los accesorios se quedan en repeticiones altas. Sube el peso en cuanto completes las cinco series limpias.');
     }
 
     if (!soloDieta) {
