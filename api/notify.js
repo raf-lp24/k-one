@@ -287,14 +287,15 @@ async function handleCronRetencion(req, res) {
     return res.status(401).json({ error: 'No autorizado' });
   }
 
+  // El push NO depende de Resend: son dos canales independientes (VAPID vs
+  // RESEND_API_KEY) y hasta ahora compartían este `return` temprano, así que
+  // quedarse sin la key de email apagaba también los avisos al móvil aunque
+  // las claves VAPID siguieran puestas. El propio comentario que había aquí ya
+  // avisaba del riesgo; con el push movido al principio del cron, desacoplarlo
+  // es inmediato: se marca que no hay email y se sigue.
   const apiKey = process.env.RESEND_API_KEY;
-  // Nota: esto también deja sin correr el bloque de push de más abajo, no
-  // solo los emails -- ambos comparten este único cron diario. Hoy no es un
-  // problema real (RESEND_API_KEY está configurada en producción), pero si
-  // algún día se quita esa key sin querer, el push diario se apagaría con
-  // ella aunque las claves VAPID sigan puestas. Si eso llega a pasar, mover
-  // el bloque de push antes de este `if` para desacoplarlos.
-  if (!apiKey) return res.status(200).json({ ok: true, skipped: true });
+  const sinEmail = !apiKey;
+  if (sinEmail) console.warn('[notify-cron] sin RESEND_API_KEY: se omiten los emails, el push diario sí se manda');
 
   try {
     const supa = getSupabaseAdmin();
@@ -308,9 +309,9 @@ async function handleCronRetencion(req, res) {
     // reintentar sin esa columna para no dejar el cron entero sin perfiles.
     let perfiles;
     {
-      const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at, last_seen');
+      const r = await supa.from('profiles').select('id, nombre, email, userdata, created_at, last_seen, is_beta, beta_expires');
       if (r.error) {
-        const r2 = await supa.from('profiles').select('id, nombre, email, userdata, created_at');
+        const r2 = await supa.from('profiles').select('id, nombre, email, userdata, created_at, is_beta, beta_expires');
         perfiles = r2.data;
       } else {
         perfiles = r.data;
@@ -391,8 +392,17 @@ async function handleCronRetencion(req, res) {
             if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
             const ud = p.userdata || {};
             if (!ud.onboardingCompletado) continue;
+            // ANTES: solo `subscriptions.status` active/trialing. Eso dejaba
+            // FUERA del aviso diario a todo el que tiene el acceso concedido a
+            // mano (is_beta + beta_expires desde Jarvis): invitados, betas y —
+            // sobre todo— la propia cuenta de admin, que no paga por Stripe y
+            // por tanto no tiene fila en `subscriptions`. Resultado: el dueño
+            // nunca recibía su propio aviso de "hoy te toca X" (reportado el 8
+            // sept 2026: no llegó ni el de entreno ni el de descanso).
             const s = subByUser[p.id];
-            if (!s || !['active', 'trialing'].includes(s.status)) continue;
+            const pagaStripe = !!s && ['active', 'trialing'].includes(s.status);
+            const premiumConcedido = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > ahora.getTime());
+            if (!pagaStripe && !premiumConcedido) continue;
             const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
             if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
 
@@ -477,7 +487,9 @@ async function handleCronRetencion(req, res) {
 
     let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0;
 
-    for (const p of (perfiles || [])) {
+    // Las tres fases de email se saltan enteras si no hay RESEND_API_KEY;
+    // el push de arriba ya se ha mandado, que es lo que importa.
+    for (const p of (sinEmail ? [] : (perfiles || []))) {
       const ud = p.userdata || {};
       const sub = subByUser[p.id];
       const tieneSubActiva = sub && ['active', 'trialing'].includes(sub.status);
@@ -681,7 +693,7 @@ async function handleCronRetencion(req, res) {
 
     // RESUMEN SEMANAL: cada lunes, email a clientes activos con su progreso
     let enviadosResumen = 0;
-    const esLunes = ahora.getDay() === 1;
+    const esLunes = !sinEmail && ahora.getDay() === 1;
     if (esLunes) {
       const semanaMs = 7 * 86400000;
       const { data: resumenEnviados } = await supa.from('email_log').select('destinatario').eq('tipo', 'resumen_semanal').gte('created_at', new Date(ahora.getTime() - semanaMs).toISOString());
@@ -814,6 +826,8 @@ async function handleCronRetencion(req, res) {
     // AVISO DIARIO AL ADMIN: "qué requiere tu atención hoy" (una vez al día).
     // Consultas propias y defensivas para no depender de la lógica de retención.
     try {
+      if (sinEmail) { /* sin clave de email no hay digest que mandar */ }
+      else {
       const hoyStr = ahora.toISOString().slice(0, 10);
       const { data: yaDigest } = await supa.from('email_log')
         .select('id').eq('tipo', 'digest_admin').gte('created_at', hoyStr + 'T00:00:00').limit(1);
@@ -887,6 +901,7 @@ async function handleCronRetencion(req, res) {
             datos: JSON.stringify({ resumen: filas.map(f => `${f.t}: ${f.n}`).join(' · '), pagoFallido, cancela, premiumCaduca, inactivos, sinEntrenar, sinResponder })
           });
         }
+      }
       }
     } catch (digestErr) { console.error('[notify] digest admin error:', digestErr.message); }
 
