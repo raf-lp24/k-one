@@ -23301,11 +23301,62 @@
       const { data: { session } } = await supa.auth.getSession();
       if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
     } catch (e) {}
-    fetch('/api/notify', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ tipo, datos })
-    }).catch(() => {});
+    // ANTES: fetch(...).catch(()=>{}) — dispara y olvida. Si la petición no
+    // salía (red caída, bloqueador de anuncios, la pestaña se cierra antes de
+    // que salga, un 429 del rate-limit o un 5xx puntual), el aviso se perdía
+    // EN SILENCIO y nadie se enteraba: ni el admin recibía el "nuevo registro"
+    // ni quedaba rastro. Pasó de verdad con un alta del 6 sept 2026.
+    // Ahora el resultado se comprueba y, si falla, el aviso queda pendiente en
+    // localStorage y se reintenta en el siguiente arranque de la app.
+    try {
+      const r = await fetch('/api/notify', {
+        method: 'POST', headers, body: JSON.stringify({ tipo, datos })
+      });
+      if (r.ok) return true;
+      console.warn('[notify] respuesta no OK:', r.status);
+    } catch (e) {
+      console.warn('[notify] no se pudo enviar:', e.message);
+    }
+    _guardarNotificacionPendiente(tipo, datos);
+    return false;
+  }
+
+  // Cola de avisos que no llegaron a enviarse. Solo se guardan los tipos que
+  // no exigen sesión, porque son los que se disparan en momentos frágiles
+  // (registro, lead) y los únicos que se pueden reintentar sin token.
+  const _TIPOS_REINTENTABLES = ['bienvenida', 'lead'];
+  function _guardarNotificacionPendiente(tipo, datos) {
+    if (!_TIPOS_REINTENTABLES.includes(tipo)) return;
+    try {
+      const cola = JSON.parse(localStorage.getItem('kone_notif_pendientes') || '[]');
+      // Sin duplicados del mismo tipo+email, y tope de 5 para no crecer sin fin.
+      const clave = tipo + '|' + (datos.email || '');
+      if (cola.some(x => x.clave === clave)) return;
+      cola.push({ clave, tipo, datos, ts: Date.now() });
+      localStorage.setItem('kone_notif_pendientes', JSON.stringify(cola.slice(-5)));
+    } catch (e) {}
+  }
+
+  async function _reintentarNotificacionesPendientes() {
+    let cola;
+    try { cola = JSON.parse(localStorage.getItem('kone_notif_pendientes') || '[]'); } catch (e) { return; }
+    if (!cola.length) return;
+    // Se descartan los avisos de más de 7 días: a esas alturas ya no aportan.
+    const vivos = cola.filter(x => Date.now() - (x.ts || 0) < 7 * 24 * 60 * 60 * 1000);
+    const fallidos = [];
+    for (const item of vivos) {
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const r = await fetch('/api/notify', {
+          method: 'POST', headers, body: JSON.stringify({ tipo: item.tipo, datos: item.datos })
+        });
+        if (!r.ok) fallidos.push(item);
+      } catch (e) { fallidos.push(item); }
+    }
+    try {
+      if (fallidos.length) localStorage.setItem('kone_notif_pendientes', JSON.stringify(fallidos));
+      else localStorage.removeItem('kone_notif_pendientes');
+    } catch (e) {}
   }
 
   // ===== OPINIÓN PÚBLICA (desde la landing, sin login) =====
@@ -24496,6 +24547,12 @@
         window.history.replaceState({}, '', window.location.pathname);
       }
     });
+
+    // Reintenta los avisos al admin que no llegaron a salir (típicamente el
+    // "nuevo registro", que se dispara en el momento más frágil: justo tras
+    // signUp, antes de confirmar el email). Sin await: no debe retrasar el
+    // arranque de la app.
+    _reintentarNotificacionesPendientes();
 
     // Restaura la sesión activa de Supabase (si la hay) y sincroniza el perfil.
     let session = null;
