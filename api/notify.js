@@ -36,6 +36,43 @@ function _indiceDiaMadrid(fecha) {
   return (d.getDay() + 6) % 7;
 }
 
+// Push a UN cliente concreto. Hasta ahora solo existían dos caminos de push:
+// el aviso diario del cron (a todos los que tocaba) y el de admins. No había
+// forma de avisar a una persona por algo que le pasa solo a ella -- que le
+// falle el cobro, que le respondas, que sea lunes y tenga resumen. Los mismos
+// cuidados que la de admins: captura sus propios errores (es un extra sobre el
+// email, no un requisito), limpia la suscripción si el navegador ya no existe
+// (404/410) y no dice nada si el cliente no tiene los avisos activados.
+async function enviarPushAUsuario(userId, { title, body, url }) {
+  const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  if (!vapidPublic || !vapidPrivate || !userId) return 0;
+  let enviados = 0;
+  try {
+    webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
+    const supaAdmin = getSupabaseAdmin();
+    const { data: subs } = await supaAdmin.from('push_subscriptions')
+      .select('id, endpoint, p256dh, auth_key').eq('user_id', userId);
+    if (!subs || !subs.length) return 0;   // no tiene avisos activados: normal
+    for (const sub of subs) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+          JSON.stringify({ title, body, url: url || '/' })
+        );
+        enviados++;
+      } catch (pushErr) {
+        if (pushErr.statusCode === 404 || pushErr.statusCode === 410) {
+          await supaAdmin.from('push_subscriptions').delete().eq('id', sub.id);
+        } else {
+          console.warn('[notify] push a usuario error:', pushErr.message);
+        }
+      }
+    }
+  } catch (e) { console.warn('[notify] enviarPushAUsuario error:', e.message); }
+  return enviados;
+}
+
 // Push instantáneo al admin (no espera al cron diario) -- usa la misma
 // suscripción push_subscriptions que ya tienen los clientes, solo que aquí
 // el "cliente" es la cuenta del propio admin (misma tabla, mismo RLS: se
@@ -421,8 +458,23 @@ async function handleCronRetencion(req, res) {
             const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
             const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
 
+            // Días que lleva sin abrir la app (mismo criterio que los emails
+            // de reenganche: last_seen del front, con last_sign_in_at de
+            // fallback). Solo cambia el TEXTO del aviso diario; no se manda
+            // ninguna notificación extra.
+            const _ultimaVezPush = p.last_seen || authLastSignIn[p.id] || null;
+            const _diasSinEntrar = _ultimaVezPush
+              ? (ahora.getTime() - new Date(_ultimaVezPush).getTime()) / 86400000
+              : 0;
             let cuerpoPush;
-            if (soloNutricion) {
+            if (_diasSinEntrar >= 7) {
+              const _d = Math.round(_diasSinEntrar);
+              cuerpoPush = _diasSinEntrar >= 21
+                ? `Tres semanas fuera${coma}. Se vuelve entrenando hoy, no mañana.`
+                : (_diasSinEntrar >= 14
+                    ? `${_d} días sin aparecer${coma}. Tu plan sigue aquí, tal cual lo dejaste.`
+                    : `${_d} días sin entrenar${coma}. Hoy es buen día para retomarlo.`);
+            } else if (soloNutricion) {
               const frasesNutri = [
                 `Tus comidas de hoy ya están listas${coma}.`,
                 `Hoy toca cuidar la alimentación${coma}. Tienes tu menú preparado.`,
@@ -720,8 +772,30 @@ async function handleCronRetencion(req, res) {
         if (!ud.onboardingCompletado) continue;
 
         const nombre = (p.nombre || '').split(' ')[0] || 'Crack';
-        const entrenos = (ud.entrenosCompletados || []).length;
-        const racha = ud.rachaDias || 0;
+        // Entrenos REALES de los últimos 7 días, no `entrenosCompletados`:
+        // ese array lo escribe el navegador y se vacía en cada check-in (ver el
+        // comentario de _entrenosSemanaAnterior), así que el resumen del lunes
+        // podía decir "0 entrenos" a quien había entrenado toda la semana.
+        // historialEntrenos son fechas persistentes: la misma fuente que usan
+        // los hitos y la comparación con la semana anterior.
+        const _fechasEntreno = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
+        const _hace7d = new Date(ahora.getTime() - 7 * 86400000);
+        const entrenos = _fechasEntreno.filter(f => {
+          const d = new Date(f);
+          return !isNaN(d.getTime()) && d >= _hace7d;
+        }).length;
+        // La racha también se recalcula sobre las fechas: días consecutivos
+        // hacia atrás desde hoy o desde ayer (si hoy todavía no ha entrenado).
+        const racha = (() => {
+          const set = new Set(_fechasEntreno.map(f => String(f).slice(0, 10)));
+          if (!set.size) return 0;
+          const unDia = 86400000;
+          let cursor = new Date(ahora.getTime());
+          if (!set.has(cursor.toISOString().slice(0, 10))) cursor = new Date(cursor.getTime() - unDia);
+          let n = 0;
+          while (set.has(cursor.toISOString().slice(0, 10))) { n++; cursor = new Date(cursor.getTime() - unDia); }
+          return n;
+        })();
         const semana = ud.progreso?.semana || 1;
 
         // Datos extra a petición del usuario (18 ago 2026): comparación con
@@ -833,6 +907,19 @@ async function handleCronRetencion(req, res) {
         });
         await supa.from('email_log').insert({ tipo: 'resumen_semanal', destinatario: p.email, asunto: `Semana ${semana}`, html: htmlResumen, datos: JSON.stringify({ nombre, entrenos, racha, semana, resumen: `Resumen semana ${semana}: ${entrenos} entrenos, racha ${racha} días. Mensaje: "${mensajeSemana}"` }) });
         enviadosResumen++;
+        // Push corto además del correo: el resumen del lunes es de lo poco
+        // que el cliente AGRADECE recibir (sus números, no una petición), y
+        // en notificación se ve; en correo se abre poco. El detalle completo
+        // sigue en el email y en la app -- el push solo lo empuja a mirarlo.
+        try {
+          await enviarPushAUsuario(p.id, {
+            title: `K-ONE · Tu semana ${semana}`,
+            body: entrenos > 0
+              ? `${entrenos} entreno${entrenos === 1 ? '' : 's'} y racha de ${racha} día${racha === 1 ? '' : 's'}. Mira cómo ha ido.`
+              : 'Semana nueva, hoja en blanco. Tu plan te espera.',
+            url: '/'
+          });
+        } catch (e) {}
       }
     }
 
@@ -985,6 +1072,7 @@ module.exports.ADMIN_EMAIL = ADMIN_EMAIL;
 // nueva -- es un require entre ficheros del mismo despliegue, y el límite de
 // 12 funciones del plan Hobby ya está justo.
 module.exports.enviarPushAAdmins = enviarPushAAdmins;
+module.exports.enviarPushAUsuario = enviarPushAUsuario;
 
 async function handlePost(req, res) {
 

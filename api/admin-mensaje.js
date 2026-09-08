@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
       if (!texto) return res.status(400).json({ error: 'texto requerido' });
 
       const { data: mensaje, error: eGet } = await supabaseAdmin
-        .from('mensajes_cliente').select('id, nombre, email, asunto').eq('id', id).maybeSingle();
+        .from('mensajes_cliente').select('id, user_id, nombre, email, asunto').eq('id', id).maybeSingle();
       if (eGet) { console.error('[admin-mensaje] responder_mensaje get error:', eGet.message); return res.status(500).json({ error: 'Error leyendo el mensaje' }); }
       if (!mensaje) return res.status(404).json({ error: 'No existe ese mensaje' });
 
@@ -71,6 +71,15 @@ module.exports = async (req, res) => {
           // aunque Resend recibe JSON y no texto crudo de cabeceras) y lo
           // acota a una longitud razonable para un asunto.
           const asuntoSeguro = (mensaje.asunto || '').replace(/[\r\n]+/g, ' ').slice(0, 150);
+          try {
+            if (mensaje.user_id) {
+              await enviarPushAUsuario(mensaje.user_id, {
+                title: 'K-ONE · Tienes respuesta',
+                body: 'Hemos contestado a tu mensaje. Ábrelo cuando puedas.',
+                url: '/'
+              });
+            }
+          } catch (e) {}
           await enviarEmail(apiKey, {
             from: 'K-ONE <equipo@k-one.fit>',
             reply_to: 'k.one.fit26@gmail.com',

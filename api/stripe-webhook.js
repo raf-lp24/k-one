@@ -3,7 +3,7 @@ const { capturarError } = require('./_sentry');
 // Push al móvil del admin para lo que de verdad urge (pago fallido, baja).
 // Hasta ahora el webhook solo mandaba emails AL CLIENTE: de un pago fallido
 // o una baja, el dueño solo se enteraba al día siguiente por el digest.
-const { enviarPushAAdmins } = require('./notify');
+const { enviarPushAAdmins, enviarPushAUsuario } = require('./notify');
 
 // Vercel necesita el cuerpo de la petición sin parsear para verificar la firma de Stripe.
 module.exports.config = { api: { bodyParser: false } };
@@ -350,7 +350,7 @@ module.exports = async (req, res) => {
             let prof = null;
             if (subscription.metadata?.supabase_user_id) {
               const { data } = await supabaseAdmin.from('profiles')
-                .select('nombre, email').eq('id', subscription.metadata.supabase_user_id).maybeSingle();
+                .select('id, nombre, email').eq('id', subscription.metadata.supabase_user_id).maybeSingle();
               prof = data;
             }
             if (!prof) {
@@ -358,11 +358,24 @@ module.exports = async (req, res) => {
                 .select('user_id').eq('stripe_customer_id', subscription.customer).maybeSingle();
               if (sub?.user_id) {
                 const { data } = await supabaseAdmin.from('profiles')
-                  .select('nombre, email').eq('id', sub.user_id).maybeSingle();
+                  .select('id, nombre, email').eq('id', sub.user_id).maybeSingle();
                 prof = data;
               }
             }
             if (prof?.email) {
+              // Push además del correo: es el aviso más urgente que recibe un
+              // cliente (si no actualiza la tarjeta, pierde el acceso) y el que
+              // peor funciona por email, que se ve tarde o se va a promociones.
+              const _idCliente = subscription.metadata?.supabase_user_id || prof.id || null;
+              if (_idCliente) {
+                try {
+                  await enviarPushAUsuario(_idCliente, {
+                    title: 'K-ONE · No hemos podido cobrar tu suscripción',
+                    body: 'Revisa tu método de pago para no perder el acceso a tu plan.',
+                    url: '/'
+                  });
+                } catch (e) {}
+              }
               const primerNombre = (prof.nombre || '').split(' ')[0] || 'Hola';
               const APP_URL = process.env.APP_URL || 'https://k-one.fit';
               const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
