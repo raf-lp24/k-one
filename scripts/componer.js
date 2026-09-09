@@ -16,8 +16,16 @@ function componer(nombre, ingredientes, prep) {
   const avisos = [];
   a.sinDatos.forEach(t => avisos.push('NO RESUELVE: ' + t));
   a.sinCantidad.filter(t => !CERO.test(t.trim())).forEach(t => avisos.push('sin cantidad: ' + t));
-  const dev = Math.abs(kcal - a.kcal) / a.kcal;
-  if (dev > 0.08) avisos.push('etiqueta ' + kcal + ' vs suma ' + Math.round(a.kcal) + ' (' + Math.round(dev * 100) + '%)');
+  // La etiqueta sale de 4p+4c+9g (lo que hace op() y lo que ve el cliente),
+  // mientras a.kcal son las kcal reales de cada alimento. Las dos cifras NO
+  // pueden cuadrar cuando hay fibra: la fibra es parte de los hidratos pero no
+  // aporta 4 kcal/g. El cacao puro es el caso extremo -- 228 kcal reales frente
+  // a 433 por la formula, porque 33 de sus 58 g de hidratos son fibra. Sin
+  // descontarla, este aviso salta en toda receta con fibra de verdad y era un
+  // falso positivo.
+  const margen = 0.08 * a.kcal + 4 * a.f;
+  const dev = Math.abs(kcal - a.kcal);
+  if (dev > margen) avisos.push('etiqueta ' + kcal + ' vs suma ' + Math.round(a.kcal) + ' (' + Math.round(dev * 100 / a.kcal) + '%, fibra ' + a.f.toFixed(1) + 'g)');
   return {
     linea: `            op("${nombre}", "${ingredientes}", "${kcal} kcal", "${p}g prot", "${c}g carbs", "${g}g grasa", "${prep}"),`,
     kcal, p, c, g, fibra: a.f, avisos

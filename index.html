@@ -14242,7 +14242,12 @@
     // ingrediente -- cubre las fuentes más comunes del recetario, no
     // pretende ser exacta al gramo en casos raros o platos con varias
     // fuentes de proteína a la vez.
-    const INGREDIENTE_PROTEINA = /pechuga|pollo|pavo|ternera|solomillo|salmón|salmon|atún|atun|merluza|bacalao|dorada|lubina|sardina|caballa|trucha|rape|gambas|langostinos|calamar|pulpo|sepia|huevo|clara|queso batido|queso fresco|queso cottage|requesón|requeson|yogur griego|skyr|proteína en polvo|proteina en polvo|scoop de proteína|scoop proteína|tofu|seitán|seitan|garbanzos|lentejas|jamón cocido|jamon cocido|lomo embuchado/i;
+    // Faltaban fuentes de proteína que el recetario usa de verdad, y el efecto
+    // era visible: "jamón cocido" estaba pero "jamón serrano" no, así que en el
+    // mini bocadillo de serrano la etiqueta bajaba la proteína a la mitad y el
+    // jamón del plato seguía igual. El cliente leía "10g prot" en un bocadillo
+    // de jamón y queso.
+    const INGREDIENTE_PROTEINA = /pechuga|pollo|pavo|ternera|solomillo|salmón|salmon|atún|atun|bonito|emperador|merluza|bacalao|dorada|lubina|lenguado|sardina|sardinilla|boquerones|anchoas|caballa|trucha|rape|gambas|langostinos|calamar|pulpo|sepia|mejillones|huevo|clara|queso batido|queso fresco|queso cottage|queso de cabra|queso manchego|requesón|requeson|yogur griego|yogur natural|yogur de soja|kéfir|kefir|skyr|proteína en polvo|proteina en polvo|scoop de proteína|scoop proteína|scoop de caseína|tofu|tempeh|seitán|seitan|garbanzos|lentejas|alubias|jud[íi]as blancas|habas|edamame|jamón cocido|jamon cocido|jamón serrano|jamon serrano|jamón ibérico|jamon iberico|cecina|lomo embuchado/i;
     const INGREDIENTE_CARBOHIDRATO = /\barroz\b|pasta\b|macarrones|espaguetis|fideos|\bpan\b|tostadas?\b|\btosta\b|patata|boniato|\bavena\b|quinoa|cuscús|cuscus|tortitas? de (arroz|maíz|maiz)|\bbulgur\b|granola|muesli/i;
     const escalarIngredientesPorMacro = (texto, corrProt, corrCarbs) => {
       if (Math.abs(corrProt - 1) < 0.03 && Math.abs(corrCarbs - 1) < 0.03) return texto;
@@ -14253,11 +14258,14 @@
           : INGREDIENTE_CARBOHIDRATO.test(t) ? corrCarbs
           : 1;
         if (factor === 1) return t;
-        return t.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
-          const raw = parseFloat(num.replace(',', '.')) * factor;
-          const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
-          return `${Math.max(5, rounded)}${unit}`;
-        });
+        // Antes esto solo escalaba lo que llevaba "g" o "ml", así que un
+        // ingrediente contado por piezas ("1 tosta integral", "2 tortitas de
+        // arroz", "1 panecillo") se quedaba igual mientras el número de la
+        // etiqueta sí se movía. Con corrCarbs en su tope de 1,6 el cliente veía
+        // "46g carbs" sobre un bocadillo de una sola tosta. scaleIngredientes
+        // ya sabe escalar las dos cosas -- gramos y piezas, con su plural --,
+        // así que se usa esa en vez de repetir aquí la mitad del trabajo.
+        return scaleIngredientes(t, factor);
       }).join(', ');
     };
 
@@ -14330,31 +14338,31 @@
           momento: "Media mañana", hora: "10:30",
           porque: "Snack pequeño para estabilizar la glucosa y llegar sin hambre a la comida",
           opciones: [
-            op("Yogur griego con miel y nueces", "150g yogur griego 0%, 10g nueces, 1 cda miel, canela", "216 kcal", "14g prot", "22g carbs", "8g grasa", "Sin cocción · 1 min"),
-            op("Tostada de salmón ahumado y queso fresco", "1 tosta de centeno, 40g salmón ahumado, 30g queso fresco, eneldo", "192 kcal", "16g prot", "14g carbs", "8g grasa", "Sin cocción · 2 min"),
-            op("Queso batido con manzana y canela", "150g queso batido 0%, 1 manzana troceada, canela, 10g pipas de calabaza", "259 kcal", "18g prot", "40g carbs", "3g grasa", "Sin cocción · 2 min"),
-            op("Kéfir con frutos rojos y semillas", "200ml kéfir natural, 80g frutos rojos, 5g semillas de lino", "148 kcal", "8g prot", "20g carbs", "4g grasa", "Sin cocción · 1 min"),
+            op("Yogur griego con frutos rojos, nueces y canela", "200g yogur griego 0%, 10g nueces, 150g frutos rojos, canela", "244 kcal", "23g prot", "20g carbs", "8g grasa", "Sin cocción · 2 min"),
+            op("Tostada de salmón ahumado con queso fresco y aguacate", "1 tosta de centeno, 50g salmón ahumado, 40g queso fresco, 30g aguacate, eneldo", "286 kcal", "22g prot", "18g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Queso batido con manzana y canela", "200g queso batido 0%, 1 manzana troceada, 5g pipas de calabaza, canela", "270 kcal", "22g prot", "41g carbs", "2g grasa", "Sin cocción · 2 min"),
+            op("Kéfir y skyr con frutos rojos y semillas de lino", "150ml kéfir natural, 100g skyr natural, 100g frutos rojos, 10g semillas de lino", "218 kcal", "19g prot", "22g carbs", "6g grasa", "Sin cocción · 2 min"),
             op("Mini bocadillo de pavo con tomate", "1 panecillo integral pequeño, 60g pavo en lonchas, tomate, orégano", "257 kcal", "19g prot", "34g carbs", "5g grasa", "Sin cocción · 2 min"),
-            op("Fruta de temporada con almendras y yogur griego", "1 manzana o pera, 15g almendras tostadas, 125g yogur griego 0%", "277 kcal", "16g prot", "33g carbs", "9g grasa", "Sin cocción · 2 min"),
-            op("Skyr con fruta y canela", "150g skyr natural, 1 pieza de fruta de temporada, canela al gusto", "157 kcal", "17g prot", "20g carbs", "1g grasa", "Sin cocción · 2 min"),
-            op("Queso batido con cerezas y canela", "150g queso batido 0%, 80g cerezas, canela", "162 kcal", "16g prot", "20g carbs", "2g grasa", "Sin cocción · 1 min"),
-            op("Huevos duros con tomate cherry y AOVE", "2 huevos duros, 100g tomate cherry, 5g AOVE, sal", "224 kcal", "15g prot", "5g carbs", "16g grasa", "Fácil · 12 min"),
+            op("Fruta de temporada con almendras y yogur griego", "1 manzana, 10g almendras tostadas, 200g yogur griego 0%", "282 kcal", "23g prot", "34g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Skyr con pera y semillas de lino", "150g skyr natural, 1 pera, 10g semillas de lino, canela", "265 kcal", "19g prot", "36g carbs", "5g grasa", "Sin cocción · 2 min"),
+            op("Queso batido con cerezas, almendras y canela", "200g queso batido 0%, 150g cerezas, 10g almendras, canela", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Huevos duros con tomate cherry y zanahoria", "2 huevos duros, 200g tomate cherry, 100g zanahoria, sal, pimienta", "239 kcal", "17g prot", "18g carbs", "11g grasa", "Fácil · 12 min"),
             op("Tosta pequeña de pavo con tomate", "1 tosta pequeña integral, 40g pavo en lonchas, tomate", "173 kcal", "16g prot", "16g carbs", "5g grasa", "Sin cocción · 2 min"),
-            op("Cecina con tortitas de arroz", "40g cecina, 2 tortitas de arroz", "182 kcal", "18g prot", "14g carbs", "6g grasa", "Sin cocción · 1 min"),
-            op("Batido de proteína whey con agua y hielo", "1 scoop proteína whey, agua, hielo, canela", "125 kcal", "25g prot", "4g carbs", "1g grasa", "Fácil · 2 min"),
-            op("Yogur griego con pepino y menta (estilo tzatziki)", "150g yogur griego, 120g pepino rallado, menta, ajo, 5g AOVE", "213 kcal", "14g prot", "10g carbs", "13g grasa", "Sin cocción · 5 min"),
+            op("Cecina con tortitas de arroz y zanahoria", "40g cecina, 2 tortitas de arroz, 150g zanahoria", "237 kcal", "19g prot", "29g carbs", "5g grasa", "Sin cocción · 3 min"),
+            op("Batido de proteína con plátano y avena", "1 scoop proteína whey, 1 plátano, 20g copos de avena, agua, canela", "311 kcal", "28g prot", "43g carbs", "3g grasa", "Fácil · 3 min"),
+            op("Tzatziki casero con bastones de zanahoria", "150g yogur griego 0%, 100g pepino rallado, 150g zanahoria, menta, ajo, 5g AOVE", "214 kcal", "17g prot", "23g carbs", "6g grasa", "Sin cocción · 5 min"),
             op("Pavo con pepinillos y bastones de zanahoria", "60g pavo en lonchas, 50g pepinillos, 100g zanahoria, mostaza", "121 kcal", "15g prot", "13g carbs", "1g grasa", "Sin cocción · 3 min"),
-            op("Sardinillas en lata con tomate", "1 lata pequeña sardinillas, tomate en rodajas, AOVE", "222 kcal", "18g prot", "6g carbs", "14g grasa", "Sin cocción · 2 min"),
+            op("Sardinillas en lata con tomate y pimiento", "1 lata pequeña sardinillas, 200g tomate, 150g pimiento rojo, 5g AOVE", "248 kcal", "18g prot", "17g carbs", "12g grasa", "Sin cocción · 3 min"),
             // "Media mañana" era la toma más corta (17 opciones, medido sobre 20
             // semanas) y la comparten tres objetivos, así que ampliarla aquí
             // llega a casi todos los clientes de 4-5 comidas.
-            op("Requesón con tomate cherry y orégano", "150g requesón, 100g tomate cherry, orégano, pimienta", "175 kcal", "19g prot", "9g carbs", "7g grasa", "Sin cocción · 2 min"),
+            op("Requesón con tomate cherry, zanahoria y orégano", "150g requesón, 150g tomate cherry, 100g zanahoria, orégano, pimienta", "227 kcal", "21g prot", "20g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Edamame con sal y limón", "150g edamame, sal, limón", "196 kcal", "18g prot", "13g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Lata de atún con tomate y AOVE", "1 lata atún al natural, 100g tomate, 5g AOVE, orégano", "154 kcal", "21g prot", "4g carbs", "6g grasa", "Sin cocción · 2 min"),
-            op("Queso cottage con pepino, tomate y eneldo", "200g queso cottage, 100g pepino, 100g tomate cherry, eneldo", "201 kcal", "22g prot", "17g carbs", "5g grasa", "Sin cocción · 3 min"),
-            op("Tortitas de arroz con queso fresco y pavo", "3 tortitas de arroz, 40g queso fresco, 40g pavo en lonchas", "244 kcal", "20g prot", "23g carbs", "8g grasa", "Sin cocción · 3 min"),
-            op("Zanahoria y apio con hummus casero y huevo duro", "2 zanahorias, 2 ramas de apio, 50g hummus casero, 1 huevo duro, pimentón", "291 kcal", "13g prot", "26g carbs", "15g grasa", "Fácil · 12 min"),
-            op("Yogur natural con arándanos y semillas de lino", "150g yogur natural, 80g arándanos, 10g semillas de lino", "201 kcal", "8g prot", "22g carbs", "9g grasa", "Sin cocción · 2 min"),
+            op("Lata de atún con ensalada de tomate y zanahoria", "1 lata atún al natural, 150g tomate, 100g zanahoria, 5g AOVE, orégano", "210 kcal", "23g prot", "16g carbs", "6g grasa", "Sin cocción · 3 min"),
+            op("Queso cottage con tomate, zanahoria y eneldo", "200g queso cottage, 150g tomate cherry, 100g zanahoria, eneldo", "237 kcal", "23g prot", "25g carbs", "5g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de arroz con queso fresco, pavo y zanahoria", "2 tortitas de arroz, 40g queso fresco, 50g pavo en lonchas, 150g zanahoria", "292 kcal", "23g prot", "32g carbs", "8g grasa", "Sin cocción · 3 min"),
+            op("Zanahoria y apio con hummus casero y huevos duros", "150g zanahoria, 2 ramas de apio, 30g hummus casero, 2 huevos duros, pimentón", "304 kcal", "18g prot", "22g carbs", "16g grasa", "Fácil · 12 min"),
+            op("Yogur griego con arándanos y semillas de lino", "200g yogur griego 0%, 100g arándanos, 10g semillas de lino", "237 kcal", "23g prot", "25g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Requesón con melocotón y canela", "150g requesón, 1 melocotón, canela", "169 kcal", "17g prot", "5g carbs", "9g grasa", "Sin cocción · 3 min")
           ]
         },
@@ -14395,26 +14403,26 @@
           momento: "Merienda", hora: "17:30",
           porque: "Post-entreno ideal si entrenas por la tarde — tómalo en los 30-60 min tras acabar. Si no entrenas hoy, elige la opción más ligera o saltatela",
           opciones: [
-            op("Yogur griego con plátano y miel", "150g yogur griego 0%, 1 plátano, 1 cda miel", "242 kcal", "14g prot", "42g carbs", "2g grasa", "Sin cocción · 1 min"),
+            op("Yogur griego con plátano y canela", "200g yogur griego 0%, 1 plátano, canela", "237 kcal", "22g prot", "35g carbs", "1g grasa", "Sin cocción · 2 min"),
             op("Tostada de pavo con queso fresco y tomate", "1 tostada integral, 80g pavo en lonchas, 30g queso fresco, tomate cherry", "271 kcal", "30g prot", "22g carbs", "7g grasa", "Sin cocción · 3 min"),
-            op("Hummus con crudités y huevo duro", "60g hummus casero, 2 zanahorias, 100g pepino, 1 huevo duro, pimentón", "312 kcal", "14g prot", "28g carbs", "16g grasa", "Fácil · 12 min"),
+            op("Hummus con crudités y huevos duros", "30g hummus casero, 150g zanahoria, 100g pepino, 2 huevos duros, pimentón", "308 kcal", "18g prot", "23g carbs", "16g grasa", "Fácil · 12 min"),
             op("Smoothie de frutos rojos y yogur", "100g frutos rojos, 150g yogur griego 0%, 1/2 plátano, hielo", "194 kcal", "14g prot", "30g carbs", "2g grasa", "Fácil · 3 min"),
             op("Queso batido con arándanos y nueces", "200g queso batido 0%, 60g arándanos, 15g nueces troceadas", "256 kcal", "24g prot", "22g carbs", "8g grasa", "Sin cocción · 1 min"),
-            op("Tostada de crema de cacahuete con plátano", "1 tosta integral, 15g crema de cacahuete, 1/2 plátano, canela", "242 kcal", "8g prot", "30g carbs", "10g grasa", "Sin cocción · 2 min"),
+            op("Tostada de crema de cacahuete con plátano y queso batido", "1 tosta integral, 10g crema de cacahuete, 1/2 plátano, 200g queso batido 0%, canela", "355 kcal", "28g prot", "45g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Edamame con sal marina y limón", "150g edamame cocido, sal marina, limón", "192 kcal", "16g prot", "14g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Mini bocadillo de jamón serrano y tomate", "1 panecillo integral, 30g jamón serrano, tomate rallado, AOVE", "321 kcal", "11g prot", "31g carbs", "17g grasa", "Sin cocción · 3 min"),
-            op("Fruta de temporada con almendras y yogur griego", "1 manzana o pera, 15g almendras tostadas, 125g yogur griego 0%", "277 kcal", "16g prot", "33g carbs", "9g grasa", "Sin cocción · 2 min"),
-            op("Yogur de soja con mandarina y semillas de girasol", "150g yogur de soja, 1 mandarina, 10g semillas de girasol", "193 kcal", "8g prot", "20g carbs", "9g grasa", "Sin cocción · 1 min"),
-            op("Yogur griego con pera, canela y nueces", "150g yogur griego 0%, 1 pera, 10g nueces, canela", "271 kcal", "18g prot", "34g carbs", "7g grasa", "Sin cocción · 2 min"),
-            op("Palitos de zanahoria con guacamole casero y huevo duro", "2 zanahorias en bastones, 50g guacamole casero, 1 huevo duro", "224 kcal", "9g prot", "20g carbs", "12g grasa", "Sin cocción · 12 min"),
-            op("Requesón con manzana, miel y almendras", "100g requesón, 1 manzana, 1 cdta miel, 10g almendras", "286 kcal", "15g prot", "34g carbs", "10g grasa", "Sin cocción · 3 min"),
+            op("Mini bocadillo de jamón serrano con queso fresco y tomate", "1 tosta integral, 40g jamón serrano, 70g queso fresco, 100g tomate rallado", "352 kcal", "29g prot", "23g carbs", "16g grasa", "Sin cocción · 3 min"),
+            op("Fruta de temporada con almendras y yogur griego", "1 manzana, 10g almendras tostadas, 200g yogur griego 0%", "282 kcal", "23g prot", "34g carbs", "6g grasa", "Sin cocción · 2 min"),
+            op("Yogur de soja con mandarina, proteína y semillas de girasol", "200g yogur de soja, 1 mandarina, 1 scoop proteína whey, 5g semillas de girasol", "342 kcal", "32g prot", "31g carbs", "10g grasa", "Sin cocción · 2 min"),
+            op("Yogur griego con pera, canela y nueces", "200g yogur griego 0%, 1 pera, 5g nueces, canela", "264 kcal", "22g prot", "35g carbs", "4g grasa", "Sin cocción · 2 min"),
+            op("Palitos de zanahoria con guacamole casero, pavo y huevo duro", "150g zanahoria, 25g guacamole casero, 60g pavo en lonchas, 1 huevo duro", "245 kcal", "22g prot", "19g carbs", "9g grasa", "Sin cocción · 12 min"),
+            op("Requesón con manzana, canela y almendras", "200g requesón, 1 manzana, 10g almendras, canela", "370 kcal", "27g prot", "34g carbs", "14g grasa", "Sin cocción · 3 min"),
             op("Tortitas de arroz con pavo y tomate", "2 tortitas de arroz, 40g pavo en lonchas, 120g tomate", "137 kcal", "11g prot", "21g carbs", "1g grasa", "Sin cocción · 3 min"),
             op("Batido de proteína con agua y canela", "1 scoop proteína whey, agua, hielo, canela", "125 kcal", "25g prot", "4g carbs", "1g grasa", "Fácil · 2 min"),
             op("Kiwi con yogur griego y canela", "2 kiwis, 150g yogur griego 0%, canela", "185 kcal", "17g prot", "27g carbs", "1g grasa", "Sin cocción · 2 min"),
             op("Pudding de chía con yogur griego y frutos rojos", "15g semillas de chía, 150g yogur griego 0%, 100ml leche semidesnatada, 80g frutos rojos, canela", "243 kcal", "22g prot", "23g carbs", "7g grasa", "Sin cocción · 5 min + reposo"),
-            op("Requesón con pera, nueces y canela", "150g requesón, 1 pera, 15g nueces, canela", "368 kcal", "22g prot", "34g carbs", "16g grasa", "Sin cocción · 3 min"),
-            op("Tortitas de arroz con aguacate y huevos", "3 tortitas de arroz, 40g aguacate, 2 huevos cocidos, sal en escamas", "325 kcal", "17g prot", "26g carbs", "17g grasa", "Fácil · 12 min"),
-            op("Batido de cacao con crema de almendra", "250ml leche semidesnatada, 10g cacao puro, 15g crema de almendra, hielo", "242 kcal", "13g prot", "16g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Requesón con pera, nueces y canela", "200g requesón, 1 pera, 8g nueces, canela", "374 kcal", "27g prot", "35g carbs", "14g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de arroz con aguacate, huevo y pavo", "2 tortitas de arroz, 20g aguacate, 2 huevos cocidos, 50g pavo en lonchas, sal en escamas", "310 kcal", "27g prot", "19g carbs", "14g grasa", "Fácil · 12 min"),
+            op("Batido de cacao y proteína con crema de almendra", "200ml leche semidesnatada, 10g cacao puro, 5g crema de almendra, 1 scoop proteína whey, hielo", "302 kcal", "34g prot", "19g carbs", "10g grasa", "Sin cocción · 3 min"),
             op("Skyr con manzana y semillas de chía", "200g skyr, 1 manzana, 10g semillas de chía, canela", "280 kcal", "24g prot", "37g carbs", "4g grasa", "Sin cocción · 3 min"),
             op("Tosta integral con queso fresco y salmón ahumado", "1 tosta integral, 50g queso fresco, 40g salmón ahumado, eneldo", "263 kcal", "24g prot", "17g carbs", "11g grasa", "Sin cocción · 4 min"),
             op("Edamame con pipas de calabaza", "120g edamame, 10g pipas de calabaza, sal", "200 kcal", "16g prot", "16g carbs", "8g grasa", "Fácil · 6 min")
@@ -15316,6 +15324,17 @@
       'proteina en polvo': 80, 'scoop de proteína': 80, 'scoop proteína': 80, 'tofu': 12,
       'seitán': 25, 'seitan': 25, 'garbanzos': 9, 'lentejas': 9, 'jamón cocido': 18,
       'jamon cocido': 18, 'lomo embuchado': 30,
+      // Faltaban y el plato se quedaba sin contar (ver _macroRealTotal).
+      'jamón serrano': 31, 'jamon serrano': 31, 'jamón ibérico': 31, 'jamon iberico': 31,
+      'cecina': 39, 'bonito': 23, 'emperador': 20, 'lenguado': 17, 'sardinilla': 25,
+      'boquerones': 19, 'anchoas': 26, 'mejillones': 24, 'yogur natural': 4,
+      'yogur de soja': 4, 'kéfir': 3, 'kefir': 3, 'queso de cabra': 19,
+      'queso manchego': 26, 'tempeh': 19, 'edamame': 11, 'alubias': 8,
+      'judías blancas': 8, 'judias blancas': 8, 'habas': 8, 'pavo en lonchas': 22,
+      'crema de cacahuete': 25, 'crema de almendra': 21, 'mantequilla de almendra': 21,
+      'nueces': 15, 'almendras': 21, 'pipas de calabaza': 19, 'semillas de calabaza': 19,
+      'semillas de girasol': 21, 'semillas de lino': 18, 'semillas de chía': 17,
+      'hummus': 8, 'tahini': 17, 'guacamole': 2, 'aguacate': 2,
     };
     const MACROS_CARBS_POR_100G = {
       'arroz': 28, 'pasta': 25, 'macarrones': 25, 'espaguetis': 25, 'fideos': 25, 'pan': 49,
@@ -15329,21 +15348,41 @@
     const _clavesCarbs = _clavesPorLongitud(MACROS_CARBS_POR_100G);
     // Suma el macro real de TODAS las cláusulas reconocidas (no solo la
     // primera): un plato puede tener más de una fuente ("2 huevos + 100g pavo").
+    // BUG REAL encontrado 9 sept 2026: esta función sumaba SOLO los ingredientes
+    // que reconocía y se callaba los demás, y el resultado se usaba para
+    // sobrescribir la etiqueta. En el "Mini bocadillo de jamón serrano con queso
+    // fresco y tomate" la tabla tenía 'jamón cocido' pero no 'jamón serrano':
+    // se saltaba 45 g de jamón, contaba solo el queso y machacaba los 29 g de
+    // proteína correctos dejando "10g prot" en un bocadillo de jamón y queso.
+    // Una red de seguridad que no puede ver el plato entero no tiene derecho a
+    // corregirlo: si hay un ingrediente con gramos que la tabla no conoce, se
+    // devuelve null y la etiqueta original se queda como está.
     const _macroRealTotal = (texto, tabla, claves) => {
       let total = 0, encontrado = false;
+      let incompleto = false;
       (texto || '').split(',').forEach(x => {
         const t = x.trim().toLowerCase();
         if (!t) return;
-        const key = claves.find(k => t.includes(k));
-        if (!key) return;
         const m = t.match(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/);
-        if (!m) return;
+        const key = claves.find(k => t.includes(k));
+        if (!key) {
+          // Lleva una cantidad medible pero no sabemos qué aporta: la suma ya
+          // no representa el plato.
+          if (m && parseFloat(m[1].replace(',', '.'))) incompleto = true;
+          return;
+        }
+        // Y al contrario: sabemos que aporta pero no cuánto, porque va contado
+        // por piezas ("1 scoop proteína whey", "2 huevos duros"). Un scoop son
+        // ~25 g de proteína y se estaba contando como cero: el yogur de soja con
+        // proteína acababa mostrando 5 g. Sin poder medirlo, la suma tampoco
+        // vale para corregir.
+        if (!m) { incompleto = true; return; }
         const gramos = parseFloat(m[1].replace(',', '.'));
         if (!gramos) return;
         total += gramos * tabla[key] / 100;
         encontrado = true;
       });
-      return encontrado ? Math.round(total) : null;
+      return (encontrado && !incompleto) ? Math.round(total) : null;
     };
     {
       const _yaVerificadas = new Set();
@@ -19074,6 +19113,33 @@
   }
 
   const RECETA_PASOS = {
+    // Renombradas al subir la densidad de proteína de los snacks de déficit
+    "Tostada de crema de cacahuete con plátano y queso batido": "Tuesta el pan y unta la crema de cacahuete. Corta el medio plátano en rodajas por encima y espolvorea canela. Sirve el queso batido en un bol al lado: es lo que convierte esto en un snack proteico y no en puro hidrato.",
+    "Mini bocadillo de jamón serrano con queso fresco y tomate": "Tuesta el pan. Ralla el tomate y extiéndelo sobre la tosta. Pon el queso fresco en lonchas o desmigado y remata con el jamón serrano. Sin AOVE: el serrano ya trae su grasa.",
+    "Palitos de zanahoria con guacamole casero, pavo y huevo duro": "Aplasta el aguacate con tenedor, lima, sal y un poco de tomate y cebolla picados: guacamole casero, nada de bote. Corta la zanahoria en bastones. Sirve con el huevo duro partido y el pavo enrollado.",
+    "Yogur de soja con mandarina, proteína y semillas de girasol": "Disuelve el scoop de proteína en el yogur de soja removiendo bien hasta que no queden grumos. Añade los gajos de mandarina y las semillas de girasol por encima.",
+    "Zanahoria y apio con hummus casero y huevos duros": "Tritura garbanzos cocidos con tahini, limón, ajo y un chorrito de agua hasta que quede cremoso: hummus casero. Corta zanahoria y apio en bastones. Sirve con los huevos duros partidos y pimentón por encima.",
+    "Hummus con crudités y huevos duros": "Haz el hummus triturando garbanzos cocidos con tahini, limón y ajo. Corta la zanahoria y el pepino en bastones. Sirve con los huevos duros partidos y una pizca de pimentón.",
+    "Tortitas de arroz con aguacate, huevo y pavo": "Aplasta el aguacate y úntalo sobre las tortitas. Reparte el pavo y corona con los huevos cocidos en rodajas. Termina con sal en escamas.",
+    "Requesón con manzana, canela y almendras": "Pon el requesón en un bol. Trocea la manzana con piel, que es donde está la fibra. Añade las almendras trituradas y espolvorea canela generosamente: con la manzana no hace falta miel.",
+    "Batido de cacao y proteína con crema de almendra": "Mete la leche, el cacao puro, la crema de almendra y el scoop de proteína en la batidora con hielo. Bate 30 segundos. Si queda espeso, añade un poco más de leche.",
+    "Yogur griego con frutos rojos, nueces y canela": "Vierte el yogur griego en un bol. Añade los frutos rojos enteros y las nueces troceadas. Espolvorea canela: con los frutos rojos ya dulces, la miel no aporta nada en un déficit.",
+    "Yogur griego con plátano y canela": "Vierte el yogur en un bol. Corta el plátano en rodajas por encima y espolvorea canela. Sin cocción, listo en 2 min.",
+    // MEDIA MAÑANA — reescritas al subir la fibra del plan de pérdida de grasa
+    "Batido de proteína con plátano y avena": "Mete el plátano troceado, los copos de avena, el scoop de proteína y un vaso de agua en la batidora. Bate 30 segundos hasta que no queden grumos de avena. Espolvorea canela y bébelo recién hecho.",
+    "Tzatziki casero con bastones de zanahoria": "Ralla el pepino y apriétalo con las manos para quitarle el agua: si no, el tzatziki queda aguado. Mézclalo con el yogur, el ajo muy picado, la menta y el AOVE. Corta la zanahoria en bastones y úsala para mojar.",
+    "Cecina con tortitas de arroz y zanahoria": "Monta la cecina sobre las tortitas de arroz. Corta la zanahoria en bastones y sírvela al lado para mojar o comer a bocados. Listo en 3 min.",
+    "Sardinillas en lata con tomate y pimiento": "Escurre las sardinillas. Corta el tomate en rodajas y el pimiento rojo en tiras finas. Colócalo todo en el plato, riega con el AOVE y añade una pizca de sal.",
+    "Tortitas de arroz con queso fresco, pavo y zanahoria": "Unta el queso fresco sobre las tortitas de arroz. Reparte el pavo por encima. Corta la zanahoria en bastones y sírvela al lado.",
+    "Huevos duros con tomate cherry y zanahoria": "Cuece los huevos 10 min desde que el agua hierve y pásalos por agua fría para pelarlos sin pelea. Pártelos por la mitad. Añade el tomate cherry partido y la zanahoria en bastones, riega con el AOVE y sal.",
+    "Requesón con tomate cherry, zanahoria y orégano": "Pon el requesón en un bol. Añade el tomate cherry partido por la mitad y la zanahoria en bastones. Espolvorea orégano y pimienta. Sin cocción.",
+    "Lata de atún con ensalada de tomate y zanahoria": "Escurre bien el atún. Corta el tomate en dados y la zanahoria en tiras finas o rallada. Mézclalo todo, riega con el AOVE y espolvorea orégano.",
+    "Tostada de salmón ahumado con queso fresco y aguacate": "Tuesta el pan de centeno. Aplasta el aguacate con un tenedor y úntalo sobre la tosta. Añade el queso fresco y el salmón ahumado por encima, y termina con eneldo.",
+    "Queso batido con cerezas, almendras y canela": "Deshuesa las cerezas y pártelas por la mitad. Mézclalas con el queso batido. Añade las almendras troceadas y espolvorea canela.",
+    "Queso cottage con tomate, zanahoria y eneldo": "Pon el cottage en un bol. Añade el tomate cherry partido y la zanahoria rallada o en bastones. Espolvorea eneldo y una pizca de sal. Sin cocción.",
+    "Skyr con pera y semillas de lino": "Trocea la pera con piel, que es donde está casi toda la fibra. Mézclala con el skyr. Esparce las semillas de lino por encima y espolvorea canela.",
+    "Kéfir y skyr con frutos rojos y semillas de lino": "Mezcla el kéfir con el skyr en un bol hasta que quede homogéneo. Añade los frutos rojos y las semillas de lino por encima. Sin cocción.",
+    "Yogur griego con arándanos y semillas de lino": "Vierte el yogur griego en un bol. Añade los arándanos y las semillas de lino por encima. Listo en 2 min.",
     // DESAYUNOS
     "Tostadas de centeno con aguacate y huevo": "Aplasta el aguacate con un tenedor, sal y unas gotas de limón. Revuelve los huevos 2 min a fuego suave en sartén antiadherente. Tuesta el pan, unta el aguacate y corona con el huevo revuelto y tomate cherry partido.",
     "Yogur griego con nueces y arándanos": "Vierte el yogur en un bol. Añade los arándanos, las nueces troceadas y una pizca de canela. Sin cocción — listo en 2 min.",
