@@ -7,7 +7,11 @@
 // (incluido el vídeo demo de 15MB) y pasó a una allowlist de assets estáticos.
 // v6 (2 sept 2026): añadidos los handlers push/notificationclick -- no toca
 // el cacheo de arriba, así que no hace falta subir CACHE_NAME por esto solo.
-const CACHE_NAME = 'kone-v5';
+// v6 (sept 2026): se sube la version para invalidar la copia guardada de
+// index.html. El fetch es network-first, pero con mala cobertura sirve la
+// cacheada, y los moviles que la tuvieran de antes seguian viendo una version
+// sin el arreglo del interruptor de avisos.
+const CACHE_NAME = 'kone-v6';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

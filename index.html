@@ -17044,6 +17044,12 @@
   // ===== MENÚ MÓVIL DEL DASHBOARD =====
   function toggleDashMenu() {
     document.querySelector('.dash-sidebar')?.classList.toggle('open');
+    // Se vuelve a mirar el estado de los avisos cada vez que se abre el menu.
+    // La llamada de buildDashboard() corre una sola vez y en un momento que
+    // depende de cuando se restaure la sesion; si algo salio mal ahi, el
+    // interruptor se quedaba oculto para el resto de la sesion. Abriendo el
+    // menu se arregla solo.
+    if (typeof actualizarBotonNotificaciones === 'function') actualizarBotonNotificaciones();
     document.getElementById('dashOverlay')?.classList.toggle('open');
   }
 
@@ -25273,8 +25279,13 @@
       // hasta 4 segundos en aparecer y el cliente ve el menú sin él y luego
       // con él. Lo que decide si hay algo que ofrecer es sincrono; el await
       // de abajo solo sirve para saber si está encendido o apagado.
+      // En un movil el interruptor NO se esconde nunca: si no se puede
+      // activar, se enseña deshabilitado y con el motivo. Esconderlo deja al
+      // cliente buscando una opcion que le hemos prometido y no encuentra,
+      // que es exactamente lo que estaba pasando.
+      const _esMovil = _esIOS || /android|mobile/i.test(navigator.userAgent);
       contenedores.forEach(cont => {
-        cont.style.display = (soportado || _iosSinInstalar) ? '' : 'none';
+        cont.style.display = (soportado || _iosSinInstalar || _esMovil) ? '' : 'none';
         const inp = cont.querySelector('.push-toggle-input');
         // Deshabilitado mientras no se sabe el estado, pero solo la primera
         // vez: si ya se resolvió antes, dejarlo como está evita que parpadee
@@ -25318,8 +25329,25 @@
           }
           return;
         }
-        // Si el navegador no soporta push, se esconde: no hay nada que ofrecer.
-        if (!soportado) { cont.style.display = 'none'; return; }
+        // Si el navegador no soporta push se esconde SOLO en escritorio. En
+        // movil se enseña deshabilitado con el motivo: un iPhone con la app
+        // instalada pero con iOS anterior a 16.4 caia aqui (no es
+        // _iosSinInstalar, porque SI esta instalada) y el bloque desaparecia
+        // sin decir nada. El cliente no tenia forma de saber por que.
+        if (!soportado) {
+          if (!_esMovil) { cont.style.display = 'none'; return; }
+          input.dataset.estadoResuelto = '1';
+          cont.style.display = '';
+          input.checked = false;
+          input.disabled = true;
+          if (hint) {
+            hint.textContent = _esIOS
+              ? 'Tu versión de iPhone no admite avisos web. Hacen falta iOS 16.4 o superior y la app añadida a la pantalla de inicio.'
+              : 'Este navegador no admite avisos. Prueba a abrir K-ONE en Chrome.';
+            hint.style.display = '';
+          }
+          return;
+        }
         // Pero si SÍ lo soporta y solo es que el service worker aún no estaba
         // listo, esconderlo era lo peor: el cliente no veía el interruptor por
         // ninguna parte y no había forma de saber por qué. Se muestra
