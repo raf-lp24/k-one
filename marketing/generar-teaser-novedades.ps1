@@ -33,7 +33,7 @@
 #  Uso:  .\generar-teaser-novedades.ps1
 # =============================================================================
 param(
-  [string]$Salida = "$PSScriptRoot\kone-teaser-novedades.mp4",
+  [string]$Salida = "$PSScriptRoot\Videos\kone-teaser-novedades.mp4",
   [double]$DuracionRotulo = 2.7,   # segundos del rótulo antes del corte
   [int]   $Fps = 30,
   [double]$Zoom = 1.4              # ampliación del clip de brasas
@@ -42,11 +42,12 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $rotulo = "$PSScriptRoot\titulo-novedades.html"
-$brasas = "$PSScriptRoot\logo-brasas.mp4"
+$brasas = "$PSScriptRoot\Videos\logo-brasas.mp4"
 $render = "$PSScriptRoot\cdp-frames.mjs"
 foreach ($f in @($rotulo, $brasas, $render)) {
   if (-not (Test-Path $f)) { throw "Falta un archivo necesario: $f" }
 }
+New-Item -ItemType Directory -Force -Path (Split-Path $Salida) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {

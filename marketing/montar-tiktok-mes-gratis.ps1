@@ -17,7 +17,7 @@
 # =============================================================================
 param(
   [string]$Src    = "",
-  [string]$Out    = "$PSScriptRoot\tiktok-mes-gratis.mp4",
+  [string]$Out    = "$PSScriptRoot\Videos\tiktok-mes-gratis.mp4",
   [double]$Inicio = 0.0,    # segundo de la grabación donde empieza lo interesante
   [double]$Dur    = 18.0    # duración final del vídeo
 )
@@ -25,6 +25,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if (-not $Src) { throw "Falta -Src: la ruta de la grabación de pantalla." }
 if (-not (Test-Path $Src)) { throw "No existe el vídeo de origen: $Src" }
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {

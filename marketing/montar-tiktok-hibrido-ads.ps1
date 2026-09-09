@@ -4,10 +4,11 @@
 #   - cabecera "PERDER GRASA / 86 KG" (src 42-47,5)
 # Mantiene solo entrenamiento: sesión de hoy, semana, bloques con RPE, técnica.
 param(
-  [string]$Src = "C:\Users\Usuario\Downloads\WhatsApp Video 2026-07-24 at 00.57.50.mp4",
-  [string]$Out = "C:\Users\Usuario\Desktop\Rafa Personl\Proyetos\Fragua\marketing\tiktok-hibrido-ads-v2.mp4"
+  [string]$Src = "$env:USERPROFILE\Downloads\WhatsApp Video 2026-07-24 at 00.57.50.mp4",
+  [string]$Out = "$PSScriptRoot\Videos\tiktok-hibrido-ads-v2.mp4"
 )
 $ErrorActionPreference='Stop'
+New-Item -ItemType Directory -Force -Path (Split-Path $Out)|Out-Null
 $ff=(Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages" -Recurse -Filter ffmpeg.exe -EA SilentlyContinue|Select-Object -First 1).FullName
 
 $txtDir=Join-Path $env:TEMP "kone-ads-txt"; New-Item -ItemType Directory -Force -Path $txtDir|Out-Null

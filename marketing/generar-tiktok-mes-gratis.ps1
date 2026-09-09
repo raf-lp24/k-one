@@ -19,11 +19,12 @@
 #  Uso:  .\generar-tiktok-mes-gratis.ps1
 # =============================================================================
 param(
-  [string]$Out = "$PSScriptRoot\tiktok-mes-gratis.mp4",
+  [string]$Out = "$PSScriptRoot\Videos\tiktok-mes-gratis.mp4",
   [int]$Fps    = 30
 )
 
 $ErrorActionPreference = 'Stop'
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 Add-Type -AssemblyName System.Drawing
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source

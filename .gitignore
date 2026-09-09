@@ -15,7 +15,7 @@ node_modules/
 ~WRL*.tmp
 
 # Vídeos exportados de marketing (se regeneran con los scripts)
-marketing/*.mp4
+marketing/Videos/*.mp4
 
 # Archivos locales que no pertenecen al repo del sitio
 .claude/

@@ -18,11 +18,12 @@
 # =============================================================================
 param(
   [string]$Src = "$PSScriptRoot\..\demo-completo.mp4",
-  [string]$Out = "$PSScriptRoot\instagram-presentacion.mp4"
+  [string]$Out = "$PSScriptRoot\Videos\instagram-presentacion.mp4"
 )
 
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $Src)) { throw "No existe la grabación de origen: $Src" }
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {

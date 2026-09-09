@@ -19,7 +19,7 @@
 # =============================================================================
 param(
   [Parameter(Mandatory = $true)][string]$CapturasDir,
-  [string]$Out = "$PSScriptRoot\reel-funciones.mp4"
+  [string]$Out = "$PSScriptRoot\Videos\reel-funciones.mp4"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,6 +27,7 @@ $capturas = @('1-hoy.png', '2-dia-ejercicios.png', '3-nutricion-comidas.png', '4
 foreach ($c in $capturas) {
   if (-not (Test-Path (Join-Path $CapturasDir $c))) { throw "Falta la captura: $c en $CapturasDir" }
 }
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {

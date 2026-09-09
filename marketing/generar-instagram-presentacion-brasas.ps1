@@ -21,12 +21,13 @@
 param(
   [Parameter(Mandatory = $true)][string]$EmbersClip,
   [string]$Src = "$PSScriptRoot\..\demo-completo.mp4",
-  [string]$Out = "$PSScriptRoot\instagram-presentacion-brasas.mp4"
+  [string]$Out = "$PSScriptRoot\Videos\instagram-presentacion-brasas.mp4"
 )
 
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $Src)) { throw "No existe la grabación de origen: $Src" }
 if (-not (Test-Path $EmbersClip)) { throw "No existe el clip de brasas: $EmbersClip" }
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {

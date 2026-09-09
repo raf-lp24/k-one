@@ -23,7 +23,7 @@
 # =============================================================================
 param(
   [string]$Src    = "$env:USERPROFILE\Downloads\WhatsApp Video 2026-07-24 at 00.57.50.mp4",
-  [string]$Out    = "$PSScriptRoot\tiktok-area-clientes.mp4",
+  [string]$Out    = "$PSScriptRoot\Videos\tiktok-area-clientes.mp4",
   [double]$Inicio = 28.0,   # segundo en el que arranca el área de clientes
   [double]$Dur    = 34.7,   # duración a exportar
   [ValidateSet('generico','hibrido')]
@@ -31,6 +31,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 # --- localizar ffmpeg / ffprobe ---
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source

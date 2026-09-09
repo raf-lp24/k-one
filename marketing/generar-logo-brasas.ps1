@@ -35,13 +35,14 @@
 #  Uso:  .\generar-logo-brasas.ps1
 # =============================================================================
 param(
-  [string]$RawClip = "$PSScriptRoot\ai-logo-brasas-raw.mp4",
-  [string]$Out      = "$PSScriptRoot\logo-brasas.mp4",
+  [string]$RawClip = "$PSScriptRoot\Videos\ai-logo-brasas-raw.mp4",
+  [string]$Out      = "$PSScriptRoot\Videos\logo-brasas.mp4",
   [double]$Pausa    = 1.0   # segundos que el logo queda quieto al final
 )
 
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $RawClip)) { throw "No existe el clip crudo de brasas: $RawClip" }
+New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
 
 $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
 if (-not $ff) {
