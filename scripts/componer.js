@@ -7,7 +7,7 @@
 const { analizar } = require('./validar-recetas');
 // Los condimentos llegan con su numero delante ("3 dientes de ajo"), asi que
 // el ancla tiene que dejar pasar la cantidad.
-const CERO = /^(\d+(?:[.,]\d+)?(?:\/\d+)?\s+)?(canela|pimienta|sal|or[ée]gano|perejil|albahaca|cilantro|eneldo|cebollino|romero|tomillo|pimentón|piment[óo]n dulce|curry|cúrcuma|azafr[áa]n|guindilla|comino|ajo|dientes de ajo|diente de ajo|ajo picado|ajo laminado|lim[óo]n|lima|hierbas|especias|zumo|ralladura|vinagre|hielo|caf[ée]|agua|laurel|nuez moscada|sal y pimienta|sal en escamas|sal marina|sal gruesa|pimienta negra|.*al gusto)$/i;
+const CERO = /^(\d+(?:[.,]\d+)?(?:\/\d+)?\s+)?(canela|pimienta|sal|or[ée]gano|perejil|albahaca|cilantro|eneldo|menta|hierbabuena|estragón|salvia|cebollino|romero|tomillo|pimentón|piment[óo]n dulce|curry|cúrcuma|azafr[áa]n|guindilla|comino|ajo|dientes de ajo|diente de ajo|ajo picado|ajo laminado|lim[óo]n|lima|hierbas|especias|zumo|ralladura|vinagre|hielo|caf[ée]|agua|laurel|nuez moscada|sal y pimienta|sal en escamas|sal marina|sal gruesa|pimienta negra|.*al gusto)$/i;
 
 function componer(nombre, ingredientes, prep) {
   const a = analizar(ingredientes);
