@@ -1,0 +1,184 @@
+<!doctype html>
+<!--
+  K-ONE · rótulo "TRAEMOS NOVEDADES" para el teaser de brasas.
+
+  Es la primera mitad del vídeo: el rótulo entra, late como un rescoldo y se
+  apaga dejando chispas subiendo. De ahí se corta en seco al clip de brasas
+  (logo-brasas.mp4), que ya se encarga de juntarlas y formar el logotipo.
+
+  Por qué un canvas y no drawtext de ffmpeg: la tipografía de la marca es Bebas
+  Neue y NO está instalada en esta máquina, así que ffmpeg no puede escribirla.
+  Chrome sí la carga de Google Fonts, igual que hace logo-render.html.
+
+  La animación NO usa CSS ni requestAnimationFrame: todo se dibuja en función de
+  render(t). Así la captura fotograma a fotograma es determinista y se puede
+  repetir exactamente igual (ver cdp-frames.mjs). Las chispas también son
+  función de t, con semilla fija, por el mismo motivo.
+
+  Render:
+    node cdp-frames.mjs "file:///.../titulo-novedades.html" <dir> 2.7 30 1080 1920
+-->
+<meta charset="utf-8">
+<title>K-ONE · rótulo de novedades</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:#000;overflow:hidden}
+  canvas{display:block}
+</style>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<!-- Nodo real que usa la fuente, para forzar su descarga (ver el gotcha de
+     abajo). Fuera del encuadre visible: no sale en la captura. -->
+<span style="position:fixed;top:-400px;left:0;font-family:'Bebas Neue',sans-serif;font-size:200px">K-ONE</span>
+<script>
+const W = 1080, H = 1920;
+const ctx = document.getElementById('c').getContext('2d');
+
+const NEGRO  = '#000000';
+const HUESO  = '#F0EDE8';
+const BRASA  = '#D1420E';
+const CALIDO = '#FF8A3D';
+
+// PRNG con semilla: las chispas tienen que salir iguales en cada render.
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd = mulberry32(20260909);
+
+// Chispas: parámetros fijos, posición calculada desde t.
+const CHISPAS = Array.from({length: 90}, () => ({
+  x: 140 + rnd() * 800,
+  xAmp: 8 + rnd() * 26,        // bamboleo lateral
+  xFrec: 0.6 + rnd() * 1.4,
+  vel: 110 + rnd() * 260,      // px por segundo hacia arriba
+  r: 1.2 + rnd() * 2.8,
+  retardo: rnd() * 2.2,
+  vida: 1.1 + rnd() * 1.3,
+  calor: rnd()                 // 0 = brasa oscura, 1 = chispa caliente
+}));
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+// Suavizado: arranca rápido y frena al final, sin rebote.
+const salida = p => 1 - Math.pow(1 - clamp(p, 0, 1), 3);
+
+const MARGEN = 80;               // aire a cada lado
+const ANCHO_UTIL = W - MARGEN * 2;
+
+// Bebas Neue es muy condensada; cualquier alternativa es bastante más ancha. Si
+// la fuente no llegara a cargar, "NOVEDADES" a 196px mide 1231px y se saldría
+// de pantalla. Así que el tamaño no se fija a ciegas: se mide y se reduce hasta
+// que quepa. Vale para las dos fuentes y para cualquier texto que se cambie
+// aquí en el futuro.
+const cacheTamano = new Map();
+function tamanoQueCabe(str, deseado, espaciado) {
+  const clave = str + '|' + deseado + '|' + espaciado;
+  if (cacheTamano.has(clave)) return cacheTamano.get(clave);
+  let tamano = deseado;
+  for (let i = 0; i < 40; i++) {
+    ctx.font = tamano + 'px "Bebas Neue", sans-serif';
+    ctx.letterSpacing = espaciado + 'px';
+    if (ctx.measureText(str).width + espaciado <= ANCHO_UTIL) break;
+    tamano -= 4;
+  }
+  cacheTamano.set(clave, tamano);
+  return tamano;
+}
+
+function texto(str, deseado, espaciado, y, color, alpha, desplazamiento) {
+  if (alpha <= 0.001) return;
+  const tamano = tamanoQueCabe(str, deseado, espaciado);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = tamano + 'px "Bebas Neue", sans-serif';
+  ctx.letterSpacing = espaciado + 'px';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = color;
+  ctx.fillText(str, W / 2 + espaciado / 2, y + desplazamiento);
+  ctx.restore();
+}
+
+function render(t) {
+  ctx.fillStyle = NEGRO;
+  ctx.fillRect(0, 0, W, H);
+
+  // Rescoldo al pie del encuadre: enlaza visualmente con el clip de brasas que
+  // viene justo detrás, para que el corte no se sienta como dos vídeos pegados.
+  const latido = 0.55 + 0.45 * Math.sin(t * 2.1);
+  const brillo = ctx.createRadialGradient(W / 2, H * 0.78, 0, W / 2, H * 0.78, 760);
+  brillo.addColorStop(0, 'rgba(209,66,14,' + (0.20 * latido).toFixed(3) + ')');
+  brillo.addColorStop(0.45, 'rgba(209,66,14,' + (0.06 * latido).toFixed(3) + ')');
+  brillo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = brillo;
+  ctx.fillRect(0, 0, W, H);
+
+  // El rótulo se apaga al final para dejar paso al corte.
+  const apagado = 1 - salida((t - 2.15) / 0.45);
+
+  // "TRAEMOS" sube a su sitio; "NOVEDADES" entra después y es la que pesa.
+  const p1 = salida(t / 0.55);
+  texto('TRAEMOS', 132, 14, H / 2 - 110, HUESO, p1 * 0.92 * apagado, (1 - p1) * 46);
+
+  const p2 = salida((t - 0.42) / 0.6);
+  ctx.save();
+  ctx.shadowColor = 'rgba(209,66,14,0.85)';
+  ctx.shadowBlur = 58 * p2 * apagado;
+  texto('NOVEDADES', 196, 10, H / 2 + 76, BRASA, p2 * apagado, (1 - p2) * 62);
+  ctx.restore();
+
+  // Filo de brasa bajo el rótulo: crece desde el centro.
+  const p3 = salida((t - 0.95) / 0.5);
+  if (p3 > 0) {
+    const ancho = 430 * p3;
+    const linea = ctx.createLinearGradient(W / 2 - ancho, 0, W / 2 + ancho, 0);
+    linea.addColorStop(0, 'rgba(209,66,14,0)');
+    linea.addColorStop(0.5, 'rgba(255,138,61,' + (0.95 * apagado).toFixed(3) + ')');
+    linea.addColorStop(1, 'rgba(209,66,14,0)');
+    ctx.fillStyle = linea;
+    ctx.fillRect(W / 2 - ancho, H / 2 + 132, ancho * 2, 4);
+  }
+
+  // Chispas subiendo desde el rescoldo.
+  CHISPAS.forEach(s => {
+    const fase = t - s.retardo;
+    if (fase < 0 || fase > s.vida) return;
+    const p = fase / s.vida;
+    const x = s.x + Math.sin(fase * s.xFrec * Math.PI * 2) * s.xAmp;
+    const y = H * 0.80 - fase * s.vel;
+    // Nace, brilla y se apaga.
+    const a = Math.sin(p * Math.PI) * (0.35 + 0.65 * s.calor);
+    ctx.save();
+    ctx.globalAlpha = clamp(a, 0, 1);
+    ctx.fillStyle = s.calor > 0.55 ? CALIDO : BRASA;
+    ctx.shadowColor = CALIDO;
+    ctx.shadowBlur = 14 * s.calor;
+    ctx.beginPath();
+    ctx.arc(x, y, s.r * (1 - p * 0.45), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+window.render = render;
+
+// Primer fotograma ya dibujado, por si la captura llega antes de la primera
+// llamada. Las fuentes se esperan aparte (cdp-frames deja 4 s).
+// Al terminar de cargar las fuentes hay que TIRAR el caché de tamaños: si se
+// midió con la fuente alternativa, los tamaños guardados son los de esa y se
+// quedarían pequeños para siempre.
+// GOTCHA: un canvas NO dispara la descarga de una webfont -- solo lo hace el
+// DOM. Con ctx.font = '...Bebas Neue...' Chrome se queda con la alternativa sin
+// pedir el archivo, y document.fonts.check() devuelve false para siempre. Hay
+// que pedirla a mano. (El <span> del body es el segundo cinturón: si la API
+// fallara, un nodo real usando la fuente también la dispara.)
+window.fuenteLista = document.fonts.load('196px "Bebas Neue"')
+  .then(() => document.fonts.ready)
+  .then(() => { cacheTamano.clear(); render(0); return document.fonts.check('196px "Bebas Neue"'); })
+  .catch(() => false);
+render(0);
+
+// Para comprobar desde fuera si la tipografía de marca llegó a cargar.
+window.diagnostico = () => ({
+  bebas: document.fonts.check('196px "Bebas Neue"'),
+  tamanoNovedades: tamanoQueCabe('NOVEDADES', 196, 10),
+  tamanoTraemos: tamanoQueCabe('TRAEMOS', 132, 14)
+});
+</script>
+</body>
