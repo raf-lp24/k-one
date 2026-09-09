@@ -14980,6 +14980,9 @@
       }
       if (sinLactosa) {
         reemplazos.push(
+          // Antes que la regla generica de yogur: si no, "salsa de yogur casera"
+          // acababa como "salsa de yogur sin lactosa casera", que se lee fatal.
+          [/salsa de yogur casera/gi, 'salsa de yogur casera sin lactosa'],
           [/yogur griego/gi, 'yogur de coco (sin lactosa)'],
           [/\byogur(t)?\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
           [/\bkéfir\b(?![^,]*sin lactosa)/gi, 'kéfir sin lactosa'],
@@ -15231,7 +15234,13 @@
     // tirada larga/series o un WOD — el resto de días siguen con la rotación
     // normal, sin forzar nada.
     if (!soloDieta && semana.length === 7) {
-      const diaEsDuroCorredor = d => ['Intensidad', 'Umbral', 'Volumen'].includes(d.etiqueta) || /tirada larga|umbral|vo2|interval|series|fartlek/i.test(d.resumen || '');
+      // Se decide por ETIQUETA, que es un campo fijo, y no por el resumen, que
+      // es una frase escrita a mano y cambia con cada plantilla. Antes se
+      // quedaban fuera el dia de Fondo (tirada progresiva, que si justifica
+      // cargar antes) y el de Fortalecimiento (fuerza del corredor, que pide
+      // proteina despues). El rodaje suave de Base aerobica sigue fuera a
+      // proposito: no justifica forzar carga previa ni batido de recuperacion.
+      const diaEsDuroCorredor = d => ['Intensidad', 'Umbral', 'Volumen', 'Fondo', 'Fortalecimiento'].includes(d.etiqueta) || /tirada larga|umbral|vo2|interval|series|fartlek/i.test(d.resumen || '');
       const diaEsWod = d => d.etiqueta === 'WOD' || /wod|metcon|amrap|emom|complejo|circuito|simulacro|chipper/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
       semana.forEach((d, i) => {
         const dm = nutricionPorDia[i];
@@ -15265,8 +15274,14 @@
         // Los días de Zona 2 suave se quedan fuera a propósito, igual que los
         // rodajes fáciles del corredor: no justifican forzar carga previa ni
         // batido de recuperación.
+        // Se mira la ETIQUETA. Antes se exigia la palabra "fuerza" en el
+        // resumen y las sesiones de hibrido se llaman "Upper A · Empuje +
+        // tiron" o "Lower B · Isquios + gluteos": no la llevan ninguna, asi
+        // que un hibrido con 4 dias de entreno se quedaba con CERO comidas de
+        // repostaje. Medido antes de este cambio.
+        const _ETIQUETAS_FUERZA = ['Fuerza', 'Empuje+Tracción', 'Piernas', 'Complemento', 'Híbrido', 'Umbral', 'Fortalecimiento'];
         if (esCombinacion && d.tipo === 'Entrenamiento' && !diaEsWod(d) &&
-            /fuerza|sesi[óo]n larga/i.test(d.resumen || '')) {
+            (_ETIQUETAS_FUERZA.includes(d.etiqueta) || /fuerza|sesi[óo]n larga/i.test(d.resumen || ''))) {
           forzar(dm, 'Comida', fuelingPreWod);
           forzar(dm, 'Merienda', fuelingPostWod);
         }
