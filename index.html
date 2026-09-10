@@ -12362,6 +12362,37 @@
     .replace(/\b(\d+)\s+ración de\b/gi, (m, n) => (n === '1' ? m : `${n} raciones de`))
     .replace(/\b1\s+raciones de\b/gi, '1 ración de');
 
+  // BUG REAL (10 sept 2026, reportado sobre un plan de cliente): el filtro de
+  // "alimentos que no comes" comparaba LITERALMENTE lo que escribe el cliente
+  // contra el texto de las recetas. Pero el cliente escribe sin tildes -- lo
+  // normal al teclear rápido en el móvil -- y las recetas sí las llevan: quien
+  // ponía "esparragos, maiz" seguía recibiendo "espárragos trigueros" y
+  // "tortillas de maíz" en su plan. Del mismo modo, un token en plural no
+  // encontraba el singular ("huevas" no tapaba "hueva de mújol"), porque el
+  // comodín de la regex solo crecía hacia el plural, nunca hacia el singular.
+  //
+  // Esto convierte cada letra acentuable en una clase que acepta las dos
+  // formas, así que la regex sigue casando contra el texto ORIGINAL (con sus
+  // tildes) y las sustituciones siguen funcionando sobre él sin descuadres de
+  // posición -- que es lo que pasaría comparando contra una copia sin tildes.
+  const _EQUIV_TILDE = { a: '[aáàä]', e: '[eéèë]', i: '[iíìï]', o: '[oóòö]', u: '[uúùü]', n: '[nñ]', c: '[cç]' };
+  function _raizSinPlural(t) {
+    // "espárragos" -> "esparrago", "huevas" -> "hueva", "mejillones" -> "mejillon".
+    // Se deja tal cual lo que es corto o no acaba en 's' ("maiz", "quinoa", "arroz").
+    if (t.length > 4 && /es$/.test(t)) return t.slice(0, -2);
+    if (t.length > 3 && /s$/.test(t)) return t.slice(0, -1);
+    return t;
+  }
+  function _reAlimento(token) {
+    const raiz = _raizSinPlural(
+      token.normalize('NFD').replace(/[̀-ͯ]/g, '')   // el token, sin tildes
+    );
+    const cuerpo = raiz
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')                  // escapar antes de tocar letras
+      .replace(/[aeiounc]/g, ch => _EQUIV_TILDE[ch] || ch);
+    return new RegExp('\\b' + cuerpo + '[a-záéíóúüñ]*', 'gi');
+  }
+
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
@@ -12382,18 +12413,47 @@
         }
       }
     });
-    const tokenArr = [...todosTokens];
-    const recetasActivas = RECETAS_SUSTITUCION.filter(([re]) => {
-      const src = re.source.toLowerCase();
-      return tokenArr.some(t => src.includes(t));
+    // Mismo alimento con otro nombre. NO son familias (decir "no como queso" no
+    // puede prohibirte la leche y el yogur), son sinónimos reales: el requesón
+    // ES queso, y quien escribe "queso" ya se llevaba tapados "queso fresco" y
+    // "queso batido" -- porque ahí la palabra aparece entera-- pero se seguía
+    // encontrando requesón en el plan. Entra solo lo que es indiscutiblemente
+    // el mismo alimento: cualquier duda se queda fuera, porque tapar de más
+    // vacía el recetario del cliente sin que él lo haya pedido.
+    const SINONIMOS_MISMO_ALIMENTO = {
+      'queso': ['requesón'],
+      'gamba': ['langostino'],
+      'langostino': ['gamba'],
+      'cacahuete': ['crema de cacahuete'],
+      'garbanzo': ['hummus'],
+      'ternera': ['solomillo']
+    };
+    [...todosTokens].forEach(t => {
+      const raiz = _raizSinPlural(t.normalize('NFD').replace(/[̀-ͯ]/g, ''));
+      const extra = SINONIMOS_MISMO_ALIMENTO[raiz];
+      if (extra) extra.forEach(e => todosTokens.add(e));
     });
-    const regexes = tokenArr.map(t => new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-záéíóúñ]*', 'gi'));
+    const tokenArr = [...todosTokens];
+    // Estas dos búsquedas comparaban cadena contra cadena, así que arrastraban
+    // el mismo problema de tildes que la regex: con "esparragos" no encontraban
+    // ni la receta de sustitución ni el alimento de recambio, que están
+    // escritos con tilde. El alimento acababa tapado pero sin sustituto, y el
+    // plato se descartaba entero en vez de repararse.
+    const _sinTilde = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const _raizToken = t => _raizSinPlural(_sinTilde(t));
+    const recetasActivas = RECETAS_SUSTITUCION.filter(([re]) => {
+      const src = _sinTilde(re.source);
+      return tokenArr.some(t => src.includes(_raizToken(t)));
+    });
+    const regexes = tokenArr.map(_reAlimento);
     const susMap = {};
     tokenArr.forEach((t, i) => {
       const s = SUSTITUCIONES_NOCOMIDA[t];
       if (s && !todosTokens.has(s.toLowerCase())) { susMap[i] = s; return; }
+      const raiz = _raizToken(t);
       for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
-        if ((clave.includes(t) || t.includes(clave)) && !todosTokens.has(valor.toLowerCase())) {
+        const claveN = _sinTilde(clave);
+        if ((claveN.includes(raiz) || raiz.includes(claveN)) && !todosTokens.has(valor.toLowerCase())) {
           susMap[i] = valor; return;
         }
       }
@@ -21459,6 +21519,16 @@
       if (generatedPlan) {
         if (generatedPlan.nutricion && userData.noComida) {
           generatedPlan.nutricion = filtrarNoComida(generatedPlan.nutricion, userData.noComida);
+          // nutricionPorDia también, y no como detalle: TODA la interfaz lee
+          // `nutricionPorDia?.[dia] || nutricion`, así que es la de por día la
+          // que ve el cliente. Filtrando solo `nutricion` se limpiaba justo la
+          // que casi nunca se muestra, y el alimento rechazado seguía saliendo
+          // en los 7 días. Afecta a los planes ya guardados: los nuevos salen
+          // filtrados de fábrica desde buildPlanFromData().
+          if (Array.isArray(generatedPlan.nutricionPorDia)) {
+            generatedPlan.nutricionPorDia = generatedPlan.nutricionPorDia
+              .map(dia => filtrarNoComida(dia, userData.noComida));
+          }
         }
         regenerarEntrenamientoHoy(generatedPlan);
         // Mismo fix que en generatePlan(): no construir el dashboard con el
