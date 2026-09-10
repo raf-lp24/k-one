@@ -6033,7 +6033,21 @@
     font-size: 13px;
     color: var(--blanco);
     z-index: 300;
-    transition: transform 0.3s ease;
+    /* BUG REAL, y de cosecha propia: este aviso SIEMPRE está en la página y
+       antes solo se escondía empujándolo 80px hacia abajo. Al añadirle el
+       margen del indicador de inicio del iPhone (la línea `bottom` de arriba),
+       su posición de reposo subió ~34px y esos 80px dejaron de bastar: asomaba
+       14px por el borde inferior como una cajita gris con la franja naranja.
+       En un emulador sin área segura queda justo fuera, por eso no se veía al
+       probarlo en el ordenador.
+       No se arregla empujándolo más lejos: un aviso largo ocupa 5 líneas y
+       volvería a asomar. Se arregla haciendo que, mientras no se muestra, sea
+       de verdad invisible. `visibility` se retrasa hasta que termina el
+       deslizamiento al ocultar, y es inmediata al mostrar. */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.25s ease, visibility 0s linear 0.3s;
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
     /* `width: max-content` + `max-width` es la pareja que hace falta: sin el
@@ -6049,7 +6063,13 @@
        y aun así evita que un email o un enlace largo desborden. */
     overflow-wrap: break-word;
   }
-  .toast.visible { transform: translateX(-50%) translateY(0); }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.3s ease, opacity 0.25s ease, visibility 0s;
+  }
 
   /* LOGOUT btn */
   .logout-btn {
@@ -8473,17 +8493,15 @@
         </div>
 
         <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
-        <!-- Reportado desde el móvil: "una barrita" pegada abajo. Es este banner
-             asomando por el borde inferior de la pantalla al hacer scroll (es
-             lo primero justo después del botón "Empezar entrenamiento", con
-             solo 20px de margen) -- con la esquina izquierda cuadrada y el
-             borde naranja, esa esquina cortada se lee como una tira suelta, no
-             como el borde de una tarjeta. Las tarjetas hermanas de este mismo
-             panel (today-hero, rail-card, motivation-card) redondean las
-             cuatro esquinas a 14-16px; aquí igual, para que si asoma se lea
-             como una tarjeta de verdad. El estilo de esquina cuadrada sigue
-             igual en las notas de Recetario/Ritmos, que son avisos dentro de
-             un modal, no lo primero que se ve al borde de la pantalla. -->
+        <!-- Esquinas redondeadas a 14px para ir a juego con las tarjetas
+             hermanas de este mismo panel (today-hero 16px, rail-card y
+             motivation-card 14px). El estilo de esquina izquierda cuadrada se
+             mantiene en las notas de Recetario/Ritmos, que son avisos dentro
+             de un modal.
+             (Se cambió creyendo que era la "barrita" que se veía abajo en el
+             móvil; NO lo era -- aquello era el .toast, ver su CSS. El cambio se
+             deja porque la coherencia con las otras tarjetas es correcta de
+             todos modos.) -->
         <div id="bannerReferidos" style="display:none;margin:0 0 20px;background:var(--carbon);border-left:3px solid var(--brasa);border-radius:14px;padding:12px 16px">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
             <div style="flex:1;min-width:200px">
