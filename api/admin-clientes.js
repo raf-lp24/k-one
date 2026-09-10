@@ -91,6 +91,57 @@ module.exports = async (req, res) => {
     const email = (user.email || '').toLowerCase();
     if (!admins.includes(email)) return res.status(403).json({ error: 'No autorizado' });
 
+    // ── REGENERAR EL PLAN DE UN CLIENTE ──────────────────────────────────────
+    // Hasta ahora no habia forma de rehacer el plan de un cliente desde Jarvis:
+    // solo se reconstruia desde SU cuenta (check-in semanal, cambio de peso o
+    // cambio de preferencias). Asi que cuando se arregla un fallo del motor
+    // -- un alergeno que se colaba, un alimento rechazado que no se filtraba --
+    // los clientes que ya tenian el plan guardado se quedaban con el plan malo
+    // hasta que les tocara mover algo por su cuenta.
+    //
+    // El motor (buildPlanFromData) vive en el navegador, no aqui, asi que el
+    // plan lo construye Jarvis en el navegador del admin y este endpoint solo
+    // hace las dos partes que necesitan el service role: leer el userdata del
+    // cliente y escribirle el plan nuevo.
+    //
+    // Va aqui, DESPUES de la comprobacion de admin: ambas acciones tocan datos
+    // de otra persona.
+    const accion = req.body?.accion;
+    if (accion === 'userdata' || accion === 'guardar_plan') {
+      const userId = req.body?.userId;
+      if (!userId || typeof userId !== 'string') {
+        return res.status(400).json({ error: 'Falta userId' });
+      }
+
+      if (accion === 'userdata') {
+        const { data, error } = await supabaseAdmin
+          .from('profiles').select('userdata, nombre, email').eq('id', userId).maybeSingle();
+        if (error) return res.status(500).json({ error: error.message });
+        if (!data) return res.status(404).json({ error: 'Cliente no encontrado' });
+        return res.status(200).json({ userdata: data.userdata || null, nombre: data.nombre, email: data.email });
+      }
+
+      // guardar_plan
+      const plan = req.body?.plan;
+      if (!plan || typeof plan !== 'object' || Array.isArray(plan)) {
+        return res.status(400).json({ error: 'Plan no válido' });
+      }
+      // Un plan real ronda los 200-400 KB. El tope evita que un fallo del
+      // navegador del admin escriba algo desproporcionado en la fila.
+      if (JSON.stringify(plan).length > 3_000_000) {
+        return res.status(413).json({ error: 'El plan generado es demasiado grande' });
+      }
+      // Solo se toca `plan`. `userdata` son las respuestas del cliente y no se
+      // modifican: aqui solo se recalcula lo que se deriva de ellas.
+      const { error: errUpd } = await supabaseAdmin
+        .from('profiles')
+        .update({ plan, saved_at: new Date().toISOString() })
+        .eq('id', userId);
+      if (errUpd) return res.status(500).json({ error: errUpd.message });
+      console.log(`[admin-clientes] plan regenerado para ${userId} por ${email}`);
+      return res.status(200).json({ ok: true });
+    }
+
     const page = parseInt(req.body?.page) || 0;
     const pageSize = 50;
     const { data: perfiles, error: e1 } = await supabaseAdmin

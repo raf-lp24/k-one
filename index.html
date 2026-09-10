@@ -23230,6 +23230,18 @@
           Enviar email
         </a>
       </div>
+      <!-- Rehacer el plan con el motor de HOY. Hace falta cuando se arregla un
+           fallo del motor (un alérgeno que se colaba, un alimento rechazado que
+           no se filtraba): los clientes que ya tienen el plan guardado se quedan
+           con el viejo hasta que hacen check-in o cambian algo por su cuenta. -->
+      <div style="margin-top:10px">
+        <button onclick="regenerarPlanCliente('${c.id}', this)" style="width:100%;padding:11px;font-size:12.5px;font-weight:700;font-family:var(--jv-ui);background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:12px;color:var(--jv-dim);cursor:pointer;transition:all .2s" onmouseenter="this.style.borderColor='var(--jv-accent)';this.style.color='var(--jv-accent)'" onmouseleave="this.style.borderColor='var(--jv-line)';this.style.color='var(--jv-dim)'">
+          Regenerar plan
+        </button>
+        <div style="font-size:10.5px;color:var(--jv-faint);text-align:center;margin-top:6px;font-family:var(--jv-ui);line-height:1.45">
+          Rehace su entrenamiento y su dieta con sus mismas respuestas. Úsalo tras arreglar algo del motor.
+        </div>
+      </div>
       <div style="margin-top:14px;text-align:center">
         <button onclick="borrarCliente('${c.id}','${_esc((c.nombre || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}','${_esc((c.email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}',this)" style="background:none;border:1px solid var(--jv-line);border-radius:10px;color:var(--jv-faint);font-size:12px;padding:9px 20px;cursor:pointer;font-family:var(--jv-ui);font-weight:600;transition:all .2s" onmouseenter="this.style.borderColor='rgba(255,94,94,.4)';this.style.color='var(--jv-bad)'" onmouseleave="this.style.borderColor='var(--jv-line)';this.style.color='var(--jv-faint)'">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:5px"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
@@ -23244,6 +23256,45 @@
   function cerrarDetalleCliente() {
     const modal = document.getElementById('modalJarvisCliente');
     if (modal) modal.classList.remove('visible');
+  }
+
+  // Rehace el plan de un cliente con el motor actual, sin tocar sus respuestas.
+  //
+  // El motor (buildPlanFromData) vive aquí, en el navegador, así que el plan se
+  // construye en ESTE navegador -- el del admin -- y el endpoint solo lee el
+  // userdata del cliente y le escribe el plan nuevo, que son las dos partes que
+  // necesitan permisos de servicio.
+  //
+  // El cliente lo recibe la próxima vez que abra la app: syncProfileFromSupabase
+  // vuelca el `plan` del servidor sobre la copia local.
+  async function regenerarPlanCliente(userId, btn) {
+    const original = btn.textContent.trim();
+    btn.disabled = true; btn.textContent = 'Regenerando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const pedir = (body) => fetch('/api/admin-clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify(body)
+      }).then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Error del servidor'); return j; });
+
+      const { userdata } = await pedir({ accion: 'userdata', userId });
+      if (!userdata) throw new Error('Este cliente no tiene datos del cuestionario');
+      if (!userdata.onboardingCompletado) throw new Error('Este cliente aún no ha completado el cuestionario');
+
+      const plan = buildPlanFromData(userdata);
+      await pedir({ accion: 'guardar_plan', userId, plan });
+
+      showToast('Plan regenerado. Lo verá la próxima vez que abra la app.', 6000);
+      btn.textContent = 'Plan regenerado';
+      // Que no se pueda pulsar dos veces seguidas sin querer: rehacerlo otra vez
+      // no aporta nada y cada pulsación escribe en la fila del cliente.
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 4000);
+    } catch (e) {
+      console.warn('[jarvis] regenerar plan:', e.message);
+      showToast('No se pudo regenerar: ' + e.message, 6000);
+      btn.disabled = false; btn.textContent = original;
+    }
   }
 
   async function togglePremiumCliente(userId, premium, btn) {
