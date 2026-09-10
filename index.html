@@ -428,6 +428,15 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  /* BUG REAL (reportado desde el móvil): "una barrita en la parte de abajo".
+     <html> no tenía fondo propio (quedaba transparente → blanco del navegador),
+     solo lo tenía <body>. En móvil, la barra de direcciones se oculta al hacer
+     scroll y el visor real CRECE más de lo que medía 100vh al cargar la
+     página -- si el usuario llega al final del contenido justo cuando eso
+     pasa, aparece una tira sin pintar (el fondo del navegador) justo debajo
+     del body. Con el mismo fondo en <html> esa tira ya no se nota, sea cual
+     sea el tema. */
+  html { background: var(--negro); }
   html, body { overflow-x: hidden; }
 
   body {
@@ -436,7 +445,12 @@
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.6;
+    /* dvh = alto real visible en móvil, ya con la barra del navegador
+       descontada; 100vh se deja como red de seguridad para navegadores
+       viejos que no entienden dvh (si no lo entienden, ignoran la línea
+       entera y se quedan con la de arriba). */
     min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
   }
 
