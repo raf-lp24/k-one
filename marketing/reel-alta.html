@@ -1,0 +1,59 @@
+<!doctype html>
+<!--
+  K-ONE · Reel "Cómo darse de alta" — 1080x1920.
+
+  Explica el alta y los seis bloques del cuestionario. Las capturas son de la
+  app REAL, hechas con cdp-shot.mjs + estado-demo-alta.js.
+
+  IMPORTANTE: ese script NO registra ninguna cuenta. index.html apunta a la
+  Supabase de producción, así que enviar el formulario crearía un cliente falso
+  de verdad. Solo se rellenan los campos y se navega entre bloques.
+
+  El motor de dibujo está en reel-motor.js, compartido con reel-hoy.html: aquí
+  solo va la lista de bloques.
+
+  Render:
+    node cdp-frames.mjs "http://localhost:8080/marketing/reel-alta.html" <dir> 33 25 1080 1920
+-->
+<meta charset="utf-8">
+<title>K-ONE · Reel del alta</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:#000;overflow:hidden}
+  canvas{display:block}
+</style>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<!-- Nodos reales que fuerzan la descarga de las webfonts: un canvas por sí solo
+     NO la dispara. -->
+<span style="position:fixed;top:-400px;font-family:'Bebas Neue';font-size:100px">K-ONE</span>
+<span style="position:fixed;top:-400px;font-family:'Inter';font-size:40px">K-ONE</span>
+<script>
+// Los nombres de los bloques son los que pone la app, no inventados: si el
+// vídeo los llama de otra forma, el cliente no se ubica al hacerlo.
+window.REEL_CARPETA = '/marketing/_tmp-alta/';
+window.REEL_BEATS = [
+  { img: null,            t0: 0.0,  t1: 3.4,  sup: 'EMPEZAR EN K-ONE',
+    tit: 'DARTE\nDE ALTA',            pie: 'Crear la cuenta y contestar el cuestionario' },
+  { img: 'registro',      t0: 3.4,  t1: 7.8,  sup: 'PASO 1',
+    tit: 'CREAR CUENTA',              pie: 'Nombre, email y contraseña. Nada más' },
+  { img: 'cuerpo',        t0: 7.8,  t1: 11.6, sup: 'BLOQUE 01',
+    tit: 'TU CUERPO',                 pie: 'Edad, sexo, peso y altura' },
+  { img: 'salud',         t0: 11.6, t1: 15.4, sup: 'BLOQUE 02',
+    tit: 'TU SALUD',                  pie: 'Lesiones, alergias y medicación: tu plan las respeta' },
+  { img: 'vida',          t0: 15.4, t1: 19.2, sup: 'BLOQUE 03',
+    tit: 'TU VIDA',                   pie: 'Tu trabajo, tu descanso y tu nivel de estrés' },
+  { img: 'alimentacion',  t0: 19.2, t1: 23.0, sup: 'BLOQUE 04',
+    tit: 'TU\nALIMENTACIÓN',          pie: 'Cuántas comidas haces y qué no quieres comer' },
+  { img: 'objetivo',      t0: 23.0, t1: 26.8, sup: 'BLOQUE 05',
+    tit: 'TU OBJETIVO',               pie: 'Qué buscas y qué enfoque nutricional prefieres' },
+  { img: 'entrenamiento', t0: 26.8, t1: 30.8, sup: 'BLOQUE 06',
+    tit: 'TU\nENTRENAMIENTO',         pie: 'Deporte, días, tiempo por sesión y dónde entrenas' },
+  { img: null,            t0: 30.8, t1: 34.0, sup: 'Y YA ESTÁ',
+    tit: 'TU PLAN,\nHECHO',           pie: 'Entrenamiento y nutrición, con tus respuestas' },
+  { img: null,            t0: 34.0, t1: 36.5, sup: '',
+    tit: 'K-ONE',                     pie: 'k-one.fit' }
+];
+</script>
+<script src="/marketing/reel-motor.js"></script>
+</body>

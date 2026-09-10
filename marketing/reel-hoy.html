@@ -4,14 +4,12 @@
 
   Las capturas son de la app REAL, hechas con cdp-shot.mjs + estado-demo-hoy.js
   (cliente inventado, nunca los datos de un cliente de verdad). Aquí solo se
-  componen: móvil, rótulos y ritmo.
+  compone la lista de bloques.
 
-  Igual que titulo-novedades.html, la animación NO usa CSS ni
-  requestAnimationFrame: todo se dibuja en función de render(t), para que la
-  captura fotograma a fotograma sea determinista y repetible (ver cdp-frames.mjs).
+  El motor de dibujo está en reel-motor.js, compartido con reel-alta.html.
 
   Render:
-    node cdp-frames.mjs "http://localhost:8080/marketing/reel-hoy.html" <dir> 24 25 1080 1920
+    node cdp-frames.mjs "http://localhost:8080/marketing/reel-hoy.html" <dir> 27 25 1080 1920
 -->
 <meta charset="utf-8">
 <title>K-ONE · Reel de la pantalla Hoy</title>
@@ -23,17 +21,14 @@
 <body>
 <canvas id="c" width="1080" height="1920"></canvas>
 <!-- Nodos reales que fuerzan la descarga de las webfonts: un canvas por sí solo
-     NO la dispara (gotcha ya documentado en titulo-novedades.html). -->
+     NO la dispara. -->
 <span style="position:fixed;top:-400px;font-family:'Bebas Neue';font-size:100px">K-ONE</span>
 <span style="position:fixed;top:-400px;font-family:'Inter';font-size:40px">K-ONE</span>
 <script>
-const W = 1080, H = 1920;
-const ctx = document.getElementById('c').getContext('2d');
-const NEGRO = '#000000', HUESO = '#F0EDE8', BRASA = '#D1420E', GRIS = '#8A8A8A';
-
 // Los rótulos van con el nombre REAL de cada cosa en la app: si el vídeo
 // promete algo que no se llama así, el cliente no lo encuentra.
-const BEATS = [
+window.REEL_CARPETA = '/marketing/_tmp-shots/';
+window.REEL_BEATS = [
   { img: null,           t0: 0.0,  t1: 3.2,  sup: 'TU ÁREA DE CLIENTE',
     tit: 'LA PANTALLA\nDE HOY',      pie: 'Todo lo que necesitas al abrir la app' },
   { img: 'arriba',       t0: 3.2,  t1: 7.4,  sup: 'LA SESIÓN DE HOY',
@@ -49,166 +44,6 @@ const BEATS = [
   { img: null,           t0: 24.2, t1: 27.0, sup: '',
     tit: 'K-ONE',                    pie: 'k-one.fit' }
 ];
-
-const IMGS = {};
-['arriba','completar','ejercicios','feedback','rail'].forEach(n => {
-  const im = new Image();
-  im.src = '/marketing/_tmp-shots/' + n + '.png';
-  IMGS[n] = im;
-});
-
-const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
-const salida = p => 1 - Math.pow(1 - clamp(p,0,1), 3);          // entra rápido, frena
-const pulso  = (p) => Math.sin(clamp(p,0,1) * Math.PI);          // 0 → 1 → 0
-
-// Ancho máximo de una línea: se mide y se reduce hasta que quepa. Sin esto, un
-// rótulo largo se sale por los lados (el mismo fallo que tenía el aviso de la app).
-const MARGEN = 90, UTIL = W - MARGEN * 2;
-const cache = new Map();
-function tamanoQueCabe(txt, deseado, esp, fuente) {
-  const k = txt + '|' + deseado + '|' + esp + '|' + fuente;
-  if (cache.has(k)) return cache.get(k);
-  let s = deseado;
-  for (let i = 0; i < 40; i++) {
-    ctx.font = s + 'px ' + fuente;
-    ctx.letterSpacing = esp + 'px';
-    if (ctx.measureText(txt).width + esp <= UTIL) break;
-    s -= 4;
-  }
-  cache.set(k, s);
-  return s;
-}
-function texto(txt, deseado, esp, y, color, alpha, dx, fuente, peso) {
-  if (alpha <= 0.003) return;
-  const s = tamanoQueCabe(txt, deseado, esp, fuente);
-  ctx.save();
-  ctx.globalAlpha = clamp(alpha, 0, 1);
-  ctx.font = (peso ? peso + ' ' : '') + s + 'px ' + fuente;
-  ctx.letterSpacing = esp + 'px';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = color;
-  ctx.fillText(txt, W/2 + esp/2 + dx, y);
-  ctx.restore();
-}
-
-// Móvil con la captura dentro. La imagen se recorta al alto de la "pantalla"
-// para que el marco no se deforme según la captura.
-function movil(im, cx, cy, alto, alpha, avance) {
-  if (!im || !im.complete || !im.naturalWidth) return;
-  const rel = 1170/2532;
-  const h = alto, w = h * rel;
-  const x = cx - w/2, y = cy - h/2, r = w * 0.075;
-
-  ctx.save();
-  ctx.globalAlpha = clamp(alpha, 0, 1);
-  // Halo de brasa detrás: da profundidad y ata el móvil al fondo.
-  ctx.shadowColor = 'rgba(209,66,14,0.5)';
-  ctx.shadowBlur = 90;
-  ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fillStyle = '#0A0A0A'; ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.globalAlpha = clamp(alpha, 0, 1);
-  ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.clip();
-  // Recorrido vertical lento por la captura (ken burns): la imagen es mucho
-  // más alta que el hueco, así que se desplaza en vez de escalarse.
-  const escala = w / im.naturalWidth;
-  const altoImg = im.naturalHeight * escala;
-  const recorrido = Math.max(0, altoImg - h);
-  ctx.drawImage(im, x, y - recorrido * clamp(avance, 0, 1), w, altoImg);
-  ctx.restore();
-
-  // Borde del marco
-  ctx.save();
-  ctx.globalAlpha = clamp(alpha, 0, 1) * 0.85;
-  ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
-  ctx.strokeStyle = 'rgba(240,237,232,0.16)'; ctx.lineWidth = 3; ctx.stroke();
-  ctx.restore();
-}
-
-function fondo(t) {
-  ctx.fillStyle = NEGRO;
-  ctx.fillRect(0, 0, W, H);
-  const latido = 0.55 + 0.45 * Math.sin(t * 1.5);
-  const g = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, 900);
-  g.addColorStop(0, 'rgba(209,66,14,' + (0.16 * latido).toFixed(3) + ')');
-  g.addColorStop(0.5, 'rgba(209,66,14,' + (0.05 * latido).toFixed(3) + ')');
-  g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-}
-
-function render(t) {
-  fondo(t);
-  const b = BEATS.find(x => t >= x.t0 && t < x.t1) || BEATS[BEATS.length - 1];
-  const dur = b.t1 - b.t0, p = (t - b.t0) / dur;
-  // Entra en los primeros 0,5 s y se va en los últimos 0,35 s.
-  const entra = salida((t - b.t0) / 0.5);
-  const sale  = 1 - salida((t - (b.t1 - 0.35)) / 0.35);
-  const a = entra * sale;
-  const dx = (1 - entra) * 50;
-
-  if (b.img) {
-    // Con captura: rótulo arriba, móvil en el centro, pie abajo.
-    texto(b.sup, 40, 7, 268, BRASA, a, dx, "'Inter',sans-serif", '600');
-    b.tit.split('\n').forEach((linea, i) => {
-      texto(linea, 132, 4, 400 + i * 124, HUESO, a, dx, "'Bebas Neue',sans-serif");
-    });
-    // Alto y centro elegidos midiendo el hueco real: con 1000px de alto quedaba
-    // un vacio de ~220px entre el rotulo y el movil, y la captura se leia peor
-    // de lo necesario en un video que va justo de enseñar la pantalla.
-    movil(IMGS[b.img], W/2, 1105, 1170, a, p * 0.85);
-    texto(b.pie, 34, 0, 1790, GRIS, a, dx, "'Inter',sans-serif", '400');
-  } else if (b.tit === 'K-ONE') {
-    // Cierre
-    ctx.save();
-    ctx.globalAlpha = a;
-    ctx.font = '210px "Bebas Neue", sans-serif';
-    ctx.letterSpacing = '14px';
-    ctx.textAlign = 'center';
-    const k = 'K-', one = 'ONE';
-    const wk = ctx.measureText(k).width, wo = ctx.measureText(one).width;
-    const x0 = W/2 - (wk + wo)/2;
-    ctx.fillStyle = HUESO; ctx.textAlign = 'left'; ctx.fillText(k, x0, H/2 + 20);
-    ctx.fillStyle = BRASA; ctx.fillText(one, x0 + wk, H/2 + 20);
-    ctx.restore();
-    texto(b.pie, 40, 6, H/2 + 130, GRIS, a, 0, "'Inter',sans-serif", '400');
-  } else {
-    // Portada
-    texto(b.sup, 40, 8, 700, BRASA, a, dx, "'Inter',sans-serif", '600');
-    b.tit.split('\n').forEach((linea, i) => {
-      texto(linea, 190, 5, 900 + i * 180, HUESO, a, dx, "'Bebas Neue',sans-serif");
-    });
-    // Filo de brasa que crece bajo el título
-    const pf = salida((t - b.t0 - 0.7) / 0.6) * a;
-    if (pf > 0) {
-      const anc = 340 * pf;
-      const lin = ctx.createLinearGradient(W/2 - anc, 0, W/2 + anc, 0);
-      lin.addColorStop(0, 'rgba(209,66,14,0)');
-      lin.addColorStop(0.5, 'rgba(255,138,61,' + pf.toFixed(3) + ')');
-      lin.addColorStop(1, 'rgba(209,66,14,0)');
-      ctx.fillStyle = lin;
-      ctx.fillRect(W/2 - anc, 1230, anc * 2, 4);
-    }
-    texto(b.pie, 36, 0, 1330, GRIS, a * pulso(clamp((t - b.t0 - 0.9) / (dur - 0.9), 0, 1) * 0.999 + 0.001), dx, "'Inter',sans-serif", '400');
-  }
-}
-window.render = render;
-
-// Fuentes e imágenes listas antes del primer fotograma, y caché de tamaños
-// tirada al cargar la tipografía (si se midió con la de reserva, los tamaños
-// guardados serían los de esa).
-// Cada espera lleva su propio tope: `img.decode()` puede quedarse colgado sin
-// resolver ni rechazar, y eso dejaba la promesa entera pendiente para siempre.
-const conTope = (pr, ms) => Promise.race([pr, new Promise(r => setTimeout(r, ms))]);
-window.listo = Promise.all([
-  conTope(document.fonts.load('132px "Bebas Neue"'), 8000),
-  conTope(document.fonts.load('600 40px "Inter"'), 8000),
-  ...Object.values(IMGS).map(im => conTope(
-    new Promise(res => { if (im.complete && im.naturalWidth) return res(); im.onload = res; im.onerror = res; }),
-    8000
-  ))
-]).then(() => { cache.clear(); render(0); return true; });
-render(0);
 </script>
+<script src="/marketing/reel-motor.js"></script>
 </body>

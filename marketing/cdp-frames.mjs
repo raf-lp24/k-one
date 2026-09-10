@@ -48,7 +48,33 @@ await cmd('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, de
 await cmd('Runtime.enable');
 await cmd('Page.navigate', { url });
 await cmd('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
-await esperar(4000); // que carguen fuentes e imagenes antes del primer fotograma
+// Antes esto era un `esperar(4000)` a secas y era una loteria: si Google Fonts
+// tardaba un pelin mas, TODOS los fotogramas salian con la tipografia de
+// reserva en vez de Bebas Neue, y no te enterabas hasta ver el video montado
+// (paso de verdad, con un render de 913 fotogramas ya hecho). Si la pagina
+// expone `window.listo` -- una promesa que resuelve cuando sus fuentes e
+// imagenes estan listas -- se espera a ESO, que es exacto. El sleep queda solo
+// como red para paginas que no la expongan.
+// Ojo: Page.navigate vuelve ANTES de que la pagina haya ejecutado sus scripts,
+// asi que preguntar por window.listo en ese instante siempre da "sin-listo".
+// Hay que esperar a que APAREZCA y luego esperar a que resuelva.
+const rListo = await cmd('Runtime.evaluate', {
+  expression: `(async () => {
+    for (let i = 0; i < 80 && !(window.listo instanceof Promise); i++) {
+      await new Promise(r => setTimeout(r, 250));
+    }
+    if (!(window.listo instanceof Promise)) return 'sin-listo';
+    await window.listo;
+    return 'listo';
+  })()`,
+  awaitPromise: true, returnByValue: true
+});
+if (rListo.result?.result?.value === 'listo') {
+  console.error('  pagina lista (window.listo)');
+  await esperar(400);
+} else {
+  await esperar(4000);
+}
 
 const t0 = Date.now();
 for (let f = 0; f < total; f++) {
