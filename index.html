@@ -12338,7 +12338,9 @@
     'soja': ['soja', 'edamame'],
   };
   function _expandirAlergenoLibre(texto) {
-    const tokens = (texto || '').split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+    // Mismo separador que filtrarNoComida: aquí el cliente también escribe
+    // "leche y frutos secos" tan a menudo como con comas.
+    const tokens = (texto || '').split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(Boolean);
     const extra = new Set();
     tokens.forEach(t => {
       // Mismo arreglo que en filtrarNoComida y por el mismo motivo: las claves
@@ -12411,6 +12413,16 @@
   // familias, sinónimos de alergia...). _normTexto ya la usa el resto del
   // archivo para comparar ejercicios escritos a mano.
   const _normAlimento = t => _raizSinPlural(_normTexto(t));
+
+  // Cómo se parte la lista de alimentos que escribe el cliente. La coma no es
+  // el único separador que usa la gente: BUG REAL (10 sept 2026) -- un cliente
+  // escribió "Tomate y pepino" y, al partir solo por comas, quedaba UN token
+  // ("tomate y pepino") que no casa con ninguna receta. Ni el tomate ni el
+  // pepino se filtraron: 61 platos con tomate y 6 con pepino en su plan, con la
+  // exclusión puesta. Se contemplan también "y", "e", "o", "ni", la barra y el
+  // signo más. Nadie escribe un alimento cuyo nombre lleve una conjunción
+  // suelta dentro, así que partir por ellas no rompe ningún caso legítimo.
+  const _SEPARADOR_ALIMENTOS = /[,;/+]+|\s+(?:y|e|o|ni)\s+/i;
   const _EQUIV_TILDE = { a: '[aáàä]', e: '[eéèë]', i: '[iíìï]', o: '[oóòö]', u: '[uúùü]', n: '[nñ]', c: '[cç]' };
   function _reAlimento(token) {
     const raiz = _raizSinPlural(_normTexto(token));
@@ -12423,7 +12435,7 @@
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
-    const tokensOriginales = raw.split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
+    const tokensOriginales = raw.split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
     if (!tokensOriginales.length) return nutricion;
     const todosTokens = new Set(tokensOriginales);
     tokensOriginales.forEach(t => {
@@ -12491,7 +12503,17 @@
     const limpiar = s => s.replace(/,\s*,+/g, ',').replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
-        const textoCompleto = (opt.nombre + ' ' + opt.ingredientes).toLowerCase();
+        // Los PASOS entran en la comprobación, no solo el nombre y los
+        // ingredientes: hay recetas que nombran un alimento SOLO en la
+        // preparación. Caso real: "Palitos de zanahoria con guacamole casero"
+        // lleva "25g guacamole casero" en los ingredientes, y son los pasos los
+        // que dicen "aplasta el aguacate con lima, sal y un poco de TOMATE y
+        // cebolla". A quien había excluido el tomate, el plato ni se le miraba
+        // -- no casaba por nombre ni por ingredientes -- y la receta le mandaba
+        // echarlo igual.
+        const _pasosOpt = opt.pasos
+          || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : '') || '';
+        const textoCompleto = (opt.nombre + ' ' + opt.ingredientes + ' ' + _pasosOpt).toLowerCase();
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
         let nuevoNombre = opt.nombre;
@@ -12515,7 +12537,34 @@
         if (!nuevoNombre) return null;
         const aun = regexes.some(re => { re.lastIndex = 0; return re.test(nuevoNombre + ' ' + nuevoIng); });
         if (aun) return null;
-        return { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
+        // Los PASOS de preparación también, y por el mismo motivo que en el
+        // filtro de alérgenos: se pintan tal cual desde RECETA_PASOS (buscados
+        // por el nombre ORIGINAL) y no pasaban por aquí. Un cliente que había
+        // dicho "no como tomate" veía el plato ya con pimiento en el nombre y en
+        // los ingredientes, y la preparación seguía diciéndole "coloca el tomate
+        // en rodajas finas por encima". 27 platos en un solo plan.
+        let nuevosPasos;
+        // `opt.pasos` primero: el filtro de alérgenos corre ANTES que este y ya
+        // pudo dejar ahí los pasos adaptados, con el plato renombrado ("...sin
+        // lactosa..."). Con ese nombre nuevo, RECETA_PASOS ya no encuentra nada
+        // -- su clave es el nombre original -- así que sin encadenar los dos
+        // pasos el texto se quedaba con la sustitución de lactosa hecha pero la
+        // del alimento rechazado sin hacer.
+        const pasosOrig = opt.pasos
+          || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : null);
+        if (pasosOrig) {
+          let ps = pasosOrig;
+          recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, reemplazo); });
+          regexes.forEach((re, i) => {
+            const reemplazo = susMap[i] || '';
+            re.lastIndex = 0; ps = ps.replace(re, reemplazo);
+          });
+          ps = _concordarSustitucion(limpiar(ps));
+          if (ps !== pasosOrig) nuevosPasos = ps;
+        }
+        const adaptada = { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
+        if (nuevosPasos) adaptada.pasos = nuevosPasos;
+        return adaptada;
       }).filter(Boolean);
       // Si NADA se pudo salvar, antes se devolvían las opciones originales — es
       // decir, el cliente veía exactamente el alimento que había dicho que no
@@ -15082,6 +15131,15 @@
           // acababa como "salsa de yogur sin lactosa casera", que se lee fatal.
           [/salsa de yogur casera/gi, 'salsa de yogur casera sin lactosa'],
           [/yogur griego/gi, 'yogur de coco (sin lactosa)'],
+          // El PLURAL va antes que el singular y con su propia regla. `\byogur\b`
+          // no casa con "yogures" (la palabra sigue con "es", así que no hay
+          // frontera de palabra ahí), y el recetario tiene "2 yogures proteicos".
+          // Resultado real, encontrado auditando el plan de un cliente
+          // intolerante (10 sept 2026): el plato se llamaba "Yogur SIN LACTOSA
+          // proteico..." pero sus ingredientes seguían diciendo "2 yogures
+          // proteicos" -- lácteo de verdad. Tampoco lo cazaba la red de
+          // seguridad de abajo, por el mismo motivo.
+          [/\byogures\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogures sin lactosa'],
           [/\byogur(t)?\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
           [/\bkéfir\b(?![^,]*sin lactosa)/gi, 'kéfir sin lactosa'],
           [/\brequesón\b/gi, 'queso fresco sin lactosa'],
@@ -15091,7 +15149,12 @@
           [/\b(parmesano|mozzarella|feta|ricotta|burrata)\b/gi, 'queso $1 sin lactosa'],
           // El adjetivo va antes del "sin lactosa": "queso tierno sin lactosa",
           // no "queso sin lactosa tierno".
-          [/\bqueso (tierno|fresco|batido|cottage|curado|semicurado|rallado|azul|de cabra|de untar|crema|manchego)/gi, 'queso $1 sin lactosa'],
+          // El lookahead NO es opcional aquí, aunque el resto de reglas de esta
+          // lista sí lo llevaran: sin él, un plato que la regla anterior ya
+          // había dejado como "queso fresco sin lactosa" (el requesón) volvía a
+          // marcarse y quedaba "queso fresco SIN LACTOSA SIN LACTOSA". Salía en
+          // 8 platos, con el nombre así de roto delante del cliente.
+          [/\bqueso (tierno|fresco|batido|cottage|curado|semicurado|rallado|azul|de cabra|de untar|crema|manchego)(?![^,]*sin lactosa)/gi, 'queso $1 sin lactosa'],
           [/\bcottage\b(?![^,]*sin lactosa)/gi, 'queso cottage sin lactosa'],
           [/\b(quesos?)\b(?![^,]*sin lactosa)/gi, '$1 sin lactosa'],
           [/\b(proteína )?whey\b/gi, 'proteína aislada de suero (sin lactosa)'],
@@ -15133,7 +15196,12 @@
 
       const rastros = [];
       if (sinGluten) rastros.push(/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|fideos|avena|trigo|cebada|centeno|espelta|cuscús|couscous|bulgur|seitán|galletas?|bocadillo|wrap|granola|muesli|harina|lasaña|croquetas?|rebozad\w*|empanad\w*|pizza|pita|bagel|barritas?|multicereal|wassa|cerveza)\b/i);
-      if (sinLactosa) rastros.push(/\b(leche|quesos?|yogur(t)?|requesón|cottage|nata|mantequilla|kéfir|skyr|whey|cuajada|parmesano|mozzarella|feta|ricotta|burrata|bechamel|helado|pesto)\b/i);
+      // Los plurales van explícitos: `yogur(t)?` NO casaba con "yogures" y por
+      // ahí se coló un lácteo entero hasta el plato de un cliente intolerante.
+      // La red de seguridad es lo último que hay entre un alérgeno y el cliente:
+      // aquí conviene pasarse de amplio (a lo sumo tira un plato de más) antes
+      // que quedarse corto.
+      if (sinLactosa) rastros.push(/\b(leches?|quesos?|yogur(t|es|ts)?|requeso?n(es)?|requesón|cottage|natas?|mantequillas?|kéfir(es)?|kefir(es)?|skyrs?|whey|cuajadas?|parmesano|mozzarella|feta|ricotta|burrata|bechamel|helados?|pesto)\b/i);
       if (sinFrutosSecos) rastros.push(/\b(nuez|nueces|almendras?|anacardos?|avellanas?|pistachos?|cacahuetes?|piñones?|macadamia|pecanas?|praliné|turrón|mazapán|frutos secos|pesto)\b/i);
 
       // Cada plato se procesa UNA sola vez: los objetos se comparten entre el pool
@@ -15143,6 +15211,20 @@
       const adaptar = (opt) => {
         if (!opt || yaProcesados.has(opt)) return;
         yaProcesados.add(opt);
+        // Los PASOS de preparación se sustituyen también. Se buscan con el
+        // nombre ORIGINAL, antes de tocarlo, porque la clave de RECETA_PASOS es
+        // ese nombre. Sin esto, el cliente intolerante veía el plato titulado
+        // "sin lactosa", los ingredientes ya corregidos... y la preparación
+        // diciéndole "vierte los yogures proteicos en un bol" -- el texto de los
+        // pasos se pinta tal cual desde RECETA_PASOS y nunca pasaba por aquí.
+        // Solo se guarda si de verdad cambia algo: así los planes de clientes
+        // sin restricciones no engordan ni un byte.
+        const pasosOriginales = RECETA_PASOS[opt.nombre];
+        if (pasosOriginales) {
+          let pasos = pasosOriginales;
+          reemplazos.forEach(([re, rep]) => { pasos = pasos.replace(re, rep); });
+          if (pasos !== pasosOriginales) opt.pasos = pasos;
+        }
         reemplazos.forEach(([re, rep]) => {
           opt.nombre = opt.nombre.replace(re, rep);
           opt.ingredientes = opt.ingredientes.replace(re, rep);
@@ -19790,7 +19872,10 @@
     contenido.innerHTML = generatedPlan.nutricion.map((meal, mealIdx) => {
       const cards = meal.opciones.map((opt, i) => {
         const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
-        const pasos = RECETA_PASOS[opt.nombre] || _pasoGenerico(opt.nombre, opt.ingredientes, opt.prep);
+        // opt.pasos solo existe cuando el plato se adaptó por alergia o
+        // intolerancia (ver `adaptar` en buildPlanFromData): tiene prioridad
+        // porque RECETA_PASOS guarda el texto SIN adaptar.
+        const pasos = opt.pasos || RECETA_PASOS[opt.nombre] || _pasoGenerico(opt.nombre, opt.ingredientes, opt.prep);
         return `
           <div class="receta-card">
             <div class="receta-num">Opción ${i + 1}</div>
