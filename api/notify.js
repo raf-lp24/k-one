@@ -1087,6 +1087,72 @@ async function handlePost(req, res) {
     if (origin) return res.status(403).json({ error: 'Origen no permitido' });
   }
 
+  // PUSH DE PRUEBA -- va ANTES de exigir RESEND_API_KEY a propósito: el push y
+  // el email son dos canales independientes (VAPID vs Resend), y este check
+  // devuelve 200 {skipped} para todo lo que venga detrás. Poniéndolo después,
+  // quedarse sin la clave de email apagaría también la prueba de push. Es el
+  // mismo acoplamiento que ya hubo que desenredar en el cron.
+  //
+  // Por qué existe: hasta ahora la ÚNICA forma de comprobar si los avisos
+  // llegan era esperar al cron diario de las 09:00 UTC. Si no llegaba, no
+  // había manera de saber en qué punto se rompía -- ¿faltan claves VAPID?,
+  // ¿se perdió la fila de la suscripción?, ¿la rechaza el navegador? Esto lo
+  // responde en el momento y dice cuál de los tres es.
+  //
+  // SOLO se manda a las suscripciones del usuario AUTENTICADO. El destinatario
+  // nunca sale del body: eso es justo lo que convirtió al tipo 'renovacion' en
+  // un relay abierto (ver el comentario de más abajo).
+  if ((req.body || {}).tipo === 'push_prueba') {
+    try {
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
+
+      const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+      const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+      if (!vapidPublic || !vapidPrivate) {
+        return res.status(200).json({ ok: false, motivo: 'sin_vapid',
+          detalle: 'Faltan VAPID_PUBLIC_KEY o VAPID_PRIVATE_KEY en las variables de entorno de Vercel.' });
+      }
+
+      const { data: subs, error: errSubs } = await supa.from('push_subscriptions')
+        .select('id, endpoint, p256dh, auth_key').eq('user_id', user.id);
+      if (errSubs) {
+        return res.status(200).json({ ok: false, motivo: 'error_bd', detalle: errSubs.message });
+      }
+      if (!subs || !subs.length) {
+        return res.status(200).json({ ok: false, motivo: 'sin_suscripcion',
+          detalle: 'Tu cuenta no tiene ninguna suscripción guardada en el servidor. Desactiva y vuelve a activar el interruptor de avisos desde el móvil, con la app añadida a la pantalla de inicio.' });
+      }
+
+      webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
+      let enviados = 0; const fallos = [];
+      for (const sub of subs) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+            JSON.stringify({ title: 'K-ONE · Prueba', body: 'Si ves esto, los avisos funcionan.', url: '/' })
+          );
+          enviados++;
+        } catch (pushErr) {
+          // Igual que el cron: una suscripción muerta se limpia en vez de
+          // quedarse reintentando cada día contra un endpoint que ya no existe.
+          const caducada = pushErr.statusCode === 404 || pushErr.statusCode === 410;
+          if (caducada) await supa.from('push_subscriptions').delete().eq('id', sub.id);
+          fallos.push({ codigo: pushErr.statusCode || 0, mensaje: pushErr.message, caducada });
+        }
+      }
+      return res.status(200).json({
+        ok: enviados > 0,
+        motivo: enviados > 0 ? 'enviado' : 'rechazado_por_el_navegador',
+        dispositivos: subs.length, enviados, fallos
+      });
+    } catch (e) {
+      console.warn('[notify] push_prueba error:', e.message);
+      return res.status(200).json({ ok: false, motivo: 'excepcion', detalle: e.message });
+    }
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[notify] RESEND_API_KEY no configurada, email no enviado');

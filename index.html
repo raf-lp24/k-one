@@ -8350,6 +8350,12 @@
             </label>
           </div>
           <p class="push-toggle-hint" style="display:none;margin:-2px 16px 4px;font-size:10.5px;color:var(--metal);line-height:1.4"></p>
+          <!-- Solo aparece con los avisos ACTIVADOS: sirve para comprobar que
+               de verdad llegan sin esperar al aviso diario, y si no llegan,
+               dice en qué punto se rompe. -->
+          <button type="button" data-push-test onclick="probarNotificacion(this)" style="display:none;width:calc(100% - 32px);margin:0 16px 6px;background:none;border:1px solid var(--humo);border-radius:8px;padding:7px 10px;font-size:10.5px;color:var(--metal);cursor:pointer;font-family:inherit">
+            Enviarme un aviso de prueba
+          </button>
         </div>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
@@ -25072,9 +25078,6 @@
     // signUp, antes de confirmar el email). Sin await: no debe retrasar el
     // arranque de la app.
     _reintentarNotificacionesPendientes();
-    // Y repara la suscripción push si el servidor perdió su fila (ver el
-    // comentario largo en _resincronizarPushSubscription). También sin await.
-    if (typeof _resincronizarPushSubscription === 'function') _resincronizarPushSubscription();
 
     // Restaura la sesión activa de Supabase (si la hay) y sincroniza el perfil.
     let session = null;
@@ -25089,6 +25092,23 @@
     } catch (e) {
       console.error('Error restaurando sesión:', e);
       clearCurrentUser();
+    }
+
+    // Repara la suscripción push si el servidor perdió su fila (ver el
+    // comentario largo en _resincronizarPushSubscription). Sin await: no debe
+    // retrasar el arranque.
+    //
+    // Va AQUÍ, después de restaurar la sesión, y no antes como estaba: la
+    // función lo primero que hace es pedir la sesión y, si no la encuentra, se
+    // rinde en silencio sin reintentar nunca. Lanzada antes de este bloque
+    // competía con la restauración -- si el token había caducado y Supabase
+    // estaba renovándolo, se encontraba sin sesión y no reparaba nada. Y eso
+    // ocurre justo en el peor caso posible: al volver tras varios días sin
+    // abrir la app, que es exactamente cuando iOS ya ha rotado el endpoint y la
+    // fila del servidor hace falta rehacerla. Resultado: no volvía a llegar un
+    // aviso nunca más, con el interruptor puesto.
+    if (session && typeof _resincronizarPushSubscription === 'function') {
+      _resincronizarPushSubscription();
     }
 
     // Vuelta desde Stripe Checkout (ver api/create-checkout-session.js).
@@ -25405,6 +25425,49 @@
     }
     window._resincronizarPushSubscription = _resincronizarPushSubscription;
 
+    // Manda un push a ESTE usuario ahora mismo. Hasta ahora la única forma de
+    // saber si los avisos llegaban era esperar al cron diario, y si no llegaba
+    // nada no había manera de saber en qué punto se rompía. Cada motivo que
+    // devuelve el servidor se traduce a algo accionable, no a "error".
+    window.probarNotificacion = async function(btn) {
+      const textoOriginal = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      try {
+        const { data: { session } } = await supa.auth.getSession();
+        if (!session) { showToast('Inicia sesión para probar los avisos.', 4000); return; }
+        const r = await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ tipo: 'push_prueba', datos: {} })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (j.ok) {
+          showToast(j.dispositivos > 1
+            ? `Aviso enviado a tus ${j.dispositivos} dispositivos. Si no lo ves, revisa las notificaciones del sistema.`
+            : 'Aviso enviado. Debería aparecerte en unos segundos.', 5000);
+        } else if (j.motivo === 'sin_suscripcion') {
+          showToast('Tus avisos no están registrados en el servidor. Apaga y vuelve a encender el interruptor.', 7000);
+        } else if (j.motivo === 'sin_vapid') {
+          showToast('Los avisos no están configurados en el servidor. Avísanos.', 7000);
+        } else if (j.motivo === 'rechazado_por_el_navegador') {
+          const caducada = (j.fallos || []).some(f => f.caducada);
+          showToast(caducada
+            ? 'Tu suscripción había caducado. Ya la hemos limpiado: apaga y vuelve a encender el interruptor.'
+            : 'El navegador rechazó el aviso. Comprueba que K-ONE tenga permiso de notificaciones en los ajustes del móvil.', 8000);
+        } else {
+          showToast('No se pudo enviar el aviso de prueba.', 5000);
+        }
+        // El servidor puede haber borrado una suscripción caducada: que el
+        // interruptor refleje el estado real y no siga diciendo "activado".
+        await actualizarBotonNotificaciones();
+      } catch (e) {
+        console.warn('[push] prueba fallida:', e.message);
+        showToast('No se pudo enviar el aviso de prueba.', 5000);
+      } finally {
+        btn.disabled = false; btn.textContent = textoOriginal;
+      }
+    };
+
     window.actualizarBotonNotificaciones = async function() {
       const contenedores = document.querySelectorAll('[data-push-toggle]');
       if (!contenedores.length) return;
@@ -25463,6 +25526,11 @@
       contenedores.forEach(cont => {
         const input = cont.querySelector('.push-toggle-input');
         const hint = cont.querySelector('.push-toggle-hint');
+        // El botón de prueba se esconde de entrada y solo lo reactiva la rama
+        // final, cuando consta que hay suscripción de verdad: no tiene sentido
+        // ofrecer "mándame una prueba" a quien todavía no los ha activado.
+        const btnPrueba = cont.querySelector('[data-push-test]');
+        if (btnPrueba) btnPrueba.style.display = 'none';
         if (!input) return;
         if (_iosSinInstalar) {
           input.dataset.estadoResuelto = '1';
@@ -25532,6 +25600,7 @@
           hint.textContent = sub ? (input.dataset.hintOn || '') : '';
           hint.style.display = sub ? '' : 'none';
         }
+        if (btnPrueba) btnPrueba.style.display = sub ? '' : 'none';
       });
     };
 
