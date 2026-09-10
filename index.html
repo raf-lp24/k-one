@@ -6584,6 +6584,9 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
         <div class="jv-title">
           <span id="adminTotalFiltro">0</span> <span style="color:var(--jv-faint);font-weight:600">de</span> <span id="adminTotalClientes">0</span> <span style="color:var(--jv-faint);font-weight:600">clientes</span>
+          <!-- Los premium no salen en la tabla general (ver renderTablaAdmin).
+               Esta línea dice cuántos hay ocultos y da el atajo para verlos. -->
+          <div id="adminAvisoPremium" style="display:none;font-family:var(--jv-ui);font-size:11px;font-weight:600;color:var(--jv-faint);margin-top:4px;letter-spacing:0"></div>
         </div>
         <div id="adminFiltrosWrap" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0">
           <input id="adminBuscador" type="text" placeholder="Buscar..." aria-label="Buscar clientes" oninput="buscarAdmin(this.value)"
@@ -22753,6 +22756,21 @@
       );
     }
 
+    // Los PREMIUM (acceso concedido a mano) no salen en la tabla general: no
+    // son clientes de pago y ensuciaban la vista de todos los días -- aparecían
+    // arriba como "SIN PAGO" mezclados con los que sí pagan. Siguen estando a
+    // un clic: salen con el filtro "Premium", con el de precio "premium", y
+    // buscando por nombre o email, que es como se busca a alguien concreto.
+    const _buscando = !!_adminFiltro.texto;
+    const _pidePremium = _adminFiltro.tipo === 'premium'
+      || document.getElementById('adminFiltroPrecio')?.value === 'premium';
+    let _premiumOcultos = 0;
+    if (_adminFiltro.tipo === 'todos' && !_buscando && !_pidePremium) {
+      const antes = lista.length;
+      lista = lista.filter(c => !c.isBeta);
+      _premiumOcultos = antes - lista.length;
+    }
+
     // Filtros de estudio de mercado
     const fPlan = document.getElementById('adminFiltroPlan')?.value;
     if (fPlan) {
@@ -22789,6 +22807,19 @@
 
     const filtroEl = document.getElementById('adminTotalFiltro');
     if (filtroEl) filtroEl.textContent = lista.length;
+
+    // Que se vea que están ocultos y no que han desaparecido: sin esta línea,
+    // buscar a un premium en la tabla y no encontrarlo parece un fallo.
+    const avisoEl = document.getElementById('adminAvisoPremium');
+    if (avisoEl) {
+      if (_premiumOcultos > 0) {
+        avisoEl.innerHTML = `${_premiumOcultos} cliente${_premiumOcultos === 1 ? '' : 's'} premium sin mostrar · `
+          + `<button onclick="filtrarAdminTipo('premium')" style="background:none;border:none;padding:0;color:var(--brasa);font:inherit;cursor:pointer;text-decoration:underline">ver</button>`;
+        avisoEl.style.display = '';
+      } else {
+        avisoEl.style.display = 'none';
+      }
+    }
 
     const tabla = document.getElementById('adminTabla');
     if (!tabla) return;
