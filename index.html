@@ -13550,7 +13550,15 @@
     } else if (enfermedad.includes('Diabetes')) {
       notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
     } else if (enfermedad.includes('Otra')) {
-      notasSalud.push('Nos indicaste que tienes una condición médica. Si algo de tu plan no encaja con ella, coméntalo con tu médico antes de empezar.');
+      // Se cita lo que escribió, igual que ya hacen las notas de medicación y
+      // de operación. El campo "¿Cuál?" se guardaba y se enseñaba en Jarvis,
+      // pero al cliente le llegaba un "tienes una condición médica" genérico
+      // que no demuestra que se haya leído. Escapado: es texto libre y esta
+      // nota se pinta con innerHTML (mismo motivo que en medicación/operación).
+      const _enfOtra = (u.enfermedadOtra || '').trim();
+      notasSalud.push(_enfOtra
+        ? `Nos indicaste una condición médica (${_esc(_enfOtra)}). El plan no la trata ni la tiene en cuenta clínicamente: si algo de lo que te proponemos no encaja con ella, coméntalo con tu médico antes de empezar.`
+        : 'Nos indicaste que tienes una condición médica. Si algo de tu plan no encaja con ella, coméntalo con tu médico antes de empezar.');
     }
 
     if (medicacion) {
