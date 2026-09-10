@@ -6000,21 +6000,40 @@
   .modal-success.visible { display: block; }
 
   /* TOAST */
+  /* Llevaba `white-space: nowrap` y ningún ancho máximo, así que el aviso se
+     pintaba en UNA sola línea por largo que fuera y, al ir centrado con
+     translateX(-50%), se salía por los dos lados a la vez. Medido en un móvil
+     de 375px con el aviso de "Entrenamiento de hoy marcado como completado":
+     549px de ancho, 87px cortados por la izquierda y 87 por la derecha -- no
+     se podía leer. Y hay avisos de hasta 128 caracteres, peores todavía.
+     Ahora se ajusta al ancho de la pantalla y parte en varias líneas. */
   .toast {
     position: fixed;
-    bottom: 32px;
+    /* Por encima del indicador de inicio del iPhone, igual que el banner de avisos. */
+    bottom: calc(32px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%) translateY(80px);
     background: var(--grafito);
     border-left: 3px solid var(--brasa);
-    padding: 14px 24px;
+    padding: 14px 20px;
     font-size: 13px;
     color: var(--blanco);
     z-index: 300;
     transition: transform 0.3s ease;
-    white-space: nowrap;
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
+    /* `width: max-content` + `max-width` es la pareja que hace falta: sin el
+       primero, la caja se encoge a su ancho MÍNIMO (188px de ancho y 5 líneas
+       de alto en una pantalla de 375px, medido) en vez de ocupar el ancho
+       disponible. Así se queda en una línea cuando el aviso es corto y solo
+       parte cuando de verdad no cabe. */
+    width: max-content;
+    max-width: min(420px, calc(100vw - 32px));
+    box-sizing: border-box;    /* el padding cuenta DENTRO del ancho máximo */
+    line-height: 1.45;         /* si parte en varias líneas, que se lean */
+    /* `break-word` y no `anywhere`: este no toca el cálculo del ancho natural,
+       y aun así evita que un email o un enlace largo desborden. */
+    overflow-wrap: break-word;
   }
   .toast.visible { transform: translateX(-50%) translateY(0); }
 
