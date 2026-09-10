@@ -12341,8 +12341,17 @@
     const tokens = (texto || '').split(/[,;]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
     const extra = new Set();
     tokens.forEach(t => {
+      // Mismo arreglo que en filtrarNoComida y por el mismo motivo: las claves
+      // de aquí abajo están escritas SIN tilde ('lacteos', no 'lácteos'), así
+      // que quien tecleaba "lácteos" CON tilde en el campo de alergia libre no
+      // encontraba la clave y se quedaba sin la exclusión de todos los
+      // lácteos. _normAlimento compara sin tildes y en singular en los dos
+      // lados, así que da igual cuál de las dos formas escriba el cliente.
+      const tNorm = _normAlimento(t);
       Object.entries(SINONIMOS_ALERGENO).forEach(([clave, miembros]) => {
-        if (t === clave || miembros.some(m => m === t)) miembros.forEach(m => extra.add(m));
+        if (tNorm === _normAlimento(clave) || miembros.some(m => _normAlimento(m) === tNorm)) {
+          miembros.forEach(m => extra.add(m));
+        }
       });
     });
     // Red de seguridad: nunca emitir un token que coincida LITERALMENTE con el
@@ -12373,15 +12382,23 @@
   // contra el texto de las recetas. Pero el cliente escribe sin tildes -- lo
   // normal al teclear rápido en el móvil -- y las recetas sí las llevan: quien
   // ponía "esparragos, maiz" seguía recibiendo "espárragos trigueros" y
-  // "tortillas de maíz" en su plan. Del mismo modo, un token en plural no
-  // encontraba el singular ("huevas" no tapaba "hueva de mújol"), porque el
-  // comodín de la regex solo crecía hacia el plural, nunca hacia el singular.
+  // "tortillas de maíz" en su plan.
   //
-  // Esto convierte cada letra acentuable en una clase que acepta las dos
-  // formas, así que la regex sigue casando contra el texto ORIGINAL (con sus
-  // tildes) y las sustituciones siguen funcionando sobre él sin descuadres de
-  // posición -- que es lo que pasaría comparando contra una copia sin tildes.
-  const _EQUIV_TILDE = { a: '[aáàä]', e: '[eéèë]', i: '[iíìï]', o: '[oóòö]', u: '[uúùü]', n: '[nñ]', c: '[cç]' };
+  // REGLA DE PRODUCTO (fijada el mismo día, tras el bug): CUALQUIER filtro que
+  // compare texto escrito por el cliente contra el recetario tiene que dar
+  // igual con tilde que sin ella. La primera pasada solo arregló la
+  // comparación directa del token contra la receta (_reAlimento) y dejó DOS
+  // sitios más con el mismo fallo sin tocar: la detección de "esto es una
+  // FAMILIA entera" (¿"lacteos" sin tilde dispara toda la familia "lácteos"?
+  // No lo hacía) y _expandirAlergenoLibre() para el campo "Otra alergia".
+  // Los tres puntos usaban cada uno su propia forma de quitar tildes -- tres
+  // implementaciones sueltas es la manera exacta en que un cuarto sitio se
+  // queda sin arreglar el día de mañana. Ahora los tres llaman a la MISMA
+  // función (_normTexto, ya existente y usada para comparar ejercicios).
+  //
+  // Plural: un token no encontraba su singular ("huevas" no tapaba "hueva de
+  // mújol"), porque el comodín de la regex solo crecía hacia el plural, nunca
+  // hacia el singular. _raizSinPlural cubre eso.
   function _raizSinPlural(t) {
     // "espárragos" -> "esparrago", "huevas" -> "hueva", "mejillones" -> "mejillon".
     // Se deja tal cual lo que es corto o no acaba en 's' ("maiz", "quinoa", "arroz").
@@ -12389,10 +12406,14 @@
     if (t.length > 3 && /s$/.test(t)) return t.slice(0, -1);
     return t;
   }
+  // Token normalizado (sin tildes, singular): la forma canónica en la que se
+  // comparan dos palabras cuando NO hace falta construir una regex (listas de
+  // familias, sinónimos de alergia...). _normTexto ya la usa el resto del
+  // archivo para comparar ejercicios escritos a mano.
+  const _normAlimento = t => _raizSinPlural(_normTexto(t));
+  const _EQUIV_TILDE = { a: '[aáàä]', e: '[eéèë]', i: '[iíìï]', o: '[oóòö]', u: '[uúùü]', n: '[nñ]', c: '[cç]' };
   function _reAlimento(token) {
-    const raiz = _raizSinPlural(
-      token.normalize('NFD').replace(/[̀-ͯ]/g, '')   // el token, sin tildes
-    );
+    const raiz = _raizSinPlural(_normTexto(token));
     const cuerpo = raiz
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')                  // escapar antes de tocar letras
       .replace(/[aeiounc]/g, ch => _EQUIV_TILDE[ch] || ch);
@@ -12406,16 +12427,22 @@
     if (!tokensOriginales.length) return nutricion;
     const todosTokens = new Set(tokensOriginales);
     tokensOriginales.forEach(t => {
+      const tNorm = _normAlimento(t);
       for (const [familia, miembros] of Object.entries(FAMILIAS_ALIMENTOS)) {
-        if (t === familia || miembros.some(m => m === t || m.includes(t) || t.includes(m))) {
-          if (t === familia) miembros.forEach(m => todosTokens.add(m));
-          else {
-            const aliasSinTilde = t.normalize('NFD').replace(/[̀-ͯ]/g, '');
-            miembros.forEach(m => {
-              const mNorm = m.normalize('NFD').replace(/[̀-ͯ]/g, '');
-              if (mNorm === aliasSinTilde || m === t) todosTokens.add(m);
-            });
-          }
+        // Comparación normalizada en los dos lados: antes "lacteos" (sin
+        // tilde) no encontraba la familia "lácteos" y el cliente se quedaba
+        // sin la exclusión completa (leche, yogur, requesón...) que sí
+        // conseguía tecleando la tilde. Con acento o sin él tiene que dar lo
+        // mismo -- es la misma regla que arregló los alimentos sueltos.
+        const familiaNorm = _normAlimento(familia);
+        const esFamiliaEntera = tNorm === familiaNorm;
+        const tocaAlgunMiembro = miembros.some(m => {
+          const mNorm = _normAlimento(m);
+          return mNorm === tNorm || mNorm.includes(tNorm) || tNorm.includes(mNorm);
+        });
+        if (esFamiliaEntera) { miembros.forEach(m => todosTokens.add(m)); continue; }
+        if (tocaAlgunMiembro) {
+          miembros.forEach(m => { if (_normAlimento(m) === tNorm) todosTokens.add(m); });
         }
       }
     });
@@ -12435,8 +12462,7 @@
       'ternera': ['solomillo']
     };
     [...todosTokens].forEach(t => {
-      const raiz = _raizSinPlural(t.normalize('NFD').replace(/[̀-ͯ]/g, ''));
-      const extra = SINONIMOS_MISMO_ALIMENTO[raiz];
+      const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)];
       if (extra) extra.forEach(e => todosTokens.add(e));
     });
     const tokenArr = [...todosTokens];
@@ -12445,20 +12471,18 @@
     // ni la receta de sustitución ni el alimento de recambio, que están
     // escritos con tilde. El alimento acababa tapado pero sin sustituto, y el
     // plato se descartaba entero en vez de repararse.
-    const _sinTilde = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    const _raizToken = t => _raizSinPlural(_sinTilde(t));
     const recetasActivas = RECETAS_SUSTITUCION.filter(([re]) => {
-      const src = _sinTilde(re.source);
-      return tokenArr.some(t => src.includes(_raizToken(t)));
+      const src = _normTexto(re.source);
+      return tokenArr.some(t => src.includes(_normAlimento(t)));
     });
     const regexes = tokenArr.map(_reAlimento);
     const susMap = {};
     tokenArr.forEach((t, i) => {
       const s = SUSTITUCIONES_NOCOMIDA[t];
       if (s && !todosTokens.has(s.toLowerCase())) { susMap[i] = s; return; }
-      const raiz = _raizToken(t);
+      const raiz = _normAlimento(t);
       for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
-        const claveN = _sinTilde(clave);
+        const claveN = _normTexto(clave);
         if ((claveN.includes(raiz) || raiz.includes(claveN)) && !todosTokens.has(valor.toLowerCase())) {
           susMap[i] = valor; return;
         }
