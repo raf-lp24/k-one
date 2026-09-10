@@ -6134,6 +6134,31 @@
   }
   .logout-btn:hover { border-color: var(--metal); color: var(--blanco); }
 
+  /* Motivos de baja: opciones de un toque en vez de un desplegable. Se ven
+     todas a la vez, que es justo lo que anima a marcar una en vez de cerrar
+     el aviso -- y sin dejar ninguna preseleccionada, para no sugerir la
+     respuesta. Es un radio real por debajo: accesible con teclado y lector. */
+  .chip-baja {
+    background: #141414;
+    border: 1px solid #333;
+    border-radius: 999px;
+    padding: 9px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: #bbb;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+    line-height: 1.3;
+  }
+  .chip-baja:hover { border-color: var(--metal); color: var(--blanco); }
+  .chip-baja input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip-baja:has(input:checked) {
+    border-color: var(--brasa);
+    background: rgba(209, 66, 14, .12);
+    color: var(--blanco);
+  }
+  .chip-baja:has(input:focus-visible) { outline: 2px solid var(--brasa); outline-offset: 2px; }
+
   /* Avisos de entreno: un interruptor de verdad en vez de un botón de texto
      que cambia -- se ve el estado de un vistazo y es el patrón que la gente
      ya conoce de cualquier ajuste on/off, no hay que leer para saber qué toca. */
@@ -8634,6 +8659,41 @@
           </div>
         </div>
 
+        <!-- Motivo de baja. Solo lo ve quien ya ha cancelado (cancelaAlFinal) y
+             SOLO UNA VEZ: en cuanto contesta o lo descarta no vuelve a salir
+             nunca -- ni en este dispositivo (localStorage) ni en otro
+             (userdata._cuenta, que viaja en la nube). No pide nada a cambio ni
+             intenta retener: eso ya lo hace el aviso de renovación. Esto es
+             solo para enterarnos de qué falla.
+             La respuesta entra en mensajes_cliente, o sea que aparece en el
+             Buzón de Jarvis como cualquier otro mensaje -- sin tabla nueva ni
+             función nueva de Vercel (el plan Hobby topa en 12 y ya están las
+             12 puestas). -->
+        <div id="bannerMotivoBaja" style="display:none;background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:18px 20px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:22px;line-height:1.2;color:var(--metal)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="7" x2="12" y2="11"/><line x1="12" y1="14" x2="12.01" y2="14"/></svg></span>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">¿Nos dices por qué lo dejas?</div>
+              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">Tu plan sigue activo hasta el final del período, esto no lo cambia. Solo queremos saber qué no ha funcionado para arreglarlo. Te lo preguntamos una vez y no volvemos a insistir.</div>
+              <div id="bannerMotivoBajaChips" role="radiogroup" aria-label="Motivo por el que cancelas" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Precio">Es caro para mí</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta de uso">No lo estaba usando</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Entrenos">Los entrenos no me encajan</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Dieta">La dieta no me encaja</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta variedad">Se me hace repetitivo</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Fallos">Algo no funcionaba bien</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Objetivo cumplido">Ya he conseguido mi objetivo</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Otro">Otro motivo</label>
+              </div>
+              <textarea id="bannerMotivoBajaTexto" rows="2" maxlength="1000" placeholder="Si quieres, cuéntanoslo con tus palabras (opcional)" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:14px"></textarea>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button class="btn-primary" id="btnEnviarMotivoBaja" style="padding:9px 20px;font-size:13px" onclick="enviarMotivoBaja()">Enviar →</button>
+                <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="descartarMotivoBaja()">Prefiero no decirlo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
             <div class="motivation-label">Entrenamiento de hoy</div>
@@ -8843,19 +8903,14 @@
               <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
             </div>
           </div>
-          <!-- Ciclado de carbohidratos: solo aparece si el plan lo aplica de
-               verdad (hace falta tener días de entreno Y días de descanso). -->
-          <div id="cicloCarbsBox" style="display:none;margin:14px 0;background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:16px 18px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">CARBOHIDRATOS SEGÚN EL DÍA</span>
-            </div>
-            <div id="cicloCarbsTexto" style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="ciclo-opt" data-ciclo="auto" onclick="cambiarCicladoCarbs('auto')">Ajustar por día</button>
-              <button class="ciclo-opt" data-ciclo="off" onclick="cambiarCicladoCarbs('off')">Los 7 días iguales</button>
-            </div>
-          </div>
+          <!-- Aquí había un selector de "ciclado de carbohidratos" (Ajustar por
+               día / Los 7 días iguales). Se quitó el 11 sept 2026: no es una
+               preferencia, es un cálculo. El motor ya decide si tiene sentido
+               ciclar y con cuánta amplitud según el objetivo y el reparto real
+               de días de entreno y descanso -- preguntárselo al cliente le pide
+               una decisión técnica que no tiene por qué saber tomar.
+               El porqué del día que está mirando sigue explicado en
+               #cicloCarbsAviso, que es donde de verdad sirve. -->
           <!-- Selector de días de la semana -->
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">Lun</button>
@@ -15822,8 +15877,13 @@
     // queda si el cliente desactiva el ciclado o si su plan no lo permite.
     let factorPorDia = new Array(7).fill(1);
 
-    const cicladoActivo = (u.cicladoCarbs || 'auto') !== 'off';
-    if (cicladoActivo && !soloDieta && semana.length === 7) {
+    // El ciclado ya no es una preferencia del cliente (el selector se retiró el
+    // 11 sept 2026): lo decide el motor con lo que sabe de él. Las condiciones
+    // de abajo SON esa decisión -- hace falta plan con entrenamiento, semana
+    // completa, y días de los dos tipos; y la amplitud sale del objetivo. Un
+    // "u.cicladoCarbs = 'off'" guardado de antes ya no se mira, a propósito:
+    // era una decisión técnica que no le tocaba tomar a él.
+    if (!soloDieta && semana.length === 7) {
       const esDiaEntreno = semana.map(d => d.tipo === 'Entrenamiento');
       const nEntreno = esDiaEntreno.filter(Boolean).length;
       const nDescanso = 7 - nEntreno;
@@ -16332,34 +16392,6 @@
   // estás mirando lleva más o menos hidratos que otro.
   const DIAS_SEMANA_LARGO = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 
-  function _reflejarCicladoCarbs() {
-    const box = document.getElementById('cicloCarbsBox');
-    if (!box) return;
-    const ciclo = generatedPlan?.cicloCarbs;
-    const pref = userData.cicladoCarbs || 'auto';
-    // La caja solo se enseña si el ciclado es POSIBLE para este cliente: con
-    // plan de solo nutrición, o con una semana sin días de descanso, no hay
-    // nada que repartir y un interruptor que no hace nada solo confunde. Si
-    // está desactivado a mano, sí se enseña -- si no, no habría forma de
-    // volver a activarlo.
-    const posible = pref === 'off'
-      ? !generatedPlan?.soloDieta && (generatedPlan?.semana || []).length === 7
-      : !!ciclo;
-    box.style.display = posible ? '' : 'none';
-    if (!posible) return;
-
-    const txt = document.getElementById('cicloCarbsTexto');
-    if (txt) {
-      txt.textContent = ciclo
-        ? `Tus ${ciclo.nEntreno} días de entreno llevan un ${ciclo.pctEntreno}% más de carbohidratos y tus ${ciclo.nDescanso} de descanso un ${ciclo.pctDescanso}% menos. El total de la semana es exactamente el mismo: solo se reparte hacia los días en que lo aprovechas.`
-        : 'Ahora mismo tus 7 días llevan los mismos carbohidratos. Si lo activas, subimos los hidratos los días que entrenas y los bajamos los de descanso, sin cambiar el total de la semana.';
-    }
-    document.querySelectorAll('.ciclo-opt').forEach(b => {
-      b.classList.toggle('active', b.dataset.ciclo === pref);
-      b.setAttribute('aria-pressed', b.dataset.ciclo === pref ? 'true' : 'false');
-    });
-  }
-
   function _actualizarAvisoCiclo(dia) {
     const el = document.getElementById('cicloCarbsAviso');
     if (!el) return;
@@ -16376,22 +16408,6 @@
       : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''}. La proteína no baja: sigue igual que cualquier otro día.`;
     el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>`;
     el.style.display = '';
-  }
-
-  function cambiarCicladoCarbs(pref) {
-    if (!['auto', 'off'].includes(pref)) return;
-    if ((userData.cicladoCarbs || 'auto') === pref) return;
-    userData.cicladoCarbs = pref;
-    generatedPlan = buildPlanFromData(userData);
-    // A diferencia del cambio de rotación de menú, aquí NO se resetea la semana:
-    // las recetas y su orden son las mismas, lo único que cambia son las
-    // cantidades. Perder las 7 elecciones del cliente por esto sería absurdo.
-    const user = getCurrentUser();
-    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
-    buildDashboard();
-    showToast(pref === 'auto'
-      ? 'Listo: tus carbohidratos se ajustan según entrenes o descanses ese día.'
-      : 'Listo: tus 7 días llevan los mismos carbohidratos.');
   }
 
   function cambiarRotacionMenu(pref) {
@@ -16746,6 +16762,7 @@
     actualizarDiasRestantesPlan();
     actualizarAvisoRenovacion();
     actualizarBannerFeedback();
+    actualizarBannerMotivoBaja();
 
     // Notas / agenda
     renderNotas();
@@ -16780,7 +16797,6 @@
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
     renderNutritionGrid(0);
     _reflejarRotacionMenu();
-    _reflejarCicladoCarbs();
 
     // Tarjeta resumen del día (entreno + comida de un vistazo)
     renderTodayHero();
@@ -22140,6 +22156,91 @@
     if (box) box.style.display = 'none';
   }
 
+  // ===== MOTIVO DE BAJA (una sola vez) =====
+  // Se le enseña a quien ya ha pedido no renovar, la próxima vez que entre.
+  // "Una sola vez" de verdad: se marca en DOS sitios porque cada uno tapa el
+  // agujero del otro -- localStorage responde al instante pero es de este
+  // navegador, y userdata._cuenta viaja en la nube pero tarda en guardarse. Con
+  // los dos, ni sale dos veces en el móvil y el portátil ni reaparece si el
+  // guardado en la nube falla.
+  const _claveMotivoBaja = () => 'kone_motivo_baja_' + ((getCurrentUser() || {}).email || '');
+
+  function _motivoBajaYaContestado() {
+    try { if (localStorage.getItem(_claveMotivoBaja())) return true; } catch (e) {}
+    try { if (userData && userData._cuenta && userData._cuenta.motivoBaja) return true; } catch (e) {}
+    return false;
+  }
+
+  function actualizarBannerMotivoBaja() {
+    const box = document.getElementById('bannerMotivoBaja');
+    if (!box) return;
+    const user = getCurrentUser();
+    // isBeta fuera: una cuenta de prueba no "cancela" nada, no hay nada que preguntar.
+    const toca = !!(user && user.cancelaAlFinal && !user.isBeta) && !_motivoBajaYaContestado();
+    box.style.display = toca ? 'block' : 'none';
+  }
+
+  // valor: lo que contestó, o 'sin_respuesta' si lo descartó. Se guarda igual en
+  // los dos casos -- lo que cierra el aviso para siempre es haberlo visto.
+  function _cerrarMotivoBaja(valor) {
+    try { localStorage.setItem(_claveMotivoBaja(), '1'); } catch (e) {}
+    const user = getCurrentUser();
+    try {
+      if (userData && typeof userData === 'object' && user && user.email) {
+        userData._cuenta = Object.assign({}, userData._cuenta, {
+          motivoBaja: valor || 'sin_respuesta',
+          motivoBajaFecha: new Date().toISOString()
+        });
+        saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      }
+    } catch (e) {}
+    const box = document.getElementById('bannerMotivoBaja');
+    if (box) box.style.display = 'none';
+  }
+
+  function descartarMotivoBaja() {
+    _cerrarMotivoBaja('sin_respuesta');
+  }
+
+  async function enviarMotivoBaja() {
+    const sel = document.querySelector('#bannerMotivoBajaChips input[name="motivoBaja"]:checked');
+    const motivo = sel ? sel.value : '';
+    const detalle = ((document.getElementById('bannerMotivoBajaTexto') || {}).value || '').trim();
+    if (!motivo && !detalle) { showToast('Marca un motivo o escríbenos dos líneas.'); return; }
+    const user = getCurrentUser();
+    if (!user || !_supaUserId) { showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000); return; }
+    const btn = document.getElementById('btnEnviarMotivoBaja');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    const cuerpo = '[BAJA] Motivo: ' + (motivo || 'sin marcar') + (detalle ? '\n\n' + detalle : '');
+    const fila = {
+      user_id: _supaUserId,
+      nombre: user.nombre || user.email,
+      email: user.email,
+      asunto: 'Baja',
+      mensaje: cuerpo
+    };
+    try {
+      // El esquema real de mensajes_cliente no vive en este repositorio, así que
+      // no consta si "asunto" tiene una restricción de valores. Si 'Baja' no
+      // pasa, se reintenta con 'Otro', que sí usa el formulario de contacto de
+      // toda la vida. El "[BAJA]" del cuerpo lo deja igual de identificable en
+      // el Buzón, así que no se pierde nada.
+      let { error } = await supa.from('mensajes_cliente').insert(fila);
+      if (error) {
+        const r2 = await supa.from('mensajes_cliente').insert(Object.assign({}, fila, { asunto: 'Otro' }));
+        if (r2.error) throw new Error(r2.error.message);
+      }
+      notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: 'Baja', mensaje: cuerpo });
+      _cerrarMotivoBaja(motivo || 'solo_texto');
+      showToast('Gracias por decírnoslo. Lo leemos de verdad.', 5000);
+    } catch (e) {
+      console.error('[motivo-baja] no se pudo enviar:', e.message);
+      showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Enviar →'; }
+    }
+  }
+
   function abrirRenovacionVoluntaria() {
     _paywallVoluntario = true;
     const modal = document.getElementById('modalPaywall');
@@ -26092,6 +26193,26 @@
       // solo ya recoge cualquier versión nueva.
       navigator.serviceWorker.register('/sw.js').catch(() => {});
       // No borrar caches aquí — el SW gestiona su propio ciclo de vida con versiones
+    }
+
+    // El interruptor de avisos se pinta también AQUÍ, no solo desde
+    // buildDashboard(). Motivo (bug real, reportado el 11 sept 2026: "me sigue
+    // desapareciendo lo de las notificaciones en el ordenador"):
+    //
+    // estas funciones se crean con `window.X = function`, que es una ASIGNACIÓN
+    // y no una declaración, así que no se elevan: no existen hasta que la
+    // ejecución llega a esta parte del onload. Pero la restauración de sesión
+    // -- y con ella buildDashboard() -- está MÁS ARRIBA en este mismo onload, o
+    // sea que cuando llama a actualizarBotonNotificaciones() todavía es
+    // undefined y su `typeof === 'function'` la salta sin decir nada.
+    //
+    // En el móvil el fallo se tapaba solo: toggleDashMenu() vuelve a llamarla
+    // cada vez que se abre el menú, y para entonces ya existe. En escritorio la
+    // barra lateral está siempre abierta, no hay segunda llamada, y el
+    // interruptor se quedaba oculto el resto de la sesión.
+    if (session) {
+      try { actualizarBotonNotificaciones(); } catch (e) {}
+      try { mostrarBannerNotificaciones(); } catch (e) {}
     }
   };
 
