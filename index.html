@@ -3403,6 +3403,50 @@
     position: relative;
   }
 
+  /* ===== "ESTE ES TU PLAN": cabecera personalizada de Nutrición y Entreno =====
+     Le habla al cliente por su nombre y le explica QUÉ va a comer/entrenar y
+     POR QUÉ. Todo el texto sale de los datos reales de su plan (sus calorías,
+     su proteína por kilo, sus tomas, su semana del ciclo, sus restricciones);
+     nunca se afirma nada que el plan no haga de verdad. */
+  .plan-porque {
+    background: linear-gradient(135deg, var(--carbon) 0%, #1a0e06 100%);
+    border: 1px solid rgba(209,66,14,0.22);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+  }
+  .plan-porque-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--brasa); margin-bottom: 8px;
+  }
+  .plan-porque-titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px; line-height: 1.05; letter-spacing: 0.5px;
+    color: var(--blanco); margin: 0 0 10px;
+  }
+  .plan-porque-texto {
+    font-size: 13.5px; line-height: 1.75; color: var(--metal-claro); margin: 0;
+  }
+  /* Plegado por defecto: 3 líneas y "Ver más". Se usa -webkit-line-clamp
+     (soportado en todos los móviles actuales) y NO una altura fija en píxeles,
+     que se rompería en cuanto el texto cambie de tamaño o de idioma. */
+  .plan-porque-texto.plegado {
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .plan-porque-mas {
+    background: none; border: none; padding: 6px 0 0;
+    color: var(--brasa); font-family: 'Inter', sans-serif;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    /* 44px de alto tactil minimo, que es lo que se puede pulsar comodo en movil */
+    min-height: 34px;
+  }
+  .plan-porque-mas:hover { text-decoration: underline; }
+  [data-theme="light"] .plan-porque {
+    background: #FFF; border-color: #E0DCD5;
+  }
+
   .motivation-label {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
@@ -8741,6 +8785,16 @@
           </div>
         </div>
 
+        <!-- Cabecera personalizada: le habla por su nombre y le cuenta qué toca
+             esta semana y por qué. Va ANTES del panel de trazabilidad, que es
+             la versión en datos sueltos de lo mismo. -->
+        <div class="plan-porque" id="porqueEntreno" style="display:none">
+          <div class="plan-porque-eyebrow">Tu plan de entrenamiento</div>
+          <h3 class="plan-porque-titulo" id="porqueEntrenoTitulo"></h3>
+          <p class="plan-porque-texto plegado" id="porqueEntrenoTexto"></p>
+          <button class="plan-porque-mas" id="porqueEntrenoMas" onclick="togglePorque('Entreno')" aria-expanded="false">Ver más</button>
+        </div>
+
         <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
         <div id="trazabilidadPanel" style="display:none;background:rgba(209,66,14,0.06);border:1px solid rgba(209,66,14,0.2);border-radius:10px;padding:14px 18px;margin-bottom:20px">
           <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;margin-bottom:8px">POR QUÉ ESTE PLAN</div>
@@ -8771,6 +8825,13 @@
             <h2 class="dash-title">Nutrición</h2>
             <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
           </div>
+        </div>
+        <!-- Cabecera personalizada: su nombre y por qué come lo que come. -->
+        <div class="plan-porque" id="porqueNutricion" style="display:none">
+          <div class="plan-porque-eyebrow">Tu plan de alimentación</div>
+          <h3 class="plan-porque-titulo" id="porqueNutricionTitulo"></h3>
+          <p class="plan-porque-texto plegado" id="porqueNutricionTexto"></p>
+          <button class="plan-porque-mas" id="porqueNutricionMas" onclick="togglePorque('Nutricion')" aria-expanded="false">Ver más</button>
         </div>
         <div class="dash-header">
           <!-- Renovación del menú: destacado para que todos sepan que pueden elegirlo -->
@@ -16484,6 +16545,149 @@
     const railKcalSubEl = document.getElementById('railKcalSub');
     if (railKcalSubEl) railKcalSubEl.textContent = generatedPlan.cicloCarbs ? 'media al día' : 'objetivo diario';
 
+    // ── "ESTE ES TU PLAN": cabeceras personalizadas de Nutrición y Entreno ────
+    // Le hablan al cliente por su nombre y le explican QUÉ va a comer/entrenar y
+    // POR QUÉ. Regla al tocar esto: cada frase tiene que salir de un dato REAL
+    // del plan (sus calorías, su proteína por kilo, sus tomas, su semana del
+    // ciclo, sus restricciones). Nada de promesas ni de afirmaciones que el plan
+    // no cumpla — es justo lo que separa esto de la palabrería de otras apps.
+    (function () {
+      const primerNombre = ((userData.nombre || '').trim().split(/\s+/)[0]) || '';
+      const coma = primerNombre ? `${primerNombre}, ` : '';
+      const may = s => s.charAt(0).toUpperCase() + s.slice(1);
+      // Separador de miles a mano y no con toLocaleString('es-ES'): hay
+      // navegadores (y el Chrome headless con el que se hacen las capturas) que
+      // vienen sin los datos de idioma completos y devuelven "2551" en vez de
+      // "2.551", asi que el resultado no seria el mismo en todas partes.
+      const miles = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+      // ---------- NUTRICIÓN ----------
+      (function () {
+        const caja = document.getElementById('porqueNutricion');
+        const elTit = document.getElementById('porqueNutricionTitulo');
+        const elTxt = document.getElementById('porqueNutricionTexto');
+        if (!caja || !elTit || !elTxt) return;
+        if (!generatedPlan.nutricion || !generatedPlan.nutricion.length) { caja.style.display = 'none'; return; }
+
+        const kcal = generatedPlan.kcalObj || 0;
+        const prot = generatedPlan.protObj || 0;
+        const peso = parseFloat(userData.peso) || 0;
+        const gxkg = (peso && prot) ? (prot / peso) : 0;
+        const tomas = generatedPlan.nutricion.length;
+        const opciones = generatedPlan.nutricion[0]?.opciones?.length || 0;
+        const objetivo = (userData.objetivo || '').toLowerCase();
+
+        const frases = [];
+
+        // 1) Las dos cifras que mandan, y por qué son ESAS.
+        if (kcal && prot) {
+          const porKilo = gxkg ? ` — unos ${gxkg.toFixed(1).replace('.', ',')} g por kilo de tu peso` : '';
+          frases.push(`${may(coma)}tu plan gira en torno a <strong>${miles(kcal)} kcal</strong> y <strong>${prot} g de proteína</strong> al día${porKilo}.`);
+        }
+        // El "por qué" de la proteína cambia según el objetivo: no es la misma
+        // razón proteger músculo en déficit que construirlo en superávit.
+        if (objetivo.includes('perder')) {
+          frases.push('Esa proteína es lo que protege tu músculo mientras pierdes grasa: sin ella bajarías peso, pero parte de lo que perderías sería músculo.');
+        } else if (objetivo.includes('ganar músculo') || objetivo.includes('ganar musculo')) {
+          frases.push('Las calorías van por encima de tu gasto a propósito: construir músculo sin ese margen no funciona, por mucho que entrenes.');
+        } else if (objetivo.includes('fuerza')) {
+          frases.push('La proteína sostiene el músculo que mueve la carga, y las calorías te dan con qué entrenar fuerte sesión tras sesión.');
+        } else if (objetivo.includes('resistencia') || objetivo.includes('competici')) {
+          frases.push('Los hidratos son la gasolina de las sesiones largas, y la proteína es lo que te permite repetir mañana lo que hiciste hoy.');
+        }
+
+        // 2) El reparto en tomas.
+        if (tomas) {
+          const porTomas = prot ? ` (unos ${Math.round(prot / tomas)} g por toma)` : '';
+          frases.push(`Lo repartimos en <strong>${tomas} tomas</strong>${porTomas}: el cuerpo aprovecha mejor la proteína repartida a lo largo del día que concentrada toda en la cena.`);
+        }
+        if (opciones) {
+          frases.push(`En cada toma tienes <strong>${opciones} opciones</strong> para elegir la que te apetezca: las cantidades de cada una ya vienen ajustadas a tu perfil, así que elijas la que elijas te salen los números.`);
+        }
+
+        // 3) Ciclado de carbohidratos, solo si de verdad está activo.
+        if (generatedPlan.cicloCarbs) {
+          frases.push('Los días que entrenas llevan más hidratos que los de descanso, porque es cuando de verdad los aprovechas. La media de la semana no cambia.');
+        }
+
+        // 4) Lo que se le está respetando. Solo se menciona lo que exista.
+        const respeta = [];
+        const dieta = userData.dieta || '';
+        if (dieta.includes('lactosa') || (userData.alergia || '').includes('Lactosa')) respeta.push('sin lactosa');
+        if (dieta.includes('gluten') || (userData.alergia || '').includes('Gluten')) respeta.push('sin gluten');
+        if ((userData.alergia || '').includes('Frutos secos')) respeta.push('sin frutos secos');
+        const noComida = (userData.noComida || '').trim();
+        if (respeta.length || noComida) {
+          let t = 'Tu plan ya está filtrado';
+          if (respeta.length) t += ` en versión <strong>${respeta.join(' y ')}</strong>`;
+          if (noComida) t += `${respeta.length ? ', y' : ''} sin lo que nos dijiste que no comes (<strong>${_esc(noComida)}</strong>)`;
+          frases.push(t + '.');
+        }
+
+        const mes = new Date().toLocaleDateString('es-ES', { month: 'long' });
+        elTit.textContent = primerNombre
+          ? `Tu alimentación de ${mes}, ${primerNombre}`
+          : `Tu alimentación de ${mes}`;
+        elTxt.innerHTML = frases.join(' ');
+        caja.style.display = frases.length ? '' : 'none';
+        _ajustarBotonPorque('Nutricion');
+      })();
+
+      // ---------- ENTRENAMIENTO ----------
+      (function () {
+        const caja = document.getElementById('porqueEntreno');
+        const elTit = document.getElementById('porqueEntrenoTitulo');
+        const elTxt = document.getElementById('porqueEntrenoTexto');
+        if (!caja || !elTit || !elTxt) return;
+        // Solo-nutrición no tiene entrenamiento que explicar.
+        if (generatedPlan.soloDieta || !(generatedPlan.semana || []).length) { caja.style.display = 'none'; return; }
+
+        // La semana sale de `progreso`, la MISMA variable que usa el resto de
+        // buildDashboard (generatedPlan.progreso tiene prioridad sobre el de
+        // userData). Leyendo userData.progreso directamente, esta tarjeta decía
+        // "semana 2" mientras la píldora de arriba decía otra cosa.
+        const semana = progreso.semana || 1;
+        const semanaCiclo = ((Math.max(1, semana) - 1) % 4) + 1;
+        const dias = (generatedPlan.semana || []).filter(d => d.tipo !== 'Descanso').length;
+        const descansos = (generatedPlan.semana || []).length - dias;
+        const objetivo = (userData.objetivo || '').toLowerCase();
+        const frases = [];
+
+        // 1) Dónde está dentro del bloque de 4 semanas, y qué significa.
+        if (semanaCiclo === 4) {
+          frases.push(`${may(coma)}esta es la <strong>semana de descarga</strong> de tu bloque. Bajamos volumen a propósito: no se busca estímulo, se busca que llegues fresco al siguiente bloque. Recuperar también es entrenar.`);
+        } else if (semanaCiclo === 1) {
+          frases.push(`${may(coma)}arrancas <strong>bloque nuevo</strong> (semana ${semana} de tu proceso). Esta semana marca el punto de partida: anota bien las cargas, porque es contra esto contra lo que vas a progresar.`);
+        } else if (semanaCiclo === 2) {
+          frases.push(`${may(coma)}vas por la <strong>segunda semana del bloque</strong>: subimos el volumen respecto a la anterior. Si la técnica se rompe, baja el peso antes que las repeticiones.`);
+        } else {
+          frases.push(`${may(coma)}esta es la <strong>semana pico del bloque</strong>: mismo volumen que la pasada, pero toca intentar superar la carga o el ritmo que anotaste. Es la semana de buscar tu récord.`);
+        }
+
+        // 2) La forma de la semana, con datos reales del plan generado.
+        if (dias) {
+          frases.push(`Son <strong>${dias} ${dias === 1 ? 'día' : 'días'} de entrenamiento</strong>${descansos ? ` y ${descansos} de descanso` : ''}, repartidos para que no acumules dos sesiones duras seguidas.`);
+        }
+        if (userData.tiempoSesion) {
+          frases.push(`Cada sesión está ajustada a los <strong>${_esc(userData.tiempoSesion)}</strong> que nos dijiste que tienes.`);
+        }
+
+        // 3) A qué apunta, según su objetivo.
+        if (objetivo.includes('perder')) {
+          frases.push('El entrenamiento aquí no está para quemar calorías, está para que conserves músculo mientras pierdes grasa: eso es lo que hace que el peso que bajes sea el que quieres bajar.');
+        } else if (objetivo.includes('ganar músculo') || objetivo.includes('ganar musculo')) {
+          frases.push('Todo gira en torno a acumular series efectivas cerca del fallo en cada grupo muscular, que es lo que de verdad construye tamaño.');
+        } else if (objetivo.includes('fuerza')) {
+          frases.push('Los básicos van con carga alta y repeticiones bajas, y los accesorios se quedan en repeticiones altas: la fuerza se entrena distinto del tamaño.');
+        }
+
+        elTit.textContent = primerNombre ? `Tu semana ${semana}, ${primerNombre}` : `Tu semana ${semana}`;
+        elTxt.innerHTML = frases.join(' ');
+        caja.style.display = frases.length ? '' : 'none';
+        _ajustarBotonPorque('Entreno');
+      })();
+    })();
+
     // ── Panel de trazabilidad IA ──────────────────────────────────────────────
     (function() {
       const panel = document.getElementById('trazabilidadPanel');
@@ -16956,20 +17160,15 @@
   }
 
   function buildDashboardNutricionExtra() {
-    // Subtítulo con objetivo calórico personalizado
+    // Subtítulo del banner. Antes repetía aquí las calorías, la proteína, el
+    // ciclado y el "N tomas con N opciones" -- exactamente lo mismo que ahora
+    // cuenta, mejor y con su nombre, la tarjeta "Tu alimentación de <mes>" de
+    // justo debajo. Dos bloques seguidos diciendo las mismas cifras se leen
+    // como un error, así que cada uno se queda con un trabajo: el banner dice
+    // QUÉ HACER en esta pantalla, y la tarjeta dice QUÉ ES tu plan y POR QUÉ.
     const nutriSubEl = document.getElementById('nutricionSubtitle');
-    if (nutriSubEl && generatedPlan.kcalObj) {
-      const numTomas = (generatedPlan.nutricion || []).length || 5;
-      const numOpciones = generatedPlan.nutricion?.[0]?.opciones?.length || 5;
-      // Con el ciclado activo ya no hay UN objetivo diario, hay siete: llamarlo
-      // "tu objetivo diario" mientras la barra de abajo enseña otra cifra
-      // distinta según el día es contradictorio. Se presenta como media semanal,
-      // que es lo que ese número es de verdad.
-      const ciclo = generatedPlan.cicloCarbs;
-      const objetivoTxt = ciclo
-        ? `Tu objetivo: <strong>${generatedPlan.kcalObj} kcal de media al día</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad. Repartido por días: más carbohidratos cuando entrenas, menos cuando descansas, sin cambiar el total de la semana.`
-        : `Tu objetivo diario: <strong>${generatedPlan.kcalObj} kcal</strong> y al menos <strong>${generatedPlan.protObj}g de proteína</strong> — calculado con tu peso, altura, edad y actividad.`;
-      nutriSubEl.innerHTML = `${objetivoTxt} Las cantidades de cada opción ya están ajustadas a tu perfil. Tienes ${numTomas} toma${numTomas !== 1 ? 's' : ''} con ${numOpciones} opciones cada una. Si tienes dudas de cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
+    if (nutriSubEl) {
+      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -17299,6 +17498,12 @@
       if (typeof renderGraficoFuerza === 'function') renderGraficoFuerza();
     }
     if (id === 'contacto' && typeof cargarConversaciones === 'function') cargarConversaciones();
+    // Ahora que la sección SÍ está visible, ya se puede medir si su explicación
+    // necesita el "Ver más" (oculta medía 0 y la cuenta salía mal).
+    if (typeof _ajustarBotonPorque === 'function') {
+      if (id === 'nutricion') _ajustarBotonPorque('Nutricion');
+      if (id === 'semana')    _ajustarBotonPorque('Entreno');
+    }
   }
 
   function mostrarGuiaSeccion(id) {
@@ -21122,6 +21327,41 @@
   }
 
   // ===== TOAST =====
+  // Plegar/desplegar la explicación del plan ("Ver más" / "Ver menos").
+  function togglePorque(cual) {
+    const txt = document.getElementById('porque' + cual + 'Texto');
+    const btn = document.getElementById('porque' + cual + 'Mas');
+    if (!txt || !btn) return;
+    const plegado = txt.classList.toggle('plegado');
+    btn.textContent = plegado ? 'Ver más' : 'Ver menos';
+    btn.setAttribute('aria-expanded', plegado ? 'false' : 'true');
+  }
+  window.togglePorque = togglePorque;
+
+  // El "Ver más" solo tiene sentido si el texto DE VERDAD no cabe en las 3
+  // líneas. Un botón que al pulsarlo no cambia nada es peor que no tenerlo:
+  // se compara el alto real con el alto recortado y se esconde si sobra.
+  function _ajustarBotonPorque(cual) {
+    const txt = document.getElementById('porque' + cual + 'Texto');
+    const btn = document.getElementById('porque' + cual + 'Mas');
+    if (!txt || !btn) return;
+    // Hay que medir DESPUÉS de pintar, o scrollHeight y clientHeight coinciden.
+    requestAnimationFrame(() => {
+      // Un elemento dentro de una sección OCULTA mide 0 de alto, y entonces
+      // scrollHeight y clientHeight son los dos 0: la cuenta daría "cabe
+      // entero" y se quitaría el recorte. Pasaba de verdad -- buildDashboard
+      // corre con "Hoy" abierta, así que Entrenamiento y Nutrición estaban
+      // ocultas y su texto salía desplegado a 10 líneas. Si no se puede medir,
+      // no se decide: se deja plegado y se vuelve a intentar al abrir la
+      // sección (ver showSection).
+      if (!txt.clientHeight) return;
+      const sobra = txt.scrollHeight > txt.clientHeight + 2;
+      btn.style.display = sobra ? '' : 'none';
+      if (!sobra) txt.classList.remove('plegado');
+    });
+  }
+  window._ajustarBotonPorque = _ajustarBotonPorque;
+
   let _toastTimer = null;
   function showToast(msg, duration = 3000) {
     const t = document.getElementById('toast');
