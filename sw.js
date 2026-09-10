@@ -11,7 +11,7 @@
 // index.html. El fetch es network-first, pero con mala cobertura sirve la
 // cacheada, y los moviles que la tuvieran de antes seguian viendo una version
 // sin el arreglo del interruptor de avisos.
-const CACHE_NAME = 'kone-v12';
+const CACHE_NAME = 'kone-v13';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

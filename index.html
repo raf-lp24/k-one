@@ -8473,7 +8473,18 @@
         </div>
 
         <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
-        <div id="bannerReferidos" style="display:none;margin:0 0 20px;background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:12px 16px">
+        <!-- Reportado desde el móvil: "una barrita" pegada abajo. Es este banner
+             asomando por el borde inferior de la pantalla al hacer scroll (es
+             lo primero justo después del botón "Empezar entrenamiento", con
+             solo 20px de margen) -- con la esquina izquierda cuadrada y el
+             borde naranja, esa esquina cortada se lee como una tira suelta, no
+             como el borde de una tarjeta. Las tarjetas hermanas de este mismo
+             panel (today-hero, rail-card, motivation-card) redondean las
+             cuatro esquinas a 14-16px; aquí igual, para que si asoma se lea
+             como una tarjeta de verdad. El estilo de esquina cuadrada sigue
+             igual en las notas de Recetario/Ritmos, que son avisos dentro de
+             un modal, no lo primero que se ve al borde de la pantalla. -->
+        <div id="bannerReferidos" style="display:none;margin:0 0 20px;background:var(--carbon);border-left:3px solid var(--brasa);border-radius:14px;padding:12px 16px">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
             <div style="flex:1;min-width:200px">
               <div style="font-size:12px;font-weight:600;color:var(--blanco);margin-bottom:2px">Invita amigos → 5€/amigo en tu 2ª cuota <span style="font-size:10px;color:var(--metal)">(máx. 15€)</span></div>
