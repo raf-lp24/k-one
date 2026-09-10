@@ -8786,8 +8786,9 @@
         </div>
 
         <!-- Cabecera personalizada: le habla por su nombre y le cuenta qué toca
-             esta semana y por qué. Va ANTES del panel de trazabilidad, que es
-             la versión en datos sueltos de lo mismo. -->
+             esta semana y por qué. Sustituye al antiguo panel "POR QUÉ ESTE
+             PLAN", que decía lo mismo en forma de lista de datos sueltos y se
+             quitó por redundante. -->
         <div class="plan-porque" id="porqueEntreno" style="display:none">
           <div class="plan-porque-eyebrow">Tu plan de entrenamiento</div>
           <h3 class="plan-porque-titulo" id="porqueEntrenoTitulo"></h3>
@@ -8795,11 +8796,6 @@
           <button class="plan-porque-mas" id="porqueEntrenoMas" onclick="togglePorque('Entreno')" aria-expanded="false">Ver más</button>
         </div>
 
-        <!-- Panel de trazabilidad: explica por qué el plan es como es esta semana -->
-        <div id="trazabilidadPanel" style="display:none;background:rgba(209,66,14,0.06);border:1px solid rgba(209,66,14,0.2);border-radius:10px;padding:14px 18px;margin-bottom:20px">
-          <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;margin-bottom:8px">POR QUÉ ESTE PLAN</div>
-          <ul id="trazabilidadList" style="margin:0;padding-left:16px;color:var(--ceniza);font-size:13px;line-height:1.9"></ul>
-        </div>
 
         <div class="week-tabs" id="weekTabs">
           <!-- generado por JS -->
@@ -16552,9 +16548,22 @@
     // ciclo, sus restricciones). Nada de promesas ni de afirmaciones que el plan
     // no cumpla — es justo lo que separa esto de la palabrería de otras apps.
     (function () {
-      const primerNombre = ((userData.nombre || '').trim().split(/\s+/)[0]) || '';
+      // El nombre se pide AL REGISTRARSE, no en el cuestionario, así que en un
+      // cliente real `userData.nombre` viene vacío y la tarjeta salía sin
+      // nombre ("Tu alimentación de septiembre" a secas). La fuente buena es
+      // la misma que usa la barra lateral: getCurrentUser().
+      let _nom = '';
+      try { _nom = (getCurrentUser() || {}).nombre || ''; } catch (e) {}
+      if (!_nom) _nom = userData.nombre || '';
+      const primerNombre = (_nom.trim().split(/\s+/)[0]) || '';
       const coma = primerNombre ? `${primerNombre}, ` : '';
-      const may = s => s.charAt(0).toUpperCase() + s.slice(1);
+      // Sin nombre, `may(coma)` devolvía cadena vacía y la frase arrancaba en
+      // minúscula ("tu plan gira en torno a..."). Ahora la mayúscula se aplica
+      // SIEMPRE a la primera letra de la frase, haya nombre o no.
+      const abrir = (resto) => {
+        const t = coma + resto;
+        return t.charAt(0).toUpperCase() + t.slice(1);
+      };
       // Separador de miles a mano y no con toLocaleString('es-ES'): hay
       // navegadores (y el Chrome headless con el que se hacen las capturas) que
       // vienen sin los datos de idioma completos y devuelven "2551" en vez de
@@ -16582,7 +16591,7 @@
         // 1) Las dos cifras que mandan, y por qué son ESAS.
         if (kcal && prot) {
           const porKilo = gxkg ? ` — unos ${gxkg.toFixed(1).replace('.', ',')} g por kilo de tu peso` : '';
-          frases.push(`${may(coma)}tu plan gira en torno a <strong>${miles(kcal)} kcal</strong> y <strong>${prot} g de proteína</strong> al día${porKilo}.`);
+          frases.push(abrir(`tu plan gira en torno a <strong>${miles(kcal)} kcal</strong> y <strong>${prot} g de proteína</strong> al día${porKilo}.`));
         }
         // El "por qué" de la proteína cambia según el objetivo: no es la misma
         // razón proteger músculo en déficit que construirlo en superávit.
@@ -16655,13 +16664,13 @@
 
         // 1) Dónde está dentro del bloque de 4 semanas, y qué significa.
         if (semanaCiclo === 4) {
-          frases.push(`${may(coma)}esta es la <strong>semana de descarga</strong> de tu bloque. Bajamos volumen a propósito: no se busca estímulo, se busca que llegues fresco al siguiente bloque. Recuperar también es entrenar.`);
+          frases.push(abrir(`esta es la <strong>semana de descarga</strong> de tu bloque. Bajamos volumen a propósito: no se busca estímulo, se busca que llegues fresco al siguiente bloque. Recuperar también es entrenar.`));
         } else if (semanaCiclo === 1) {
-          frases.push(`${may(coma)}arrancas <strong>bloque nuevo</strong> (semana ${semana} de tu proceso). Esta semana marca el punto de partida: anota bien las cargas, porque es contra esto contra lo que vas a progresar.`);
+          frases.push(abrir(`arrancas <strong>bloque nuevo</strong> (semana ${semana} de tu proceso). Esta semana marca el punto de partida: anota bien las cargas, porque es contra esto contra lo que vas a progresar.`));
         } else if (semanaCiclo === 2) {
-          frases.push(`${may(coma)}vas por la <strong>segunda semana del bloque</strong>: subimos el volumen respecto a la anterior. Si la técnica se rompe, baja el peso antes que las repeticiones.`);
+          frases.push(abrir(`vas por la <strong>segunda semana del bloque</strong>: subimos el volumen respecto a la anterior. Si la técnica se rompe, baja el peso antes que las repeticiones.`));
         } else {
-          frases.push(`${may(coma)}esta es la <strong>semana pico del bloque</strong>: mismo volumen que la pasada, pero toca intentar superar la carga o el ritmo que anotaste. Es la semana de buscar tu récord.`);
+          frases.push(abrir(`esta es la <strong>semana pico del bloque</strong>: mismo volumen que la pasada, pero toca intentar superar la carga o el ritmo que anotaste. Es la semana de buscar tu récord.`));
         }
 
         // 2) La forma de la semana, con datos reales del plan generado.
@@ -16688,68 +16697,6 @@
       })();
     })();
 
-    // ── Panel de trazabilidad IA ──────────────────────────────────────────────
-    (function() {
-      const panel = document.getElementById('trazabilidadPanel');
-      const lista = document.getElementById('trazabilidadList');
-      if (!panel || !lista) return;
-      const razones = [];
-      const p = userData.progreso || {};
-      const semana = progreso.semana;
-      const soloDietaPanel = !!generatedPlan.soloDieta;
-
-      if (soloDietaPanel) {
-        // Plan solo nutrición: trazabilidad centrada en la alimentación, sin entrenamiento.
-        razones.push('Plan de nutrición personalizado a partir de tu cuestionario');
-        razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu peso, altura, edad y actividad`);
-        {
-          const numTomas = (generatedPlan.nutricion || []).length || 5;
-          const numOpciones = generatedPlan.nutricion?.[0]?.opciones?.length || 5;
-          razones.push(`${numTomas} toma${numTomas !== 1 ? 's' : ''} al día con ${numOpciones} opciones cada una, ajustadas a tus cantidades`);
-        }
-      } else if (semana <= 1) {
-        razones.push(`Plan inicial personalizado basado en tu cuestionario de ${userData.deporte || 'entrenamiento'}`);
-        razones.push(`Nivel ${(userData.nivel || '').split(',')[0].toLowerCase() || 'adaptado'} · ${userData.diasEntreno || '3'} días/semana · ${userData.lugar || 'tu zona'}`);
-        razones.push(`Objetivo "${userData.objetivo || 'bienestar general'}" — calorías y proteína calculadas con tu metabolismo`);
-      } else {
-        const diasSemAnt = p.diasEntrenados || 0;
-        razones.push(`Semana ${semana} de tu proceso — llevas ${(userData.historialEntrenos || []).length} entrenos completados`);
-        if (diasSemAnt > 0) razones.push(`La semana pasada completaste ${diasSemAnt} días de entrenamiento`);
-        if (p.ajuste > 0)  razones.push('Subimos ligeramente la intensidad: tu energía y físico reportados fueron buenos');
-        if (p.ajuste < 0)  razones.push('Bajamos el volumen para que puedas recuperar bien esta semana');
-        if (p.ajuste === 0 && diasSemAnt > 0) razones.push('Mantenemos el nivel: buen equilibrio entre esfuerzo y recuperación');
-        // p.ultimaNota es texto libre que escribe el propio cliente en el
-        // check-in semanal, y esta lista se pinta con innerHTML más abajo —
-        // sin escapar, un comentario con HTML/JS se ejecutaba en su propio
-        // dashboard cada vez que abriera "Por qué este plan" (XSS almacenado,
-        // mismo patrón que el de "Añadir ejercicio" arreglado antes).
-        if (p.ultimaNota) razones.push(`Tu nota del check-in: "${_esc(p.ultimaNota.slice(0,80))}${p.ultimaNota.length > 80 ? '…' : ''}"`);
-      }
-
-      if (!soloDietaPanel && userData.lesion && userData.lesion !== 'No' && userData.lesion !== 'No especificado') {
-        razones.push(`Ejercicios adaptados a tu historial de ${userData.lesion.toLowerCase()}`);
-      }
-      if (userData.alergia && userData.alergia !== 'No' && userData.alergia !== 'No especificado') {
-        razones.push(`Nutrición filtrada por tu ${userData.alergia === 'Otra' ? 'alergia personalizada' : userData.alergia.toLowerCase()}`);
-      }
-
-      // Sugerencia de graduación de nivel con criterio objetivo: antes el único
-      // camino de "Llevo algo de tiempo" a "Avanzado" era que el cliente
-      // reeditara el cuestionario por su cuenta, sin ningún criterio de por
-      // medio. Se exige un mínimo de entrenos reales completados (36 ≈ 3
-      // meses a 3 días/semana) Y que el último ajuste semanal no haya sido a
-      // la baja (si se le está bajando volumen por fatiga, no es buen momento
-      // para sugerir subir la exigencia).
-      if (!soloDietaPanel && userData.nivel && userData.nivel.includes('Llevo')) {
-        const entrenosCompletados = (userData.historialEntrenos || []).length;
-        if (entrenosCompletados >= 36 && (p.ajuste || 0) >= 0) {
-          razones.push(`Llevas ${entrenosCompletados} entrenos completados con buena progresión — si los pesos y la técnica ya no te suponen reto, prueba a marcarte como "Avanzado" en tu perfil para desbloquear más volumen y técnicas de intensidad`);
-        }
-      }
-
-      lista.innerHTML = razones.map(r => `<li>${r}</li>`).join('');
-      panel.style.display = razones.length ? '' : 'none';
-    })();
 
     const checkinSemanaLabel = document.getElementById('checkinSemanaLabel');
     if (checkinSemanaLabel) checkinSemanaLabel.textContent = `Semana ${progreso.semana}`;
