@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  Rótulo "K-ONE" sobre fondo TRANSPARENTE, para superponerlo con ffmpeg a los
+  planos de gimnasio generados por IA.
+
+  Por qué esto y no pedirle el cartel a la IA: los modelos de vídeo escriben
+  letras deformadas que no dicen nada. El cartel se pone aquí, con la
+  tipografía real de la marca (Bebas Neue, la misma de la app y de los reels).
+
+  Se renderiza con cdp-frames.mjs, que ya fuerza el fondo transparente:
+    node cdp-frames.mjs "http://localhost:8080/marketing/cartel-kone.html" <dir> 0.04 25 1080 1920
+  y sale un único f00000.png con alfa.
+-->
+<meta charset="utf-8">
+<title>K-ONE · Cartel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
+  canvas{display:block}
+</style>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<!-- Nodo real que fuerza la descarga de la webfont: un canvas por sí solo no la dispara. -->
+<span style="position:fixed;top:-400px;font-family:'Bebas Neue';font-size:100px">K-ONE</span>
+<script>
+const c = document.getElementById('c');
+const x = c.getContext('2d');
+
+window.listo = (async () => {
+  await document.fonts.load("700 150px 'Bebas Neue'");
+  await document.fonts.ready;
+})();
+
+function render() {
+  x.clearRect(0, 0, 1080, 1920);
+
+  // Placa del cartel: rectángulo oscuro con borde de brasa, como una chapa
+  // colgada en la pared del gimnasio.
+  const w = 560, h = 190, cx = 540, cy = 300;
+  const rx = cx - w / 2, ry = cy - h / 2;
+
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,.75)';
+  x.shadowBlur = 40;
+  x.shadowOffsetY = 14;
+  x.fillStyle = 'rgba(10,10,10,.88)';
+  x.beginPath();
+  x.roundRect(rx, ry, w, h, 10);
+  x.fill();
+  x.restore();
+
+  x.strokeStyle = '#D1420E';
+  x.lineWidth = 4;
+  x.beginPath();
+  x.roundRect(rx + 10, ry + 10, w - 20, h - 20, 6);
+  x.stroke();
+
+  // El wordmark va en dos colores, igual que en la app: "K-" en hueso y "ONE"
+  // en brasa. Se mide cada parte para centrar el conjunto, no cada trozo.
+  x.font = "150px 'Bebas Neue'";
+  x.textBaseline = 'middle';
+  const a = 'K-', b = 'ONE';
+  const wa = x.measureText(a).width, wb = x.measureText(b).width;
+  const esp = 10;
+  let px = cx - (wa + wb + esp) / 2;
+
+  x.fillStyle = '#F2EDE4';
+  x.fillText(a, px, cy + 4);
+  px += wa + esp;
+  x.fillStyle = '#D1420E';
+  x.fillText(b, px, cy + 4);
+}
+render();
+</script>
+</body>

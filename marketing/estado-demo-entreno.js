@@ -13,6 +13,16 @@
   // Guías de primera vez marcadas como vistas: si no, el modal tapa la captura.
   ['hoy', 'semana', 'nutricion', 'checkin', 'progreso', 'notas', 'contacto']
     .forEach(s => { try { localStorage.setItem('kone_guia_' + s, '1'); } catch (e) {} });
+  // Los banners de aviso se ocultan A PELO, no descartándolos por su clave de
+  // localStorage: cada uno tiene su propio mecanismo (unos con fecha, otros
+  // para siempre) y acertar con las siete claves es frágil. Aquí solo se
+  // capturan pantallas, así que basta con que no estorben -- son avisos de
+  // producto, no funciones del entrenamiento, que es lo que cuenta el vídeo.
+  const _ocultarBanners = () => {
+    ['bannerRecalculo', 'bannerFeedback', 'bannerMotivoBaja', 'avisoRenovacion',
+     'avisoPagoPendiente', 'pwaInstallBanner', 'pushBanner']
+      .forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+  };
   document.querySelectorAll('button').forEach(b => {
     if (/ACEPTAR|Solo necesarias/i.test(b.textContent || '')) b.click();
   });
@@ -56,6 +66,8 @@
   try { buildDashboard(); } catch (e) { return 'ERROR buildDashboard: ' + e.message; }
   try { showSection('hoy'); } catch (e) {}
   await new Promise(r => setTimeout(r, 800));
+  // Después de buildDashboard(), que es quien los vuelve a mostrar.
+  _ocultarBanners();
 
   const irA = (sel, margen = 24) => {
     const e = document.querySelector(sel);
@@ -73,9 +85,11 @@
   if (vista === 'tarjeta') { pos = irA('.ejercicio-card', 60); }
 
   if (vista === 'peso') {
-    // El stepper de peso vive DENTRO de la tarjeta: centrar el peso concreto,
-    // no la tarjeta entera, para que la captura sea del control en sí.
-    pos = irA('.peso-stepper', 200);
+    // OJO con el selector: '.peso-stepper' a secas coge el PRIMERO del
+    // documento, que es el del modal "Cambiar tu plan" -- está oculto y arriba
+    // del todo, así que el scroll se iba a 0 y la captura salía de la portada.
+    // Hay que anclarlo a la tarjeta de ejercicio.
+    pos = irA('.ejercicio-card .peso-stepper', 240);
   }
 
   if (vista === 'comosehace') {

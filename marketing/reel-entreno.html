@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  K-ONE · Reel "Cómo funciona el entrenamiento" — 1080x1920.
+
+  Las capturas de la app son REALES (cdp-shot.mjs + estado-demo-entreno.js,
+  con un cliente inventado, "Marcos"). Los dos planos de gimnasio -- el banco
+  y la espalda -- son de Higgsfield (kling3_0_turbo, 7,5 créditos cada uno) y
+  se montan aparte con ffmpeg, no desde aquí: este archivo solo dibuja los
+  bloques de app y los rótulos.
+
+  Sobre el "cartel del gimnasio" que se pidió: a la IA NO se le pide texto.
+  Lo que genera son letras deformadas que no dicen nada -- la marca se pone
+  luego, con tipografía de verdad, en el rótulo del propio reel.
+
+  El motor de dibujo está en reel-motor.js, compartido con los otros reels.
+
+  Render:
+    node cdp-frames.mjs "http://localhost:8080/marketing/reel-entreno.html" <dir> 31.2 25 1080 1920
+-->
+<meta charset="utf-8">
+<title>K-ONE · Reel de entrenamiento</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:#000;overflow:hidden}
+  canvas{display:block}
+</style>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<!-- Nodos reales que fuerzan la descarga de las webfonts: un canvas por sí solo
+     NO la dispara. -->
+<span style="position:fixed;top:-400px;font-family:'Bebas Neue';font-size:100px">K-ONE</span>
+<span style="position:fixed;top:-400px;font-family:'Inter';font-size:40px">K-ONE</span>
+<script>
+// Los nombres son los que pone la app, no inventados: si el vídeo los llama de
+// otra forma, el cliente no los encuentra luego.
+window.REEL_CARPETA = '/marketing/_tmp-entreno/';
+window.REEL_BEATS = [
+  { img: null,          t0: 0.0,  t1: 3.2,  sup: 'TU ENTRENAMIENTO EN K-ONE',
+    tit: 'NO ES UNA\nRUTINA GENÉRICA', pie: 'Se calcula con tus datos y se ajusta a cómo vas' },
+  { img: 'semana',      t0: 3.2,  t1: 7.4,  sup: 'TU SEMANA',
+    tit: 'CADA DÍA\nTIENE SU SITIO',   pie: 'Empuje, tirón, pierna. Y las próximas semanas de tu mes' },
+  { img: 'hoy',         t0: 7.4,  t1: 11.6, sup: 'LA SESIÓN DE HOY',
+    tit: 'ABRES Y\nYA SABES QUÉ TOCA', pie: 'Con tu calentamiento y por qué esta semana va así' },
+  { img: 'tarjeta',     t0: 11.6, t1: 15.8, sup: 'CADA EJERCICIO',
+    tit: 'SERIES, REPS\nY RPE',        pie: 'El RPE te dice cuánto apretar. No vas a ciegas' },
+  { img: 'comosehace',  t0: 15.8, t1: 20.4, sup: '¿NO SABES HACERLO?',
+    tit: 'CÓMO SE HACE,\nPASO A PASO', pie: 'Fotos del movimiento, músculos que trabaja y vídeo de técnica' },
+  { img: 'peso',        t0: 20.4, t1: 24.6, sup: 'APUNTA LO QUE LEVANTAS',
+    tit: 'TUS PESOS,\nGUARDADOS',      pie: 'La próxima vez ves lo que hiciste y si subes o no' },
+  { img: 'feedback',    t0: 24.6, t1: 29.4, sup: 'SI ALGO NO TE ENCAJA',
+    tit: 'CAMBIA EL\nEJERCICIO',       pie: 'Dices cómo te sientes y te proponemos alternativas al momento' }
+];
+</script>
+<script src="/marketing/reel-motor.js"></script>
+</body>
