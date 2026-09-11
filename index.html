@@ -3598,6 +3598,16 @@
     color: var(--brasa); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
     text-transform: uppercase; margin-left: 6px; vertical-align: middle;
   }
+  /* Resultados de USDA/Open Food Facts en vivo cuando el alimento no está en
+     la tabla curada de K-ONE -- se distinguen a propósito (borde punteado,
+     etiqueta gris, no naranja) para que no se confundan con la tabla propia
+     ya auditada. Son solo consulta: no entran en el cálculo de ningún plan. */
+  .alimento-fila-externo { border-bottom-style: dashed; opacity: .92; }
+  .alimento-fuente-badge {
+    font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700; letter-spacing: .4px;
+    color: var(--metal); border: 1px solid var(--humo); border-radius: 20px; padding: 1px 7px;
+    text-transform: uppercase; margin-left: 6px; vertical-align: middle; flex-shrink: 0;
+  }
   @media (max-width: 560px) {
     .alimento-fila { flex-direction: column; align-items: flex-start; gap: 4px; }
     .alimento-macros { font-size: 10.5px; gap: 8px; }
@@ -11001,10 +11011,105 @@
     if (input && window.innerWidth > 768) setTimeout(() => input.focus(), 50);
   }
 
+  // ===== RESPALDO EXTERNO: USDA FoodData Central + Open Food Facts =====
+  // Solo se usa cuando la tabla PROPIA (alimentos.json, curada y auditada a
+  // mano) no tiene el alimento buscado. Son datos en VIVO de fuera: no pasan
+  // por la misma auditoría, así que se pintan aparte y marcados con su
+  // fuente -- nunca se mezclan con la tabla propia ni entran en el cálculo
+  // de ningún plan (este buscador es solo consulta, ver renderAlimentos()).
+  //
+  // USDA usa DEMO_KEY (pública, de la propia USDA) porque generar una clave
+  // personal implica crear una cuenta -- eso es siempre decisión del
+  // usuario, nunca algo que se haga en su nombre. DEMO_KEY tiene un límite
+  // bajo (unas 30 peticiones/hora por IP): si se agota, esa fuente
+  // simplemente no aparece, Open Food Facts (sin límite ni clave) sigue
+  // funcionando igual.
+  const _alimentosExtCache = new Map();
+  let _alimentosExtToken = 0;
+
+  async function _buscarAlimentosExternos(query) {
+    if (_alimentosExtCache.has(query)) return _alimentosExtCache.get(query);
+    const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
+
+    const buscarUSDA = async () => {
+      const r = await Promise.race([
+        fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&pageSize=5&query=${encodeURIComponent(query)}`),
+        timeout(6000)
+      ]);
+      if (!r.ok) return [];
+      const d = await r.json();
+      const num = (fn, nombre) => {
+        const n = (fn || []).find(x => (x.nutrientName || '').toLowerCase().includes(nombre));
+        return n ? n.value : 0;
+      };
+      return (d.foods || []).slice(0, 5).map(f => ({
+        n: f.description ? f.description.charAt(0).toUpperCase() + f.description.slice(1).toLowerCase() : 'Sin nombre',
+        kcal: Math.round(num(f.foodNutrients, 'energy')),
+        p: num(f.foodNutrients, 'protein'),
+        c: num(f.foodNutrients, 'carbohydrate'),
+        g: num(f.foodNutrients, 'total lipid'),
+        fuente: 'USDA'
+      })).filter(a => a.kcal > 0);
+    };
+
+    const buscarOFF = async () => {
+      // OJO -- comprobado en vivo (11 sept 2026): el endpoint "moderno"
+      // /api/v2/search NO manda cabecera Access-Control-Allow-Origin, así que
+      // el navegador lo bloquea por CORS para cualquier web ajena a Open Food
+      // Facts (falla siempre, no a veces). El endpoint clásico
+      // cgi/search.pl?...&json=1 sí la manda -- pero ESTE tiene su propio
+      // problema: aplica un límite de tasa agresivo (comprobado con 3
+      // búsquedas seguidas: la 1ª bien, la 2ª y 3ª "Failed to fetch" por
+      // CORS -- el propio rate-limit hace que su respuesta de error se quede
+      // sin la cabecera, así que en el navegador se ve como fallo de CORS,
+      // no como un 429 legible). Un solo reintento con una pequeña espera
+      // basta para la mayoría de los casos: aquí solo hay UNA búsqueda del
+      // cliente a la vez, no una ráfaga.
+      const intentar = () => fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=5&fields=product_name,generic_name,brands,nutriments`);
+      let r;
+      try {
+        r = await Promise.race([intentar(), timeout(6000)]);
+      } catch (e) {
+        await new Promise(res => setTimeout(res, 1200));
+        r = await Promise.race([intentar(), timeout(6000)]);
+      }
+      if (!r.ok) return [];
+      const d = await r.json();
+      return (d.products || [])
+        .filter(p => (p.product_name || p.generic_name || p.brands) && p.nutriments && p.nutriments['energy-kcal_100g'])
+        .slice(0, 5)
+        .map(p => {
+          // El nombre a veces viene vacío y solo hay marca ("Idilia Foods,
+          // Nocilla") -- se usa lo primero disponible, nunca un hueco en blanco.
+          const nombre = p.product_name || p.generic_name || p.brands.split(',')[0];
+          const marca = p.brands ? p.brands.split(',')[0] : '';
+          return {
+            n: nombre + (marca && !nombre.toLowerCase().includes(marca.toLowerCase()) ? ` (${marca})` : ''),
+            kcal: Math.round(p.nutriments['energy-kcal_100g'] || 0),
+            p: +(p.nutriments['proteins_100g'] || 0).toFixed(1),
+            c: +(p.nutriments['carbohydrates_100g'] || 0).toFixed(1),
+            g: +(p.nutriments['fat_100g'] || 0).toFixed(1),
+            fuente: 'Open Food Facts'
+          };
+        });
+    };
+
+    // allSettled: si una fuente falla o se agota (DEMO_KEY, red...), la otra
+    // se enseña igual. No es un error del buscador, es normal.
+    const [rUSDA, rOFF] = await Promise.allSettled([buscarUSDA(), buscarOFF()]);
+    const items = [
+      ...(rUSDA.status === 'fulfilled' ? rUSDA.value : []),
+      ...(rOFF.status === 'fulfilled' ? rOFF.value : [])
+    ];
+    _alimentosExtCache.set(query, items);
+    return items;
+  }
+
   function renderAlimentos() {
     const cont = document.getElementById('alimentosLista');
     if (!cont || !_alimentos) return;
-    const q = _normTexto(document.getElementById('alimentoBuscar')?.value || '');
+    const qRaw = document.getElementById('alimentoBuscar')?.value || '';
+    const q = _normTexto(qRaw);
     const gramos = Math.max(1, parseInt(document.getElementById('alimentoGramos')?.value) || 100);
     const f = gramos / 100;
 
@@ -11017,9 +11122,40 @@
       .sort((a, b) => a.n.localeCompare(b.n, 'es'));
 
     if (!items.length) {
-      cont.innerHTML = `<p style="color:var(--metal);text-align:center;padding:24px 0;font-size:13px">Sin resultados para “${(document.getElementById('alimentoBuscar')?.value || '').slice(0,30)}”.</p>`;
+      const miToken = ++_alimentosExtToken;
+      cont.innerHTML = `<p style="color:var(--metal);text-align:center;padding:24px 0 8px;font-size:13px">Sin resultados en la tabla de K-ONE para “${(qRaw || '').slice(0,30)}”.</p>` +
+        (q.length >= 2 ? `<p id="alimentosExtEstado" style="color:var(--metal);text-align:center;padding:0 0 20px;font-size:12px">Buscando en USDA y Open Food Facts…</p>` : '');
+      if (q.length < 2) return;
+      _buscarAlimentosExternos(q).then(ext => {
+        // El usuario puede haber seguido escribiendo mientras llegaba la
+        // respuesta -- si ya no es la búsqueda actual, se descarta.
+        if (miToken !== _alimentosExtToken) return;
+        const estado = document.getElementById('alimentosExtEstado');
+        if (!ext.length) {
+          if (estado) estado.textContent = 'Tampoco hay resultados fuera de K-ONE.';
+          return;
+        }
+        if (estado) estado.remove();
+        cont.insertAdjacentHTML('beforeend', `
+          <div style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1.5px;margin:6px 0 6px">RESULTADOS FUERA DE K-ONE · SOLO CONSULTA</div>
+          ${ext.map(a => `
+            <div class="alimento-fila alimento-fila-externo">
+              <span class="alimento-nombre">${_esc(a.n)}<span class="alimento-fuente-badge">${a.fuente}</span></span>
+              <span class="alimento-macros">
+                <b>${Math.round(a.kcal * f)}</b> kcal
+                <span>P ${(a.p * f).toFixed(1)}</span>
+                <span>C ${(a.c * f).toFixed(1)}</span>
+                <span>G ${(a.g * f).toFixed(1)}</span>
+              </span>
+            </div>`).join('')}
+        `);
+      }).catch(() => {
+        const estado = document.getElementById('alimentosExtEstado');
+        if (estado) estado.textContent = 'No se pudo buscar fuera de K-ONE ahora mismo.';
+      });
       return;
     }
+    _alimentosExtToken++; // invalida cualquier búsqueda externa en vuelo: ya hay resultados propios
     // Agrupar por categoría
     const porCat = {};
     items.forEach(a => { (porCat[a.cat] = porCat[a.cat] || []).push(a); });
