@@ -8680,19 +8680,19 @@
           <div style="display:flex;align-items:flex-start;gap:14px">
             <span style="font-size:22px;line-height:1.2;color:var(--metal)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="7" x2="12" y2="11"/><line x1="12" y1="14" x2="12.01" y2="14"/></svg></span>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">¿Nos dices por qué lo dejas?</div>
-              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">Tu plan sigue activo hasta el final del período, esto no lo cambia. Solo queremos saber qué no ha funcionado para arreglarlo. Te lo preguntamos una vez y no volvemos a insistir.</div>
-              <div id="bannerMotivoBajaChips" role="radiogroup" aria-label="Motivo por el que cancelas" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Precio">Es caro para mí</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta de uso">No lo estaba usando</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Entrenos">Los entrenos no me encajan</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Dieta">La dieta no me encaja</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta variedad">Se me hace repetitivo</label>
+              <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">¿Nos cuentas qué ha pasado?</div>
+              <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">No es nada obligatorio, es simple curiosidad: nos gustaría saber si fue algo del plan de nutrición, del entrenamiento, o cualquier otra cosa — así sabemos qué mejorar. Tu plan sigue activo hasta que acabe el período, esto no cambia eso.</div>
+              <div id="bannerMotivoBajaChips" role="radiogroup" aria-label="Si quieres, marca de qué fue" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Dieta">Algo de la nutrición</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Entrenos">Algo del entrenamiento</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta variedad">Se me hacía repetitivo</label>
                 <label class="chip-baja"><input type="radio" name="motivoBaja" value="Fallos">Algo no funcionaba bien</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Objetivo cumplido">Ya he conseguido mi objetivo</label>
-                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Otro">Otro motivo</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Falta de uso">No lo estaba usando</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Precio">Es caro para mí</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Objetivo cumplido">Ya conseguí mi objetivo</label>
+                <label class="chip-baja"><input type="radio" name="motivoBaja" value="Otro">Otra cosa</label>
               </div>
-              <textarea id="bannerMotivoBajaTexto" rows="2" maxlength="1000" placeholder="Si quieres, cuéntanoslo con tus palabras (opcional)" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:14px"></textarea>
+              <textarea id="bannerMotivoBajaTexto" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:14px"></textarea>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn-primary" id="btnEnviarMotivoBaja" style="padding:9px 20px;font-size:13px" onclick="enviarMotivoBaja()">Enviar →</button>
                 <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="descartarMotivoBaja()">Prefiero no decirlo</button>
