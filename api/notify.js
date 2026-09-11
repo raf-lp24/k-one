@@ -9,6 +9,7 @@
 
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const { alimentosProhibidos, escanearProhibidos } = require('../lib/normalizador-alimentos');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
@@ -944,9 +945,9 @@ async function handleCronRetencion(req, res) {
         const subMap = {}; (subsFull || []).forEach(s => { subMap[s.user_id] = s; });
         let profsFull = [];
         {
-          const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires, last_seen');
+          const r = await supa.from('profiles').select('id, nombre, email, userdata, plan, is_beta, beta_expires, last_seen');
           if (r.error) {
-            const r2 = await supa.from('profiles').select('id, userdata, is_beta, beta_expires');
+            const r2 = await supa.from('profiles').select('id, nombre, email, userdata, plan, is_beta, beta_expires');
             profsFull = r2.data || [];
           } else {
             profsFull = r.data || [];
@@ -954,6 +955,22 @@ async function handleCronRetencion(req, res) {
         }
         const now = ahora.getTime();
         let pagoFallido = 0, cancela = 0, premiumCaduca = 0, inactivos = 0, sinEntrenar = 0;
+        // IDs con fila abierta ANTES de esta pasada -- así el borrado de "ya
+        // no hay hallazgo" solo toca a quien de verdad tenía una fila, en vez
+        // de lanzar un DELETE ... IN (...) con todos los clientes cada día.
+        let idsConFilaPrevia = new Set();
+        try {
+          const { data: previas } = await supa.from('auditorias_clientes').select('user_id');
+          idsConFilaPrevia = new Set((previas || []).map(x => x.user_id));
+        } catch (eIds) { /* tabla sin migrar todavía: se trata como vacío */ }
+        // AGENTE DE AUDITORÍA (11 sept 2026): para cada cliente real, ¿hay algún
+        // alimento de su lista "no como"/alergia en el plan que ya tiene
+        // guardado? Reglas fijas (lib/normalizador-alimentos.js, con tilde o
+        // sin ella igual), no una IA -- exactamente el mismo bug que se
+        // encontró a mano con Esther y Pablo esta sesión, pero revisado cada
+        // día para TODOS los clientes, no solo cuando alguien lo pide.
+        let clientesConHallazgo = 0;
+        const escritasAuditoria = [];
         for (const p of profsFull) {
           const s = subMap[p.id]; const st = s?.status || 'none'; const activo = ['active', 'trialing'].includes(st);
           const ud = p.userdata || {};
@@ -965,6 +982,40 @@ async function handleCronRetencion(req, res) {
           if (activo && ent === 0) sinEntrenar++;
           const ls = p.last_seen ? new Date(p.last_seen).getTime() : null;
           if (ud.onboardingCompletado && ls && (now - ls) / 86400000 > 14) inactivos++;
+
+          if (p.plan) {
+            try {
+              const tokens = alimentosProhibidos(ud);
+              if (tokens.length) {
+                const hallazgos = escanearProhibidos(JSON.stringify(p.plan), tokens);
+                if (hallazgos.length) {
+                  clientesConHallazgo++;
+                  escritasAuditoria.push({
+                    op: 'set', user_id: p.id, nombre: p.nombre || ud.nombre || '', email: p.email || '',
+                    hallazgos, actualizado_at: ahora.toISOString()
+                  });
+                } else if (idsConFilaPrevia.has(p.id)) {
+                  escritasAuditoria.push({ op: 'del', user_id: p.id });
+                }
+              } else if (idsConFilaPrevia.has(p.id)) {
+                escritasAuditoria.push({ op: 'del', user_id: p.id });
+              }
+            } catch (eAud) {
+              console.warn('[notify-cron] auditoría de', p.id, 'falló:', eAud.message);
+            }
+          }
+        }
+        // Escritura best-effort: si la tabla aún no existe (falta aplicar
+        // supabase/migration-auditorias-clientes.sql), no debe tumbar el
+        // resto del cron -- solo se queda sin este aviso.
+        try {
+          const paraGuardar = escritasAuditoria.filter(x => x.op === 'set')
+            .map(({ op, ...fila }) => fila);
+          const paraBorrar = escritasAuditoria.filter(x => x.op === 'del').map(x => x.user_id);
+          if (paraGuardar.length) await supa.from('auditorias_clientes').upsert(paraGuardar, { onConflict: 'user_id' });
+          if (paraBorrar.length) await supa.from('auditorias_clientes').delete().in('user_id', paraBorrar);
+        } catch (eTabla) {
+          console.warn('[notify-cron] no se pudo escribir auditorias_clientes (¿falta la migración?):', eTabla.message);
         }
         let sinResponder = 0;
         try {
@@ -973,12 +1024,13 @@ async function handleCronRetencion(req, res) {
         } catch (_) {}
 
         const filas = [
-          { n: pagoFallido,   t: 'Pagos fallidos',          c: '#e74c3c' },
-          { n: cancela,       t: 'Cancelan al vencer',      c: '#e67e22' },
-          { n: premiumCaduca, t: 'Premium por caducar (7d)',c: '#f0a500' },
-          { n: inactivos,     t: 'Inactivos +14 días',      c: '#e67e22' },
-          { n: sinEntrenar,   t: 'Activos sin entrenar',    c: '#f0a500' },
-          { n: sinResponder,  t: 'Mensajes sin responder',  c: '#9b59b6' },
+          { n: pagoFallido,        t: 'Pagos fallidos',                c: '#e74c3c' },
+          { n: clientesConHallazgo,t: 'Alimentos prohibidos en su plan',c: '#e74c3c' },
+          { n: cancela,            t: 'Cancelan al vencer',            c: '#e67e22' },
+          { n: premiumCaduca,      t: 'Premium por caducar (7d)',      c: '#f0a500' },
+          { n: inactivos,          t: 'Inactivos +14 días',            c: '#e67e22' },
+          { n: sinEntrenar,        t: 'Activos sin entrenar',          c: '#f0a500' },
+          { n: sinResponder,       t: 'Mensajes sin responder',        c: '#9b59b6' },
         ].filter(f => f.n > 0);
         const totalAcc = filas.reduce((a, f) => a + f.n, 0);
 

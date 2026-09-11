@@ -183,6 +183,17 @@ module.exports = async (req, res) => {
       }
     }
 
+    // Hallazgos del agente de auditoría diario (api/notify.js, ver
+    // lib/normalizador-alimentos.js): alimentos prohibidos que se colaron en
+    // el plan ya guardado de un cliente. Consulta defensiva a propósito: si
+    // aún no se ha aplicado supabase/migration-auditorias-clientes.sql, el
+    // panel sigue funcionando igual, solo sin este aviso.
+    let auditoriaMap = {};
+    try {
+      const { data: auds, error: eAud } = await supabaseAdmin.from('auditorias_clientes').select('user_id, hallazgos, actualizado_at');
+      if (!eAud) (auds || []).forEach(a => { auditoriaMap[a.user_id] = { hallazgos: a.hallazgos, actualizado_at: a.actualizado_at }; });
+    } catch (e) { /* tabla sin migrar todavía */ }
+
     if (e1) {
       // B-4: no exponer el mensaje crudo de Supabase al cliente
       console.error('[admin-clientes] profiles query error:', e1);
@@ -363,6 +374,10 @@ module.exports = async (req, res) => {
         // a mostrar (no ha cancelado, o es cuenta beta).
         motivoBaja:      ud._cuenta?.motivoBaja      || null,
         motivoBajaFecha: ud._cuenta?.motivoBajaFecha || null,
+        // Alimentos prohibidos detectados por el agente de auditoría diario
+        // en el plan YA guardado (null = no hay ninguno abierto ahora mismo).
+        auditoriaHallazgos: auditoriaMap[p.id]?.hallazgos || null,
+        auditoriaFecha:     auditoriaMap[p.id]?.actualizado_at || null,
         objetivo:     ud.objetivo     || '—',
         deporte:      ud.deporte      || '—',
         tipoPlan:     ud.tipoPlan     || '—',

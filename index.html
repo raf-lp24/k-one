@@ -12472,6 +12472,11 @@
   // bogavante, berberechos...) y con el cerdo en piezas nuevas (solomillo,
   // chuletas, costillas, morcilla, butifarra) que no llevan la palabra "jamón"
   // ni "bacon" y por eso no calificaban como cerdo.
+  // OJO: lib/normalizador-alimentos.js (Node, usado por el auditor
+  // automático de api/notify.js) mantiene una COPIA de esta tabla y de
+  // SINONIMOS_ALERGENO de abajo, porque ese runtime no puede requerir este
+  // <script> de 26.000 líneas. Si tocas familias o sinónimos aquí, tócalos
+  // también allí -- están marcadas con la misma nota, cruzada.
   const FAMILIAS_ALIMENTOS = {
     'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones','rodaballo','lenguado','gallo'],
     'marisco': ['gambas','langostinos','mejillon','mejillón','mejillones','almejas','calamar','calamares','pulpo','sepia','vieira','vieiras','cangrejo','langosta','cigalas','bogavante','berberechos','surimi'],
@@ -23486,11 +23491,16 @@
           const rowBg = c.isBeta ? 'background:rgba(255,197,61,.045)' : c.alerta==='red' ? 'background:rgba(255,94,94,.05)' : c.alerta==='orange' ? 'background:rgba(255,149,86,.04)' : '';
           const badgeNuevo = c.esNuevo ? '<span class="jv-chip" style="background:rgba(255,95,46,.14);color:var(--jv-accent-2);border:1px solid rgba(255,95,46,.3);margin-left:7px">Nuevo</span>' : '';
           const badgePremium = c.isBeta ? '<span class="jv-chip" style="background:rgba(255,197,61,.13);color:var(--jv-warn);border:1px solid rgba(255,197,61,.3);margin-left:7px">★ Premium</span>' : '';
+          // Hallazgo del agente de auditoría diario: alimento prohibido colado
+          // en el plan ya guardado. Va primero en la fila (antes que "Nuevo"
+          // o "Premium") porque es lo más urgente de revisar.
+          const badgeAuditoria = (c.auditoriaHallazgos && c.auditoriaHallazgos.length)
+            ? '<span class="jv-chip" style="background:rgba(255,94,94,.16);color:var(--jv-bad);border:1px solid rgba(255,94,94,.35);margin-left:7px" title="Alimento prohibido detectado en su plan">⚠ Revisar</span>' : '';
           const isBaja = ['canceled','unpaid'].includes(c.estado);
           const realIdx = clientes.indexOf(c);
           return `<tr style="${rowBg};cursor:pointer;transition:background .15s" onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background='${rowBg.replace('background:','') || 'transparent'}'" onclick="verDetalleCliente(${realIdx})">
             ${td(alertaDot(c))}
-            ${td('<span style="font-weight:700;color:var(--jv-text);font-size:13.5px;letter-spacing:-.01em' + (isBaja ? ';opacity:.5' : '') + '">' + _esc(c.nombre) + '</span>' + badgePremium + badgeNuevo + (isBaja ? '<span class="jv-chip" style="background:rgba(255,94,94,.13);color:var(--jv-bad);border:1px solid rgba(255,94,94,.28);margin-left:7px">Baja</span>' : ''))}
+            ${td('<span style="font-weight:700;color:var(--jv-text);font-size:13.5px;letter-spacing:-.01em' + (isBaja ? ';opacity:.5' : '') + '">' + _esc(c.nombre) + '</span>' + badgeAuditoria + badgePremium + badgeNuevo + (isBaja ? '<span class="jv-chip" style="background:rgba(255,94,94,.13);color:var(--jv-bad);border:1px solid rgba(255,94,94,.28);margin-left:7px">Baja</span>' : ''))}
             ${td('<span style="color:var(--jv-faint);font-size:12.5px">' + _esc(c.email) + '</span>')}
             ${td('<span style="color:var(--jv-dim);font-size:12.5px;font-variant-numeric:tabular-nums">' + _fmtFecha(c.alta) + '</span>')}
             ${td(_estadoLegible(c))}
@@ -23713,6 +23723,26 @@
       .slice(0, 5);
 
     document.getElementById('jcBody').innerHTML = `
+      ${(() => {
+        // Aviso del agente de auditoría diario (api/notify.js + lib/
+        // normalizador-alimentos.js): alimentos de su lista "no como"/alergia
+        // que se colaron en el plan YA guardado -- el mismo tipo de fallo que
+        // se encontró a mano con Esther y Pablo, ahora revisado cada día para
+        // todos los clientes. Va lo primero de la ficha, antes incluso de
+        // "Salud del cliente": es un aviso de seguridad alimentaria, más
+        // urgente que cualquier métrica de retención.
+        const h = c.auditoriaHallazgos;
+        if (!h || !h.length) return '';
+        const lista = h.map(x => `<li><strong>${_esc(x.coincidencia)}</strong> <span style="color:var(--jv-faint)">(por "${_esc(x.token)}")</span></li>`).join('');
+        return `<div style="background:rgba(255,94,94,.10);border:1px solid rgba(255,94,94,.35);border-radius:14px;padding:15px 17px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--jv-bad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="jc-label" style="margin-bottom:0;color:var(--jv-bad)">Alimentos prohibidos detectados en su plan</span>
+          </div>
+          <ul style="margin:0 0 10px;padding-left:18px;font-size:12.5px;color:var(--jv-text);line-height:1.7">${lista}</ul>
+          <div style="font-size:11.5px;color:var(--jv-faint)">Detectado el ${_fmtFecha(c.auditoriaFecha)}. Usa "Regenerar plan" (más abajo) para corregirlo.</div>
+        </div>`;
+      })()}
       <div style="background:linear-gradient(135deg,rgba(${hs.rgb},.10),var(--jv-glass));border:1px solid rgba(${hs.rgb},.26);border-radius:14px;padding:15px 17px;margin-bottom:12px">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px">
           <span class="jc-label" style="margin-bottom:0">Salud del cliente</span>
