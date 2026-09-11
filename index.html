@@ -8458,7 +8458,14 @@
         <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Panel de admin
         </button>
-        <button class="logout-btn" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+        <!-- Oculto para cuentas sin suscripción real en Stripe (beta o
+             concedidas a mano): create-portal-session.js exige
+             stripe_customer_id y devuelve 404 si no lo hay, así que a esas
+             cuentas el botón solo les daba un error de "no tienes suscripción
+             asociada" -- exactamente lo que le pasaba a azuqueca1@hotmail.com
+             (11 sept 2026). Mismo criterio que ya usa actualizarBtnCancelar()
+             para el botón de cancelar, ver más abajo. -->
+        <button class="logout-btn" id="btnGestionarSub" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Gestionar suscripción
         </button>
         <!-- Oculto hasta que actualizarBotonNotificaciones() sepa el estado
@@ -22453,8 +22460,11 @@
   function actualizarBtnCancelar() {
     const user = getCurrentUser();
     const btn = document.getElementById('btnCancelarSub');
-    if (!btn) return;
-    btn.style.display = (user && user.suscripcionActiva && user.tieneSub && !user.isBeta) ? '' : 'none';
+    if (btn) btn.style.display = (user && user.suscripcionActiva && user.tieneSub && !user.isBeta) ? '' : 'none';
+    // Mismo criterio: "Gestionar suscripción" abre el Portal de Stripe, que
+    // necesita un stripe_customer_id real -- sin él solo da un error.
+    const btnGestion = document.getElementById('btnGestionarSub');
+    if (btnGestion) btnGestion.style.display = (user && user.tieneSub && !user.isBeta) ? '' : 'none';
     actualizarBtnAdmin();
   }
 
