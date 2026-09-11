@@ -23479,6 +23479,29 @@
         ${row('Estado', estadoTexto, estadoColor)}
         ${row('Plan', c.tipoPlan + (c.planPrecio && c.planPrecio !== '—' ? ' · ' + c.planPrecio : ''))}
       </div>
+      ${(() => {
+        // Solo aparece si ha cancelado o si ya contestó al banner "¿Nos dices
+        // por qué lo dejas?" (index.html, sección Hoy). Las tres situaciones
+        // posibles: no ha vuelto a entrar desde que canceló (motivoBaja aún
+        // null), prefirió no decirlo (guardado como 'sin_respuesta'), o marcó
+        // un motivo concreto -- el texto libre que haya escrito, si lo hizo,
+        // no viaja aquí (no se guarda en el perfil): está completo en su
+        // mensaje del Buzón, con el mismo sello de tiempo.
+        if (!c.cancelaAlFinal && !c.motivoBaja) return '';
+        const MOTIVOS_LABEL = {
+          'Precio': 'Es caro para mí', 'Falta de uso': 'No lo estaba usando',
+          'Entrenos': 'Los entrenos no le encajaban', 'Dieta': 'La dieta no le encajaba',
+          'Falta variedad': 'Se le hacía repetitivo', 'Fallos': 'Algo no funcionaba bien',
+          'Objetivo cumplido': 'Ya consiguió su objetivo', 'Otro': 'Otro motivo (ver Buzón)',
+          'solo_texto': 'Solo escribió texto libre (ver Buzón)', 'sin_respuesta': 'Prefirió no decirlo'
+        };
+        const texto = !c.motivoBaja ? 'Aún no ha vuelto a entrar desde que canceló'
+          : (MOTIVOS_LABEL[c.motivoBaja] || c.motivoBaja);
+        const color = (c.motivoBaja && c.motivoBaja !== 'sin_respuesta') ? 'var(--jv-warn)' : 'var(--jv-faint)';
+        return `<div style="display:grid;grid-template-columns:1fr;gap:10px">
+          ${row('Motivo de baja', texto + (c.motivoBajaFecha ? ' · ' + _fmtFecha(c.motivoBajaFecha) : ''), color)}
+        </div>`;
+      })()}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Alta', _fmtFecha(c.alta))}
         ${row(c.isBeta ? 'Expira premium' : 'Renueva', _fmtFecha(c.renovacion))}

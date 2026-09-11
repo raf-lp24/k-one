@@ -357,6 +357,12 @@ module.exports = async (req, res) => {
         planPrecio:   s?.plan ? (PRICE_LABELS[s.plan] || '—') : '—',
         cancelaAlFinal: cancela,
         renovacion,
+        // Motivo que dio el cliente al cancelar (banner "¿Nos dices por qué lo
+        // dejas?" en index.html, una sola vez, guardado en userData._cuenta).
+        // 'sin_respuesta' = lo descartó sin contestar; null = nunca se le llegó
+        // a mostrar (no ha cancelado, o es cuenta beta).
+        motivoBaja:      ud._cuenta?.motivoBaja      || null,
+        motivoBajaFecha: ud._cuenta?.motivoBajaFecha || null,
         objetivo:     ud.objetivo     || '—',
         deporte:      ud.deporte      || '—',
         tipoPlan:     ud.tipoPlan     || '—',
