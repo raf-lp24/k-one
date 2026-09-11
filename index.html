@@ -6726,6 +6726,7 @@
           <div style="display:flex;gap:4px" id="adminFiltrosBtns">
             <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('alertas')">Alertas</button>
+            <button class="jarvis-filtro" onclick="filtrarAdminTipo('revisar')">Revisar plan</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('activos')">Activos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('premium')">Premium</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('sinpago')">Sin pago</button>
@@ -15414,16 +15415,24 @@
     if (sinGluten || sinLactosa || sinFrutosSecos) {
       const reemplazos = [];
       // Las reglas van de lo MÁS específico a lo más genérico, y las genéricas
-      // llevan el lookahead `(?![^,]*sin gluten)` / `(?![^,]*sin lactosa)`: así no
+      // llevan el lookahead `(?![^,.;:]*sin gluten)` / `(?![^,.;:]*sin lactosa)`: así no
       // vuelven a marcar un ingrediente que una regla anterior ya dejó seguro
       // (sin eso salían cosas como "3 tostas sin gluten de pan sin gluten").
+      // El lookahead para en coma Y en punto/punto y coma/dos puntos, no solo
+      // en coma: estas mismas reglas se aplican a los PASOS de la receta, que
+      // son frases con pocas comas. Con `[^,]*` el lookahead de "la leche en
+      // la batidora. Bate... proteína aislada de suero (sin lactosa)" veía el
+      // "sin lactosa" de OTRO ingrediente dos frases más allá y dejaba la
+      // leche sin marcar: el cliente intolerante leía "mete la leche" a
+      // secas. Encontrado por el agente de auditoría el 11 sept 2026 (96
+      // apariciones en 200 planes sin lactosa).
       if (sinGluten) {
         reemplazos.push(
           [/galletas (de )?avena/gi, 'tortitas de arroz'],
           // La bebida de avena solo es sin gluten si está certificada.
           [/leche (de )?avena/gi, 'bebida de avena certificada sin gluten'],
           [/harina de avena/gi, 'harina de avena certificada sin gluten'],
-          [/\bavena\b(?![^,]*sin gluten)/gi, 'avena certificada sin gluten'],
+          [/\bavena\b(?![^,.;:]*sin gluten)/gi, 'avena certificada sin gluten'],
           [/pasta integral/gi, 'pasta sin gluten'],
           [/fideos( finos)?/gi, 'fideos de arroz'],
           [/\b(cuscús|couscous|bulgur)\b/gi, 'quinoa'],
@@ -15438,24 +15447,37 @@
           [/panes? wassa/gi, 'tortitas de arroz'],
           // Formas compuestas de pan, antes de la genérica, para que el resultado
           // se lea bien y no quede el calificativo con gluten suelto detrás.
-          [/(tostas?|tostadas?|rebanadas?) (de )?pan (centeno|integrales?|multicereal|blanco|de trigo)/gi, '$1 de pan sin gluten'],
-          [/(tostas?|tostadas?|rebanadas?) (centeno|integrales?|multicereal|espelta|blanco)/gi, '$1 de pan sin gluten'],
-          [/(tostas?|tostadas?|rebanadas?) de pan\b(?![^,]*sin gluten)/gi, '$1 de pan sin gluten'],
+          // "(?:de )?" delante del tipo de pan: el recetario dice tanto "pan
+          // centeno" como "pan DE centeno". Sin él, la segunda forma se la
+          // quedaba la red final de abajo, que solo añade "sin gluten" detrás
+          // de "pan" -- y salía "Tuesta el pan sin gluten de centeno" (el
+          // centeno LLEVA gluten). 261 apariciones en 200 planes de celíacos,
+          // encontrado por el agente de auditoría el 11 sept 2026.
+          [/(tostas?|tostadas?|rebanadas?) (de )?pan (?:de )?(centeno|integrales?|multicereal|blanco|trigo|espelta)/gi, '$1 de pan sin gluten'],
+          [/(tostas?|tostadas?|rebanadas?) (?:de )?(centeno|integrales?|multicereal|espelta|blanco)/gi, '$1 de pan sin gluten'],
+          [/(tostas?|tostadas?|rebanadas?) de pan\b(?![^,.;:]*sin gluten)/gi, '$1 de pan sin gluten'],
           [/panecillos? integral(es)?( pequeños?)?/gi, 'panecillo sin gluten'],
-          [/pan (centeno|integral|multicereal|blanco|de trigo|de espelta)/gi, 'pan sin gluten'],
+          [/\bpan (?:integral )?(?:de )?(centeno|integral|multicereal|blanco|trigo|espelta|molde)\b/gi, 'pan sin gluten'],
           [/barra de pan/gi, 'pan sin gluten'],
           // Los croutons/picatostes son pan tostado en cubos: se colaban enteros
           // en la Ensalada César de cualquiera con alergia al gluten o dieta sin
           // gluten (bug real encontrado auditando el filtro de alérgenos el 7
           // sept 2026, 248 apariciones en 576 planes). No entraban en la red
           // final de abajo porque esa lista no los nombraba.
-          [/\b(croutons?|picatostes)\b(?![^,]*sin gluten)/gi, 'croutons sin gluten'],
+          [/\b(croutons?|picatostes)\b(?![^,.;:]*sin gluten)/gi, 'croutons sin gluten'],
           // El maíz no tiene gluten, pero los copos de maíz comerciales llevan
           // casi siempre extracto de malta de CEBADA — trampa clásica para
           // celíacos. Se marca para que se compre la versión certificada.
-          [/\bcopos de ma[íi]z\b(?![^,]*sin gluten)/gi, 'copos de maíz sin gluten'],
+          [/\bcopos de ma[íi]z\b(?![^,.;:]*sin gluten)/gi, 'copos de maíz sin gluten'],
+          // OJO -- NO añadir una regla para "pan tumaca" (probado y deshecho el
+          // 11 sept 2026): el título se lee "(pan sin gluten tumaca)", pero si
+          // se convierte en "(pan tumaca sin gluten)", el lookahead de la red
+          // final ve ese "sin gluten" desde "Tostada" y ya no marca la
+          // tostada -- y entonces la red de seguridad TIRA el plato entero de
+          // todos los planes sin gluten. Un título algo raro es mejor que un
+          // plato menos.
           // Red final: cualquier forma de pan/bollería que siga suelta se marca.
-          [/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|granola|muesli|barritas?)\b(?![^,]*sin gluten)(?!\s+de\s+(?:arroz|maíz))/gi, '$1 sin gluten']
+          [/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|granola|muesli|barritas?)\b(?![^,.;:]*sin gluten)(?!\s+de\s+(?:arroz|maíz))/gi, '$1 sin gluten']
         );
       }
       if (sinLactosa) {
@@ -15472,9 +15494,9 @@
           // proteico..." pero sus ingredientes seguían diciendo "2 yogures
           // proteicos" -- lácteo de verdad. Tampoco lo cazaba la red de
           // seguridad de abajo, por el mismo motivo.
-          [/\byogures\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogures sin lactosa'],
-          [/\byogur(t)?\b(?![^,]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
-          [/\bkéfir\b(?![^,]*sin lactosa)/gi, 'kéfir sin lactosa'],
+          [/\byogures\b(?![^,.;:]*(?:sin lactosa|de coco))/gi, 'yogures sin lactosa'],
+          [/\byogur(t)?\b(?![^,.;:]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
+          [/\bkéfir\b(?![^,.;:]*sin lactosa)/gi, 'kéfir sin lactosa'],
           [/\brequesón\b/gi, 'queso fresco sin lactosa'],
           [/\bskyr\b/gi, 'skyr sin lactosa'],
           // El pesto lleva parmesano (y piñones): se cambia por la alternativa.
@@ -15487,14 +15509,14 @@
           // había dejado como "queso fresco sin lactosa" (el requesón) volvía a
           // marcarse y quedaba "queso fresco SIN LACTOSA SIN LACTOSA". Salía en
           // 8 platos, con el nombre así de roto delante del cliente.
-          [/\bqueso (tierno|fresco|batido|cottage|curado|semicurado|rallado|azul|de cabra|de untar|crema|manchego)(?![^,]*sin lactosa)/gi, 'queso $1 sin lactosa'],
-          [/\bcottage\b(?![^,]*sin lactosa)/gi, 'queso cottage sin lactosa'],
-          [/\b(quesos?)\b(?![^,]*sin lactosa)/gi, '$1 sin lactosa'],
+          [/\bqueso (tierno|fresco|batido|cottage|curado|semicurado|rallado|azul|de cabra|de untar|crema|manchego)(?![^,.;:]*sin lactosa)/gi, 'queso $1 sin lactosa'],
+          [/\bcottage\b(?![^,.;:]*sin lactosa)/gi, 'queso cottage sin lactosa'],
+          [/\b(quesos?)\b(?![^,.;:]*sin lactosa)/gi, '$1 sin lactosa'],
           [/\b(proteína )?whey\b/gi, 'proteína aislada de suero (sin lactosa)'],
           [/\bnata\b/gi, 'nata de coco'],
           [/\bmantequilla\b(?! de)/gi, 'AOVE'],
           [/\bleche (entera|semidesnatada|desnatada)/gi, 'leche $1 sin lactosa'],
-          [/\bleche\b(?! de (?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,]*sin lactosa)/gi, 'leche sin lactosa']
+          [/\bleche\b(?! de (?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,.;:]*sin lactosa)/gi, 'leche sin lactosa']
         );
       }
       if (sinFrutosSecos) {
@@ -20306,7 +20328,7 @@
     "Tortitas de avena y plátano con yogur griego": "Tritura la avena, el huevo y medio plátano hasta obtener una masa fina. Cocina en sartén antiadherente 2-3 min por lado, formando 2-3 tortitas. Sirve con el yogur griego y el resto del plátano en rodajas.",
     "Huevos revueltos con espinacas y tostada integral": "Saltea las espinacas en el AOVE hasta que se ablanden. Añade el huevo batido y cuaja a fuego medio removiendo. Sirve con la tostada.",
     "Bizcocho de avena y plátano al microondas": "Aplasta el plátano con un tenedor y mézclalo con la avena, el huevo y la canela hasta obtener una masa homogénea. Vierte en un bol o taza apto para microondas y cocina 2 min a máxima potencia.",
-    "Bowl de açaí con plátano, granola y frutos rojos": "Tritura la pulpa de açaí congelada con medio plátano hasta obtener una crema espesa (casi de helado). Sirve en un bol y decora con el resto del plátano en rodajas, la granola y los frutos rojos.",
+    "Bowl de açaí con plátano, granola y frutos rojos": "Tritura la pulpa de açaí congelada con medio plátano hasta obtener una crema espesa y fría. Sirve en un bol y decora con el resto del plátano en rodajas, la granola y los frutos rojos.",
     "Puñado de frutos secos variados": "Sin cocción: toma el puñado de frutos secos tal cual. Listo en 0 min.",
     "Batido de plátano con leche": "Mete el plátano, la leche y la canela en la batidora. Bate 20-30 segundos hasta que quede homogéneo.",
     "Marmitako de atún con patata": "Sofríe la cebolla y el pimiento en el AOVE 5 min. Añade la patata cascada en trozos (rompiéndola en vez de cortarla, para que suelte almidón) y el tomate. Cubre con agua, añade el pimentón y cuece 15 min. Incorpora el atún en dados los últimos 3-4 min.",
@@ -22990,6 +23012,9 @@
   const _accInactivo     = c => { const d = c.ultimaConexion ? _diasDesde(c.ultimaConexion) : (c.diasDesdeAlta ?? 999); return c.onboarding && d > 14; };
   const _accPremiumCaduca = c => c.isBeta && c.betaExpires && (new Date(c.betaExpires).getTime() - Date.now()) < 7 * 86400000;
   const _accCancela      = c => !!c.cancelaAlFinal;
+  // Hallazgo del agente de auditoría diario (api/notify.js): alimento que el
+  // cliente no puede o no quiere comer, colado en su plan guardado.
+  const _accRevisarPlan  = c => !!(c.auditoriaHallazgos && c.auditoriaHallazgos.length);
   const _accRenueva7     = c => ['active','trialing'].includes(c.estado) && !c.cancelaAlFinal && c.renovacion && (() => { const ms = new Date(c.renovacion).getTime() - Date.now(); return ms > 0 && ms < 7 * 86400000; })();
 
   // Health score 0-100: cruza pago + conexión + entrenos + onboarding. Menor = más riesgo de baja.
@@ -23024,6 +23049,8 @@
     const sinResponder = (data.mensajes || []).filter(m => !m.respuesta).length;
 
     const items = [
+      // Lo primero: es seguridad alimentaria, no una métrica de negocio.
+      { n: clientes.filter(_accRevisarPlan).length,   label: 'Plan con alimento prohibido', sub: 'Revisar y regenerar', color: 'var(--jv-bad)',  rgb: '255,94,94',   tipo: 'revisar' },
       { n: clientes.filter(_accPagoFallido).length,   label: 'Pago fallido',        sub: 'Reintentando cobro',      color: 'var(--jv-bad)',  rgb: '255,94,94',   tipo: 'past_due' },
       { n: clientes.filter(_accCancela).length,        label: 'Cancela al vencer',   sub: 'Se van al renovar',       color: '#FF9556',        rgb: '255,149,86',  tipo: 'cancela' },
       { n: clientes.filter(_accPremiumCaduca).length,  label: 'Premium por caducar', sub: 'Próximos 7 días',         color: 'var(--jv-warn)', rgb: '255,197,61',  tipo: 'premiumcaduca' },
@@ -23361,6 +23388,7 @@
         case 'nuevos':  return c.esNuevo;
         case 'bajas':   return ['canceled','unpaid'].includes(c.estado);
         // Filtros del Centro de acción diaria
+        case 'revisar':      return _accRevisarPlan(c);
         case 'past_due':     return _accPagoFallido(c);
         case 'cancela':      return _accCancela(c);
         case 'premiumcaduca':return _accPremiumCaduca(c);
@@ -23733,7 +23761,14 @@
         // urgente que cualquier métrica de retención.
         const h = c.auditoriaHallazgos;
         if (!h || !h.length) return '';
-        const lista = h.map(x => `<li><strong>${_esc(x.coincidencia)}</strong> <span style="color:var(--jv-faint)">(por "${_esc(x.token)}")</span></li>`).join('');
+        // Cada hallazgo dice DÓNDE está (plato y campo) y enseña el trozo de
+        // texto, para poder juzgarlo sin abrir el plan del cliente. El formato
+        // viejo (solo token/coincidencia) se sigue pintando por si queda alguna
+        // fila de antes.
+        const CAMPO = { nombre: 'nombre del plato', ingredientes: 'ingredientes', pasos: 'preparación' };
+        const lista = h.map(x => x.plato
+          ? `<li style="margin-bottom:7px"><strong>${_esc(x.coincidencia)}</strong> en «${_esc(x.plato)}» <span style="color:var(--jv-faint)">(${_esc(CAMPO[x.campo] || x.campo)} · ${_esc(x.motivo)}${x.veces > 1 ? ' · aparece ' + x.veces + ' veces' : ''})</span>${x.fragmento ? `<div style="font-size:11px;color:var(--jv-faint);margin-top:2px;line-height:1.5">${_esc(x.fragmento)}</div>` : ''}</li>`
+          : `<li><strong>${_esc(x.coincidencia)}</strong> <span style="color:var(--jv-faint)">(por "${_esc(x.token)}")</span></li>`).join('');
         return `<div style="background:rgba(255,94,94,.10);border:1px solid rgba(255,94,94,.35);border-radius:14px;padding:15px 17px;margin-bottom:12px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--jv-bad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>

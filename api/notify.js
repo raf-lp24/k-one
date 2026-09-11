@@ -9,7 +9,7 @@
 
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
-const { alimentosProhibidos, escanearProhibidos } = require('../lib/normalizador-alimentos');
+const { auditarPlan } = require('../lib/normalizador-alimentos');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
@@ -931,6 +931,92 @@ async function handleCronRetencion(req, res) {
       }
     }
 
+    // ===== AGENTE DE AUDITORÍA (11 sept 2026) =====
+    // Para cada cliente con acceso: ¿hay en su plan GUARDADO algo que dijo que
+    // no puede o no quiere comer? Reglas fijas (lib/normalizador-alimentos.js,
+    // espejo exacto del filtro y de la red de seguridad del motor), no una IA.
+    // El mismo tipo de fallo que se encontró a mano con Esther y Pablo, pero
+    // revisado cada día para todos. Solo avisa: el arreglo es el botón
+    // "Regenerar plan" de Jarvis.
+    //
+    // Va en su propio bloque y ANTES del resumen al admin: antes vivía dentro
+    // del resumen, que no corre si falta la clave de email o si ya se mandó
+    // hoy -- y entonces el agente tampoco revisaba nada. Aquí no depende del
+    // email. Cuenta para el resumen en `clientesConHallazgo`.
+    //
+    // Solo clientes CON ACCESO (suscripción activa/en prueba/pago pendiente,
+    // o premium vigente): quien no paga no ve el plan, avisar de él es ruido.
+    //
+    // OJO: supabase-js NO lanza, devuelve {data, error}. Hay que mirar
+    // `.error` en cada llamada -- un try/catch solo no se entera de nada.
+    let clientesConHallazgo = 0;
+    try {
+      const { data: subsAud } = await supa.from('subscriptions').select('user_id, status');
+      const conSub = new Set((subsAud || [])
+        .filter(s => ['active', 'trialing', 'past_due'].includes(s.status))
+        .map(s => s.user_id));
+      const rAud = await supa.from('profiles')
+        .select('id, nombre, email, userdata, plan, is_beta, beta_expires')
+        .not('plan', 'is', null);
+      if (rAud.error) throw new Error('profiles: ' + rAud.error.message);
+      // Si la tabla no existe todavía (falta aplicar
+      // supabase/migration-auditorias-clientes.sql), se revisa igual para el
+      // log, pero no se intenta escribir.
+      const rPrev = await supa.from('auditorias_clientes').select('user_id');
+      const tablaLista = !rPrev.error;
+      const idsPrevios = new Set(tablaLista ? (rPrev.data || []).map(x => x.user_id) : []);
+
+      const guardar = [], borrar = [];
+      const vistos = new Set();
+      let revisados = 0;
+      for (const p of (rAud.data || [])) {
+        vistos.add(p.id);
+        const premium = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > ahora.getTime());
+        let hallazgos = [];
+        if (conSub.has(p.id) || premium) {
+          revisados++;
+          try {
+            hallazgos = auditarPlan(p.userdata || {}, p.plan);
+          } catch (e) {
+            console.warn('[notify-cron] auditoría de', p.id, 'falló:', e.message);
+            continue;
+          }
+        }
+        if (hallazgos.length) {
+          clientesConHallazgo++;
+          guardar.push({
+            user_id: p.id,
+            nombre: p.nombre || (p.userdata && p.userdata.nombre) || '',
+            email: p.email || '',
+            hallazgos,
+            actualizado_at: ahora.toISOString()
+          });
+        } else if (idsPrevios.has(p.id)) {
+          // Ya no hay nada (se regeneró el plan, o perdió el acceso): se cierra solo.
+          borrar.push(p.id);
+        }
+      }
+      // Filas de clientes que ya ni tienen plan guardado: también se cierran.
+      idsPrevios.forEach(id => { if (!vistos.has(id)) borrar.push(id); });
+
+      if (tablaLista) {
+        if (guardar.length) {
+          const rG = await supa.from('auditorias_clientes').upsert(guardar, { onConflict: 'user_id' });
+          if (rG.error) console.warn('[notify-cron] auditoría: no se pudo guardar:', rG.error.message);
+        }
+        if (borrar.length) {
+          const rB = await supa.from('auditorias_clientes').delete().in('user_id', borrar);
+          if (rB.error) console.warn('[notify-cron] auditoría: no se pudo cerrar:', rB.error.message);
+        }
+      } else {
+        console.warn('[notify-cron] auditoría: falta la tabla auditorias_clientes (aplica supabase/migration-auditorias-clientes.sql):', rPrev.error.message);
+      }
+      console.log(`[notify-cron] Auditoría: ${revisados} planes revisados, ${clientesConHallazgo} con hallazgo, ${borrar.length} cerrados`);
+    } catch (eAud) {
+      console.error('[notify-cron] auditoría error:', eAud.message);
+      capturarError(eAud, { fn: 'notify-cron-auditoria' });
+    }
+
     // AVISO DIARIO AL ADMIN: "qué requiere tu atención hoy" (una vez al día).
     // Consultas propias y defensivas para no depender de la lógica de retención.
     try {
@@ -945,9 +1031,9 @@ async function handleCronRetencion(req, res) {
         const subMap = {}; (subsFull || []).forEach(s => { subMap[s.user_id] = s; });
         let profsFull = [];
         {
-          const r = await supa.from('profiles').select('id, nombre, email, userdata, plan, is_beta, beta_expires, last_seen');
+          const r = await supa.from('profiles').select('id, userdata, is_beta, beta_expires, last_seen');
           if (r.error) {
-            const r2 = await supa.from('profiles').select('id, nombre, email, userdata, plan, is_beta, beta_expires');
+            const r2 = await supa.from('profiles').select('id, userdata, is_beta, beta_expires');
             profsFull = r2.data || [];
           } else {
             profsFull = r.data || [];
@@ -955,22 +1041,6 @@ async function handleCronRetencion(req, res) {
         }
         const now = ahora.getTime();
         let pagoFallido = 0, cancela = 0, premiumCaduca = 0, inactivos = 0, sinEntrenar = 0;
-        // IDs con fila abierta ANTES de esta pasada -- así el borrado de "ya
-        // no hay hallazgo" solo toca a quien de verdad tenía una fila, en vez
-        // de lanzar un DELETE ... IN (...) con todos los clientes cada día.
-        let idsConFilaPrevia = new Set();
-        try {
-          const { data: previas } = await supa.from('auditorias_clientes').select('user_id');
-          idsConFilaPrevia = new Set((previas || []).map(x => x.user_id));
-        } catch (eIds) { /* tabla sin migrar todavía: se trata como vacío */ }
-        // AGENTE DE AUDITORÍA (11 sept 2026): para cada cliente real, ¿hay algún
-        // alimento de su lista "no como"/alergia en el plan que ya tiene
-        // guardado? Reglas fijas (lib/normalizador-alimentos.js, con tilde o
-        // sin ella igual), no una IA -- exactamente el mismo bug que se
-        // encontró a mano con Esther y Pablo esta sesión, pero revisado cada
-        // día para TODOS los clientes, no solo cuando alguien lo pide.
-        let clientesConHallazgo = 0;
-        const escritasAuditoria = [];
         for (const p of profsFull) {
           const s = subMap[p.id]; const st = s?.status || 'none'; const activo = ['active', 'trialing'].includes(st);
           const ud = p.userdata || {};
@@ -982,40 +1052,6 @@ async function handleCronRetencion(req, res) {
           if (activo && ent === 0) sinEntrenar++;
           const ls = p.last_seen ? new Date(p.last_seen).getTime() : null;
           if (ud.onboardingCompletado && ls && (now - ls) / 86400000 > 14) inactivos++;
-
-          if (p.plan) {
-            try {
-              const tokens = alimentosProhibidos(ud);
-              if (tokens.length) {
-                const hallazgos = escanearProhibidos(JSON.stringify(p.plan), tokens);
-                if (hallazgos.length) {
-                  clientesConHallazgo++;
-                  escritasAuditoria.push({
-                    op: 'set', user_id: p.id, nombre: p.nombre || ud.nombre || '', email: p.email || '',
-                    hallazgos, actualizado_at: ahora.toISOString()
-                  });
-                } else if (idsConFilaPrevia.has(p.id)) {
-                  escritasAuditoria.push({ op: 'del', user_id: p.id });
-                }
-              } else if (idsConFilaPrevia.has(p.id)) {
-                escritasAuditoria.push({ op: 'del', user_id: p.id });
-              }
-            } catch (eAud) {
-              console.warn('[notify-cron] auditoría de', p.id, 'falló:', eAud.message);
-            }
-          }
-        }
-        // Escritura best-effort: si la tabla aún no existe (falta aplicar
-        // supabase/migration-auditorias-clientes.sql), no debe tumbar el
-        // resto del cron -- solo se queda sin este aviso.
-        try {
-          const paraGuardar = escritasAuditoria.filter(x => x.op === 'set')
-            .map(({ op, ...fila }) => fila);
-          const paraBorrar = escritasAuditoria.filter(x => x.op === 'del').map(x => x.user_id);
-          if (paraGuardar.length) await supa.from('auditorias_clientes').upsert(paraGuardar, { onConflict: 'user_id' });
-          if (paraBorrar.length) await supa.from('auditorias_clientes').delete().in('user_id', paraBorrar);
-        } catch (eTabla) {
-          console.warn('[notify-cron] no se pudo escribir auditorias_clientes (¿falta la migración?):', eTabla.message);
         }
         let sinResponder = 0;
         try {
