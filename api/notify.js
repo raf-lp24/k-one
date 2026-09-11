@@ -337,8 +337,15 @@ async function handleCronRetencion(req, res) {
   try {
     const supa = getSupabaseAdmin();
     const ahora = new Date();
-    const hace3d = new Date(ahora.getTime() - 3 * 86400000).toISOString();
-    const hace4d = new Date(ahora.getTime() - 4 * 86400000).toISOString();
+    // "A las 24 horas de registrarse" (pedido 11 sept 2026, antes eran 3-4
+    // días): el cron corre una sola vez al día (vercel.json, 09:00), así que
+    // no hay forma de acertar la hora exacta sin montar un cron por usuario.
+    // Lo más ajustado que da un cron diario es disparar en el PRIMER ciclo en
+    // que la cuenta ya tenga 24h o más -- llega entre 24h y 48h después del
+    // alta según a qué hora del día se registrara. Sin límite superior: no
+    // hace falta, retencion_dia3 se manda una sola vez por email gracias a
+    // yaEnviado (más abajo), así que no hay riesgo de repetirlo cada día.
+    const hace1d = new Date(ahora.getTime() - 1 * 86400000).toISOString();
     const hace8d = new Date(ahora.getTime() - 8 * 86400000).toISOString();
     const hace9d = new Date(ahora.getTime() - 9 * 86400000).toISOString();
 
@@ -558,14 +565,14 @@ async function handleCronRetencion(req, res) {
       const email = p.email;
       if (!email) continue;
 
-      // DÍA 3: registrado hace 3-4 días, NO completó cuestionario, NO tiene sub activa
-      if (p.created_at >= hace4d && p.created_at < hace3d && !ud.onboardingCompletado && !tieneAcceso) {
+      // A LAS 24H: registrado hace 24h o más, NO completó cuestionario, NO tiene sub activa.
+      if (p.created_at < hace1d && !ud.onboardingCompletado && !tieneAcceso) {
         if (yaEnviado.has(`retencion_dia3:${email}`)) continue;
         const htmlDia3 = emailWrapper(`
             <div style="padding:28px 28px 0">
               <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">El mejor momento para empezar siempre es hoy</h1>
               <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
-              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Te registraste en K-ONE hace unos días y eso ya dice algo de ti: <span style="color:#F0EDE8">que quieres dar el paso</span>. A veces lo difícil no es entrenar, es empezar.</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Te registraste en K-ONE hace poco y eso ya dice algo de ti: <span style="color:#F0EDE8">que quieres dar el paso</span>. A veces lo difícil no es entrenar, es empezar.</p>
               <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Tu plan personalizado está a <span style="color:#F0EDE8;font-weight:500">menos de 2 minutos</span>. Solo necesitamos que completes un cuestionario rápido y nosotros nos encargamos del resto: entrenamiento, nutrición y progresión semanal.</p>
               <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
                 <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">QUÉ VAS A CONSEGUIR</div>
@@ -590,7 +597,7 @@ async function handleCronRetencion(req, res) {
           subject: `${esc(primerNombre)}, el mejor momento para empezar siempre es hoy`,
           html: htmlDia3
         });
-        await supa.from('email_log').insert({ tipo: 'retencion_dia3', destinatario: email, asunto: 'El mejor momento para empezar siempre es hoy', html: htmlDia3, datos: JSON.stringify({ nombre, resumen: 'Retención día 3: motivacional para completar cuestionario.' }) });
+        await supa.from('email_log').insert({ tipo: 'retencion_dia3', destinatario: email, asunto: 'El mejor momento para empezar siempre es hoy', html: htmlDia3, datos: JSON.stringify({ nombre, resumen: 'Retención 24h: motivacional para completar cuestionario.' }) });
         enviados3++;
       }
 
