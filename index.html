@@ -21435,28 +21435,63 @@
     _saveTimer = setTimeout(() => badge.classList.remove('visible'), 3000);
   }
 
+  // Pide al servidor que revise el plan recién guardado (api/notify.js, tipo
+  // 'auditar_plan'): el agente de auditoría mira si se ha colado algo que el
+  // cliente no puede o no quiere comer y, si es así, avisa al admin en el
+  // momento (push + email + Jarvis) en vez de esperar al cron del día
+  // siguiente. El servidor solo revisa el plan del cliente AUTENTICADO -- el
+  // body no lleva ningún id. Nunca bloquea ni le enseña nada al cliente.
+  function _pedirAuditoriaPlan() {
+    supa.auth.getSession().then(({ data }) => {
+      const token = data && data.session && data.session.access_token;
+      if (!token) return;
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ tipo: 'auditar_plan' })
+      }).catch(() => {});
+    }).catch(() => {});
+  }
+
+  // El último plan que se mandó a revisar. buildPlanFromData() devuelve un
+  // objeto NUEVO cada vez, así que "plan distinto del último" = plan recién
+  // generado (registro, cambio de plan, check-in...). Guardar pesos o marcar
+  // un entreno reutiliza el mismo objeto y no dispara ninguna revisión.
+  let _ultimoPlanAuditado = null;
+
+  // Devuelve una promesa que resuelve a true si quedó guardado en la nube
+  // (quien no la necesite puede ignorarla, como hasta ahora).
   function saveUserData(email, data) {
     try { localStorage.setItem(`k1_data_${email}`, JSON.stringify(data)); } catch(e) {}
-    if (!_supaUserId) return;
+    if (!_supaUserId) return Promise.resolve(false);
     const payload = { userdata: data.userData, plan: data.plan, saved_at: data.savedAt };
-    supa.from('profiles').update(payload).eq('id', _supaUserId)
+    // Se marca ANTES de guardar: si llegan dos guardados seguidos del mismo
+    // plan nuevo, solo el primero pide la revisión.
+    const planNuevo = !!data.plan && data.plan !== _ultimoPlanAuditado;
+    if (planNuevo) _ultimoPlanAuditado = data.plan;
+    // La revisión se pide DESPUÉS de que el guardado confirme: el servidor
+    // lee el plan de la base de datos, no del navegador.
+    const alGuardar = () => {
+      _mostrarGuardado();
+      if (planNuevo) _pedirAuditoriaPlan();
+      return true;
+    };
+    return supa.from('profiles').update(payload).eq('id', _supaUserId)
       .then(({ error }) => {
-        if (error) {
-          // Retry una vez tras 2 segundos
-          setTimeout(() => {
-            supa.from('profiles').update(payload).eq('id', _supaUserId)
-              .then(({ error: e2 }) => {
-                if (e2) {
-                  console.error('Error guardando en Supabase (retry):', e2);
-                  showToast('No se pudo guardar en la nube. Tus cambios están en este dispositivo.', 5000);
-                } else {
-                  _mostrarGuardado();
-                }
-              });
-          }, 2000);
-        } else {
-          _mostrarGuardado();
-        }
+        if (!error) return alGuardar();
+        // Retry una vez tras 2 segundos
+        return new Promise(resolve => setTimeout(() => {
+          supa.from('profiles').update(payload).eq('id', _supaUserId)
+            .then(({ error: e2 }) => {
+              if (e2) {
+                console.error('Error guardando en Supabase (retry):', e2);
+                showToast('No se pudo guardar en la nube. Tus cambios están en este dispositivo.', 5000);
+                resolve(false);
+              } else {
+                resolve(alGuardar());
+              }
+            });
+        }, 2000));
       });
   }
 
@@ -23963,10 +23998,20 @@
       if (!userdata.onboardingCompletado) throw new Error('Este cliente aún no ha completado el cuestionario');
 
       const plan = buildPlanFromData(userdata);
-      await pedir({ accion: 'guardar_plan', userId, plan });
+      const r = await pedir({ accion: 'guardar_plan', userId, plan });
 
-      showToast('Plan regenerado. Lo verá la próxima vez que abra la app.', 6000);
+      // El servidor revisa el plan recién guardado con el agente de auditoría
+      // (r.avisos: cuántos avisos quedan; null = no se pudo revisar).
+      const revisado = typeof r.avisos === 'number';
+      showToast(!revisado
+        ? 'Plan regenerado. Lo verá la próxima vez que abra la app.'
+        : r.avisos === 0
+          ? 'Plan regenerado y revisado: ya no tiene ningún aviso.'
+          : `Plan regenerado, pero sigue con ${r.avisos} aviso${r.avisos === 1 ? '' : 's'}. Si no desaparece, es un fallo del motor.`, 7000);
       btn.textContent = 'Plan regenerado';
+      // Jarvis se recarga para que la ficha, la tabla y el Centro de acción
+      // enseñen el resultado de la revisión (el aviso rojo desaparece ya).
+      if (revisado) { cerrarDetalleCliente(); abrirPanelAdmin(); }
       // Que no se pueda pulsar dos veces seguidas sin querer: rehacerlo otra vez
       // no aporta nada y cada pulsación escribe en la fila del cliente.
       setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 4000);
@@ -24000,7 +24045,7 @@
   }
 
   // ===== PANEL DE EMAILS: tipos, filtros y render =====
-  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario' };
+  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario', auditoria_plan: 'Aviso del agente de revisión' };
   // Paleta por tipo de email: familias distinguibles entre sí (naranja de marca
   // para captación, verde para altas, azul/violeta para informes, y rojos cada
   // vez más intensos para los 3 niveles de re-enganche).

@@ -9,7 +9,7 @@
 
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
-const { auditarPlan } = require('../lib/normalizador-alimentos');
+const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
@@ -233,7 +233,11 @@ function _entrenosSemanaAnterior(ud, ahora) {
 // más veces porque cualquiera puede pasar por el lead-magnet de la landing
 // varias veces sin ser un abuso; "mensaje" es más generoso en abuso potencial
 // (contenido libre, reply_to arbitrario) así que va más ajustado.
-const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5 };
+// auditar_plan va más holgado: es barato (lee un solo perfil) y un cliente
+// puede regenerar varias veces seguidas al terminar el cuestionario o al
+// cambiar de plan. Si aun así se pasa, no se pierde nada: el cron de las 09:00
+// revisa a todos igualmente.
+const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5, auditar_plan: 20 };
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 
 // Vercel pone la IP real del cliente en x-forwarded-for (primer valor de la
@@ -1245,6 +1249,70 @@ async function handlePost(req, res) {
     } catch (e) {
       console.warn('[notify] push_prueba error:', e.message);
       return res.status(200).json({ ok: false, motivo: 'excepcion', detalle: e.message });
+    }
+  }
+
+  // AUDITAR MI PLAN (11 sept 2026) -- lo pide el navegador del cliente en
+  // cuanto guarda un plan NUEVO: al registrarse, al cambiar de plan, en el
+  // check-in (ver _pedirAuditoriaPlan en index.html). El agente de auditoría
+  // revisa el plan GUARDADO del cliente AUTENTICADO -- el body no lleva
+  // ningún id, así que nadie puede pedir la revisión del plan de otro -- y si
+  // encuentra algo que no estaba ya avisado, avisa al admin en el momento:
+  // push + email + la fila de Jarvis. Antes esto solo pasaba en el cron de
+  // las 09:00, así que un cliente nuevo podía estar un día entero con un
+  // alimento prohibido en el plan sin que nadie lo supiera.
+  //
+  // Va ANTES del check de RESEND_API_KEY por lo mismo que push_prueba: el
+  // push y la fila de Jarvis no dependen de que haya clave de email.
+  if ((req.body || {}).tipo === 'auditar_plan') {
+    try {
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
+      if (await estaLimitadoPorTasa(req, 'auditar_plan')) {
+        return res.status(429).json({ error: 'Demasiadas peticiones' });
+      }
+      const r = await auditarYGuardar(supa, user.id);
+      // Solo si hay algo NUEVO: si el cliente vuelve a guardar el mismo plan
+      // con el mismo fallo, no se le vuelve a avisar al admin.
+      if (r.nuevo) {
+        const quien = r.nombre || r.email || 'Un cliente';
+        const resumen = r.hallazgos.slice(0, 3).map(x => `${x.coincidencia} en «${x.plato}»`).join(' · ');
+        try {
+          await enviarPushAAdmins({ title: 'K-ONE · Revisar plan', body: `${quien}: ${resumen}`, url: '/' });
+        } catch (ePush) { console.warn('[notify] auditar_plan push:', ePush.message); }
+
+        const apiKeyAud = process.env.RESEND_API_KEY;
+        if (apiKeyAud) {
+          try {
+            const filas = r.hallazgos.slice(0, 8).map(x =>
+              `<li style="margin:0 0 8px"><strong style="color:#F0EDE8">${esc(x.coincidencia)}</strong> en «${esc(x.plato)}» <span style="color:#8A8A8A">(${esc(x.campo)} · ${esc(x.motivo)})</span></li>`).join('');
+            const asunto = `Revisar plan · ${quien}`;
+            const htmlAud = emailWrapper(`
+              <div style="padding:28px 28px 0">
+                <h1 style="color:#F0EDE8;font-size:19px;font-weight:600;margin:0 0 12px">Un plan recién guardado lleva algo que no debería</h1>
+                <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">El agente de revisión ha encontrado esto en el plan de <strong style="color:#F0EDE8">${esc(quien)}</strong>${r.email ? ` (${esc(r.email)})` : ''}:</p>
+                <ul style="color:#B5B2AD;font-size:13px;line-height:1.6;padding-left:18px;margin:0 0 18px">${filas}</ul>
+                <p style="color:#8A8A8A;font-size:12.5px;line-height:1.6;margin:0 0 20px">Ábrelo en Jarvis (filtro «Revisar plan») y pulsa «Regenerar plan». Si con eso no desaparece, es un fallo del motor: avísame.</p>
+              </div>
+              <div style="padding:0 28px 28px;text-align:center">
+                <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;border-radius:8px">ABRIR JARVIS</a>
+              </div>`, 'Aviso del agente de revisión');
+            await enviarEmail(apiKeyAud, { from: 'K-ONE Jarvis <equipo@k-one.fit>', to: ADMIN_EMAIL, subject: asunto, html: htmlAud });
+            const { error: eLog } = await supa.from('email_log').insert({
+              tipo: 'auditoria_plan', destinatario: ADMIN_EMAIL, asunto, html: htmlAud,
+              datos: JSON.stringify({ resumen: `Agente de revisión: ${r.hallazgos.length} hallazgo(s) en el plan de ${quien}` })
+            });
+            if (eLog) console.warn('[notify] auditar_plan email_log:', eLog.message);
+          } catch (eMail) { console.warn('[notify] auditar_plan email:', eMail.message); }
+        }
+      }
+      // Al cliente no se le devuelve el detalle: el aviso es para el admin.
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      console.warn('[notify] auditar_plan error:', e.message);
+      capturarError(e, { fn: 'notify-auditar-plan' });
+      return res.status(200).json({ ok: false });
     }
   }
 

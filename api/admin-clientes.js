@@ -1,5 +1,6 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const { auditarYGuardar } = require('../lib/normalizador-alimentos');
 
 // A-5: sin fallback hardcodeado — fail-closed si ADMIN_EMAILS no está configurada
 function getAdmins() {
@@ -138,8 +139,19 @@ module.exports = async (req, res) => {
         .update({ plan, saved_at: new Date().toISOString() })
         .eq('id', userId);
       if (errUpd) return res.status(500).json({ error: errUpd.message });
-      console.log(`[admin-clientes] plan regenerado para ${userId} por ${email}`);
-      return res.status(200).json({ ok: true });
+      // Revisión inmediata del plan recién guardado (mismo agente que el cron
+      // diario): si el arreglo ha funcionado, el aviso de Jarvis desaparece
+      // ya, sin esperar al día siguiente. Si la revisión falla, el plan ya
+      // está guardado igual -- `avisos: null` significa "no se pudo revisar".
+      let avisos = null;
+      try {
+        const r = await auditarYGuardar(supabaseAdmin, userId);
+        avisos = r.hallazgos.length;
+      } catch (e) {
+        console.warn('[admin-clientes] auditoría tras regenerar:', e.message);
+      }
+      console.log(`[admin-clientes] plan regenerado para ${userId} por ${email} · avisos tras revisar: ${avisos}`);
+      return res.status(200).json({ ok: true, avisos });
     }
 
     const page = parseInt(req.body?.page) || 0;
