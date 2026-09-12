@@ -736,6 +736,30 @@
     padding: 3px 9px; border-radius: 999px; white-space: nowrap;
   }
 
+  /* Botón plano con borde de color, al estilo de la web de cliente
+     (.btn-recetario en Nutrición: "Ver recetario completo", "Descargar plan
+     semanal"...) -- pedido por el usuario el 12 sept 2026 para los botones
+     de acción de la ficha de Jarvis. Mismo lenguaje visual (relleno tenue
+     del color, borde fino del mismo color, esquinas rectas, icono + texto),
+     con la tipografía y los tokens propios de Jarvis en vez de los del
+     cliente (Jarvis no usa DM Mono ni --brasa). */
+  .jv-btn-flat {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    font-family: var(--jv-ui); font-size: 12px; font-weight: 700; letter-spacing: -.005em;
+    border-radius: 6px; cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .jv-btn-flat svg { flex-shrink: 0; }
+  .jv-btn-flat-accent {
+    background: rgba(255,95,46,.09); border: 1px solid rgba(255,95,46,.32); color: var(--jv-accent);
+  }
+  .jv-btn-flat-accent:hover { background: rgba(255,95,46,.17); border-color: var(--jv-accent); }
+  .jv-btn-flat-bad {
+    background: rgba(255,94,94,.09); border: 1px solid rgba(255,94,94,.32); color: var(--jv-bad);
+  }
+  .jv-btn-flat-bad:hover { background: rgba(255,94,94,.17); border-color: var(--jv-bad); }
+
   /* ---- Controles: selects, fechas y botones ----
      Antes eran <select>/<input>/<button> nativos con solo el fondo oscuro
      cambiado -- los botones eran rellenos planos sin ninguna relación con
@@ -23985,7 +24009,13 @@ Se coló: ${lista}`;
             <span class="jc-label" style="margin-bottom:0;color:var(--jv-bad)">Alimentos prohibidos detectados en su plan</span>
           </div>
           <ul style="margin:0 0 10px;padding-left:18px;font-size:12.5px;color:var(--jv-text);line-height:1.7">${lista}</ul>
-          <div style="font-size:11.5px;color:var(--jv-faint)">Detectado el ${_fmtFecha(c.auditoriaFecha)}. Usa "Regenerar plan" (más abajo) para corregirlo.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div style="font-size:11.5px;color:var(--jv-faint)">Detectado el ${_fmtFecha(c.auditoriaFecha)}. Usa "Regenerar plan" (más abajo) para corregirlo.</div>
+            <button class="jv-btn-flat jv-btn-flat-bad" onclick="marcarRevisionHecha('${c.id}', this)" title="Ciérralo si ya has comprobado el plan a mano, o si es un falso aviso. Si el fallo sigue ahí de verdad, el robot lo volverá a detectar solo.">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Marcar revisión hecha
+            </button>
+          </div>
         </div>`;
       })()}
       <div style="background:linear-gradient(135deg,rgba(${hs.rgb},.10),var(--jv-glass));border:1px solid rgba(${hs.rgb},.26);border-radius:14px;padding:15px 17px;margin-bottom:12px">
@@ -24125,7 +24155,8 @@ Se coló: ${lista}`;
            no se filtraba): los clientes que ya tienen el plan guardado se quedan
            con el viejo hasta que hacen check-in o cambian algo por su cuenta. -->
       <div style="margin-top:10px">
-        <button onclick="regenerarPlanCliente('${c.id}', this)" style="width:100%;padding:11px;font-size:12.5px;font-weight:700;font-family:var(--jv-ui);background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:12px;color:var(--jv-dim);cursor:pointer;transition:all .2s" onmouseenter="this.style.borderColor='var(--jv-accent)';this.style.color='var(--jv-accent)'" onmouseleave="this.style.borderColor='var(--jv-line)';this.style.color='var(--jv-dim)'">
+        <button class="jv-btn-flat jv-btn-flat-accent" style="width:100%;justify-content:center" onclick="regenerarPlanCliente('${c.id}', this)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
           Regenerar plan
         </button>
         <div style="font-size:10.5px;color:var(--jv-faint);text-align:center;margin-top:6px;font-family:var(--jv-ui);line-height:1.45">
@@ -24193,6 +24224,37 @@ Se coló: ${lista}`;
     } catch (e) {
       console.warn('[jarvis] regenerar plan:', e.message);
       showToast('No se pudo regenerar: ' + e.message, 6000);
+      btn.disabled = false; btn.textContent = original;
+    }
+  }
+
+  // Cierre MANUAL del aviso del agente de auditoría (12 sept 2026): para
+  // cuando el admin ya ha comprobado el plan por su cuenta -- o ha decidido
+  // que no hace falta esperar a que el cliente conteste el pop-up -- y
+  // quiere quitar el aviso sin pasar por "Regenerar plan". Solo cierra la
+  // fila, no toca el plan del cliente: si el fallo de verdad sigue ahí, el
+  // agente automático (al guardar un plan nuevo, al Regenerar, o en el cron
+  // diario) lo vuelve a abrir solo -- esto no es un "silenciar para siempre".
+  async function marcarRevisionHecha(userId, btn) {
+    const original = btn.textContent.trim();
+    btn.disabled = true; btn.textContent = 'Marcando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'marcar_revision_hecha', userId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Error del servidor');
+      showToast('Revisión marcada como hecha. Si el fallo sigue en el plan, el robot lo volverá a avisar.', 6000);
+      // Recarga Jarvis para que la tarjeta roja, el badge de la tabla y el
+      // Centro de acción desaparezcan ya, sin esperar al próximo repaso.
+      cerrarDetalleCliente();
+      abrirPanelAdmin();
+    } catch (e) {
+      console.warn('[jarvis] marcar revisión hecha:', e.message);
+      showToast('No se pudo marcar: ' + e.message, 6000);
       btn.disabled = false; btn.textContent = original;
     }
   }

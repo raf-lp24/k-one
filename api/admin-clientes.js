@@ -108,10 +108,26 @@ module.exports = async (req, res) => {
     // Va aqui, DESPUES de la comprobacion de admin: ambas acciones tocan datos
     // de otra persona.
     const accion = req.body?.accion;
-    if (accion === 'userdata' || accion === 'guardar_plan') {
+    if (accion === 'userdata' || accion === 'guardar_plan' || accion === 'marcar_revision_hecha') {
       const userId = req.body?.userId;
       if (!userId || typeof userId !== 'string') {
         return res.status(400).json({ error: 'Falta userId' });
+      }
+
+      // MARCAR REVISION HECHA (12 sept 2026): el admin ha comprobado el plan
+      // por su cuenta (o ha esperado a que el cliente conteste) y quiere
+      // cerrar el aviso sin pasar por "Regenerar plan" -- por ejemplo, si el
+      // hallazgo era un falso aviso, o si ya lo arreglo de otra forma. Es un
+      // cierre MANUAL: solo borra la fila, no toca el plan del cliente. Si
+      // el problema de verdad sigue ahi, el agente automatico (al guardar un
+      // plan nuevo, al pulsar Regenerar, o en el cron diario) lo volvera a
+      // detectar y a abrir -- esto no es un "silenciar para siempre".
+      if (accion === 'marcar_revision_hecha') {
+        const { error: errDel } = await supabaseAdmin
+          .from('auditorias_clientes').delete().eq('user_id', userId);
+        if (errDel) return res.status(500).json({ error: errDel.message });
+        console.log(`[admin-clientes] revisión marcada como hecha para ${userId} por ${email}`);
+        return res.status(200).json({ ok: true });
       }
 
       if (accion === 'userdata') {
