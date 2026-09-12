@@ -3726,11 +3726,13 @@
   }
 
   .week-tab {
-    background: var(--carbon);
-    border: 1px solid var(--humo);
+    background: #16171A;
+    border: 1px solid #26272B;
     color: var(--metal);
-    padding: 12px 24px;
-    font-family: 'DM Mono', monospace;
+    padding: 13px 26px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -3738,7 +3740,12 @@
     transition: all 0.2s;
   }
   .week-tab:hover { border-color: var(--brasa); color: var(--blanco); }
-  .week-tab.active { background: var(--brasa); border-color: var(--brasa); color: white; }
+  .week-tab.active {
+    background: linear-gradient(135deg, var(--brasa), #E8481C);
+    border-color: var(--brasa);
+    color: white;
+    box-shadow: 0 4px 16px rgba(209,66,14,.35);
+  }
 
   .week-preview-note {
     font-size: 14px;
@@ -6034,18 +6041,20 @@
     align-items: center;
     gap: 7px;
     margin-top: 16px;
-    padding: 9px 18px;
-    background: rgba(209,66,14,0.08);
-    border: 1px solid rgba(209,66,14,0.3);
+    padding: 11px 22px;
+    border-radius: 10px;
+    background: rgba(209,66,14,0.10);
+    border: 1px solid rgba(209,66,14,0.4);
     color: var(--brasa);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.2px;
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
   }
-  .btn-recetario:hover { background: rgba(209,66,14,0.16); border-color: var(--brasa); }
-  .btn-recetario svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-recetario:hover { background: rgba(209,66,14,0.2); border-color: var(--brasa); transform: translateY(-1px); }
+  .btn-recetario svg { width: 15px; height: 15px; flex-shrink: 0; }
   /* Enlace inline naranja para llamar la atención sobre el recetario dentro del texto */
   .link-recetario { color: var(--brasa); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
   .link-recetario:hover { opacity: 0.82; }
