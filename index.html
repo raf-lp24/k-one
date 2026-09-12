@@ -928,6 +928,12 @@
     font-family: var(--jv-display); letter-spacing: -.015em;
     font-variant-numeric: tabular-nums;
   }
+  /* Días plegables de "Ver plan actual" (verPlanActualCliente): <details>
+     nativo en vez de JS a mano para abrir/cerrar -- gratis, accesible con
+     teclado, y no hace falta guardar qué días están abiertos. */
+  .jc-plan-dia summary { list-style: none; }
+  .jc-plan-dia summary::-webkit-details-marker { display: none; }
+  .jc-plan-dia[open] summary .jc-plan-chevron { transform: rotate(90deg); }
 
   @media (max-width: 900px) {
     /* Antes era una sola fila (marca + pestañas + acciones) con las 4
@@ -24150,8 +24156,7 @@ Se coló: ${lista}`;
         ${row('Deporte', c.deporte)}
         ${row('Edad', c.edad ? c.edad + ' años' : '—')}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        ${row('Sexo', _valido(c.sexo) ? c.sexo : null)}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Altura', c.altura ? c.altura + ' cm' : null)}
         ${row('Nivel', _valido(c.nivel) ? c.nivel : null)}
       </div>
@@ -24213,7 +24218,6 @@ Se coló: ${lista}`;
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
         c.alerta==='red' ? 'var(--jv-bad)' : c.alerta==='orange' ? '#FF9556' : 'var(--jv-warn)') : ''}
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? 'var(--jv-ok)' : 'var(--jv-faint)')}
-      ${row('Premium gratuito', c.isBeta ? '✓ Activado' : '✗ No', c.isBeta ? 'var(--jv-ok)' : 'var(--jv-faint)')}
       ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? 'var(--jv-bad)' : 'var(--jv-warn)') : ''}
       <div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--jv-line)">
         <div class="jc-label" style="margin-bottom:8px">Nota privada (solo la ves tú)</div>
@@ -24389,17 +24393,31 @@ Se coló: ${lista}`;
     const comidasCliente = Array.isArray(userdata.comidasSemana) ? userdata.comidasSemana : [];
     let html = '';
 
+    // Cada día es un <details> nativo, plegado por defecto: con 7 días de
+    // entreno + 7 de nutrición, tenerlo todo desplegado a la vez hacía la
+    // ficha kilométrica. El admin abre solo el día que le interesa.
+    const _chevron = `<svg class="jc-plan-chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--jv-faint);transition:transform .15s"><polyline points="9 6 15 12 9 18"/></svg>`;
+
     if (plan.semana && plan.semana.length && !plan.soloDieta) {
       html += `<div class="jc-label" style="margin-bottom:8px">Entrenamiento de esta semana</div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">`;
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">`;
       plan.semana.forEach((dia, i) => {
         const esDescanso = dia.tipo === 'Descanso';
+        const nombreDia = _esc(dia.dia || DIAS[i] || '');
+        const etiqueta = esDescanso ? 'Descanso' : _esc(dia.split || dia.resumen || '');
+        if (esDescanso) {
+          html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+            <span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${nombreDia}</span>
+            <span style="font-size:10.5px;color:var(--jv-faint)">${etiqueta}</span>
+          </div>`;
+          return;
+        }
         // dia.detalle suele venir como "Zona del cuerpo · ejercicio 3x10,
         // ejercicio 3x12, ..." -- la parte antes del primer " · " ya se
-        // enseña en la etiqueta de la derecha (dia.split/dia.resumen), así
-        // que se quita de aquí para no repetirla, y el resto se parte por
-        // comas en FILAS propias -- antes iba todo en un único párrafo
-        // corrido y con 6-8 ejercicios quedaba ilegible ("apelotonado").
+        // enseña en la etiqueta del resumen, así que se quita de aquí para
+        // no repetirla, y el resto se parte por comas en FILAS propias --
+        // antes iba todo en un único párrafo corrido y con 6-8 ejercicios
+        // quedaba ilegible ("apelotonado").
         let items = [];
         if (dia.ejercicios && dia.ejercicios.length) {
           items = dia.ejercicios.map(ej => ej.nombre || ej);
@@ -24408,22 +24426,22 @@ Se coló: ${lista}`;
           const cuerpo = puntoIdx !== -1 ? dia.detalle.slice(puntoIdx + 3) : dia.detalle;
           items = _splitFueraDeParentesis(cuerpo, ',').map(s => s.trim()).filter(Boolean);
         }
-        html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:10px 12px">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${esDescanso || !items.length ? '0' : '6px'}">
-            <span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${_esc(dia.dia || DIAS[i] || '')}</span>
-            <span style="font-size:10.5px;color:${esDescanso ? 'var(--jv-faint)' : 'var(--jv-dim)'};text-align:right">${esDescanso ? 'Descanso' : _esc(dia.split || dia.resumen || '')}</span>
-          </div>
-          ${!esDescanso && items.length ? `<div style="display:flex;flex-direction:column;gap:3px">
+        html += `<details class="jc-plan-dia">
+          <summary style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;cursor:pointer">
+            <span style="display:flex;align-items:center;gap:6px">${_chevron}<span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${nombreDia}</span></span>
+            <span style="font-size:10.5px;color:var(--jv-dim);text-align:right">${etiqueta}</span>
+          </summary>
+          ${items.length ? `<div style="border:1px solid var(--jv-line);border-top:0;border-radius:0 0 10px 10px;padding:8px 12px 10px;margin-top:-1px;display:flex;flex-direction:column;gap:3px">
             ${items.map(it => `<div style="font-size:11px;color:var(--jv-faint);line-height:1.4">· ${_esc(it)}</div>`).join('')}
           </div>` : ''}
-        </div>`;
+        </details>`;
       });
       html += `</div>`;
     }
 
     const frecuencia = userdata.comidas ? ` · ${_esc(userdata.comidas)}` : '';
     html += `<div class="jc-label" style="margin-bottom:8px">Alimentación que está siguiendo${frecuencia}</div>
-      <div style="display:flex;flex-direction:column;gap:10px">`;
+      <div style="display:flex;flex-direction:column;gap:8px">`;
     DIAS.forEach((nombreDia, diaIdx) => {
       const tomasDia = (plan.nutricionPorDia && plan.nutricionPorDia[diaIdx]) || plan.nutricion || [];
       if (!tomasDia.length) return;
@@ -24434,10 +24452,14 @@ Se coló: ${lista}`;
         return `<div style="font-size:11px;color:var(--jv-faint);line-height:1.6"><span style="color:var(--jv-dim);font-weight:600">${_esc(meal.momento)}:</span> ${_esc(opt.nombre)}</div>`;
       }).join('');
       if (!filas) return;
-      html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:9px 12px">
-        <div style="font-size:11.5px;font-weight:700;color:var(--jv-text);margin-bottom:4px">${_esc(nombreDia)}</div>
-        ${filas}
-      </div>`;
+      html += `<details class="jc-plan-dia">
+        <summary style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:6px;cursor:pointer">
+          ${_chevron}<span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${_esc(nombreDia)}</span>
+        </summary>
+        <div style="border:1px solid var(--jv-line);border-top:0;border-radius:0 0 10px 10px;padding:8px 12px 9px;margin-top:-1px">
+          ${filas}
+        </div>
+      </details>`;
     });
     html += `</div>`;
     return html;
