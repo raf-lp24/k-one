@@ -183,6 +183,114 @@ console.log('  · ' + fotos + ' fotos de ejercicio en data/ej-img');
 const sinPasosFicha = Object.entries(fichas).filter(([, v]) => !v || (!v.pasos && !v.como && !v.desc && !v.d));
 sinPasosFicha.length ? nota(sinPasosFicha.length + ' fichas sin descripción', sinPasosFicha.slice(0, 5).map(x => x[0])) : ok('todas las fichas tienen contenido');
 
+// ═══════════════════════ 5 · AGENTE DE AUDITORÍA ═══════════════════════
+// lib/normalizador-alimentos.js (el agente que revisa los planes guardados)
+// COPIA tablas y patrones del motor, porque desde Node no se puede requerir
+// index.html. Si alguien toca una copia y no la otra, el agente empezaría a
+// avisar de cosas que el motor da por buenas (o a callar las que quita) sin
+// que nadie se enterase. Aquí se comparan las dos y FALLA si se separan.
+sec('5 · AGENTE DE AUDITORÍA (lib/normalizador-alimentos.js)');
+const AG = require('../lib/normalizador-alimentos');
+
+// Trozo "{ ... }" que empieza en `desde`, contando llaves.
+const _bloqueLlaves = (desde) => {
+  const j = TXT.indexOf('{', desde);
+  if (desde < 0 || j < 0) return null;
+  let prof = 0;
+  for (let k = j; k < TXT.length; k++) {
+    if (TXT[k] === '{') prof++;
+    else if (TXT[k] === '}' && --prof === 0) return TXT.slice(j, k + 1);
+  }
+  return null;
+};
+const _objetoMotor = (nombre, ...deps) => {
+  const src = _bloqueLlaves(TXT.indexOf('const ' + nombre + ' = {'));
+  if (!src) return null;
+  return new Function(...deps.map(d => d[0]), 'return (' + src + ');')(...deps.map(d => d[1]));
+};
+const _mismo = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const desincronizados = [];
+
+const famMotor = _objetoMotor('FAMILIAS_ALIMENTOS');
+if (!_mismo(famMotor, AG.FAMILIAS_ALIMENTOS)) desincronizados.push('FAMILIAS_ALIMENTOS');
+const sinMotor = famMotor && _objetoMotor('SINONIMOS_ALERGENO', ['FAMILIAS_ALIMENTOS', famMotor]);
+if (!_mismo(sinMotor, AG.SINONIMOS_ALERGENO)) desincronizados.push('SINONIMOS_ALERGENO');
+if (!_mismo(_objetoMotor('SINONIMOS_MISMO_ALIMENTO'), AG.SINONIMOS_MISMO_ALIMENTO)) desincronizados.push('SINONIMOS_MISMO_ALIMENTO');
+const equivMotor = _objetoMotor('_EQUIV_TILDE');
+if (!_mismo(equivMotor, AG._EQUIV_TILDE)) desincronizados.push('_EQUIV_TILDE');
+
+const sepMotor = (TXT.match(/const _SEPARADOR_ALIMENTOS = \/(.+)\/([a-z]*);/) || [])[1];
+if (sepMotor !== AG._SEPARADOR_ALIMENTOS.source) desincronizados.push('_SEPARADOR_ALIMENTOS');
+
+// neutralizar: la cadena de .replace(/…/gi, '·') del motor, patrón a patrón.
+{
+  const ini = TXT.indexOf('const neutralizar = (txt) => txt');
+  const lineas = ini < 0 ? [] : TXT.slice(ini).split(/\r?\n/).slice(1);
+  const pats = [];
+  for (const l of lineas) {
+    const m = l.match(/^\s*\.replace\(\/(.+)\/([a-z]*), '·'\)\s*(;?)\s*$/);
+    if (!m) break;
+    pats.push(m[1] + '/' + m[2]);
+    if (m[3]) break;
+  }
+  const deLib = AG.NEUTRALIZAR.map(re => re.source + '/' + re.flags);
+  if (!pats.length || !_mismo(pats, deLib)) desincronizados.push('neutralizar (' + pats.length + ' patrones en el motor, ' + deLib.length + ' en el agente)');
+}
+
+// rastros: los tres patrones de la red de seguridad, en el orden del motor.
+{
+  const pats = [...TXT.matchAll(/rastros\.push\(\/(.+)\/[a-z]*\);/g)].map(m => m[1]);
+  const deLib = ['gluten', 'lactosa', 'frutos secos'].map(k => AG.RASTROS[k].source);
+  if (!_mismo(pats, deLib)) desincronizados.push('rastros');
+}
+
+// _normTexto / _raizSinPlural / _reAlimento: se ejecutan las del MOTOR y se
+// comparan resultados con las del agente sobre palabras de muestra.
+{
+  const fn = n => _bloqueLlaves(TXT.indexOf('function ' + n + '('));
+  const src = ['_normTexto', '_raizSinPlural', '_reAlimento'].map(n => 'function ' + n + TXT.slice(TXT.indexOf('function ' + n + '(') + ('function ' + n).length, TXT.indexOf('{', TXT.indexOf('function ' + n + '('))) + fn(n)).join('\n');
+  let motor = null;
+  try { motor = new Function('_EQUIV_TILDE', src + '\nreturn { _normTexto, _raizSinPlural, _reAlimento };')(equivMotor); } catch (e) {}
+  const muestra = ['espárragos', 'Huevas', 'maiz', 'quinoa', 'nueces', 'piñones', 'queso fresco', 'Mejillones', 'judías', 'atún', 'Lácteos'];
+  const iguales = motor && muestra.every(w =>
+    motor._normTexto(w) === AG._normTexto(w) &&
+    motor._raizSinPlural(motor._normTexto(w)) === AG._raizSinPlural(AG._normTexto(w)) &&
+    motor._reAlimento(w).source === AG._reAlimento(w).source);
+  if (!iguales) desincronizados.push('_normTexto/_raizSinPlural/_reAlimento');
+}
+
+desincronizados.length
+  ? mal(desincronizados.length + ' piezas del agente ya no coinciden con el motor (copia la versión de index.html a lib/normalizador-alimentos.js)', desincronizados)
+  : ok('el agente usa exactamente las mismas tablas, patrones y normalización que el motor');
+
+// 5b · casos conocidos: los que DEBEN saltar saltan, y los correctos no.
+{
+  const plan = (nombre, ingredientes, pasos) => ({ nutricion: [{ momento: 'Desayuno', opciones: [{ nombre, ingredientes, pasos }] }] });
+  const casos = [
+    ['lactosa, queso a secas', { alergia: 'Lactosa' }, plan('Tostada con queso curado', '1 tosta, 30g queso curado', 'Pon el queso encima.'), true],
+    ['lactosa, todo sin lactosa', { alergia: 'Lactosa' }, plan('Tostada con queso curado sin lactosa', '1 tosta, 30g queso curado sin lactosa, 200ml leche sin lactosa', 'Pon el queso curado sin lactosa encima.'), false],
+    ['lactosa, yogur de coco y bebida de avena', { alergia: 'Lactosa' }, plan('Yogur de coco (sin lactosa) con fruta', '200g yogur de coco (sin lactosa), 200ml bebida de avena', 'Mezcla el yogur de coco con la fruta.'), false],
+    ['sin lactosa, leche suelta en los pasos', { dieta: 'Sin lactosa' }, plan('Batido de caseína', '200ml leche sin lactosa, proteína aislada de suero (sin lactosa)', 'Mete la leche en la batidora. Bate 30 segundos. Añade la proteína aislada de suero (sin lactosa).'), true],
+    ['gluten, pan sin gluten de centeno', { alergia: 'Gluten' }, plan('Tostada', '2 rebanadas de pan sin gluten', 'Tuesta el pan sin gluten de centeno. Añade tomate.'), true],
+    ['gluten, bocadillo con panecillo sin gluten', { alergia: 'Gluten' }, plan('Mini bocadillo de jamón con tomate', '1 panecillo sin gluten, 30g jamón, tomate', 'Abre el panecillo sin gluten y rellena.'), false],
+    ['gluten, bocadillo con pan normal', { alergia: 'Gluten' }, plan('Bocadillo de jamón', '1 barra de pan, 30g jamón', 'Abre el pan.'), true],
+    ['sin gluten, patatas panadera', { dieta: 'Sin gluten' }, plan('Merluza con patatas panadera', '200g merluza, 200g patata panadera', 'Hornea las patatas panadera 20 min.'), false],
+    ['gluten, harina y fideos de arroz', { alergia: 'Gluten' }, plan('Fideos de arroz con pollo', '100g fideos de arroz, harina de arroz', 'Cuece los fideos de arroz.'), false],
+    ['no come espárragos (sin tilde) y la receta la lleva', { noComida: 'Espinacas, esparragos, maiz, tataki, huevas, quinoa' }, plan('Pollo con espárragos', '180g pollo, 150g espárragos trigueros', 'Saltea los espárragos.'), true],
+    ['no come leche: no es toda la familia', { noComida: 'leche' }, plan('Yogur natural con fruta', '150g yogur natural, 1 manzana', 'Mezcla.'), false],
+    ['otra alergia marisco, gambas', { alergia: 'Otra', alergiaOtra: 'marisco' }, plan('Pasta con gambas', '100g pasta, 100g gambas', 'Saltea las gambas.'), true],
+    ['frutos secos, nueces en los pasos', { alergia: 'Frutos secos' }, plan('Yogur con fruta', '150g yogur, 1 pera, semillas de calabaza', 'Trocea la pera y añade las nueces.'), true],
+    ['sin restricciones', {}, plan('Tostada con queso', '1 tosta, 30g queso', 'Pon el queso.'), false],
+    ['sin plan', { alergia: 'Lactosa' }, null, false],
+  ];
+  const fallan = casos.filter(([, ud, p, espera]) => (AG.auditarPlan(ud, p).length > 0) !== espera).map(c => (c[3] ? 'NO salta: ' : 'salta sin motivo: ') + c[0]);
+  // Una palabra = un aviso por sitio, aunque la cacen varias variantes internas.
+  const esp = AG.auditarPlan({ noComida: 'esparragos' }, plan('Pollo con espárragos', '150g espárragos trigueros', 'Saltea los espárragos.'));
+  if (esp.length !== 3) fallan.push('"espárragos" repetido: ' + esp.length + ' avisos en 3 sitios (nombre, ingredientes, pasos)');
+  fallan.length ? mal(fallan.length + ' casos conocidos del agente fallan', fallan)
+                : ok('los ' + casos.length + ' casos conocidos del agente dan lo esperado, sin avisos repetidos');
+}
+
 // ═══════════════════════ RESUMEN ═══════════════════════
 sec('RESUMEN');
 console.log('  ' + (fallos === 0 ? '✔ Sin fallos.' : '✘ ' + fallos + ' comprobaciones falladas.') + '  ' + (avisos ? avisos + ' avisos para revisar.' : 'Sin avisos.'));

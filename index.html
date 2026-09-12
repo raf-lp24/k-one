@@ -21453,11 +21453,31 @@
     }).catch(() => {});
   }
 
-  // El último plan que se mandó a revisar. buildPlanFromData() devuelve un
-  // objeto NUEVO cada vez, así que "plan distinto del último" = plan recién
-  // generado (registro, cambio de plan, check-in...). Guardar pesos o marcar
-  // un entreno reutiliza el mismo objeto y no dispara ninguna revisión.
-  let _ultimoPlanAuditado = null;
+  // Huella de lo que mira el agente de auditoría: los platos del plan y las
+  // respuestas que deciden qué no se puede comer. Si no ha cambiado desde la
+  // última revisión pedida EN ESTE DISPOSITIVO, no se vuelve a pedir.
+  //
+  // Antes se comparaba si era el mismo OBJETO de plan, y fallaba: al abrir la
+  // web, syncProfileFromSupabase() restaura el plan de la nube llamando a
+  // saveUserData con un objeto recién leído -- así que CADA VISITA de cada
+  // cliente pedía una revisión aunque nada hubiera cambiado. Con la huella
+  // del contenido solo se pide cuando de verdad hay platos o restricciones
+  // nuevas (registro, cambio de plan, check-in), y guardar pesos o marcar un
+  // entreno no la toca.
+  function _huellaAuditoria(data) {
+    try {
+      const p = data.plan || {}, u = data.userData || {};
+      const s = JSON.stringify([p.nutricion || null, p.nutricionPorDia || null,
+        u.noComida || '', u.alergia || '', u.alergiaOtra || '', u.dieta || '']);
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+      return (h >>> 0).toString(36) + '.' + s.length;
+    } catch (e) { return null; }
+  }
+  // La que ya se ha pedido en esta sesión, aunque el guardado no haya
+  // confirmado todavía: dos guardados seguidos del mismo plan nuevo piden UNA
+  // revisión, no dos.
+  let _huellaPedida = null;
 
   // Devuelve una promesa que resuelve a true si quedó guardado en la nube
   // (quien no la necesite puede ignorarla, como hasta ahora).
@@ -21465,15 +21485,20 @@
     try { localStorage.setItem(`k1_data_${email}`, JSON.stringify(data)); } catch(e) {}
     if (!_supaUserId) return Promise.resolve(false);
     const payload = { userdata: data.userData, plan: data.plan, saved_at: data.savedAt };
-    // Se marca ANTES de guardar: si llegan dos guardados seguidos del mismo
-    // plan nuevo, solo el primero pide la revisión.
-    const planNuevo = !!data.plan && data.plan !== _ultimoPlanAuditado;
-    if (planNuevo) _ultimoPlanAuditado = data.plan;
+    const claveHuella = `kone_auditoria_huella_${email}`;
+    const huella = data.plan ? _huellaAuditoria(data) : null;
+    let huellaPrevia = null;
+    try { huellaPrevia = localStorage.getItem(claveHuella); } catch (e) {}
+    const planNuevo = !!huella && huella !== huellaPrevia && huella !== _huellaPedida;
+    if (planNuevo) _huellaPedida = huella;
     // La revisión se pide DESPUÉS de que el guardado confirme: el servidor
     // lee el plan de la base de datos, no del navegador.
     const alGuardar = () => {
       _mostrarGuardado();
-      if (planNuevo) _pedirAuditoriaPlan();
+      if (planNuevo) {
+        try { localStorage.setItem(claveHuella, huella); } catch (e) {}
+        _pedirAuditoriaPlan();
+      }
       return true;
     };
     return supa.from('profiles').update(payload).eq('id', _supaUserId)
@@ -21486,6 +21511,9 @@
               if (e2) {
                 console.error('Error guardando en Supabase (retry):', e2);
                 showToast('No se pudo guardar en la nube. Tus cambios están en este dispositivo.', 5000);
+                // Si no se guardó, esa revisión no se ha pedido: el próximo
+                // guardado del mismo plan la vuelve a intentar.
+                if (planNuevo && _huellaPedida === huella) _huellaPedida = null;
                 resolve(false);
               } else {
                 resolve(alGuardar());

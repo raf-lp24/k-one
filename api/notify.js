@@ -265,11 +265,16 @@ function _ipDe(req) {
 // en ráfaga. El INSERT ... ON CONFLICT ... DO UPDATE ... WHERE de la función
 // es una sola operación atómica de Postgres, serializada a nivel de fila.
 async function estaLimitadoPorTasa(req, tipo) {
+  return superaLimite(`${tipo}:${_ipDe(req)}`, RATE_LIMITS[tipo] || 5);
+}
+
+// El mismo límite atómico, con una clave cualquiera en vez de la IP. Lo usa el
+// agente de auditoría para limitar los avisos al admin POR CLIENTE (ver
+// 'auditar_plan'): la IP sola no basta, cada cliente puede escribir en su
+// propio plan y cambiar de red.
+async function superaLimite(clave, limite) {
   try {
     const supa = getSupabaseAdmin();
-    const ip = _ipDe(req);
-    const clave = `${tipo}:${ip}`;
-    const limite = RATE_LIMITS[tipo] || 5;
     const ventana = new Date(Math.floor(Date.now() / RATE_WINDOW_MS) * RATE_WINDOW_MS).toISOString();
     const { data: permitido, error } = await supa.rpc('check_rate_limit', {
       p_clave: clave, p_limite: limite, p_ventana: ventana
@@ -948,21 +953,20 @@ async function handleCronRetencion(req, res) {
     // hoy -- y entonces el agente tampoco revisaba nada. Aquí no depende del
     // email. Cuenta para el resumen en `clientesConHallazgo`.
     //
-    // Solo clientes CON ACCESO (suscripción activa/en prueba/pago pendiente,
-    // o premium vigente): quien no paga no ve el plan, avisar de él es ruido.
+    // TODOS los clientes con un plan guardado, tengan o no acceso de pago:
+    // el motivo original era "quien no paga no ve el plan, avisar es ruido",
+    // pero eso rompía la revisión inmediata (11 sept 2026) -- un cliente
+    // recién registrado que aún no ha pagado sí es auditado nada más
+    // guardar su plan, y esa fila quedaba abierta en Jarvis; al día
+    // siguiente, este cron la BORRABA sin haber revisado nada de verdad
+    // (`hallazgos` se dejaba vacío por no tener acceso), como si el fallo se
+    // hubiera arreglado solo. Un plan con un alérgeno no deja de tener el
+    // alérgeno porque el cliente no haya pagado todavía.
     //
     // OJO: supabase-js NO lanza, devuelve {data, error}. Hay que mirar
     // `.error` en cada llamada -- un try/catch solo no se entera de nada.
     let clientesConHallazgo = 0;
     try {
-      const { data: subsAud } = await supa.from('subscriptions').select('user_id, status');
-      const conSub = new Set((subsAud || [])
-        .filter(s => ['active', 'trialing', 'past_due'].includes(s.status))
-        .map(s => s.user_id));
-      const rAud = await supa.from('profiles')
-        .select('id, nombre, email, userdata, plan, is_beta, beta_expires')
-        .not('plan', 'is', null);
-      if (rAud.error) throw new Error('profiles: ' + rAud.error.message);
       // Si la tabla no existe todavía (falta aplicar
       // supabase/migration-auditorias-clientes.sql), se revisa igual para el
       // log, pero no se intenta escribir.
@@ -973,32 +977,44 @@ async function handleCronRetencion(req, res) {
       const guardar = [], borrar = [];
       const vistos = new Set();
       let revisados = 0;
-      for (const p of (rAud.data || [])) {
-        vistos.add(p.id);
-        const premium = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > ahora.getTime());
-        let hallazgos = [];
-        if (conSub.has(p.id) || premium) {
+      // PostgREST corta en 1000 filas por consulta si no se pide explícito:
+      // por debajo de eso una sola consulta ya lo trae todo, pero por encima
+      // se perdería a los clientes de más sin avisar de nada -- ni error ni
+      // hueco visible, solo clientes que dejan de revisarse en silencio. Se
+      // pagina en bloques de 1000 hasta que un bloque vuelva incompleto.
+      const TAM_PAGINA = 1000;
+      for (let desde = 0; ; desde += TAM_PAGINA) {
+        const rAud = await supa.from('profiles')
+          .select('id, nombre, email, userdata, plan')
+          .not('plan', 'is', null)
+          .range(desde, desde + TAM_PAGINA - 1);
+        if (rAud.error) throw new Error('profiles: ' + rAud.error.message);
+        const pagina = rAud.data || [];
+        for (const p of pagina) {
+          vistos.add(p.id);
           revisados++;
+          let hallazgos = [];
           try {
             hallazgos = auditarPlan(p.userdata || {}, p.plan);
           } catch (e) {
             console.warn('[notify-cron] auditoría de', p.id, 'falló:', e.message);
             continue;
           }
+          if (hallazgos.length) {
+            clientesConHallazgo++;
+            guardar.push({
+              user_id: p.id,
+              nombre: p.nombre || (p.userdata && p.userdata.nombre) || '',
+              email: p.email || '',
+              hallazgos,
+              actualizado_at: ahora.toISOString()
+            });
+          } else if (idsPrevios.has(p.id)) {
+            // Ya no hay nada (se regeneró el plan): se cierra solo.
+            borrar.push(p.id);
+          }
         }
-        if (hallazgos.length) {
-          clientesConHallazgo++;
-          guardar.push({
-            user_id: p.id,
-            nombre: p.nombre || (p.userdata && p.userdata.nombre) || '',
-            email: p.email || '',
-            hallazgos,
-            actualizado_at: ahora.toISOString()
-          });
-        } else if (idsPrevios.has(p.id)) {
-          // Ya no hay nada (se regeneró el plan, o perdió el acceso): se cierra solo.
-          borrar.push(p.id);
-        }
+        if (pagina.length < TAM_PAGINA) break;
       }
       // Filas de clientes que ya ni tienen plan guardado: también se cierran.
       idsPrevios.forEach(id => { if (!vistos.has(id)) borrar.push(id); });
@@ -1275,7 +1291,12 @@ async function handlePost(req, res) {
       const r = await auditarYGuardar(supa, user.id);
       // Solo si hay algo NUEVO: si el cliente vuelve a guardar el mismo plan
       // con el mismo fallo, no se le vuelve a avisar al admin.
-      if (r.nuevo) {
+      // Y como mucho 3 avisos por CLIENTE y hora, además del límite de
+      // peticiones por IP: cada cliente puede escribir lo que quiera en su
+      // propio plan, así que sin este tope uno malintencionado podría mandar
+      // al admin un email por cada plan que guarde. La fila de Jarvis se
+      // actualiza igual aunque se salte el aviso.
+      if (r.nuevo && !(await superaLimite('aviso_auditoria:' + user.id, 3))) {
         const quien = r.nombre || r.email || 'Un cliente';
         const resumen = r.hallazgos.slice(0, 3).map(x => `${x.coincidencia} en «${x.plato}»`).join(' · ');
         try {
@@ -1285,8 +1306,9 @@ async function handlePost(req, res) {
         const apiKeyAud = process.env.RESEND_API_KEY;
         if (apiKeyAud) {
           try {
+            const CAMPO_AUD = { nombre: 'nombre del plato', ingredientes: 'ingredientes', pasos: 'preparación' };
             const filas = r.hallazgos.slice(0, 8).map(x =>
-              `<li style="margin:0 0 8px"><strong style="color:#F0EDE8">${esc(x.coincidencia)}</strong> en «${esc(x.plato)}» <span style="color:#8A8A8A">(${esc(x.campo)} · ${esc(x.motivo)})</span></li>`).join('');
+              `<li style="margin:0 0 8px"><strong style="color:#F0EDE8">${esc(x.coincidencia)}</strong> en «${esc(x.plato)}» <span style="color:#8A8A8A">(${esc(CAMPO_AUD[x.campo] || x.campo)} · ${esc(x.motivo)})</span>${x.fragmento ? `<div style="color:#6A6A6A;font-size:12px;margin-top:2px">${esc(x.fragmento)}</div>` : ''}</li>`).join('');
             const asunto = `Revisar plan · ${quien}`;
             const htmlAud = emailWrapper(`
               <div style="padding:28px 28px 0">
