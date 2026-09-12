@@ -759,6 +759,10 @@
     background: rgba(255,94,94,.09); border: 1px solid rgba(255,94,94,.32); color: var(--jv-bad);
   }
   .jv-btn-flat-bad:hover { background: rgba(255,94,94,.17); border-color: var(--jv-bad); }
+  .jv-btn-flat-dim {
+    background: var(--jv-glass); border: 1px solid var(--jv-line); color: var(--jv-dim);
+  }
+  .jv-btn-flat-dim:hover { background: var(--jv-glass-hi); border-color: var(--jv-dim); }
 
   /* ---- Controles: selects, fechas y botones ----
      Antes eran <select>/<input>/<button> nativos con solo el fondo oscuro
@@ -24196,6 +24200,16 @@ Se coló: ${lista}`;
           Enviar email
         </a>
       </div>
+      <!-- Qué entrenamiento y qué comidas tiene AHORA MISMO el cliente, tal
+           cual se las generó el motor -- no se piden solas con la ficha (el
+           plan pesa 200-400KB) sino al pulsar, una sola vez por apertura. -->
+      <div style="margin-top:10px">
+        <button class="jv-btn-flat jv-btn-flat-dim" id="jcBtnVerPlan" style="width:100%;justify-content:center" onclick="verPlanActualCliente('${c.id}', this)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Ver plan actual
+        </button>
+        <div id="jcPlanBox" style="display:none;margin-top:10px"></div>
+      </div>
       <!-- Rehacer el plan con el motor de HOY. Hace falta cuando se arregla un
            fallo del motor (un alérgeno que se colaba, un alimento rechazado que
            no se filtraba): los clientes que ya tienen el plan guardado se quedan
@@ -24272,6 +24286,100 @@ Se coló: ${lista}`;
       showToast('No se pudo regenerar: ' + e.message, 6000);
       btn.disabled = false; btn.textContent = original;
     }
+  }
+
+  // Enseña en Jarvis el entrenamiento y la alimentación que el cliente tiene
+  // AHORA MISMO guardados -- tal cual, no sus respuestas del cuestionario
+  // (eso ya se ve más arriba en la ficha) sino el plan que de verdad le
+  // generó el motor y, en nutrición, la opción que él mismo ha elegido cada
+  // día (userdata.comidasSemana), no siempre la primera de la lista.
+  //
+  // Se pide solo al pulsar, una vez por apertura de la ficha: el plan pesa
+  // 200-400KB y cargarlo con cada ficha (aunque el admin solo quiera ver el
+  // estado de pago) sería tirar ancho de banda a la basura.
+  async function verPlanActualCliente(userId, btn) {
+    const box = document.getElementById('jcPlanBox');
+    if (!box) return;
+    if (box.dataset.cargado === '1') {
+      const visible = box.style.display !== 'none';
+      box.style.display = visible ? 'none' : '';
+      btn.lastChild.textContent = visible ? 'Ver plan actual' : 'Ocultar plan actual';
+      return;
+    }
+    btn.disabled = true; btn.lastChild.textContent = 'Cargando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const r = await fetch('/api/admin-clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ accion: 'userdata', userId })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'Error del servidor');
+      box.innerHTML = j.plan ? _renderPlanClienteJarvis(j.userdata || {}, j.plan)
+        : '<p style="font-size:12px;color:var(--jv-faint);text-align:center;padding:8px 0">Este cliente todavía no tiene un plan generado.</p>';
+      box.style.display = '';
+      box.dataset.cargado = '1';
+      btn.lastChild.textContent = 'Ocultar plan actual';
+    } catch (e) {
+      console.warn('[jarvis] ver plan actual:', e.message);
+      showToast('No se pudo cargar el plan: ' + e.message, 5000);
+      btn.lastChild.textContent = 'Ver plan actual';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Construye el HTML de solo lectura para verPlanActualCliente(). Mismo
+  // criterio que ya usa el PDF del cliente (generarPdfSemanal): si el día
+  // trae `ejercicios` estructurados se listan, si no se cae al `detalle` en
+  // texto (running y demás deportes que no usan esa estructura); en
+  // nutrición, la opción elegida de cada toma viene de comidasSemana y si el
+  // cliente no ha tocado nada se asume la primera (índice 0), igual que hace
+  // el propio dashboard del cliente.
+  function _renderPlanClienteJarvis(userdata, plan) {
+    const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const comidasCliente = Array.isArray(userdata.comidasSemana) ? userdata.comidasSemana : [];
+    let html = '';
+
+    if (plan.semana && plan.semana.length && !plan.soloDieta) {
+      html += `<div class="jc-label" style="margin-bottom:8px">Entrenamiento de esta semana</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">`;
+      plan.semana.forEach((dia, i) => {
+        const esDescanso = dia.tipo === 'Descanso';
+        const cuerpo = (dia.ejercicios && dia.ejercicios.length)
+          ? dia.ejercicios.map(ej => _esc(ej.nombre || ej)).join(' · ')
+          : (dia.detalle ? _esc(dia.detalle) : '');
+        html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:9px 12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${esDescanso || !cuerpo ? '0' : '4px'}">
+            <span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${_esc(dia.dia || DIAS[i] || '')}</span>
+            <span style="font-size:10.5px;color:${esDescanso ? 'var(--jv-faint)' : 'var(--jv-dim)'};text-align:right">${esDescanso ? 'Descanso' : _esc(dia.split || dia.resumen || '')}</span>
+          </div>
+          ${!esDescanso && cuerpo ? `<div style="font-size:11px;color:var(--jv-faint);line-height:1.5">${cuerpo}</div>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `<div class="jc-label" style="margin-bottom:8px">Alimentación que está siguiendo</div>
+      <div style="display:flex;flex-direction:column;gap:6px">`;
+    DIAS.forEach((nombreDia, diaIdx) => {
+      const tomasDia = (plan.nutricionPorDia && plan.nutricionPorDia[diaIdx]) || plan.nutricion || [];
+      if (!tomasDia.length) return;
+      const filas = tomasDia.map((meal, mealIdx) => {
+        const optIdx = (comidasCliente[diaIdx] && comidasCliente[diaIdx][mealIdx]) || 0;
+        const opt = meal.opciones && meal.opciones[optIdx];
+        if (!opt) return '';
+        return `<div style="font-size:11px;color:var(--jv-faint);line-height:1.6"><span style="color:var(--jv-dim);font-weight:600">${_esc(meal.momento)}:</span> ${_esc(opt.nombre)}</div>`;
+      }).join('');
+      if (!filas) return;
+      html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:9px 12px">
+        <div style="font-size:11.5px;font-weight:700;color:var(--jv-text);margin-bottom:4px">${_esc(nombreDia)}</div>
+        ${filas}
+      </div>`;
+    });
+    html += `</div>`;
+    return html;
   }
 
   // Cierre MANUAL del aviso del agente de auditoría (12 sept 2026): para

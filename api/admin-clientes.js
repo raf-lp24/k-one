@@ -131,11 +131,15 @@ module.exports = async (req, res) => {
       }
 
       if (accion === 'userdata') {
+        // `plan` va aquí también (no solo `userdata`) para que Jarvis pueda
+        // enseñar el entrenamiento y la alimentación que el cliente tiene
+        // AHORA MISMO guardados -- antes solo se pedía para reconstruirlo
+        // (regenerarPlanCliente), nunca para leerlo y mostrarlo tal cual.
         const { data, error } = await supabaseAdmin
-          .from('profiles').select('userdata, nombre, email').eq('id', userId).maybeSingle();
+          .from('profiles').select('userdata, plan, nombre, email').eq('id', userId).maybeSingle();
         if (error) return res.status(500).json({ error: error.message });
         if (!data) return res.status(404).json({ error: 'Cliente no encontrado' });
-        return res.status(200).json({ userdata: data.userdata || null, nombre: data.nombre, email: data.email });
+        return res.status(200).json({ userdata: data.userdata || null, plan: data.plan || null, nombre: data.nombre, email: data.email });
       }
 
       // guardar_plan
