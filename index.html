@@ -8539,7 +8539,7 @@
           <div class="push-toggle-row">
             <span class="push-toggle-label"><span>⬡</span> Avisos de entreno</span>
             <label class="push-toggle-switch">
-              <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día" data-hint-on="Te avisamos a media mañana los días que no hayas marcado ningún entreno.">
+              <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día">
               <span class="push-toggle-slider"></span>
             </label>
           </div>
@@ -26836,8 +26836,12 @@ Se coló: ${lista}`;
         input.disabled = false;
         input.checked = !!sub;
         if (hint) {
-          hint.textContent = sub ? (input.dataset.hintOn || '') : '';
-          hint.style.display = sub ? '' : 'none';
+          // Si no hay texto que enseñar (data-hint-on vacío o sin poner),
+          // se esconde del todo -- si no, quedaba un hueco vacío con su
+          // padding, como un renglón en blanco debajo del interruptor.
+          const texto = sub ? (input.dataset.hintOn || '') : '';
+          hint.textContent = texto;
+          hint.style.display = texto ? '' : 'none';
         }
         if (btnPrueba) btnPrueba.style.display = sub ? '' : 'none';
       });
