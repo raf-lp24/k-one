@@ -7233,6 +7233,23 @@
   </div>
 </div>
 
+<!-- MODAL AVISO DEL AGENTE DE AUDITORÍA: algo se coló en el plan que el
+     cliente dijo que no come/no puede comer. Solo se abre si de verdad hay
+     una fila abierta en auditorias_clientes para ESTE cliente (comprobado
+     en el servidor, ver comprobarAvisoFiltro()) -- nunca se enseña a ciegas. -->
+<div class="modal-overlay" id="modalAvisoFiltro" onclick="if(event.target===this)descartarAvisoFiltro()">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title" style="font-size:19px">Hemos encontrado un fallo en tu plan</div>
+    <p class="modal-desc" id="avisoFiltroTexto" style="margin-bottom:16px"></p>
+    <div id="avisoFiltroLista" style="margin-bottom:18px"></div>
+    <p class="modal-desc" style="font-size:12.5px;color:var(--metal);margin-bottom:20px">Tu plan sigue siendo válido mientras tanto. Si quieres, te lo regeneramos ya quitando esto -- se lo pedimos directamente a tu entrenador.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" id="btnPedirRegeneracion" style="flex:1;padding:12px 20px;font-size:13px" onclick="pedirRegeneracionPlan()">Sí, regenérame el plan →</button>
+      <button style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--metal);font-size:13px;cursor:pointer;padding:12px 16px" onclick="descartarAvisoFiltro()">Ahora no</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -16933,6 +16950,7 @@
     actualizarAvisoRenovacion();
     actualizarBannerFeedback();
     actualizarBannerMotivoBaja();
+    comprobarAvisoFiltro();
 
     // Notas / agenda
     renderNotas();
@@ -22586,6 +22604,134 @@
       console.error('[motivo-baja] no se pudo enviar:', e.message);
       showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
       if (btn) { btn.disabled = false; btn.textContent = 'Enviar →'; }
+    }
+  }
+
+  // ===== AVISO DEL AGENTE DE AUDITORÍA (12 sept 2026) =====
+  // Cuando el robot de Jarvis detecta que se coló en el plan del cliente
+  // algo que dijo no comer/no poder comer (ver lib/normalizador-alimentos.js
+  // y api/notify.js, tipo 'mi_auditoria'), se le avisa a ÉL también, no solo
+  // al admin: explicándole qué se coló, con un par de alternativas reales, y
+  // dejándole pedir la regeneración con un botón -- en vez de que se entere
+  // por su cuenta comiéndose algo que no debía.
+  //
+  // Sustitutos conocidos por alimento, para que el aviso sea concreto y no
+  // un genérico "algo va mal". Si el alimento no está aquí (el agente puede
+  // detectar cualquier "no como" o alergia), se cae a un texto sin
+  // alternativas nombradas -- sigue siendo cierto, solo menos detallado.
+  const _SUGERENCIAS_SUSTITUCION = {
+    'maiz': ['guisantes', 'zanahoria en dados'],
+    'esparrago': ['judías verdes', 'brócoli'],
+    'espinaca': ['acelgas', 'kale'],
+    'champiñon': ['calabacín salteado', 'setas variadas'],
+    'aguacate': ['hummus', 'guacamole de guisante'],
+  };
+
+  function _sugerenciasPara(palabra) {
+    const norm = _normAlimento(palabra);
+    return _SUGERENCIAS_SUSTITUCION[norm] || null;
+  }
+
+  let _avisoFiltroHallazgos = null;
+
+  // Se llama desde buildDashboard(). Consulta de solo lectura: nunca escribe
+  // nada ni cambia el plan -- eso solo lo hace el admin desde Jarvis.
+  async function comprobarAvisoFiltro() {
+    const user = getCurrentUser();
+    if (!user || !user.email || !_supaUserId) return;
+    let hallazgos = null;
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      const r = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ tipo: 'mi_auditoria' })
+      });
+      if (!r.ok) return;
+      const j = await r.json();
+      hallazgos = j.hallazgos || null;
+    } catch (e) { return; }
+    if (!hallazgos || !hallazgos.length) return;
+    _avisoFiltroHallazgos = hallazgos;
+
+    // Misma huella que usa el motor del servidor (palabra + plato + campo),
+    // para saber si esto es EXACTAMENTE lo que ya pidió regenerar o lo que ya
+    // descartó hoy -- si cambia (se coló algo distinto), se le vuelve a avisar.
+    const firma = JSON.stringify(hallazgos.map(h => [(h.coincidencia||'').toLowerCase(), h.plato, h.campo]).sort());
+    try {
+      if (localStorage.getItem('kone_aviso_filtro_pedido_' + user.email) === firma) return;
+      const claveHoy = 'kone_aviso_filtro_' + user.email + '_' + new Date().toDateString();
+      if (localStorage.getItem(claveHoy) === firma) return;
+    } catch (e) {}
+
+    // Un aviso por palabra distinta, no uno por cada campo donde aparece
+    // (el cliente no necesita saber si está en el nombre o en los pasos).
+    const porPalabra = new Map();
+    hallazgos.forEach(h => {
+      const clave = (h.coincidencia || '').toLowerCase();
+      if (!porPalabra.has(clave)) porPalabra.set(clave, h.coincidencia);
+    });
+
+    const items = [...porPalabra.values()].map(palabra => {
+      const sugs = _sugerenciasPara(palabra);
+      return `<div style="background:var(--grafito);border-radius:8px;padding:10px 14px;margin-bottom:8px">
+        <strong style="color:var(--blanco)">${_esc(palabra)}</strong>${sugs ? ` <span style="color:var(--metal);font-size:12.5px">— podría cambiarse por ${sugs.map(_esc).join(' o ')}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    const palabras = [...porPalabra.values()];
+    const listaTexto = palabras.length > 1
+      ? palabras.slice(0, -1).join(', ') + ' y ' + palabras[palabras.length - 1]
+      : (palabras[0] || '');
+    const textoEl = document.getElementById('avisoFiltroTexto');
+    if (textoEl) textoEl.textContent = `Nos dijiste que no comes ${listaTexto}, pero se ha colado en tu plan de nutrición por un fallo nuestro al generarlo.`;
+    const listaEl = document.getElementById('avisoFiltroLista');
+    if (listaEl) listaEl.innerHTML = items;
+
+    const modal = document.getElementById('modalAvisoFiltro');
+    if (modal) modal.classList.add('visible');
+  }
+
+  function descartarAvisoFiltro() {
+    const user = getCurrentUser();
+    const modal = document.getElementById('modalAvisoFiltro');
+    if (modal) modal.classList.remove('visible');
+    if (!user || !_avisoFiltroHallazgos) return;
+    try {
+      const firma = JSON.stringify(_avisoFiltroHallazgos.map(h => [(h.coincidencia||'').toLowerCase(), h.plato, h.campo]).sort());
+      localStorage.setItem('kone_aviso_filtro_' + user.email + '_' + new Date().toDateString(), firma);
+    } catch (e) {}
+  }
+
+  async function pedirRegeneracionPlan() {
+    const user = getCurrentUser();
+    if (!user || !_supaUserId || !_avisoFiltroHallazgos) { showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000); return; }
+    const btn = document.getElementById('btnPedirRegeneracion');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    const porPalabra = new Map();
+    _avisoFiltroHallazgos.forEach(h => { const c = (h.coincidencia||'').toLowerCase(); if (!porPalabra.has(c)) porPalabra.set(c, h.coincidencia); });
+    const lista = [...porPalabra.values()].join(', ');
+    const cuerpo = `[REGENERAR PLAN] El cliente ha visto el aviso automático y pide que se le regenere el plan.
+
+Se coló: ${lista}`;
+    const fila = { user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Plan', mensaje: cuerpo };
+    try {
+      const { error } = await supa.from('mensajes_cliente').insert(fila);
+      if (error) throw new Error(error.message);
+      notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: 'Plan', mensaje: cuerpo });
+      try {
+        const firma = JSON.stringify(_avisoFiltroHallazgos.map(h => [(h.coincidencia||'').toLowerCase(), h.plato, h.campo]).sort());
+        localStorage.setItem('kone_aviso_filtro_pedido_' + user.email, firma);
+      } catch (e) {}
+      document.getElementById('modalAvisoFiltro')?.classList.remove('visible');
+      showToast('Hecho. Se lo hemos pedido a tu entrenador -- verás el cambio en cuanto lo regenere.', 6000);
+    } catch (e) {
+      console.error('[aviso-filtro] no se pudo enviar:', e.message);
+      showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Sí, regenérame el plan →'; }
     }
   }
 

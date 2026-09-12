@@ -1268,6 +1268,30 @@ async function handlePost(req, res) {
     }
   }
 
+  // MI AUDITORIA (12 sept 2026) -- de solo lectura: el cliente pregunta si
+  // el agente ha dejado algún aviso abierto sobre SU PROPIO plan, para
+  // enseñarle un aviso propio (ver comprobarAvisoFiltro en index.html) con
+  // qué se coló y ofrecerle pedir que se lo regeneremos. auditorias_clientes
+  // no tiene política RLS para clientes a propósito (es información interna
+  // de Jarvis) -- este endpoint es la única puerta, y solo deja ver la fila
+  // del propio usuario autenticado (.eq('user_id', user.id)), nunca la de
+  // otro. Degrada en silencio (hallazgos: null) ante cualquier fallo -- ni
+  // la tabla sin migrar ni un error de red deben mostrar nada raro al cliente.
+  if ((req.body || {}).tipo === 'mi_auditoria') {
+    try {
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
+      const { data, error } = await supa.from('auditorias_clientes')
+        .select('hallazgos').eq('user_id', user.id).maybeSingle();
+      if (error) return res.status(200).json({ hallazgos: null });
+      return res.status(200).json({ hallazgos: data ? data.hallazgos : null });
+    } catch (e) {
+      console.warn('[notify] mi_auditoria error:', e.message);
+      return res.status(200).json({ hallazgos: null });
+    }
+  }
+
   // AUDITAR MI PLAN (11 sept 2026) -- lo pide el navegador del cliente en
   // cuanto guarda un plan NUEVO: al registrarse, al cambiar de plan, en el
   // check-in (ver _pedirAuditoriaPlan en index.html). El agente de auditoría
