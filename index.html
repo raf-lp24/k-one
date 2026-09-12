@@ -7247,6 +7247,7 @@
       <button class="btn-primary" id="btnPedirRegeneracion" style="flex:1;padding:12px 20px;font-size:13px" onclick="pedirRegeneracionPlan()">Sí, regenérame el plan →</button>
       <button style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--metal);font-size:13px;cursor:pointer;padding:12px 16px" onclick="descartarAvisoFiltro()">Ahora no</button>
     </div>
+    <p style="font-size:11.5px;color:var(--metal);text-align:center;margin:14px 0 0">¿Prefieres contarnos algo más antes? Escríbenos desde <a onclick="descartarAvisoFiltro();showSection('contacto')" style="color:var(--brasa);cursor:pointer;text-decoration:underline">Contacto</a>.</p>
   </div>
 </div>
 
@@ -26414,34 +26415,45 @@ Se coló: ${lista}`;
     // en Supabase (insert directo protegido por RLS -- push_subscriptions_
     // insert_own -- sin gastar ninguna función serverless nueva). El envío
     // real lo hace el cron diario de api/notify.js con el service role.
+    // Suscribe ESTE navegador a los avisos push y lo reclama en el servidor.
+    // Un solo sitio para los dos pasos (antes solo vivían dentro de
+    // activarNotificaciones) -- la reconciliación automática de más abajo
+    // (_resincronizarPushSubscription) los necesita exactamente igual cuando
+    // repara una suscripción que iOS revocó del todo, y con dos copias
+    // sueltas era cuestión de tiempo que se desincronizaran.
+    async function _suscribirPush() {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      const json = sub.toJSON();
+      // reclamar_push_subscription() (RPC, no insert directo): un mismo
+      // endpoint push es único por NAVEGADOR, no por usuario -- en un
+      // dispositivo compartido (tablet familiar, portátil de gimnasio), si
+      // otro cliente ya había activado avisos antes en este mismo
+      // navegador, un insert directo chocaba contra ese endpoint (23505) y
+      // el error se descartaba en silencio: parecía que "ya estaba
+      // suscrito", pero la fila seguía apuntando al OTRO cliente, que
+      // seguía recibiendo el push en vez de ti. La función libera el
+      // endpoint (lo borra, sea de quien sea) y lo vuelve a dar de alta a
+      // tu nombre -- necesita permisos elevados que un insert normal
+      // protegido por RLS no tiene.
+      const { error } = await supa.rpc('reclamar_push_subscription', {
+        p_endpoint: json.endpoint,
+        p_p256dh: json.keys.p256dh,
+        p_auth_key: json.keys.auth
+      });
+      if (error) throw error;
+      return sub;
+    }
+
     window.activarNotificaciones = async function() {
       cerrarPushBanner();
       try {
         const permiso = await Notification.requestPermission();
         if (permiso !== 'granted') { showToast('No hemos podido activar los avisos.'); return; }
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
-        const json = sub.toJSON();
-        // reclamar_push_subscription() (RPC, no insert directo): un mismo
-        // endpoint push es único por NAVEGADOR, no por usuario -- en un
-        // dispositivo compartido (tablet familiar, portátil de gimnasio), si
-        // otro cliente ya había activado avisos antes en este mismo
-        // navegador, un insert directo chocaba contra ese endpoint (23505) y
-        // el error se descartaba en silencio: parecía que "ya estaba
-        // suscrito", pero la fila seguía apuntando al OTRO cliente, que
-        // seguía recibiendo el push en vez de ti. La función libera el
-        // endpoint (lo borra, sea de quien sea) y lo vuelve a dar de alta a
-        // tu nombre -- necesita permisos elevados que un insert normal
-        // protegido por RLS no tiene.
-        const { error } = await supa.rpc('reclamar_push_subscription', {
-          p_endpoint: json.endpoint,
-          p_p256dh: json.keys.p256dh,
-          p_auth_key: json.keys.auth
-        });
-        if (error) throw error;
+        await _suscribirPush();
         showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
@@ -26539,7 +26551,28 @@ Se coló: ${lista}`;
         if (!session?.user) return;               // sin sesión no hay a quién asociarla
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
-        if (!sub) return;                          // el usuario no los tiene activados: nada que reparar
+        if (!sub) {
+          // BUG REAL (12 sept 2026, reportado: avisos que dejan de llegar sin
+          // avisar en iPhone con la app instalada). Hasta ahora, si iOS
+          // revocaba la suscripción ENTERA del dispositivo (no solo perdía
+          // la fila del servidor, que es lo que cubre el bloque de abajo),
+          // getSubscription() devolvía null y aquí no se hacía nada -- el
+          // interruptor se quedaba apagado en silencio hasta que alguien
+          // entraba a mirar el menú a mano. Notification.permission sigue en
+          // 'granted' aunque la suscripción haya muerto (son cosas
+          // distintas): eso es justo la señal de que el usuario SÍ quiere
+          // los avisos -- los aceptó una vez -- y hay que reponérselos, no
+          // preguntarle otra vez. requestPermission() no muestra ningún
+          // diálogo cuando el permiso ya está concedido, así que
+          // _suscribirPush() se puede llamar aquí sin que el usuario toque nada.
+          try {
+            await _suscribirPush();
+            console.log('[push] suscripción recreada (iOS había revocado la anterior)');
+          } catch (e) {
+            console.warn('[push] no se pudo recrear la suscripción revocada:', e.message);
+          }
+          return;
+        }
         const json = sub.toJSON();
         const { data: filas, error } = await supa
           .from('push_subscriptions').select('id').eq('endpoint', json.endpoint).limit(1);
@@ -26557,6 +26590,7 @@ Se coló: ${lista}`;
         console.warn('[push] resincronización fallida:', e.message);
       }
     }
+    window._suscribirPush = _suscribirPush; // para comprobación externa, igual que la de abajo
     window._resincronizarPushSubscription = _resincronizarPushSubscription;
 
     // Manda un push a ESTE usuario ahora mismo. Hasta ahora la única forma de
