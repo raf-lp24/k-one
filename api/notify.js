@@ -1292,9 +1292,11 @@ async function handlePost(req, res) {
     }
   }
 
-  // AUDITAR MI PLAN (11 sept 2026) -- lo pide el navegador del cliente en
-  // cuanto guarda un plan NUEVO: al registrarse, al cambiar de plan, en el
-  // check-in (ver _pedirAuditoriaPlan en index.html). El agente de auditoría
+  // AUDITAR MI PLAN (11 sept 2026, agente rebautizado THOR el 12 sept) -- lo
+  // pide el navegador del cliente en cuanto guarda un plan NUEVO: al
+  // registrarse, al cambiar de plan, en el check-in (ver _pedirAuditoriaPlan
+  // en index.html) o justo después de auto-corregirse desde el pop-up de
+  // aviso (ver pedirRegeneracionPlan, `origen: 'cliente_confirmo'`). Thor
   // revisa el plan GUARDADO del cliente AUTENTICADO -- el body no lleva
   // ningún id, así que nadie puede pedir la revisión del plan de otro -- y si
   // encuentra algo que no estaba ya avisado, avisa al admin en el momento:
@@ -1312,19 +1314,31 @@ async function handlePost(req, res) {
       if (await estaLimitadoPorTasa(req, 'auditar_plan')) {
         return res.status(429).json({ error: 'Demasiadas peticiones' });
       }
+      // 'cliente_confirmo': el cliente ya vio el pop-up de Thor y aceptó que
+      // le regeneráramos el plan al momento (ver pedirRegeneracionPlan) -- el
+      // plan que se está revisando aquí es el YA CORREGIDO, no el original
+      // con el fallo. Cambia solo el TEXTO del aviso al admin (para saber de
+      // un vistazo si hace falta hacer algo o si ya se resolvió sola),
+      // ninguna otra lógica.
+      const autoRegenerado = (req.body || {}).origen === 'cliente_confirmo';
       const r = await auditarYGuardar(supa, user.id);
       // Solo si hay algo NUEVO: si el cliente vuelve a guardar el mismo plan
-      // con el mismo fallo, no se le vuelve a avisar al admin.
-      // Y como mucho 3 avisos por CLIENTE y hora, además del límite de
-      // peticiones por IP: cada cliente puede escribir lo que quiera en su
-      // propio plan, así que sin este tope uno malintencionado podría mandar
-      // al admin un email por cada plan que guarde. La fila de Jarvis se
-      // actualiza igual aunque se salte el aviso.
-      if (r.nuevo && !(await superaLimite('aviso_auditoria:' + user.id, 3))) {
+      // con el mismo fallo, no se le vuelve a avisar al admin. Cuando es un
+      // auto-regenerado, en cambio, SIEMPRE se avisa aunque no sea "nuevo":
+      // el admin quiere saber que Thor ha actuado solo, no solo que sigue
+      // habiendo un problema.
+      const hayQueAvisar = autoRegenerado || r.nuevo;
+      if (hayQueAvisar && !(await superaLimite('aviso_auditoria:' + user.id, 3))) {
         const quien = r.nombre || r.email || 'Un cliente';
-        const resumen = r.hallazgos.slice(0, 3).map(x => `${x.coincidencia} en «${x.plato}»`).join(' · ');
+        const arreglado = autoRegenerado && r.hallazgos.length === 0;
+        const resumen = r.hallazgos.length
+          ? r.hallazgos.slice(0, 3).map(x => `${x.coincidencia} en «${x.plato}»`).join(' · ')
+          : 'ya no lleva nada raro';
         try {
-          await enviarPushAAdmins({ title: 'K-ONE · Revisar plan', body: `${quien}: ${resumen}`, url: '/' });
+          await enviarPushAAdmins({
+            title: arreglado ? 'K-ONE · Thor lo ha corregido solo' : 'K-ONE · Thor ha encontrado algo',
+            body: `${quien}: ${resumen}`, url: '/'
+          });
         } catch (ePush) { console.warn('[notify] auditar_plan push:', ePush.message); }
 
         const apiKeyAud = process.env.RESEND_API_KEY;
@@ -1333,28 +1347,38 @@ async function handlePost(req, res) {
             const CAMPO_AUD = { nombre: 'nombre del plato', ingredientes: 'ingredientes', pasos: 'preparación' };
             const filas = r.hallazgos.slice(0, 8).map(x =>
               `<li style="margin:0 0 8px"><strong style="color:#F0EDE8">${esc(x.coincidencia)}</strong> en «${esc(x.plato)}» <span style="color:#8A8A8A">(${esc(CAMPO_AUD[x.campo] || x.campo)} · ${esc(x.motivo)})</span>${x.fragmento ? `<div style="color:#6A6A6A;font-size:12px;margin-top:2px">${esc(x.fragmento)}</div>` : ''}</li>`).join('');
-            const asunto = `Revisar plan · ${quien}`;
+            const asunto = arreglado ? `Thor corrigió el plan de ${quien}` : `Thor: revisar plan de ${quien}`;
+            const introAuto = autoRegenerado
+              ? (arreglado
+                  ? `<p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px"><strong style="color:#F0EDE8">${esc(quien)}</strong> vio el aviso de Thor, confirmó que se lo regeneráramos y su plan ya ha quedado bien. No hace falta que hagas nada -- esto es solo para que lo tengas registrado.</p>`
+                  : `<p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px"><strong style="color:#F0EDE8">${esc(quien)}</strong> confirmó el aviso de Thor y su plan se regeneró solo, pero SIGUE con esto -- probablemente un fallo del motor, no algo que "Regenerar plan" vaya a arreglar por sí solo:</p>`)
+              : `<p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Thor ha encontrado esto en el plan de <strong style="color:#F0EDE8">${esc(quien)}</strong>${r.email ? ` (${esc(r.email)})` : ''}:</p>`;
+            const cierreAuto = arreglado
+              ? `<p style="color:#8A8A8A;font-size:12.5px;line-height:1.6;margin:0 0 20px">Puedes revisarlo en Jarvis (filtro «Revisar plan») para ver el detalle, y usar «Marcar revisión hecha» o dejarlo como referencia para afinar las reglas de Thor.</p>`
+              : `<p style="color:#8A8A8A;font-size:12.5px;line-height:1.6;margin:0 0 20px">Ábrelo en Jarvis (filtro «Revisar plan»). Si «Regenerar plan» tampoco lo arregla, es un fallo del motor que hay que corregir a mano.</p>`;
             const htmlAud = emailWrapper(`
               <div style="padding:28px 28px 0">
-                <h1 style="color:#F0EDE8;font-size:19px;font-weight:600;margin:0 0 12px">Un plan recién guardado lleva algo que no debería</h1>
-                <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">El agente de revisión ha encontrado esto en el plan de <strong style="color:#F0EDE8">${esc(quien)}</strong>${r.email ? ` (${esc(r.email)})` : ''}:</p>
-                <ul style="color:#B5B2AD;font-size:13px;line-height:1.6;padding-left:18px;margin:0 0 18px">${filas}</ul>
-                <p style="color:#8A8A8A;font-size:12.5px;line-height:1.6;margin:0 0 20px">Ábrelo en Jarvis (filtro «Revisar plan») y pulsa «Regenerar plan». Si con eso no desaparece, es un fallo del motor: avísame.</p>
+                <h1 style="color:#F0EDE8;font-size:19px;font-weight:600;margin:0 0 12px">${arreglado ? 'Thor ha corregido un plan solo' : 'Un plan recién guardado lleva algo que no debería'}</h1>
+                ${introAuto}
+                ${r.hallazgos.length ? `<ul style="color:#B5B2AD;font-size:13px;line-height:1.6;padding-left:18px;margin:0 0 18px">${filas}</ul>` : ''}
+                ${cierreAuto}
               </div>
               <div style="padding:0 28px 28px;text-align:center">
                 <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;border-radius:8px">ABRIR JARVIS</a>
-              </div>`, 'Aviso del agente de revisión');
+              </div>`, 'Thor · agente de revisión de planes');
             await enviarEmail(apiKeyAud, { from: 'K-ONE Jarvis <equipo@k-one.fit>', to: ADMIN_EMAIL, subject: asunto, html: htmlAud });
             const { error: eLog } = await supa.from('email_log').insert({
               tipo: 'auditoria_plan', destinatario: ADMIN_EMAIL, asunto, html: htmlAud,
-              datos: JSON.stringify({ resumen: `Agente de revisión: ${r.hallazgos.length} hallazgo(s) en el plan de ${quien}` })
+              datos: JSON.stringify({ resumen: `Thor: ${r.hallazgos.length} hallazgo(s) en el plan de ${quien}${autoRegenerado ? ' (cliente confirmó auto-regeneración)' : ''}` })
             });
             if (eLog) console.warn('[notify] auditar_plan email_log:', eLog.message);
           } catch (eMail) { console.warn('[notify] auditar_plan email:', eMail.message); }
         }
       }
-      // Al cliente no se le devuelve el detalle: el aviso es para el admin.
-      return res.status(200).json({ ok: true });
+      // Al cliente no se le devuelve el detalle de los hallazgos (el aviso es
+      // para el admin), pero sí cuántos quedan -- pedirRegeneracionPlan() lo
+      // usa para decir "ya está corregido" o "sigue con algo" sin adivinar.
+      return res.status(200).json({ ok: true, avisos: r.hallazgos.length });
     } catch (e) {
       console.warn('[notify] auditar_plan error:', e.message);
       capturarError(e, { fn: 'notify-auditar-plan' });

@@ -7275,9 +7275,9 @@
     <div class="modal-title" style="font-size:19px">Hemos encontrado un fallo en tu plan</div>
     <p class="modal-desc" id="avisoFiltroTexto" style="margin-bottom:16px"></p>
     <div id="avisoFiltroLista" style="margin-bottom:18px"></div>
-    <p class="modal-desc" style="font-size:12.5px;color:var(--metal);margin-bottom:20px">Tu plan sigue siendo válido mientras tanto. Si quieres, te lo regeneramos ya quitando esto -- se lo pedimos directamente a tu entrenador.</p>
+    <p class="modal-desc" style="font-size:12.5px;color:var(--metal);margin-bottom:20px">Tu plan sigue siendo válido mientras tanto. Si quieres, te lo regeneramos ya mismo quitando esto -- al momento, sin esperar a nadie.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-primary" id="btnPedirRegeneracion" style="flex:1;padding:12px 20px;font-size:13px" onclick="pedirRegeneracionPlan()">Sí, regenérame el plan →</button>
+      <button class="btn-primary" id="btnPedirRegeneracion" style="flex:1;padding:12px 20px;font-size:13px" onclick="pedirRegeneracionPlan()">Sí, regenérame el plan ya →</button>
       <button style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--metal);font-size:13px;cursor:pointer;padding:12px 16px" onclick="descartarAvisoFiltro()">Ahora no</button>
     </div>
     <p style="font-size:11.5px;color:var(--metal);text-align:center;margin:14px 0 0">¿Prefieres contarnos algo más antes? Escríbenos desde <a onclick="descartarAvisoFiltro();showSection('contacto')" style="color:var(--brasa);cursor:pointer;text-decoration:underline">Contacto</a>.</p>
@@ -21488,21 +21488,28 @@
   }
 
   // Pide al servidor que revise el plan recién guardado (api/notify.js, tipo
-  // 'auditar_plan'): el agente de auditoría mira si se ha colado algo que el
-  // cliente no puede o no quiere comer y, si es así, avisa al admin en el
-  // momento (push + email + Jarvis) en vez de esperar al cron del día
+  // 'auditar_plan'): Thor (el agente de auditoría) mira si se ha colado algo
+  // que el cliente no puede o no quiere comer y, si es así, avisa al admin en
+  // el momento (push + email + Jarvis) en vez de esperar al cron del día
   // siguiente. El servidor solo revisa el plan del cliente AUTENTICADO -- el
   // body no lleva ningún id. Nunca bloquea ni le enseña nada al cliente.
-  function _pedirAuditoriaPlan() {
-    supa.auth.getSession().then(({ data }) => {
+  //
+  // `origen` es opcional: 'cliente_confirmo' cuando lo llama
+  // pedirRegeneracionPlan() justo después de auto-corregir el plan -- cambia
+  // solo el TEXTO del aviso al admin (ver api/notify.js), no la lógica.
+  // Devuelve la respuesta ya parseada (o null si algo falla) para quien
+  // necesite saber cuántos avisos quedan; el disparo normal desde
+  // saveUserData() la ignora, como siempre (fire-and-forget).
+  function _pedirAuditoriaPlan(origen) {
+    return supa.auth.getSession().then(({ data }) => {
       const token = data && data.session && data.session.access_token;
-      if (!token) return;
-      fetch('/api/notify', {
+      if (!token) return null;
+      return fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ tipo: 'auditar_plan' })
-      }).catch(() => {});
-    }).catch(() => {});
+        body: JSON.stringify(origen ? { tipo: 'auditar_plan', origen } : { tipo: 'auditar_plan' })
+      }).then(r => r.ok ? r.json() : null).catch(() => null);
+    }).catch(() => null);
   }
 
   // Huella de lo que mira el agente de auditoría: los platos del plan y las
@@ -22738,34 +22745,64 @@
     } catch (e) {}
   }
 
+  // Regenera el plan AL MOMENTO con el mismo motor de siempre
+  // (buildPlanFromData), sin esperar a que nadie en Jarvis lo haga a mano.
+  // _huellaPedida se fija ANTES de guardar para que saveUserData() no
+  // dispare su propio aviso automático (vería el mismo plan como "nuevo" y
+  // pediría una segunda auditoría por su cuenta) -- el único aviso de Thor
+  // para esta regeneración es el explícito de más abajo, con origen
+  // 'cliente_confirmo', que además deja constancia en Jarvis del hallazgo
+  // aunque ya esté arreglado.
   async function pedirRegeneracionPlan() {
     const user = getCurrentUser();
     if (!user || !_supaUserId || !_avisoFiltroHallazgos) { showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000); return; }
     const btn = document.getElementById('btnPedirRegeneracion');
-    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Regenerando...'; }
 
     const porPalabra = new Map();
     _avisoFiltroHallazgos.forEach(h => { const c = (h.coincidencia||'').toLowerCase(); if (!porPalabra.has(c)) porPalabra.set(c, h.coincidencia); });
     const lista = [...porPalabra.values()].join(', ');
-    const cuerpo = `[REGENERAR PLAN] El cliente ha visto el aviso automático y pide que se le regenere el plan.
+
+    try {
+      const nuevoPlan = buildPlanFromData(userData);
+      const datosGuardado = { userData, plan: nuevoPlan, savedAt: new Date().toISOString() };
+      const huellaNueva = _huellaAuditoria(datosGuardado);
+      if (huellaNueva) _huellaPedida = huellaNueva;
+      generatedPlan = nuevoPlan;
+
+      const guardado = await saveUserData(user.email, datosGuardado);
+      if (!guardado) throw new Error('no se pudo guardar el plan regenerado');
+
+      buildDashboard();
+
+      const cuerpo = `[REGENERAR PLAN] El cliente confirmó el aviso automático; el plan ya se ha regenerado solo.
 
 Se coló: ${lista}`;
-    const fila = { user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Plan', mensaje: cuerpo };
-    try {
-      const { error } = await supa.from('mensajes_cliente').insert(fila);
-      if (error) throw new Error(error.message);
-      notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: 'Plan', mensaje: cuerpo });
+      const fila = { user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Plan', mensaje: cuerpo };
+      try {
+        const { error } = await supa.from('mensajes_cliente').insert(fila);
+        if (error) throw new Error(error.message);
+        notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: 'Plan', mensaje: cuerpo });
+      } catch (eAviso) { console.warn('[aviso-filtro] no se pudo avisar a Jarvis:', eAviso.message); }
+
+      const resultado = await _pedirAuditoriaPlan('cliente_confirmo');
+
       try {
         const firma = JSON.stringify(_avisoFiltroHallazgos.map(h => [(h.coincidencia||'').toLowerCase(), h.plato, h.campo]).sort());
         localStorage.setItem('kone_aviso_filtro_pedido_' + user.email, firma);
       } catch (e) {}
       document.getElementById('modalAvisoFiltro')?.classList.remove('visible');
-      showToast('Hecho. Se lo hemos pedido a tu entrenador -- verás el cambio en cuanto lo regenere.', 6000);
+
+      if (resultado && resultado.avisos === 0) {
+        showToast('Listo, ya está corregido. Puedes ver tu plan actualizado ahora mismo.', 6000);
+      } else {
+        showToast('Plan regenerado. Si sigue sin cuadrarte del todo, escríbenos desde Contacto.', 6000);
+      }
     } catch (e) {
-      console.error('[aviso-filtro] no se pudo enviar:', e.message);
-      showToast('No se pudo enviar. Inténtalo de nuevo.', 4000);
+      console.error('[aviso-filtro] no se pudo regenerar:', e.message);
+      showToast('No se pudo regenerar. Inténtalo de nuevo.', 4000);
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = 'Sí, regenérame el plan →'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Sí, regenérame el plan ya →'; }
     }
   }
 
