@@ -282,6 +282,10 @@ desincronizados.length
     ['frutos secos, nueces en los pasos', { alergia: 'Frutos secos' }, plan('Yogur con fruta', '150g yogur, 1 pera, semillas de calabaza', 'Trocea la pera y añade las nueces.'), true],
     ['sin restricciones', {}, plan('Tostada con queso', '1 tosta, 30g queso', 'Pon el queso.'), false],
     ['sin plan', { alergia: 'Lactosa' }, null, false],
+    // BUG REAL (12 sept 2026): un token de dos palabras solo toleraba plural
+    // en la ÚLTIMA -- "tosta integral" no casaba con "tostas integrales",
+    // que es como sale casi siempre en el recetario (alimentos contables).
+    ['no come tosta integral (la receta la lleva en plural)', { noComida: 'tosta integral' }, plan('Tostada con crema de cacahuete', '2 tostas integrales, 20g crema de cacahuete', 'Unta la crema sobre las tostas integrales.'), true],
   ];
   const fallan = casos.filter(([, ud, p, espera]) => (AG.auditarPlan(ud, p).length > 0) !== espera).map(c => (c[3] ? 'NO salta: ' : 'salta sin motivo: ') + c[0]);
   // Una palabra = un aviso por sitio, aunque la cacen varias variantes internas.

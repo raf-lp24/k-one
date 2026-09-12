@@ -12805,12 +12805,28 @@
   // suelta dentro, así que partir por ellas no rompe ningún caso legítimo.
   const _SEPARADOR_ALIMENTOS = /[,;/+]+|\s+(?:y|e|o|ni)\s+/i;
   const _EQUIV_TILDE = { a: '[aáàä]', e: '[eéèë]', i: '[iíìï]', o: '[oóòö]', u: '[uúùü]', n: '[nñ]', c: '[cç]' };
+  // BUG REAL (12 sept 2026, encontrado auditando el filtro con el recetario
+  // real): con un token de dos palabras ("tosta integral"), solo la ÚLTIMA
+  // quedaba tolerante a plural (el comodín final `[a-záéíóúüñ]*`) -- la
+  // PRIMERA exigía forma exacta con un espacio pegado justo detrás, y en el
+  // recetario los alimentos contables van casi siempre en plural ("2 tostas
+  // integrales", "4 panecillos integrales"), nunca en singular. Un cliente
+  // que escribía "tosta integral" en "no quiero esto" se lo seguía comiendo:
+  // filtrarNoComida ni siquiera detectaba el plato para intentar sustituirlo.
+  // Ahora cada palabra (menos la última, que ya tenía comodín abierto) lleva
+  // su propio comodín acotado a 3 letras -- de sobra para "s"/"es" sin
+  // colarse en la palabra siguiente, que sigue exigiendo su propio espacio.
   function _reAlimento(token) {
-    const raiz = _raizSinPlural(_normTexto(token));
-    const cuerpo = raiz
-      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')                  // escapar antes de tocar letras
-      .replace(/[aeiounc]/g, ch => _EQUIV_TILDE[ch] || ch);
-    return new RegExp('\\b' + cuerpo + '[a-záéíóúüñ]*', 'gi');
+    const palabras = _normTexto(token).split(/\s+/).filter(Boolean).map(_raizSinPlural);
+    const cuerpo = palabras
+      .map((p, i) => {
+        const base = p
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')                // escapar antes de tocar letras
+          .replace(/[aeiounc]/g, ch => _EQUIV_TILDE[ch] || ch);
+        return i === palabras.length - 1 ? base + '[a-záéíóúüñ]*' : base + '[a-záéíóúüñ]{0,3}';
+      })
+      .join('\\s+');
+    return new RegExp('\\b' + cuerpo, 'gi');
   }
 
   function filtrarNoComida(nutricion, noComidaRaw) {
@@ -16179,6 +16195,18 @@
     //    arroz con leche pide arroz redondo y un poké, arroz de sushi. Poner
     //    "integral" ahí no es más sano, es una receta que nadie va a cocinar.
     const _NO_INTEGRAL = /pre-?entreno|post-?entreno|antes de entrenar|despu[ée]s de entrenar|pre-?wod|post-?wod|pre-?carrera|post-?carrera|antes de correr|recuperaci[óo]n|arborio|rissotto|risotto|pok[ée]|sushi|arroz con leche|tortitas? de arroz|crema de arroz|basmati|paella|a la cubana/i;
+    // BUG REAL (12 sept 2026, encontrado auditando el filtro con el
+    // recetario real): esta subida de categoría corre DESPUÉS de
+    // filtrarNoComida y no miraba textoFiltro en absoluto -- un cliente que
+    // había escrito "no quiero arroz integral" (o "pan integral", "pasta
+    // integral"...) se lo encontraba de todas formas, porque filtrarNoComida
+    // lo dejaba en "arroz" a secas y esto lo volvía a subir a "arroz
+    // integral" sin volver a comprobar nada. Ahora se salta la receta si la
+    // subida reintroduciría justo lo que el cliente rechazó.
+    const _tokensFiltroIntegral = textoFiltro
+      ? textoFiltro.split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2)
+      : [];
+    const _reFiltroIntegral = _tokensFiltroIntegral.map(_reAlimento);
     const _aIntegral = (o) => {
       if (_NO_INTEGRAL.test(`${o.nombre} ${o.ingredientes} ${o.prep || ''}`)) return o;
       const ing = o.ingredientes
@@ -16189,7 +16217,9 @@
         .replace(/\bcusc[úu]s\b(?! integral)/gi, 'cuscús integral')
         .replace(/\bpan blanco\b/gi, 'pan integral')
         .replace(/\bpan de molde\b(?! integral)/gi, 'pan de molde integral');
-      return ing === o.ingredientes ? o : { ...o, ingredientes: ing };
+      if (ing === o.ingredientes) return o;
+      if (_reFiltroIntegral.some(re => { re.lastIndex = 0; return re.test(ing); })) return o;
+      return { ...o, ingredientes: ing };
     };
     nutricionPorDia.forEach(dia => {
       dia.forEach(m => { m.opciones = (m.opciones || []).map(_aIntegral); });
@@ -24337,6 +24367,23 @@ Se coló: ${lista}`;
   // nutrición, la opción elegida de cada toma viene de comidasSemana y si el
   // cliente no ha tocado nada se asume la primera (índice 0), igual que hace
   // el propio dashboard del cliente.
+  // Separa por coma SIN partir las que van dentro de un paréntesis -- el
+  // detalle de un ejercicio trae notas tipo "3×12 (baja completo, aprieta 1s
+  // abajo, sube resistiendo)" y un split() normal rompía esa nota en tres
+  // líneas sueltas dentro de la ficha de Jarvis.
+  function _splitFueraDeParentesis(texto, sep) {
+    const partes = [];
+    let actual = '', profundidad = 0;
+    for (const ch of texto) {
+      if (ch === '(') profundidad++;
+      else if (ch === ')') profundidad = Math.max(0, profundidad - 1);
+      if (ch === sep && profundidad === 0) { partes.push(actual); actual = ''; }
+      else actual += ch;
+    }
+    if (actual) partes.push(actual);
+    return partes;
+  }
+
   function _renderPlanClienteJarvis(userdata, plan) {
     const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const comidasCliente = Array.isArray(userdata.comidasSemana) ? userdata.comidasSemana : [];
@@ -24344,25 +24391,39 @@ Se coló: ${lista}`;
 
     if (plan.semana && plan.semana.length && !plan.soloDieta) {
       html += `<div class="jc-label" style="margin-bottom:8px">Entrenamiento de esta semana</div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">`;
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">`;
       plan.semana.forEach((dia, i) => {
         const esDescanso = dia.tipo === 'Descanso';
-        const cuerpo = (dia.ejercicios && dia.ejercicios.length)
-          ? dia.ejercicios.map(ej => _esc(ej.nombre || ej)).join(' · ')
-          : (dia.detalle ? _esc(dia.detalle) : '');
-        html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:9px 12px">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${esDescanso || !cuerpo ? '0' : '4px'}">
+        // dia.detalle suele venir como "Zona del cuerpo · ejercicio 3x10,
+        // ejercicio 3x12, ..." -- la parte antes del primer " · " ya se
+        // enseña en la etiqueta de la derecha (dia.split/dia.resumen), así
+        // que se quita de aquí para no repetirla, y el resto se parte por
+        // comas en FILAS propias -- antes iba todo en un único párrafo
+        // corrido y con 6-8 ejercicios quedaba ilegible ("apelotonado").
+        let items = [];
+        if (dia.ejercicios && dia.ejercicios.length) {
+          items = dia.ejercicios.map(ej => ej.nombre || ej);
+        } else if (dia.detalle) {
+          const puntoIdx = dia.detalle.indexOf(' · ');
+          const cuerpo = puntoIdx !== -1 ? dia.detalle.slice(puntoIdx + 3) : dia.detalle;
+          items = _splitFueraDeParentesis(cuerpo, ',').map(s => s.trim()).filter(Boolean);
+        }
+        html += `<div style="background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:10px;padding:10px 12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${esDescanso || !items.length ? '0' : '6px'}">
             <span style="font-size:11.5px;font-weight:700;color:var(--jv-text)">${_esc(dia.dia || DIAS[i] || '')}</span>
             <span style="font-size:10.5px;color:${esDescanso ? 'var(--jv-faint)' : 'var(--jv-dim)'};text-align:right">${esDescanso ? 'Descanso' : _esc(dia.split || dia.resumen || '')}</span>
           </div>
-          ${!esDescanso && cuerpo ? `<div style="font-size:11px;color:var(--jv-faint);line-height:1.5">${cuerpo}</div>` : ''}
+          ${!esDescanso && items.length ? `<div style="display:flex;flex-direction:column;gap:3px">
+            ${items.map(it => `<div style="font-size:11px;color:var(--jv-faint);line-height:1.4">· ${_esc(it)}</div>`).join('')}
+          </div>` : ''}
         </div>`;
       });
       html += `</div>`;
     }
 
-    html += `<div class="jc-label" style="margin-bottom:8px">Alimentación que está siguiendo</div>
-      <div style="display:flex;flex-direction:column;gap:6px">`;
+    const frecuencia = userdata.comidas ? ` · ${_esc(userdata.comidas)}` : '';
+    html += `<div class="jc-label" style="margin-bottom:8px">Alimentación que está siguiendo${frecuencia}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">`;
     DIAS.forEach((nombreDia, diaIdx) => {
       const tomasDia = (plan.nutricionPorDia && plan.nutricionPorDia[diaIdx]) || plan.nutricion || [];
       if (!tomasDia.length) return;
