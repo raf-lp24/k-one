@@ -10411,7 +10411,12 @@
     // gimnasio a propósito -- quien entrena en casa se queda con el peso
     // muerto rumano fijo, que es justo el mejor ejercicio de isquios que
     // puede hacer con mancuernas.
-    [/peso muerto rumano( con mancuernas?)?/i, ['Femoral tumbado en máquina', 'Curl femoral sentado en máquina', 'Femoral sentado']],
+    // Las tres eran de isquio, sí, pero las tres eran AISLAMIENTO en máquina: en
+    // el Lower A del Upper/Lower el peso muerto rumano es la única bisagra de
+    // cadera del día, y la rotación la cambiaba siempre por un curl femoral
+    // sentado. El patrón de bisagra desaparecía de la semana entera. Se deja una
+    // alternativa que SÍ es bisagra para que el patrón sobreviva a la rotación.
+    [/peso muerto rumano( con mancuernas?)?/i, ['Peso muerto rumano a una pierna', 'Femoral tumbado en máquina', 'Curl femoral sentado en máquina']],
     // "( sumo)?( con mancuernas?)?" consume el material/variante que puede ir
     // detrás en la plantilla ("peso muerto con mancuernas", "peso muerto sumo
     // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
@@ -10483,8 +10488,18 @@
     // y con un aislamiento de glúteo medio abriendo el entrenamiento. Misma
     // regla que ya se aplicó al peso muerto rumano y al press banca: una
     // alternativa tiene que trabajar el mismo músculo y el mismo patrón.
-    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Patada de glúteo en polea', 'Patada de glúteo en cuadrupedia']],
-    [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack', 'Aductores en máquina']],
+    // "Patada de glúteo en cuadrupedia" quitada (14 sept 2026): es glúteo con el
+    // propio peso, y el hip thrust es el ÚNICO movimiento de cadera cargado de
+    // los días de pierna del Upper/Lower. Medido en un plan real de principiante
+    // a 5 días: la rotación dejó los DOS días de pierna con patada de glúteo en
+    // cuadrupedia y ninguno con extensión de cadera con carga.
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Patada de glúteo en polea']],
+    // "Aductores en máquina" quitado: el aductor no es el cuádriceps. Y
+    // "Sentadilla goblet" también, porque los días que llevan prensa ya traen
+    // una sentadilla unas comas más allá y la rotación duplicaba el ejercicio
+    // entre el día A y el día B (el guardia anti-duplicados solo mira dentro de
+    // la misma sesión, no entre días).
+    [/prensa de piernas/i, ['Sentadilla hack', 'Zancadas con mancuernas', 'Extensión de cuádriceps']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
     // ellos quedaba colgando el material que trae esa opción por su cuenta
@@ -10505,7 +10520,13 @@
     // ampliar el catálogo el 5 sept). Misma cautela que ya usan las reglas de
     // sentadilla goblet y hip thrust de más arriba.
     [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna']],
-    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Press Arnold', 'Elevaciones frontales con mancuernas']],
+    // "Elevaciones frontales" y "Press Arnold" quitadas (14 sept 2026): las dos
+    // trabajan el deltoides ANTERIOR, que en cualquiera de estas plantillas ya
+    // va saturado por los presses de pecho y de hombro. La elevación lateral es
+    // el único trabajo directo del deltoides MEDIO de la semana, así que
+    // cambiarla por una frontal deja ese haz a cero. Las alternativas son ahora
+    // el mismo movimiento con otro material.
+    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Elevaciones laterales en máquina']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
@@ -10775,7 +10796,22 @@
             const m = fr.match(regex);
             return !(m && _NEGACION_PREVIA.test(fr.slice(0, m.index)));
           });
-          const rotado = _aplicarRotacionAutomatica(fr, tablaSegura);
+          // Lo que va ENTRE PARÉNTESIS es una aclaración del movimiento o un
+          // consejo de técnica, nunca un ejercicio aparte, así que la rotación
+          // no debe entrar ahí. Sin esta máscara, la regla de "zancadas" mordía
+          // la aclaración de "split squat (zancada estática)" y salía
+          // "split squat (Zancada lateral con mancuernas estática)" -- un nombre
+          // que no existe, con el adjetivo de la aclaración colgando detrás del
+          // reemplazo. Es la misma familia de fallos que ya obligó a atacar los
+          // paréntesis a mano en el mapa de lesiones (bloque pliométrico de
+          // Running); aquí se corta de raíz para toda la tabla a la vez.
+          const _parens = [];
+          const frSinParens = fr.replace(/\([^()]*\)/g, m => {
+            _parens.push(m);
+            return `@@P${_parens.length - 1}@@`;
+          });
+          const rotado = _aplicarRotacionAutomatica(frSinParens, tablaSegura)
+            .replace(/@@P(\d+)@@/g, (m, i) => _parens[+i] !== undefined ? _parens[+i] : m);
           const antes = _nombreDeTramo(fr);
           const despues = _nombreDeTramo(rotado);
           // Si el cambio duplicaría un ejercicio de esta misma sesión, se deja
@@ -13733,7 +13769,16 @@
              // aperturas: mismo número de ejercicios y misma duración de sesión,
              // pero el pecho sube a 9 series/semana. El bíceps conserva su curl
              // martillo del Upper B más todo el trabajo de los tirones.
-             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press de hombro con mancuernas (agarre neutro, baja hasta formar una "L" a 90°) 3×12, remo con mancuerna a una mano 3×10/lado, aperturas con mancuernas en banco 3×12 (codos algo flexionados y fijos, abre hasta notar el pecho), fondos en banco (tríceps, codos pegados al cuerpo) 3×15, plancha 3×30s${finisher3}`,
+             //
+             // ORDEN (14 sept 2026): las aperturas van CUARTAS, antes del remo.
+             // Desde que la sesión se recorta según el tiempo que tiene el
+             // cliente, el orden de la plantilla decide qué sobrevive en una
+             // sesión de 30-45 min. Con las aperturas en quinto lugar, los
+             // cuatro que quedaban eran un pecho, DOS espaldas y un hombro, y
+             // sumando el Upper B la semana acababa con 12 series de espalda
+             // contra 6 de pecho. Con este orden quedan dos de pecho, una de
+             // espalda y una de hombro, y la semana sale 9/9/6.
+             detalle:`Pecho, espalda, hombros, brazos · Press de banca o mancuernas 3×10 (foco en técnica, baja el peso si lo necesitas), jalón en polea o remo australiano 3×10, press de hombro con mancuernas (agarre neutro, baja hasta formar una "L" a 90°) 3×12, aperturas con mancuernas en banco 3×12 (codos algo flexionados y fijos, abre hasta notar el pecho), remo con mancuerna a una mano 3×10/lado, fondos en banco (tríceps, codos pegados al cuerpo) 3×15, plancha 3×30s${finisher3}`,
              etiqueta:"Empuje+Tracción"},
             {dia:"Martes", tipo:"Entrenamiento", resumen:"Lower A · Cuádriceps + glúteos",
              detalle:`Piernas y glúteos · Sentadilla goblet con mancuerna 3×12 (profundidad cómoda, espalda recta), peso muerto rumano con mancuernas 3×12, hip thrust en banco 3×15, split squat (zancada estática) 3×10/pierna, elevación de gemelos de pie 3×20${finisher3}`,
@@ -13754,8 +13799,14 @@
              etiqueta:"Piernas"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico · Full Body ligero" : "Core + accesorios") : "Descanso activo",
+             // Sin ${finisher3} a propósito: este día YA ES el trabajo
+             // metabólico. Añadirle encima el remate interválico dejaba al
+             // cliente haciendo 4 rondas de circuito y después 8-12 minutos de
+             // intervalos — doble acondicionamiento el mismo día, y además el
+             // quinto de la semana, que es justo donde un principiante en
+             // déficit tiene menos margen de recuperación.
              detalle: numDias >= 5 ? (perdidaGrasa
-               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo con mancuerna a una mano/lado, 30s plancha. Descanso 90s entre rondas${finisher3}`
+               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo con mancuerna a una mano/lado, 30s plancha. Descanso 90s entre rondas`
                : `Core y complementos · Peso muerto con mancuernas 3×10, jalón en polea 3×10, press en máquina 3×10, plancha 3×40s, elevación de piernas en barra o banco 3×15, plancha lateral 3×30s/lado`) : "",
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
