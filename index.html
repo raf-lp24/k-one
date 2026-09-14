@@ -10553,7 +10553,11 @@
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
     [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas', 'Contractor de pecho en máquina']],
-    [/curl femoral|leg curl( tumbado| sentado)?|femoral tumbado( en m[aá]quina)?/i, ['Peso muerto rumano', 'Hip thrust', 'Curl femoral sentado en máquina']],
+    // El grupo de material del final es obligatorio: sin él la regex se comía solo
+    // "curl femoral" de "Curl femoral sentado en máquina" y el reemplazo heredaba el
+    // resto -- salía "Hip thrust sentado en máquina", un hip thrust sentado en la
+    // máquina de femoral. Mismo patrón de texto colgando de siempre.
+    [/(curl femoral|leg curl|femoral)( tumbado| sentado)?( en m[aá]quina)?/i, ['Peso muerto rumano', 'Hip thrust', 'Curl femoral sentado en máquina']],
     // La regex tiene que comerse el nombre ENTERO del ejercicio, no solo la
     // palabra "gemelos": la plantilla escribe "elevación de gemelos de pie" o
     // "gemelos en prensa o máquina", y cazar solo "gemelos" dejaba el resto
@@ -10825,7 +10829,7 @@
   // que separaba "Step-ups controlados" de "step ups controlados". Ojo: se quita el
   // material, NO los calificativos que sí cambian el ejercicio ("búlgara", "sumo",
   // "a una pierna"), porque sentadilla y sentadilla búlgara sí conviven bien.
-  const _MATERIAL = /\s+(con (barra|mancuernas?|kettlebell|banda el[áa]stica|banda|disco|soga|cuerda)|en (m[áa]quina|polea( alta| baja)?|multipower|prensa|banco|escal[óo]n))\b.*$/i;
+  const _MATERIAL = /\s+(sentado |tumbado |de pie )?(con (barra|mancuernas?|kettlebell|banda el[áa]stica|banda|disco|soga|cuerda)|en (m[áa]quina|polea( alta| baja)?|multipower|prensa|banco|escal[óo]n))\b.*$/i;
   const _nombreDeTramo = (fr) => {
     const t = (fr || '').trim();
     const m = t.match(/^([^0-9(]+?)\s*[\d(]/);
@@ -10836,6 +10840,20 @@
       .trim();
   };
   const _ES_REMATE_CARDIO = /interv[aá]lico|circuito al final|cardio al final|\btabata\b|\bamrap\b|\bemom\b/i;
+  // Dos tramos son el MISMO ejercicio cuando comparten nombre, o cuando lo que
+  // los separa es solo un calificativo de lateralidad o una opción ("hip thrust"
+  // y "hip thrust a una pierna"; "step-ups controlados" y "step-ups controlados o
+  // prensa"). NO valen como iguales los calificativos que sí cambian el ejercicio
+  // -- "búlgara", "sumo", "inclinado" --, que es justo lo que hacía inservible
+  // comparar por prefijo a secas (534 falsos positivos medidos en su día).
+  const _QUALIF_EQUIV = /^(a una pierna|a un brazo|a una mano|unilateral|por lado|o [a-záéíóúñ ]+)$/;
+  const _mismoEjercicio = (a, b) => {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    const [corto, largo] = a.length <= b.length ? [a, b] : [b, a];
+    if (!largo.startsWith(corto + ' ')) return false;
+    return _QUALIF_EQUIV.test(largo.slice(corto.length + 1).trim());
+  };
   const _rotarSoloEjercicios = (texto, tabla) => {
     if (!tabla.length || !texto) return texto;
     const partes = texto.split('·');
@@ -10908,7 +10926,8 @@
           // distintos y que tiene todo el sentido programar juntos: sentadilla
           // y sentadilla búlgara, flexiones y flexiones con pies elevados.
           // Medido: 534 falsos positivos frente a un puñado de casos reales.
-          if (despues !== antes && despues.length > 3 && presentes.has(despues)) return fr;
+          if (despues !== antes && despues.length > 3 &&
+              [...presentes].some(v => _mismoEjercicio(v, despues))) return fr;
           if (despues !== antes) { presentes.delete(antes); presentes.add(despues); }
           return rotado;
         })
@@ -14053,6 +14072,12 @@
       ]);
     }
     if (_lesionZonaRodilla) {
+      // "The Bear" también se cambia ENTERO aquí. El complejo lleva front squat y
+      // back squat a 5 repeticiones ininterrumpidas y subiendo peso cada ronda: no
+      // hay forma de controlar el rango ni la velocidad, que es justo lo que una
+      // rodilla tocada necesita. El circuito de abajo mantiene el trabajo de pierna
+      // en máquinas, donde el recorrido sí se puede limitar.
+      mapaLesion.push([/Complejo con barra "The Bear"[^.]*\./g, 'Circuito de pierna en máquinas, 4 rondas: 12 prensa de piernas (rango sin dolor, sin bajar del todo) + 12 curl femoral sentado en máquina + 15 hip thrust con mancuerna + 12 extensión de cuádriceps (rango corto). Descansa 2 min entre rondas.']);
       // Las reglas van de la frase MÁS larga a la más corta y consumen el material
       // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
       // ("Press inclinado en máquina (rango controlado) mancuernas 4×10").
@@ -14194,6 +14219,14 @@
         // 2. La segunda regla no consumía " sumo", así que "peso muerto sumo con
         //    mancuernas" salía como "Hip thrust sumo con mancuernas" -- el mismo
         //    patrón de texto colgando que ya ha aparecido media docena de veces.
+        // "The Bear" se cambia ENTERO, no movimiento a movimiento. Es un complejo
+        // construido sobre power clean y back squat, los dos de máxima carga axial:
+        // sustituyendo solo el clean quedaba "hip thrust con barra + front squat +
+        // push press + BACK SQUAT", con el back squat intacto y un hip thrust en
+        // mitad de un complejo que se hace sin soltar la barra. Se cambia por un
+        // circuito en máquinas con el mismo papel metabólico y sin carga en la
+        // columna. Va ANTES que las reglas sueltas de abajo, que si no lo destrozan.
+        [/Complejo con barra "The Bear"[^.]*\./g, 'Circuito en máquinas, 4 rondas sin descanso entre ejercicios: 12 prensa de piernas + 10 press en máquina + 12 remo en máquina con apoyo de pecho + 15 hip thrust con mancuerna. Descansa 2 min entre rondas y sube peso cada una.'],
         [/[Pp]eso muerto rumano( con mancuernas?)?/g, 'Femoral tumbado en máquina'],
         // El SUMO va aparte: los días que lo llevan (Lower B) ya traen un hip thrust
         // unas comas más allá, y mandarlo también a hip thrust dejaba dos seguidos.
@@ -14222,6 +14255,11 @@
         // prosa del Híbrido ("Tabata 4 min alternando KB swings y burpees") y no lo
         // tocaba ninguna regla, así que el cliente con el hombro tocado los recibía
         // tal cual. Se le quita la flexión y se queda el trabajo de piernas y pulso.
+        // El "behind-neck press" del complejo "The Bear" no lo tocaba ninguna regla,
+        // y es de los movimientos menos amables que existen para un hombro tocado:
+        // rotación externa máxima con la barra por detrás de la cabeza. Igual que en
+        // espalda, el complejo se cambia entero en vez de parchear un movimiento.
+        [/Complejo con barra "The Bear"[^.]*\./g, 'Complejo con barra, 4 rondas: front squat + peso muerto rumano + remo con barra × 5 repeticiones ininterrumpidas de cada uno. Sin nada por encima de la cabeza. Sube peso cada ronda.'],
         [/burpees?/gi, 'burpees sin flexión (baja, pie atrás y sube)'],
         // Nombre corto a propósito (y en plural, para seguir enlazando con la
         // ficha de ejercicio y el vídeo, que buscan por "elevaciones frontales"):
@@ -14776,8 +14814,59 @@
     // "femoral en máquina" a "peso muerto rumano con mancuernas" justo para quien
     // tiene la espalda lesionada). Por eso los ejercicios de sustitución de las
     // lesiones ya se eligen según el material disponible, más arriba.
+    // Sustitutos de reserva para cuando una adaptación por lesión deja el MISMO
+    // ejercicio dos veces en la sesión. El mapa de lesiones sustituye a ciegas,
+    // una regex detrás de otra, sin saber qué más hay en el día: por eso a quien
+    // tiene la espalda tocada le salía "Hip thrust 3×12, hip thrust a una pierna
+    // 3×10/pierna" (el peso muerto convertido justo en lo que el día ya traía), y
+    // a quien tiene la rodilla tocada, "Step-ups controlados o prensa (rango sin
+    // dolor) 4×6, ... step-ups controlados 4×10/pierna".
+    //
+    // Cada entrada es [qué ha quedado repetido, con qué sustituirlo]. Las reservas
+    // cumplen la misma regla que las de la rotación -- mismo músculo, mismo patrón
+    // y misma unidad -- y además son seguras para la zona lesionada, que es por lo
+    // que aquí no hay sentadillas libres ni peso muerto.
+    const _RESERVA_DUPLICADO = [
+      [/hip thrust|puente de gl[uú]teo/i, ['Patada de glúteo en polea', 'Abductores en máquina', 'Patada de glúteo en cuadrupedia']],
+      [/step[- ]ups? controlados/i, ['Prensa de piernas (rango sin dolor)', 'Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared']],
+      [/prensa de piernas/i, ['Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared']],
+      [/femoral/i, ['Curl femoral sentado en máquina', 'Peso muerto rumano a una pierna']],
+      [/elevaciones frontales/i, ['Face pull', 'Retracción escapular con banda']],
+      [/press en m[aá]quina|press con mancuernas/i, ['Contractor de pecho en máquina', 'Aperturas en polea']],
+      [/remo bajo mesa|remo en polea baja/i, ['Remo en máquina con apoyo de pecho', 'Jalón al pecho en polea']],
+    ];
+    // Deshace los ejercicios repetidos que haya dejado la adaptación por lesión.
+    // Solo mira DENTRO de cada día: repetir un ejercicio en dos días distintos de
+    // la semana es normal, y a veces buscado.
+    const _dedupSesion = (texto) => {
+      if (!texto || texto.indexOf('·') < 0) return texto;
+      const partes = texto.split('·');
+      const cabecera = partes[0];
+      const cuerpo = partes.slice(1).join('·');
+      const frs = splitRespetandoParentesis(cuerpo);
+      const vistos = new Set();
+      let tocado = false;
+      const salida = frs.map(fr => {
+        if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
+        const nombre = _nombreDeTramo(fr);
+        if (!nombre || nombre.length < 4) return fr;
+        if (![...vistos].some(v => _mismoEjercicio(v, nombre))) { vistos.add(nombre); return fr; }
+        const entrada = _RESERVA_DUPLICADO.find(([re]) => re.test(nombre));
+        if (!entrada) return fr;
+        const libre = entrada[1].find(alt => ![...vistos].some(v => _mismoEjercicio(v, _nombreDeTramo(alt))));
+        if (!libre) return fr;
+        vistos.add(_nombreDeTramo(libre));
+        tocado = true;
+        // Se cambia SOLO el nombre: las series, las repeticiones y la nota del
+        // tramo se quedan exactamente como estaban.
+        return fr.replace(/^(\s*)([^0-9(]+?)(\s*[\d(])/, '$1' + libre + '$3');
+      });
+      return tocado ? cabecera + '·' + salida.join(',') : texto;
+    };
+
     if (mapaLesion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
+      semana = semana.map(d => d.detalle ? { ...d, detalle: _dedupSesion(d.detalle) } : d);
     }
 
     // ROTACIÓN AUTOMÁTICA DE EJERCICIOS — antes el plan repetía exactamente los
