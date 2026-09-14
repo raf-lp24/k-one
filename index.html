@@ -14662,10 +14662,22 @@
     // daba el mismo gramaje a un runner que a alguien de CrossFit con el mismo
     // peso. Se limita el tope a IMC ≥ 25 (sobrepeso), que es para lo que se
     // pensó -- con IMC normal se respeta el multiplicador tal cual.
+    //
+    // 2.4 → 2.7 (14 sept 2026, auditoría de nutricionista). Helms et al. 2014
+    // (referencia estándar de proteína en déficit para entrenados en fuerza)
+    // recomienda 2,3-3,1 g/kg de MASA MAGRA -- 2.4 estaba en el extremo bajo
+    // del rango, y el IMC (que no distingue músculo de grasa) disparaba este
+    // tope hasta en gente sin sobrepeso real: un hombre de 80kg/178cm (IMC
+    // 25,3, deportista normal) topaba en 146g/día, 1,82 g/kg de SU PESO --
+    // por debajo de la proteína que el mismo motor le da en superávit (2,0
+    // g/kg). En déficit, cuando más importa conservar masa magra, la
+    // proteína no debería ser menor que en volumen. Con 2.7 (dentro del
+    // mismo rango de Helms) ese mismo perfil sube a 164g, 2,06 g/kg -- ya
+    // por encima del superávit, que es como debe ser.
     const lbm = esMujer
       ? (0.252 * pesoKg + 0.473 * altCm - 48.3)
       : (0.407 * pesoKg + 0.267 * altCm - 19.2);
-    const lbmProtMax = Math.round(lbm * 2.4);
+    const lbmProtMax = Math.round(lbm * 2.7);
     const bmi = pesoKg / Math.pow(altCm / 100, 2);
     const conSobrepeso = bmi >= 25;
 
