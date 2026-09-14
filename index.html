@@ -14617,6 +14617,38 @@
       notasSalud.push('Tu objetivo es fuerza, no tamaño: en los dos básicos de cada sesión vas a 5×5 con carga alta (deberías llegar justo a la quinta repetición) y descansas 2-3 minutos entre series. Los accesorios se quedan en repeticiones altas. Sube el peso en cuanto completes las cinco series limpias.');
     }
 
+    // HIPERTROFIA: subir las repeticiones de los básicos (14 sept 2026).
+    //
+    // El objetivo "Ganar músculo" subía las SERIES (5 en los básicos, 4 en los
+    // accesorios) pero dejaba las repeticiones donde estaban, que en los básicos
+    // son 5 y 6. Resultado: quien pedía tamaño recibía "Sentadilla 5×5, Press
+    // banca 4×6" -- un esquema de fuerza, casi el mismo que el objetivo "Ganar
+    // fuerza" de aquí arriba, y con los dos objetivos dando planes parecidos no
+    // se entiende para qué se pregunta.
+    //
+    // Para crecer, el volumen efectivo se acumula mejor en repeticiones
+    // moderadas: los básicos suben a 8 y los accesorios ya venían a 10-15, que
+    // es el reparto clásico. No se baja de 8 en ningún básico y no se toca nada
+    // que ya esté en 8 o más, así que un día que ya fuera de hipertrofia se
+    // queda igual.
+    if (!soloDieta && ganarMusculo) {
+      const BASICOS_HIPER = /(press de banca|press banca|press inclinado|press declinado|sentadilla|peso muerto|press militar|press de hombro|dominadas|remo con barra|remo en|jal[oó]n|prensa|hip thrust|fondos)/i;
+      const aHipertrofia = (texto) => {
+        // Mismo cuidado que en el bloque de fuerza: los paréntesis llevan comas
+        // dentro y romperían el trozo sobre el que se decide si es un básico.
+        const notas = [];
+        let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return ' ' + (notas.length - 1) + ' '; });
+        t = t.replace(/([^,·]*?)(\d+)×(\d+)(?!\s*(?:s|seg|min|m)\b)/g, (m, nombre, ser, reps) => {
+          if (parseInt(reps, 10) >= 8 || !BASICOS_HIPER.test(nombre)) return m;
+          return nombre + ser + '×8';
+        });
+        t = t.replace(/ (\d+) /g, (m, i) => notas[+i]);
+        return t;
+      };
+      semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
+      notasSalud.push('Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa 2 minutos entre series de básicos y 60-90 segundos en los accesorios.');
+    }
+
     if (!soloDieta) {
       if (esDescarga) {
         notasSalud.push('Semana de descarga (toca cada 4). Ya te hemos quitado volumen del plan: haz las series con algo menos de peso y céntrate en la técnica. Recuperar también es entrenar — así llegas más fuerte al siguiente bloque.');
@@ -15047,7 +15079,14 @@
     // los primeros ejercicios se les suma una serie (0 = a ninguno).
     const _DUR = {
       expres:   { maxEj: 3, seriesTope: 3, sumarSerieA: 0 },
-      corta:    { maxEj: 4, seriesTope: 0, sumarSerieA: 0 },
+      // El tope de series de la sesión corta depende del NIVEL. Con 30-45 min,
+      // cuatro ejercicios a cinco series no caben; con pérdida de grasa daba igual
+      // (ya iban a 3), pero al pedir músculo los básicos suben a 5 y la sesión se
+      // iba de tiempo. A quien empieza se le topa en 3: progresa de sobra con ese
+      // volumen y así su plan de 30-45 deja de ser idéntico al de 45-60. A quien ya
+      // lleva tiempo se le topa en 4, que es el mínimo con el que un básico sigue
+      // siendo un básico.
+      corta:    { maxEj: 4, seriesTope: esPrincipiante ? 3 : 4, sumarSerieA: 0 },
       media:    { maxEj: 6, seriesTope: 0, sumarSerieA: 0 },
       larga:    { maxEj: 8, seriesTope: 0, sumarSerieA: 2 },
       muyLarga: { maxEj: 9, seriesTope: 0, sumarSerieA: 4 },
