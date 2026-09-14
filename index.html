@@ -10959,7 +10959,16 @@
           // conjunto se calcula antes de rotar nada.
           if (enLaSemana && despues !== antes && despues.length > 3 &&
               [...enLaSemana].some(v => _mismoEjercicio(v, despues))) return fr;
-          if (despues !== antes) { presentes.delete(antes); presentes.add(despues); }
+          if (despues !== antes) {
+            presentes.delete(antes);
+            presentes.add(despues);
+            // El conjunto de la semana también se actualiza sobre la marcha. Sin esto,
+            // dos rotaciones de días distintos podían CONVERGER en el mismo ejercicio:
+            // el conjunto se calcula antes de rotar, así que ninguna de las dos veía a
+            // la otra llegar. Pasaba de verdad -- la sentadilla del día A y la prensa
+            // del día B acababan las dos en "Zancadas con mancuernas".
+            if (enLaSemana) { enLaSemana.delete(antes); enLaSemana.add(despues); }
+          }
           return rotado;
         })
         .join(',');
@@ -14151,7 +14160,7 @@
       // hay forma de controlar el rango ni la velocidad, que es justo lo que una
       // rodilla tocada necesita. El circuito de abajo mantiene el trabajo de pierna
       // en máquinas, donde el recorrido sí se puede limitar.
-      mapaLesion.push([/Complejo con barra "The Bear"[^.]*\./g, 'Circuito de pierna en máquinas, 4 rondas: 12 prensa de piernas (rango sin dolor, sin bajar del todo) + 12 curl femoral sentado en máquina + 15 hip thrust con mancuerna + 12 extensión de cuádriceps (rango corto). Descansa 2 min entre rondas.']);
+      mapaLesion.push([/Complejo con barra "The Bear"[^.]*\./g, eq('Circuito de pierna en máquinas, 4 rondas: 12 prensa de piernas (rango sin dolor, sin bajar del todo) + 12 curl femoral sentado en máquina + 15 hip thrust con mancuerna + 12 extensión de cuádriceps (rango corto). Descansa 2 min entre rondas.', 'Circuito de pierna con mancuernas, 4 rondas: 12 step-ups controlados (sin salto) + 12 curl femoral tumbado con mancuerna + 15 hip thrust con mancuerna + 12 puente de glúteo a una pierna. Descansa 2 min entre rondas.', 'Circuito de pierna con el propio peso, 4 rondas: 12 step-ups controlados (sin salto) + 20 puente de glúteo + 15 puente de glúteo a una pierna. Descansa 2 min entre rondas.')]);
       // Las reglas van de la frase MÁS larga a la más corta y consumen el material
       // que va detrás del ejercicio: si solo se cambia el nombre, queda colgando
       // ("Press inclinado en máquina (rango controlado) mancuernas 4×10").
@@ -14300,12 +14309,12 @@
         // mitad de un complejo que se hace sin soltar la barra. Se cambia por un
         // circuito en máquinas con el mismo papel metabólico y sin carga en la
         // columna. Va ANTES que las reglas sueltas de abajo, que si no lo destrozan.
-        [/Complejo con barra "The Bear"[^.]*\./g, 'Circuito en máquinas, 4 rondas sin descanso entre ejercicios: 12 prensa de piernas + 10 press en máquina + 12 remo en máquina con apoyo de pecho + 15 hip thrust con mancuerna. Descansa 2 min entre rondas y sube peso cada una.'],
-        [/[Pp]eso muerto rumano( con mancuernas?)?/g, 'Femoral tumbado en máquina'],
+        [/Complejo con barra "The Bear"[^.]*\./g, eq('Circuito en máquinas, 4 rondas sin descanso entre ejercicios: 12 prensa de piernas + 10 press en máquina + 12 remo en máquina con apoyo de pecho + 15 hip thrust con mancuerna. Descansa 2 min entre rondas y sube peso cada una.', 'Circuito con mancuernas, 4 rondas sin descanso entre ejercicios: 12 sentadilla goblet + 10 press con mancuernas en banco + 12 remo con mancuernas + 15 hip thrust con mancuerna. Descansa 2 min entre rondas y sube peso cada una.', 'Circuito con el propio peso, 4 rondas sin descanso: 15 sentadillas + 12 flexiones + 12 remo australiano bajo mesa + 20 puente de glúteo. Descansa 2 min entre rondas.')],
+        [/[Pp]eso muerto rumano( con mancuernas?)?/g, eq('Femoral tumbado en máquina', 'Curl femoral tumbado con mancuerna', 'Puente de glúteo a una pierna')],
         // El SUMO va aparte: los días que lo llevan (Lower B) ya traen un hip thrust
         // unas comas más allá, y mandarlo también a hip thrust dejaba dos seguidos.
         // La prensa cubre la misma musculatura del sumo sin cargar la columna.
-        [/[Pp]eso muerto sumo( con mancuernas?)?/g, 'Prensa de piernas (rango cómodo)'],
+        [/[Pp]eso muerto sumo( con mancuernas?)?/g, eq('Prensa de piernas (rango cómodo)', 'Sentadilla goblet con mancuerna (rango cómodo)', 'Sentadilla goblet (rango cómodo)')],
         [/[Pp]eso muerto( convencional)?( con mancuernas?)?/g, 'Hip thrust'],
         [/\bdeadlifts?\b/gi, 'hip thrust'],
         [/[Rr]ussian twist/g, 'Plancha frontal'],
@@ -14333,7 +14342,7 @@
         // y es de los movimientos menos amables que existen para un hombro tocado:
         // rotación externa máxima con la barra por detrás de la cabeza. Igual que en
         // espalda, el complejo se cambia entero en vez de parchear un movimiento.
-        [/Complejo con barra "The Bear"[^.]*\./g, 'Complejo con barra, 4 rondas: front squat + peso muerto rumano + remo con barra × 5 repeticiones ininterrumpidas de cada uno. Sin nada por encima de la cabeza. Sube peso cada ronda.'],
+        [/Complejo con barra "The Bear"[^.]*\./g, eq('Complejo con barra, 4 rondas: front squat + peso muerto rumano + remo con barra × 5 repeticiones ininterrumpidas de cada uno. Sin nada por encima de la cabeza. Sube peso cada ronda.', 'Complejo con mancuernas, 4 rondas: sentadilla goblet + peso muerto rumano con mancuernas + remo con mancuernas × 8 repeticiones de cada uno sin soltar el peso. Sin nada por encima de la cabeza.', 'Circuito con el propio peso, 4 rondas: 15 sentadillas + 12 puente de glúteo + 12 remo australiano bajo mesa. Sin nada por encima de la cabeza.')],
         [/burpees?/gi, 'burpees sin flexión (baja, pie atrás y sube)'],
         // Nombre corto a propósito (y en plural, para seguir enlazando con la
         // ficha de ejercicio y el vídeo, que buscan por "elevaciones frontales"):
@@ -14637,12 +14646,12 @@
         // Mismo cuidado que en el bloque de fuerza: los paréntesis llevan comas
         // dentro y romperían el trozo sobre el que se decide si es un básico.
         const notas = [];
-        let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return ' ' + (notas.length - 1) + ' '; });
+        let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return '\u0000' + (notas.length - 1) + '\u0000'; });
         t = t.replace(/([^,·]*?)(\d+)×(\d+)(?!\s*(?:s|seg|min|m)\b)/g, (m, nombre, ser, reps) => {
           if (parseInt(reps, 10) >= 8 || !BASICOS_HIPER.test(nombre)) return m;
           return nombre + ser + '×8';
         });
-        t = t.replace(/ (\d+) /g, (m, i) => notas[+i]);
+        t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
         return t;
       };
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
@@ -14804,6 +14813,69 @@
       });
     }
 
+    // Sustitutos de reserva para cuando una adaptación por lesión deja el MISMO
+    // ejercicio dos veces en la sesión. El mapa de lesiones sustituye a ciegas,
+    // una regex detrás de otra, sin saber qué más hay en el día: por eso a quien
+    // tiene la espalda tocada le salía "Hip thrust 3×12, hip thrust a una pierna
+    // 3×10/pierna" (el peso muerto convertido justo en lo que el día ya traía), y
+    // a quien tiene la rodilla tocada, "Step-ups controlados o prensa (rango sin
+    // dolor) 4×6, ... step-ups controlados 4×10/pierna".
+    //
+    // Cada entrada es [qué ha quedado repetido, con qué sustituirlo]. Las reservas
+    // cumplen la misma regla que las de la rotación -- mismo músculo, mismo patrón
+    // y misma unidad -- y además son seguras para la zona lesionada, que es por lo
+    // que aquí no hay sentadillas libres ni peso muerto.
+    // Las reservas se eligen con eq() por el mismo motivo que las reglas de
+    // arriba: esto corre DESPUÉS del traductor de material, así que una reserva
+    // de gimnasio metida aquí llegaría tal cual a quien entrena en casa.
+    const _RESERVA_DUPLICADO = [
+      [/hip thrust|puente de gl[uú]teo/i, eq(['Patada de glúteo en polea', 'Abductores en máquina', 'Patada de glúteo en cuadrupedia'], ['Patada de glúteo en cuadrupedia', 'Puente de glúteo a una pierna'], ['Patada de glúteo en cuadrupedia', 'Puente de glúteo a una pierna'])],
+      [/step[- ]ups? controlados/i, eq(['Extensión de cuádriceps (rango corto)', 'Prensa de piernas (rango sin dolor)', 'Puente de glúteo a una pierna'], ['Puente de glúteo a una pierna', 'Curl femoral tumbado con mancuerna', 'Sentadilla isométrica en pared'], ['Puente de glúteo a una pierna', 'Superman'])],
+      [/prensa de piernas/i, eq(['Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'])],
+      [/femoral/i, eq(['Curl femoral sentado en máquina', 'Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'], ['Curl femoral tumbado con mancuerna', 'Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'], ['Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'])],
+      [/elevaciones frontales/i, eq(['Face pull', 'Retracción escapular con banda'], ['Retracción escapular con banda'], ['Retracción escapular tumbado boca abajo'])],
+      [/press en m[aá]quina|press con mancuernas/i, eq(['Contractor de pecho en máquina', 'Aperturas en polea'], ['Aperturas con mancuernas en banco'], ['Flexiones'])],
+      [/jal[oó]n/i, eq(['Pullover en polea alta', 'Remo en polea baja', 'Remo en máquina con apoyo de pecho'], ['Pullover con mancuerna', 'Remo con mancuernas', 'Remo australiano bajo mesa'], ['Remo australiano bajo mesa'])],
+      [/remo bajo mesa|remo en polea baja/i, eq(['Remo en máquina con apoyo de pecho', 'Jalón al pecho en polea'], ['Remo con mancuerna apoyado en banco'], ['Remo australiano bajo mesa'])],
+    ];
+    // Deshace los ejercicios repetidos que haya dejado la adaptación por lesión.
+    // Solo mira DENTRO de cada día: repetir un ejercicio en dos días distintos de
+    // la semana es normal, y a veces buscado.
+    const _dedupSesion = (texto) => {
+      if (!texto || texto.indexOf('·') < 0) return texto;
+      const partes = texto.split('·');
+      const cabecera = partes[0];
+      const cuerpo = partes.slice(1).join('·');
+      const frs = splitRespetandoParentesis(cuerpo);
+      const vistos = new Set();
+      let tocado = false;
+      const salida = frs.map(fr => {
+        if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
+        const nombre = _nombreDeTramo(fr);
+        if (!nombre || nombre.length < 4) return fr;
+        if (![...vistos].some(v => _mismoEjercicio(v, nombre))) { vistos.add(nombre); return fr; }
+        const entrada = _RESERVA_DUPLICADO.find(([re]) => re.test(nombre));
+        if (!entrada) return fr;
+        // La reserva tiene que ser segura para la zona lesionada: esto corre DESPUÉS
+        // del mapa de lesiones, así que lo que se meta aquí ya no lo filtra nadie.
+        // Sin esto, al deshacer un jalón repetido entraba un "Pullover con mancuerna"
+        // en el plan de alguien con el hombro tocado.
+        const seguraParaLesion = alt =>
+          !(_lesionZonaRodilla && _ALT_RIESGO_RODILLA.test(alt)) &&
+          !(_lesionZonaHombro  && _ALT_RIESGO_HOMBRO.test(alt)) &&
+          !(_lesionZonaEspalda && _ALT_RIESGO_ESPALDA.test(alt));
+        const libre = entrada[1].find(alt => seguraParaLesion(alt) &&
+          ![...vistos].some(v => _mismoEjercicio(v, _nombreDeTramo(alt))));
+        if (!libre) return fr;
+        vistos.add(_nombreDeTramo(libre));
+        tocado = true;
+        // Se cambia SOLO el nombre: las series, las repeticiones y la nota del
+        // tramo se quedan exactamente como estaban.
+        return fr.replace(/^(\s*)([^0-9(]+?)(\s*[\d(])/, '$1' + libre + '$3');
+      });
+      return tocado ? cabecera + '·' + salida.join(',') : texto;
+    };
+
     // ─────────────────────────────────────────────────────────────────────────
     // MATERIAL DISPONIBLE: traducir máquinas de gimnasio a lo que hay en casa.
     //
@@ -14833,7 +14905,11 @@
         r(/gemelos en prensa o máquina/gi, 'gemelos en escalón con mancuerna'),
         r(/gemelos en máquina/gi, 'gemelos en escalón con mancuerna'),
         r(/femoral tumbado en máquina/gi, 'peso muerto rumano con mancuernas'),
-        r(/extensión de cuádriceps en máquina/gi, 'sentadilla búlgara con mancuernas'),
+        // Ojo al elegir sustituto aquí: el día de Accesorios del split de 5 días ya
+        // abre con una sentadilla búlgara, así que traducir la extensión de
+        // cuádriceps a búlgara dejaba las dos seguidas. La banda hace el mismo
+        // movimiento (extensión de rodilla sentado) sin chocar con nada del día.
+        r(/extensión de cuádriceps en máquina/gi, 'extensión de cuádriceps con banda elástica'),
         r(/\bprensa\b/gi, 'sentadilla goblet con mancuerna'),
         // Empuje
         r(/press inclinado en multipower/gi, 'press inclinado con mancuernas'),
@@ -14868,6 +14944,27 @@
         // Core y varios
         r(/elevación de piernas en barra o banco/gi, 'elevación de piernas tumbado en suelo'),
         r(/face pull(?! con banda)/gi, 'face pull con banda elástica'),
+        // BÁSICOS ESCRITOS A SECAS (14 sept 2026). Las reglas de arriba cubren lo
+        // que lleva el material en el nombre ("remo con barra", "en polea", "en
+        // máquina"), pero las plantillas escriben los básicos sin material:
+        // "Sentadilla 5×8", "Press banca 4×8", "Peso muerto 5×8". En el gimnasio
+        // se entiende que son con barra; en casa, ese nombre a secas no dice con
+        // qué se hace, y no hay ni barra ni jaula ni banco olímpico. Medido: le
+        // llegaban a los tres niveles y a todas las frecuencias.
+        //
+        // Los lookaheads dejan en paz lo que YA trae calificativo o material,
+        // que son ejercicios distintos: la goblet, la búlgara, la sumo, el peso
+        // muerto rumano o a una pierna, y todo lo que las reglas de arriba hayan
+        // traducido ya a mancuernas.
+        r(/\bsentadillas?\b(?! goblet| búlgara| sumo| hack| isométrica| aérea| ancha| copa| con | a una| en )/gi, 'sentadilla goblet con mancuerna'),
+        r(/press (de )?banca(?! con mancuernas| plano con mancuernas)( plano)?/gi, 'press con mancuernas en banco'),
+        r(/\bpeso muerto\b(?! rumano| sumo| con mancuernas| a una pierna| convencional)/gi, 'peso muerto con mancuernas'),
+        r(/press militar(?! con mancuernas| con barra)/gi, 'press militar con mancuernas'),
+        r(/\bdominadas\b(?! asistidas| \(o remo| o jalón| con banda)/gi, 'dominadas (o remo australiano bajo mesa)'),
+        r(/hip thrust(?! con mancuerna| con barra| a una pierna| en banco| sentado)/gi, 'hip thrust con mancuerna'),
+        r(/femoral tumbado(?! en máquina| con mancuerna)/gi, 'curl femoral tumbado con mancuerna'),
+        r(/extensión de cuádriceps(?! en máquina| con)/gi, 'extensión de cuádriceps con banda elástica'),
+        r(/sentadilla hack/gi, 'sentadilla goblet con mancuerna'),
         // Red final para lo que no esté contemplado arriba
         r(/\ben polea\b/gi, 'con banda elástica'),
         r(/\ben multipower\b/gi, 'con mancuernas'),
@@ -14910,6 +15007,11 @@
 
       const mapaMaterial = (u.lugar || '').includes('sin material') ? mapaSinMaterial : mapaConMaterial;
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaMaterial) } : d);
+      // El traductor de material también puede dejar el mismo ejercicio dos veces:
+      // "jalón al pecho con agarre neutro" y "jalón en polea" son dos reglas
+      // distintas que en casa acaban las dos en un jalón con banda. Se le pasa el
+      // mismo dedup que a la adaptación por lesión.
+      semana = semana.map(d => d.detalle ? { ...d, detalle: _dedupSesion(d.detalle) } : d);
     }
 
     // ADAPTACIÓN POR LESIÓN — va al final, después de rotar accesorios y de ajustar
@@ -14920,56 +15022,6 @@
     // "femoral en máquina" a "peso muerto rumano con mancuernas" justo para quien
     // tiene la espalda lesionada). Por eso los ejercicios de sustitución de las
     // lesiones ya se eligen según el material disponible, más arriba.
-    // Sustitutos de reserva para cuando una adaptación por lesión deja el MISMO
-    // ejercicio dos veces en la sesión. El mapa de lesiones sustituye a ciegas,
-    // una regex detrás de otra, sin saber qué más hay en el día: por eso a quien
-    // tiene la espalda tocada le salía "Hip thrust 3×12, hip thrust a una pierna
-    // 3×10/pierna" (el peso muerto convertido justo en lo que el día ya traía), y
-    // a quien tiene la rodilla tocada, "Step-ups controlados o prensa (rango sin
-    // dolor) 4×6, ... step-ups controlados 4×10/pierna".
-    //
-    // Cada entrada es [qué ha quedado repetido, con qué sustituirlo]. Las reservas
-    // cumplen la misma regla que las de la rotación -- mismo músculo, mismo patrón
-    // y misma unidad -- y además son seguras para la zona lesionada, que es por lo
-    // que aquí no hay sentadillas libres ni peso muerto.
-    const _RESERVA_DUPLICADO = [
-      [/hip thrust|puente de gl[uú]teo/i, ['Patada de glúteo en polea', 'Abductores en máquina', 'Patada de glúteo en cuadrupedia']],
-      [/step[- ]ups? controlados/i, ['Prensa de piernas (rango sin dolor)', 'Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared']],
-      [/prensa de piernas/i, ['Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared']],
-      [/femoral/i, ['Curl femoral sentado en máquina', 'Peso muerto rumano a una pierna']],
-      [/elevaciones frontales/i, ['Face pull', 'Retracción escapular con banda']],
-      [/press en m[aá]quina|press con mancuernas/i, ['Contractor de pecho en máquina', 'Aperturas en polea']],
-      [/remo bajo mesa|remo en polea baja/i, ['Remo en máquina con apoyo de pecho', 'Jalón al pecho en polea']],
-    ];
-    // Deshace los ejercicios repetidos que haya dejado la adaptación por lesión.
-    // Solo mira DENTRO de cada día: repetir un ejercicio en dos días distintos de
-    // la semana es normal, y a veces buscado.
-    const _dedupSesion = (texto) => {
-      if (!texto || texto.indexOf('·') < 0) return texto;
-      const partes = texto.split('·');
-      const cabecera = partes[0];
-      const cuerpo = partes.slice(1).join('·');
-      const frs = splitRespetandoParentesis(cuerpo);
-      const vistos = new Set();
-      let tocado = false;
-      const salida = frs.map(fr => {
-        if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
-        const nombre = _nombreDeTramo(fr);
-        if (!nombre || nombre.length < 4) return fr;
-        if (![...vistos].some(v => _mismoEjercicio(v, nombre))) { vistos.add(nombre); return fr; }
-        const entrada = _RESERVA_DUPLICADO.find(([re]) => re.test(nombre));
-        if (!entrada) return fr;
-        const libre = entrada[1].find(alt => ![...vistos].some(v => _mismoEjercicio(v, _nombreDeTramo(alt))));
-        if (!libre) return fr;
-        vistos.add(_nombreDeTramo(libre));
-        tocado = true;
-        // Se cambia SOLO el nombre: las series, las repeticiones y la nota del
-        // tramo se quedan exactamente como estaban.
-        return fr.replace(/^(\s*)([^0-9(]+?)(\s*[\d(])/, '$1' + libre + '$3');
-      });
-      return tocado ? cabecera + '·' + salida.join(',') : texto;
-    };
-
     if (mapaLesion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
       semana = semana.map(d => d.detalle ? { ...d, detalle: _dedupSesion(d.detalle) } : d);
