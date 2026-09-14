@@ -13789,6 +13789,21 @@
         // de alto impacto que notasSalud dice haber eliminado.
         [/[Bb]road jumps?/g, 'step ups controlados (sin salto)'],
         [/[Ss]kater hops?/g, 'step lateral controlado (sin salto)'],
+        // BUG REAL (14 sept 2026, encontrado auditando el filtro con 4032
+        // planes): plioVariantesAv (Running avanzado, más arriba) lleva la
+        // explicación del movimiento pegada DETRÁS de las reps, entre
+        // paréntesis: "broad jumps 3×5 (salto horizontal máximo,
+        // recuperación completa entre SALTOS)". Las dos reglas de arriba
+        // solo cambian el NOMBRE del ejercicio -- la explicación, escrita
+        // para el movimiento original, sobrevivía intacta y le seguía
+        // diciendo a alguien con la rodilla lesionada que descansara "entre
+        // saltos". Como el paréntesis no está pegado al nombre (las reps se
+        // cuelan en medio), no se puede resolver ampliando esas dos reglas:
+        // hace falta una regla aparte para el paréntesis en sí, sea cual sea
+        // lo que venga antes -- mismo patrón que ya se usa abajo para
+        // "técnica de front squat + lanzamiento".
+        [/\(salto horizontal máximo, recuperación completa entre saltos\)/gi, '(sin salto, recuperación completa)'],
+        [/\(salto lateral tipo patinador, aterriza estable\)/gi, '(sin salto, controlado)'],
         // Los jumping jacks del remate metabólico ("circuito al final: 3 rondas
         // ... de 15 jumping jacks + ...") no tenían regla y se colaban en el
         // plan de cualquiera con la rodilla tocada: es salto repetido con
@@ -13800,6 +13815,10 @@
         // singular o incontable descuadraba la frase ("15 marcha rápida...").
         [/[Jj]umping jacks?/g, 'pasos laterales con brazos (sin salto)'],
         [/[Ss]quat jumps?( con mancuernas( ligeras)?)?/g, 'sentadillas parciales sin dolor'],
+        // Mismo bug que broad jumps/skater hops arriba: "squat jumps 3×8
+        // (salto vertical con carga corporal)" -- el paréntesis explicativo
+        // sobrevive a la regla de arriba, que solo toca el nombre.
+        [/\(salto vertical con carga corporal\)/gi, '(sin salto, controlado)'],
         [/[Ss]ingle-leg hop lateral/g, 'step lateral a una pierna (sin salto)'],
       ]);
       notasSalud.push(_lesionOtra
