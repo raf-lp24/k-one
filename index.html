@@ -14248,6 +14248,20 @@
       if (esGimnasio && !perdidaGrasa && !mejorarResistencia && !ganarMusculo) {
         notasSalud.push('Tu plan es de fuerza, que es la base para encontrarte mejor. Para redondearlo, la referencia de salud (OMS) son 150 min de actividad moderada a la semana: cuentan caminar a paso vivo, la bici o cualquier deporte que ya practiques. Si ya llegas por tu cuenta, no necesitas añadir nada al plan; si no, sumar dos paseos largos a la semana es la forma más fácil de cubrirlo.');
       }
+      // NEAT en pérdida de grasa (14 sept 2026, a petición directa: "aquí
+      // habría que añadir también andar como mínimo 10k"). NO se mete como
+      // una opción más del selector "Cardio final de tus sesiones" -- ese
+      // selector rota Sprints/Assault bike/Remo/Burpees/Comba en un formato
+      // interválico fijo (finisher4, arriba: "1 min fuerte / 1 min suave ×
+      // 7 rondas"), y andar no admite ese formato sin quedar como un remate
+      // de mentira. Caminar a diario es otra cosa -- un complemento, no un
+      // sustituto de ningún remate -- y por eso va como nota aparte, igual
+      // que ya se hacía con los 150 min/semana de arriba. El gasto por
+      // actividad no estructurada (NEAT) puede ser 15-30% del gasto total, y
+      // unos días flojos de pasos se comen el déficit que ya creó el plan.
+      if (esGimnasio && perdidaGrasa) {
+        notasSalud.push('El remate de después de entrenar no sustituye caminar: son cosas distintas. Fuera del gimnasio, muévete al menos 8.000-10.000 pasos al día (NEAT) -- ese movimiento de fondo puede ser hasta un 15-30% de lo que quemas en total, y unos días muy sedentarios se comen el déficit que ya te da el plan, aunque entrenes bien.');
+      }
       if (esRunner && ganarMusculo) {
         notasSalud.push('Ganar músculo corriendo tiene un techo: el volumen de carrera compite con la ganancia de masa (lo que se conoce como efecto de interferencia). Te hemos subido una serie el día de fuerza, que es donde de verdad se construye, y hemos dejado la carrera como estaba a propósito — sumar kilómetros iría en contra. Lo que más te va a rendir es no saltarte ese día y cubrir bien la proteína.');
       }
