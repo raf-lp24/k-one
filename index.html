@@ -13565,9 +13565,19 @@
              detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
+            // BUG REAL (14 sept 2026, medido: 40 de 40 planes de principiante
+            // a 3 días lo tenían): este día repetía LETRA POR LETRA el Full
+            // Body B del miércoles -- mismo resumen, mismos cinco ejercicios,
+            // mismas series. La plantilla solo definía dos sesiones (A y B) y
+            // a la tercera le tocaba B otra vez, así que el principiante a 3
+            // días -- que es el perfil más común de todos -- entrenaba dos
+            // veces exactamente lo mismo en la misma semana. Ahora hay una
+            // sesión C de verdad: mismos cinco patrones (rodilla, empuje,
+            // tirón, cadera, core) pero con la variante que no usan ni A ni
+            // B, que es como se programa un full body A/B/C.
             {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 3 ? "Full Body B · Variantes" : "Descanso activo",
-             detalle: numDias >= 3 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
+             resumen: numDias >= 3 ? "Full Body C · Unilateral y core" : "Descanso activo",
+             detalle: numDias >= 3 ? `Cuerpo completo · Step-ups con mancuernas ${sVol}×10 por pierna, press banca plano con mancuernas ${sVol}×10, remo en polea baja o remo con banda elástica ${sVol}×12, peso muerto rumano ${sVol}×10, dead bug ${sVol}×30s${finisher3}` : "",
              etiqueta: numDias >= 3 ? "Fuerza" : "Descanso"},
             {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 4 ? "Full Body A · Sube el peso" : "Descanso activo",
@@ -13894,7 +13904,15 @@
         // este reemplazo se combina con varias plantillas de día distintas, cada
         // una con su propia nota, y con el texto largo se pasaba de las 15
         // palabras en más de una — se perdía la tarjeta de peso.
-        [/[Pp]ress (de )?banca( o mancuernas)?/g, eq('Press en máquina', 'Press con mancuernas', 'Flexiones (sin dolor)')],
+        // El material y la variante que vienen DETRÁS entran en el patrón, o
+        // quedan colgando del reemplazo. BUG REAL (14 sept 2026, medido: 128
+        // sesiones de 768 planes con lesión de hombro): solo se consumía
+        // " o mancuernas", así que "Press banca con mancuernas" salía como
+        // "Press en máquina con mancuernas" -- una máquina con mancuernas,
+        // que no existe -- y "Press banca plano" como "Press en máquina
+        // plano". Las dos formas las escriben tanto las plantillas del día
+        // como la rotación automática (ALTERNATIVAS_EJERCICIO).
+        [/[Pp]ress (de )?banca( plano)?( con mancuernas| o mancuernas| con barra| en multipower| en máquina)?/g, eq('Press en máquina', 'Press con mancuernas', 'Flexiones (sin dolor)')],
         // Una sola regla con el material opcional dentro: con dos reglas (una
         // específica y otra genérica) la segunda volvía a coincidir con el texto
         // que acababa de escribir la primera y salía duplicado
