@@ -10777,6 +10777,7 @@
     const m = t.match(/^([^0-9(]+?)\s*[\d(]/);
     return normalizarEjercicio((m ? m[1] : t).trim());
   };
+  const _ES_REMATE_CARDIO = /interv[aá]lico|circuito al final|cardio al final|\btabata\b|\bamrap\b|\bemom\b/i;
   const _rotarSoloEjercicios = (texto, tabla) => {
     if (!tabla.length || !texto) return texto;
     const partes = texto.split('·');
@@ -10792,6 +10793,17 @@
       return fragmentos
         .map(fr => {
           if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
+          // El REMATE de cardio no pasa por la tabla de rotación. Ya tiene su
+          // propia rotación (modInterval, en el bloque de gimnasio) y, sobre
+          // todo, sale de lo que el cliente ha elegido a mano en "Cardio final
+          // de tus sesiones". Dejarlo entrar aquí rompía las dos cosas: quien
+          // elegía Burpees solo los recibía 1 de cada 4 bloques (los otros tres
+          // le salían Mountain climbers o cinta), y el texto quedaba sin sentido
+          // -- "Remo o bici suave 5 min 15 min interválico al finalizar" (dos
+          // duraciones pegadas) o "Bici estática suave ... 1 min fuerte", que es
+          // justo lo contrario de lo que pide el bloque. Las sustituciones por
+          // lesión sí lo tocan, y esas corren antes que esto.
+          if (_ES_REMATE_CARDIO.test(fr)) return fr;
           const tablaSegura = tabla.filter(([regex]) => {
             const m = fr.match(regex);
             return !(m && _NEGACION_PREVIA.test(fr.slice(0, m.index)));
@@ -13231,6 +13243,18 @@
     // DATOS DE SALUD (lesiones, alergias, enfermedades, medicación) — se usan más abajo
     // para adaptar ejercicios y nutrición, no solo para mostrarlos.
     const lesion = u.lesion || 'No';
+    // Zonas de lesión. Se calculan AQUÍ ARRIBA, antes de construir la semana,
+    // porque las necesitan tres sitios distintos: el mapa de sustituciones por
+    // lesión, el filtro de la rotación automática y la elección del remate de
+    // cardio (más abajo, en el bloque de gimnasio). Una sola fuente de verdad:
+    // duplicar la detección era garantizar que las copias se separasen.
+    const _lesionOtra = lesion.includes('Otra');
+    const _detalleLesion = (u.lesionDetalle || '').toLowerCase();
+    const _mencionaLesion = (...palabras) => palabras.some(p => _detalleLesion.includes(p));
+    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
+    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
+    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
+
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
     const medicacion = (u.medicacion || '').trim();
@@ -13659,7 +13683,7 @@
         // modalidad pero no el paréntesis, así que un "Burpees (burpees
         // seguidos al máximo)" acababa siendo "Mountain climbers (burpees
         // seguidos al máximo)": la tarjeta decía una cosa y la explicación otra.
-        { nombre: 'Burpees', accion: 'seguidos y sin parar, al máximo que puedas mantener', impacto: true },
+        { nombre: 'Burpees', accion: 'seguidos y sin parar, al máximo que puedas mantener', impacto: true, cargaHombro: true },
         { nombre: 'Comba', accion: 'a ritmo alto, con saltos simples', impacto: true },
         { nombre: 'Caminata en cuesta', accion: 'andando rápido en cuesta o con la cinta muy inclinada' },
       ];
@@ -13684,14 +13708,33 @@
       // pliometría después, nunca como remate con el cliente ya fatigado. Si él
       // ha elegido una a mano desde "Cambiar plan" se respeta -- es su decisión
       // informada, no un sorteo nuestro.
+      //
+      // Y con la RODILLA tocada tampoco, lo elija él o no: correr al máximo,
+      // saltar a la comba o hacer burpees son impacto repetido sobre la
+      // articulación justo cuando ya llega fatigado. Esto no lo tapaba nadie:
+      // el mapa de lesiones sustituye "comba" y "burpees" por su cuenta, pero
+      // "Sprints" no tiene regla en ningún sitio, así que 15 minutos de series
+      // corriendo llegaban tal cual a un cliente con la rodilla lesionada.
+      // Con el HOMBRO tocado cae el burpee: cada repetición lleva una flexión a
+      // fondo, que es carga de hombro en su rango más comprometido, y aquí van
+      // 15 minutos seguidos con el cliente ya fatigado. El resto de modalidades
+      // (correr, comba, bici, remo, cuesta) no cargan el hombro así.
+      const modalidadesSeguras = modalidadesDisponibles.filter(m => {
+        if (_lesionZonaRodilla && m.impacto) return false;
+        if (_lesionZonaHombro && m.cargaHombro) return false;
+        return true;
+      });
       const modalidadesSorteo = esPrincipiante
-        ? modalidadesDisponibles.filter(m => !m.impacto)
-        : modalidadesDisponibles;
+        ? modalidadesSeguras.filter(m => !m.impacto)
+        : modalidadesSeguras;
       // Si el cliente ha elegido una modalidad concreta desde "Cambiar plan", se
       // respeta — salvo que no exista donde entrena, y entonces se rota entre las
       // que sí tiene.
-      const prefFinisher = modalidadesDisponibles.find(m => m.nombre === u.preferenciaCardioFinisher);
-      const _pool = modalidadesSorteo.length ? modalidadesSorteo : modalidadesDisponibles;
+      // Se busca entre las SEGURAS, no entre todas: la elección del cliente manda
+      // sobre el sorteo, pero no sobre su propia lesión.
+      const prefFinisher = modalidadesSeguras.find(m => m.nombre === u.preferenciaCardioFinisher);
+      const _pool = modalidadesSorteo.length ? modalidadesSorteo
+        : (modalidadesSeguras.length ? modalidadesSeguras : modalidadesDisponibles);
       const modInterval = prefFinisher || _pool[(semilla + bloqueMeso) % _pool.length];
       // El principiante hace el mismo remate pero con la proporción al revés:
       // 30 segundos fuertes por 90 suaves (1:3) en vez de 1:1. Es la progresión
@@ -13911,12 +13954,6 @@
     // libre que el usuario escribió alguna palabra clave de rodilla/espalda/
     // hombro para aplicar el mismo filtro de seguridad de forma preventiva --
     // antes esto no hacía nada y el entreno salía sin adaptar ningún ejercicio.
-    const _lesionOtra = lesion.includes('Otra');
-    const _detalleLesion = (u.lesionDetalle || '').toLowerCase();
-    const _mencionaLesion = (...palabras) => palabras.some(p => _detalleLesion.includes(p));
-    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
-    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
-    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
     // Las tres constantes de zona se declaran FUERA de este if a propósito: el
     // filtro de lesiones de la rotación automática (más abajo, ya fuera de este
     // bloque) las necesita, y duplicar allí la detección era garantizar que las
