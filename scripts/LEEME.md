@@ -1,4 +1,4 @@
-# Auditores del recetario y de la tabla de alimentos
+# Auditores del recetario, los alimentos y el entrenamiento
 
 Scripts de comprobación que se pueden volver a pasar cada vez que se toca la
 nutrición. Todos se ejecutan con `node scripts/<archivo>` desde la raíz del
@@ -12,6 +12,7 @@ proyecto y no modifican nada: solo miden y avisan.
 | `auditar-grasas.js` | Reparto de grasa por plato y fibra del día tipo, por rama. Ojo al interpretarlo: un plato con mucha grasa no es malo si la grasa es buena (salmón, frutos secos, aguacate, AOVE). |
 | `auditar-reparto.js` | Reparto de calorías y proteína entre tomas y presencia de verdura, por rama. En déficit la comida debe pesar más que la cena. |
 | `medir-pools.js` | Cuántas opciones tiene cada (rama × toma). Sirve para saber qué pool está más corto antes de ampliar a ciegas. |
+| `auditar-rotacion.js` | **Entrenamiento.** La tabla de rotación de ejercicios: que cada alternativa trabaje el mismo músculo, con el mismo patrón de movimiento y medida en la misma unidad que el ejercicio al que sustituye. Avisa también de reglas muertas (ejercicios que ya no escribe ninguna plantilla). |
 | `validar-recetas.js` | Reimplementa "Ver macros": qué % de frases de ingrediente resuelven contra `alimentos.json` y cuánto se desvían las kcal declaradas de lo que suman los ingredientes. |
 
 `componer.js` y `cant-defecto.js` son auxiliares: el primero genera la línea
@@ -26,3 +27,17 @@ Estos auditores nacieron de fallos reales que llegaron a producción: una
 puestos como desayuno, el mismo producto con dos valores distintos en la
 tabla, y salsas sin especificar si eran de bote. Pasarlos antes de tocar la
 nutrición evita que vuelvan.
+
+## El auditor de rotación
+
+`auditar-rotacion.js` nació igual que los demás: de fallos reales repetidos. La
+rotación cambia el NOMBRE de un ejercicio por el de otro sin mirar el resto de la
+frase, y de ahí salieron, uno detrás de otro, un peso muerto rumano convertido en
+hip thrust (isquios a 0,9 series por semana), una plancha convertida en "Rueda
+abdominal 3x30s", unos A-skips convertidos en "Comba 3x20m" y un complejo que
+decía "8 RDL + 8 Peso muerto rumano" (el mismo ejercicio dos veces). Todos son el
+mismo error de fondo, así que se comprueban de una vez y automáticamente.
+
+Si el script marca un cambio que de verdad está justificado, se añade a la lista
+`ACEPTADAS` **con su motivo escrito**. Esa lista es la documentación de por qué se
+acepta cada excepción: sin motivo, no es una excepción, es un fallo.

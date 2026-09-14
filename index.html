@@ -10397,7 +10397,13 @@
     // excluye en su lookahead) y no tenía ninguna propia: el principiante la
     // veía las 12 semanas. Alternativas todas sin material y con ficha.
     [/sentadillas? a[ée]reas?/i, ['Sentadilla isométrica en pared', 'Split squat', 'Zancada lateral']],
-    [/sentadilla sumo/i, ['Peso muerto rumano', 'Hip thrust']],
+    // La sentadilla sumo es el ÚNICO movimiento de rodilla del Full Body B, y
+    // sus dos alternativas eran de cadera (isquios y glúteo): medido sobre planes
+    // reales, el día se quedaba SIN NINGUNA sentadilla, zancada ni step-up --
+    // "Peso muerto rumano, press inclinado, jalón, ..." para un principiante que
+    // solo entrena dos o tres veces por semana. Ahora rota entre variantes que
+    // siguen siendo de rodilla y siguen abriendo las caderas como el sumo.
+    [/sentadilla sumo/i, ['Sentadilla goblet ancha', 'Prensa con pies altos y abiertos', 'Sentadilla copa sumo']],
     // BUG REAL Y GRAVE (14 sept 2026, medido: 0,9 series de isquio a la semana
     // en el perfil intermedio de 4 días). El peso muerto rumano es el ÚNICO
     // ejercicio de isquios del día de pierna, y sus dos alternativas no
@@ -10421,7 +10427,15 @@
     // detrás en la plantilla ("peso muerto con mancuernas", "peso muerto sumo
     // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
     // mancuernas" -- dos materiales contradictorios en el mismo nombre).
-    [/peso muerto( convencional| sumo| rumano)?( con mancuernas?)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano', 'Hip thrust con barra'], false, true],
+    // "Hip thrust con barra" fuera (14 sept 2026). Sobre el papel era defendible
+    // -- cadena posterior con menos carga lumbar -- pero medido en planes reales
+    // rompía el día "Lower B · Isquios + glúteos": el peso muerto sumo, que es la
+    // única bisagra del día, se convertía en un hip thrust, y como el día YA trae
+    // "hip thrust a una pierna" quedaban dos hip thrust seguidos y los isquios con
+    // un solo ejercicio. El guardia anti-duplicados no lo veía porque conserva a
+    // propósito el "a una pierna" como parte del nombre. El peso muerto rumano,
+    // que sigue siendo alternativa, es la sustitución correcta: misma bisagra.
+    [/peso muerto( convencional| sumo| rumano)?( con mancuernas?)?\b|\bdeadlifts?\b/i, ['Peso muerto rumano'], false, true],
     // El material entra en el patrón por el mismo motivo que en zancadas y en
     // el press francés de más abajo: "press banca con mancuernas" rotaba solo
     // las dos primeras palabras y dejaba el material pegado al reemplazo, que
@@ -10457,7 +10471,11 @@
     // ("dominadas asistidas o jalón", "dominadas lastradas", "dominadas
     // australianas en mesa", "dominadas o jalón"): sin esto quedaba colgando
     // ("Remo en polea baja asistidas o jalón" -- bug real encontrado ago 2026).
-    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Remo en polea baja', 'Pullover en polea alta', 'Jalón en polea con agarre cerrado'], false, true],
+    // "Remo en polea baja" fuera: la dominada es tracción VERTICAL y el remo es
+    // horizontal. Los días que llevan dominadas ya traen su propio remo unas comas
+    // más allá, así que la rotación dejaba el día con dos tirones horizontales y
+    // ninguno vertical. Las otras tres alternativas sí son verticales.
+    [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Pullover en polea alta', 'Jalón en polea con agarre cerrado'], false, true],
     [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna', 'Remo en T en máquina'], false, true],
     // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
     // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
@@ -10465,7 +10483,11 @@
     // "(?! apoyado)" evita tocar "remo con mancuerna apoyado en banco" (opción
     // de poolsEjercicio, más abajo): sin esto quedaba colgando ("Remo en polea
     // baja apoyado en banco").
-    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Farmer carry con mancuernas']],
+    // "Farmer carry con mancuernas" fuera: el remo es tracción horizontal medida
+    // en repeticiones y el farmer carry es un transporte medido en metros. Salía
+    // "Farmer carry con mancuernas 4×10 por lado" -- un paseo cargado de "10
+    // repeticiones por lado".
+    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
     // "( cargadas? con mancuernas?)?" entra en el patrón por lo mismo que el
     // material del hip thrust de abajo: la plantilla de Híbrido en casa escribe
     // "zancadas cargadas con mancuernas" y, si la regla solo se comía
@@ -10570,7 +10592,10 @@
     // ── Cardio / acondicionamiento: rotan cada semana, con más variedad de
     // intensidad (desde andar hasta pliometría) para no repetir siempre lo mismo.
     [/burpees?/i, ['Mountain climbers', 'Cinta con inclinación a paso rápido', 'Remo o bici suave 5 min'], true],
-    [/box jumps?( over)?/i, ['Step-ups explosivos', 'Cinta con inclinación a paso rápido', 'Comba (saltos simples)'], true],
+    // La cinta fuera: los box jumps se escriben por repeticiones ("3×6") y la
+    // cinta se mide en minutos, así que salía "Cinta con inclinación a paso
+    // rápido 3×6" -- seis repeticiones de andar en cinta.
+    [/box jumps?( over)?/i, ['Step-ups explosivos', 'Comba (saltos simples)'], true],
     [/\bdouble[- ]unders?\b|\bcomba\b|salto(s)? a la comba/i, ['Cinta con inclinación a paso rápido', 'Bici estática suave', 'Remo suave 5 min'], true],
     [/wall balls?/i, ['Thrusters con mancuernas', 'Sentadilla + press de hombro'], true],
     [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro'], true],
@@ -10597,8 +10622,12 @@
     //     patrón. Las tres de abajo son isométricas, como la plancha.
     [/plancha lateral/i, ['Copenhagen plank']],
     [/plancha(?! lateral| invertida)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados'], true],
-    [/dead bug(?! lateral)/i, ['Bird dog', 'Superman', 'Equilibrio en una pierna']],
-    [/clamshells(?! con banda)/i, ['Círculos de tobillo', 'Equilibrio en una pierna']],
+    // "Equilibrio en una pierna" fuera de estos dos huecos: es una postura que se
+    // aguanta (segundos) y tanto el dead bug de las plantillas de running como los
+    // clamshells se escriben por repeticiones por lado, así que salía un
+    // "Equilibrio en una pierna 3×10/lado".
+    [/dead bug(?! lateral)/i, ['Bird dog', 'Superman']],
+    [/clamshells(?! con banda)/i, ['Círculos de tobillo', 'Lateral band walks']],
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
     // REGLA ELIMINADA (14 sept 2026). Su único consumidor vivo es el complejo
@@ -10789,10 +10818,22 @@
   const _NEGACION_PREVIA = /\b(no|sin|evita|nada de|cuidado con|olvídate de|jamás)\s+[^,.;·]{0,25}$/i;
   // Nombre del ejercicio de un tramo ("Peso muerto rumano 4×10" -> "peso muerto
   // rumano"), para poder comparar tramos entre sí dentro de la misma sesión.
+  // Para comparar tramos entre sí, el MATERIAL no distingue un ejercicio de otro:
+  // "Hip thrust con barra" y "Hip thrust" son el mismo movimiento, y dejarlos como
+  // nombres distintos hacía que la rotación metiera los dos en la misma sesión
+  // ("Hip thrust con barra 4×12, ..., Hip thrust 4×12"). Se quita también el guion,
+  // que separaba "Step-ups controlados" de "step ups controlados". Ojo: se quita el
+  // material, NO los calificativos que sí cambian el ejercicio ("búlgara", "sumo",
+  // "a una pierna"), porque sentadilla y sentadilla búlgara sí conviven bien.
+  const _MATERIAL = /\s+(con (barra|mancuernas?|kettlebell|banda el[áa]stica|banda|disco|soga|cuerda)|en (m[áa]quina|polea( alta| baja)?|multipower|prensa|banco|escal[óo]n))\b.*$/i;
   const _nombreDeTramo = (fr) => {
     const t = (fr || '').trim();
     const m = t.match(/^([^0-9(]+?)\s*[\d(]/);
-    return normalizarEjercicio((m ? m[1] : t).trim());
+    return normalizarEjercicio((m ? m[1] : t).trim())
+      .replace(_MATERIAL, '')
+      .replace(/-/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
   const _ES_REMATE_CARDIO = /interv[aá]lico|circuito al final|cardio al final|\btabata\b|\bamrap\b|\bemom\b/i;
   const _rotarSoloEjercicios = (texto, tabla) => {
@@ -10807,6 +10848,20 @@
       // 5×8, Peso muerto rumano 4×10" o dos veces el press inclinado. Medido
       // sobre 8.532 sesiones reales: pasaba en el 3%.
       const presentes = new Set(fragmentos.map(_nombreDeTramo).filter(n => n && n.length > 3));
+      // Los nombres que van ENTRE PARÉNTESIS también cuentan como presentes. El
+      // filtro de lesiones escribe aclaraciones del tipo "elevaciones de cadera
+      // (hip thrust)", y _nombreDeTramo solo se queda con lo de fuera, así que la
+      // rotación podía meter un "hip thrust" suelto unas comas más allá y dejar el
+      // mismo ejercicio dos veces en la sesión con dos nombres distintos. Visto en
+      // Running con la rodilla lesionada.
+      fragmentos.forEach(fr => {
+        const m = fr.match(/\(([^()]{3,40})\)/);
+        // Solo si el paréntesis parece un NOMBRE de ejercicio. Muchos son avisos
+        // de seguridad ("sin salto", "rango sin dolor", "agarre neutro") y meterlos
+        // aquí ensuciaba el conjunto con cosas que no son ejercicios.
+        const esAviso = /^(sin |rango|al |hasta |baja|aprieta|codos|controla|profundidad|agarre|foco|opcional|bajo impacto|aceleraci)/i;
+        if (m && !/\d/.test(m[1]) && !esAviso.test(m[1].trim())) presentes.add(normalizarEjercicio(m[1].trim()));
+      });
       return fragmentos
         .map(fr => {
           if (!_TRAMO_CON_CANTIDAD.test(fr)) return fr;
@@ -14011,7 +14066,15 @@
         // la que ya viene con su aviso puesto por otra regla.
         [/[Pp]rensa de piernas(?! \(rango)/g, 'Prensa de piernas (rango sin dolor, sin bajar del todo)'],
         [/[Ss]entadilla goblet( con mancuerna)?/g, 'Step-ups controlados (sin salto)'],
-        [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'elevaciones de cadera (hip thrust)'],
+        // Antes esto era "elevaciones de cadera (hip thrust)", y eso convertía un
+        // movimiento de rodilla unilateral en una extensión de cadera. En el día de
+        // fuerza del corredor, que ya trae "puente glúteo a una pierna" dos comas
+        // más allá, el resultado eran DOS extensiones de cadera seguidas y ni un
+        // solo ejercicio unilateral de rodilla -- justo lo que un corredor con la
+        // rodilla tocada más necesita conservar, en rango tolerable. Lo que se
+        // recorta ahora es el RANGO, no el patrón, que es como se adapta una
+        // zancada con dolor femoropatelar.
+        [/[Zz]ancadas( inversas)?( con mancuernas)?/g, 'zancada estática en rango corto (sin bajar del todo)'],
         // "Burpees box jump over" tiene que ir ANTES que la regla suelta de "box
         // jump over" (justo debajo): si no, esa regla mataba a traición el
         // "box jump over" de en medio de la frase de burpees primero, y para
@@ -14118,8 +14181,25 @@
     }
     if (_lesionZonaEspalda) {
       mapaLesion = mapaLesion.concat([
-        [/[Pp]eso muerto rumano( con mancuernas)?/g, 'Hip thrust'],
-        [/[Pp]eso muerto( con mancuernas| convencional)?/g, 'Hip thrust'],
+        // DOS FALLOS AQUÍ (14 sept 2026):
+        //
+        // 1. El peso muerto rumano se convertía en un hip thrust, igual que el
+        //    convencional. Pero el rumano es de ISQUIOS y el hip thrust de GLÚTEO,
+        //    y los días que llevan rumano suelen traer ya un hip thrust: al
+        //    cliente con la espalda tocada le salían DOS hip thrust seguidos y
+        //    cero trabajo de isquios. El femoral tumbado entrena el mismo músculo
+        //    que el rumano sin ninguna carga sobre la columna, que es justo lo que
+        //    se busca aquí.
+        //
+        // 2. La segunda regla no consumía " sumo", así que "peso muerto sumo con
+        //    mancuernas" salía como "Hip thrust sumo con mancuernas" -- el mismo
+        //    patrón de texto colgando que ya ha aparecido media docena de veces.
+        [/[Pp]eso muerto rumano( con mancuernas?)?/g, 'Femoral tumbado en máquina'],
+        // El SUMO va aparte: los días que lo llevan (Lower B) ya traen un hip thrust
+        // unas comas más allá, y mandarlo también a hip thrust dejaba dos seguidos.
+        // La prensa cubre la misma musculatura del sumo sin cargar la columna.
+        [/[Pp]eso muerto sumo( con mancuernas?)?/g, 'Prensa de piernas (rango cómodo)'],
+        [/[Pp]eso muerto( convencional)?( con mancuernas?)?/g, 'Hip thrust'],
         [/\bdeadlifts?\b/gi, 'hip thrust'],
         [/[Rr]ussian twist/g, 'Plancha frontal'],
         [/[Rr]emo con barra( inclinado)?/g, eq('Remo en máquina con apoyo de pecho', 'Remo con mancuerna apoyado en banco', 'Remo bajo mesa')],
@@ -14137,6 +14217,12 @@
     }
     if (_lesionZonaHombro) {
       mapaLesion = mapaLesion.concat([
+        // El burpee lleva una flexión a fondo en CADA repetición: carga de hombro en
+        // su rango más comprometido, y encima a fatiga. Aparece en los finishers en
+        // prosa del Híbrido ("Tabata 4 min alternando KB swings y burpees") y no lo
+        // tocaba ninguna regla, así que el cliente con el hombro tocado los recibía
+        // tal cual. Se le quita la flexión y se queda el trabajo de piernas y pulso.
+        [/burpees?/gi, 'burpees sin flexión (baja, pie atrás y sube)'],
         // Nombre corto a propósito (y en plural, para seguir enlazando con la
         // ficha de ejercicio y el vídeo, que buscan por "elevaciones frontales"):
         // "Elevaciones frontales con mancuernas (ligero)" sumado a la nota técnica
@@ -14932,11 +15018,33 @@
     // colarse fuera de rango), esto no debería activarse nunca, pero si
     // llegase un TDEE anómalo por cualquier otra vía, mejor un mínimo
     // biológico que un objetivo calórico negativo o absurdo.
+    // BUG REAL (14 sept 2026). El déficit y el superávit eran cantidades FIJAS
+    // (-450 y +350 kcal) para todo el mundo, y una cantidad fija es un porcentaje
+    // distinto según lo grande que seas. Medido:
+    //
+    //   mujer 50 kg, 45 años -> TDEE 1.678 -> 1.228 kcal = -27%
+    //   mujer 58 kg          -> TDEE 1.986 -> 1.536 kcal = -23%
+    //   hombre 95 kg         -> TDEE 3.040 -> 2.590 kcal = -15%
+    //
+    // O sea: cuanto más pequeña es la persona, más agresivo le salía el déficit,
+    // que es justo al revés de lo que toca -- quien menos masa tiene es quien más
+    // riesgo corre de perderla. Y el -27% incumplía el propio rango del motor
+    // (-15/-19%). El suelo de 1.200 kcal casi nunca llegaba a saltar porque 1.228
+    // ya estaba por encima.
+    //
+    // Ahora el ajuste es PROPORCIONAL al gasto, con topes absolutos por arriba:
+    // un déficit mayor de 500 kcal no acelera la pérdida de grasa en la práctica
+    // (acelera la pérdida de músculo y el abandono), y un superávit mayor de 400
+    // solo añade grasa. Los topes dejan a la gente grande casi donde estaba y
+    // arreglan a la pequeña, que era donde estaba el problema.
+    const _acotar = (v, min, max) => Math.round(Math.min(max, Math.max(min, v)));
+    const _deficit   = _acotar(tdee * 0.18, 250, 500);
+    const _superavit = _acotar(tdee * 0.13, 200, 400);
     let kcalObj;
     if (perdidaGrasa) {
-      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - 450);
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - _deficit);
     } else if (ganarMusculo) {
-      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + 350);
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + _superavit);
     } else {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee); // equilibrio = TDEE real calculado, no valor fijo
     }
