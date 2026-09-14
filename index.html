@@ -10547,8 +10547,17 @@
     // distintos en 12 semanas, frente a 18 del intermedio). Estas dos reglas le
     // dan alternativas con ficha propia. El compuesto "A-skips + B-skips" va
     // primero para que no se sustituya solo la mitad y quede "B-skips + B-skips".
-    [/copenhagen plank/i, ['Plancha lateral', 'Pallof press', 'Bird dog']],
-    [/a-skips \+ b-skips|a-skips|b-skips/i, ['A-skips + B-skips', 'B-skips', 'Comba']],
+    // "Pallof press" fuera: el copenhagen se escribe en segundos por lado
+    // ("3×15s/lado") y el pallof va por repeticiones, así que salía un
+    // "Pallof press 3×15s/lado". Plancha lateral y bird dog sí se aguantan.
+    [/copenhagen plank/i, ['Plancha lateral', 'Bird dog']],
+    // "Comba" fuera (14 sept 2026): este hueco se escribe en METROS ("A-skips
+    // 3×20m") porque son drills de técnica de carrera que se hacen avanzando,
+    // y salía "Comba 3×20m" -- saltar a la comba veinte metros. Misma regla de
+    // unidades que la plancha: una alternativa comparte cómo se mide con lo que
+    // sustituye. High knees y butt kicks son drills de carrera, van en metros y
+    // tienen ficha propia.
+    [/a-skips \+ b-skips|a-skips|b-skips/i, ['A-skips + B-skips', 'B-skips', 'High knees', 'Butt kicks']],
     // "Suspensión activa en barra" (nombre inventado, nadie lo busca así) quitado:
     // "dead hang" es el término real, usado tal cual hasta en medios en español
     // (verificado ago 2026) -- rotar a sí mismo no aporta nada.
@@ -10592,7 +10601,15 @@
     [/clamshells(?! con banda)/i, ['Círculos de tobillo', 'Equilibrio en una pierna']],
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
-    [/clean( ?& ?jerk)?|hang clean|power clean/i, ['Hip thrust con barra', 'Peso muerto rumano'], true],
+    // REGLA ELIMINADA (14 sept 2026). Su único consumidor vivo es el complejo
+    // con mancuernas del Híbrido ("8 RDL + 8 hang clean + 8 front squat + 8 push
+    // press + 8 reverse lunge"), y las dos alternativas lo rompían: "Peso muerto
+    // rumano" DUPLICABA el RDL que ya abre el complejo (son el mismo ejercicio),
+    // y "Hip thrust con barra" metía una barra y un banco en mitad de un complejo
+    // de mancuernas que se hace sin soltar el peso. El guardia anti-duplicados no
+    // lo veía porque el complejo entero es UN fragmento de texto, no cinco.
+    // Las plantillas de CrossFit y Hyrox, que eran el objetivo original de esta
+    // regla, ya no generan entrenamiento (se venden solo como nutrición).
     [/sled push/i, ['Farmer carry', 'Zancadas cargadas con mancuernas'], true],
     [/sled pull/i, ['Farmer carry', 'Remo con banda de resistencia'], true],
     // "Sled push" es de gimnasio, así que a quien entrena en casa solo le
@@ -14824,7 +14841,17 @@
         });
         return { ...d, detalle: cabecera + '· ' + piezas.join(', ') };
       });
-      if (_tramoDur === 'expres') {
+      // El corredor que empieza va PRIMERO en esta cadena: las demás notas hablan
+      // de recortar ejercicios o subir series, y su día no es una lista de
+      // ejercicios sino una tirada de carrera. Recibe la misma tirada diga el
+      // tiempo que diga, y eso es lo correcto -- el volumen de un principiante sube
+      // por semanas, no por los minutos que tenga libres ese día, y subirlo de golpe
+      // es la causa más común de lesión en gente que empieza a correr. Pero la
+      // pantalla le promete que "cada sesión está ajustada a los X min que nos
+      // dijiste", así que hay que explicárselo o parece que no le hemos hecho caso.
+      if (esRunner && esPrincipiante) {
+        notasSalud.push('Tus tiradas no se alargan aunque tengas más rato libre, y es a propósito: empezando a correr, el volumen sube semana a semana, no según los minutos que tengas ese día. Subir de golpe es la causa más común de lesión en gente que empieza. Si te sobra tiempo, dedícalo a calentar mejor, a los estiramientos del final o a caminar un rato más.');
+      } else if (_tramoDur === 'expres') {
         notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
       } else if (_tramoDur === 'corta') {
         notasSalud.push('Sesión de 30-45 min: te hemos dejado cuatro ejercicios por día, los que más rinden por minuto. Descansa 60 segundos entre series en los accesorios y 90 en los básicos, y entra de sobra en el tiempo que tienes. Si un día vas justo, quita el último ejercicio antes que hacerlos todos con prisa y mala técnica.');
