@@ -7112,8 +7112,9 @@
             <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Remo</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Burpees</div>
             <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Comba</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-cardioFinisher')">Caminata en cuesta</div>
           </div>
-          <span class="field-hint">Solo aplica si entrenas Gimnasio/Fuerza con objetivo perder grasa: elige el que puedas hacer según lo que tenga tu gimnasio, o deja "Automático" para que vaya rotando.</span>
+          <span class="field-hint">Solo aplica si entrenas Gimnasio/Fuerza con objetivo perder grasa: elige el que puedas hacer según lo que tenga tu gimnasio, o deja "Automático" para que vaya rotando. Si empiezas desde cero, en automático no te tocará nada de salto (sprints, burpees ni comba) hasta que tengas base.</span>
         </div>
       </div>
     </div>
@@ -10475,7 +10476,14 @@
     // reales). "a una pierna" NO se consume a propósito: "Peso muerto rumano a
     // una pierna" y "Puente de glúteo a una pierna" sí son ejercicios reales, y
     // conservarlo mantiene el carácter unilateral que buscaba la plantilla.
-    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Abductores en máquina', 'Patada de glúteo en polea', 'Patada de glúteo en cuadrupedia']],
+    // "Abductores en máquina" quitado el 14 sept 2026: el hip thrust es EXTENSIÓN
+    // de cadera y el abductor es ABDUCCIÓN — músculo y patrón distintos. En la
+    // plantilla de Full Body B el hip thrust ocupa el único hueco de cadera del
+    // día, así que la rotación dejaba la sesión sin ninguna extensión de cadera
+    // y con un aislamiento de glúteo medio abriendo el entrenamiento. Misma
+    // regla que ya se aplicó al peso muerto rumano y al press banca: una
+    // alternativa tiene que trabajar el mismo músculo y el mismo patrón.
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Patada de glúteo en polea', 'Patada de glúteo en cuadrupedia']],
     [/prensa de piernas/i, ['Sentadilla goblet', 'Zancadas con mancuernas', 'Sentadilla hack', 'Aductores en máquina']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
@@ -10537,8 +10545,28 @@
     [/wall balls?/i, ['Thrusters con mancuernas', 'Sentadilla + press de hombro'], true],
     [/thrusters?/i, ['Wall balls', 'Sentadilla goblet + press de hombro'], true],
     [/kettlebell swings?|\bKB swings?\b/i, ['Hip thrust con mancuerna', 'Peso muerto rumano con kettlebell'], true],
-    [/russian twist/i, ['Plancha lateral', 'Rueda abdominal'], true],
-    [/plancha( frontal)?\b/i, ['Dead bug', 'Rueda abdominal', 'Plancha invertida', 'Tijeras'], true],
+    // El russian twist se escribe por REPETICIONES, así que sus alternativas
+    // tienen que serlo también: "Plancha lateral" (que se mide en segundos)
+    // dejaba "Plancha lateral 3×20" — una plancha de 20 repeticiones.
+    [/russian twist/i, ['Rueda abdominal', 'Tijeras'], true],
+    // DOS BUGS REALES EN LA MISMA REGLA (14 sept 2026, medidos sobre 4.320
+    // planes de gimnasio: 2.304 sesiones afectadas).
+    //  1. TEXTO COLGANDO — cuarta vez que aparece este patrón. La genérica
+    //     mordía el "plancha" de "plancha lateral" y dejaba el adjetivo suelto
+    //     detrás del reemplazo: "Rueda abdominal lateral", "Dead bug lateral",
+    //     "Tijeras lateral", "Plancha invertida lateral". Ejercicios que no
+    //     existen. Se arregla con el lookahead, igual que ya se hizo con
+    //     "sentadillas con salto" en el mapa de lesiones.
+    //  2. ISOMÉTRICO CAMBIADO POR DINÁMICO — la plancha va en SEGUNDOS
+    //     ("plancha 3×30s") y dead bug, rueda abdominal y tijeras van en
+    //     REPETICIONES. La sustitución conservaba el formato de origen y salía
+    //     "Rueda abdominal 3×30s" o "Dead bug 4×45s": nadie hace una rueda
+    //     abdominal "durante 30 segundos". REGLA: una alternativa de rotación
+    //     tiene que compartir unidad de medida con lo que sustituye (segundos
+    //     con segundos, repeticiones con repeticiones), además de músculo y
+    //     patrón. Las tres de abajo son isométricas, como la plancha.
+    [/plancha lateral/i, ['Copenhagen plank']],
+    [/plancha(?! lateral| invertida)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados'], true],
     [/dead bug(?! lateral)/i, ['Bird dog', 'Superman', 'Equilibrio en una pierna']],
     [/clamshells(?! con banda)/i, ['Círculos de tobillo', 'Equilibrio en una pierna']],
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
@@ -10617,7 +10645,16 @@
   // alternativas al slot de carries para quien entrena en casa.
   const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
   const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n/i;
-  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones) => {
+  // BUG REAL (14 sept 2026): la rotación no sabía NADA del nivel del cliente,
+  // así que a un principiante le cambiaba la plancha por una "Rueda abdominal
+  // 3×30s". La rueda abdominal es de los ejercicios de core más exigentes que
+  // existen: quien empieza desde cero no hace una sola repetición limpia, y
+  // mucho menos "durante 30 segundos". Estas son las alternativas que piden una
+  // base de fuerza o de técnica que alguien que empieza aún no tiene; si tras
+  // filtrarlas no queda ninguna, se deja el ejercicio original (que la
+  // plantilla ya eligió pensando en su nivel).
+  const _ALT_NIVEL_ALTO = /rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b/i;
+  const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones, esPrincipiante) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
       // ejercicios de gimnasio a quien entrena en casa y, encima, con el material
@@ -10630,6 +10667,7 @@
       const viables = alternativas.filter(a => {
         if (_ALT_SOLO_GIMNASIO.test(a) && entorno !== 'gimnasio') return false;
         if (_ALT_PESO_LIBRE.test(a) && entorno === 'sinMaterial') return false;
+        if (esPrincipiante && _ALT_NIVEL_ALTO.test(a)) return false;
         if (lesiones) {
           if (lesiones.rodilla && _ALT_RIESGO_RODILLA.test(a)) return false;
           if (lesiones.hombro && _ALT_RIESGO_HOMBRO.test(a)) return false;
@@ -11573,11 +11611,25 @@
     const reps = srMatch ? srMatch[2] : '';
     // RPE objetivo derivado del rango de repeticiones (menos reps = más cerca de fuerza
     // máxima = RPE algo menor; más reps = accesorio cerca del fallo = RPE mayor).
+    // BUG REAL (14 sept 2026): esto NO miraba el nivel del cliente, así que a
+    // alguien que empieza desde cero se le pedía RPE 8,5 en su primera sentadilla
+    // de la vida y RPE 9,5 en las series de 15 — es decir, entrenar al borde del
+    // fallo antes de tener la técnica. La recomendación estándar para quien
+    // empieza es quedarse en RPE 7-8 (3-4 repeticiones en recámara) durante las
+    // primeras semanas: la técnica se mantiene limpia y no se acumula fatiga
+    // inútil. Se baja un punto entero todo el rango del principiante.
     const repsNum = reps ? parseInt(reps, 10) : null;
     let rpeHTML = '';
     if (repsNum) {
-      const rpe = repsNum <= 6 ? '8' : repsNum <= 10 ? '8.5' : repsNum <= 14 ? '9' : '9.5';
-      rpeHTML = `<div class="ejercicio-rpe"><span class="k">RPE objetivo</span><span class="v">${rpe}</span></div>`;
+      const _novato = (userData.nivel || '').includes('Principiante');
+      const rpe = repsNum <= 6 ? (_novato ? '7' : '8')
+                : repsNum <= 10 ? (_novato ? '7.5' : '8.5')
+                : repsNum <= 14 ? (_novato ? '8' : '9')
+                : (_novato ? '8.5' : '9.5');
+      const _ayuda = _novato
+        ? 'Cuánto debe costarte la serie. Deja 2-3 repeticiones en recámara: si acabas sin poder hacer ni una más, te has pasado de peso.'
+        : 'Cuánto debe costarte la serie, del 1 al 10. RPE 8 = podrías haber hecho 2 repeticiones más.';
+      rpeHTML = `<div class="ejercicio-rpe" title="${_esc(_ayuda)}"><span class="k">RPE objetivo</span><span class="v">${rpe}</span></div>`;
     }
 
     // El nombre casi siempre viene del propio plan (confiable), pero desde que
@@ -13113,6 +13165,14 @@
     const sesionExpres = tiempoSesion.includes('15-20');
     const sesionCorta = tiempoSesion.includes('30-45') || sesionExpres;
     const sesionLarga = tiempoSesion.includes('90') || tiempoSesion.includes('Más');
+    // Tramo de duración real, usado en DOS sitios: aquí abajo para dimensionar el
+    // remate de cardio, y al final del todo para recortar o ampliar la lista de
+    // ejercicios (buscar "AJUSTE POR DURACIÓN DE LA SESIÓN").
+    const _tramoDur = sesionExpres ? 'expres'
+      : tiempoSesion.includes('30-45') ? 'corta'
+      : tiempoSesion.includes('60-90') ? 'larga'
+      : tiempoSesion.includes('Más')   ? 'muyLarga'
+      : 'media';
 
     // OBJETIVO — se declaran aquí para que los planes de entrenamiento (más abajo)
     // y la nutrición (también más abajo) puedan usarlos sin TDZ.
@@ -13544,18 +13604,28 @@
       const _cardioZona2 = lugar.includes('casa')
         ? ', cardio al final: 15-20 min en zona 2 (caminar rápido o bici; ritmo conversacional, RPE 3-4)'
         : ', cardio al final: 15-20 min en zona 2 (remo, bici o cinta; ritmo conversacional, RPE 3-4)';
-      const finisher3 = perdidaGrasa ? ', circuito al final: 3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto + 8 flexiones' : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
       // El remate interválico rota entre lo que de verdad hay en un gimnasio
       // normal (mismo patrón que la rotación de accesorios: semilla+bloqueMeso).
       // Antes siempre decía "corre, pedalea o rema" en el texto pero la tarjeta
       // solo mostraba "Sprints" fijo — no realista para quien no vaya a salir a
       // correr cada vez que le toque este bloque de 4 semanas.
+      // "Caminata en cuesta" añadida el 14 sept 2026: era la ÚNICA modalidad de
+      // bajo impacto que funciona igual en el gimnasio (cinta inclinada) y en
+      // casa (una cuesta de la calle). Sin ella, a quien entrena en casa solo le
+      // quedaban las tres de salto/impacto — justo las que no puede recibir un
+      // principiante (ver el filtro de abajo), que se quedaba sin remate.
       const modalidadesInterval = [
-        { nombre: 'Sprints', accion: 'corriendo — cinta o al aire libre, con algo de inclinación si puedes' },
-        { nombre: 'Assault bike', accion: 'en la bici de aire (brazos y piernas a la vez)' },
+        { nombre: 'Sprints', accion: 'corriendo — cinta o al aire libre, con algo de inclinación si puedes', impacto: true },
+        { nombre: 'Assault bike', accion: 'en la bici de aire, brazos y piernas a la vez' },
         { nombre: 'Remo', accion: 'en el remoergómetro' },
-        { nombre: 'Burpees', accion: 'burpees seguidos al máximo, sin parar' },
-        { nombre: 'Comba', accion: 'saltando a la comba' },
+        // La descripción NO puede volver a nombrar el ejercicio. Tanto la
+        // rotación como el filtro de lesiones sustituyen el NOMBRE de la
+        // modalidad pero no el paréntesis, así que un "Burpees (burpees
+        // seguidos al máximo)" acababa siendo "Mountain climbers (burpees
+        // seguidos al máximo)": la tarjeta decía una cosa y la explicación otra.
+        { nombre: 'Burpees', accion: 'seguidos y sin parar, al máximo que puedas mantener', impacto: true },
+        { nombre: 'Comba', accion: 'a ritmo alto, con saltos simples', impacto: true },
+        { nombre: 'Caminata en cuesta', accion: 'andando rápido en cuesta o con la cinta muy inclinada' },
       ];
       // BUG REAL (6 sept 2026): esta lista se escribió pensando en "lo que de
       // verdad hay en un gimnasio normal" —lo dice el comentario de arriba— pero
@@ -13566,17 +13636,53 @@
       const enCasa = lugar.includes('casa');
       const modalidadesDisponibles = enCasa
         ? modalidadesInterval
-            .filter(m => /Sprints|Burpees|Comba/.test(m.nombre))
+            .filter(m => /Sprints|Burpees|Comba|Caminata/.test(m.nombre))
             .map(m => m.nombre === 'Sprints'
-              ? { nombre: 'Sprints', accion: 'corriendo al aire libre, con algo de cuesta si puedes' }
+              ? { nombre: 'Sprints', accion: 'corriendo al aire libre, con algo de cuesta si puedes', impacto: true }
               : m)
         : modalidadesInterval;
+      // Al principiante NO le entra por sorteo nada de salto o impacto repetido.
+      // Empezar desde cero significa que tendones y articulaciones aún no están
+      // acondicionados, y el perfil típico de "perder grasa" además carga peso
+      // de más: la recomendación estándar es construir fuerza primero y meter
+      // pliometría después, nunca como remate con el cliente ya fatigado. Si él
+      // ha elegido una a mano desde "Cambiar plan" se respeta -- es su decisión
+      // informada, no un sorteo nuestro.
+      const modalidadesSorteo = esPrincipiante
+        ? modalidadesDisponibles.filter(m => !m.impacto)
+        : modalidadesDisponibles;
       // Si el cliente ha elegido una modalidad concreta desde "Cambiar plan", se
       // respeta — salvo que no exista donde entrena, y entonces se rota entre las
       // que sí tiene.
       const prefFinisher = modalidadesDisponibles.find(m => m.nombre === u.preferenciaCardioFinisher);
-      const modInterval = prefFinisher || modalidadesDisponibles[(semilla + bloqueMeso) % modalidadesDisponibles.length];
-      const finisher4 = perdidaGrasa ? `, ${modInterval.nombre} 15 min interválico al finalizar (${modInterval.accion}): 1 min fuerte / 1 min suave × 7 rondas` : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
+      const _pool = modalidadesSorteo.length ? modalidadesSorteo : modalidadesDisponibles;
+      const modInterval = prefFinisher || _pool[(semilla + bloqueMeso) % _pool.length];
+      // El principiante hace el mismo remate pero con la proporción al revés:
+      // 30 segundos fuertes por 90 suaves (1:3) en vez de 1:1. Es la progresión
+      // con la que se empieza a entrenar por intervalos; el 1:1 de 7 rondas
+      // asume una base aeróbica que alguien que empieza desde cero no tiene.
+      // El remate también se dimensiona con el tiempo que tiene el cliente: 12-15
+      // minutos de intervalos dentro de una sesión de 30-45 se comen un tercio
+      // del entrenamiento, y lo que se recorta entonces es la fuerza, que es lo
+      // que de verdad protege la masa muscular en un déficit.
+      const _corta = _tramoDur === 'corta' || _tramoDur === 'expres';
+      const _interval = esPrincipiante
+        ? (_corta ? '8 min interválico al finalizar' : '12 min interválico al finalizar')
+        : (_corta ? '10 min interválico al finalizar' : '15 min interválico al finalizar');
+      const _rondas = esPrincipiante
+        ? (_corta ? '30 s fuerte / 90 s suave × 4 rondas' : '30 s fuerte / 90 s suave × 6 rondas')
+        : (_corta ? '1 min fuerte / 1 min suave × 5 rondas' : '1 min fuerte / 1 min suave × 7 rondas');
+      const _finisherInterval = `, ${modInterval.nombre} ${_interval} (${modInterval.accion}): ${_rondas}`;
+      // BUG REAL (14 sept 2026): `finisher3` era un circuito FIJO de pliometría
+      // —"3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto +
+      // 8 flexiones"— y lo usaban todas las plantillas de principiante. O sea:
+      // 60 impactos de salto encadenados y sin descanso, al final de la sesión y
+      // con el cliente ya cansado, a alguien que empieza desde cero. Además
+      // ignoraba por completo el selector "Cardio final de tus sesiones", cuya
+      // propia ayuda promete que aplica justo a este perfil (Gimnasio + perder
+      // grasa). Ahora los dos remates son el mismo y salen del selector.
+      const finisher3 = perdidaGrasa ? _finisherInterval : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
+      const finisher4 = perdidaGrasa ? _finisherInterval : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -14503,7 +14609,8 @@
       : /casa/i.test(_lugarTxt) ? 'casa'
       : 'gimnasio';
     const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot,
-      { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda });
+      { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda },
+      esPrincipiante);
     if (mapaRotacion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion) } : d);
     }
@@ -14543,19 +14650,51 @@
       });
     }
 
-    // ─── SESIÓN EXPRÉS (15-20 min) ──────────────────────────────────────────
+    // ─── AJUSTE POR DURACIÓN DE LA SESIÓN ───────────────────────────────────
     // Va al final del todo, después de la rotación y de las adaptaciones por
-    // lesión y material: así se recorta lo que el cliente va a ver de verdad,
+    // lesión y material: así se ajusta lo que el cliente va a ver de verdad,
     // no una versión intermedia que luego cambia.
     //
-    // No se recorta al azar ni por la mitad: estas plantillas ya ordenan los
-    // ejercicios de más a menos importantes (primero los básicos que mueven
-    // varias articulaciones, al final el aislamiento), así que quedarse con
-    // los tres primeros conserva el trabajo que de verdad estimula. Las series
-    // se topan en 3: tres ejercicios por tres series con 45-60s de descanso
-    // son unos 15-18 minutos reales, que es lo que el cliente ha dicho tener.
-    if (!soloDieta && sesionExpres && semana.length) {
-      const _EXPRES_MAX_EJERCICIOS = 3;
+    // BUG REAL (14 sept 2026, medido sobre 288 planes): el cuestionario
+    // pregunta cuánto tiempo tiene el cliente por sesión y la respuesta NO SE
+    // USABA en 60 de los 72 perfiles de gimnasio. `sesionLarga` se calculaba y
+    // no se leía en ninguna parte, y `sesionCorta` solo lo miraba la plantilla
+    // de Empuje/Tracción/Piernas a 3 días de intermedio y avanzado. Resultado:
+    // TODO el nivel principiante recibía el mismo plan letra por letra tanto
+    // si decía tener 30 minutos como más de 90 -- y encima la pantalla de
+    // Entrenamiento le prometía que "cada sesión está ajustada a los X min que
+    // nos dijiste que tienes". Ahora se ajusta de verdad, y para todas las
+    // plantillas a la vez en vez de a mano en cada una.
+    //
+    // Dos palancas, no una:
+    //  · Menos tiempo → MENOS EJERCICIOS. No se recorta al azar ni por la
+    //    mitad: las plantillas ya ordenan de más a menos importante (primero
+    //    los básicos multiarticulares, al final el aislamiento), así que
+    //    quedarse con los primeros conserva el estímulo que de verdad cuenta.
+    //  · Más tiempo → MÁS SERIES DE LO MISMO, no ejercicios nuevos. Es lo que
+    //    haría un entrenador: ante tiempo de sobra, más práctica de los
+    //    patrones básicos rinde más que añadir movimientos accesorios, y
+    //    además no mete nombres nuevos que tendrían que volver a pasar por el
+    //    filtro de lesiones, el de material y la cobertura de fichas.
+    // maxEj: tope de ejercicios de fuerza por sesión. topeSeries: a cuántos de
+    // los primeros ejercicios se les suma una serie (0 = a ninguno).
+    const _DUR = {
+      expres:   { maxEj: 3, seriesTope: 3, sumarSerieA: 0 },
+      corta:    { maxEj: 4, seriesTope: 0, sumarSerieA: 0 },
+      media:    { maxEj: 6, seriesTope: 0, sumarSerieA: 0 },
+      larga:    { maxEj: 8, seriesTope: 0, sumarSerieA: 2 },
+      muyLarga: { maxEj: 9, seriesTope: 0, sumarSerieA: 4 },
+    }[_tramoDur];
+    // El core NO cuenta para el tope de ejercicios. Una plancha de 3×30s son 90
+    // segundos de trabajo y no lleva descanso entre series: no es lo que hace
+    // que una sesión se vaya de tiempo. Contarlo como un ejercicio más salía
+    // caro de verdad — medido: al recortar a 4 en la sesión de 30-45 min, el
+    // core (que las plantillas escriben al final) empujaba fuera al peso muerto
+    // y los isquios de la semana se quedaban en 1,3 series, cuando el mínimo
+    // para no perder masa es 6. Se cambia un minuto y medio de plancha por la
+    // única bisagra de cadera del día: mal negocio.
+    const _esCore = /plancha|dead bug|bird dog|hollow|rueda abdominal|pallof|russian twist|abdominal|superman|tijeras|copenhagen|elevaci[oó]n de piernas/i;
+    if (!soloDieta && _DUR && semana.length) {
       semana = semana.map(d => {
         if (!d.detalle || d.tipo !== 'Entrenamiento') return d;
         const partes = d.detalle.split('·');
@@ -14568,11 +14707,42 @@
         // rompería. Se reconoce por las piezas con formato N×M.
         const conSeries = frs.filter(f => /\d+\s*[x×]\s*\d+/.test(f)).length;
         if (conSeries < 2) return d;
-        const recortado = frs.slice(0, _EXPRES_MAX_EJERCICIOS)
-          .map(f => f.replace(/(\d+)(\s*[x×]\s*)(\d+)/g, (m, s, x, r) => (parseInt(s, 10) > 3 ? '3' : s) + x + r));
-        return { ...d, detalle: cabecera + '· ' + recortado.join(', ') };
+
+        // El REMATE de cardio no es un ejercicio más de la lista y no puede
+        // entrar en el recorte: es justo la pieza que persigue el objetivo del
+        // cliente (perder grasa), y al recortar por número de comas se caía la
+        // primera. Se reconoce porque no lleva formato series×reps.
+        const esEjercicio = f => /\d+\s*[x×]\s*\d+/.test(f);
+        // Solo cuenta para el tope lo que de verdad consume tiempo: ejercicios
+        // de fuerza con series, descanso y montaje. El core y el remate de
+        // cardio se quedan siempre.
+        const cuenta = f => esEjercicio(f) && !_esCore.test(f);
+        let iEj = -1;
+        const idxEjercicios = frs.map(f => cuenta(f) ? ++iEj : -1);
+        let piezas = frs.filter((f, i) => idxEjercicios[i] < 0 || idxEjercicios[i] < _DUR.maxEj);
+        let k = -1;
+        piezas = piezas.map(f => {
+          if (!esEjercicio(f)) return f;
+          k++;
+          return f.replace(/(\d+)(\s*[x×]\s*)(\S+)/, (m, s, x, r) => {
+            let n = parseInt(s, 10);
+            if (_DUR.seriesTope && n > _DUR.seriesTope) n = _DUR.seriesTope;
+            // Tope duro de 5 series por ejercicio: por encima, el volumen extra
+            // dentro de la MISMA sesión deja de aportar (meta-regresiones 2025) y
+            // lo que toca es repartirlo en otro día, no seguir sumando aquí.
+            if (k < _DUR.sumarSerieA && n < 5) n += 1;
+            return n + x + r;
+          });
+        });
+        return { ...d, detalle: cabecera + '· ' + piezas.join(', ') };
       });
-      notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
+      if (_tramoDur === 'expres') {
+        notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
+      } else if (_tramoDur === 'corta') {
+        notasSalud.push('Sesión de 30-45 min: te hemos dejado cuatro ejercicios por día, los que más rinden por minuto. Descansa 60 segundos entre series en los accesorios y 90 en los básicos, y entra de sobra en el tiempo que tienes. Si un día vas justo, quita el último ejercicio antes que hacerlos todos con prisa y mala técnica.');
+      } else if (_tramoDur === 'larga' || _tramoDur === 'muyLarga') {
+        notasSalud.push('Tienes tiempo de sobra por sesión, así que hemos subido las series de los ejercicios básicos en vez de añadirte ejercicios nuevos: más práctica de los patrones que de verdad mueven la aguja rinde más que acumular movimientos accesorios. Aprovecha el margen para descansar bien (2-3 min en los básicos pesados) en lugar de correr.');
+      }
     }
 
 
