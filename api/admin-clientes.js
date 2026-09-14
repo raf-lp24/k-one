@@ -474,6 +474,10 @@ module.exports = async (req, res) => {
     const distDeporte  = distribucion(clientes.filter(c => c.deporte  !== '—'), 'deporte');
     const distObjetivo = distribucion(clientes.filter(c => c.objetivo !== '—'), 'objetivo');
     const distPlan     = distribucion(clientes.filter(c => c.tipoPlan !== '—'), 'tipoPlan');
+    // Motivos de baja agregados (12 sept: cada uno ya se veía suelto en su
+    // ficha; esto es la vista de conjunto para detectar patrones -- si la
+    // mayoría se va por precio o por la dieta, por ejemplo).
+    const distMotivoBaja = distribucion(clientes.filter(c => c.motivoBaja), 'motivoBaja');
 
     let leads = [];
     try {
@@ -518,7 +522,7 @@ module.exports = async (req, res) => {
       }
     } catch (e) { console.warn('[admin-clientes] mensajes query error:', e.message); }
 
-    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, retencion, leads, emailLog, mensajes });
+    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, distMotivoBaja, retencion, leads, emailLog, mensajes });
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);

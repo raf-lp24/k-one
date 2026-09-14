@@ -7294,6 +7294,38 @@
   </div>
 </div>
 
+<!-- MODAL CANCELAR SUSCRIPCIÓN (12 sept 2026): antes cancelarSuscripcion()
+     usaba un window.confirm() de una línea, y el motivo de baja solo se
+     preguntaba DESPUÉS, con un banner que salía la siguiente vez que el
+     cliente entraba -- si no volvía a entrar (lo normal tras cancelar), no
+     nos enterábamos nunca de por qué se fue. Ahora se pregunta en el mismo
+     momento de cancelar, antes de que exista la ocasión de no volver. El
+     banner de "¿Nos dices por qué lo dejas?" se queda como red de
+     seguridad para quien cancela desde el Portal de Stripe en vez de
+     desde aquí (ese camino no pasa por este modal). -->
+<div class="modal-overlay" id="modalCancelarSuscripcion" onclick="if(event.target===this)cerrarModalCancelar()">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title" style="font-size:19px">¿Seguro que quieres cancelar?</div>
+    <p class="modal-desc" id="cancelarSubTexto" style="margin-bottom:18px"></p>
+    <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:10px">Si quieres, dinos por qué -- no es obligatorio, pero nos ayuda a mejorar:</p>
+    <div id="cancelarSubChips" role="radiogroup" aria-label="Si quieres, marca de qué fue" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Dieta">Algo de la nutrición</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Entrenos">Algo del entrenamiento</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Falta variedad">Se me hacía repetitivo</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Fallos">Algo no funcionaba bien</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Falta de uso">No lo estaba usando</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Precio">Es caro para mí</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Objetivo cumplido">Ya conseguí mi objetivo</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Otro">Otra cosa</label>
+    </div>
+    <textarea id="cancelarSubTexto2" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:18px"></textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button style="flex:1;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarModalCancelar()">Seguir con mi plan</button>
+      <button id="btnConfirmarCancelar" style="flex:1;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px" onclick="confirmarCancelarSuscripcion()">Sí, cancelar suscripción</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -23540,11 +23572,30 @@ Se coló: ${lista}`;
         <div style="font-size:12px;color:var(--jv-faint);margin-bottom:14px;font-weight:500">Los activos en semana 4+ rara vez cancelan</div>
         ${retBarras}</div>`;
 
+      // Motivos de baja agregados (12 sept 2026): antes solo se veía uno a
+      // uno en la ficha de cada cliente; esto junta todos para detectar de
+      // un vistazo si la mayoría se va por lo mismo (precio, dieta...). El
+      // % es sobre quienes contestaron, no sobre el total de clientes --
+      // mezclar los dos denominadores haría parecer el problema más pequeño
+      // de lo que es.
+      const distMotivoBaja = data.distMotivoBaja || [];
+      const totalBajas = distMotivoBaja.reduce((s, it) => s + it.count, 0);
+      const bajaCard = totalBajas > 0
+        ? `<div class="jv-card" style="padding:17px 19px">
+            <div class="jv-metric-label" style="margin-bottom:4px">Motivos de baja</div>
+            <div style="font-size:12px;color:var(--jv-faint);margin-bottom:14px;font-weight:500">${totalBajas} cliente${totalBajas===1?'':'s'} que cancelaron nos dijeron por qué</div>
+            ${distMotivoBaja.map(it => {
+              const pct = Math.round((it.count / totalBajas) * 100);
+              return barra(_esc(MOTIVOS_LABEL[it.label] || it.label), it.count, pct, it.label === 'sin_respuesta' ? 'linear-gradient(90deg,#5A5A5A,#7A7A7A)' : GRAD_ACC);
+            }).join('')}
+          </div>`
+        : '';
+
       distEl.innerHTML =
         renderDist('Deporte', data.distDeporte, totalClientes) +
         renderDist('Objetivo', data.distObjetivo, totalClientes) +
         renderDist('Tipo de plan', data.distPlan, totalClientes) +
-        retCard;
+        retCard + bajaCard;
     }
 
     // — Totales en cabecera de tabla —
@@ -23960,6 +24011,17 @@ Se coló: ${lista}`;
     a.click(); URL.revokeObjectURL(url);
   }
 
+  // Etiquetas legibles para userData._cuenta.motivoBaja -- compartidas entre
+  // la ficha del cliente (verDetalleCliente) y el panel agregado del
+  // Dashboard (actualizarPanelAdmin), para que no diverjan con el tiempo.
+  const MOTIVOS_LABEL = {
+    'Precio': 'Es caro para mí', 'Falta de uso': 'No lo estaba usando',
+    'Entrenos': 'Los entrenos no le encajaban', 'Dieta': 'La dieta no le encajaba',
+    'Falta variedad': 'Se le hacía repetitivo', 'Fallos': 'Algo no funcionaba bien',
+    'Objetivo cumplido': 'Ya consiguió su objetivo', 'Otro': 'Otro motivo (ver Buzón)',
+    'solo_texto': 'Solo escribió texto libre (ver Buzón)', 'sin_respuesta': 'Prefirió no decirlo'
+  };
+
   // Modal de detalle de cliente
   function verDetalleCliente(idx) {
     if (!_adminDatos) return;
@@ -24149,13 +24211,6 @@ Se coló: ${lista}`;
         // no viaja aquí (no se guarda en el perfil): está completo en su
         // mensaje del Buzón, con el mismo sello de tiempo.
         if (!c.cancelaAlFinal && !c.motivoBaja) return '';
-        const MOTIVOS_LABEL = {
-          'Precio': 'Es caro para mí', 'Falta de uso': 'No lo estaba usando',
-          'Entrenos': 'Los entrenos no le encajaban', 'Dieta': 'La dieta no le encajaba',
-          'Falta variedad': 'Se le hacía repetitivo', 'Fallos': 'Algo no funcionaba bien',
-          'Objetivo cumplido': 'Ya consiguió su objetivo', 'Otro': 'Otro motivo (ver Buzón)',
-          'solo_texto': 'Solo escribió texto libre (ver Buzón)', 'sin_respuesta': 'Prefirió no decirlo'
-        };
         const texto = !c.motivoBaja ? 'Aún no ha vuelto a entrar desde que canceló'
           : (MOTIVOS_LABEL[c.motivoBaja] || c.motivoBaja);
         const color = (c.motivoBaja && c.motivoBaja !== 'sin_respuesta') ? 'var(--jv-warn)' : 'var(--jv-faint)';
@@ -25138,21 +25193,39 @@ Se coló: ${lista}`;
     }
   }
 
-  async function cancelarSuscripcion() {
+  // La fecha calculada al abrir el modal, para no repetir el cálculo al
+  // confirmar y para que el toast final use la misma fecha que se le enseñó.
+  let _fechaFinCancelacion = '';
+
+  function cancelarSuscripcion() {
     const user = getCurrentUser();
     if (!user) return;
-    const fechaFin = user.fechaPago
+    _fechaFinCancelacion = user.fechaPago
       ? new Date(user.fechaPago).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
       : 'el final de tu período actual';
-    const confirmar = window.confirm(
-      `¿Seguro que quieres cancelar tu suscripción?\n\nTu acceso seguirá activo hasta el ${fechaFin}. Después no se renovará y podrás volver cuando quieras.`
-    );
-    if (!confirmar) return;
+    const texto = document.getElementById('cancelarSubTexto');
+    if (texto) texto.textContent = `Tu acceso seguirá activo hasta el ${_fechaFinCancelacion}. Después no se renovará, y podrás volver cuando quieras.`;
+    document.querySelectorAll('#cancelarSubChips input[name="cancelarMotivoBaja"]').forEach(el => { el.checked = false; });
+    const txt2 = document.getElementById('cancelarSubTexto2');
+    if (txt2) txt2.value = '';
+    document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
+  }
 
+  function cerrarModalCancelar() {
+    document.getElementById('modalCancelarSuscripcion')?.classList.remove('visible');
+  }
+
+  // Antes el motivo de baja solo se preguntaba DESPUÉS (bannerMotivoBaja,
+  // la siguiente vez que el cliente entraba) -- si no volvía a entrar, cosa
+  // normal justo después de cancelar, nunca nos enterábamos de nada. Ahora
+  // se pregunta en el mismo paso de cancelar, reutilizando el mismo destino
+  // (userData._cuenta.motivoBaja + Buzón + aviso al admin) que ya usaba
+  // enviarMotivoBaja()/_cerrarMotivoBaja() para el banner.
+  async function confirmarCancelarSuscripcion() {
     const { data: { session } } = await supa.auth.getSession();
     if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
 
-    const btn = document.getElementById('btnCancelarSub');
+    const btn = document.getElementById('btnConfirmarCancelar');
     const textoOriginal = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Cancelando...'; }
 
@@ -25163,8 +25236,33 @@ Se coló: ${lista}`;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al cancelar');
-      if (btn) { btn.style.display = 'none'; }
-      showToast(`Suscripción cancelada. Tu acceso sigue activo hasta el ${fechaFin}.`, 6000);
+
+      const sel = document.querySelector('#cancelarSubChips input[name="cancelarMotivoBaja"]:checked');
+      const motivo = sel ? sel.value : '';
+      const detalle = ((document.getElementById('cancelarSubTexto2') || {}).value || '').trim();
+      if (motivo || detalle) {
+        try {
+          const user = getCurrentUser();
+          const cuerpo = '[BAJA] Motivo: ' + (motivo || 'sin marcar') + (detalle ? '\n\n' + detalle : '');
+          if (user && _supaUserId) {
+            let { error } = await supa.from('mensajes_cliente').insert({
+              user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Baja', mensaje: cuerpo
+            });
+            if (error) {
+              await supa.from('mensajes_cliente').insert({
+                user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Otro', mensaje: cuerpo
+              });
+            }
+            notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: 'Baja', mensaje: cuerpo });
+          }
+        } catch (eMotivo) { console.warn('[cancelar-sub] no se pudo enviar el motivo:', eMotivo.message); }
+        _cerrarMotivoBaja(motivo || 'solo_texto');
+      }
+
+      const btnPanel = document.getElementById('btnCancelarSub');
+      if (btnPanel) { btnPanel.style.display = 'none'; }
+      cerrarModalCancelar();
+      showToast(`Suscripción cancelada. Tu acceso sigue activo hasta el ${_fechaFinCancelacion}.`, 6000);
     } catch (e) {
       showToast('No se pudo cancelar: ' + e.message, 5000);
       if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
