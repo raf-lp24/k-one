@@ -10846,10 +10846,32 @@
   // prensa"). NO valen como iguales los calificativos que sí cambian el ejercicio
   // -- "búlgara", "sumo", "inclinado" --, que es justo lo que hacía inservible
   // comparar por prefijo a secas (534 falsos positivos medidos en su día).
+  // Ejercicios que son el MISMO trabajo aunque se llamen distinto. Va aparte del
+  // material porque aquí lo que cambia es la variante, no el hierro: "femoral
+  // tumbado en máquina" y "femoral tumbado" son literalmente el mismo ejercicio
+  // (se vieron los dos juntos en el mismo día de pierna), y un curl femoral
+  // sentado al lado de uno tumbado es el mismo estímulo dos veces.
+  //
+  // La lista es CORTA a propósito. Agrupar de más se lleva por delante parejas
+  // que tiene sentido programar juntas: sentadilla y prensa son las dos de
+  // cuádriceps, dominadas y jalón los dos de tirón vertical, hip thrust y patada
+  // de glúteo los dos de glúteo, y en los tres casos conviven bien en un día.
+  const _FAMILIA = [
+    [/curl femoral|femoral( tumbado| sentado| de pie)?|leg curl/i, 'curl-femoral'],
+    [/extensi[oó]n de cu[aá]driceps/i, 'extension-cuadriceps'],
+    [/elevaciones laterales|elevaciones en polea/i, 'elevacion-lateral'],
+    [/face pull|retracci[oó]n escapular/i, 'retraccion-escapular'],
+  ];
+  const _familiaDe = n => {
+    for (const [re, f] of _FAMILIA) if (re.test(n)) return f;
+    return null;
+  };
   const _QUALIF_EQUIV = /^(a una pierna|a un brazo|a una mano|unilateral|por lado|o [a-záéíóúñ ]+)$/;
   const _mismoEjercicio = (a, b) => {
     if (a === b) return true;
     if (!a || !b) return false;
+    const fa = _familiaDe(a);
+    if (fa && fa === _familiaDe(b)) return true;
     const [corto, largo] = a.length <= b.length ? [a, b] : [b, a];
     if (!largo.startsWith(corto + ' ')) return false;
     return _QUALIF_EQUIV.test(largo.slice(corto.length + 1).trim());
@@ -13989,21 +14011,26 @@
           // Intermedio/Avanzado + 3 días → Push / Pull / Legs (orden correcto de recovery)
           semana = [
             {dia:"Lunes", tipo:"Entrenamiento", resumen:"Push · Pecho, hombros, tríceps",
-             detalle: sesionCorta
-               ? `Pecho, hombros, tríceps · Press banca 5×6, press inclinado con mancuernas 4×10, elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), extensión tríceps en polea 3×12 (codos pegados, aprieta abajo), plancha 3×45s${finisher3}`
-               : `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado con mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
+             // La versión "corta" a mano de esta plantilla se ha quitado (14 sept
+             // 2026). Desde que el plan se recorta según el tiempo real del cliente
+             // (buscar "AJUSTE POR DURACIÓN DE LA SESIÓN") había DOS mecanismos de
+             // acortado encima del otro, y el viejo era peor: quitaba el press
+             // militar, así que el día de EMPUJE se quedaba sin ningún empuje
+             // vertical y el hombro bajaba a 2,1 series por semana. El recorte
+             // general respeta el orden de la plantilla, y aquí ese orden ya pone
+             // los cuatro patrones primero.
+             detalle: `Pecho, hombros, tríceps · Press banca ${volP}×6, press inclinado con mancuernas ${volA}×10, press militar 3×8 (baja hasta formar "L" a 90°), elevaciones laterales 4×15 (sin balanceo, aguanta 1s arriba), fondos 3×10 (codos pegados al cuerpo), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s, sube resistiendo), plancha 3×45s${finisher3}`,
              etiqueta:"Empuje"},
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Pull · Espalda, bíceps, manguito",
-             detalle: sesionCorta
-               ? `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón 5×6, remo con barra 4×8, face pull 4×15, curl bíceps 3×10 (sin balanceo, controla subida y bajada), elevación de piernas 3×12${finisher3}`
-               : `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo con barra ${volA}×8, remo en polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
+             detalle: `Dorsal, trapecio, bíceps, manguito rotador · Dominadas o jalón ${volP}×6, remo con barra ${volA}×8, remo en polea baja 3×10, face pull 4×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), curl martillo 3×10 (control excéntrico lento), elevación de piernas 3×12${finisher3}`,
              etiqueta:"Tracción"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Legs · Piernas y glúteos",
-             detalle: sesionCorta
-               ? `Cuádriceps, isquios, glúteos · Sentadilla 5×6, hip thrust 4×10, peso muerto rumano 3×10, femoral tumbado 3×12${finisher3}`
-               : `Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano 3×10, prensa 3×12, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
+             // El peso muerto rumano sube a ${volP} por lo mismo que en el split de
+             // 4-5 días: en Empuje/Tracción/Piernas las piernas también se entrenan
+             // una vez por semana, y la bisagra de cadera es un básico del día.
+             detalle: `Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volP}×10, prensa 3×12, sentadilla búlgara 3×10 por pierna, femoral tumbado 3×12, elevación de gemelos 4×15${finisher3}`,
              etiqueta:"Piernas"},
             {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -14036,7 +14063,14 @@
              // ella el cuádriceps se caía a 8,5, por debajo de su mínimo).
              // Queda igual que la plantilla de 3 días de más arriba, que ya
              // estaba bien: 11 series de cuádriceps y 7 de isquios.
-             detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volA}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, femoral tumbado 3×12, elevación de gemelos 4×15${finisher4}`,
+             // El peso muerto rumano pasa a ${volP} (las mismas series que la
+             // sentadilla). En este split las piernas se entrenan UNA vez por
+             // semana, así que la bisagra de cadera es un básico del día, no un
+             // accesorio: con 3 series y una sesión corta, los isquios de la semana
+             // se quedaban en 3,3 series, por debajo del mínimo de 6 para no perder
+             // masa. Y va TERCERO a propósito: con poco tiempo la sesión se recorta
+             // a los primeros ejercicios, y este tiene que sobrevivir al recorte.
+             detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volP}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, femoral tumbado 3×12, elevación de gemelos 4×15${finisher4}`,
              etiqueta:"Piernas"},
             {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core",
              // La nota de "elevaciones laterales" se acortó de 13 a 9 palabras (misma
