@@ -10403,7 +10403,10 @@
     // "Peso muerto rumano, press inclinado, jalón, ..." para un principiante que
     // solo entrena dos o tres veces por semana. Ahora rota entre variantes que
     // siguen siendo de rodilla y siguen abriendo las caderas como el sumo.
-    [/sentadilla sumo/i, ['Sentadilla goblet ancha', 'Prensa con pies altos y abiertos', 'Sentadilla copa sumo']],
+    // "( con mancuernas?)?" consume el material de la plantilla ("sentadilla sumo
+    // con mancuerna"): sin él salía "Prensa con pies altos y abiertos con
+    // mancuerna" -- una prensa y una mancuerna a la vez (15 sept 2026).
+    [/sentadilla sumo( con mancuernas?)?/i, ['Sentadilla goblet ancha', 'Prensa con pies altos y abiertos', 'Sentadilla copa sumo']],
     // BUG REAL Y GRAVE (14 sept 2026, medido: 0,9 series de isquio a la semana
     // en el perfil intermedio de 4 días). El peso muerto rumano es el ÚNICO
     // ejercicio de isquios del día de pierna, y sus dos alternativas no
@@ -10460,7 +10463,12 @@
     // estímulo equivalente para alguien que tiene una barra delante. Para
     // quien entrena en casa queda "Press inclinado con mancuernas", que sí lo
     // es y sí se puede hacer allí, así que la rotación no se congela.
-    [/(press banca|bench press)( con mancuernas?| con barra| plano)?/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
+    // "( plano)?" y el material van en grupos SEPARADOS y seguidos (15 sept
+    // 2026): con una sola alternancia la regex se comía "press banca plano" y
+    // se paraba ahí, así que en "press banca plano con mancuernas" (Full Body C
+    // del principiante) el material quedaba colgando -- salía "Press declinado
+    // en máquina con mancuernas", una máquina y mancuernas a la vez.
+    [/(press banca|bench press)( plano)?( con mancuernas?| con barra)?/i, ['Press inclinado con mancuernas', 'Fondos en paralelas', 'Press declinado en máquina'], false, true],
     // "(?!...)" evita que esta regla vuelva a tocar el texto que ya dejó la
     // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
     // "press inclinado en máquina/multipower": sin esto quedaba colgando
@@ -10495,7 +10503,11 @@
     // rota -- "Sentadilla búlgara cargadas con mancuernas", "Zancada lateral
     // cargadas con mancuernas" (bug real visto al medir la cobertura de fichas
     // el 7 sept 2026: esos nombres tampoco encontraban ficha, claro).
-    [/zancadas?( inversas)?( cargadas? con mancuernas?)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara con mancuernas', 'Zancada inversa con mancuernas', 'Zancada lateral con mancuernas', 'Zancada cruzada atrás']],
+    // "( cargadas?)?" y "( con mancuernas?)?" van en grupos separados (15 sept
+    // 2026): juntos solo se consumía el material si iba precedido de
+    // "cargadas", y "zancadas con mancuernas" salía "Step-ups con mancuernas
+    // con mancuernas" -- el material repetido dos veces en el mismo nombre.
+    [/zancadas?( inversas)?( cargadas?)?( con mancuernas?)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara con mancuernas', 'Zancada inversa con mancuernas', 'Zancada lateral con mancuernas', 'Zancada cruzada atrás']],
     // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
     // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
     // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
@@ -10533,7 +10545,12 @@
     // scott" pegado) y colaba el match igual -- salía "Curl martillos en
     // banco scott" (con una "s" de más). "bíceps" en español no tiene
     // singular sin ella, así que exigirla no pierde ningún caso real.
-    [/curl b[ií]ceps(?! con barra z| en banco scott)|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
+    // "( con banda elástica| con mancuernas?)?" consume el material que deja el
+    // ajuste de "en casa con material" ("curl en polea" -> "curl bíceps con
+    // banda elástica", "curl bíceps con barra z" -> "curl bíceps con
+    // mancuernas"): sin él salía "Curl inclinado con mancuernas con banda
+    // elástica" en el Upper B de casa (15 sept 2026).
+    [/curl b[ií]ceps(?! con barra z| en banco scott)( con banda el[aá]stica| con mancuernas?)?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
     // El grupo de material del final consume lo que deja detrás la plantilla o
     // la rotación de accesorios: el pool escribe "extensión de tríceps en polea"
     // y esta regla solo se comía el nombre, así que el material quedaba colgando
@@ -10648,7 +10665,13 @@
     // "Sled push" es de gimnasio, así que a quien entrena en casa solo le
     // quedaba UNA alternativa viable y el slot de carries se movía entre dos
     // ejercicios en 12 semanas. Las dos nuevas se hacen con mancuernas.
-    [/farmer carry/i, ['Sled push', 'Suitcase carry a un lado', 'Overhead carry con mancuerna', 'Zancadas cargadas con mancuernas'], true],
+    // "( con mancuernas?)?" consume el material, y la plantilla del Híbrido lo
+    // escribe DELANTE de las series ("farmer carry con mancuernas 3×20m"): con
+    // el material detrás ("farmer carry 3×20m con mancuernas") ninguna regex
+    // podía comérselo y salía "Zancadas cargadas con mancuernas 4×20m con
+    // mancuernas", "Overhead carry con mancuerna 3×20m con mancuernas" o
+    // "Sled push 3×20m con mancuernas" (15 sept 2026).
+    [/farmer carry( con mancuernas?)?/i, ['Sled push', 'Suitcase carry a un lado', 'Overhead carry con mancuerna', 'Zancadas cargadas con mancuernas'], true],
     [/sandbag lunges/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas'], true],
   ];
   const alternativasParaEjercicio = nombre => {
@@ -13684,7 +13707,7 @@
       if (esPrincipiante) {
         semana = [
           {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body · Fuerza base",
-           detalle: `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry 3×20m con mancuernas, plancha 3×30s`,
+           detalle: `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry con mancuernas 3×20m, plancha 3×30s`,
            etiqueta:"Fuerza"},
           {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
            resumen: numDias >= 5 ? "Cardio suave · Zona 2" : "Recuperación",
@@ -14011,7 +14034,7 @@
              // quinto de la semana, que es justo donde un principiante en
              // déficit tiene menos margen de recuperación.
              detalle: numDias >= 5 ? (perdidaGrasa
-               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrusts con mancuerna, 10 remo con mancuerna a una mano/lado, 30s plancha. Descanso 90s entre rondas`
+               ? `Acondicionamiento · 4 rondas: 12 sentadillas goblet, 10 flexiones, 15 hip thrust con mancuerna, 10 remo con mancuerna a una mano/lado, 30s plancha. Descanso 90s entre rondas`
                : `Core y complementos · Peso muerto con mancuernas 3×10, jalón en polea 3×10, press en máquina 3×10, plancha 3×40s, elevación de piernas en barra o banco 3×15, plancha lateral 3×30s/lado`) : "",
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
@@ -14961,7 +14984,11 @@
         r(/\bpeso muerto\b(?! rumano| sumo| con mancuernas| a una pierna| convencional)/gi, 'peso muerto con mancuernas'),
         r(/press militar(?! con mancuernas| con barra)/gi, 'press militar con mancuernas'),
         r(/\bdominadas\b(?! asistidas| \(o remo| o jalón| con banda)/gi, 'dominadas (o remo australiano bajo mesa)'),
-        r(/hip thrust(?! con mancuerna| con barra| a una pierna| en banco| sentado)/gi, 'hip thrust con mancuerna'),
+        // "s?\b" (15 sept 2026): con "hip thrusts con mancuerna" la regex cazaba
+        // "hip thrust" y el lookahead veía "s con mancuerna", que no excluye --
+        // salía "hip thrust con mancuernas con mancuerna". El "\b" impide que
+        // el motor suelte la "s" para esquivar la exclusión.
+        r(/hip thrusts?\b(?! con mancuerna| con barra| a una pierna| en banco| sentado)/gi, 'hip thrust con mancuerna'),
         r(/femoral tumbado(?! en máquina| con mancuerna)/gi, 'curl femoral tumbado con mancuerna'),
         r(/extensión de cuádriceps(?! en máquina| con)/gi, 'extensión de cuádriceps con banda elástica'),
         r(/sentadilla hack/gi, 'sentadilla goblet con mancuerna'),
