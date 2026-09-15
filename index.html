@@ -10747,7 +10747,10 @@
   // base de fuerza o de técnica que alguien que empieza aún no tiene; si tras
   // filtrarlas no queda ninguna, se deja el ejercicio original (que la
   // plantilla ya eligió pensando en su nivel).
-  const _ALT_NIVEL_ALTO = /rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b/i;
+  // "fondos en paralelas" (15 sept 2026): la rotación se los daba a principiantes
+  // en el hueco del press banca. Bajar el propio peso colgado de dos barras pide
+  // una fuerza de tríceps y un control de hombro que quien empieza no tiene.
+  const _ALT_NIVEL_ALTO = /rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones, esPrincipiante) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
@@ -10889,7 +10892,10 @@
     for (const [re, f] of _FAMILIA) if (re.test(n)) return f;
     return null;
   };
-  const _QUALIF_EQUIV = /^(a una pierna|a un brazo|a una mano|unilateral|por lado|o [a-záéíóúñ ]+)$/;
+  // "de piernas" (15 sept 2026): la lesión de espalda cambia la sentadilla por
+  // "Prensa de piernas", y el día de pierna ya traía "prensa 3×12" -- dos prensas
+  // en la misma sesión que el dedup no veía porque el nombre no era idéntico.
+  const _QUALIF_EQUIV = /^(a una pierna|a un brazo|a una mano|unilateral|por lado|de piernas|o [a-záéíóúñ ]+)$/;
   const _mismoEjercicio = (a, b) => {
     if (a === b) return true;
     if (!a || !b) return false;
@@ -10899,7 +10905,7 @@
     if (!largo.startsWith(corto + ' ')) return false;
     return _QUALIF_EQUIV.test(largo.slice(corto.length + 1).trim());
   };
-  const _rotarSoloEjercicios = (texto, tabla, enLaSemana) => {
+  const _rotarSoloEjercicios = (texto, tabla, enLaSemana, opciones) => {
     if (!tabla.length || !texto) return texto;
     const partes = texto.split('·');
     return partes.map((parte, i) => {
@@ -10939,6 +10945,19 @@
           // justo lo contrario de lo que pide el bloque. Las sustituciones por
           // lesión sí lo tocan, y esas corren antes que esto.
           if (_ES_REMATE_CARDIO.test(fr)) return fr;
+          // GANAR FUERZA: los básicos no rotan (15 sept 2026). La fuerza es
+          // específica del levantamiento -- se gana repitiendo el MISMO
+          // movimiento y subiéndole peso --, y la rotación los cambiaba: el
+          // "Press banca 5×5" de un avanzado salía "Press declinado en máquina",
+          // y el hip thrust "Patada de glúteo en polea 5×8". Se reconocen por el
+          // esquema que les deja el bloque de fuerza (5 o 6 repeticiones).
+          // Tampoco rotan los multiarticulares aunque no vayan a 5: el hip thrust
+          // de un día de pierna salía "Patada de glúteo en polea 5×10" en segundo
+          // lugar, un aislamiento con cinco series en un plan de fuerza. Solo
+          // rotan los accesorios.
+          if (opciones && opciones.fijarFuerza &&
+              (/\d+\s*×\s*[56](?!\d)(?!\s*(?:s|seg|min|m)\b)/.test(fr) ||
+               /hip thrust|press (de )?banca|press militar|sentadilla|peso muerto|dominadas|remo con barra/i.test(fr))) return fr;
           const tablaSegura = tabla.filter(([regex]) => {
             const m = fr.match(regex);
             return !(m && _NEGACION_PREVIA.test(fr.slice(0, m.index)));
@@ -10991,6 +11010,18 @@
             // la otra llegar. Pasaba de verdad -- la sentadilla del día A y la prensa
             // del día B acababan las dos en "Zancadas con mancuernas".
             if (enLaSemana) { enLaSemana.delete(antes); enLaSemana.add(despues); }
+          }
+          // Un ejercicio a una mano rotado a una máquina o polea arrastraba el
+          // "por lado" de la plantilla: "Remo en máquina con apoyo de pecho 3×10
+          // por lado" (principiante, 15 sept 2026). Solo se quita cuando el
+          // original era de un brazo y el nuevo es de dos.
+          // Se compara el TEXTO (rotado !== fr) y no el nombre normalizado:
+          // _nombreDeTramo quita el material, así que "remo con mancuerna a una
+          // mano" y "Remo en polea baja" quedan los dos en "remo" y parecían iguales.
+          if (rotado !== fr && /a una mano|a un brazo/i.test(fr) &&
+              !/a una mano|a un brazo|unilateral/i.test(rotado) &&
+              /m[aá]quina|polea|barra|banda/i.test(rotado)) {
+            return rotado.replace(/\s*(?:por lado|\/lado)/i, '');
           }
           return rotado;
         })
@@ -13815,9 +13846,20 @@
       // de rodilla la sustituye por "remo o bici (bajo impacto)" y la frase
       // quedaba torpe ("bici o remo o bici (bajo impacto) suave"). Caminar y
       // bici ya son de bajo impacto y valen para cualquier lesión.
-      const _cardioZona2 = lugar.includes('casa')
-        ? ', cardio al final: 15-20 min en zona 2 (caminar rápido o bici; ritmo conversacional, RPE 3-4)'
-        : ', cardio al final: 15-20 min en zona 2 (remo, bici o cinta; ritmo conversacional, RPE 3-4)';
+      // Los minutos dependen del tiempo que tiene el cliente (15 sept 2026).
+      // Eran 15-20 min fijos: en una sesión exprés de 15-20 min el cardio se
+      // comía la sesión entera (medido: ~50 min reales) y una de 30-45 la
+      // llevaba a una hora. En exprés solo se deja para "Mejorar resistencia",
+      // que es su objetivo; a "Sentirme mejor" se le explica en una nota.
+      const _minZona2 = _tramoDur === 'expres' ? (mejorarResistencia ? '10 min' : '')
+        : _tramoDur === 'corta' ? '10 min'
+        : _tramoDur === 'media' ? '15 min'
+        : _tramoDur === 'larga' ? '20 min'
+        : '25 min';
+      const _cardioZona2 = !_minZona2 ? ''
+        : lugar.includes('casa')
+          ? `, cardio al final: ${_minZona2} en zona 2 (caminar rápido o bici; ritmo conversacional, RPE 3-4)`
+          : `, cardio al final: ${_minZona2} en zona 2 (remo, bici o cinta; ritmo conversacional, RPE 3-4)`;
       // El remate interválico rota entre lo que de verdad hay en un gimnasio
       // normal (mismo patrón que la rotación de accesorios: semilla+bloqueMeso).
       // Antes siempre decía "corre, pedalea o rema" en el texto pero la tarjeta
@@ -13961,7 +14003,7 @@
             {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
             {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
              resumen: numDias >= 2 ? "Full Body B · Variantes" : "Movilidad",
-             detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press inclinado con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
+             detalle: numDias >= 2 ? `Cuerpo completo · Hip thrust con mancuerna ${sVol}×12, press de hombro con mancuernas ${sVol}×10, jalón en polea o remo australiano ${sVol}×10, sentadilla sumo con mancuerna ${sVol}×10, plancha lateral ${sVol}×25s por lado${finisher3}` : "",
              etiqueta: numDias >= 2 ? "Fuerza" : "Descanso"},
             {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
             // BUG REAL (14 sept 2026, medido: 40 de 40 planes de principiante
@@ -14339,6 +14381,14 @@
         // La prensa cubre la misma musculatura del sumo sin cargar la columna.
         [/[Pp]eso muerto sumo( con mancuernas?)?/g, eq('Prensa de piernas (rango cómodo)', 'Sentadilla goblet con mancuerna (rango cómodo)', 'Sentadilla goblet (rango cómodo)')],
         [/[Pp]eso muerto( convencional)?( con mancuernas?)?/g, 'Hip thrust'],
+        // La SENTADILLA CON BARRA no tenía regla (15 sept 2026): se quitaba el
+        // peso muerto por la carga sobre la columna y se dejaba "Sentadilla 5×5"
+        // con la barra a la espalda, que carga la columna igual. Medido: todos los
+        // intermedios y avanzados de gimnasio con la espalda tocada la recibían.
+        // Solo el nombre a secas seguido de las series ("Sentadilla 4×8") o con
+        // barra: goblet, búlgara, sumo o isométrica no llevan carga axial de barra.
+        // La prensa del mismo día que pueda quedar repetida la resuelve el dedup.
+        [/\b[Ss]entadilla( trasera| con barra)?(?= \d)|\bback squat\b/g, eq('Prensa de piernas', 'Sentadilla goblet con mancuerna', 'Sentadilla goblet')],
         [/\bdeadlifts?\b/gi, 'hip thrust'],
         [/[Rr]ussian twist/g, 'Plancha frontal'],
         [/[Rr]emo con barra( inclinado)?/g, eq('Remo en máquina con apoyo de pecho', 'Remo con mancuerna apoyado en banco', 'Remo bajo mesa')],
@@ -14351,8 +14401,8 @@
         [/[Hh]iperextensiones?/g, 'plancha frontal'],
       ]);
       notasSalud.push(_lesionOtra
-        ? 'Detectamos mención a la espalda en lo que nos contaste y hemos sustituido de forma preventiva los ejercicios con más carga lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
-        : 'Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, remo con barra inclinado, levantamientos olímpicos y swings) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
+        ? 'Detectamos mención a la espalda en lo que nos contaste y hemos sustituido de forma preventiva los ejercicios con más carga lumbar (peso muerto, sentadilla con barra, remo con barra inclinado, levantamientos olímpicos y swings). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
+        : 'Hemos sustituido los ejercicios con más carga en la zona lumbar (peso muerto, sentadilla con barra, remo con barra inclinado, levantamientos olímpicos y swings) por variantes con apoyo y menos estrés en la espalda, por la lesión que nos indicaste. Si notas dolor, párate y consulta con un profesional.');
     }
     if (_lesionZonaHombro) {
       mapaLesion = mapaLesion.concat([
@@ -14625,11 +14675,20 @@
     // Se hace aqui, sobre el texto ya montado, para que llegue a todas las
     // plantillas sin tocarlas una a una (mismo patron que ajustarSeries).
     if (!soloDieta && ganarFuerza) {
-      const BASICOS = /(press de banca|press banca|sentadilla|peso muerto|press militar|press de hombro|dominadas|remo con barra|prensa|hip thrust|zancadas|fondos en paralelas|empuje de cadera)/i;
+      // Sin hip thrust, zancadas ni empuje de cadera (15 sept 2026): van
+      // SEGUNDOS en el día de pierna, así que se llevaban el segundo hueco de
+      // básico y el peso muerto rumano se quedaba a 10 repeticiones. Un hip
+      // thrust a 5 no es un levantamiento de fuerza de referencia; la bisagra sí.
+      const BASICOS = /(press de banca|press banca|sentadilla|peso muerto|press militar|press de hombro|dominadas|remo con barra|prensa|fondos en paralelas)/i;
       // Las series del basico siguen la periodizacion como todo lo demas: si
       // toca descarga, tambien baja aqui. Sin esto el 5x5 fijo se comia la
       // semana de descarga.
-      const seriesFuerza = Math.min(6, Math.max(3, 5 + deltaSeries));
+      // El principiante va a 4×6 y no a 5×5: sus básicos son con mancuernas
+      // (goblet, press con mancuernas), y empezando la fuerza sube sobre todo
+      // por técnica. Cinco series a cinco repeticiones es para quien ya domina
+      // el patrón.
+      const repsFuerza = esPrincipiante ? 6 : 5;
+      const seriesFuerza = Math.min(esPrincipiante ? 4 : 6, Math.max(3, (esPrincipiante ? 4 : 5) + deltaSeries));
       const aFuerza = (texto) => {
         // Los parentesis llevan comas dentro ("(agarre neutro, baja hasta...)")
         // y romperian el trozo de texto sobre el que se decide si el ejercicio
@@ -14638,15 +14697,19 @@
         let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return '\u0000' + (notas.length - 1) + '\u0000'; });
         let cambiados = 0;
         t = t.replace(/([^,·]*?)(\d+)×(\d+)(?!\s*(?:s|seg|min)\b)/g, (m, nombre, ser, reps) => {
-          if (cambiados >= 2 || !BASICOS.test(nombre) || parseInt(reps, 10) < 6) return m;
+          if (cambiados >= 2 || !BASICOS.test(nombre) || parseInt(reps, 10) < repsFuerza) return m;
           cambiados++;
-          return nombre + seriesFuerza + '×5';
+          return nombre + seriesFuerza + '×' + repsFuerza;
         });
         t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
         return t;
       };
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aFuerza(d.detalle) } : d);
-      notasSalud.push('Tu objetivo es fuerza, no tamaño: en los dos básicos de cada sesión vas a 5×5 con carga alta (deberías llegar justo a la quinta repetición) y descansas 2-3 minutos entre series. Los accesorios se quedan en repeticiones altas. Sube el peso en cuanto completes las cinco series limpias.');
+      notasSalud.push((esPrincipiante
+        ? 'Tu objetivo es fuerza: los dos básicos de cada sesión van a 6 repeticiones con carga exigente (que la sexta cueste pero salga limpia) y descansas 2 minutos entre series. Empezando, la fuerza sube sobre todo por técnica, así que no busques el fallo: sube el peso cuando completes todas las series limpias.'
+        : 'Tu objetivo es fuerza, no tamaño: los dos básicos de cada sesión van a 5 repeticiones con carga alta (deberías llegar justo a la quinta) y descansas 2-3 minutos entre series. Sube el peso en cuanto completes todas las series limpias.')
+        + ' Los básicos no cambian de ejercicio de una semana a otra: la fuerza se gana repitiendo el mismo levantamiento. Los accesorios se quedan en repeticiones altas.'
+        + (_tramoDur === 'expres' ? ' En una sesión exprés no caben descansos largos: en los básicos descansa 90 segundos y no más.' : ''));
     }
 
     // HIPERTROFIA: subir las repeticiones de los básicos (14 sept 2026).
@@ -14663,7 +14726,19 @@
     // es el reparto clásico. No se baja de 8 en ningún básico y no se toca nada
     // que ya esté en 8 o más, así que un día que ya fuera de hipertrofia se
     // queda igual.
-    if (!soloDieta && ganarMusculo) {
+    // "&& !ganarFuerza" (15 sept 2026): `ganarMusculo` mira si el objetivo
+    // contiene "Ganar", así que también se activa con "Ganar fuerza". Este
+    // bloque corre DESPUÉS del de fuerza y le subía el 5×5 a ×8: el cliente
+    // que pedía fuerza recibía hipertrofia mientras la nota le prometía 5×5.
+    //
+    // "Sentirme mejor en general" también pasa por aquí (15 sept 2026). Sus
+    // plantillas de intermedio y avanzado son las mismas que las de fuerza
+    // ("Sentadilla 4×5", "Press banca 4×6", con 2-3 min de descanso), y medido
+    // sobre sus 60 planes: a 30-45 min la sesión se iba a ~50 y a 45-60 a ~68
+    // con el cardio del final. Para encontrarse mejor no hace falta carga
+    // máxima: a 8 repeticiones rinde igual para la salud, se recupera antes y
+    // el descanso de 90 s hace que la sesión quepa en el tiempo elegido.
+    if (!soloDieta && ((ganarMusculo && !ganarFuerza) || sentirseMejor)) {
       const BASICOS_HIPER = /(press de banca|press banca|press inclinado|press declinado|sentadilla|peso muerto|press militar|press de hombro|dominadas|remo con barra|remo en|jal[oó]n|prensa|hip thrust|fondos)/i;
       const aHipertrofia = (texto) => {
         // Mismo cuidado que en el bloque de fuerza: los paréntesis llevan comas
@@ -14678,7 +14753,9 @@
         return t;
       };
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
-      notasSalud.push('Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa 2 minutos entre series de básicos y 60-90 segundos en los accesorios.');
+      notasSalud.push(sentirseMejor
+        ? 'Tu objetivo es encontrarte mejor, así que los básicos van a 8 repeticiones con una carga que controles, no a 5 con carga máxima: para la salud rinde lo mismo, te recuperas antes y la sesión cabe en tu tiempo porque el descanso es más corto (unos 90 segundos). Acaba cada serie con 2-3 repeticiones de reserva.'
+        : 'Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa 2 minutos entre series de básicos y 60-90 segundos en los accesorios.');
     }
 
     if (!soloDieta) {
@@ -14713,12 +14790,20 @@
       // el techo que tiene ese objetivo mientras mantiene volumen de carrera —
       // es el "efecto de interferencia", bien documentado. Nada de prometer
       // hipertrofia de gimnasio con un plan de running.
-      // "Sentirme mejor en general" es el otro objetivo que no recibía nada
-      // aeróbico en Gimnasio. Aquí NO se le fuerza un remate: mucha gente con
-      // ese objetivo ya camina, va en bici o juega a algo, y añadirle volumen
-      // sin saberlo sería presuponer. Se le dice la referencia (150 min/semana
-      // de actividad moderada, recomendación de la OMS) y que decida él.
-      if (esGimnasio && !perdidaGrasa && !mejorarResistencia && !ganarMusculo) {
+      // "Sentirme mejor en general" SÍ lleva cardio en zona 2 al final de cada
+      // sesión desde el 8 sept, pero la nota de abajo seguía diciéndole "si ya
+      // llegas por tu cuenta, no necesitas añadir nada al plan" -- contradecía
+      // al propio plan. Ahora se le cuentan los minutos que ya hace y cuántos
+      // le faltan para la referencia de la OMS (150 min/semana), contando las
+      // sesiones reales que llevan cardio (el sábado de 5 días no lo lleva).
+      if (esGimnasio && sentirseMejor) {
+        const _minPorSesion = { corta: 10, media: 15, larga: 20, muyLarga: 25 }[_tramoDur] || 0;
+        const _sesionesZona2 = semana.filter(d => /cardio al final/.test(d.detalle || '')).length;
+        const _minSemana = _minPorSesion * _sesionesZona2;
+        notasSalud.push(_minSemana
+          ? `Cada sesión termina con cardio suave en zona 2: unos ${_minSemana} min a la semana. La referencia de salud (OMS) son 150 min de actividad moderada${_minSemana >= 150 ? ', así que con el plan ya llegas.' : `: te faltan unos ${150 - _minSemana}, y los cubres caminando a paso vivo, en bici o con cualquier deporte que ya practiques.`}`
+          : 'Tus sesiones son exprés y el cardio no cabe dentro: van dedicadas a la fuerza, que es lo que más rinde en poco tiempo. Para encontrarte mejor, la referencia de salud (OMS) son 150 min de actividad moderada a la semana, y caminar a paso vivo 20-25 minutos al día ya la cubre.');
+      } else if (esGimnasio && !perdidaGrasa && !mejorarResistencia && !ganarMusculo) {
         notasSalud.push('Tu plan es de fuerza, que es la base para encontrarte mejor. Para redondearlo, la referencia de salud (OMS) son 150 min de actividad moderada a la semana: cuentan caminar a paso vivo, la bici o cualquier deporte que ya practiques. Si ya llegas por tu cuenta, no necesitas añadir nada al plan; si no, sumar dos paseos largos a la semana es la forma más fácil de cubrirlo.');
       }
       // NEAT en pérdida de grasa (14 sept 2026, a petición directa: "aquí
@@ -14854,7 +14939,10 @@
     const _RESERVA_DUPLICADO = [
       [/hip thrust|puente de gl[uú]teo/i, eq(['Patada de glúteo en polea', 'Abductores en máquina', 'Patada de glúteo en cuadrupedia'], ['Patada de glúteo en cuadrupedia', 'Puente de glúteo a una pierna'], ['Patada de glúteo en cuadrupedia', 'Puente de glúteo a una pierna'])],
       [/step[- ]ups? controlados/i, eq(['Extensión de cuádriceps (rango corto)', 'Prensa de piernas (rango sin dolor)', 'Puente de glúteo a una pierna'], ['Puente de glúteo a una pierna', 'Curl femoral tumbado con mancuerna', 'Sentadilla isométrica en pared'], ['Puente de glúteo a una pierna', 'Superman'])],
-      [/prensa de piernas/i, eq(['Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'])],
+      // "\bprensa\b" y no "prensa de piernas": la reserva se busca por el nombre
+      // del tramo REPETIDO, y en el día de pierna ese es "prensa 3×12" a secas
+      // (15 sept 2026, espalda: "Prensa de piernas 5×5" + "prensa 3×12").
+      [/\bprensa\b/i, eq(['Extensión de cuádriceps (rango corto)', 'Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'], ['Sentadilla isométrica en pared'])],
       [/femoral/i, eq(['Curl femoral sentado en máquina', 'Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'], ['Curl femoral tumbado con mancuerna', 'Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'], ['Peso muerto rumano a una pierna', 'Puente de glúteo a una pierna'])],
       [/elevaciones frontales/i, eq(['Face pull', 'Retracción escapular con banda'], ['Retracción escapular con banda'], ['Retracción escapular tumbado boca abajo'])],
       [/press en m[aá]quina|press con mancuernas/i, eq(['Contractor de pecho en máquina', 'Aperturas en polea'], ['Aperturas con mancuernas en banco'], ['Flexiones'])],
@@ -15090,7 +15178,7 @@
           if (nn && nn.length > 3) _nombresSemana.add(nn);
         });
       });
-      semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion, _nombresSemana) } : d);
+      semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion, _nombresSemana, { fijarFuerza: ganarFuerza }) } : d);
     }
 
 
@@ -15205,17 +15293,35 @@
         let iEj = -1;
         const idxEjercicios = frs.map(f => cuenta(f) ? ++iEj : -1);
         let piezas = frs.filter((f, i) => idxEjercicios[i] < 0 || idxEjercicios[i] < _DUR.maxEj);
-        let k = -1;
+        // En las sesiones exprés y de 30-45 el core SÍ se come el tiempo: el día
+        // de "Core y complementos" se quedaba con 3 ejercicios de fuerza y 3 de
+        // core (~30 min en una sesión de 15-20), y el de "Hombros y core" con
+        // cuatro de hombro más plancha y rueda (~53 min en una de 30-45).
+        // Medido 15 sept 2026. Se deja uno.
+        if (_tramoDur === 'expres' || _tramoDur === 'corta') {
+          let cores = 0;
+          piezas = piezas.filter(f => !(esEjercicio(f) && _esCore.test(f)) || ++cores <= 1);
+        }
+        // La serie extra va a los primeros ejercicios que de verdad la admiten
+        // (15 sept 2026). Antes contaba por POSICIÓN: si los dos primeros ya
+        // estaban en 5 series (fuerza, músculo), la serie no iba a ningún sitio
+        // y el plan de 60-90 min salía idéntico letra por letra al de 45-60.
+        // El core no la recibe: el tiempo de más es para la fuerza.
+        let sumadas = 0;
         piezas = piezas.map(f => {
           if (!esEjercicio(f)) return f;
-          k++;
           return f.replace(/(\d+)(\s*[x×]\s*)(\S+)/, (m, s, x, r) => {
             let n = parseInt(s, 10);
             if (_DUR.seriesTope && n > _DUR.seriesTope) n = _DUR.seriesTope;
             // Tope duro de 5 series por ejercicio: por encima, el volumen extra
             // dentro de la MISMA sesión deja de aportar (meta-regresiones 2025) y
             // lo que toca es repartirlo en otro día, no seguir sumando aquí.
-            if (k < _DUR.sumarSerieA && n < 5) n += 1;
+            if (sumadas < _DUR.sumarSerieA && n < 5 && !_esCore.test(f)) { n += 1; sumadas++; }
+            // Un aislamiento no se programa a 5-6 repeticiones pesadas. Pasaba cuando
+            // la adaptación por lesión cambiaba un básico YA reescrito a fuerza
+            // ("peso muerto rumano 5×5") por uno de aislamiento: salía "Femoral
+            // tumbado en máquina 5×5" (15 sept 2026). Aquí se ve el texto final.
+            if (/femoral|extensi[oó]n de cu[aá]driceps|patada de gl[uú]teo|aperturas|cruces|contractor|elevaciones (laterales|frontales)|p[aá]jaros|\bcurl\b|face pull|pullover/i.test(f) && /^[1-6]$/.test(r)) r = '10';
             return n + x + r;
           });
         });
@@ -15236,7 +15342,7 @@
       } else if (_tramoDur === 'corta') {
         notasSalud.push('Sesión de 30-45 min: te hemos dejado cuatro ejercicios por día, los que más rinden por minuto. Descansa 60 segundos entre series en los accesorios y 90 en los básicos, y entra de sobra en el tiempo que tienes. Si un día vas justo, quita el último ejercicio antes que hacerlos todos con prisa y mala técnica.');
       } else if (_tramoDur === 'larga' || _tramoDur === 'muyLarga') {
-        notasSalud.push('Tienes tiempo de sobra por sesión, así que hemos subido las series de los ejercicios básicos en vez de añadirte ejercicios nuevos: más práctica de los patrones que de verdad mueven la aguja rinde más que acumular movimientos accesorios. Aprovecha el margen para descansar bien (2-3 min en los básicos pesados) en lugar de correr.');
+        notasSalud.push('Tienes tiempo de sobra por sesión, así que hemos subido una serie a los primeros ejercicios de cada día (los básicos, o los siguientes si ya estaban al máximo) en vez de añadirte ejercicios nuevos: más práctica de los patrones que de verdad mueven la aguja rinde más que acumular movimientos accesorios. Aprovecha el margen para descansar bien (2-3 min en los básicos pesados) en lugar de correr.');
       }
     }
 
