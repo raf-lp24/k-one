@@ -80,7 +80,13 @@ self.addEventListener('push', e => {
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       data: { url: datos.url || '/' },
-      tag: 'kone-recordatorio'
+      // Antes TODO iba con la misma etiqueta 'kone-recordatorio': el aviso de
+      // "tienes respuesta" pisaba al de "hoy toca pecho" y viceversa. Y sin
+      // renotify, en Android una notificación que reemplaza a otra con la misma
+      // etiqueta llega EN SILENCIO (sin sonido ni vibración): si el cliente no
+      // había quitado la de ayer, la de hoy se cambiaba sin que se enterara.
+      tag: datos.tag || 'kone-aviso',
+      renotify: true
     })
   );
 });

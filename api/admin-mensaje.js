@@ -76,7 +76,8 @@ module.exports = async (req, res) => {
               await enviarPushAUsuario(mensaje.user_id, {
                 title: 'K-ONE · Tienes respuesta',
                 body: 'Hemos contestado a tu mensaje. Ábrelo cuando puedas.',
-                url: '/'
+                url: '/',
+                tag: 'kone-mensaje'
               });
             }
           } catch (e) {}

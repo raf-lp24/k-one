@@ -10,6 +10,7 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
+const { avisoDelDia } = require('../lib/aviso-del-dia');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
 const APP_URL = 'https://k-one.fit';
@@ -44,7 +45,7 @@ function _indiceDiaMadrid(fecha) {
 // cuidados que la de admins: captura sus propios errores (es un extra sobre el
 // email, no un requisito), limpia la suscripción si el navegador ya no existe
 // (404/410) y no dice nada si el cliente no tiene los avisos activados.
-async function enviarPushAUsuario(userId, { title, body, url }) {
+async function enviarPushAUsuario(userId, { title, body, url, tag }) {
   const vapidPublic = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
   if (!vapidPublic || !vapidPrivate || !userId) return 0;
@@ -59,7 +60,7 @@ async function enviarPushAUsuario(userId, { title, body, url }) {
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-          JSON.stringify({ title, body, url: url || '/' })
+          JSON.stringify({ title, body, url: url || '/', tag })
         );
         enviados++;
       } catch (pushErr) {
@@ -460,74 +461,41 @@ async function handleCronRetencion(req, res) {
             const historial = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos : [];
             if (historial.includes(hoyMadrid)) continue; // ya entrenó hoy
 
-            // Qué le toca HOY según su propio plan. semana[] va de lunes (0) a
-            // domingo (6), igual que idxDiaHoy.
-            const planCliente = planPorId[p.id] || null;
-            const diaPlan = planCliente?.semana?.[idxDiaHoy] || null;
-            const esDescanso = diaPlan ? diaPlan.tipo === 'Descanso' : false;
-            // "Solo nutrición" no tiene rutina: su plan viene con semana vacía.
-            // Sin esto caía en el aviso genérico y le preguntaba "¿entrenas
-            // hoy?" a quien no ha contratado entrenamiento.
-            const soloNutricion = !!planCliente?.soloDieta || (!!planCliente && !(planCliente.semana || []).length);
-
-            // Con nombre y variado, no el mismo aviso robótico cada día --
-            // mismo criterio que ya usan los mensajes de racha en index.html.
+            // Qué le toca HOY según su propio plan (semana[] va de lunes = 0 a
+            // domingo = 6, igual que idxDiaHoy). El texto lo monta
+            // lib/aviso-del-dia.js: músculos del día en el título ("Lunes:
+            // Pecho y tríceps"), primeros ejercicios en el cuerpo, y en los
+            // días de descanso lo que toca mañana.
             const primerNombrePush = (p.nombre || ud.nombre || '').split(' ')[0] || '';
-            const coma = primerNombrePush ? `, ${primerNombrePush}` : '';
-
             // Días que lleva sin abrir la app (mismo criterio que los emails
             // de reenganche: last_seen del front, con last_sign_in_at de
-            // fallback). Solo cambia el TEXTO del aviso diario; no se manda
-            // ninguna notificación extra.
+            // fallback). Ya no sustituye al contenido del día: se antepone.
             const _ultimaVezPush = p.last_seen || authLastSignIn[p.id] || null;
             const _diasSinEntrar = _ultimaVezPush
               ? (ahora.getTime() - new Date(_ultimaVezPush).getTime()) / 86400000
               : 0;
-            let cuerpoPush;
-            if (_diasSinEntrar >= 7) {
-              const _d = Math.round(_diasSinEntrar);
-              cuerpoPush = _diasSinEntrar >= 21
-                ? `Tres semanas fuera${coma}. Se vuelve entrenando hoy, no mañana.`
-                : (_diasSinEntrar >= 14
-                    ? `${_d} días sin aparecer${coma}. Tu plan sigue aquí, tal cual lo dejaste.`
-                    : `${_d} días sin entrenar${coma}. Hoy es buen día para retomarlo.`);
-            } else if (soloNutricion) {
-              const frasesNutri = [
-                `Tus comidas de hoy ya están listas${coma}.`,
-                `Hoy toca cuidar la alimentación${coma}. Tienes tu menú preparado.`,
-                `Tu plan de comidas de hoy te espera${coma}.`
-              ];
-              cuerpoPush = frasesNutri[Math.floor(Math.random() * frasesNutri.length)];
-            } else if (esDescanso) {
-              // Antes se mandaba "¿entrenas hoy?" TODOS los días, también en los
-              // de descanso programado: el aviso contradecía al propio plan y
-              // empujaba justo el día que toca recuperar.
-              cuerpoPush = `Hoy toca descanso${coma}. Recuperar también es entrenar.`;
-            } else if (diaPlan && diaPlan.resumen) {
-              cuerpoPush = `Hoy toca: ${diaPlan.resumen}.`;
-            } else {
+            const aviso = avisoDelDia({
+              plan: planPorId[p.id] || null,
+              idx: idxDiaHoy,
+              nombre: primerNombrePush,
+              diasSinEntrar: _diasSinEntrar
+            }) || {
               // Sin plan cargado (cliente antiguo, plan aún sin generar): aviso
               // genérico de siempre.
-              const frasesPush = primerNombrePush ? [
-                `${primerNombrePush}, tu plan de hoy te está esperando.`,
-                `¿Entrenas hoy, ${primerNombrePush}? Tienes el plan listo.`,
-                `Hoy toca${coma}. Un paso más.`
-              ] : [
-                'Tu plan de hoy te está esperando.',
-                '¿Entrenas hoy? Tienes el plan listo.',
-                'Hoy toca. Un paso más.'
-              ];
-              cuerpoPush = frasesPush[Math.floor(Math.random() * frasesPush.length)];
-            }
+              title: `K-ONE · ${nombreDiaHoy}`,
+              body: primerNombrePush ? `${primerNombrePush}, tu plan de hoy te está esperando.` : 'Tu plan de hoy te está esperando.',
+              tipo: 'generico'
+            };
 
             try {
               await webpush.sendNotification(
                 { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-                // El día de la semana va en el título: es lo primero que se lee
-                // en la notificación, antes de desplegarla.
-                JSON.stringify({ title: `K-ONE · ${nombreDiaHoy}`, body: cuerpoPush, url: '/' })
+                JSON.stringify({ title: aviso.title, body: aviso.body, url: '/', tag: 'kone-hoy' })
               );
-              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: 'Recordatorio push diario', datos: JSON.stringify({ resumen: 'Push: recordatorio de entreno diario.' }) });
+              // Se guarda el texto EXACTO enviado. Antes solo quedaba "Push:
+              // recordatorio de entreno diario.", así que ante un "no me cuadra
+              // la notificación" no había forma de saber qué le había llegado.
+              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: aviso.title, datos: JSON.stringify({ resumen: `Push (${aviso.tipo}): ${aviso.title} — ${aviso.body}` }) });
               // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
               // portátil) recibía el push una vez POR DISPOSITIVO en la misma
               // pasada del cron -- yaAvisadoHoy solo se rellenaba una vez al
@@ -1240,13 +1208,27 @@ async function handlePost(req, res) {
           detalle: 'Tu cuenta no tiene ninguna suscripción guardada en el servidor. Desactiva y vuelve a activar el interruptor de avisos desde el móvil, con la app añadida a la pantalla de inicio.' });
       }
 
+      // La prueba manda el aviso REAL de hoy (el mismo que mandará el cron por
+      // la mañana), no un "si ves esto, funciona": así se comprueba a la vez
+      // que llega y que dice lo que toca según el plan de esta cuenta.
+      let aviso = null;
+      try {
+        const { data: perfilPrueba } = await supa.from('profiles')
+          .select('nombre, userdata, plan').eq('id', user.id).maybeSingle();
+        if (perfilPrueba) {
+          const nombrePrueba = (perfilPrueba.nombre || perfilPrueba.userdata?.nombre || '').split(' ')[0] || '';
+          aviso = avisoDelDia({ plan: perfilPrueba.plan, idx: _indiceDiaMadrid(), nombre: nombrePrueba, diasSinEntrar: 0 });
+        }
+      } catch (_) { /* sin plan legible: se manda la prueba genérica */ }
+      if (!aviso) aviso = { title: 'K-ONE · Prueba', body: 'Si ves esto, los avisos funcionan.' };
+
       webpush.setVapidDetails(`mailto:${ADMIN_EMAIL}`, vapidPublic, vapidPrivate);
       let enviados = 0; const fallos = [];
       for (const sub of subs) {
         try {
           await webpush.sendNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-            JSON.stringify({ title: 'K-ONE · Prueba', body: 'Si ves esto, los avisos funcionan.', url: '/' })
+            JSON.stringify({ title: aviso.title, body: aviso.body, url: '/', tag: 'kone-hoy' })
           );
           enviados++;
         } catch (pushErr) {
@@ -1260,7 +1242,8 @@ async function handlePost(req, res) {
       return res.status(200).json({
         ok: enviados > 0,
         motivo: enviados > 0 ? 'enviado' : 'rechazado_por_el_navegador',
-        dispositivos: subs.length, enviados, fallos
+        dispositivos: subs.length, enviados, fallos,
+        aviso: { title: aviso.title, body: aviso.body }
       });
     } catch (e) {
       console.warn('[notify] push_prueba error:', e.message);
