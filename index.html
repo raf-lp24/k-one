@@ -13886,6 +13886,7 @@
     } else if (esCombinacion) {
       // ── HÍBRIDO — fuerza + cardio concurrente: complejos, carries, metcons, zona 2
       const lugarComb   = u.lugar || 'Gimnasio';
+      const _casaHib = lugarComb.includes('casa');
       const v = ganarMusculo ? '4' : '3';
       // Alternancia de énfasis por bloque de mesociclo: en entrenamiento concurrente
       // (fuerza + resistencia a la vez) exigir el máximo de ambas cualidades cada
@@ -13900,96 +13901,192 @@
           : 'Este bloque de 4 semanas prioriza motor/acondicionamiento: metcons más largos, fuerza en mantenimiento. Alternar así evita que ambas cualidades se frenen entre sí.');
       }
 
+      // ─── HÍBRIDO: semana según días, nivel, tiempo, lugar, objetivo y lesión ───
+      // Reescrito el 15 sept 2026 tras revisarlo como entrenador sobre 3.600
+      // planes reales:
+      //  · El TIEMPO solo recortaba los días de fuerza: la zona 2 era de 35-45
+      //    min en una sesión de 15-20, el run/walk de 25 y la "sesión larga" de
+      //    45-75 min para quien tenía 30-45.
+      //  · "Llevo algo de tiempo" y "Avanzado" recibían el MISMO plan a 2-3 días.
+      //  · El OBJETIVO no cambiaba nada salvo 3→4 series en ganar músculo.
+      //  · Días duros seguidos: pierna pesada el jueves y complejo con front
+      //    squat, RDL y zancadas el viernes; el avanzado sumaba la sesión larga.
+      //  · Con la espalda tocada seguía el RDL del complejo; con la rodilla, los
+      //    strides; y en casa se pedían bici y remo ergómetro.
+      //
+      // Semana (los días de fuerza de pierna nunca van seguidos de un metcon):
+      //   Principiante: 2d Lun fuerza · Jue cardio | 3d + Vie circuito suave |
+      //                 4d Lun fuerza A · Mar cardio · Jue fuerza B · Sáb circuito |
+      //                 5d + Vie cardio suave
+      //   Resto:        2d Lun fuerza completo · Jue metcon |
+      //                 3d Lun fuerza · Mié cardio (series si avanzado) · Vie metcon |
+      //                 4d Lun tren superior · Mar cardio · Jue tren inferior · Sáb metcon |
+      //                 5d + Vie sesión larga en zona 2
+
+      const _TOPE_HIB = { expres: 20, corta: 45, media: 60, larga: 90, muyLarga: 120 }[_tramoDur];
+      const _rango = (lo, hi) => {
+        const h = Math.min(_TOPE_HIB, hi);
+        const l = Math.max(10, Math.min(h - 5, lo));
+        return l >= h ? `${h} min` : `${l}-${h} min`;
+      };
+      // "Preparar una competición" va con resistencia: en híbrido la competición
+      // (Hyrox y similares) es sobre todo motor.
+      const _resistenciaHib = mejorarResistencia || objetivo.includes('competici');
+
+      // ── Cardio en zona 2 ──
+      const _Z2 = { expres: [15, 20], corta: [25, 35], media: [35, 45], larga: [45, 60], muyLarga: [50, 70] }[_tramoDur];
+      const _extraRes = _resistenciaHib ? 5 : 0;
+      const _conStridesHib = !_lesionZonaRodilla && _TOPE_HIB >= 60;
+      const _modalidadZ2 = _casaHib
+        ? (_lesionZonaRodilla ? 'de caminata rápida en cuesta, al aire libre' : 'de carrera suave o caminata rápida en cuesta, al aire libre')
+        : (_lesionZonaRodilla ? 'rotando cada 10 min entre bici y remo' : 'rotando cada 10 min entre carrera, bici y remo');
+      const _zona2 = () => ({
+        resumen: 'Zona 2 · Cardio aeróbico', etiqueta: 'Cardio',
+        detalle: `Zona 2 · ${_rango(_Z2[0] + _extraRes, Math.min(_TOPE_HIB - (_conStridesHib ? 5 : 0), _Z2[1] + _extraRes))} ${_modalidadZ2}, ritmo conversacional (RPE 3-4)${_conStridesHib ? '. Al acabar: 4 strides de 60m' : ''}`
+      });
+      const _LARGA_HIB = { expres: [15, 20], corta: [40, 45], media: [50, 60], larga: [70, 85], muyLarga: [90, 110] }[_tramoDur];
+      const _sesionLarga = () => ({
+        resumen: 'Sesión larga · Zona 2', etiqueta: 'Cardio',
+        detalle: `Sesión larga · ${_rango(_LARGA_HIB[0], _LARGA_HIB[1])} a zona 2 (RPE 3-4) ${_casaHib
+          ? (_lesionZonaRodilla ? 'de caminata rápida en cuesta' : 'alternando carrera suave y caminata rápida')
+          : (_lesionZonaRodilla ? 'alternando bici y remo cada 15 min' : 'alternando carrera, bici y remo cada 15 min')}. Un ritmo en el que puedas hablar todo el rato: es la base aeróbica de la semana`
+      });
+
+      // ── Series de cardio (avanzado) ──
+      const _CAL_HIB = {
+        expres: 'Calentamiento: 4 min suave. Intervalos: 6×(1 min fuerte / 1 min suave). Vuelta a la calma: 2 min',
+        corta: 'Calentamiento: 10 min en zona 2. Series: 5×400m con 90s rec. Enfriamiento: 5 min suave',
+        media: 'Calentamiento: 10 min en zona 2. Series: 4×800m con 2 min rec a ritmo umbral (RPE 7-8). Enfriamiento: 8 min suave',
+        larga: 'Calentamiento: 12 min en zona 2. Series: 6×800m con 90s rec a ritmo umbral (RPE 7-8). Enfriamiento: 10 min suave',
+        muyLarga: 'Calentamiento: 15 min en zona 2. Series: 5×1000m con 2 min rec a ritmo umbral (RPE 7-8). Enfriamiento: 10 min suave'
+      }[_tramoDur];
+      const _dondeCal = _casaHib
+        ? (_lesionZonaRodilla ? 'caminando rápido en cuesta, subiendo el ritmo en cada tramo fuerte' : 'corriendo al aire libre')
+        : (_lesionZonaRodilla ? 'en bici o remo (en remo, los metros tal cual)' : 'corriendo en cinta o al aire libre, o en remo');
+      const _calidadHib = () => ({
+        resumen: 'Cardio calidad · Series', etiqueta: 'Intensidad',
+        detalle: `${_CAL_HIB} — ${_dondeCal}. Cronometra cada repetición`
+      });
+
+      // ── Fuerza ──
+      const _sP = ganarMusculo ? 4 : 3;
+      // "Perder grasa": remate corto de acondicionamiento en los días de fuerza
+      // (no en exprés, donde no cabe; nunca al principiante).
+      const _emomFin = { expres: 0, corta: 6, media: 8, larga: 10, muyLarga: 10 }[_tramoDur];
+      const _finGrasa = perdidaGrasa && !esPrincipiante && _emomFin
+        ? `. Finisher: EMOM ${_emomFin} min alternando 12 KB swings y 8 burpees`
+        : '';
+      const _fuerza = (resumen, detalle) => ({ resumen, detalle: detalle + _finGrasa, etiqueta: 'Fuerza' });
+      const _FULL_PRINC_A = `Fuerza full body · Sentadilla goblet ${_sP}×10, press banca con mancuernas ${_sP}×10, remo con mancuerna a una mano ${_sP}×10 por lado, hip thrust con mancuerna ${_sP}×12, farmer carry con mancuernas 3×20m, plancha 3×30s`;
+      const _FULL_PRINC_B = `Fuerza full body · Peso muerto rumano con mancuernas ${_sP}×10, press de hombro con mancuernas ${_sP}×10, ${_casaHib ? 'remo con banda elástica' : 'jalón en polea'} ${_sP}×12, step-ups con mancuernas 3×8 por pierna, farmer carry con mancuernas 3×20m, dead bug 3×10 por lado`;
+      const _FULL_INTER = `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo con barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m`;
+      const _FULL_AV = `Fuerza · Sentadilla ${vv}×5, press banca ${vv}×5, peso muerto rumano ${vv}×6, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas'} 3×6, farmer carry 3×40m, plancha 3×45s`;
+      const _SUP_INTER = `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m`;
+      const _SUP_AV = `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} 3×6, face pull 3×15, overhead carry con mancuerna 3×30m por lado, farmer carry 3×40m`;
+      const _INF_INTER = `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, gemelos en escalón 3×15, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
+      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_casaHib ? 'squat jumps 3×6' : 'box jumps 3×6'}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
+
+      // ── Metcon / circuito ──
+      // Cardio entre rondas: más metros si el objetivo es resistencia; en casa,
+      // carrera en vez de remo; con la rodilla, sin carrera.
+      const _cardioEntre = _casaHib
+        ? (_lesionZonaRodilla ? '1 min de marcha rápida' : (_resistenciaHib ? '400m de carrera' : '200m de carrera'))
+        : (_lesionZonaRodilla ? (_resistenciaHib ? '500m de remo' : '250m de remo') : (_resistenciaHib ? '400m de carrera o 500m de remo' : '200m de carrera o 250m de remo'));
+      // "Perder grasa" cierra el circuito con zona 2 cuando hay tiempo.
+      const _colaGrasa = perdidaGrasa && _TOPE_HIB >= 60 ? `. Al terminar: 10 min en zona 2 ${_casaHib ? 'caminando rápido' : 'en bici o remo'}` : '';
+      // Ganar músculo/fuerza: una ronda menos, para recuperar para la fuerza.
+      const _rondas = (base) => Math.max(2, base - (ganarMusculo ? 1 : 0));
+      const _circuitoSuave = () => ({
+        resumen: 'Circuito combinado · Fuerza + cardio', etiqueta: 'Híbrido',
+        detalle: `Circuito ${_rondas({ expres: 3, corta: 4, media: 5, larga: 5, muyLarga: 6 }[_tramoDur])} rondas (descanso 90 s entre rondas): 10 sentadillas goblet, 8 press de hombro con mancuernas, 10 remo con mancuerna por lado, 12 step-ups, ${_cardioEntre}. Ritmo que puedas mantener (RPE 6)${_colaGrasa}`
+      });
+      const _circuitoModerado = () => ({
+        resumen: 'Circuito moderado · Fuerza + cardio', etiqueta: 'Híbrido',
+        detalle: `Circuito ${_rondas({ expres: 3, corta: 4, media: 5, larga: 6, muyLarga: 6 }[_tramoDur])} rondas (descanso 90 s entre rondas): 10 sentadillas goblet, 10 remo con mancuerna por lado, 8 press de hombro con mancuernas, 12 KB swings, ${_cardioEntre}. A ritmo constante que puedas sostener (RPE 6), sin llegar al fallo${_colaGrasa}`
+      });
+      // El complejo con mancuernas cambia de movimientos según la lesión DESDE la
+      // plantilla (antes el RDL y la hang clean llegaban tal cual con la espalda
+      // tocada: el mapa de lesiones no tenía regla para "RDL").
+      const _complejoDB = () => {
+        const movs = [
+          _lesionZonaEspalda ? '8 hip thrust con mancuerna' : '8 RDL',
+          _lesionZonaEspalda ? '8 remo con mancuerna apoyado en banco' : '8 hang clean',
+          _lesionZonaRodilla ? '8 puente de glúteo' : '8 front squat',
+          _lesionZonaHombro ? '8 remo inclinado con mancuernas' : '8 push press',
+          _lesionZonaRodilla ? '8 press de suelo con mancuernas' : '8 reverse lunge por pierna'
+        ];
+        const r = _rondas({ expres: 2, corta: 3, media: 4, larga: 5, muyLarga: 6 }[_tramoDur] + (esAvanzado && !enfasisFuerza ? 1 : 0));
+        return {
+          resumen: 'Metcon · Complejo + cardio', etiqueta: 'Híbrido',
+          detalle: `Complejo con mancuernas ${r} rondas (descanso 2 min): ${movs.join(' + ')}. Entre rondas: ${_cardioEntre}. Cronometra${_colaGrasa}`
+        };
+      };
+      const _theBear = () => {
+        const r = _rondas({ expres: 2, corta: 3, media: 4, larga: 5, muyLarga: 6 }[_tramoDur] + (enfasisFuerza ? 0 : 1));
+        const emom = { expres: 0, corta: 6, media: 9, larga: 12, muyLarga: 15 }[_tramoDur] + (enfasisFuerza || _tramoDur === 'expres' ? 0 : 3);
+        const cardio3 = _lesionZonaRodilla
+          ? (_resistenciaHib ? '500m de remo' : '250m de remo')
+          : (_resistenciaHib ? '500m de remo o 400m de carrera' : '250m de remo o 200m de carrera');
+        return {
+          resumen: 'Metcon · Complejo + EMOM', etiqueta: 'Híbrido',
+          detalle: `Complejo con barra "The Bear" ${r} rondas: power clean + front squat + push press + back squat + press militar × 5 reps ininterrumpidas. Sube peso cada ronda.${emom ? ` Post: EMOM ${emom} min: min1: 12 KB swings · min2: 8 burpees · min3: ${cardio3}` : ''}${_colaGrasa}`
+        };
+      };
+      const _metcon = () => sentirseMejor ? _circuitoModerado() : (esAvanzado && !_casaHib ? _theBear() : _complejoDB());
+
+      // ── Cardio del principiante: run/walk que progresa cada 3 semanas ──
+      const _PASO_HIB = [{ c: 1, a: 2 }, { c: 2, a: 1 }, { c: 3, a: 1 }, { c: 5, a: 1 }][Math.min(3, Math.floor((Math.max(1, semanaActual) - 1) / 3))];
+      const _minCardioPrinc = { expres: 15, corta: 25, media: 30, larga: 30, muyLarga: 30 }[_tramoDur] + (_resistenciaHib && _TOPE_HIB >= 45 ? 5 : 0);
+      const _cardioPrinc = () => {
+        const rondas = Math.max(3, Math.floor(_minCardioPrinc / (_PASO_HIB.c + _PASO_HIB.a)));
+        const core = _tramoDur === 'expres' ? '' : '. Después del cardio: plancha 3×30s, dead bug 3×10 por lado';
+        // La caminata va ANTES del core, no detrás: el recorte por duración parte
+        // el texto por comas y, al quitar un ejercicio de core ("dead bug ..."),
+        // se llevaba con él lo que viniera pegado detrás.
+        const caminata = perdidaGrasa && _TOPE_HIB >= 45 ? '. Opcional: 10 min más caminando a paso vivo' : '';
+        if (_lesionZonaRodilla) {
+          return { resumen: 'Cardio sin impacto · Zona 2', etiqueta: 'Cardio',
+            detalle: `Cardio sin impacto · ${_minCardioPrinc} min ${_casaHib ? 'de caminata rápida' : 'de bici, elíptica o remo'} a ritmo conversacional (RPE 3-4)${caminata}${core}` };
+        }
+        return { resumen: 'Cardio · Run/walk + core', etiqueta: 'Cardio',
+          detalle: `Cardio progresivo · Alternar ${_PASO_HIB.c} min corriendo / ${_PASO_HIB.a} min caminando × ${rondas} rondas, o ${_minCardioPrinc} min de ${_casaHib ? 'caminata rápida' : 'bici o remo'} a ritmo conversacional${caminata}${core}` };
+      };
+      const _cardioSuavePrinc = () => ({
+        resumen: 'Cardio suave · Zona 2', etiqueta: 'Cardio',
+        detalle: `Zona 2 · ${_rango(_Z2[0], _Z2[1])} ${_casaHib ? 'de caminata rápida' : 'de bici, remo o caminata rápida en cinta'} a ritmo conversacional (RPE 3)${_TOPE_HIB >= 45 ? '. Movilidad 5 min al acabar: cadera, hombros, tobillos' : ''}`
+      });
+
+      const _planHib = {};
       if (esPrincipiante) {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Full Body · Fuerza base",
-           detalle: `Fuerza full body · Sentadilla goblet 3×10, press banca con mancuernas 3×10, remo con mancuerna a una mano 3×10/lado, hip thrust con mancuerna 3×12, farmer carry con mancuernas 3×20m, plancha 3×30s`,
-           etiqueta:"Fuerza"},
-          {dia:"Martes", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Cardio suave · Zona 2" : "Recuperación",
-           detalle: numDias >= 5 ? `Zona 2 · 20-25 min ${'bici, remo o carrera'} a ritmo conversacional (RPE 3). Movilidad 10 min: cadera, hombros, tobillos` : "",
-           etiqueta: numDias >= 5 ? "Cardio" : "Descanso"},
-          {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 2 ? "Cardio · Run/walk + core" : "Movilidad",
-           detalle: numDias >= 2 ? `Cardio progresivo · Alternar 2 min corriendo / 1 min caminando × 8 rondas${', o 25 min bici/remo zona 2'}. Post-cardio: plancha 3×30s, dead bug 3×10/lado, ${'pallof press con banda 3×10/lado'}` : "",
-           etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Circuito combinado · Fuerza + cardio" : "Descanso",
-           detalle: numDias >= 3 ? `Circuito 4 rondas (descanso 90s entre rondas): ${'10 goblet squats, 8 push press con mancuernas, 10 remo con mancuerna a una mano/lado, 12 step-ups, 250m remo o 200m carrera'}` : "",
-           etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
-          {dia:"Sábado", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 4 ? "Sesión larga · Fuerza + zona 2" : "Descanso",
-           detalle: numDias >= 4 ? `Combinado · ${'20 min remo/bici zona 2 + sentadilla goblet 3×12 + press banca con mancuernas 3×10 + remo con mancuerna a una mano 3×10/lado'}. Cierre: plancha 3×30s` : "",
-           etiqueta: numDias >= 4 ? "Híbrido" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
-      } else if (numDias <= 3) {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Full body + finisher",
-           detalle: `Fuerza · Sentadilla ${v}×8, press banca ${v}×8, remo con barra ${v}×10, peso muerto rumano 3×10, farmer carry 3×30m. Finisher: Tabata 4 min alternando KB swings y burpees`,
-           etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-          {dia:"Miércoles", tipo: numDias >= 2 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 2 ? "Zona 2 · Cardio aeróbico" : "Movilidad",
-           detalle: numDias >= 2 ? `Zona 2 · ${sesionCorta ? '25-30 min' : '35-45 min'} ${'rota cada 10 min entre remo, bici y carrera a zona 2 (RPE 3-4)'}. Al acabar: 4 strides de 60m` : "",
-           etiqueta: numDias >= 2 ? "Cardio" : "Descanso"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad", detalle:"Movilidad general 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Metcon · Complejo + cardio" : "Descanso",
-           detalle: numDias >= 3 ? (`Complejo con mancuernas 5 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Anota tiempos`) : "",
-           etiqueta: numDias >= 3 ? "Híbrido" : "Descanso"},
-          {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca (nadar, bici tranquila). El objetivo es moverte sin generar fatiga, no entrenar", etiqueta:"Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
-      } else if (esAvanzado) {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior + carries",
-           detalle: `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, dominadas lastradas 3×6, face pull 3×15, overhead carry con mancuerna 3×30m/lado, farmer carry pesado 3×40m`,
-           etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Entrenamiento", resumen:"Cardio calidad · Series + zona 2",
-           detalle:`${sesionCorta ? '25 min total' : (enfasisFuerza ? '35-40 min total' : '45-50 min total')}: 15 min zona 2 calentamiento + ${sesionCorta ? '5×400m con 90s rec' : (enfasisFuerza ? '4×800m con 2 min rec a ritmo umbral (RPE 7-8)' : '6×800m con 90s rec a ritmo umbral (RPE 7-8)')}. Cronometra cada rep. Enfriamiento: 10 min zona 1 + 4 strides de 80m`,
-           etiqueta:"Intensidad"},
-          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle: "Recovery run opcional: 20 min zona 1 muy suave, o descanso total", etiqueta:"Descanso"},
-          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior + pliometría",
-           // El trineo solo existe en un gimnasio: en "en casa con material"
-           // (mancuernas y bandas) se cambia por zancadas cargadas, que
-           // trabajan lo mismo con lo que sí tiene en casa.
-           detalle: `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8/pierna, box jumps 3×6, gemelos con carga 4×12, ${lugarComb.includes('casa') ? 'zancadas cargadas con mancuernas 4×12/pierna' : 'sled push 4×20m'}`,
-           etiqueta:"Fuerza"},
-          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Complejo + EMOM",
-           detalle: `Complejo con barra "The Bear" ${enfasisFuerza ? 4 : 6} rondas: power clean + front squat + push press + back squat + behind-neck press × 5 reps ininterrumpidas. Sube peso cada ronda. Post: EMOM ${enfasisFuerza ? 10 : 15} min: min1: 12 KB swings · min2: 8 burpees · min3: 500m remo o 200m carrera`,
-           etiqueta:"Híbrido"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Sesión larga · Híbrido aeróbico" : "Descanso",
-           detalle: numDias >= 5 ? (`Sesión larga ${enfasisFuerza ? '45-55' : '60-75'} min: ${enfasisFuerza ? '1.5' : '2.5'}km carrera zona 2 + complejo DB 3 rondas (8 RDL + 8 clean + 8 thruster + 8 lunges) + 1000m remo + 3 rondas (farmer carry 40m + 15 wall balls + 10 box jumps) + 1km carrera. Anota tiempo total`) : "",
-           etiqueta: numDias >= 5 ? "Híbrido" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
+        const fA = _fuerza('Full Body · Fuerza base', _FULL_PRINC_A);
+        const fB = _fuerza('Full Body · Variantes', _FULL_PRINC_B);
+        if (numDias <= 2) { _planHib[0] = fA; _planHib[3] = _cardioPrinc(); }
+        else if (numDias === 3) { _planHib[0] = fA; _planHib[2] = _cardioPrinc(); _planHib[4] = _circuitoSuave(); }
+        else if (numDias === 4) { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[5] = _circuitoSuave(); }
+        else { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[4] = _cardioSuavePrinc(); _planHib[5] = _circuitoSuave(); }
       } else {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza · Tren superior",
-           detalle: `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m. Finisher: EMOM 6 min: 5 thrusters con mancuernas + 5 burpees`,
-           etiqueta:"Fuerza"},
-          {dia:"Martes", tipo:"Entrenamiento", resumen:"Zona 2 · Cardio multimodal",
-           detalle:`Zona 2 · ${sesionCorta ? '25-30 min' : '35-40 min'} ${'rotar cada 8-10 min entre remo, bici y carrera a zona 2 (RPE 3-4). Al acabar: 4 strides de 60m'}`,
-           etiqueta:"Cardio"},
-          {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-          {dia:"Jueves", tipo:"Entrenamiento", resumen:"Fuerza · Tren inferior",
-           // Mismo motivo que la plantilla de arriba: quien entrena en casa no
-           // tiene trineo, así que ahí se manda el farmer carry.
-           detalle: `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10/pierna, gemelos en escalón 3×15, ${lugarComb.includes('casa') ? 'farmer carry 3×30m' : 'sled push 3×20m o farmer carry 3×30m'}`,
-           etiqueta:"Fuerza"},
-          {dia:"Viernes", tipo:"Entrenamiento", resumen:"Metcon · Circuito fuerza + cardio",
-           detalle: `Complejo con mancuernas 4 rondas (descanso 2 min): 8 RDL + 8 hang clean + 8 front squat + 8 push press + 8 reverse lunge/pierna. Entre rondas: 400m carrera o 500m remo. Cronometra`,
-           etiqueta:"Híbrido"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Sesión larga · Cardio + fuerza" : "Descanso",
-           detalle: numDias >= 5 ? (`Sesión larga 45-55 min: 15 min remo/bici zona 2 + circuito 4 rondas (10 KB swings, 10 goblet squats, 10 push press, 200m carrera) + 10 min bici zona 2`) : "",
-           etiqueta: numDias >= 5 ? "Híbrido" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
+        const cardioDia = esAvanzado && !sentirseMejor ? _calidadHib() : _zona2();
+        const full = _fuerza('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER);
+        const sup = _fuerza(esAvanzado ? 'Fuerza · Tren superior + carries' : 'Fuerza · Tren superior', esAvanzado ? _SUP_AV : _SUP_INTER);
+        const inf = _fuerza(esAvanzado ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
+        if (numDias <= 2) { _planHib[0] = full; _planHib[3] = _metcon(); }
+        else if (numDias === 3) { _planHib[0] = full; _planHib[2] = cardioDia; _planHib[4] = _metcon(); }
+        else if (numDias === 4) { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[5] = _metcon(); }
+        else { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[4] = _sesionLarga(); _planHib[5] = _metcon(); }
       }
+      const _DIAS_HIB = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+      const _DESCANSOS_HIB = [
+        { resumen: 'Descanso', detalle: '' },
+        { resumen: 'Recuperación activa', detalle: '20 min caminar suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min' },
+        { resumen: 'Movilidad', detalle: 'Movilidad general 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes' },
+        { resumen: 'Movilidad y stretching', detalle: 'Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes' },
+        { resumen: 'Descanso', detalle: '' },
+        { resumen: 'Descanso activo', detalle: 'Paseo suave 20-30 min o actividad ligera que te apetezca. El objetivo es moverte sin generar fatiga, no entrenar' },
+        { resumen: 'Recuperación total', detalle: '' },
+      ];
+      semana = _DIAS_HIB.map((dia, i) => _planHib[i]
+        ? { dia, tipo: 'Entrenamiento', resumen: _planHib[i].resumen, detalle: _planHib[i].detalle, etiqueta: _planHib[i].etiqueta }
+        : { dia, tipo: 'Descanso', resumen: _DESCANSOS_HIB[i].resumen, detalle: _DESCANSOS_HIB[i].detalle, etiqueta: 'Descanso' });
 
     // CrossFit y Hyrox no generan plan de entrenamiento (auditoría 5 sept
     // 2026): se venden solo como nutrición, el cliente ya entrena en su box.
@@ -14106,12 +14203,17 @@
       // del entrenamiento, y lo que se recorta entonces es la fuerza, que es lo
       // que de verdad protege la masa muscular en un déficit.
       const _corta = _tramoDur === 'corta' || _tramoDur === 'expres';
+      // La sesión EXPRÉS tiene su propio remate (15 sept 2026): con los 8-10 min
+      // de la sesión de 30-45, tres ejercicios de fuerza más el interválico se
+      // iban a ~30 min en una sesión de 15-20. Mismo estímulo, más corto: 5 min
+      // el principiante (sigue con más descanso que trabajo) y 6 min el resto.
+      const _expres = _tramoDur === 'expres';
       const _interval = esPrincipiante
-        ? (_corta ? '8 min interválico al finalizar' : '12 min interválico al finalizar')
-        : (_corta ? '10 min interválico al finalizar' : '15 min interválico al finalizar');
+        ? (_expres ? '4 min interválico al finalizar' : _corta ? '8 min interválico al finalizar' : '12 min interválico al finalizar')
+        : (_expres ? '5 min interválico al finalizar' : _corta ? '10 min interválico al finalizar' : '15 min interválico al finalizar');
       const _rondas = esPrincipiante
-        ? (_corta ? '30 s fuerte / 90 s suave × 4 rondas' : '30 s fuerte / 90 s suave × 6 rondas')
-        : (_corta ? '1 min fuerte / 1 min suave × 5 rondas' : '1 min fuerte / 1 min suave × 7 rondas');
+        ? (_expres ? '30 s fuerte / 30 s suave × 4 rondas' : _corta ? '30 s fuerte / 90 s suave × 4 rondas' : '30 s fuerte / 90 s suave × 6 rondas')
+        : (_expres ? '30 s fuerte / 30 s suave × 5 rondas' : _corta ? '1 min fuerte / 1 min suave × 5 rondas' : '1 min fuerte / 1 min suave × 7 rondas');
       const _finisherInterval = `, ${modInterval.nombre} ${_interval} (${modInterval.accion}): ${_rondas}`;
       // BUG REAL (14 sept 2026): `finisher3` era un circuito FIJO de pliometría
       // —"3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto +
@@ -15519,6 +15621,17 @@
           muyLarga: 'Tienes tiempo de sobra: se usa en la tirada larga y en los rodajes, no en más intensidad. Correr más minutos suaves es lo que construye resistencia; la calidad se queda en una sesión a la semana.'
         }[_tramoDur];
         if (_notaRun) notasSalud.push(_notaRun);
+      } else if (esCombinacion) {
+        // Híbrido recibía las notas de GIMNASIO ("te hemos dejado los tres
+        // ejercicios que más rinden"), que no describen sus días de cardio ni
+        // sus circuitos.
+        const _notaHib = {
+          expres: 'Sesiones de 15-20 min: la fuerza se queda en los ejercicios que más rinden, los circuitos en 2-3 rondas y el cardio en 15-20 min seguidos. Descansa lo justo entre series (45-60 s) y todo cabe.',
+          corta: 'Sesiones de 30-45 min: fuerza recortada a lo esencial, circuitos de 3-4 rondas y cardio de 25-35 min. Cabe con su calentamiento si no alargas los descansos.',
+          larga: 'Tienes tiempo de sobra: se usa en más rondas en los circuitos, más minutos de cardio suave y descansos completos en la fuerza, no en meter más intensidad.',
+          muyLarga: 'Tienes tiempo de sobra: se usa en más rondas en los circuitos, más minutos de cardio suave y descansos completos en la fuerza, no en meter más intensidad.'
+        }[_tramoDur];
+        if (_notaHib) notasSalud.push(_notaHib);
       } else if (_tramoDur === 'expres') {
         notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
       } else if (_tramoDur === 'corta') {
