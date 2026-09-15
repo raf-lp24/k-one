@@ -13577,16 +13577,6 @@
       // 3ª" pero los minutos mostrados eran fijos toda la temporada — no cuadraba
       // ni con lo que el propio texto decía ni con el resto del programa (deload
       // cada 4ª semana, no cada 3ª).
-      const _multVolumenRun = [1.0, 1.10, 1.21, 0.70][semanaCiclo - 1];
-      const _escalarDur = (lo, hi, mult) => {
-        const loS = Math.max(15, Math.round(lo * mult / 5) * 5);
-        const hiS = Math.max(loS + 5, Math.round(hi * mult / 5) * 5);
-        return `${loS}-${hiS} min`;
-      };
-      const durBase  = _escalarDur(...(sesionCorta ? [20,25] : esAvanzado ? [50,60] : [35,45]), _multVolumenRun);
-      const durMedio = _escalarDur(...(sesionCorta ? [25,30] : esAvanzado ? [55,65] : [40,50]), _multVolumenRun);
-      const durLarga = _escalarDur(...(esAvanzado  ? [80,100] : [55,70]), _multVolumenRun);
-
       const lugarR  = u.lugar || 'Gimnasio';
       const rSinMat = lugarR.includes('sin material') || lugarR.includes('aire libre');
       // Rotación del ejercicio pliométrico "de firma" del bloque avanzado, por
@@ -13639,83 +13629,231 @@
         ? fuerzaCorredor.replace(/(\d)×/g, (m, s) => `${Math.min(5, parseInt(s, 10) + 1)}×`)
         : fuerzaCorredor) + _extraCorredor;
 
+      // ─── RUNNING: semana según días, nivel, tiempo y objetivo (15 sept 2026) ───
+      //
+      // Reescrito tras revisarlo como entrenador sobre 2.280 planes reales:
+      //  · El TIEMPO por sesión casi no se usaba: 15-20 min daba lo mismo que
+      //    30-45, y 45-60 lo mismo que 60-90 y que más de 90. Una sesión de
+      //    series en exprés salía de ~45 min (15 de calentamiento + series + 10).
+      //  · El PRINCIPIANTE no progresaba: la semana 1 y la 8 eran idénticas,
+      //    mientras la nota le decía que el volumen subía semana a semana.
+      //  · La TIRADA LARGA solo existía con 5 días: quien corría 3 o 4 no tenía
+      //    nunca la sesión que más resistencia construye.
+      //  · Demasiada intensidad: a 3 días, 2 de cada 3 sesiones eran duras, y el
+      //    avanzado a 5 hacía 4 de 5 (pliometría el martes y VO2máx el miércoles).
+      //  · El OBJETIVO no cambiaba nada con 2-3 días: su único efecto estaba en
+      //    el día de fuerza, que solo existía con 4 o más.
+      //
+      // Estructura (intermedio y avanzado): UNA sesión de calidad a la semana y
+      // tirada larga desde 2 días. La fuerza va el día DESPUÉS de la calidad
+      // (días duros juntos, días suaves de verdad suaves), nunca antes de ella.
+      //   2 días:  Mié calidad · Sáb tirada larga
+      //   3 días:  Lun rodaje · Mié calidad · Sáb tirada larga
+      //   4 días:  Lun rodaje · Mié calidad · Jue fuerza · Sáb tirada larga
+      //   5+ días: Lun rodaje · Mar calidad · Mié fuerza · Vie recuperación · Sáb larga
+      // Principiante: run/walk con un escalón nuevo cada 2 semanas (la 4ª de cada
+      // bloque repite el anterior para asimilar), sin series, y a 5 días uno de
+      // los días es cardio sin impacto en vez de un cuarto día corriendo.
+
+      // Minutos máximos reales de la sesión según lo que dijo tener el cliente.
+      const _TOPE_RUN = { expres: 20, corta: 45, media: 60, larga: 90, muyLarga: 120 }[_tramoDur];
+      // Regla del 10 %: el volumen sube dentro del bloque de 4 semanas y descarga
+      // la 4ª. Nunca por encima del tiempo que tiene el cliente.
+      const _multVolumenRun = [1.0, 1.10, 1.21, 0.70][semanaCiclo - 1];
+      const _escalarDur = (lo, hi, mult, tope) => {
+        const cap = tope || _TOPE_RUN;
+        const hiS = Math.min(cap, Math.max(15, Math.round(hi * mult / 5) * 5));
+        const loS = Math.min(hiS - 5, Math.max(10, Math.round(lo * mult / 5) * 5));
+        return loS >= hiS ? `${hiS} min` : `${loS}-${hiS} min`;
+      };
+      const _RUN_DUR = {
+        expres:   { suave: [15, 20], larga: [20, 20] },
+        corta:    { suave: [25, 35], larga: [40, 45] },
+        media:    { suave: [35, 45], larga: [50, 60] },
+        larga:    { suave: [45, 60], larga: [70, 85] },
+        muyLarga: { suave: [50, 70], larga: [90, 110] },
+      }[_tramoDur];
+      // El avanzado aguanta 5 min más de rodaje cuando hay tiempo para ello.
+      const _extraAv = esAvanzado && _TOPE_RUN >= 60 ? 5 : 0;
+      // Strides y cuestas fuera con la rodilla tocada: son aceleraciones casi a
+      // sprint y bajadas al trote, el impacto que el aviso de lesión dice haber
+      // quitado. Y fuera de la sesión exprés, donde no caben.
+      const _conStrides = !_lesionZonaRodilla && _tramoDur !== 'expres';
+      const _strides = (n, metros, nota) => _conStrides ? `. Al acabar: ${n} strides de ${metros}m (${nota})` : '';
+      const durSuave = _escalarDur(_RUN_DUR.suave[0] + _extraAv, _RUN_DUR.suave[1] + _extraAv, _multVolumenRun, _TOPE_RUN - (_conStrides ? 5 : 0));
+      const durLarga = _escalarDur(_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv, _multVolumenRun);
+      const durRecup = _escalarDur(Math.max(10, _RUN_DUR.suave[0] - 10), Math.max(15, _RUN_DUR.suave[1] - 10), 1);
+      const _cal = { expres: 4, corta: 10, media: 10, larga: 15, muyLarga: 15 }[_tramoDur];
+      const _vuelta = { expres: 2, corta: 5, media: 8, larga: 10, muyLarga: 10 }[_tramoDur];
+      // "Perder grasa": caminar al acabar los días suaves suma gasto sin sumar
+      // impacto. Antes solo lo recibía el día de fuerza, que con 2-3 días no existía.
+      const _extraSuave = perdidaGrasa
+        ? (rSinMat
+            ? '. Opcional, al terminar: 10-15 min caminando a paso vivo (suma gasto sin cargar más las piernas)'
+            : '. Opcional, al terminar: 10-15 min caminando en cinta con inclinación o en bici suave (suma gasto sin impacto)')
+        : '';
+      const _descargaTxt = semanaCiclo === 4
+        ? 'Semana de descarga: volumen reducido a propósito, no fuerces el ritmo.'
+        : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.';
+
+      const _diaFuerza = () => ({
+        resumen: esAvanzado ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
+        detalle: fuerzaCorredorObjetivo,
+        etiqueta: 'Fortalecimiento'
+      });
+      const _rodajeSuave = () => ({
+        resumen: esAvanzado && _conStrides ? 'Zona 2 · Easy run + strides' : 'Easy run · Zona 2',
+        etiqueta: 'Cardio',
+        detalle: `Easy run · ${durSuave} a zona 2 (65-75% FCmáx, RPE 3-4), ritmo conversacional${esAvanzado ? ', cadencia 170-180 spm' : '. Si no puedes mantener una conversación, baja el ritmo'}${esAvanzado ? _strides(6, 80, 'aceleración al 90%, recuperación caminando') : _strides(4, 60, 'aceleración progresiva al 85%, recuperación andando')}${_extraSuave}`
+      });
+      const _recuperacion = () => ({
+        resumen: 'Recovery run · Suave',
+        etiqueta: 'Cardio',
+        detalle: `Recovery run · ${durRecup} muy suave, zona 1-2 (RPE 2-3). Más lento de lo que crees: sirve para recuperar, no para sumar forma${_extraSuave}`
+      });
+      const _tiradaLarga = () => {
+        if (_tramoDur === 'expres') {
+          return { resumen: 'Rodaje continuo · Fondo', etiqueta: 'Cardio',
+            detalle: `Rodaje continuo · ${durLarga} seguidos a zona 2 (RPE 3-4), sin parar. Es tu sesión de fondo de la semana: lo que cuenta es no cortar${_extraSuave}` };
+        }
+        // Final a ritmo maratón solo en avanzado, una semana sí y otra no, y nunca
+        // en descarga ni con el objetivo de encontrarse mejor.
+        const conFinal = esAvanzado && !sentirseMejor && Math.max(1, semanaActual) % 2 === 0 && semanaCiclo !== 4;
+        return conFinal
+          ? { resumen: 'Tirada larga · Final a ritmo maratón', etiqueta: 'Volumen',
+              detalle: `Tirada larga con calidad · ${durLarga}. Todo a zona 2 suave salvo los últimos 15-20 min, a ritmo maratón. Hidratación cada 20 min. ${_descargaTxt}${_extraSuave ? ' ' + _extraSuave.slice(2) : ''}` }
+          : { resumen: 'Tirada larga', etiqueta: 'Volumen',
+              detalle: `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). ${_descargaTxt} Post: foam rolling + estiramientos${_extraSuave}` };
+      };
+      // Calidad del intermedio: fartlek o escalera un bloque, cuestas el siguiente.
+      const _calidadIntermedio = () => {
+        const cuestas = !_lesionZonaRodilla && _tramoDur !== 'expres' && bloqueMeso % 2 === 1;
+        const bloque = cuestas
+          ? { corta: 'Cuestas: 6 repeticiones de 150-200m subiendo fuerte (RPE 8)',
+              media: 'Cuestas: 8 repeticiones de 200-300m subiendo fuerte (RPE 8-9)',
+              larga: 'Cuestas: 10 repeticiones de 200-300m subiendo fuerte (RPE 8-9)',
+              muyLarga: 'Cuestas: 12 repeticiones de 200-300m subiendo fuerte (RPE 8-9)' }[_tramoDur]
+            + ` — cuesta real de 4-6%${rSinMat ? '' : ' o cinta con inclinación alta'}. Bajas trotando de vuelta como recuperación`
+          : { expres: 'Fartlek: 5×(1 min fuerte / 1 min suave)',
+              corta: 'Fartlek: 8×(1 min fuerte / 2 min suave)',
+              media: 'Escalera: 200m-400m-800m-1000m-800m-400m-200m con recuperación proporcional al esfuerzo (mitad del tiempo de trabajo)',
+              larga: 'Escalera: 400m-800m-1200m-1600m-1200m-800m-400m con recuperación de la mitad del tiempo de trabajo',
+              muyLarga: 'Escalera: 400m-800m-1200m-1600m-1200m-800m-400m con recuperación de la mitad del tiempo de trabajo, seguida de 10 min de rodaje suave' }[_tramoDur];
+        return {
+          resumen: cuestas ? 'Cuestas · Calidad' : 'Fartlek o series · Calidad',
+          etiqueta: 'Intensidad',
+          detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? ' + drills (A-skips, balanceos de piernas)' : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
+        };
+      };
+      // Calidad del avanzado: VO2máx una semana, umbral la siguiente.
+      const _calidadAvanzado = () => Math.max(1, semanaActual) % 2 === 1
+        ? { resumen: 'VO2máx · Intervalos cortos', etiqueta: 'Intensidad',
+            detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? ' + drills (A-skips, high knees, butt kicks)' : ''}. Series: ${{
+              expres: '3×400m con 60s rec trote',
+              corta: '5×400m con 90s rec trote',
+              media: '5×800m con 2 min rec trote',
+              larga: '6×800m (Yasso 800s) con recuperación igual al tiempo de trabajo',
+              muyLarga: '6×1000m con 3 min rec trote' }[_tramoDur]}. Ritmo 5K (RPE 9, 93-97% FCmáx). ${_tramoDur === 'expres' ? '' : 'Anota cada split. Si caen más de 5s, para. '}Enfriamiento: ${_vuelta} min trote suave` }
+        : { resumen: 'Threshold · Cruise intervals', etiqueta: 'Umbral',
+            detalle: `Calentamiento: ${_cal} min progresivo. Cruise intervals: ${{
+              expres: '2×4 min a ritmo umbral con 60s rec trote',
+              corta: '3×6 min a ritmo umbral con 60s rec trote',
+              media: '3×8 min a ritmo umbral (86-92% FCmáx, RPE 7-8) con 90s rec trote',
+              larga: '3×10 min a ritmo umbral (86-92% FCmáx, RPE 7-8) con 90s rec trote',
+              muyLarga: '4×10 min a ritmo umbral (86-92% FCmáx, RPE 7-8) con 90s rec trote' }[_tramoDur]}. Puedes hablar solo con esfuerzo. Enfriamiento: ${_vuelta} min trote` };
+      // "Sentirme mejor en general": la sesión de calidad es un fartlek
+      // controlado, nunca series a tope. La salud no pide VO2máx.
+      const _calidadSalud = () => ({
+        resumen: 'Fartlek controlado · Ritmos', etiqueta: 'Intensidad',
+        detalle: `Fartlek controlado · ${_cal} min trote suave de calentamiento. Luego: ${{ expres: 3, corta: 6, media: 8, larga: 10, muyLarga: 12 }[_tramoDur]} × (2 min a ritmo alegre + 2 min suave). Ritmo alegre = puedes hablar con frases cortas (RPE 5-6), nunca a tope. Enfriamiento: ${_vuelta} min trote`
+      });
+
+      // ── Principiante: escalones de run/walk ──
+      const _PASOS_RW = [
+        { corre: 1, anda: 2, rondas: 8 },
+        { corre: 2, anda: 1, rondas: 8 },
+        { corre: 3, anda: 1, rondas: 7 },
+        { corre: 5, anda: 1, rondas: 5 },
+        { corre: 8, anda: 1, rondas: 3 },
+        { corre: 12, anda: 1, rondas: 2 },
+        { continuo: 25 },
+      ];
+      const _pasoBase = Math.min(_PASOS_RW.length - 1, Math.floor((Math.max(1, semanaActual) - 1) / 2));
+      const _paso = semanaCiclo === 4 ? Math.max(0, _pasoBase - 1) : _pasoBase;
+      const _calRW = _tramoDur === 'expres' ? 3 : 5;
+      const _topeRW = _TOPE_RUN - _calRW - 2;
+      const _runWalk = (extraRondas, tipo) => {
+        const p = _PASOS_RW[_paso];
+        const titulo = tipo === 'largo' ? 'Run/walk largo' : tipo === 'tecnica' ? 'Run/walk técnico' : 'Run/walk progresivo';
+        const cola = tipo === 'tecnica' ? ' Céntrate en la técnica: pasos cortos y rápidos, brazos relajados, mirada al frente.'
+          : tipo === 'largo' ? ' Es la sesión más larga de tu semana: lo importante es acabarla, no el ritmo.'
+          : ' Pasos cortos y frecuentes, no alargues el paso.';
+        let texto;
+        if (p.continuo) {
+          const min = Math.min(_topeRW, p.continuo + extraRondas * 5);
+          texto = `${titulo} · ${min} min de carrera continua a ritmo conversacional (RPE 3-4). Si lo necesitas, camina 1 minuto y sigue.`;
+        } else {
+          let rondas = p.rondas + extraRondas;
+          while (rondas > 2 && (p.corre + p.anda) * rondas > _topeRW) rondas--;
+          texto = `${titulo} · Alternar: ${p.corre} min corriendo (conversacional, RPE 3-4) / ${p.anda} min caminando × ${rondas} rondas. Total ~${(p.corre + p.anda) * rondas} min.`;
+        }
+        return {
+          resumen: tipo === 'largo' ? 'Run/walk largo · Fondo' : tipo === 'tecnica' ? 'Run/walk · Técnica' : 'Run/walk · Base aeróbica',
+          etiqueta: tipo === 'largo' ? 'Fondo' : 'Cardio',
+          detalle: `${texto}${cola} Calentamiento: ${_calRW} min caminando a paso vivo${_extraSuave}`
+        };
+      };
+      // El fartlek suave solo entra cuando ya corre 5 min seguidos (escalón 3).
+      const _calidadPrinc = () => _paso >= 3
+        ? { resumen: 'Fartlek suave · Juego de ritmos', etiqueta: 'Intensidad',
+            detalle: `Fartlek introductorio · ${_tramoDur === 'expres' ? 3 : 5} min trote suave o caminando rápido de calentamiento. Luego: ${_tramoDur === 'expres' ? 4 : 6} × (1 min a ritmo alegre + 2 min caminando o trotando muy suave). Ritmo alegre = algo por encima de conversacional, puedes hablar con frases cortas. Cierre: ${_tramoDur === 'expres' ? 2 : 5} min caminando${_conStrides ? ' + 4 strides de 50m (aceleración progresiva, no sprint)' : ''}` }
+        : _runWalk(0, 'tecnica');
+      const _cardioSinImpacto = () => ({
+        resumen: 'Cardio sin impacto', etiqueta: 'Cardio',
+        detalle: rSinMat
+          ? `Caminata rápida · ${_tramoDur === 'expres' ? 20 : 30} min a paso vivo: respiras más fuerte, pero puedes hablar. Suma resistencia sin el impacto de correr un día más`
+          : `Bici o elíptica · ${_tramoDur === 'expres' ? 20 : 30} min suave (RPE 3-4). Suma resistencia sin el impacto de correr un día más`
+      });
+
+      // "Ganar músculo" y "Ganar fuerza" (ganarMusculo cubre las dos): con 3
+      // días, uno de ellos pasa a ser de fuerza, que es donde se construye.
+      const _quiereFuerza = ganarMusculo;
+      const _plan = {};
       if (esPrincipiante) {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Run/walk · Base aeróbica",
-           detalle:`Run/walk progresivo · Alternar: 2 min corriendo (conversacional, RPE 3-4) / 1 min caminando × 8-10 rondas. Total ~30 min. Pasos cortos y frecuentes, no alargues el paso. Calentamiento: 5 min caminata + balanceos de piernas`,
-           etiqueta:"Cardio"},
-          {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Fartlek suave · Juego de ritmos",
-           detalle:`Fartlek introductorio · 5 min trote suave de calentamiento. Luego: 6-8 × (1 min a ritmo alegre + 1.5 min caminando/trote suave). Ritmo alegre = ligeramente por encima de conversacional, deberías poder hablar con frases cortas. Cierre: 5 min trote + 4 strides de 50m (aceleración progresiva, no sprint)`,
-           etiqueta:"Intensidad"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y recuperación", detalle:"Estiramientos: cuádriceps, flexores de cadera, gemelos, isquiotibiales — 30s cada uno. Foam rolling si tienes", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Run/walk progresivo · Fondo" : "Descanso",
-           detalle: numDias >= 3 ? `Resistencia base · Alternar: 3 min corriendo / 1 min caminando × 7-9 rondas. Si llevas bien el ritmo, cierra las últimas 2 rondas sin caminar. Ritmo: conversacional. Post: 4 strides de 60m` : "",
-           etiqueta: numDias >= 3 ? "Fondo" : "Descanso"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Tirada larga suave" : "Descanso activo",
-           detalle: numDias >= 5 ? `Base aeróbica · 30-40 min alternando 5 min corriendo / 1 min caminando. Ritmo muy cómodo zona 1-2 (RPE 3). No importa la distancia, importa el tiempo en movimiento. Hidrátate cada 15-20 min` : "",
-           etiqueta: numDias >= 5 ? "Volumen" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
-      } else if (esAvanzado) {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Zona 2 · Easy run + strides",
-           detalle:`Easy run · ${durBase} a zona 2 (65-75% FCmáx, RPE 3-4), ritmo conversacional, cadencia 170-180 spm. Postura: caída desde tobillo, brazos relajados a 90°. Al acabar: 6 strides de 80m (aceleración al 90%, recuperación caminando)`,
-           etiqueta:"Cardio"},
-          {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 4 ? "Fuerza + pliometría corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen:"VO2máx · Intervalos cortos",
-           detalle:`Calentamiento: 15 min progresivo + drills (A-skips, high knees, butt kicks) + 3 strides. Series: ${sesionCorta ? '6×400m con 90s rec trote' : '5×800m (Yasso 800s) con recuperación igual al tiempo de trabajo'}. Ritmo 5K (RPE 9, 93-97% FCmáx). Anota cada split. Si caen más de 5s, para. Enfriamiento: 10 min trote suave`,
-           etiqueta:"Intensidad"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Recovery run o descanso", detalle: numDias >= 5 ? "Recovery run opcional: 20 min muy suave, zona 1 (RPE 2). Si sientes fatiga muscular, mejor descanso total" : "", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Threshold · Cruise intervals" : "Descanso",
-           detalle: numDias >= 3 ? `Calentamiento: 10 min progresivo + 3 strides. Cruise intervals: ${sesionCorta ? '3×8 min a ritmo umbral con 60s rec trote' : '3×10 min a ritmo umbral (86-92% FCmáx, RPE 7-8) con 90s rec trote'}. Puedes hablar solo con esfuerzo. Enfriamiento: 10 min trote + estiramientos` : "",
-           etiqueta: numDias >= 3 ? "Umbral" : "Descanso"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Tirada larga · Negative split" : "Descanso activo",
-           detalle: numDias >= 5 ? `Tirada larga con calidad · ${durLarga}. Primera mitad a zona 2 suave. Segunda mitad: progresivo hasta ritmo maratón (últimos 20 min más rápido que los primeros). Hidratación cada 20 min. ${semanaCiclo === 4 ? 'Semana de descarga: volumen reducido a propósito, no fuerces el ritmo.' : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.'}` : "",
-           etiqueta: numDias >= 5 ? "Volumen" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
+        if (numDias <= 2) { _plan[0] = _runWalk(0); _plan[3] = _runWalk(1, 'largo'); }
+        else if (numDias === 3) { _plan[0] = _runWalk(0); _plan[2] = _quiereFuerza ? _diaFuerza() : _calidadPrinc(); _plan[5] = _runWalk(2, 'largo'); }
+        else if (numDias === 4) { _plan[0] = _runWalk(0); _plan[1] = _diaFuerza(); _plan[3] = _calidadPrinc(); _plan[5] = _runWalk(2, 'largo'); }
+        // A 5 días la calidad va el JUEVES, no el miércoles: pegada a la fuerza
+        // del martes eran dos días exigentes seguidos para alguien que empieza.
+        else { _plan[0] = _runWalk(0); _plan[1] = _diaFuerza(); _plan[3] = _calidadPrinc(); _plan[4] = _cardioSinImpacto(); _plan[5] = _runWalk(2, 'largo'); }
       } else {
-        semana = [
-          {dia:"Lunes", tipo:"Entrenamiento", resumen:"Easy run · Zona 2",
-           detalle:`Easy run · ${durBase} a zona 2 (65-75% FCmáx, RPE 3-4), ritmo conversacional. Si no puedes mantener una conversación, baja el ritmo. Al acabar: 4 strides de 60m (aceleración progresiva al 85%, recuperación andando)`,
-           etiqueta:"Cardio"},
-          {dia:"Martes", tipo: numDias >= 4 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 4 ? "Fuerza específica corredor" : "Recuperación",
-           detalle: numDias >= 4 ? fuerzaCorredorObjetivo : "", etiqueta: numDias >= 4 ? "Fortalecimiento" : "Descanso"},
-          {dia:"Miércoles", tipo:"Entrenamiento", resumen: sesionCorta || bloqueMeso % 2 === 0 ? "Fartlek o series · Calidad" : "Cuestas · Calidad",
-           // Cuestas no estaba en ningun sitio del catalogo de running -- solo
-           // habia escalera y fartlek, siempre los mismos. Rota por bloqueMeso
-           // (mismo patron que plioVariantesAv, mas arriba) para que no sea
-           // siempre la misma sesion de calidad cada semana. Funciona igual en
-           // cinta que al aire libre: solo cambia si la cuesta es real o de
-           // inclinacion.
-           detalle:`Calentamiento: 10 min trote + drills (A-skips, balanceos de piernas). ${sesionCorta
-             ? 'Fartlek: 8×(1 min fuerte / 2 min suave)'
-             : (bloqueMeso % 2 === 0
-               ? 'Escalera: 200m-400m-800m-1000m-800m-400m-200m con recuperación proporcional al esfuerzo (mitad del tiempo de trabajo)'
-               : 'Cuestas: 8-10 repeticiones de 200-300m subiendo fuerte (RPE 8-9) — cuesta real de 4-6% o cinta con inclinación alta si entrenas en interior. Bajas trotando de vuelta como recuperación')
-           }. Ritmo fuerte = incómodo pero controlado (RPE 7-8). Cronometra y anota. Enfriamiento: 5-10 min trote`,
-           etiqueta:"Intensidad"},
-          {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y recuperación", detalle:"Estiramientos: cuádriceps, flexores de cadera, gemelos, isquiotibiales, piramidal — 30s cada uno. Foam rolling opcional", etiqueta:"Descanso"},
-          {dia:"Viernes", tipo: numDias >= 3 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 3 ? "Progression run · Resistencia" : "Descanso",
-           detalle: numDias >= 3 ? `Progression run · ${durMedio} empezando en zona 2 (conversacional). Cada 10 min sube ligeramente el ritmo. Últimos 10 min a ritmo tempo (RPE 6-7). Terminas más rápido de lo que empezaste. Estiramientos 10 min al acabar` : "",
-           etiqueta: numDias >= 3 ? "Fondo" : "Descanso"},
-          {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-           resumen: numDias >= 5 ? "Tirada larga" : "Descanso activo",
-           detalle: numDias >= 5 ? `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). ${semanaCiclo === 4 ? 'Semana de descarga: volumen reducido a propósito, no fuerces el ritmo.' : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.'} Post: foam rolling + estiramientos` : "",
-           etiqueta: numDias >= 5 ? "Volumen" : "Descanso"},
-          {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
-        ];
+        const calidad = sentirseMejor ? _calidadSalud() : esAvanzado ? _calidadAvanzado() : _calidadIntermedio();
+        if (numDias <= 2) { _plan[2] = calidad; _plan[5] = _tiradaLarga(); }
+        else if (numDias === 3) { _plan[0] = _quiereFuerza ? _diaFuerza() : _rodajeSuave(); _plan[2] = calidad; _plan[5] = _tiradaLarga(); }
+        else if (numDias === 4) { _plan[0] = _rodajeSuave(); _plan[2] = calidad; _plan[3] = _diaFuerza(); _plan[5] = _tiradaLarga(); }
+        else { _plan[0] = _rodajeSuave(); _plan[1] = calidad; _plan[2] = _diaFuerza(); _plan[4] = _recuperacion(); _plan[5] = _tiradaLarga(); }
+      }
+      const _DIAS_RUN = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+      const _DESCANSOS_RUN = [
+        { resumen: 'Descanso', detalle: '' },
+        { resumen: 'Recuperación', detalle: '' },
+        { resumen: 'Movilidad', detalle: 'Movilidad 10 min: cadera (90/90), tobillo (rodilla a pared) y gemelos. Opcional: 20 min caminando suave' },
+        { resumen: 'Movilidad y recuperación', detalle: 'Estiramientos: cuádriceps, flexores de cadera, gemelos, isquiotibiales, piramidal — 30s cada uno. Foam rolling si tienes' },
+        { resumen: 'Descanso', detalle: '' },
+        { resumen: 'Descanso activo', detalle: 'Paseo suave 20-30 min o actividad ligera, sin cargar las piernas' },
+        { resumen: 'Recuperación total', detalle: '' },
+      ];
+      semana = _DIAS_RUN.map((dia, i) => _plan[i]
+        ? { dia, tipo: 'Entrenamiento', resumen: _plan[i].resumen, detalle: _plan[i].detalle, etiqueta: _plan[i].etiqueta }
+        : { dia, tipo: 'Descanso', resumen: _DESCANSOS_RUN[i].resumen, detalle: _DESCANSOS_RUN[i].detalle, etiqueta: 'Descanso' });
+
+      // Sin día de fuerza (2-3 días): se le dice qué hacer, porque en corredores
+      // es lo que más lesiones previene.
+      if (!semana.some(d => d.etiqueta === 'Fortalecimiento')) {
+        notasSalud.push(`Tu semana no lleva un día de fuerza, y en corredores es lo que más lesiones previene. Dos días a la semana, al acabar de correr, 10-15 min: ${rSinMat ? 'sentadilla' : 'sentadilla goblet'} 3×12, puente de glúteo a una pierna 3×10 por lado, gemelos en escalón 3×15 y plancha 3×30s.`);
+        if (_quiereFuerza) {
+          notasSalud.push('Con dos días de carrera no queda hueco para una sesión de fuerza completa, y el músculo se construye ahí. Si quieres ganar masa de verdad, un tercer día dedicado a fuerza es lo que más va a cambiar tus resultados.');
+        }
       }
 
     } else if (esCombinacion) {
@@ -15178,7 +15316,12 @@
           if (nn && nn.length > 3) _nombresSemana.add(nn);
         });
       });
-      semana = semana.map(d => d.detalle ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion, _nombresSemana, { fijarFuerza: ganarFuerza }) } : d);
+      // Los días de DESCANSO no rotan (15 sept 2026). Su texto lleva cantidades
+      // ("Movilidad 10 min: cadera, tobillo y gemelos"), así que la rotación lo
+      // trataba como una lista de ejercicios y salía "tobillo y Elevación de
+      // gemelos sentado" -- y solo a algunos clientes, porque la rotación
+      // depende de la semilla.
+      semana = semana.map(d => d.detalle && d.tipo !== 'Descanso' ? { ...d, detalle: _rotarSoloEjercicios(d.detalle, mapaRotacion, _nombresSemana, { fijarFuerza: ganarFuerza }) } : d);
     }
 
 
@@ -15336,7 +15479,19 @@
       // pantalla le promete que "cada sesión está ajustada a los X min que nos
       // dijiste", así que hay que explicárselo o parece que no le hemos hecho caso.
       if (esRunner && esPrincipiante) {
-        notasSalud.push('Tus tiradas no se alargan aunque tengas más rato libre, y es a propósito: empezando a correr, el volumen sube semana a semana, no según los minutos que tengas ese día. Subir de golpe es la causa más común de lesión en gente que empieza. Si te sobra tiempo, dedícalo a calentar mejor, a los estiramientos del final o a caminar un rato más.');
+        notasSalud.push(_tramoDur === 'expres'
+          ? 'Tus sesiones de carrera están recortadas a lo que cabe en 15-20 minutos: menos rondas, el mismo ritmo. Empezando a correr, lo que cuenta es la constancia de la semana, no lo que dure una sesión suelta.'
+          : 'Tus sesiones no se alargan aunque tengas más rato libre, y es a propósito: empezando a correr, lo que sube es la parte corriendo, un escalón cada dos semanas (y cada cuarta semana repites el anterior para asimilar). Subir de golpe es la causa más común de lesión en gente que empieza. Si te sobra tiempo, dedícalo a calentar mejor o a caminar un rato más.');
+      } else if (esRunner) {
+        // El corredor recibía las notas de GIMNASIO ("te hemos dejado los tres
+        // ejercicios que más rinden por minuto"), que no describen su semana.
+        const _notaRun = {
+          expres: 'Con 15-20 minutos por sesión, cada rodaje y la sesión de calidad están dimensionados para caber enteros, con calentamiento y vuelta a la calma incluidos. Tu sesión de fondo es un rodaje continuo de 20 min: si algún día tienes más tiempo, alargar ese rodaje es lo que más resistencia te dará.',
+          corta: 'Sesiones de 30-45 min: rodajes de 25-35 min, una tirada larga de hasta 45 y la sesión de calidad ajustada para caber con su calentamiento.',
+          larga: 'Tienes tiempo de sobra: se usa en la tirada larga y en los rodajes, no en más intensidad. Correr más minutos suaves es lo que construye resistencia; la calidad se queda en una sesión a la semana.',
+          muyLarga: 'Tienes tiempo de sobra: se usa en la tirada larga y en los rodajes, no en más intensidad. Correr más minutos suaves es lo que construye resistencia; la calidad se queda en una sesión a la semana.'
+        }[_tramoDur];
+        if (_notaRun) notasSalud.push(_notaRun);
       } else if (_tramoDur === 'expres') {
         notasSalud.push('Sesión exprés: te hemos dejado los tres ejercicios que más rinden por minuto, a 3 series. Descansa 45-60 segundos entre series (no más) y vas en 15-20 minutos. Es menos volumen por sesión que un plan largo, así que si algún día tienes más tiempo, añade una serie a cada ejercicio antes que ejercicios nuevos.');
       } else if (_tramoDur === 'corta') {
