@@ -9597,6 +9597,10 @@
     if (group === 'cp-deporte') updateLugarOptions(el.textContent.trim(), 'cp-lugar');
     if (group === 'tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'deporte');
     if (group === 'cp-tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'cp-deporte');
+    // El objetivo también decide qué deportes se ofrecen (Running no, con
+    // "Ganar músculo" o "Ganar fuerza"). Se pregunta antes que el deporte.
+    if (group === 'objetivo') updateDeporteOptionsPorPlan(document.querySelector('#tipoPlan .selected')?.textContent.trim() || '', 'deporte');
+    if (group === 'cp-objetivo') updateDeporteOptionsPorPlan(document.querySelector('#cp-tipoPlan .selected')?.textContent.trim() || '', 'cp-deporte');
     if (['deporte','diasEntreno','nivel','lugar'].includes(group)) actualizarRutinaPreview();
   }
 
@@ -9683,16 +9687,39 @@
   // según el tipo de plan ya elegido (el tipo de plan se pregunta ANTES que
   // el deporte en el formulario, así que cuando el usuario llega a esta
   // pregunta ya sabemos si hay que ocultar Hyrox/CrossFit).
+  //
+  // Running tampoco se ofrece con "Ganar músculo" ni "Ganar fuerza" en el plan
+  // completo (15 sept 2026, decisión de producto): correr no construye músculo,
+  // y con 2 días el plan ni siquiera tenía hueco para una sesión de fuerza, así
+  // que el objetivo no cambiaba nada del entrenamiento. En "Solo nutrición" sí
+  // se ofrecen todos: ahí el deporte solo ajusta las calorías.
+  // El MOTOR sigue entendiendo la combinación (mismo criterio que al retirar
+  // "Vegetariano/a"): quien ya la tenía guardada conserva su plan, y en "Cambiar
+  // plan" se le sigue ofreciendo Running mientras no cambie de objetivo, para no
+  // obligarle a cambiar de deporte por tocar solo los días.
+  const _OBJETIVOS_SIN_RUNNING = ['Ganar músculo', 'Ganar fuerza'];
   function updateDeporteOptionsPorPlan(tipoPlan, grupoId) {
     const container = document.getElementById(grupoId);
     if (!container) return;
     const currentSel = container.querySelector('.radio-opt.selected')?.textContent.trim() || '';
     const esCompleto = !(tipoPlan || '').includes('Solo nutrición');
+    const esModal = grupoId.startsWith('cp-');
+    const objetivoSel = document.querySelector(`#${esModal ? 'cp-objetivo' : 'objetivo'} .selected`)?.textContent.trim() || '';
+    const legado = esModal && userData && userData.deporte === 'Running' && userData.objetivo === objetivoSel;
+    const sinRunning = esCompleto && _OBJETIVOS_SIN_RUNNING.includes(objetivoSel) && !legado;
     const todas = ['Gimnasio / Fuerza', 'Running', 'Hyrox', 'CrossFit', 'Híbrido'];
-    const opciones = esCompleto ? todas.filter(op => op !== 'Hyrox' && op !== 'CrossFit') : todas;
+    const opciones = (esCompleto ? todas.filter(op => op !== 'Hyrox' && op !== 'CrossFit') : todas)
+      .filter(op => !(sinRunning && op === 'Running'));
     container.innerHTML = opciones.map(op =>
       `<div class="radio-opt${op === currentSel ? ' selected' : ''}" onclick="selectRadio(this,'${grupoId}')">${op}</div>`
     ).join('');
+    // Si el deporte que estaba marcado ya no se ofrece, se queda sin marcar, y el
+    // lugar (que depende del deporte) vuelve a las opciones por defecto para no
+    // dejar "Al aire libre" elegido con otro deporte.
+    if (currentSel && !opciones.includes(currentSel)) {
+      updateLugarOptions('', esModal ? 'cp-lugar' : 'lugar');
+      if (!esModal) actualizarRutinaPreview();
+    }
   }
 
   function updateLugarOptions(deporte, grupoId) {
