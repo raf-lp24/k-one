@@ -24610,7 +24610,9 @@ Se coló: ${lista}`;
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
       if (!data.url) throw new Error('No se recibió URL de pago');
-      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 1.99 : 7.99 });
+      // El primer mes es gratis (trial de Stripe): mandar 1,99 a Analytics
+      // inflaba el valor de pagos iniciados con dinero que no existe.
+      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 0 : 7.99 });
       window.location.href = data.url;
     } catch (e) {
       showToast('No se pudo iniciar el pago: ' + e.message, 5000);

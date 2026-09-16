@@ -20,5 +20,13 @@ serve.ps1
 # Generadores de video/marketing: se ejecutan en local, no en el servidor
 marketing/
 
+# Esquema y migraciones de la base de datos (con sus políticas RLS, triggers y
+# funciones de seguridad) y los auditores internos. Se publicaban en
+# k-one.fit/supabase/schema.sql y k-one.fit/scripts/: no son credenciales, pero
+# regalan el mapa de la seguridad. Ninguna función del servidor los requiere
+# (lib/ sí, por eso lib/ NO va aquí).
+supabase/
+scripts/
+
 # Fuentes de imagenes sin optimizar
 IMAGEN K-one.png
