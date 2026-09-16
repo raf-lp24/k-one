@@ -10598,7 +10598,11 @@
     // banda elástica", "curl bíceps con barra z" -> "curl bíceps con
     // mancuernas"): sin él salía "Curl inclinado con mancuernas con banda
     // elástica" en el Upper B de casa (15 sept 2026).
-    [/curl b[ií]ceps(?! con barra z| en banco scott)( con banda el[aá]stica| con mancuernas?)?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
+    // "( concentrado)?" (16 sept 2026): la traducción a casa convierte "curl
+    // bíceps en banco scott" en "curl bíceps concentrado con mancuerna", y la
+    // regla solo cambiaba "curl bíceps" -- salía "Curl martillo concentrado con
+    // mancuerna" o "Curl inclinado con mancuernas concentrado con mancuerna".
+    [/curl b[ií]ceps(?! con barra z| en banco scott)( concentrado)?( con banda el[aá]stica| con mancuernas?)?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
     // El grupo de material del final consume lo que deja detrás la plantilla o
     // la rotación de accesorios: el pool escribe "extensión de tríceps en polea"
     // y esta regla solo se comía el nombre, así que el material quedaba colgando
@@ -10606,7 +10610,10 @@
     // MÁQUINA", "Press cerrado CON MANCUERNAS" (bugs reales, encontrados al
     // ampliar el catálogo el 5 sept). Misma cautela que ya usan las reglas de
     // sentadilla goblet y hip thrust de más arriba.
-    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna']],
+    // "con banda elástica" en el material (16 sept 2026): la traducción a casa
+    // pasa "extensión de tríceps con cuerda" a "con banda elástica", y sin
+    // consumirlo salía "Patada de tríceps con mancuerna con banda elástica".
+    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra| con banda el[aá]stica)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna']],
     // "Elevaciones frontales" y "Press Arnold" quitadas (14 sept 2026): las dos
     // trabajan el deltoides ANTERIOR, que en cualquiera de estas plantillas ya
     // va saturado por los presses de pecho y de hombro. La elevación lateral es
@@ -11003,6 +11010,11 @@
           // justo lo contrario de lo que pide el bloque. Las sustituciones por
           // lesión sí lo tocan, y esas corren antes que esto.
           if (_ES_REMATE_CARDIO.test(fr)) return fr;
+          // Los COMPLEJOS ("power clean + front squat + push press + ...") se
+          // hacen sin soltar la barra: rotar un movimiento suelto metía una
+          // sentadilla goblet y un press con mancuernas en mitad del complejo
+          // "The Bear" (Híbrido avanzado, 16 sept 2026).
+          if (/^\s*complejo\b/i.test(fr) || (fr.match(/\s\+\s/g) || []).length >= 2) return fr;
           // GANAR FUERZA: los básicos no rotan (15 sept 2026). La fuerza es
           // específica del levantamiento -- se gana repitiendo el MISMO
           // movimiento y subiéndole peso --, y la rotación los cambiaba: el
@@ -11406,7 +11418,10 @@
   // normalizarEjercicio() y las claves del JSON.
   const _EQUIPO_VARIANTE = ['mancuerna', 'mancuernas', 'barra', 'polea', 'maquina', 'kettlebell',
     'banda', 'disco', 'goblet', 'sumo', 'rumano', 'bulgara', 'declinado', 'inclinado', 'cerrado',
-    'martillo', 'concentrado', 'predicador', 'apoyado', 'alterno', 'pendlay', 'gironda', 'menton', 'militar'];
+    'martillo', 'concentrado', 'predicador', 'apoyado', 'alterno', 'pendlay', 'gironda', 'menton', 'militar',
+    // 16 sept 2026: "Remo australiano bajo mesa" abría la ficha del remo con
+    // barra, y "Press inclinado en multipower" la de mancuernas.
+    'australiano', 'invertido', 'multipower'];
   async function abrirInfoEjercicio(nombre, diaNombre) {
     await _cargarInfoEjercicios();
     const n = normalizarEjercicio(nombre);
@@ -11418,6 +11433,16 @@
     if (key && key.split(' ').length <= 2) {
       const noCubre = _EQUIPO_VARIANTE.some(w => n.includes(w) && !key.includes(w));
       if (noCubre) key = null;
+    }
+    // Unilateral frente a bilateral: la ficha de "peso muerto (rumano)" enseña
+    // el movimiento a dos piernas, que no se parece al de una pierna.
+    if (key && /una pierna/.test(n) && /^peso muerto/.test(key) && !key.includes('pierna')) key = null;
+    // Listas "X y Y" / "X o Y": una clave de UNA palabra que solo aparece
+    // detrás del "y"/"o" no es el ejercicio principal ("Bici y remo" abría el
+    // remo con peso).
+    if (key && !key.includes(' ')) {
+      const partesLista = n.split(/\s+(?:y|o)\s+/);
+      if (partesLista.length > 1 && !partesLista[0].includes(key)) key = null;
     }
     const info = key ? _infoEjercicios[key] : null;
     if (!info) {
@@ -13939,7 +13964,7 @@
       const _recuperacion = () => ({
         resumen: 'Recovery run · Suave',
         etiqueta: 'Cardio',
-        detalle: `Recovery run · ${durRecup} muy suave, zona 1-2 (RPE 2-3). Más lento de lo que crees: sirve para recuperar, no para sumar forma${_extraSuave}`
+        detalle: `Recovery run · ${durRecup} muy suave en zona 1-2 (RPE 2-3). Más lento de lo que crees: sirve para recuperar, no para sumar forma${_extraSuave}`
       });
       const _tiradaLarga = () => {
         if (_tramoDur === 'expres') {
@@ -14142,7 +14167,10 @@
       const _conStridesHib = !_lesionZonaRodilla && _TOPE_HIB >= 60;
       const _modalidadZ2 = _casaHib
         ? (_lesionZonaRodilla ? 'de caminata rápida en cuesta, al aire libre' : 'de carrera suave o caminata rápida en cuesta, al aire libre')
-        : (_lesionZonaRodilla ? 'rotando cada 10 min entre bici y remo' : 'rotando cada 10 min entre carrera, bici y remo');
+        // La lista va entre paréntesis: fuera, "carrera, bici y remo" se partía
+        // por la coma y "Bici y remo" salía como tarjeta de ejercicio con la
+        // ficha del remo CON PESO (16 sept 2026).
+        : (_lesionZonaRodilla ? 'cambiando de máquina cada 10 min (bici y remo)' : 'cambiando de máquina cada 10 min (carrera, bici y remo)');
       const _zona2 = () => ({
         resumen: 'Zona 2 · Cardio aeróbico', etiqueta: 'Cardio',
         detalle: `Zona 2 · ${_rango(_Z2[0] + _extraRes, Math.min(_TOPE_HIB - (_conStridesHib ? 5 : 0), _Z2[1] + _extraRes))} ${_modalidadZ2}, ritmo conversacional (RPE 3-4)${_conStridesHib ? '. Al acabar: 4 strides de 60m' : ''}`
@@ -14152,7 +14180,7 @@
         resumen: 'Sesión larga · Zona 2', etiqueta: 'Cardio',
         detalle: `Sesión larga · ${_rango(_LARGA_HIB[0], _LARGA_HIB[1])} a zona 2 (RPE 3-4) ${_casaHib
           ? (_lesionZonaRodilla ? 'de caminata rápida en cuesta' : 'alternando carrera suave y caminata rápida')
-          : (_lesionZonaRodilla ? 'alternando bici y remo cada 15 min' : 'alternando carrera, bici y remo cada 15 min')}. Un ritmo en el que puedas hablar todo el rato: es la base aeróbica de la semana`
+          : (_lesionZonaRodilla ? 'cambiando de máquina cada 15 min (bici y remo)' : 'cambiando de máquina cada 15 min (carrera, bici y remo)')}. Un ritmo en el que puedas hablar todo el rato: es la base aeróbica de la semana`
       });
 
       // ── Series de cardio (avanzado) ──
@@ -14205,7 +14233,7 @@
       });
       const _circuitoModerado = () => ({
         resumen: 'Circuito moderado · Fuerza + cardio', etiqueta: 'Híbrido',
-        detalle: `Circuito ${_rondas({ expres: 3, corta: 4, media: 5, larga: 6, muyLarga: 6 }[_tramoDur])} rondas (descanso 90 s entre rondas): 10 sentadillas goblet, 10 remo con mancuerna por lado, 8 press de hombro con mancuernas, 12 KB swings, ${_cardioEntre}. A ritmo constante que puedas sostener (RPE 6), sin llegar al fallo${_colaGrasa}`
+        detalle: `Circuito ${_rondas({ expres: 3, corta: 4, media: 5, larga: 6, muyLarga: 6 }[_tramoDur])} rondas (descanso 90 s entre rondas): 10 sentadillas goblet, 10 remo con mancuerna por lado, 8 press de hombro con mancuernas, 12 KB swings, ${_cardioEntre}. A ritmo constante que puedas sostener (RPE 6) y sin llegar al fallo${_colaGrasa}`
       });
       // El complejo con mancuernas cambia de movimientos según la lesión DESDE la
       // plantilla (antes el RDL y la hang clean llegaban tal cual con la espalda
@@ -14338,7 +14366,11 @@
       const modalidadesInterval = [
         { nombre: 'Sprints', accion: 'corriendo — cinta o al aire libre, con algo de inclinación si puedes', impacto: true },
         { nombre: 'Assault bike', accion: 'en la bici de aire, brazos y piernas a la vez' },
-        { nombre: 'Remo', accion: 'en el remoergómetro' },
+        // `texto` es lo que ve el cliente; `nombre` se queda en "Remo" porque es
+        // la clave guardada en "Cardio final de tus sesiones". La tarjeta
+        // "Remo" abría la ficha del remo CON PESO para espalda, con fotos de
+        // otro ejercicio (16 sept 2026); "Máquina de remo" va al vídeo.
+        { nombre: 'Remo', texto: 'Máquina de remo', accion: 'empujando con las piernas y tirando al final' },
         // La descripción NO puede volver a nombrar el ejercicio. Tanto la
         // rotación como el filtro de lesiones sustituyen el NOMBRE de la
         // modalidad pero no el paréntesis, así que un "Burpees (burpees
@@ -14418,7 +14450,7 @@
       const _rondas = esPrincipiante
         ? (_expres ? '30 s fuerte / 30 s suave × 4 rondas' : _corta ? '30 s fuerte / 90 s suave × 4 rondas' : '30 s fuerte / 90 s suave × 6 rondas')
         : (_expres ? '30 s fuerte / 30 s suave × 5 rondas' : _corta ? '1 min fuerte / 1 min suave × 5 rondas' : '1 min fuerte / 1 min suave × 7 rondas');
-      const _finisherInterval = `, ${modInterval.nombre} ${_interval} (${modInterval.accion}): ${_rondas}`;
+      const _finisherInterval = `, ${modInterval.texto || modInterval.nombre} ${_interval} (${modInterval.accion}): ${_rondas}`;
       // BUG REAL (14 sept 2026): `finisher3` era un circuito FIJO de pliometría
       // —"3 rondas sin descanso de 15 jumping jacks + 10 sentadillas con salto +
       // 8 flexiones"— y lo usaban todas las plantillas de principiante. O sea:
