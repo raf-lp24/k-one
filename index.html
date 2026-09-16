@@ -13561,9 +13561,15 @@
     const _lesionOtra = lesion.includes('Otra');
     const _detalleLesion = (u.lesionDetalle || '').toLowerCase();
     const _mencionaLesion = (...palabras) => palabras.some(p => _detalleLesion.includes(p));
-    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'tendinitis rotuliana'));
-    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco'));
-    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion'));
+    // Palabras clave ampliadas (16 sept 2026): probadas contra 30 descripciones
+    // reales de lesión ("Cuéntanos más" con lesión = "Otra"). Fallaban términos
+    // de los más comunes en consulta -- "lumbalgia" y "escoliosis" (espalda),
+    // "pinzamiento subacromial" y "labrum" (hombro), la grafía inglesa
+    // "chondromalacia" (rodilla) -- y el cliente se quedaba SIN ninguna
+    // sustitución de seguridad aunque hubiera descrito la lesión con claridad.
+    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'chondromalacia', 'tendinitis rotuliana'));
+    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'lumbalgia', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco', 'escoliosis'));
+    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion', 'pinzamiento', 'subacromial', 'labrum', 'por encima de la cabeza'));
 
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
