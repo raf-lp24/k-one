@@ -259,6 +259,29 @@ if (sepMotor !== AG._SEPARADOR_ALIMENTOS.source) desincronizados.push('_SEPARADO
   if (!iguales) desincronizados.push('_normTexto/_raizSinPlural/_reAlimento');
 }
 
+// ALERGIAS_DEDICADAS + las tres funciones del texto libre de alergias: se
+// ejecutan las del MOTOR y se comparan resultados con las del agente.
+{
+  if (!_mismo(_objetoMotor('ALERGIAS_DEDICADAS'), AG.ALERGIAS_DEDICADAS)) desincronizados.push('ALERGIAS_DEDICADAS');
+  const cabecera = n => { const i = TXT.indexOf('function ' + n + '('); return 'function ' + n + TXT.slice(i + ('function ' + n).length, TXT.indexOf('{', i)); };
+  const src = ['_expandirAlergenoLibre', '_alergiasDedicadas', '_quitarAlergiasDedicadas']
+    .map(n => cabecera(n) + _bloqueLlaves(TXT.indexOf('function ' + n + '('))).join('\n');
+  let motor = null;
+  try {
+    motor = new Function('_SEPARADOR_ALIMENTOS', '_normAlimento', '_normTexto', 'SINONIMOS_ALERGENO', 'FAMILIAS_ALIMENTOS', 'ALERGIAS_DEDICADAS',
+      src + '\nreturn { _expandirAlergenoLibre, _alergiasDedicadas, _quitarAlergiasDedicadas };')(
+      AG._SEPARADOR_ALIMENTOS, AG._normAlimento, AG._normTexto, AG.SINONIMOS_ALERGENO, AG.FAMILIAS_ALIMENTOS, AG.ALERGIAS_DEDICADAS);
+  } catch (e) {}
+  const frases = ['alergia al marisco', 'soy celíaco', 'intolerancia a la lactosa', 'alergia a la proteína de la leche', 'gluten y huevo', 'frutos secos, pescado', 'lácteos'];
+  const activas = { gluten: true, lactosa: true };
+  const iguales = motor && frases.every(f =>
+    motor._expandirAlergenoLibre(f) === AG._expandirAlergenoLibre(f) &&
+    _mismo(motor._alergiasDedicadas(f), AG._alergiasDedicadas(f)) &&
+    _mismo(motor._alergiasDedicadas(f, false), AG._alergiasDedicadas(f, false)) &&
+    motor._quitarAlergiasDedicadas(f, activas) === AG._quitarAlergiasDedicadas(f, activas));
+  if (!iguales) desincronizados.push('_expandirAlergenoLibre/_alergiasDedicadas/_quitarAlergiasDedicadas');
+}
+
 desincronizados.length
   ? mal(desincronizados.length + ' piezas del agente ya no coinciden con el motor (copia la versión de index.html a lib/normalizador-alimentos.js)', desincronizados)
   : ok('el agente usa exactamente las mismas tablas, patrones y normalización que el motor');
@@ -286,6 +309,11 @@ desincronizados.length
     // en la ÚLTIMA -- "tosta integral" no casaba con "tostas integrales",
     // que es como sale casi siempre en el recetario (alimentos contables).
     ['no come tosta integral (la receta la lleva en plural)', { noComida: 'tosta integral' }, plan('Tostada con crema de cacahuete', '2 tostas integrales, 20g crema de cacahuete', 'Unta la crema sobre las tostas integrales.'), true],
+    // BUGS REALES (16 sept 2026): la alergia escrita como frase no protegía
+    // nada, y "Otra: gluten" no usaba la protección de gluten de verdad.
+    ['otra alergia escrita como frase, gambas', { alergia: 'Otra', alergiaOtra: 'alergia al marisco' }, plan('Pasta con gambas', '100g pasta, 100g gambas', 'Saltea las gambas.'), true],
+    ['otra alergia "soy celíaco", avena sin certificar', { alergia: 'Otra', alergiaOtra: 'soy celíaco' }, plan('Bol de avena con plátano', '40g avena, 1 plátano', 'Mezcla la avena.'), true],
+    ['otra alergia "gluten", todo sin gluten', { alergia: 'Otra', alergiaOtra: 'gluten' }, plan('Tostadas de pan sin gluten con pavo', '2 tostadas de pan sin gluten, 60g pavo', 'Tuesta el pan sin gluten.'), false],
   ];
   const fallan = casos.filter(([, ud, p, espera]) => (AG.auditarPlan(ud, p).length > 0) !== espera).map(c => (c[3] ? 'NO salta: ' : 'salta sin motivo: ') + c[0]);
   // Una palabra = un aviso por sitio, aunque la cacen varias variantes internas.

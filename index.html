@@ -13062,11 +13062,15 @@
     // peso: sustituir solo la palabra dejaba "4 tofu firme" (sin sentido, el
     // número de huevos se quedaba pegado a un alimento que no se cuenta así).
     'huevo': 'ración de tofu firme', 'huevos': 'raciones de tofu firme', 'claras': 'tofu sedoso',
-    'arroz': 'quinoa', 'quinoa': 'cuscús',
+    'arroz': 'quinoa', 'quinoa': 'arroz integral',
     'pasta': 'arroz integral', 'fideos': 'arroz',
     'patata': 'boniato', 'boniato': 'patata cocida',
-    'avena': 'copos de espelta', 'pan': 'tortas de arroz', 'cereales': 'copos de avena',
-    'leche': 'bebida de avena', 'yogur': 'yogur de soja',
+    // Sustitutos sin gluten, sin lactosa y sin frutos secos A PROPÓSITO: este
+    // filtro corre DESPUÉS del de alérgenos y no vuelve a pasar por él. Antes
+    // un celíaco que no comía avena recibía "copos de espelta" (gluten), y
+    // quinoa → cuscús o leche → bebida de avena le metían gluten igual.
+    'avena': 'quinoa', 'pan': 'tortas de arroz', 'cereales': 'tortas de arroz',
+    'leche': 'bebida de arroz', 'yogur': 'yogur de soja',
     'queso': 'hummus', 'requesón': 'tofu sedoso', 'requeson': 'tofu sedoso',
     'kéfir': 'yogur de soja', 'kefir': 'yogur de soja',
     'cottage': 'hummus', 'nata': 'leche de coco', 'mantequilla': 'AOVE',
@@ -13103,6 +13107,9 @@
   };
 
   const RECETAS_SUSTITUCION = [
+    // Quien no come coco: borrar solo "coco" dejaba "la leche" a secas en el
+    // curry, y a un intolerante a la lactosa eso le manda leche de vaca.
+    [/(leche|nata) de coco( light)?/gi, 'bebida de arroz'],
     [/solomillo de ternera/gi, 'pechuga de pollo a la plancha'],
     [/ternera magra/gi, 'pechuga de pollo'],
     [/cinta de lomo/gi, 'pechuga de pavo a la plancha'],
@@ -13200,6 +13207,8 @@
     // "leche y frutos secos" tan a menudo como con comas.
     const tokens = (texto || '').split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(Boolean);
     const extra = new Set();
+    // Palabra a palabra, sin tildes y en singular: " alergia al marisco ".
+    const palabras = s => ' ' + String(s).split(/\s+/).filter(Boolean).map(_normAlimento).join(' ') + ' ';
     tokens.forEach(t => {
       // Mismo arreglo que en filtrarNoComida y por el mismo motivo: las claves
       // de aquí abajo están escritas SIN tilde ('lacteos', no 'lácteos'), así
@@ -13207,9 +13216,15 @@
       // encontraba la clave y se quedaba sin la exclusión de todos los
       // lácteos. _normAlimento compara sin tildes y en singular en los dos
       // lados, así que da igual cuál de las dos formas escriba el cliente.
+      // BUG REAL (16 sept 2026): solo casaba si el cliente escribía la palabra
+      // SUELTA. El campo dice "Cuéntanos a qué eres alérgico/a", y quien
+      // escribía "alergia al marisco" o "alergia al huevo" no tenía NINGUNA
+      // exclusión: gambas, huevos y salmón seguían en su plan. Ahora también
+      // casa la palabra dentro de la frase.
       const tNorm = _normAlimento(t);
+      const tPalabras = palabras(t);
       Object.entries(SINONIMOS_ALERGENO).forEach(([clave, miembros]) => {
-        if (tNorm === _normAlimento(clave) || miembros.some(m => _normAlimento(m) === tNorm)) {
+        if ([clave, ...miembros].some(c => _normAlimento(c) === tNorm || tPalabras.includes(palabras(c)))) {
           miembros.forEach(m => extra.add(m));
         }
       });
@@ -13220,6 +13235,46 @@
     // el nombre de la familia él mismo) y puede arrastrar palabras de plato.
     Object.keys(FAMILIAS_ALIMENTOS).forEach(clave => extra.delete(clave));
     return [texto, ...extra].filter(Boolean).join(', ');
+  }
+
+  // Alergias con sistema PROPIO en buildPlanFromData (sustitución + red de
+  // seguridad: "pan sin gluten", "avena certificada sin gluten", "yogur sin
+  // lactosa", semillas en vez de frutos secos). Si el cliente las escribe a
+  // mano -- en "Otra alergia" o en "no como" -- se tratan igual que marcar el
+  // desplegable, porque la vía del texto libre es mucho más débil (16 sept
+  // 2026: a "Otra: gluten" le llegaba avena sin certificar).
+  // "leche"/"lácteos" NO activan lactosa a propósito: una alergia a la
+  // PROTEÍNA de la leche no tolera la leche sin lactosa, y esas palabras
+  // siguen por la exclusión completa de la familia de lácteos.
+  // Copia exacta en lib/normalizador-alimentos.js (lo vigila auditoria-completa).
+  const ALERGIAS_DEDICADAS = {
+    'gluten': ['gluten', 'celiac', 'celiaqu', 'trigo'],
+    'lactosa': ['lactosa'],
+    'frutos secos': ['frutos secos', 'fruto seco', 'nuez', 'nueces', 'almendra', 'avellana', 'cacahuete', 'anacardo', 'pistacho'],
+  };
+  // esAlergia=false para "no como": ahí "leche" es un gusto, no una alergia a
+  // la proteína, y no debe impedir tratar "lactosa" con su sistema propio.
+  function _alergiasDedicadas(texto, esAlergia = true) {
+    const t = _normTexto(texto);
+    const hay = k => ALERGIAS_DEDICADAS[k].some(p => t.includes(p));
+    return {
+      gluten: hay('gluten'),
+      lactosa: hay('lactosa') && !(esAlergia && /\bleches?\b|lacteo|caseina|aplv/.test(t)),
+      frutosSecos: hay('frutos secos'),
+    };
+  }
+  // Quita del texto libre las palabras de gluten/lactosa cuando su sistema
+  // propio ya está activo. Si se quedaban, filtrarNoComida borraba la palabra
+  // "gluten" o "lactosa" como si fuera un alimento y el cliente leía
+  // "Tostadas sin de boniato" o "avena certificada sin , plátano".
+  function _quitarAlergiasDedicadas(texto, activas) {
+    if (!texto) return '';
+    return String(texto).split(_SEPARADOR_ALIMENTOS).map(x => x.trim()).filter(Boolean).filter(tok => {
+      const n = _normTexto(tok);
+      if (activas.gluten && ALERGIAS_DEDICADAS['gluten'].some(p => n.includes(p))) return false;
+      if (activas.lactosa && ALERGIAS_DEDICADAS['lactosa'].some(p => n.includes(p))) return false;
+      return true;
+    }).join(', ');
   }
 
   // Arregla la concordancia después de sustituir un alimento por otro. El
@@ -13362,19 +13417,58 @@
       return tokenArr.some(t => src.includes(_normAlimento(t)));
     });
     const regexes = tokenArr.map(_reAlimento);
+    // Al SUSTITUIR, el calificativo de alergia que llevaba el alimento quitado
+    // se va con él. Si no, un celíaco que no come avena leía "Bol de tortas de
+    // arroz certificada sin gluten" (el calificativo era de la avena). Solo para
+    // reemplazar: detectar sigue usando `regexes`.
+    const regexesSust = regexes.map(re => new RegExp('(?:' + re.source + ')(?:\\s+certificad[ao]s?)?(?:\\s+sin (?:gluten|lactosa))?', re.flags));
     const susMap = {};
+    // Un sustituto sirve si no está vetado él mismo (ni por token ni por regex:
+    // "pechuga de pollo" no vale si el cliente no come pollo).
+    const _permitido = s => !todosTokens.has(s.toLowerCase()) && !regexes.some(re => { re.lastIndex = 0; return re.test(s); });
     tokenArr.forEach((t, i) => {
-      const s = SUSTITUCIONES_NOCOMIDA[t];
-      if (s && !todosTokens.has(s.toLowerCase())) { susMap[i] = s; return; }
+      let s = SUSTITUCIONES_NOCOMIDA[t];
+      // Si el sustituto directo también está vetado, se sigue la cadena
+      // (salmón → merluza → lubina → dorada → pechuga de pavo). Antes se
+      // borraba sin sustituto y a un alérgico al pescado le quedaba "Tostadas
+      // con , queso crema y huevo".
+      for (let paso = 0; s && !_permitido(s) && paso < 6; paso++) s = SUSTITUCIONES_NOCOMIDA[s.toLowerCase()];
+      if (s && _permitido(s)) { susMap[i] = s; return; }
       const raiz = _normAlimento(t);
       for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
         const claveN = _normTexto(clave);
-        if ((claveN.includes(raiz) || raiz.includes(claveN)) && !todosTokens.has(valor.toLowerCase())) {
+        if ((claveN.includes(raiz) || raiz.includes(claveN)) && _permitido(valor)) {
           susMap[i] = valor; return;
         }
       }
     });
-    const limpiar = s => s.replace(/,\s*,+/g, ',').replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
+    // Tras borrar un alimento sin sustituto pueden quedar preposiciones sueltas
+    // delante de la puntuación ("sin grumos de .", "con , plátano").
+    const limpiar = s => s.replace(/,\s*,+/g, ',').replace(/\s+(de|del|con|y|e)\s*(?=[,.;])/g, '')
+      .replace(/\s+de\s+(?=(con|y|e)\b)/g, ' ')
+      .replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
+    // El artículo que llevaba el alimento quitado no tiene por qué valer para
+    // el sustituto: "Tuesta el pan" → "Tuesta el tortas de arroz".
+    const _generoSust = s => {
+      const w = s.split(/\s+/)[0].toLowerCase();
+      if (/^(leche|raci[oó]n|col|sal)$/.test(w)) return 'fs';
+      if (/^raciones$/.test(w)) return 'fp';
+      if (/as$/.test(w)) return 'fp';
+      if (/(os|es)$/.test(w)) return 'mp';
+      if (/a$/.test(w)) return 'fs';
+      return 'ms';
+    };
+    const _ARTICULOS = { ms: ['el', 'del', 'al'], fs: ['la', 'de la', 'a la'], mp: ['los', 'de los', 'a los'], fp: ['las', 'de las', 'a las'] };
+    const concordarArticulos = (txt) => Object.values(susMap).reduce((acc, s) => {
+      const esc = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const [art, deArt, aArt] = _ARTICULOS[_generoSust(s)];
+      return acc.replace(new RegExp('\\b(el|la|los|las|del|al)\\s+(' + esc + ')\\b', 'gi'), (m, a, x) => {
+        const low = a.toLowerCase();
+        const nuevo = low === 'del' ? deArt : low === 'al' ? aArt : art;
+        const conMayus = a[0] === a[0].toUpperCase() ? nuevo.charAt(0).toUpperCase() + nuevo.slice(1) : nuevo;
+        return conMayus + ' ' + x;
+      });
+    }, txt);
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
         // Los PASOS entran en la comprobación, no solo el nombre y los
@@ -13396,13 +13490,14 @@
           nuevoNombre = nuevoNombre.replace(re, reemplazo);
           nuevoIng = nuevoIng.replace(re, reemplazo);
         });
-        regexes.forEach((re, i) => {
+        regexesSust.forEach((re, i) => {
           const reemplazo = susMap[i] || '';
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
         nuevoIng = _concordarSustitucion(limpiar(nuevoIng));
-        nuevoNombre = _concordarSustitucion(nuevoNombre)
+        nuevoNombre = concordarArticulos(_concordarSustitucion(nuevoNombre))
+          .replace(/\s+(con|de|y)\s*,\s*/g, ' $1 ').replace(/\s+de\s+(con|y)\s+/g, ' $1 ').replace(/\s*,\s*,/g, ',')
           .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
         // El nombre puede quedar empezando en minúscula si la palabra sustituida
         // era la primera ("Huevos revueltos con champiñones" -> "tofu revuelto
@@ -13429,11 +13524,11 @@
         if (pasosOrig) {
           let ps = pasosOrig;
           recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, reemplazo); });
-          regexes.forEach((re, i) => {
+          regexesSust.forEach((re, i) => {
             const reemplazo = susMap[i] || '';
             re.lastIndex = 0; ps = ps.replace(re, reemplazo);
           });
-          ps = _concordarSustitucion(limpiar(ps));
+          ps = concordarArticulos(_concordarSustitucion(limpiar(ps)));
           if (ps !== pasosOrig) nuevosPasos = ps;
         }
         const adaptada = { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
@@ -14560,14 +14655,12 @@
     // texto libre TAMBIÉN activa sinGluten/sinLactosa/sinFrutosSecos, así que
     // pasa por el mismo sistema robusto que si hubiera marcado el desplegable
     // -- además de seguir excluyendo recetas por _expandirAlergenoLibre.
-    const _alergiaOtraTxt = (u.alergiaOtra || '').toLowerCase();
-    const _mencionaAlergia = (...palabras) => palabras.some(p => _alergiaOtraTxt.includes(p));
-    const sinGluten = (u.dieta && u.dieta.includes('gluten')) || alergiaSalud.includes('Gluten')
-      || (alergiaSalud === 'Otra' && _mencionaAlergia('gluten', 'celiac', 'celíac', 'celiaqu', 'trigo'));
-    const sinLactosa = (u.dieta && u.dieta.includes('lactosa')) || alergiaSalud.includes('Lactosa')
-      || (alergiaSalud === 'Otra' && _mencionaAlergia('lactosa', 'lácteo', 'lacteo', 'leche', 'dairy'));
-    const sinFrutosSecos = alergiaSalud.includes('Frutos secos')
-      || (alergiaSalud === 'Otra' && _mencionaAlergia('frutos secos', 'fruto seco', 'nueces', 'almendra', 'avellana', 'cacahuete', 'anacardo', 'pistacho'));
+    // Palabras clave y excepciones en ALERGIAS_DEDICADAS / _alergiasDedicadas().
+    const _dedOtra = alergiaSalud === 'Otra' ? _alergiasDedicadas(u.alergiaOtra) : {};
+    const _dedNoCome = _alergiasDedicadas(u.noComida, false);
+    const sinGluten = (u.dieta && u.dieta.includes('gluten')) || alergiaSalud.includes('Gluten') || !!(_dedOtra.gluten || _dedNoCome.gluten);
+    const sinLactosa = (u.dieta && u.dieta.includes('lactosa')) || alergiaSalud.includes('Lactosa') || !!(_dedOtra.lactosa || _dedNoCome.lactosa);
+    const sinFrutosSecos = alergiaSalud.includes('Frutos secos') || !!(_dedOtra.frutosSecos || _dedNoCome.frutosSecos);
 
     const aplicarReemplazos = (texto, mapa) => {
       let out = texto;
@@ -16886,6 +16979,11 @@
     //      antes bastaba con que una receta usara una palabra no contemplada para
     //      que llegara al cliente tal cual.
     // ─────────────────────────────────────────────────────────────────────────
+    // Se guarda la red de seguridad para volver a pasarla DESPUÉS del filtro de
+    // "no como", que corre más abajo y puede formar algo que ya no es seguro:
+    // "fideos de arroz" (sin gluten) → "fideos de quinoa" a un celíaco que
+    // tampoco come arroz.
+    let _redAlergenos = null;
     if (sinGluten || sinLactosa || sinFrutosSecos) {
       const reemplazos = [];
       // Las reglas van de lo MÁS específico a lo más genérico, y las genéricas
@@ -17069,6 +17167,7 @@
         const t = neutralizar(opt.nombre + ' ' + opt.ingredientes);
         return !rastros.some(re => re.test(t));
       };
+      _redAlergenos = { esSeguro, platosSeguros: (momento) => platosSeguros(momento) };
 
       // Si un momento se queda sin platos seguros, se rellena con recetas que no
       // llevan gluten, lácteos ni frutos secos por naturaleza (nunca se devuelve
@@ -17136,9 +17235,19 @@
     // recibir esa receta igualmente mientras la app afirmaba lo contrario.
     // Reutiliza filtrarNoComida (sustitución + red de seguridad que descarta
     // el plato si el rastro sigue ahí) juntando ambos textos.
-    const alergiaLibre = (u.alergia === 'Otra' && u.alergiaOtra) ? _expandirAlergenoLibre(u.alergiaOtra) : '';
-    const textoFiltro = [u.noComida, alergiaLibre].filter(Boolean).join(', ');
+    const _activas = { gluten: sinGluten, lactosa: sinLactosa };
+    const _otraLimpia = u.alergia === 'Otra' ? _quitarAlergiasDedicadas(u.alergiaOtra, _activas) : '';
+    const alergiaLibre = _otraLimpia ? _expandirAlergenoLibre(_otraLimpia) : '';
+    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
+    if (_redAlergenos && textoFiltro) {
+      nutricion = nutricion.map(m => {
+        const seguras = m.opciones.filter(_redAlergenos.esSeguro);
+        if (seguras.length) return { ...m, opciones: seguras };
+        const relleno = filtrarNoComida([{ momento: m.momento, opciones: _redAlergenos.platosSeguros(m.momento) }], textoFiltro)[0].opciones;
+        return { ...m, opciones: relleno.length ? relleno : seguras };
+      });
+    }
 
     // AJUSTE POR "¿CUÁNTAS VECES COMES AL DÍA?" (u.comidas)
     // Antes se recogía este dato en el formulario y no se usaba en ningún sitio:
@@ -17200,7 +17309,8 @@
     // formato {momento, opciones}, así que se envuelve cada pool, se filtra
     // igual que el resto del menú, y se desenvuelve.
     if (textoFiltro) {
-      const _filtrarPool = pool => filtrarNoComida([{ momento: '_fueling', opciones: pool }], textoFiltro)[0].opciones;
+      const _filtrarPool = pool => filtrarNoComida([{ momento: '_fueling', opciones: pool }], textoFiltro)[0].opciones
+        .filter(o => !_redAlergenos || _redAlergenos.esSeguro(o));
       fuelingPreCarrera  = _filtrarPool(fuelingPreCarrera);
       fuelingPostCarrera = _filtrarPool(fuelingPostCarrera);
       fuelingPreWod      = _filtrarPool(fuelingPreWod);
@@ -23774,8 +23884,11 @@
       }
       generatedPlan = saved.plan || null;
       if (generatedPlan) {
-        if (generatedPlan.nutricion && userData.noComida) {
-          generatedPlan.nutricion = filtrarNoComida(generatedPlan.nutricion, userData.noComida);
+        // Sin las palabras de gluten/lactosa: el plan guardado ya las trató con
+        // su sistema propio, y aquí solo borrarían el "sin" de "sin gluten".
+        const _noComidaCarga = _quitarAlergiasDedicadas(userData.noComida, { gluten: true, lactosa: true });
+        if (generatedPlan.nutricion && _noComidaCarga) {
+          generatedPlan.nutricion = filtrarNoComida(generatedPlan.nutricion, _noComidaCarga);
           // nutricionPorDia también, y no como detalle: TODA la interfaz lee
           // `nutricionPorDia?.[dia] || nutricion`, así que es la de por día la
           // que ve el cliente. Filtrando solo `nutricion` se limpiaba justo la
@@ -23784,7 +23897,7 @@
           // filtrados de fábrica desde buildPlanFromData().
           if (Array.isArray(generatedPlan.nutricionPorDia)) {
             generatedPlan.nutricionPorDia = generatedPlan.nutricionPorDia
-              .map(dia => filtrarNoComida(dia, userData.noComida));
+              .map(dia => filtrarNoComida(dia, _noComidaCarga));
           }
         }
         regenerarEntrenamientoHoy(generatedPlan);
