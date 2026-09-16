@@ -14897,43 +14897,6 @@
         : 'Entrenas en casa con material y los WOD están escritos con barra olímpica. Si no tienes barra, sustituye cada movimiento por su versión con mancuerna o kettlebell (clean y snatch a una mano, thruster con mancuernas, swing con kettlebell) usando un peso que te deje completar las series sin parar. Mantén el formato de rondas y tiempos.');
     }
 
-    // Notas por enfermedad y medicación: avisar y ajustar el tono, nunca "recetar"
-    if (enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos')) {
-      notasSalud.push('Nos indicaste que tienes problemas cardíacos. Antes de hacer trabajo de alta intensidad (AMRAPs, WODs, series), consulta con tu médico. Empieza siempre conservador y prioriza controlar la frecuencia cardíaca.');
-    } else if (enfermedad.includes('Hipertensión')) {
-      notasSalud.push('Nos indicaste hipertensión. Evita aguantar la respiración en esfuerzos máximos (apnea) y los bloqueos isométricos muy largos; prioriza repeticiones moderadas con respiración continua.');
-    } else if (enfermedad.includes('Diabetes')) {
-      notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
-    } else if (enfermedad.includes('Otra')) {
-      // Se cita lo que escribió, igual que ya hacen las notas de medicación y
-      // de operación. El campo "¿Cuál?" se guardaba y se enseñaba en Jarvis,
-      // pero al cliente le llegaba un "tienes una condición médica" genérico
-      // que no demuestra que se haya leído. Escapado: es texto libre y esta
-      // nota se pinta con innerHTML (mismo motivo que en medicación/operación).
-      const _enfOtra = (u.enfermedadOtra || '').trim();
-      notasSalud.push(_enfOtra
-        ? `Nos indicaste una condición médica (${_esc(_enfOtra)}). El plan no la trata ni la tiene en cuenta clínicamente: si algo de lo que te proponemos no encaja con ella, coméntalo con tu médico antes de empezar.`
-        : 'Nos indicaste que tienes una condición médica. Si algo de tu plan no encaja con ella, coméntalo con tu médico antes de empezar.');
-    }
-
-    if (medicacion) {
-      // medicacion/operacion son texto libre del cuestionario y esta nota se
-      // pinta con innerHTML en "Hoy": sin escapar, un cliente podía meter
-      // HTML/JS en su propia medicación y ejecutarlo en su propio dashboard
-      // (mismo patrón de XSS almacenado que el de "Añadir ejercicio").
-      notasSalud.push(`Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
-    }
-
-    // El cuestionario pregunta por operaciones ("menisco, hernia discal...") y
-    // hasta ahora ese dato no se usaba en ninguna parte: se pedía un dato de salud
-    // (categoría especial del RGPD, como dice la propia política de privacidad) y
-    // se guardaba sin que cambiara nada del plan. Ahora al menos se reconoce y se
-    // avisa, igual que con la medicación.
-    const operacion = (u.operacion || '').trim();
-    if (operacion) {
-      notasSalud.push(`Nos indicaste que te han operado (${_esc(operacion)}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
-    }
-
     // NIVEL AVANZADO EN GIMNASIO: hasta ahora "Llevo algo de tiempo" y "Avanzado"
     // recibían un plan de gimnasio LITERALMENTE idéntico (comprobado comparando
     // el plan generado carácter a carácter). Running, Hyrox y CrossFit sí usan
@@ -14986,6 +14949,58 @@
       }
     }
     } // fin if (!soloDieta) — adaptaciones de entrenamiento por lesión/enfermedad/medicación
+
+    // Notas por enfermedad y medicación: avisar y ajustar el tono, nunca "recetar".
+    // FUERA del if(!soloDieta) a propósito (16 sept 2026, bug real): estaban
+    // dentro, así que un cliente con diabetes, hipertensión, problemas
+    // cardíacos, medicación u operación que comprara un plan de Solo nutrición
+    // -- o CrossFit/Hyrox, que fuerzan soloDieta -- no recibía ni un solo aviso
+    // sobre su condición. Es información que sigue importando sin entrenamiento
+    // (la diabetes condiciona el reparto de carbohidratos, por ejemplo), y
+    // notasNutricion ya recoge notasSalud completo para soloDieta (más abajo,
+    // en el return) -- solo hacía falta que estos push() no vivieran atrapados
+    // en el bloque de solo-entrenamiento.
+    if (enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos')) {
+      notasSalud.push('Nos indicaste que tienes problemas cardíacos. Antes de hacer trabajo de alta intensidad (AMRAPs, WODs, series), consulta con tu médico. Empieza siempre conservador y prioriza controlar la frecuencia cardíaca.');
+    } else if (enfermedad.includes('Hipertensión')) {
+      notasSalud.push('Nos indicaste hipertensión. Evita aguantar la respiración en esfuerzos máximos (apnea) y los bloqueos isométricos muy largos; prioriza repeticiones moderadas con respiración continua.');
+    } else if (enfermedad.includes('Diabetes')) {
+      notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
+    } else if (enfermedad.includes('Otra')) {
+      // Se cita lo que escribió, igual que ya hacen las notas de medicación y
+      // de operación. El campo "¿Cuál?" se guardaba y se enseñaba en Jarvis,
+      // pero al cliente le llegaba un "tienes una condición médica" genérico
+      // que no demuestra que se haya leído. Escapado: es texto libre y esta
+      // nota se pinta con innerHTML (mismo motivo que en medicación/operación).
+      const _enfOtra = (u.enfermedadOtra || '').trim();
+      notasSalud.push(_enfOtra
+        ? `Nos indicaste una condición médica (${_esc(_enfOtra)}). El plan no la trata ni la tiene en cuenta clínicamente: si algo de lo que te proponemos no encaja con ella, coméntalo con tu médico antes de empezar.`
+        : 'Nos indicaste que tienes una condición médica. Si algo de tu plan no encaja con ella, coméntalo con tu médico antes de empezar.');
+    }
+
+    if (medicacion) {
+      // medicacion/operacion son texto libre del cuestionario y esta nota se
+      // pinta con innerHTML en "Hoy": sin escapar, un cliente podía meter
+      // HTML/JS en su propia medicación y ejecutarlo en su propio dashboard
+      // (mismo patrón de XSS almacenado que el de "Añadir ejercicio").
+      notasSalud.push(`Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
+    }
+
+    // El cuestionario pregunta por operaciones ("menisco, hernia discal...") y
+    // hasta ahora ese dato no se usaba en ninguna parte: se pedía un dato de salud
+    // (categoría especial del RGPD, como dice la propia política de privacidad) y
+    // se guardaba sin que cambiara nada del plan. Ahora al menos se reconoce y se
+    // avisa, igual que con la medicación.
+    const operacion = (u.operacion || '').trim();
+    if (operacion) {
+      // La referencia a "¿Cómo va el entreno?" solo vale si el cliente tiene
+      // entrenamiento -- ese botón se oculta entero en soloDieta (script de
+      // arriba, todayPlanEl.style.display = soloDieta ? 'none' : '') -- así que
+      // aquí no se le manda a una función que no puede ver.
+      notasSalud.push(soloDieta
+        ? `Nos indicaste que te han operado (${_esc(operacion)}). Si sigues actividad física por tu cuenta, ten cuidado con los ejercicios que carguen esa zona y prioriza el rango sin dolor. Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`
+        : `Nos indicaste que te han operado (${_esc(operacion)}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
+    }
 
     if (sinGluten) {
       notasSalud.push('Tu plan de comidas evita ingredientes con gluten (pan, pasta y avena estándar sustituidos por versiones sin gluten).');
