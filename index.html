@@ -15113,6 +15113,15 @@
         : `Nos indicaste que te han operado (${_esc(operacion)}). Ten cuidado con los ejercicios que carguen esa zona: empieza con menos peso del que crees que puedes, prioriza el rango sin dolor y si algo te molesta cámbialo desde "¿Cómo va el entreno?". Si la operación es reciente, consulta antes con tu médico o fisioterapeuta.`);
     }
 
+    // Obesidad (IMC ≥ 30) con objetivo de ganar músculo o fuerza: el cálculo de
+    // calorías (más abajo) no le suma superávit. Se avisa aquí porque las notas
+    // del bloque "Tu plan, adaptado" se pintan antes de ese cálculo.
+    {
+      const _imcNota = (parseFloat(u.peso) || 70) / Math.pow((parseFloat(u.altura) || 170) / 100, 2);
+      if (_imcNota >= 30 && ganarMusculo) {
+        notasSalud.push('Con tu peso y altura, lo que más rinde para ganar músculo es comer a mantenimiento, no con superávit: el entrenamiento de fuerza con proteína suficiente construye músculo mientras se va perdiendo grasa (recomposición). Por eso tus calorías están en tu gasto real. Cuando tu IMC baje de 30, el plan pasa a superávit solo.');
+      }
+    }
     if (sinGluten) {
       notasSalud.push('Tu plan de comidas evita ingredientes con gluten (pan, pasta y avena estándar sustituidos por versiones sin gluten).');
     }
@@ -15931,9 +15940,11 @@
     const esMujer = (u.sexo || '').toLowerCase().includes('mujer') ||
                     (u.sexo || '').toLowerCase() === 'f';
 
-    const bmr = esMujer
-      ? (10 * pesoKg + 6.25 * altCm - 5 * edadAnn - 161)
-      : (10 * pesoKg + 6.25 * altCm - 5 * edadAnn + 5);
+    // "Prefiero no decirlo" usa el punto medio (-78), el MISMO que enseña el
+    // panel de metabolismo del cuestionario. Antes aquí caía en la fórmula de
+    // hombre y el plan partía de un metabolismo distinto al que vio el cliente.
+    const esHombre = (u.sexo || '').toLowerCase() === 'hombre' || (u.sexo || '').toLowerCase() === 'm';
+    const bmr = 10 * pesoKg + 6.25 * altCm - 5 * edadAnn + (esMujer ? -161 : esHombre ? 5 : -78);
 
     // Factor de actividad según deporte, nivel e intensidad semanal. En "Solo
     // nutrición" no hay deporte/nivel que mirar (el cliente no genera rutina con
@@ -16004,11 +16015,16 @@
     const _acotar = (v, min, max) => Math.round(Math.min(max, Math.max(min, v)));
     const _deficit   = _acotar(tdee * 0.18, 250, 500);
     const _superavit = _acotar(tdee * 0.13, 200, 400);
+    // IMC ≥ 30: sin superávit aunque el objetivo sea ganar músculo o fuerza
+    // (recomposición, ver la nota al cliente más arriba). Un +400 kcal a quien
+    // ya tiene obesidad añade sobre todo grasa.
+    const _imc = pesoKg / Math.pow(altCm / 100, 2);
+    const _obesidad = _imc >= 30;
     let kcalObj;
     if (perdidaGrasa) {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - _deficit);
     } else if (ganarMusculo) {
-      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + _superavit);
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + (_obesidad ? 0 : _superavit));
     } else {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee); // equilibrio = TDEE real calculado, no valor fijo
     }
@@ -16068,7 +16084,15 @@
       : ganarMusculo
       ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
       : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6)) * (enfoqueAltoProt ? 1.15 : 1);
-    const protObjSinTope = pesoKg * protMultiplier;
+    // Peso de referencia para los gramos por kilo. Con obesidad (IMC ≥ 30) el
+    // peso total infla proteína e hidratos sin sentido: medido, un hombre de
+    // 180 kg y 1,90 m en mantenimiento recibía 288 g de proteína y 736 g de
+    // hidratos. Se usa el peso ajustado clásico: el peso de un IMC 25 más el
+    // 40% del exceso. Por debajo de IMC 30 no cambia nada (un deportista
+    // musculado con IMC 26-28 conserva su proteína por kilo real).
+    const _pesoIMC25 = 25 * Math.pow(altCm / 100, 2);
+    const pesoRef = _obesidad ? _pesoIMC25 + 0.4 * (pesoKg - _pesoIMC25) : pesoKg;
+    const protObjSinTope = pesoRef * protMultiplier;
     const protObj = Math.round(
       perdidaGrasa
         ? (conSobrepeso ? Math.min(Math.max(protObjSinTope, 100), lbmProtMax) : Math.max(protObjSinTope, 100))
@@ -16097,7 +16121,7 @@
     const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
       : (perdidaGrasa ? 3.0 : ganarMusculo ? 4.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
-    let carbsObj = Math.round(pesoKg * carbsMultiplier);
+    let carbsObj = Math.round(pesoRef * carbsMultiplier);
 
     // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
     // que queda tras la proteína y los carbohidratos, y en los extremos de peso
@@ -16115,7 +16139,7 @@
     {
       const kcalProt = protObj * 4;
       const grasaG = (kcalObj - kcalProt - carbsObj * 4) / 9;
-      const grasaMin = Math.max(0.6 * pesoKg, (kcalObj * 0.18) / 9);
+      const grasaMin = Math.max(0.6 * pesoRef, (kcalObj * 0.18) / 9);
       const grasaMax = (kcalObj * (enfoqueBajoCarbo ? 0.55 : 0.35)) / 9;
       if (grasaG < grasaMin) {
         carbsObj = Math.max(0, Math.round((kcalObj - kcalProt - grasaMin * 9) / 4));
@@ -17366,7 +17390,14 @@
         // El filtro de alérgenos puede haber vaciado alguna de estas listas; sin el
         // guard, `lista[x % 0]` daba NaN y se colaba un `undefined` como primera
         // opción del día (tarjeta de comida en blanco en el panel).
-        const forzar = (comidas, momento, lista) => {
+        const forzar = (comidas, momento, listaEntera) => {
+          // En el hueco de la COMIDA solo valen los pre-entrenos que son un
+          // plato (arroz con pollo, pasta con pavo, boniato con huevo): el
+          // yogur con avena o las tortitas de arroz como comida del día no
+          // tienen sentido, y escalados a una comida salían "480g yogur griego,
+          // 210g avena, 45g miel" (16 sept 2026).
+          const platos = momento === 'Comida' ? listaEntera.filter(o => !/yogur|tortitas|bocadillo peque|batido|d[aá]tiles|sándwich|sandwich|pan con mermelada|copos/i.test(o.nombre)) : listaEntera;
+          const lista = platos.length ? platos : listaEntera;
           if (!lista.length) return;
           const m = comidas.find(x => x.momento === momento);
           // `semanaActual` entra en el índice porque sin él la comida de
@@ -18049,15 +18080,29 @@
     // se saca de `opciones[0]`, que es sobre lo que ya estaba calibrado todo.
     // Lo que cambia es que dentro de cada toma las opciones pasan a ser
     // intercambiables de verdad, que es lo que promete un "elige una".
+    // REPARTO ENTRE TOMAS (16 sept 2026). Ya no se saca de `opciones[0]`: lo
+    // que pesaba la primera opción de cada toma variaba por accidente según el
+    // perfil (correcciones de proteína e hidratos que inflan unas recetas más
+    // que otras). Medido sobre 400 perfiles: en el 31% de los días de DÉFICIT
+    // la cena pesaba más que la comida (regla de producto al revés), la comida
+    // bajaba del 20% del día en muchos planes y había tomas del 83% del día.
+    // Ahora cada toma recibe su parte fija de PESO_TOMA (desayuno 25, media
+    // mañana 10, comida 30, merienda 10, cena 25), repartida entre las tomas
+    // que tenga el cliente.
+    //
+    // Tope de escala según cuántas comidas hace: con 2 o 3 al día cada plato
+    // TIENE que ser grande (es el mismo día en menos tomas), y con el tope de
+    // 1,9 la opción que no llegaba se quedaba corta -- con 2 comidas y
+    // superávit, la primera opción de cada toma dejaba el día en el 72%.
     const _yaNormalizadas = new Set();
     nutricionPorDia.forEach((tomasDia, iDia) => {
       const objetivoDia = kcalObjPorDia[iDia] || kcalObj;
-      const totalBase = tomasDia.reduce((s, m) => s + (parseInt(m.opciones[0]?.kcal) || 0), 0);
-      if (!(totalBase > 0)) return;
+      const pesoDia = tomasDia.reduce((s, m) => s + (PESO_TOMA[m.momento] || 0.2), 0);
+      if (!(pesoDia > 0)) return;
+      const topeEscala = tomasDia.length <= 2 ? 3.0 : tomasDia.length === 3 ? 2.4 : 1.9;
       tomasDia.forEach(m => {
-        const kcalRef = parseInt(m.opciones[0]?.kcal) || 0;
-        if (!kcalRef) return;
-        const objetivoToma = objetivoDia * (kcalRef / totalBase);
+        if (!m.opciones || !m.opciones.length) return;
+        const objetivoToma = objetivoDia * ((PESO_TOMA[m.momento] || 0.2) / pesoDia);
         m.opciones.forEach(o => {
           if (_yaNormalizadas.has(o)) return;
           _yaNormalizadas.add(o);
@@ -18067,7 +18112,11 @@
           // acerca, pero sin llegar a raciones absurdas (900 g de pasta o
           // medio filete). Lo poco que quede sin cuadrar se prefiere a un
           // plato que nadie va a cocinar.
-          const f = Math.min(1.9, Math.max(0.5, objetivoToma / k));
+          // Una receta de base pequeña (un pre-entreno de 300 kcal puesto como
+          // comida) puede crecer hasta la ración de su toma sin llegar a nada
+          // absurdo: 300 kcal × 3 = 900. El tope bajo es para bases grandes.
+          const tope = k < 450 ? Math.max(topeEscala, tomasDia.length <= 2 ? 4.5 : 3.0) : topeEscala;
+          const f = Math.min(tope, Math.max(0.5, objetivoToma / k));
           if (Math.abs(f - 1) < 0.04) return;
           const p = Math.max(0, Math.round((parseInt(o.prot) || 0) * f));
           const c = Math.max(0, Math.round((parseInt(o.carbs) || 0) * f));
