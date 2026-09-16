@@ -11739,6 +11739,54 @@
   // ===== FICHA DE COMIDA: desglose de macros por ingrediente =====
   // Busca cada ingrediente con cantidad en gramos ("280g pollo") en la tabla USDA.
   // Los que no llevan cantidad (AOVE, especias) no se pueden calcular y se marcan.
+  // ===== PASTA, ARROZ Y CEREALES: ¿COCIDO O EN SECO? =====
+  // Pregunta real de un cliente (16 sept 2026): "¿la pasta es en mojado o en
+  // seco?". La tabla de alimentos guarda pasta, arroz, quinoa, cuscús... YA
+  // COCIDOS (pasta 158 kcal/100g, arroz 130), así que un "150g pasta" de una
+  // receta es peso cocido -- pero el texto no lo decía en 34 de 53 recetas, y
+  // quien lo pesara en seco comía más del doble de hidratos. Las que sí dicen
+  // "crudo" tienen su propia clave en la tabla (pasta cruda 371, arroz crudo 360).
+  // [nombre, kcal/100g en seco, kcal/100g cocido (los de data/alimentos.json), nombre en la compra]
+  const _CEREALES_COCCION = [
+    [/(pasta|espaguetis|macarrones)( integral(es)?)? sin gluten/i, 357, 155, 'pasta sin gluten'],
+    [/(pasta|espaguetis|macarrones|tallarines) integral(es)?/i, 348, 149, 'pasta integral'],
+    [/(tallarines|fideos) de arroz/i, 360, 109, 'fideos de arroz'],
+    [/\bpasta\b|espaguetis|macarrones|tallarines|fideos/i, 371, 158, 'pasta'],
+    [/arroz integral/i, 350, 123, 'arroz integral'],
+    [/\barroz\b/i, 360, 130, 'arroz'],
+    [/quinoa/i, 368, 120, 'quinoa'],
+    [/cusc[uú]s/i, 376, 112, 'cuscús'],
+    [/bulgur/i, 342, 83, 'bulgur'],
+  ];
+  // Lo que se llama igual pero no se cuece en casa (o no cambia de peso).
+  const _NO_CEREAL_COCCION = /crema de arroz|tortas? de arroz|tortitas? de arroz|bebida de arroz|leche de arroz|harina|galleta|salvado|pasta fresca|ñoqui|arroz inflado|copos/i;
+  function _cerealDeIngrediente(texto) {
+    const m = (texto || '').trim().match(/^(\d+(?:[.,]\d+)?)\s*g\b\s*(.+)$/i);
+    if (!m) return null;
+    const resto = m[2];
+    if (_NO_CEREAL_COCCION.test(resto)) return null;
+    const hit = _CEREALES_COCCION.find(([re]) => re.test(resto));
+    if (!hit) return null;
+    return {
+      gramos: parseFloat(m[1].replace(',', '.')),
+      crudo: /\bcrud[oa]s?\b|\ben seco\b/i.test(resto),
+      factor: hit[1] / hit[2],
+      compra: hit[3]
+    };
+  }
+  const _redondeo5 = n => Math.max(5, Math.round(n / 5) * 5);
+  // Texto que ve el cliente: la cantidad de SU plan (ya escalada por objetivo,
+  // deporte y peso) con su equivalencia. Solo para pintar: el texto de la
+  // receta no se toca, porque el cálculo de macros busca el alimento en él.
+  function _ingredienteConPesoCereal(texto) {
+    const t = (texto || '').trim();
+    const c = _cerealDeIngrediente(t);
+    if (!c || /en seco\)|cocido\)/i.test(t)) return t;
+    return c.crudo
+      ? `${t} (≈${_redondeo5(c.gramos * c.factor)} g una vez cocido)`
+      : `${t} (pesado ya cocido · ≈${_redondeo5(c.gramos / c.factor)} g en seco)`;
+  }
+
   function _buscarAlimento(texto) {
     if (!_alimentos) return null;
     // "sin lactosa" no cambia los macros (es leche/queso/yogur normal con la
@@ -16397,7 +16445,7 @@
             op("Espaguetis con almejas y gambas", "150g espaguetis crudos, 150g almejas, 100g gambas, ajo, perejil, AOVE", "811 kcal", "52g prot", "117g carbs", "15g grasa", "Medio · 20 min"),
             op("Pechuga rellena de jamón y queso con patatas", "200g pechuga de pollo, 40g jamón cocido, 40g queso tierno, 150g patatas al horno, AOVE", "582 kcal", "48g prot", "48g carbs", "22g grasa", "Medio · 30 min"),
             op("Cuscús con pollo y verduras", "150g cuscús, 200g pollo especiado, calabacín, pimiento, pasas", "584 kcal", "44g prot", "66g carbs", "16g grasa", "Fácil · 20 min"),
-            op("Rissotto de champiñones con pollo", "150g arroz arborio, 180g pollo, champiñones, caldo, parmesano", "610 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
+            op("Rissotto de champiñones con pollo", "80g arroz crudo (arborio), 180g pollo, champiñones, caldo, parmesano", "610 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
             // PLATOS DENSOS EN CARBOHIDRATOS (auditoría 5 sept 2026). El pool de
             // ganancia se movía en 38-70 g de carbohidratos por comida, y a un
             // cliente grande (100 kg en superávit, objetivo ~500 g/día) no se
@@ -16550,7 +16598,7 @@
           opciones: [
             op("Marmitako de atún con patata", "180g atún fresco, 200g patata, pimiento, cebolla, tomate, AOVE, pimentón", "513 kcal", "48g prot", "42g carbs", "17g grasa", "Medio · 30 min"),
             op("Potaje de garbanzos con espinacas y bacalao", "200g garbanzos cocidos, 150g bacalao desalado, 150g espinacas, AOVE, ajo", "568 kcal", "48g prot", "58g carbs", "16g grasa", "Medio · 30 min"),
-            op("Albóndigas de pavo en salsa con arroz", "180g pavo picado, 80g arroz, salsa de tomate casera, cebolla, AOVE", "611 kcal", "51g prot", "68g carbs", "15g grasa", "Medio · 30 min"),
+            op("Albóndigas de pavo en salsa con arroz", "180g pavo picado, 80g arroz crudo, salsa de tomate casera, cebolla, AOVE", "611 kcal", "51g prot", "68g carbs", "15g grasa", "Medio · 30 min"),
             op("Pollo al horno con patata asada y ensalada", "180g pollo, 150g patata asada con romero, ensalada verde, AOVE", "448 kcal", "40g prot", "36g carbs", "16g grasa", "Fácil · 25 min"),
             (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos'))
               ? op("Lentejas estofadas con verduras", "180g lentejas, zanahoria, patata, pimiento, cebolla, pimentón ahumado, AOVE", "460 kcal", "28g prot", "62g carbs", "8g grasa", "Fácil · 35 min")
@@ -16558,12 +16606,12 @@
             op("Merluza al horno con patatas y pisto", "200g merluza, 120g patata, calabacín, tomate, pimiento, AOVE, limón", "384 kcal", "36g prot", "42g carbs", "8g grasa", "Fácil · 25 min"),
             op("Arroz con pollo al curry y verduras", "180g pollo, 100g arroz basmati, leche coco light, curry, pimiento, cebolla", "494 kcal", "40g prot", "52g carbs", "14g grasa", "Medio · 25 min"),
             op("Garbanzos con atún, huevo y ensalada", "150g garbanzos, 1 lata atún, 1 huevo duro, ensalada variada, AOVE", "524 kcal", "42g prot", "44g carbs", "20g grasa", "Sin cocción · 8 min"),
-            op("Pasta con pollo y pesto casero", "100g pasta integral cruda, 150g pollo a la plancha, pesto de albahaca casero, tomate cherry", "496 kcal", "40g prot", "48g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Pasta con pollo y pesto casero", "60g pasta integral cruda, 150g pollo a la plancha, pesto de albahaca casero, tomate cherry", "496 kcal", "40g prot", "48g carbs", "16g grasa", "Fácil · 20 min"),
             op("Salmón a la parrilla con quinoa y ensalada", "200g salmón, 150g quinoa cocida, ensalada con tomate, pepino y limón", "593 kcal", "48g prot", "35g carbs", "29g grasa", "Fácil · 20 min"),
             op("Sepia a la plancha con judías pintas y ensalada", "200g sepia a la plancha, 150g judías pintas cocidas, ensalada verde, AOVE, limón", "412 kcal", "36g prot", "40g carbs", "12g grasa", "Fácil · 20 min"),
             op("Pollo al ajillo con patatas panadera", "180g pollo, 150g patata, ajo, AOVE, perejil", "464 kcal", "38g prot", "42g carbs", "16g grasa", "Fácil · 25 min"),
             op("Arroz con conejo y verduras", "100g arroz, 180g conejo, pimiento, tomate, romero", "470 kcal", "36g prot", "50g carbs", "14g grasa", "Medio · 35 min"),
-            op("Ensalada de pasta con atún y verduras", "100g pasta integral, 1 lata atún, tomate, pepino, maíz", "436 kcal", "30g prot", "52g carbs", "12g grasa", "Sin cocción · 15 min"),
+            op("Ensalada de pasta con atún y verduras", "130g pasta integral cocida, 1 lata atún, tomate, pepino, maíz", "436 kcal", "30g prot", "52g carbs", "12g grasa", "Sin cocción · 15 min"),
             op("Bacalao con tomate y pimientos", "200g bacalao, tomate frito casero, pimientos, ajo", "348 kcal", "36g prot", "24g carbs", "12g grasa", "Fácil · 25 min"),
             op("Pollo al horno con verduras variadas", "180g pollo, calabacín, zanahoria, cebolla, AOVE", "408 kcal", "40g prot", "26g carbs", "16g grasa", "Fácil · 30 min"),
             op("Judías blancas estofadas con verduras", "200g judías blancas, zanahoria, pimiento, cebolla, pimentón", "357 kcal", "21g prot", "66g carbs", "1g grasa", "Fácil · 30 min"),
@@ -16710,7 +16758,7 @@
     // PLATOS EXTRA POR DEPORTE — se añaden al pool de opciones para más variedad y especificidad
     if (esRunner || esHyrox) {
       const extrasCarbs = [
-        op("Pasta con verduras y atún", "100g pasta integral cruda, 1 lata atún, calabacín, tomate, AOVE", "468 kcal", "32g prot", "58g carbs", "12g grasa", "Fácil · 15 min"),
+        op("Pasta con verduras y atún", "70g pasta integral cruda, 1 lata atún, calabacín, tomate, AOVE", "468 kcal", "32g prot", "58g carbs", "12g grasa", "Fácil · 15 min"),
         op("Arroz con pollo y boniato", "180g pollo, 80g arroz, 100g boniato, AOVE", "502 kcal", "42g prot", "52g carbs", "14g grasa", "Fácil · 25 min"),
         op("Bowl de avena salada con huevo", "60g avena cocida en caldo, 2 huevos, espinacas, queso rallado", "467 kcal", "28g prot", "46g carbs", "19g grasa", "Fácil · 10 min"),
         op("Wrap integral de pollo y hummus casero", "1 tortilla integral, 150g pollo, 40g hummus casero, lechuga, zanahoria", "422 kcal", "38g prot", "36g carbs", "14g grasa", "Sin cocción · 5 min"),
@@ -18610,7 +18658,7 @@
         </div>`).join('');
 
       const optionsHTML = meal.opciones.map((opt, optIdx) => {
-        const ingredTexto = opt.ingredientes.split(',').map(s => s.trim()).join(', ');
+        const ingredTexto = opt.ingredientes.split(',').map(s => _ingredienteConPesoCereal(s)).join(', ');
         const kcalNum = parseInt(opt.kcal) || 0;
         const protNum = parseInt(opt.prot) || 0;
         const carbsNum = parseInt(opt.carbs) || 0;
@@ -18675,7 +18723,7 @@
     // QUÉ HACER en esta pantalla, y la tarjeta dice QUÉ ES tu plan y POR QUÉ.
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl) {
-      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>.`;
+      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>. La pasta, el arroz y los cereales van en peso cocido salvo que ponga «crudo»; al lado de cada uno tienes su equivalencia.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -21771,7 +21819,7 @@
     const contenido = document.getElementById('recetarioContenido');
     contenido.innerHTML = generatedPlan.nutricion.map((meal, mealIdx) => {
       const cards = meal.opciones.map((opt, i) => {
-        const items = opt.ingredientes.split(',').map(s => `<li>${s.trim()}</li>`).join('');
+        const items = opt.ingredientes.split(',').map(s => `<li>${_ingredienteConPesoCereal(s)}</li>`).join('');
         // opt.pasos solo existe cuando el plato se adaptó por alergia o
         // intolerancia (ver `adaptar` en buildPlanFromData): tiene prioridad
         // porque RECETA_PASOS guarda el texto SIN adaptar.
@@ -22342,7 +22390,7 @@
         }
       }
 
-      callback(key, gramos, unidades, esLiquido);
+      callback(key, gramos, unidades, esLiquido, clean);
     });
   }
 
@@ -22362,7 +22410,16 @@
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
         if (!opt) return;
-        _procesarIngredientes(opt.ingredientes, (key, gramos, unidades, esLiquido) => {
+        _procesarIngredientes(opt.ingredientes, (key, gramos, unidades, esLiquido, crudoTexto) => {
+          // Pasta, arroz y cereales se COMPRAN en seco, pero las recetas los
+          // dan cocidos: la lista decía "Pasta 600g" a quien tenía que comprar
+          // unos 255g. Se pasa a peso en seco y se junta en una sola línea con
+          // lo que ya venía "crudo" (antes eran dos: "arroz" y "arroz crudo").
+          const _cer = gramos > 0 ? _cerealDeIngrediente(crudoTexto) : null;
+          if (_cer) {
+            key = `${_cer.compra} (peso en seco)`;
+            gramos = _cer.crudo ? gramos : gramos / _cer.factor;
+          }
           if (!ingredientes[key]) {
             ingredientes[key] = { nombre: key.charAt(0).toUpperCase() + key.slice(1), cantidad: 0, unidades: 0, esLiquido: false, dias: new Set(), veces: 0 };
           }
@@ -22694,11 +22751,15 @@
         opt.ingredientes.split(',').forEach(ing => {
           const clean = ing.trim().toLowerCase();
           if (!clean || clean.length < 2) return;
-          const key = clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
-          if (!ingredientes[key]) ingredientes[key] = { nombre: clean, cantidad: 0, veces: 0 };
+          // Pasta, arroz y cereales, en peso EN SECO (lo que se compra) y en una
+          // sola línea: mismo criterio que la lista de la compra de la pantalla.
+          const cer = _cerealDeIngrediente(clean);
+          const key = cer ? `${cer.compra} (peso en seco)` : clean.replace(/\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\b/g, '').replace(/\d+/g, '').trim();
+          if (!ingredientes[key]) ingredientes[key] = { nombre: cer ? key : clean, cantidad: 0, veces: 0 };
           ingredientes[key].veces++;
           const m = clean.match(/(\d+(?:[.,]\d+)?)\s*(g|gr|ml|kg|l)\b/);
-          if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
+          if (cer) ingredientes[key].cantidad += cer.crudo ? cer.gramos : cer.gramos / cer.factor;
+          else if (m) ingredientes[key].cantidad += parseFloat(m[1].replace(',', '.')) * (m[2] === 'kg' || m[2] === 'l' ? 1000 : 1);
         });
       });
     }
