@@ -442,8 +442,27 @@ async function handleCronRetencion(req, res) {
               .map(e => e.destinatario)
           );
 
+          // Envíos de ESTA pasada, por cliente. El aviso va a TODOS sus
+          // dispositivos y se registra una sola vez al final (16 sept 2026).
+          // Antes, tras el primer envío aceptado se marcaba al cliente como
+          // "ya avisado" y se saltaban sus demás suscripciones: si la primera
+          // de la lista era un dispositivo viejo (el portátil, una instalación
+          // anterior de la app en el mismo iPhone...), el servicio de push la
+          // aceptaba, quedaba registrado como enviado y al móvil de verdad no
+          // le llegaba nunca. Reportado por el propio admin: el registro decía
+          // "Miércoles: Descanso" enviado y en el iPhone no apareció nada.
+          const enviadosEstaPasada = new Map();
+          const _tipoDispositivoPush = endpoint => {
+            const host = (() => { try { return new URL(endpoint).hostname; } catch (_) { return ''; } })();
+            if (/push\.apple\.com$/.test(host)) return 'iPhone/iPad/Mac (Safari)';
+            if (/fcm\.googleapis\.com$/.test(host)) return 'Chrome/Android';
+            if (/mozilla\.com$/.test(host)) return 'Firefox';
+            if (/notify\.windows\.com$/.test(host)) return 'Edge/Windows';
+            return host || 'desconocido';
+          };
           for (const sub of subsPush) {
             const p = perfilPorId[sub.user_id];
+            // yaAvisadoHoy = avisado en una pasada ANTERIOR del cron (email_log).
             if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
             const ud = p.userdata || {};
             if (!ud.onboardingCompletado) continue;
@@ -474,7 +493,9 @@ async function handleCronRetencion(req, res) {
             const _diasSinEntrar = _ultimaVezPush
               ? (ahora.getTime() - new Date(_ultimaVezPush).getTime()) / 86400000
               : 0;
-            const aviso = avisoDelDia({
+            // Mismo texto en todos sus dispositivos (el de solo nutrición elige
+            // frase al azar y cada dispositivo decía una distinta).
+            const aviso = enviadosEstaPasada.get(p.email)?.aviso || avisoDelDia({
               plan: planPorId[p.id] || null,
               idx: idxDiaHoy,
               nombre: primerNombrePush,
@@ -492,17 +513,9 @@ async function handleCronRetencion(req, res) {
                 { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
                 JSON.stringify({ title: aviso.title, body: aviso.body, url: '/', tag: 'kone-hoy' })
               );
-              // Se guarda el texto EXACTO enviado. Antes solo quedaba "Push:
-              // recordatorio de entreno diario.", así que ante un "no me cuadra
-              // la notificación" no había forma de saber qué le había llegado.
-              await supa.from('email_log').insert({ tipo: 'push_recordatorio_diario', destinatario: p.email, asunto: aviso.title, datos: JSON.stringify({ resumen: `Push (${aviso.tipo}): ${aviso.title} — ${aviso.body}` }) });
-              // Sin esto, un cliente con 2+ dispositivos suscritos (móvil +
-              // portátil) recibía el push una vez POR DISPOSITIVO en la misma
-              // pasada del cron -- yaAvisadoHoy solo se rellenaba una vez al
-              // principio, antes del bucle, así que la segunda vuelta para el
-              // mismo email todavía no lo veía como "ya avisado".
-              yaAvisadoHoy.add(p.email);
-              pushEnviados++;
+              const reg = enviadosEstaPasada.get(p.email) || { aviso, destinos: [] };
+              reg.destinos.push(_tipoDispositivoPush(sub.endpoint));
+              enviadosEstaPasada.set(p.email, reg);
             } catch (pushErr) {
               // 404/410 = el navegador anuló la suscripción (desinstaló, borró
               // datos del sitio...) -- limpiarla para no reintentar cada día
@@ -517,6 +530,16 @@ async function handleCronRetencion(req, res) {
                 capturarError(pushErr, { fn: 'notify-cron-push', endpoint: sub.endpoint });
               }
             }
+          }
+          // Un registro por cliente con el texto EXACTO enviado y a qué
+          // dispositivos llegó: ante un "no me ha llegado" se ve en Jarvis si
+          // el aviso fue a su iPhone o solo a otro dispositivo.
+          for (const [email, reg] of enviadosEstaPasada) {
+            await supa.from('email_log').insert({
+              tipo: 'push_recordatorio_diario', destinatario: email, asunto: reg.aviso.title,
+              datos: JSON.stringify({ resumen: `Push (${reg.aviso.tipo}) a ${reg.destinos.length} dispositivo${reg.destinos.length === 1 ? '' : 's'} [${reg.destinos.join(', ')}]: ${reg.aviso.title} — ${reg.aviso.body}` })
+            });
+            pushEnviados++;
           }
         }
       } catch (pushBlockErr) { console.error('[notify-cron] push diario error:', pushBlockErr.message); }

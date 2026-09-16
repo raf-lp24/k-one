@@ -10502,7 +10502,23 @@
     // rotación de accesorios (poolsEjercicio, más abajo) si esta semana tocó
     // "press inclinado en máquina/multipower": sin esto quedaba colgando
     // ("Press con mancuernas en máquina" -- dos materiales contradictorios).
-    [/press inclinado(?! en (máquina|multipower))/i, ['Press banca plano', 'Press con mancuernas']],
+    // Las alternativas al press inclinado tienen que seguir siendo INCLINADAS
+    // (16 sept 2026). Eran "Press banca plano" y "Press con mancuernas": en el
+    // día de empuje, que ya abre con press banca, la semana quedaba con dos
+    // press planos seguidos y ningún trabajo inclinado.
+    //
+    // BUG DE FONDO (la causa real, no solo qué alternativas se ofrecen): la
+    // regla no se comía el material que ya trae el ejercicio ("press inclinado
+    // CON MANCUERNAS", que es como lo escribe la plantilla de casa). El regex
+    // solo capturaba "press inclinado" y dejaba " con mancuernas" colgando
+    // detrás de la alternativa elegida -- así salía "Press banca plano CON
+    // MANCUERNAS" (el bug real que reportó el usuario) o, con el arreglo a
+    // medias de hoy, "Flexiones con pies elevados CON MANCUERNAS". Se añade el
+    // grupo opcional que ya usan zancadas/farmer carry para este mismo fallo.
+    // "en máquina" no vuelve a casar con la regla (lookahead) y en casa lo
+    // descarta el filtro de gimnasio; las flexiones con pies elevados cargan
+    // la parte alta del pecho sin material.
+    [/press inclinado(?! en (máquina|multipower))( con mancuernas?)?/i, ['Press inclinado en máquina', 'Flexiones con pies elevados']],
     [/press militar|press de hombro con barra|overhead press/i, ['Press de hombro con mancuernas', 'Press Arnold'], false, true],
     // Excluye los sufijos que puede traer "dominadas" en la plantilla
     // ("dominadas asistidas o jalón", "dominadas lastradas", "dominadas
