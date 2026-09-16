@@ -13567,9 +13567,13 @@
     // "pinzamiento subacromial" y "labrum" (hombro), la grafía inglesa
     // "chondromalacia" (rodilla) -- y el cliente se quedaba SIN ninguna
     // sustitución de seguridad aunque hubiera descrito la lesión con claridad.
-    const _lesionZonaRodilla = lesion.includes('Rodilla') || (_lesionOtra && _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'chondromalacia', 'tendinitis rotuliana'));
-    const _lesionZonaEspalda = lesion.includes('Espalda') || (_lesionOtra && _mencionaLesion('espalda', 'lumbar', 'lumbago', 'lumbalgia', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco', 'escoliosis'));
-    const _lesionZonaHombro = lesion.includes('Hombro') || (_lesionOtra && _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion', 'pinzamiento', 'subacromial', 'labrum', 'por encima de la cabeza'));
+    // Detección MULTIZONA (16 sept 2026): el texto libre se lee siempre, no solo
+    // con lesión = "Otra" -- así, si alguien marca "Rodilla" y además escribe
+    // "y también tengo molestias de hombro", se protegen las dos zonas a la vez
+    // en vez de perder la segunda por no ser la lesión principal marcada.
+    const _lesionZonaRodilla = lesion.includes('Rodilla') || _mencionaLesion('rodilla', 'menisco', 'ligamento cruzado', 'lca', 'rótula', 'rotula', 'condromalacia', 'chondromalacia', 'tendinitis rotuliana');
+    const _lesionZonaEspalda = lesion.includes('Espalda') || _mencionaLesion('espalda', 'lumbar', 'lumbago', 'lumbalgia', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco', 'escoliosis');
+    const _lesionZonaHombro = lesion.includes('Hombro') || _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion', 'pinzamiento', 'subacromial', 'labrum', 'por encima de la cabeza');
 
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
