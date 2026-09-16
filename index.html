@@ -14547,9 +14547,27 @@
     // ===== ADAPTACIONES POR SALUD, PROGRESIÓN Y FEEDBACK =====
     // Lesiones, alergias, medicación y los cambios pedidos en el feedback de la sesión
     // anterior modifican de verdad el entreno de hoy y la semana — no son solo texto.
-    const sinGluten = (u.dieta && u.dieta.includes('gluten')) || alergiaSalud.includes('Gluten');
-    const sinLactosa = (u.dieta && u.dieta.includes('lactosa')) || alergiaSalud.includes('Lactosa');
-    const sinFrutosSecos = alergiaSalud.includes('Frutos secos');
+    // Alergia "Otra" en texto libre (16 sept 2026, bug real): un cliente que
+    // escribe "soy celíaco" o "intolerante a la lactosa" en el campo libre en
+    // vez de marcar el desplegable "Gluten"/"Lactosa" solo pasaba por
+    // _expandirAlergenoLibre() -- una lista de sinónimos más corta (sin avena,
+    // sin croutons/picatostes, sin copos de maíz) que solo EXCLUYE recetas
+    // enteras, sin la sustitución + red de seguridad de abajo. Medido: un
+    // celíaco que escribía "gluten" en el texto libre recibía "Bol de avena"
+    // sin certificar, tal cual, porque avena no está en la lista de sinónimos
+    // (es gluten-free por naturaleza, la contaminación cruzada es lo que la
+    // hace de riesgo, y solo la rama sinGluten de abajo lo sabe). Ahora el
+    // texto libre TAMBIÉN activa sinGluten/sinLactosa/sinFrutosSecos, así que
+    // pasa por el mismo sistema robusto que si hubiera marcado el desplegable
+    // -- además de seguir excluyendo recetas por _expandirAlergenoLibre.
+    const _alergiaOtraTxt = (u.alergiaOtra || '').toLowerCase();
+    const _mencionaAlergia = (...palabras) => palabras.some(p => _alergiaOtraTxt.includes(p));
+    const sinGluten = (u.dieta && u.dieta.includes('gluten')) || alergiaSalud.includes('Gluten')
+      || (alergiaSalud === 'Otra' && _mencionaAlergia('gluten', 'celiac', 'celíac', 'celiaqu', 'trigo'));
+    const sinLactosa = (u.dieta && u.dieta.includes('lactosa')) || alergiaSalud.includes('Lactosa')
+      || (alergiaSalud === 'Otra' && _mencionaAlergia('lactosa', 'lácteo', 'lacteo', 'leche', 'dairy'));
+    const sinFrutosSecos = alergiaSalud.includes('Frutos secos')
+      || (alergiaSalud === 'Otra' && _mencionaAlergia('frutos secos', 'fruto seco', 'nueces', 'almendra', 'avellana', 'cacahuete', 'anacardo', 'pistacho'));
 
     const aplicarReemplazos = (texto, mapa) => {
       let out = texto;
