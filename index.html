@@ -9671,7 +9671,9 @@
       } else if (deporte.includes('Hyrox') || deporte.includes('CrossFit')) {
         nota = 'Al ser avanzado, los WODs incluyen movimientos más técnicos y benchmarks reales, en vez de sus versiones escaladas.';
       } else if (esGym) {
-        nota = 'Al ser avanzado, las series se calculan a mayor % de tu 1RM (más peso, menos repeticiones) que en "Llevo algo de tiempo" — mismo split, más intensidad.';
+        // Antes prometía "mayor % de tu 1RM, más peso, menos repeticiones", que
+        // el motor no hacía. Esto es lo que hace de verdad (15 sept 2026).
+        nota = 'Al ser avanzado, sumas una serie en los ejercicios principales de cada sesión y trabajas más cerca del fallo (RPE 8,5-9), con una técnica de intensidad distinta cada bloque de 4 semanas.';
       }
     }
 
@@ -10554,7 +10556,10 @@
     // los días de pierna del Upper/Lower. Medido en un plan real de principiante
     // a 5 días: la rotación dejó los DOS días de pierna con patada de glúteo en
     // cuadrupedia y ninguno con extensión de cadera con carga.
-    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo', 'Patada de glúteo en polea']],
+    // "Puente de glúteo con mancuerna" y no "Puente de glúteo" a secas (15 sept
+    // 2026): el hip thrust es un básico con carga, y en casa salía "Puente de
+    // glúteo 5×10" sin peso para quien quiere ganar músculo.
+    [/hip thrust( en banco| con barra| con mancuernas?)?/i, ['Peso muerto rumano', 'Puente de glúteo con mancuerna', 'Patada de glúteo en polea']],
     // "Aductores en máquina" quitado: el aductor no es el cuádriceps. Y
     // "Sentadilla goblet" también, porque los días que llevan prensa ya traen
     // una sentadilla unas comas más allá y la rotación duplicaba el ejercicio
@@ -10765,7 +10770,9 @@
   // de un overhead carry METIDO por la propia rotación. Se vio al darle
   // alternativas al slot de carries para quien entrena en casa.
   const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
-  const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n/i;
+  // "superman" (15 sept 2026): es extensión lumbar tumbado boca abajo, lo mismo
+  // que la hiperextensión, y la rotación del dead bug lo metía con la espalda tocada.
+  const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n|superman/i;
   // BUG REAL (14 sept 2026): la rotación no sabía NADA del nivel del cliente,
   // así que a un principiante le cambiaba la plancha por una "Rueda abdominal
   // 3×30s". La rueda abdominal es de los ejercicios de core más exigentes que
@@ -10912,6 +10919,14 @@
   const _FAMILIA = [
     [/curl femoral|femoral( tumbado| sentado| de pie)?|leg curl/i, 'curl-femoral'],
     [/extensi[oó]n de cu[aá]driceps/i, 'extension-cuadriceps'],
+  // Press PLANO con mancuernas, se llame como se llame (15 sept 2026): en casa
+  // "press banca" se traduce a "press con mancuernas en banco" y la rotación del
+  // press inclinado podía elegir "press banca plano con mancuernas" en la misma
+  // sesión -- el mismo ejercicio dos veces con dos nombres.
+  // "banca plano/plana" sin material a propósito: la rotación compara el nombre
+  // NUEVO ya sin material ("press banca plano"), y con el material en el patrón
+  // la familia no casaba y el veto no saltaba.
+  [/press (con mancuernas en banco|banca plan[oa]|banca con mancuernas|de banca con mancuernas|plano con mancuernas)/i, 'press-plano-mancuernas'],
     [/elevaciones laterales|elevaciones en polea/i, 'elevacion-lateral'],
     [/face pull|retracci[oó]n escapular/i, 'retraccion-escapular'],
   ];
@@ -11003,8 +11018,21 @@
             _parens.push(m);
             return `@@P${_parens.length - 1}@@`;
           });
-          const rotado = _aplicarRotacionAutomatica(frSinParens, tablaSegura)
-            .replace(/@@P(\d+)@@/g, (m, i) => _parens[+i] !== undefined ? _parens[+i] : m);
+          // Si la rotación CAMBIA el ejercicio, sus notas técnicas eran del
+          // ejercicio anterior y se quitan (15 sept 2026): "press francés 3×10
+          // (codos fijos cerca de la cabeza)" salía "Patada de tríceps con
+          // mancuerna 3×10 (codos fijos cerca de la cabeza)", que es otro
+          // movimiento. Las notas de SEGURIDAD sí se conservan, sea cual sea el
+          // ejercicio: rango sin dolor, sin salto, controlado.
+          const _rotadoMarcas = _aplicarRotacionAutomatica(frSinParens, tablaSegura);
+          const _cambioEjercicio = _rotadoMarcas !== frSinParens;
+          const rotado = _rotadoMarcas
+            .replace(/(\s*)@@P(\d+)@@/g, (m, esp, i) => {
+              const nota = _parens[+i];
+              if (nota === undefined) return m;
+              if (_cambioEjercicio && !/rango|dolor|sin salto|sin impulso|controlad|ligero|c[oó]modo|sin flexi/i.test(nota)) return '';
+              return esp + nota;
+            });
           const antes = _nombreDeTramo(fr);
           const despues = _nombreDeTramo(rotado);
           // Si el cambio duplicaría un ejercicio de esta misma sesión, se deja
@@ -11882,13 +11910,19 @@
     let rpeHTML = '';
     if (repsNum) {
       const _novato = (userData.nivel || '').includes('Principiante');
-      const rpe = repsNum <= 6 ? (_novato ? '7' : '8')
-                : repsNum <= 10 ? (_novato ? '7.5' : '8.5')
+      // El avanzado trabaja más cerca del fallo: es lo que le dice su nota
+      // ("1-2 repeticiones del fallo en los básicos") y lo que la tarjeta no
+      // reflejaba -- le pedía el mismo RPE que a "Llevo algo de tiempo".
+      const _avanzado = (userData.nivel || '').includes('Avanzado');
+      const rpe = repsNum <= 6 ? (_novato ? '7' : _avanzado ? '8.5' : '8')
+                : repsNum <= 10 ? (_novato ? '7.5' : _avanzado ? '9' : '8.5')
                 : repsNum <= 14 ? (_novato ? '8' : '9')
                 : (_novato ? '8.5' : '9.5');
       const _ayuda = _novato
         ? 'Cuánto debe costarte la serie. Deja 2-3 repeticiones en recámara: si acabas sin poder hacer ni una más, te has pasado de peso.'
-        : 'Cuánto debe costarte la serie, del 1 al 10. RPE 8 = podrías haber hecho 2 repeticiones más.';
+        : _avanzado
+          ? 'Cuánto debe costarte la serie, del 1 al 10. Con tu nivel, en los básicos quédate a 1-2 repeticiones del fallo (RPE 8,5-9).'
+          : 'Cuánto debe costarte la serie, del 1 al 10. RPE 8 = podrías haber hecho 2 repeticiones más.';
       rpeHTML = `<div class="ejercicio-rpe" title="${_esc(_ayuda)}"><span class="k">RPE objetivo</span><span class="v">${rpe}</span></div>`;
     }
 
@@ -14143,7 +14177,8 @@
         // seguidos al máximo)": la tarjeta decía una cosa y la explicación otra.
         { nombre: 'Burpees', accion: 'seguidos y sin parar, al máximo que puedas mantener', impacto: true, cargaHombro: true },
         { nombre: 'Comba', accion: 'a ritmo alto, con saltos simples', impacto: true },
-        { nombre: 'Caminata en cuesta', accion: 'andando rápido en cuesta o con la cinta muy inclinada' },
+        // En casa no hay cinta: la alternativa a la cuesta son las escaleras.
+        { nombre: 'Caminata en cuesta', accion: lugar.includes('casa') ? 'andando rápido en cuesta o subiendo escaleras' : 'andando rápido en cuesta o con la cinta muy inclinada' },
       ];
       // BUG REAL (6 sept 2026): esta lista se escribió pensando en "lo que de
       // verdad hay en un gimnasio normal" —lo dice el comentario de arriba— pero
@@ -14854,6 +14889,26 @@
           'Técnica de este bloque — excéntricas controladas: en la primera serie de cada básico, baja el peso en 3-4 segundos manteniendo la tensión. Bajas algo de carga, pero el tiempo bajo tensión sube y es donde más margen de mejora te queda.'
         ];
         notasSalud.push(tecnicasAvanzadas[bloqueMeso % tecnicasAvanzadas.length]);
+        // Y un cambio REAL en el plan, no solo la nota (15 sept 2026). Medido: en
+        // gimnasio y en casa, "Avanzado" recibía EXACTAMENTE el mismo plan que
+        // "Llevo algo de tiempo" en los 120 casos de días × tiempo × objetivo,
+        // mientras la vista previa le prometía más intensidad. Quien lleva años
+        // entrenando necesita más volumen efectivo para seguir progresando: una
+        // serie más en los DOS primeros ejercicios de cada sesión (los básicos),
+        // con el tope de 5 de siempre. El recorte por duración va después, así
+        // que en sesiones cortas manda el tope de tiempo.
+        semana = semana.map(d => {
+          if (d.tipo !== 'Entrenamiento' || !d.detalle) return d;
+          const partes = d.detalle.split('·');
+          if (partes.length < 2) return d;
+          let sumadas = 0;
+          const cuerpo = partes.slice(1).join('·').replace(/(^|,\s*)([^,()]*?)(\d+)(\s*×\s*)(\d+)(?!\s*(?:s|seg|min|m)\b)/g, (m, sep, nombre, s, x, r) => {
+            if (sumadas >= 2 || /plancha|dead bug|bird dog|hollow|rueda|pallof|superman|copenhagen|elevaci[oó]n de piernas|interv|rondas/i.test(nombre)) return m;
+            sumadas++;
+            return sep + nombre + Math.min(5, parseInt(s, 10) + 1) + x + r;
+          });
+          return { ...d, detalle: partes[0] + '·' + cuerpo };
+        });
       }
     }
     } // fin if (!soloDieta) — adaptaciones de entrenamiento por lesión/enfermedad/medicación
@@ -15279,6 +15334,14 @@
 
       const mapaConMaterial = [
         // Piernas
+        // La variedad semanal (poolsEjercicio) ofrece "extensión de tríceps con
+        // cuerda", que es un accesorio de POLEA, y las plantillas de hombros traen
+        // "rueda abdominal": ninguna de las dos cosas entra en "mancuernas y banda
+        // elástica", que es lo que el cuestionario dice que hay en casa (15 sept 2026).
+        r(/extensión de tríceps con cuerda/gi, 'extensión de tríceps con banda elástica'),
+        r(/rueda abdominal/gi, 'dead bug'),
+        // "fondos" a secas son en paralelas, que en casa no hay.
+        r(/\bfondos(?! en banco| entre sillas| en paralelas)/gi, 'fondos en banco'),
         r(/prensa de piernas/gi, 'sentadilla goblet con mancuerna'),
         r(/gemelos en prensa o máquina/gi, 'gemelos en escalón con mancuerna'),
         r(/gemelos en máquina/gi, 'gemelos en escalón con mancuerna'),
@@ -15477,7 +15540,13 @@
         const vistos = new Set();
         const limpio = frs.filter(f => {
           const m = f.match(/^([^0-9(]+?)\s*[\d(]/);
-          const nombre = normalizarEjercicio((m ? m[1] : f).trim());
+          // Sin el material del final (15 sept 2026): en casa "curl bíceps" y
+          // "curl martillo" acababan en "curl martillo con mancuernas" y "curl
+          // martillo" seguidos, y esta red los veía distintos. Solo se quita el
+          // sufijo que añade la traducción a casa, no "con barra" ni "en polea":
+          // "remo con barra" y "remo en polea baja" SÍ son ejercicios distintos.
+          const nombre = normalizarEjercicio((m ? m[1] : f).trim())
+            .replace(/ con (mancuernas?|banda el[aá]stica)$/, '');
           if (!nombre || nombre.length < 4) return true;
           if (vistos.has(nombre)) return false;
           vistos.add(nombre);
