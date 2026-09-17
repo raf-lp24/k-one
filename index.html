@@ -16203,12 +16203,16 @@
       'tomate': '100g', 'tomate cherry': '80g', 'tomate rallado': '60g',
       'tomate en rodajas': '80g', 'tomate frito casero': '50g', 'salsa de tomate': '50g',
       'ensalada con tomate': '100g', 'espinacas': '60g', 'espinacas salteadas con ajo': '80g',
-      'pimiento': '80g', 'pimiento verde': '80g', 'cebolla': '60g', 'cebolla salteados': '60g',
+      // "pimientos" en plural no casaba con la clave "pimiento": Ver macros lo
+      // marcaba "al gusto" (0 kcal) en vez de sus ~80g reales (16 sept 2026).
+      'pimiento': '80g', 'pimientos': '80g', 'pimiento verde': '80g', 'cebolla': '60g', 'cebolla salteados': '60g',
+      'maíz': '50g', 'maiz': '50g', 'aceitunas': '15g', 'tomate seco': '10g',
       'cebolleta': '30g', 'zanahoria': '60g', 'zanahoria rallada': '50g',
       'zanahoria y pepino en bastones': '100g', 'zanahoria y judías verdes al vapor': '120g',
       'calabacín': '100g', 'brócoli': '150g', 'pepino': '80g', 'pepino y limón': '80g',
       'lechuga': '60g', 'lechuga romana': '60g', 'hojas de lechuga romana': '50g',
-      'ensalada verde': '80g', 'ensalada variada': '80g', 'rúcula': '30g',
+      'ensalada verde': '80g', 'ensalada variada': '80g', 'ensalada': '80g', 'rúcula': '30g',
+      'garbanzos': '80g',
       'champiñones': '80g', 'judías verdes': '120g', 'judía verde': '120g',
       'alcachofa': '100g', 'espárragos verdes': '100g', 'apio': '50g', 'puerro': '60g',
       // Faltaban y salían "al gusto" en la lista de ingredientes aunque sí aportan.
@@ -16221,7 +16225,7 @@
       // Lácteos y bebidas
       'leche': '200ml', 'leche semidesnatada': '200ml', 'bebida de avena': '200ml',
       'bebida de avena': '200ml', 'leche vegetal': '200ml', 'leche coco light': '100ml',
-      'queso rallado': '15g', 'parmesano rallado': '10g', 'queso fresco': '50g',
+      'queso rallado': '15g', 'parmesano rallado': '10g', 'parmesano': '10g', 'queso fresco': '50g',
       'salsa de yogur': '30g', 'caldo casero': '200ml',
       // Variantes caseras: al marcarlas como tales dejaron de casar con la
       // clave de arriba y se quedaban sin cantidad. El guacamole y el hummus
@@ -16344,14 +16348,38 @@
     // jamón del plato seguía igual. El cliente leía "10g prot" en un bocadillo
     // de jamón y queso.
     const INGREDIENTE_PROTEINA = /pechuga|pollo|pavo|ternera|solomillo|salmón|salmon|atún|atun|bonito|emperador|merluza|bacalao|dorada|lubina|lenguado|sardina|sardinilla|boquerones|anchoas|caballa|trucha|rape|gambas|langostinos|calamar|pulpo|sepia|mejillones|huevo|clara|queso batido|queso fresco|queso cottage|queso de cabra|queso manchego|requesón|requeson|yogur griego|yogur natural|yogur de soja|kéfir|kefir|skyr|proteína en polvo|proteina en polvo|scoop de proteína|scoop proteína|scoop de caseína|tofu|tempeh|seitán|seitan|garbanzos|lentejas|alubias|jud[íi]as blancas|habas|edamame|jamón cocido|jamon cocido|jamón serrano|jamon serrano|jamón ibérico|jamon iberico|cecina|lomo embuchado/i;
-    const INGREDIENTE_CARBOHIDRATO = /\barroz\b|pasta\b|macarrones|espaguetis|fideos|\bpan\b|tostadas?\b|\btosta\b|patata|boniato|\bavena\b|quinoa|cuscús|cuscus|tortitas? de (arroz|maíz|maiz)|\bbulgur\b|granola|muesli/i;
+    // Legumbres A PROPÓSITO también aquí, aunque ya estén en INGREDIENTE_PROTEINA:
+    // aportan carbohidrato de verdad (20-27g/100g cocidas) y así se mueven con la
+    // media de los dos factores en vez de quedarse fijas cuando solo cambia
+    // corrCarbs (ver el comentario de escalarIngredientesPorMacro).
+    const INGREDIENTE_CARBOHIDRATO = /\barroz\b|pasta\b|macarrones|espaguetis|fideos|\bpan\b|tostadas?\b|\btosta\b|patata|boniato|\bavena\b|quinoa|cuscús|cuscus|tortitas? de (arroz|maíz|maiz)|\bbulgur\b|granola|muesli|garbanzos|lentejas|alubias|jud[íi]as blancas|habas|edamame/i;
+    // BUG REAL (17 sept 2026, encontrado auditando "Ver macros" sobre planes
+    // reales): garbanzos/lentejas/alubias están SOLO en INGREDIENTE_PROTEINA
+    // (con razón, son su fuente de proteína del plato), así que aquí el
+    // if/else-if los mandaba siempre por corrProt y nunca por corrCarbs. El
+    // ciclado de carbohidratos (más abajo) llama a esto con corrProt FIJO en
+    // 1 -- solo quiere mover carbohidratos -- así que en un plato de legumbres
+    // el factor salía en 1 y el gramaje no se tocaba, mientras la etiqueta de
+    // carbs/kcal sí subía o bajaba con el día. Medido: una ración de lentejas
+    // seguía en el mismo peso mientras la etiqueta subía de 549 a 1044 kcal
+    // tras pasar por el ciclado y la calibración de macros seguidos, cada uno
+    // sin tocar el ingrediente porque el otro factor (el que sí variaba) no
+    // era el que miraba la legumbre. Las legumbres aportan proteína Y
+    // carbohidrato de verdad, así que cuando un ingrediente cae en las dos
+    // listas se mueve con la MEDIA de los dos factores: no es exacto para
+    // ninguno de los dos objetivos por separado -- no puede serlo, cambiar el
+    // peso de un solo alimento no puede seguir dos objetivos distintos a la
+    // vez--, pero es muchísimo mejor que dejarlo completamente quieto.
     const escalarIngredientesPorMacro = (texto, corrProt, corrCarbs) => {
       if (Math.abs(corrProt - 1) < 0.03 && Math.abs(corrCarbs - 1) < 0.03) return texto;
       return texto.split(',').map(x => {
         const t = x.trim();
         if (!t) return t;
-        const factor = INGREDIENTE_PROTEINA.test(t) ? corrProt
-          : INGREDIENTE_CARBOHIDRATO.test(t) ? corrCarbs
+        const esProt = INGREDIENTE_PROTEINA.test(t);
+        const esCarb = INGREDIENTE_CARBOHIDRATO.test(t);
+        const factor = esProt && esCarb ? (corrProt + corrCarbs) / 2
+          : esProt ? corrProt
+          : esCarb ? corrCarbs
           : 1;
         if (factor === 1) return t;
         // Antes esto solo escalaba lo que llevaba "g" o "ml", así que un
