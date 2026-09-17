@@ -24972,6 +24972,17 @@ Se coló: ${lista}`;
       _activarFiltroBtn('todos');
       renderPanelAdmin(data);
       if (estado) estado.textContent = data.clientes.length ? '' : 'Aún no hay clientes registrados.';
+      // El servidor pone al día el premium al abrir Jarvis (api/_premium.js):
+      // se avisa solo cuando de verdad ha cambiado algo.
+      const pr = data.premiumReconciliado;
+      if (pr && (pr.aplicadas.length || pr.stripeCanceladas)) {
+        const partes = [];
+        if (pr.aplicadas.length) partes.push(`premium activado a ${pr.aplicadas.join(', ')}`);
+        if (pr.stripeCanceladas) partes.push(`${pr.stripeCanceladas} suscripción${pr.stripeCanceladas === 1 ? '' : 'es'} de Stripe de clientes premium cancelada${pr.stripeCanceladas === 1 ? '' : 's'}`);
+        showToast('Premium al día: ' + partes.join(' y ') + '. No se les cobrará nada.', 8000);
+      } else if (pr && pr.avisos && pr.avisos.length) {
+        showToast('Premium: ' + pr.avisos[0], 8000);
+      }
       const ts = document.getElementById('adminTimestamp');
       if (ts) ts.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     } catch (e) {
@@ -25457,8 +25468,16 @@ Se coló: ${lista}`;
     // Que se vea que están ocultos y no que han desaparecido: sin esta línea,
     // buscar a un premium en la tabla y no encontrarlo parece un fallo.
     const avisoEl = document.getElementById('adminAvisoPremium');
+    // Emails invitados que todavía no han creado su cuenta: no son perfiles,
+    // así que no salen en la tabla. Sin esto no había forma de ver a quién se
+    // había invitado.
+    const _pendientes = (_adminDatos?.premiumReconciliado?.pendientes) || [];
     if (avisoEl) {
-      if (_premiumOcultos > 0) {
+      if (_pidePremium && _pendientes.length) {
+        avisoEl.innerHTML = `Invitados que aún no han entrado (tendrán el premium al entrar, sin pagar): `
+          + _pendientes.map(p => `<strong style="color:var(--jv-warn);font-weight:600">${_esc(p.email)}</strong>`).join(', ');
+        avisoEl.style.display = '';
+      } else if (_premiumOcultos > 0) {
         avisoEl.innerHTML = `${_premiumOcultos} cliente${_premiumOcultos === 1 ? '' : 's'} premium sin mostrar · `
           + `<button onclick="filtrarAdminTipo('premium')" style="background:none;border:none;padding:0;color:var(--brasa);font:inherit;cursor:pointer;text-decoration:underline">ver</button>`;
         avisoEl.style.display = '';

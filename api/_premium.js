@@ -41,7 +41,7 @@ async function detenerCobrosStripe(supabaseAdmin, userId) {
   try {
     stripe = getStripe();
     const lista = await stripe.subscriptions.list({ customer: fila.stripe_customer_id, status: 'all', limit: 20 });
-    const cobrables = lista.data.filter(s => ['trialing', 'active', 'past_due', 'unpaid', 'incomplete'].includes(s.status));
+    const cobrables = lista.data.filter(s => ESTADOS_COBRABLES.includes(s.status));
     for (const s of cobrables) {
       try {
         await stripe.subscriptions.cancel(s.id, {
@@ -72,7 +72,69 @@ async function concederPremium(supabaseAdmin, userId) {
   return { ok: true, betaExpires, ...stripe };
 }
 
+const ESTADOS_COBRABLES = ['trialing', 'active', 'past_due', 'unpaid', 'incomplete'];
+
+// Pone al día, de una vez, lo que quedó mal antes de este arreglo. Corre al
+// abrir Jarvis (api/admin-clientes.js), así que no hace falta tocar la base
+// de datos a mano:
+//  1. Emails invitados desde Jarvis que YA tienen cuenta (la invitación no se
+//     canjeaba nunca, ver syncProfileFromSupabase): premium concedido ya.
+//  2. Premium vigente con una suscripción de Stripe que aún puede cobrar
+//     (premium dado antes de que "Dar premium" cancelara Stripe): cancelada.
+// Idempotente: la segunda vez no encuentra nada que hacer. Nunca lanza.
+async function reconciliarPremium(supabaseAdmin) {
+  const out = { aplicadas: [], pendientes: [], stripeCanceladas: 0, avisos: [] };
+  const yaRevisados = new Set(); // Stripe ya cortado en el paso 1: no repetir en el 2
+  try {
+    const { data: invs, error } = await supabaseAdmin
+      .from('invitaciones_premium').select('email, created_at').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    for (const inv of invs || []) {
+      const email = (inv.email || '').trim().toLowerCase();
+      if (!email) continue;
+      const patron = email.replace(/[\\%_]/g, c => '\\' + c);
+      const { data: perfiles } = await supabaseAdmin
+        .from('profiles').select('id, is_beta, beta_expires').ilike('email', patron).limit(1);
+      const perfil = perfiles && perfiles[0];
+      if (!perfil) { out.pendientes.push({ email, creada: inv.created_at }); continue; }
+      // Si ya era premium vigente no se le reinicia la caducidad: solo se
+      // limpia la invitación (Stripe lo cubre el paso 2).
+      if (!premiumVigente(perfil)) {
+        const r = await concederPremium(supabaseAdmin, perfil.id);
+        if (!r.ok) { out.avisos.push(`No se pudo dar premium a ${email}: ${r.error || 'perfil no encontrado'}`); continue; }
+        out.stripeCanceladas += r.canceladas;
+        out.avisos.push(...r.avisos);
+        yaRevisados.add(perfil.id);
+      }
+      await supabaseAdmin.from('invitaciones_premium').delete().eq('email', inv.email);
+      out.aplicadas.push(email);
+    }
+  } catch (e) {
+    out.avisos.push(`Invitaciones premium: ${e.message}`);
+  }
+  try {
+    const { data: premiums, error } = await supabaseAdmin
+      .from('profiles').select('id, email, is_beta, beta_expires').eq('is_beta', true);
+    if (error) throw new Error(error.message);
+    const vigentes = (premiums || []).filter(premiumVigente);
+    if (vigentes.length) {
+      const { data: subs } = await supabaseAdmin
+        .from('subscriptions').select('user_id, status').in('user_id', vigentes.map(p => p.id));
+      for (const s of subs || []) {
+        if (!ESTADOS_COBRABLES.includes(s.status) || yaRevisados.has(s.user_id)) continue;
+        const r = await detenerCobrosStripe(supabaseAdmin, s.user_id);
+        out.stripeCanceladas += r.canceladas;
+        out.avisos.push(...r.avisos);
+      }
+    }
+  } catch (e) {
+    out.avisos.push(`Stripe de clientes premium: ${e.message}`);
+  }
+  return out;
+}
+
 module.exports = {
+  reconciliarPremium,
   MOTIVO_CANCELACION_PREMIUM,
   fechaExpiraPremium,
   premiumVigente,

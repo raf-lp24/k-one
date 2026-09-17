@@ -1,6 +1,7 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarYGuardar } = require('../lib/normalizador-alimentos');
+const { reconciliarPremium } = require('./_premium');
 
 // A-5: sin fallback hardcodeado — fail-closed si ADMIN_EMAILS no está configurada
 function getAdmins() {
@@ -173,6 +174,15 @@ module.exports = async (req, res) => {
       console.log(`[admin-clientes] plan regenerado para ${userId} por ${email} · avisos tras revisar: ${avisos}`);
       return res.status(200).json({ ok: true, avisos });
     }
+
+    // Antes de leer los perfiles: aplica el premium a los emails invitados
+    // que ya tienen cuenta y corta Stripe a los premium (ver api/_premium.js),
+    // para que la lista que se devuelve ya salga con todo al día.
+    const premiumReconciliado = await reconciliarPremium(supabaseAdmin);
+    if (premiumReconciliado.aplicadas.length || premiumReconciliado.stripeCanceladas) {
+      console.log(`[admin-clientes] premium puesto al día: ${premiumReconciliado.aplicadas.length} invitaciones aplicadas, ${premiumReconciliado.stripeCanceladas} suscripciones de Stripe canceladas`);
+    }
+    if (premiumReconciliado.avisos.length) console.warn('[admin-clientes] premium:', premiumReconciliado.avisos.join(' | '));
 
     const page = parseInt(req.body?.page) || 0;
     const pageSize = 50;
@@ -544,7 +554,7 @@ module.exports = async (req, res) => {
       }
     } catch (e) { console.warn('[admin-clientes] mensajes query error:', e.message); }
 
-    return res.status(200).json({ metrics: m, clientes, distDeporte, distObjetivo, distPlan, distMotivoBaja, retencion, leads, emailLog, mensajes });
+    return res.status(200).json({ premiumReconciliado, metrics: m, clientes, distDeporte, distObjetivo, distPlan, distMotivoBaja, retencion, leads, emailLog, mensajes });
 
   } catch (err) {
     console.error('[admin-clientes] error no controlado:', err);
