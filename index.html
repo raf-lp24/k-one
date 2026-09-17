@@ -21372,7 +21372,7 @@
     // (current_period_end, una fecha futura): se cuentan los días que faltan hasta ella.
     if (!enPrueba && !isNaN(finReal) && finReal > Date.now()) {
       el.textContent = Math.max(0, Math.ceil((finReal - Date.now()) / DIA_MS));
-      if (label) label.textContent = 'de tu plan actual';
+      if (label) label.textContent = user.isBeta ? 'de tu acceso premium' : 'de tu plan actual';
       return;
     }
     // Caso prueba (cuenta desde el registro) o datos heredados (fechaPago pasada):
@@ -23266,6 +23266,14 @@
     // en el registro todavía no había sesión (email sin confirmar). Es un no-op
     // barato si no hay nada pendiente.
     _aplicarCodigoPendiente(authUser.id, authUser.email);
+    // Invitación premium de Jarvis ("Invitar cliente"). Antes solo se canjeaba
+    // en registrar(), DESPUÉS del return de "revisa tu correo" -- y como el
+    // registro exige confirmar el email, esa línea no llegaba a ejecutarse
+    // nunca: el invitado entraba, veía el muro de pago y metía la tarjeta.
+    // Aquí corre en cada inicio de sesión; si no hay invitación es un no-op
+    // (y la borra al canjearla, así que solo actúa una vez). Con await: el
+    // is_beta de justo debajo tiene que leer ya el premium recién concedido.
+    try { await supa.rpc('aplicar_invitacion_premium'); } catch (e) {}
     // Solo columnas que existen seguro. NO incluir aquí columnas opcionales:
     // si una columna no existe en la BD, PostgREST devuelve error y profile queda
     // null, lo que borraría la restauración del perfil (y reaparecería el
@@ -23279,10 +23287,12 @@
     // is_beta es opcional: si la columna no existe todavía en la BD, esta consulta
     // falla de forma aislada (betaRow = null) sin afectar a la carga del perfil.
     let esBeta = false;
+    let betaExpira = null;
     try {
       const { data: betaRow } = await supa.from('profiles')
         .select('is_beta, beta_expires').eq('id', authUser.id).maybeSingle();
       esBeta = !!betaRow?.is_beta;
+      betaExpira = betaRow?.beta_expires || null;
       if (esBeta && betaRow.beta_expires && new Date(betaRow.beta_expires) < new Date()) {
         esBeta = false;
       }
@@ -23306,7 +23316,9 @@
       email: authUser.email,
       creado: cuenta.creado || authUser.created_at,
       suscripcionActiva: suscripcionStripeActiva || esBeta || esTest,
-      fechaPago: sub?.current_period_end || cuenta.fechaPago || null,
+      // Premium: su "fin de periodo" es cuando caduca el premium, no la fecha
+      // de una suscripción de Stripe que pudiera quedar detrás (ya cancelada).
+      fechaPago: (esBeta && betaExpira) || sub?.current_period_end || cuenta.fechaPago || null,
       // Inicio del período actual de Stripe — para que semanas y días restantes arranquen desde el pago.
       inicioPeriodo: sub?.current_period_start || null,
       // Pago de la renovación pendiente/fallido: mostrar aviso para actualizar la tarjeta.
@@ -24669,6 +24681,17 @@ Se coló: ${lista}`;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      // Cliente premium (o invitado desde Jarvis): el servidor no crea ningún
+      // pago. Se recarga su cuenta para que desaparezca el muro de pago.
+      if (data.premium) {
+        if (session.user) await syncProfileFromSupabase(session.user);
+        document.getElementById('modalPaywall')?.classList.remove('visible');
+        if (boton) { boton.disabled = false; boton.textContent = textoBoton || 'Continuar con K-One →'; }
+        showToast('Tienes acceso premium: no tienes que pagar nada.', 5000);
+        if (typeof comprobarPaywall === 'function') comprobarPaywall(user.email);
+        if (typeof actualizarBtnCancelar === 'function') actualizarBtnCancelar();
+        return;
+      }
       if (!data.url) throw new Error('No se recibió URL de pago');
       // El primer mes es gratis (trial de Stripe): mandar 1,99 a Analytics
       // inflaba el valor de pagos iniciados con dinero que no existe.
@@ -24808,7 +24831,7 @@ Se coló: ${lista}`;
     modal.innerHTML = `
       <div class="modal-box" style="max-width:400px;padding:28px">
         <div class="modal-title" style="font-size:18px">Invitar cliente premium</div>
-        <p class="modal-desc" style="margin-bottom:16px">Introduce el email del cliente. Cuando se registre en k-one.fit con ese email, tendrá acceso premium automático durante 1 año sin pasar por Stripe.</p>
+        <p class="modal-desc" style="margin-bottom:16px">Introduce el email del cliente. Cuando entre en k-one.fit con ese email tendrá acceso premium durante 1 año, sin pagar ni poner tarjeta. Si ya tiene cuenta, se le activa ahora y se cancela lo que tuviera en Stripe.</p>
         <div>
           <label style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:4px">EMAIL DEL CLIENTE</label>
           <input type="email" id="altaEmail" placeholder="cliente@email.com" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:12px 14px;font-size:14px;font-family:inherit;box-sizing:border-box;border-radius:8px">
@@ -24835,7 +24858,9 @@ Se coló: ${lista}`;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      showToast(`Invitación premium guardada para ${email}`);
+      showToast(data.yaRegistrado
+        ? `${email} ya tenía cuenta: premium activado ya${data.stripeCanceladas ? ' y su suscripción de Stripe cancelada' : ''}. No se le cobrará nada.`
+        : `Invitación premium guardada para ${email}. Al entrar en K-ONE tendrá el premium sin pagar.`, 6000);
       btn.closest('.modal-overlay').remove();
       abrirPanelAdmin();
     } catch (e) {
@@ -24911,6 +24936,9 @@ Se coló: ${lista}`;
     `<span class="jv-chip" style="background:rgba(${rgb},.13);color:rgb(${rgb});border:1px solid rgba(${rgb},.26)">` +
     `<span style="width:5px;height:5px;border-radius:50%;background:rgb(${rgb});flex-shrink:0"></span>${txt}</span>`;
   const _estadoLegible = (c) => {
+    // 'premium' lo pone api/admin-clientes.js para un premium vigente: manda
+    // sobre lo que diga Stripe (no paga nada, aunque quede una fila vieja).
+    if (c.estado === 'premium') return _estadoPill('Premium', '255,197,61');
     if (c.enOferta)    return _estadoPill('Oferta 1,99€', '255,197,61');
     if (c.estado === 'past_due') return _estadoPill('Pago fallido', '255,94,94');
     if (c.cancelaAlFinal) return _estadoPill('Cancela al final', '255,149,86');
@@ -24954,7 +24982,7 @@ Se coló: ${lista}`;
   // ===== JARVIS: predicados de acción (compartidos por el centro de acción y el filtro de tabla) =====
   const _diasDesde = (iso) => iso ? (Date.now() - new Date(iso).getTime()) / 86400000 : null;
   const _accPagoFallido  = c => c.estado === 'past_due';
-  const _accSinEntrenar  = c => ['active','trialing'].includes(c.estado) && (c.entrenosTotal || 0) === 0;
+  const _accSinEntrenar  = c => ['active','trialing','premium'].includes(c.estado) && (c.entrenosTotal || 0) === 0;
   const _accInactivo     = c => { const d = c.ultimaConexion ? _diasDesde(c.ultimaConexion) : (c.diasDesdeAlta ?? 999); return c.onboarding && d > 14; };
   const _accPremiumCaduca = c => c.isBeta && c.betaExpires && (new Date(c.betaExpires).getTime() - Date.now()) < 7 * 86400000;
   const _accCancela      = c => !!c.cancelaAlFinal;
@@ -25067,6 +25095,7 @@ Se coló: ${lista}`;
       { label: 'Ingresos est./mes (MRR)', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2) : '0') + '€', color: 'var(--jv-accent-2)' },
       { label: 'Activos de pago', valor: mt.activosPago || 0, color: 'var(--jv-ok)', sub: `${mt.tasaConversion || 0}% conversión` },
       { label: 'En oferta 1,99€', valor: mt.enOferta || 0, color: (mt.enOferta || 0) > 0 ? 'var(--jv-warn)' : OFF },
+      { label: 'Premium (no pagan)', valor: mt.premium || 0, color: (mt.premium || 0) > 0 ? 'var(--jv-warn)' : OFF },
       { label: 'Total registrados', valor: mt.registrados || 0, color: 'var(--jv-text)' },
     ]);
 
@@ -25349,7 +25378,7 @@ Se coló: ${lista}`;
         case 'alertas': return c.alerta === 'red' || c.alerta === 'orange';
         case 'activos': return ['active','trialing'].includes(c.estado);
         case 'premium': return c.isBeta;
-        case 'sinpago': return !['active','trialing','past_due','canceled','unpaid'].includes(c.estado);
+        case 'sinpago': return !['active','trialing','past_due','canceled','unpaid','premium'].includes(c.estado);
         case 'nuevos':  return c.esNuevo;
         case 'bajas':   return ['canceled','unpaid'].includes(c.estado);
         // Filtros del Centro de acción diaria
@@ -25497,14 +25526,16 @@ Se coló: ${lista}`;
             ${td('<span style="color:var(--jv-faint);font-size:12.5px">' + _esc(c.email) + '</span>')}
             ${td('<span style="color:var(--jv-dim);font-size:12.5px;font-variant-numeric:tabular-nums">' + _fmtFecha(c.alta) + '</span>')}
             ${td(_estadoLegible(c))}
-            ${td('<span style="color:var(--jv-dim);font-size:12.5px">' + _esc(c.tipoPlan) + '</span>' + (c.planPrecio && c.planPrecio !== '—' ? '<br><span style="font-size:11.5px;font-weight:600;color:' + (c.enOferta ? 'var(--jv-warn)' : 'var(--jv-ok)') + '">' + _esc(c.planPrecio) + '</span>' : ''))}
+            ${td('<span style="color:var(--jv-dim);font-size:12.5px">' + _esc(c.tipoPlan) + '</span>' + (c.planPrecio && c.planPrecio !== '—' ? '<br><span style="font-size:11.5px;font-weight:600;color:' + (c.enOferta || c.estado === 'premium' ? 'var(--jv-warn)' : 'var(--jv-ok)') + '">' + _esc(c.planPrecio) + '</span>' : ''))}
             ${td('<span style="color:var(--jv-dim);font-size:12.5px">' + _esc(c.objetivo) + '</span>')}
             ${td('<span style="color:var(--jv-dim);font-size:12.5px">' + _esc(c.deporte) + '</span>')}
             ${td(c.entrenosTotal > 0
               ? '<span style="color:var(--jv-ok);font-weight:700;font-variant-numeric:tabular-nums">' + c.entrenosTotal + '</span>'
               : '<span style="color:var(--jv-faint);font-variant-numeric:tabular-nums">0</span>')}
             ${td('<span style="color:var(--jv-dim);font-size:12.5px;font-variant-numeric:tabular-nums">Sem. ' + (c.semanaActual || 1) + '</span>')}
-            ${td('<span style="color:var(--jv-dim);font-size:12.5px;font-variant-numeric:tabular-nums">' + _fmtFecha(c.renovacion) + '</span>')}
+            ${td(c.estado === 'premium'
+              ? '<span style="color:var(--jv-warn);font-size:12.5px;font-variant-numeric:tabular-nums" title="Premium hasta esta fecha. No se le cobra nada.">Hasta ' + _fmtFecha(c.renovacion) + '</span>'
+              : '<span style="color:var(--jv-dim);font-size:12.5px;font-variant-numeric:tabular-nums">' + _fmtFecha(c.renovacion) + '</span>')}
             ${td('<span style="color:' + _colorConexion(c.ultimaConexion) + ';font-size:12.5px;font-weight:500" title="' + (c.ultimaConexion ? _fmtFecha(c.ultimaConexion) : 'Sin registro') + '">' + _fmtRelativo(c.ultimaConexion) + '</span>')}
             ${td(c.lesion
               ? '<span class="jv-chip" style="background:rgba(255,149,86,.12);color:#FF9556;border:1px solid rgba(255,149,86,.26)">Lesión</span>'
@@ -25624,7 +25655,7 @@ Se coló: ${lista}`;
     // Divisor de sección con el mismo estilo que ya usaba "Nota privada".
     const seccion = (titulo) => `<div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--jv-line)"><div class="jc-label" style="margin-bottom:10px">${_esc(titulo)}</div></div>`;
 
-    const estadoColor = c.enOferta ? 'var(--jv-warn)' : c.estado==='past_due' ? 'var(--jv-bad)' :
+    const estadoColor = (c.enOferta || c.estado === 'premium') ? 'var(--jv-warn)' : c.estado==='past_due' ? 'var(--jv-bad)' :
       ['active','trialing'].includes(c.estado) ? 'var(--jv-ok)' : 'var(--jv-dim)';
     // BUG REAL (17 sept 2026): sin la rama final del propio 'none', c.estado
     // || 'Sin pago' colaba el valor interno de Stripe TAL CUAL en pantalla
@@ -25632,7 +25663,8 @@ Se coló: ${lista}`;
     // un string, no vacío, así que el || nunca llegaba a activarse para él.
     // Y un cliente premium (is_beta) sin ninguna suscripción de Stripe detrás
     // leía "Sin pago", que suena a que debe algo cuando no debe nada.
-    const estadoTexto = c.enOferta ? 'Oferta 1,99€' : c.cancelaAlFinal ? 'Cancela al final' :
+    const estadoTexto = c.estado === 'premium' ? 'Premium · no paga' :
+      c.enOferta ? 'Oferta 1,99€' : c.cancelaAlFinal ? 'Cancela al final' :
       c.estado === 'past_due' ? 'Pago fallido' :
       c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
       c.estado === 'canceled' ? 'Cancelado' :
@@ -25819,8 +25851,10 @@ Se coló: ${lista}`;
           return row('Renueva', _fmtFecha(c.renovacion));
         })()}
       </div>
-      ${c.isBeta && ['active', 'trialing'].includes(c.estado) && c.renovacion ? row('Aviso: además tiene una suscripción de Stripe activa, le cobrará el', _fmtFecha(c.renovacion),
-        'var(--jv-bad)') : ''}
+      ${c.isBeta && ['active', 'trialing', 'past_due', 'unpaid'].includes(c.estadoStripe) ? `<div style="display:grid;grid-template-columns:1fr;gap:10px">
+        ${row('Aviso: le queda una suscripción de Stripe que puede cobrarle' + (c.renovacionStripe ? ' el' : ''), c.renovacionStripe ? _fmtFecha(c.renovacionStripe) : 'pendiente', 'var(--jv-bad)')}
+        <button style="padding:11px;font-size:12.5px;font-weight:700;font-family:var(--jv-ui);border:none;border-radius:12px;cursor:pointer;background:rgba(255,94,94,.16);color:var(--jv-bad);box-shadow:inset 0 0 0 1px rgba(255,94,94,.3)" onclick="detenerStripeCliente('${c.id}', this)">Cancelar esa suscripción de Stripe</button>
+      </div>` : ''}
       <div style="display:grid;grid-template-columns:1fr;gap:10px">
         ${row('Última conexión', _fmtRelativo(c.ultimaConexion) + (c.ultimaConexion ? ' · ' + _fmtFecha(c.ultimaConexion) : ''), _colorConexion(c.ultimaConexion))}
       </div>
@@ -26169,6 +26203,11 @@ Se coló: ${lista}`;
   }
 
   async function togglePremiumCliente(userId, premium, btn) {
+    if (premium) {
+      const cli = (_adminDatos?.clientes || []).find(x => x.id === userId);
+      if (cli && ['active', 'trialing', 'past_due', 'unpaid'].includes(cli.estadoStripe)
+        && !confirm('Este cliente tiene una suscripción de Stripe. Al darle premium se cancela ya y no se le cobra nada más. ¿Seguir?')) return;
+    }
     btn.disabled = true;
     btn.textContent = 'Actualizando...';
     try {
@@ -26180,13 +26219,42 @@ Se coló: ${lista}`;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      showToast(premium ? 'Cliente marcado como premium' : 'Premium desactivado');
+      if (!premium) showToast('Premium desactivado');
+      else if (data.avisos && data.avisos.length) showToast('Premium activado, pero Stripe no dejó cancelar su suscripción: ' + data.avisos[0] + ' Cancélala a mano en Stripe.', 9000);
+      else if (data.stripeCanceladas) showToast('Premium activado. Su suscripción de Stripe queda cancelada: no se le cobrará nada.', 6000);
+      else showToast('Premium activado. No se le cobrará nada.');
       cerrarDetalleCliente();
       abrirPanelAdmin();
     } catch (e) {
       showToast('Error: ' + e.message, 4000);
       btn.disabled = false;
-      btn.textContent = premium ? 'Hacer premium' : 'Quitar premium';
+      btn.textContent = premium ? 'Dar premium (1 año)' : 'Quitar premium';
+    }
+  }
+
+  // Premium concedido antes de que "Dar premium" cancelara Stripe solo: corta
+  // la suscripción que le quede detrás sin tocar la caducidad del premium.
+  async function detenerStripeCliente(userId, btn) {
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Cancelando...';
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const res = await fetch('/api/admin-set-premium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, accion: 'detener_stripe' })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (data.avisos && data.avisos.length) throw new Error(data.avisos[0]);
+      showToast(data.stripeCanceladas ? 'Suscripción de Stripe cancelada: no se le cobrará nada.' : 'No le quedaba ninguna suscripción de Stripe que cobrar.', 6000);
+      cerrarDetalleCliente();
+      abrirPanelAdmin();
+    } catch (e) {
+      showToast('Error: ' + e.message, 6000);
+      btn.disabled = false;
+      btn.textContent = original;
     }
   }
 

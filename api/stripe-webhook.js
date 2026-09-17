@@ -1,5 +1,6 @@
 const { getStripe, getSupabaseAdmin, getSubscriptionPeriod } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const { MOTIVO_CANCELACION_PREMIUM } = require('./_premium');
 // Push al móvil del admin para lo que de verdad urge (pago fallido, baja).
 // Hasta ahora el webhook solo mandaba emails AL CLIENTE: de un pago fallido
 // o una baja, el dueño solo se enteraba al día siguiente por el digest.
@@ -403,7 +404,11 @@ module.exports = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
-        try { await enviarPushAAdmins({ title: 'K-ONE · Baja de un cliente', body: 'Una suscripcion se ha cancelado. Míralo en Jarvis.', url: '/' }); } catch (e) {}
+        // Si la cancelación la ha provocado el propio admin al darle premium
+        // (api/_premium.js), no es una baja: no se avisa.
+        if (subscription.cancellation_details?.comment !== MOTIVO_CANCELACION_PREMIUM) {
+          try { await enviarPushAAdmins({ title: 'K-ONE · Baja de un cliente', body: 'Una suscripcion se ha cancelado. Míralo en Jarvis.', url: '/' }); } catch (e) {}
+        }
         break;
       }
       // Antes no se manejaba: una disputa/chargeback solo se veía si alguien

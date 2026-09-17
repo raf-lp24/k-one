@@ -1,5 +1,6 @@
 const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const { premiumVigente, concederPremium } = require('./_premium');
 
 // Crea una sesión de Stripe Checkout (suscripción) para el plan/periodicidad
 // elegidos por el usuario logueado y devuelve la URL a la que redirigir.
@@ -22,6 +23,31 @@ module.exports = async (req, res) => {
     if (!user) return res.status(401).json({ error: 'No autenticado' });
 
     const { tipoPlan, periodicidad } = req.body;
+
+    // PREMIUM: un cliente con premium concedido (o invitado desde Jarvis) no
+    // tiene que pasar por Stripe ni meter tarjeta. La app ya no le enseña el
+    // muro de pago, pero esto es la red de seguridad del servidor: si llega
+    // aquí igualmente (app en caché, invitación sin canjear todavía), se le
+    // concede/confirma el premium y no se crea ningún pago.
+    {
+      const { data: perfil } = await supabaseAdmin
+        .from('profiles').select('is_beta, beta_expires').eq('id', user.id).maybeSingle();
+      if (premiumVigente(perfil)) {
+        return res.status(200).json({ premium: true });
+      }
+      const emailUser = (user.email || '').trim().toLowerCase();
+      if (emailUser) {
+        const { data: invitacion } = await supabaseAdmin
+          .from('invitaciones_premium').select('email').eq('email', emailUser).maybeSingle();
+        if (invitacion) {
+          const r = await concederPremium(supabaseAdmin, user.id);
+          if (r.ok) {
+            await supabaseAdmin.from('invitaciones_premium').delete().eq('email', emailUser);
+            return res.status(200).json({ premium: true });
+          }
+        }
+      }
+    }
 
     const { data: existingSub } = await supabaseAdmin
       .from('subscriptions')

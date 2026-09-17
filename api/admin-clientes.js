@@ -272,7 +272,7 @@ module.exports = async (req, res) => {
     const m = {
       registrados: 0, onboardingCompletado: 0,
       activosPago: 0, enOferta: 0, cancelanAlFinal: 0,
-      pagoFallido: 0, sinSuscripcion: 0, cancelados: 0,
+      pagoFallido: 0, sinSuscripcion: 0, cancelados: 0, premium: 0,
       renovacionProximos7d: 0, sinOnboarding14d: 0, ceroEntrenosActivos: 0,
       tasaConversion: 0, tiempoMedioPago: null, mediaEntrenos: 0, mrrEstimado: 0,
       nuevosEstaSemana: 0, nuevosSemanaPasada: 0, nuevosPagosEstaSemana: 0,
@@ -282,8 +282,18 @@ module.exports = async (req, res) => {
 
     const clientes = (perfiles || []).map(p => {
       const ud      = p.userdata || {};
-      const s       = subByUser[p.id];
-      const status  = s?.status || 'none';
+      // PREMIUM VIGENTE (acceso concedido a mano, no paga): antes todo lo de
+      // abajo salía SOLO de Stripe, así que un premium con una suscripción
+      // vieja detrás se veía como cliente de pago ("Mensual 7,99€", "Renueva")
+      // y, al cancelarla, como "Cancelado"/"Baja" -- caso real 17 sept 2026.
+      // Para un premium vigente Stripe no cuenta ni para el estado, ni para
+      // las alertas, ni para ingresos o bajas. El dato crudo de Stripe viaja
+      // aparte (estadoStripe/renovacionStripe) para avisar si le queda algo
+      // cobrando detrás.
+      const premium = !!p.is_beta && (!p.beta_expires || new Date(p.beta_expires) > new Date());
+      const sStripe = subByUser[p.id];
+      const s       = premium ? null : sStripe;
+      const status  = premium ? 'premium' : (s?.status || 'none');
       const activo  = ['active', 'trialing'].includes(status);
       const enOferta  = activo && offerPriceId && s?.plan === offerPriceId;
       const cancela   = activo && !!s?.cancel_at_period_end;
@@ -348,7 +358,14 @@ module.exports = async (req, res) => {
       const sinOnboarding14d = !ud.onboardingCompletado && diasDesdeAlta >= 14;
 
       let alerta = 'none', alertaRazon = '';
-      if (status === 'past_due')              { alerta = 'red';    alertaRazon = 'Pago fallido'; }
+      if (premium) {
+        const caducaPronto = p.beta_expires && new Date(p.beta_expires) <= en7d;
+        if (caducaPronto)                     { alerta = 'yellow'; alertaRazon = 'Premium caduca en 7 días'; }
+        else if (sinOnboarding14d)            { alerta = 'red';    alertaRazon = '+14 días sin onboarding'; }
+        else if (entrenosTotal === 0)         { alerta = 'orange'; alertaRazon = 'Premium, 0 entrenos'; }
+        else                                  { alerta = 'green';  alertaRazon = 'Premium y entrenando'; }
+      }
+      else if (status === 'past_due')              { alerta = 'red';    alertaRazon = 'Pago fallido'; }
       else if (sinOnboarding14d)              { alerta = 'red';    alertaRazon = '+14 días sin onboarding'; }
       else if (activo && entrenosTotal === 0) { alerta = 'orange'; alertaRazon = 'Activo, 0 entrenos'; }
       else if (cancela)                       { alerta = 'orange'; alertaRazon = 'Cancela al vencer'; }
@@ -369,11 +386,12 @@ module.exports = async (req, res) => {
         retencion[sem]++;
       }
 
-      if (activo) { sumEntrenosActivos += entrenosTotal; contEntrenosActivos++; }
+      if (activo || premium) { sumEntrenosActivos += entrenosTotal; contEntrenosActivos++; }
 
       m.registrados++;
       if (ud.onboardingCompletado) m.onboardingCompletado++;
-      if (!s || status === 'none')    m.sinSuscripcion++;
+      if (premium) m.premium++;
+      else if (!s || status === 'none') m.sinSuscripcion++;
       if (activo)    m.activosPago++;
       if (enOferta)  m.enOferta++;
       if (cancela)   m.cancelanAlFinal++;
@@ -381,7 +399,7 @@ module.exports = async (req, res) => {
       if (status === 'canceled' || status === 'unpaid') m.cancelados++;
       if (renovaProximo) m.renovacionProximos7d++;
       if (sinOnboarding14d) m.sinOnboarding14d++;
-      if (activo && entrenosTotal === 0) m.ceroEntrenosActivos++;
+      if ((activo || premium) && entrenosTotal === 0) m.ceroEntrenosActivos++;
       if (activo && !enOferta && MRR_MAP[s.plan]) mrr += MRR_MAP[s.plan];
       if (esNuevo)       m.nuevosEstaSemana++;
       if (esSemanaPasada) m.nuevosSemanaPasada++;
@@ -397,7 +415,11 @@ module.exports = async (req, res) => {
         esNuevo,
         estado:       status,
         enOferta:     !!enOferta,
-        planPrecio:   s?.plan ? (PRICE_LABELS[s.plan] || '—') : '—',
+        planPrecio:   premium ? 'Premium · gratis' : s?.plan ? (PRICE_LABELS[s.plan] || '—') : '—',
+        // Stripe en crudo, aunque sea premium: si le queda una suscripción
+        // cobrable detrás, la ficha lo avisa en rojo con su fecha de cobro.
+        estadoStripe:     sStripe?.status || 'none',
+        renovacionStripe: sStripe?.current_period_end || null,
         cancelaAlFinal: cancela,
         renovacion,
         // Motivo que dio el cliente al cancelar (banner "¿Nos dices por qué lo

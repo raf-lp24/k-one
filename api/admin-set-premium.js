@@ -1,5 +1,6 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
+const { concederPremium, detenerCobrosStripe } = require('./_premium');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
@@ -14,8 +15,17 @@ module.exports = async (req, res) => {
       return res.status(403).json({ error: 'No autorizado' });
     }
 
-    const { userId, premium } = req.body || {};
+    const { userId, premium, accion } = req.body || {};
     if (!userId) return res.status(400).json({ error: 'userId requerido' });
+
+    // Premium concedido ANTES de que "Dar premium" cancelara Stripe: le puede
+    // quedar una suscripción cobrando detrás. Esto la corta sin tocar la
+    // fecha de caducidad del premium.
+    if (accion === 'detener_stripe') {
+      const r = await detenerCobrosStripe(supabaseAdmin, userId);
+      if (r.avisos.length) console.warn('[admin-set-premium] Stripe:', r.avisos.join(' | '));
+      return res.status(200).json({ ok: true, stripeCanceladas: r.canceladas, avisos: r.avisos });
+    }
 
     // supabase-js no lanza en errores de query (devuelve {data, error}) -- sin
     // comprobar esto, un fallo de la UPDATE o un userId que no coincide con
@@ -23,20 +33,18 @@ module.exports = async (req, res) => {
     // creer que había concedido o revocado premium y en realidad no había
     // pasado nada.
     if (premium) {
-      const expira = new Date();
-      expira.setFullYear(expira.getFullYear() + 1);
-      const { data, error } = await supabaseAdmin.from('profiles').update({
-        is_beta: true,
-        beta_expires: expira.toISOString()
-      }).eq('id', userId).select('id');
-      if (error) {
-        console.error('[admin-set-premium] update falló:', error.message);
-        return res.status(500).json({ error: 'No se pudo conceder premium' });
-      }
-      if (!data || !data.length) {
+      // Premium = no paga nada: además de marcarlo, se cancela cualquier
+      // suscripción de Stripe que tenga detrás (ver api/_premium.js).
+      const r = await concederPremium(supabaseAdmin, userId);
+      if (!r.ok && r.noExiste) {
         return res.status(404).json({ error: 'No existe ningún cliente con ese userId' });
       }
-      return res.status(200).json({ ok: true, is_beta: true, beta_expires: expira.toISOString() });
+      if (!r.ok) {
+        console.error('[admin-set-premium] update falló:', r.error);
+        return res.status(500).json({ error: 'No se pudo conceder premium' });
+      }
+      if (r.avisos.length) console.warn('[admin-set-premium] Stripe:', r.avisos.join(' | '));
+      return res.status(200).json({ ok: true, is_beta: true, beta_expires: r.betaExpires, stripeCanceladas: r.canceladas, avisos: r.avisos });
     } else {
       const { data, error } = await supabaseAdmin.from('profiles').update({
         is_beta: false,

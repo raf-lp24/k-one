@@ -1053,7 +1053,10 @@ async function handleCronRetencion(req, res) {
         const now = ahora.getTime();
         let pagoFallido = 0, cancela = 0, premiumCaduca = 0, inactivos = 0, sinEntrenar = 0;
         for (const p of profsFull) {
-          const s = subMap[p.id]; const st = s?.status || 'none'; const activo = ['active', 'trialing'].includes(st);
+          // Premium vigente: su estado de Stripe (si queda alguna fila) no cuenta
+          // como pago fallido ni como baja -- no paga nada.
+          const premium = p.is_beta && (!p.beta_expires || new Date(p.beta_expires).getTime() > now);
+          const s = premium ? null : subMap[p.id]; const st = s?.status || 'none'; const activo = premium || ['active', 'trialing'].includes(st);
           const ud = p.userdata || {};
           const ent = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length
             : (Array.isArray(ud.entrenosCompletados) ? ud.entrenosCompletados.length : 0);
