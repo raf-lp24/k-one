@@ -4298,6 +4298,19 @@
     text-transform: uppercase;
   }
 
+  /* Botón secundario (no es la acción principal del bloque, es una utilidad):
+     gris en vez de naranja de marca para no competir con "Ver macros". */
+  .meal-reiniciar-btn {
+    margin-left: 0;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
+    color: var(--metal-claro);
+  }
+  .meal-reiniciar-btn:hover { background: var(--humo); color: var(--blanco); }
+  @media (max-width: 480px) {
+    .meal-reiniciar-btn { padding: 5px 9px 5px 7px; font-size: 10px; }
+  }
+
   /* MINIATURAS DE LAS OPCIONES, SIEMPRE VISIBLES (sin expandir) */
   .meal-preview-row {
     display: grid;
@@ -17520,6 +17533,15 @@
     // de recetas real de esta app) para que `dia*31 % N` nunca se anule por
     // coincidencia con el tamaño N de ningún pool.
     const periodoRot = _periodoNutricion(u.rotacionMenu);
+    // "Reiniciar opciones" (botón por toma en la ficha de nutrición): un
+    // contador propio por Desayuno/Media mañana/Comida/Merienda/Cena que el
+    // cliente sube a mano cuando quiere recetas distintas para esa toma en
+    // concreto, sin esperar a que cambie la rotación semanal/mensual. Sigue
+    // dentro del MISMO pool (mismo objetivo de macros que ya tenía esa toma):
+    // no es un plato nuevo, es otro reparto del mismo recetario. Se multiplica
+    // por un primo grande para que dos reinicios seguidos no coincidan nunca
+    // con el offset de otra toma o del periodo de rotación.
+    const resetComida = u.resetComida || {};
     const nutricionPorDia = [];
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
@@ -17527,7 +17549,7 @@
         // La semilla ya NO lleva el día: repartirDia() reparte la semana entera
         // desde una única baraja por toma (ver su comentario), y es él quien usa
         // el día como posición dentro del reparto.
-        opciones: repartirDia(m.opciones, semilla + i * 3 + periodoRot * 5, dia, 5)
+        opciones: repartirDia(m.opciones, semilla + i * 3 + periodoRot * 5 + (resetComida[m.momento] || 0) * 104729, dia, 5)
       })));
     }
 
@@ -18404,6 +18426,46 @@
     showToast(txt);
   }
 
+  // "Reiniciar opciones" por toma (17 sept 2026, a petición de un cliente):
+  // sin esperar a que cambie la rotación semanal/mensual, se puede pedir OTRO
+  // reparto del recetario para una toma en concreto -- Desayuno, Cena... --
+  // con los mismos macros de siempre: no es un plato nuevo ni cambia el
+  // objetivo, es otro sorteo dentro del MISMO pool de recetas de su objetivo
+  // (buildPlanFromData suma un offset propio de esta toma a la semilla, ver
+  // resetComida más arriba). Solo se resetea la selección de ESA toma en
+  // todos los días (índice a 0: las recetas de ahí son otras, así que la
+  // elección anterior ya no tiene sentido) -- las demás tomas, los días ya
+  // confirmados y el día que se está viendo no se tocan.
+  function reiniciarOpcionesComida(momento) {
+    if (!generatedPlan) return;
+    userData.resetComida = { ...(userData.resetComida || {}) };
+    userData.resetComida[momento] = (userData.resetComida[momento] || 0) + 1;
+    generatedPlan = buildPlanFromData(userData);
+
+    const mealIdx = generatedPlan.nutricion.findIndex(m => m.momento === momento);
+    if (mealIdx === -1) return;
+
+    if (!comidasSemana.length) inicializarComidasSemana();
+    for (let d = 0; d < 7; d++) {
+      // Longitud distinta = datos de otro momento (p.ej. cambió "¿cuántas veces
+      // comes?" entre sesiones): no reutilizar un array que ya no encaja.
+      if (!comidasSemana[d] || comidasSemana[d].length !== generatedPlan.nutricion.length) {
+        comidasSemana[d] = generatedPlan.nutricion.map(() => 0);
+      }
+      comidasSemana[d][mealIdx] = 0;
+    }
+    comidasSeleccionadas[mealIdx] = 0;
+    userData.comidasSeleccionadas = comidasSeleccionadas;
+    userData.comidasSemana = comidasSemana;
+
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+
+    renderNutritionGrid(diaNutriActual);
+    showToast(`Nuevas opciones de ${momento.toLowerCase()}, con los mismos macros.`);
+  }
+  window.reiniciarOpcionesComida = reiniciarOpcionesComida;
+
   // ===== CONSTRUIR DASHBOARD =====
   function buildDashboard() {
     if (!generatedPlan) {
@@ -19079,6 +19141,11 @@
             <div class="meal-block-right">
               <div class="meal-block-why">${meal.porque}</div>
               <div class="meal-block-count">${meal.opciones.length} opciones · toca para ver detalles</div>
+              <button type="button" class="ejercicio-info-btn meal-reiniciar-btn" title="Cambia las recetas de ${_esc(meal.momento)} por otras, con los mismos macros"
+                onclick="event.stopPropagation();reiniciarOpcionesComida('${meal.momento}')">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                Reiniciar
+              </button>
               <div class="meal-block-toggle">▾</div>
             </div>
           </div>
