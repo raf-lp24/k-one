@@ -7069,10 +7069,10 @@
               <option value="21097">Media maratón</option>
               <option value="42195">Maratón</option>
             </select>
-            <input type="text" id="cp-marcaTiempo" placeholder="Tiempo (ej: 48:30)" oninput="previsualizarRitmosCambioPlan()"
-                   inputmode="numeric" autocomplete="off" style="flex:1;min-width:130px">
+            <input type="text" id="cp-marcaTiempo" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmosCambioPlan()"
+                   inputmode="decimal" autocomplete="off" style="flex:1;min-width:130px">
           </div>
-          <span class="field-hint">Si has mejorado tu marca, actualízala aquí y recalculamos tus ritmos de rodaje, umbral y series.</span>
+          <span class="field-hint">Minutos y segundos separados por un punto, por ejemplo 48.30. Para media maratón o maratón usa horas.minutos.segundos, por ejemplo 1.35.20. Si has mejorado tu marca, actualízala aquí y recalculamos tus ritmos de rodaje, umbral y series.</span>
           <div id="cp-previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
         </div>
         <!-- Evento/competición: añadir o actualizar la fecha activa la cuenta atrás del panel -->
@@ -8470,10 +8470,10 @@
                 <option value="21097">Media maratón</option>
                 <option value="42195">Maratón</option>
               </select>
-              <input type="text" id="marcaTiempo" placeholder="Tiempo (ej: 48:30)" oninput="previsualizarRitmos()"
-                     inputmode="numeric" autocomplete="off" style="flex:1;min-width:130px">
+              <input type="text" id="marcaTiempo" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmos()"
+                     inputmode="decimal" autocomplete="off" style="flex:1;min-width:130px">
             </div>
-            <span class="field-hint">Si nos lo das, calculamos tus ritmos exactos de cada sesión (rodaje, umbral, series) en min/km. Si no, usamos referencias por sensación.</span>
+            <span class="field-hint">Minutos y segundos separados por un punto, por ejemplo 48.30. Para media maratón o maratón usa horas.minutos.segundos, por ejemplo 1.35.20. Si nos lo das, calculamos tus ritmos exactos de cada sesión (rodaje, umbral, series) en min/km. Si no, usamos referencias por sensación.</span>
             <div id="previewRitmos" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--metal-claro);background:var(--carbon);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:10px 14px"></div>
           </div>
           <div class="field">
@@ -10369,31 +10369,38 @@
   // ===== ESTRUCTURA COMPLETA DE UNA SESIÓN (calentamiento + bloque + vuelta a la calma) =====
   // Se usa tanto para "Hoy" como para cada día de "Plan semanal", para que ambas vistas
   // muestren siempre el mismo nivel de detalle y el mismo contenido.
+  //
+  // BUG REAL (reportado por un cliente real, Alejandro): "movilidad de cadera
+  // y hombros" nombra la ZONA pero no dice QUÉ hacer -- alguien con experiencia
+  // ya sabe rellenar eso solo, pero quien no sabe se queda sin saber qué
+  // ejercicio hacer. 'Fortalecimiento' ya lo hacía bien (ejercicios concretos
+  // entre paréntesis: "90/90", "band pull-aparts"...); el resto de etiquetas
+  // se ponen al mismo nivel aquí, sin tocar duración ni estructura.
   const SESION_EXTRAS = {
-    'Cardio': { calentamiento: '5-8 min de movilidad de tobillos, cadera y rodillas + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
-    'Fuerza': { calentamiento: '8-10 min de movilidad articular + 1-2 series de aproximación con poco peso en el primer ejercicio', vueltaCalma: '5 min de estiramientos de los grupos musculares trabajados hoy' },
+    'Cardio': { calentamiento: '5-8 min de movilidad de tobillos, cadera y rodillas (círculos de tobillo, balanceos de pierna adelante-atrás y lateral, sentadilla profunda sostenida 20s) + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
+    'Fuerza': { calentamiento: '8-10 min de movilidad articular (círculos de cadera y hombro, rotaciones de tronco, gato-camello, sentadilla profunda sostenida) + 1-2 series de aproximación con poco peso en el primer ejercicio', vueltaCalma: '5 min de estiramientos de los grupos musculares trabajados hoy' },
     'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (skipping, talones al glúteo, zancada progresiva)', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
-    'Fondo': { calentamiento: '8-10 min trote suave + movilidad de cadera y tobillo', vueltaCalma: '5 min caminando + estiramientos de toda la cadena posterior' },
-    'Volumen': { calentamiento: '10 min trote muy suave + activación de glúteo y core', vueltaCalma: '5-8 min caminando + estiramientos de piernas y espalda baja' },
-    'Combinado': { calentamiento: '5 min de cardio suave + movilidad articular general', vueltaCalma: '5 min de estiramientos de cuerpo completo' },
-    'Hyrox': { calentamiento: '10 min carrera suave + movilidad dinámica de cadera y hombros', vueltaCalma: '5 min caminando + estiramientos completos' },
-    'Simulacro': { calentamiento: '10 min carrera suave + movilidad dinámica completa', vueltaCalma: '5-8 min caminando + estiramientos completos, hidrátate bien' },
-    'WOD': { calentamiento: '3 rondas suaves: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks, más movilidad específica del WOD', vueltaCalma: '5 min de respiración + estiramientos de los grupos más exigidos' },
-    'Empuje': { calentamiento: '8 min de activación de hombro y pecho + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
-    'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
-    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
-    'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
-    'Complemento': { calentamiento: '5-8 min de movilidad general y activación', vueltaCalma: '5 min de estiramientos generales + respiración' },
+    'Fondo': { calentamiento: '8-10 min trote suave + movilidad de cadera y tobillo (90/90, círculos de tobillo, balanceos de pierna)', vueltaCalma: '5 min caminando + estiramientos de toda la cadena posterior' },
+    'Volumen': { calentamiento: '10 min trote muy suave + activación de glúteo y core (puente de glúteo, paseo lateral con banda, dead bug)', vueltaCalma: '5-8 min caminando + estiramientos de piernas y espalda baja' },
+    'Combinado': { calentamiento: '5 min de cardio suave + movilidad articular general (círculos de cadera y hombro, rotaciones de tronco, sentadilla profunda sostenida)', vueltaCalma: '5 min de estiramientos de cuerpo completo' },
+    'Hyrox': { calentamiento: '10 min carrera suave + movilidad dinámica de cadera y hombros (balanceos de pierna, 90/90, rotaciones de hombro con palo o banda)', vueltaCalma: '5 min caminando + estiramientos completos' },
+    'Simulacro': { calentamiento: '10 min carrera suave + movilidad dinámica completa (balanceos de pierna, 90/90, círculos de tobillo, rotaciones de hombro)', vueltaCalma: '5-8 min caminando + estiramientos completos, hidrátate bien' },
+    'WOD': { calentamiento: '3 rondas suaves: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks, más movilidad de cadera y hombro (círculos, balanceos) según el WOD de hoy', vueltaCalma: '5 min de respiración + estiramientos de los grupos más exigidos' },
+    'Empuje': { calentamiento: '8 min de activación de hombro y pecho (band pull-aparts, rotaciones de hombro con banda, flexiones con rodillas apoyadas) + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
+    'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda (band pull-aparts, remo con banda elástica, rotaciones de hombro) + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
+    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo (90/90, círculos de tobillo, sentadilla profunda sostenida) + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
+    'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador (rotaciones externas con banda, band pull-aparts, círculos de brazo) + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
+    'Complemento': { calentamiento: '5-8 min de movilidad general y activación (círculos de cadera y hombro, sentadilla profunda sostenida, gato-camello)', vueltaCalma: '5 min de estiramientos generales + respiración' },
     // Estas cuatro etiquetas se usan de verdad en los planes (Híbrido 312 veces,
     // Fortalecimiento 144, Empuje+Tracción 96, Umbral 72, medido sobre 2.592
     // sesiones) pero no tenían entrada propia y caían en el calentamiento
     // genérico. Añadidas el 7 sept 2026.
-    'Híbrido': { calentamiento: '6-8 min de cardio progresivo (remo, bici o carrera suave) + movilidad de cadera y hombros + 1 serie ligera del primer ejercicio de fuerza', vueltaCalma: '5 min de cardio muy suave para bajar pulsaciones + estiramientos de piernas, espalda y hombros' },
+    'Híbrido': { calentamiento: '6-8 min de cardio progresivo (remo, bici o carrera suave) + movilidad de cadera y hombros (círculos de cadera con banda, 90/90, rotaciones de hombro con palo o banda) + 1 serie ligera del primer ejercicio de fuerza', vueltaCalma: '5 min de cardio muy suave para bajar pulsaciones + estiramientos de piernas, espalda y hombros' },
     'Fortalecimiento': { calentamiento: '8 min: movilidad de tobillo y cadera (círculos de tobillo, 90/90) + activación de glúteo (puente de glúteo, paseo lateral con banda) + 20 m de skipping suave', vueltaCalma: '5 min de estiramientos de glúteo, psoas, isquiotibiales y gemelo — las zonas que más se cargan corriendo' },
-    'Empuje+Tracción': { calentamiento: '8-10 min: movilidad de hombro y columna torácica + band pull-aparts + 1-2 series de aproximación con poco peso en el primer empuje', vueltaCalma: '5 min de estiramientos de pecho, dorsal, hombros y bíceps' },
+    'Empuje+Tracción': { calentamiento: '8-10 min: movilidad de hombro y columna torácica (rotaciones de tronco a cuadrupedia, rotaciones de hombro con palo) + band pull-aparts + 1-2 series de aproximación con poco peso en el primer empuje', vueltaCalma: '5 min de estiramientos de pecho, dorsal, hombros y bíceps' },
     'Umbral': { calentamiento: '10-12 min progresivos: empieza muy suave y sube hasta ritmo cómodo, + 3-4 rectas de 60-80 m acelerando', vueltaCalma: '8-10 min de trote muy suave hasta que la respiración vuelva a la normalidad + estiramientos de tren inferior' }
   };
-  const SESION_EXTRAS_DEFAULT = { calentamiento: '8-10 min de movilidad general y activación progresiva', vueltaCalma: '5 min de estiramientos de los grupos trabajados hoy' };
+  const SESION_EXTRAS_DEFAULT = { calentamiento: '8-10 min de movilidad general y activación progresiva (círculos de cadera y hombro, sentadilla profunda sostenida, gato-camello, balanceos de pierna)', vueltaCalma: '5 min de estiramientos de los grupos trabajados hoy' };
 
   // Construye el bloque "Calentamiento / Bloque principal / Vuelta a la calma" a partir de
   // un día de `semana` (mismo dato para "Hoy" y para "Plan semanal" → mismo contenido).
@@ -14327,7 +14334,19 @@
       const _SUP_INTER = `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m`;
       const _SUP_AV = `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} 3×6, face pull 3×15, overhead carry con mancuerna 3×30m por lado, farmer carry 3×40m`;
       const _INF_INTER = `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, gemelos en escalón 3×15, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
-      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_casaHib ? 'squat jumps 3×6' : 'box jumps 3×6'}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
+      // BUG REAL (reportado por un cliente real, Alejandro, que compagina
+      // Híbrido con carrera): el día "Tren inferior + pliometría" solo tenía UN
+      // ejercicio realmente pliométrico (box/squat jumps, siempre el mismo) --
+      // "se me queda un poquillo escaso" para alguien que corre, donde la
+      // pliometría es justo lo que más transfiere a la economía de carrera.
+      // Mismo arreglo que ya tenía Running (plioVariantesAv, más arriba): rota
+      // el salto por mesociclo y añade un segundo movimiento (A-skips, drill de
+      // carrera con componente reactivo) en vez de dejarlo en uno solo.
+      const _plioVariantesHibAv = _casaHib
+        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado']
+        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras'];
+      const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
+      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_plioHibAv}, A-skips 3×20m, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
 
       // ── Metcon / circuito ──
       // Cardio entre rondas: más metros si el objetivo es resistencia; en casa,
@@ -21320,9 +21339,17 @@
   // hay repos que las transcriben, pero su licencia MIT solo cubre el código del
   // repo, no el copyright del libro. Con las ecuaciones se obtiene lo mismo.
 
-  // "48:30" o "1:32:10" o "48" (minutos) -> segundos
+  // "48:30" o "1:32:10" o "48" (minutos) -> segundos.
+  // BUG REAL (reportado por un cliente real, Alejandro): con inputmode="numeric"
+  // el teclado del móvil no muestra NINGÚN símbolo de puntuación -- ni ":", ni
+  // ".", ni "," -- así que era literalmente imposible escribir "48:30" desde el
+  // móvil sin cambiar a mano al teclado de letras. El campo pasa a
+  // inputmode="decimal" (SÍ trae separador decimal en el teclado numérico de
+  // iOS/Android), y aquí se acepta cualquiera de los tres símbolos como
+  // separador -- ":" se mantiene por quien lo escriba en escritorio o por datos
+  // ya guardados con ese formato.
   function _segundosDesdeMarca(txt) {
-    const partes = String(txt || '').trim().split(':').map(p => parseInt(p, 10));
+    const partes = String(txt || '').trim().split(/[:.,]/).map(p => parseInt(p, 10));
     if (!partes.length || partes.some(isNaN)) return 0;
     if (partes.length === 1) return partes[0] * 60;              // solo minutos
     if (partes.length === 2) return partes[0] * 60 + partes[1];  // mm:ss
