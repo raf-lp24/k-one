@@ -4298,17 +4298,21 @@
     text-transform: uppercase;
   }
 
-  /* Botón secundario (no es la acción principal del bloque, es una utilidad):
-     gris en vez de naranja de marca para no competir con "Ver macros". */
+  /* Versión compacta de .btn-primary (mismo naranja de marca, misma
+     tipografía en mayúsculas que el resto de botones de la web) para que
+     encaje dentro de la cabecera de una toma sin ser tan grande como el
+     botón de pago o el de "Siguiente" del tour. */
   .meal-reiniciar-btn {
-    margin-left: 0;
-    background: var(--grafito);
-    border: 1px solid var(--humo);
-    color: var(--metal-claro);
+    padding: 6px 13px 6px 10px;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
-  .meal-reiniciar-btn:hover { background: var(--humo); color: var(--blanco); }
   @media (max-width: 480px) {
-    .meal-reiniciar-btn { padding: 5px 9px 5px 7px; font-size: 10px; }
+    .meal-reiniciar-btn { padding: 5px 10px 5px 8px; font-size: 10px; }
   }
 
   /* MINIATURAS DE LAS OPCIONES, SIEMPRE VISIBLES (sin expandir) */
@@ -10310,6 +10314,7 @@
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>', title: 'Añade tus propios ejercicios', text: 'Si te apetece meter uno que no está en tu plan, pulsa "+ Añadir ejercicio" al final del día (en Hoy y en Tu entrenamiento). Se guarda con sus series y repeticiones, como uno más de tu sesión.' },
     { section: 'semana', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title: 'Plan semanal', text: 'Consulta toda tu semana de un vistazo, y las próximas semanas de tu plan, que se irán ajustando según tu progreso.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Nutrición', text: 'Elige tus comidas día a día (lunes a domingo). Para cada toma tienes 5 opciones. Confirma cada día y pasa al siguiente.' },
+    { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>', title: '¿Ninguna opción te convence?', text: 'Junto a cada comida tienes un botón "Reiniciar". Si ninguna de las 5 opciones te apetece, pulsa ahí y te damos otras 5 recetas para esa toma, con los mismos macros de siempre. Solo cambia esa comida: el resto de tu día se queda igual.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>', title: 'Tú eliges cómo se renueva tu dieta', text: 'Arriba del todo en Nutrición decides cada cuánto quieres platos nuevos: cada semana, cada mes o mantenerlos fijos. Al renovarse, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/><circle cx="19" cy="18" r="2"/></svg>', title: 'Pesa lo que comes', text: 'Cada ingrediente lleva su cantidad en gramos: no es capricho, es lo que hace que el plan funcione. Solo las especias y el limón van al gusto (no suman calorías). En "Ver macros" puedes abrir cualquier plato y ver de dónde sale cada caloría.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>', title: 'Añade tu propia comida', text: 'Si prefieres comer algo distinto a las opciones del plan, pulsa "+ Añadir tu comida" al final de cada toma. Busca el alimento, ajusta la cantidad y se añade con sus macros reales (tabla USDA), como una opción más de esa comida.' },
@@ -13958,15 +13963,24 @@
       // versión "sin material" pedía "saltos al cajón", que necesita un cajón —
       // contradicción con no tener material. Ahora rota entre saltos verticales,
       // horizontales y laterales, todos sin ningún equipo en la variante sinMat.
+      // 17 sept 2026: añadidos pogo jumps y bounding (bibliografía de pliometría
+      // para corredores -- bounding y broad jumps son los que más transfieren a
+      // velocidad de carrera; pogo jumps son de bajo impacto y van bien para
+      // tolerancia de tendón). Fuera quedan depth jumps y tuck jumps: mayor
+      // riesgo de aterrizaje mal hecho sin nadie delante corrigiendo la técnica.
       const plioVariantesAv = rSinMat
         ? ['broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
            'squat jumps 3×8 (salto vertical con carga corporal)',
-           'single-leg hop lateral 3×8/lado']
+           'single-leg hop lateral 3×8/lado',
+           'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
         : ['box jumps 3×6',
            'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
-           'squat jumps 3×8 con mancuernas ligeras'];
+           'squat jumps 3×8 con mancuernas ligeras',
+           'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
@@ -14342,9 +14356,12 @@
       // Mismo arreglo que ya tenía Running (plioVariantesAv, más arriba): rota
       // el salto por mesociclo y añade un segundo movimiento (A-skips, drill de
       // carrera con componente reactivo) en vez de dejarlo en uno solo.
+      // Mismas dos variantes nuevas que Running (pogo jumps, bounding): más
+      // variedad de la que pedía el cliente, y con mejor transferencia real a
+      // carrera que un salto vertical suelto.
       const _plioVariantesHibAv = _casaHib
-        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado']
-        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras'];
+        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
+        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
       const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_plioHibAv}, A-skips 3×20m, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
 
@@ -14997,6 +15014,15 @@
         // sobrevive a la regla de arriba, que solo toca el nombre.
         [/\(salto vertical con carga corporal\)/gi, '(sin salto, controlado)'],
         [/[Ss]ingle-leg hop lateral/g, 'step lateral a una pierna (sin salto)'],
+        // Mismo bug de siempre, mismo arreglo: pogo jumps y bounding son
+        // pliometría de rodilla/tobillo (17 sept 2026, añadidos a
+        // plioVariantesAv/_plioVariantesHibAv) y no tenían regla propia --
+        // se habrían colado sin adaptar en el plan de alguien con la rodilla
+        // lesionada. El paréntesis explicativo va aparte, igual que arriba.
+        [/[Pp]ogo jumps?/g, 'elevación de gemelos de pie (sin salto)'],
+        [/\(rebote corto de tobillo, contacto mínimo con el suelo\)/gi, '(controlado, sin salto)'],
+        [/\b[Bb]ounding\b/g, 'zancadas largas caminando (sin salto)'],
+        [/\(zancada exagerada, prioriza altura y longitud sobre velocidad\)/gi, '(paso largo y controlado, sin fase de vuelo)'],
       ]);
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención a la rodilla en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios que más la cargan (sentadilla profunda, zancadas, saltos e impacto). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
@@ -19160,7 +19186,7 @@
             <div class="meal-block-right">
               <div class="meal-block-why">${meal.porque}</div>
               <div class="meal-block-count">${meal.opciones.length} opciones · toca para ver detalles</div>
-              <button type="button" class="ejercicio-info-btn meal-reiniciar-btn" title="Cambia las recetas de ${_esc(meal.momento)} por otras, con los mismos macros"
+              <button type="button" class="btn-primary meal-reiniciar-btn" title="Cambia las recetas de ${_esc(meal.momento)} por otras, con los mismos macros"
                 onclick="event.stopPropagation();reiniciarOpcionesComida('${meal.momento}')">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
                 Reiniciar
@@ -19188,7 +19214,7 @@
     // QUÉ HACER en esta pantalla, y la tarjeta dice QUÉ ES tu plan y POR QUÉ.
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl) {
-      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>. La pasta, el arroz y los cereales van en peso cocido salvo que ponga «crudo»; al lado de cada uno tienes su equivalencia.`;
+      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>. La pasta, el arroz y los cereales van en peso cocido salvo que ponga «crudo»; al lado de cada uno tienes su equivalencia. Si ninguna de las 5 opciones de una toma te convence, pulsa <strong>Reiniciar</strong> junto a esa comida: te damos otras 5, con los mismos macros.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
