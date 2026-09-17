@@ -13129,6 +13129,20 @@
     'seitan': 'pechuga de pavo', 'tempeh': 'pechuga de pollo',
     'cuscús': 'arroz integral', 'cuscus': 'arroz integral',
     'harina': 'harina de arroz',
+    // Miembros de familia que no tenían sustituto: a quien no come pescado,
+    // marisco o lácteos se le BORRABA el alimento y le quedaba "600g " suelto
+    // en la lista (17 sept 2026).
+    'lenguado': 'merluza', 'rodaballo': 'merluza', 'rape': 'merluza', 'gallo': 'merluza',
+    'pez espada': 'pechuga de pollo', 'boquerón': 'pechuga de pollo', 'boquerones': 'pechuga de pollo',
+    'almejas': 'pechuga de pollo', 'berberechos': 'pechuga de pollo', 'vieiras': 'pechuga de pavo',
+    'calamar': 'pechuga de pavo', 'cangrejo': 'pechuga de pavo', 'surimi': 'pechuga de pavo',
+    'skyr': 'yogur de soja', 'yogur de soja': 'postre de soja natural',
+    'hummus': 'guacamole',
+    // Último recurso por familia: si toda la cadena del alimento está vetada
+    // (no come legumbres: lentejas → alubias → garbanzos → lentejas...).
+    // (Huevos no: su familia lleva nombres de plato -- "revuelto", "tortilla"
+    // -- y el huevo ya tiene sustituto propio.)
+    'carne roja': 'pechuga de pollo', 'lácteos': 'postre de soja natural',
   };
 
   const RECETAS_SUSTITUCION = [
@@ -13175,7 +13189,14 @@
     [/revuelto de gambas/gi, 'revuelto de champiñones'],
     [/tortilla de atún/gi, 'tortilla de pavo'],
     [/ensalada de atún/gi, 'ensalada de pollo'],
-    [/lata de atún/gi, 'pechuga de pollo desmechada'],
+    [/latas? de atún/gi, 'pechuga de pollo desmechada'],
+    // Nombres compuestos en los que cambiar solo la palabra rechazada daba un
+    // alimento inventado (17 sept 2026): "garbanzos verdes" (judías verdes),
+    // "salsa garbanzos" (salsa de soja), "480g en vinagre" (boquerones).
+    [/judías verdes|judias verdes/gi, 'calabacín'],
+    [/\s*\(pan(?: sin gluten)? tumaca\)/gi, ''],
+    [/salsa (?:de )?soja/gi, 'zumo de limón'],
+    [/boquerones en vinagre/gi, 'pechuga de pavo a la plancha'],
     [/atún al natural/gi, 'pechuga de pollo desmechada'],
     [/atún en conserva/gi, 'pollo desmechado'],
     [/pescado azul/gi, 'pollo'],
@@ -13185,12 +13206,13 @@
     [/queso batido 0%/gi, 'yogur de soja natural'],
     [/queso batido/gi, 'yogur de soja'],
     [/queso fresco batido/gi, 'yogur de soja natural'],
-    [/queso fresco/gi, 'tofu sedoso'],
+    [/queso fresco(?: \d+ ?%)?/gi, 'tofu sedoso'],
     [/requesón/gi, 'tofu sedoso'],
     [/crema de cacahuete/gi, 'crema de semillas de girasol'],
     [/mantequilla de almendra/gi, 'tahini'],
     [/mantequilla de cacahuete/gi, 'crema de semillas de girasol'],
-    [/tomate cherry/gi, 'pimiento rojo en dados'],
+    // Sin "en dados": los pasos siguen con "partido por la mitad".
+    [/tomates? cherry/gi, 'pimiento rojo'],
     [/tomate triturado/gi, 'pimiento rojo triturado'],
     [/tomate frito/gi, 'sofrito de pimiento'],
     [/salsa de tomate/gi, 'sofrito de pimiento y cebolla'],
@@ -13313,6 +13335,8 @@
     // "2 tofu revuelto" / "3 hummus" -> "2 raciones de tofu revuelto"
     .replace(/\b(\d+)\s+(tofu(?:\s+\w+)?|hummus|tempeh|seit[aá]n)\b(?!\s+de\b)/gi,
       (_, n, item) => `${n} ${n === '1' ? 'ración' : 'raciones'} de ${item.trim()}`)
+    // "2 postre de soja natural" -> "2 postres de soja naturales"
+    .replace(/\b(\d+)\s+postres? de soja natural(?:es)?\b/gi, (_, n) => n === '1' ? '1 postre de soja natural' : `${n} postres de soja naturales`)
     // "2 ración de X" -> "2 raciones de X"  ·  "1 raciones de X" -> "1 ración de X"
     .replace(/\b(\d+)\s+ración de\b/gi, (m, n) => (n === '1' ? m : `${n} raciones de`))
     .replace(/\b1\s+raciones de\b/gi, '1 ración de');
@@ -13373,6 +13397,23 @@
   // Ahora cada palabra (menos la última, que ya tenía comodín abierto) lleva
   // su propio comodín acotado a 3 letras -- de sobra para "s"/"es" sin
   // colarse en la palabra siguiente, que sigue exigiendo su propio espacio.
+  //
+  // BUG REAL (17 sept 2026): el inicio de palabra era \b, que en JavaScript
+  // solo entiende letras SIN tilde -- una "ó" cuenta como separador. "col"
+  // casaba dentro de "brócoli" (bró|coli) y a quien no come col le salía
+  // "440g brólechuga". Ahora el inicio exige que no haya ninguna letra
+  // (con o sin tilde) justo delante.
+  //
+  // Y hay alimentos cuyo nombre contiene el de otro sin serlo: las semillas
+  // de calabaza no son calabaza, ni la leche de coco es leche.
+  const _NO_ES_ESE_ALIMENTO = {
+    calabaza: { antes: '(?<!semillas de )(?<!pipas de )' },
+    pan: { antes: '(?!panader|pancet)' },
+    // Tortilla de maíz/trigo/integral es un wrap, no huevo.
+    tortilla: { despues: '(?![a-záéíóúüñ]*\\s+(?:de\\s+)?(?:ma[ií]z|trigo|integral))' },
+    leche: { despues: '(?!\\s+(?:sin lactosa\\s+)?(?:de\\s+)?coco)' },
+    nata: { despues: '(?!\\s+(?:de\\s+)?coco)' },
+  };
   function _reAlimento(token) {
     const palabras = _normTexto(token).split(/\s+/).filter(Boolean).map(_raizSinPlural);
     const cuerpo = palabras
@@ -13383,7 +13424,8 @@
         return i === palabras.length - 1 ? base + '[a-záéíóúüñ]*' : base + '[a-záéíóúüñ]{0,3}';
       })
       .join('\\s+');
-    return new RegExp('\\b' + cuerpo, 'gi');
+    const exc = _NO_ES_ESE_ALIMENTO[palabras.join(' ')] || {};
+    return new RegExp('(?<![a-záéíóúüñ])' + (exc.antes || '') + cuerpo + (exc.despues || ''), 'gi');
   }
 
   function filtrarNoComida(nutricion, noComidaRaw) {
@@ -13425,7 +13467,8 @@
       'langostino': ['gamba'],
       'cacahuete': ['crema de cacahuete'],
       'garbanzo': ['hummus'],
-      'ternera': ['solomillo']
+      'ternera': ['solomillo'],
+      'aguacate': ['guacamole']
     };
     [...todosTokens].forEach(t => {
       const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)];
@@ -13446,7 +13489,20 @@
     // se va con él. Si no, un celíaco que no come avena leía "Bol de tortas de
     // arroz certificada sin gluten" (el calificativo era de la avena). Solo para
     // reemplazar: detectar sigue usando `regexes`.
-    const regexesSust = regexes.map(re => new RegExp('(?:' + re.source + ')(?:\\s+certificad[ao]s?)?(?:\\s+sin (?:gluten|lactosa))?', re.flags));
+    //
+    // BUG REAL (17 sept 2026, barrido de 709 platos × cada alimento
+    // rechazable): se cambiaba la PALABRA y se quedaban detrás los apellidos
+    // del alimento quitado, que no pegan con el sustituto: "rúcula romana",
+    // "pavo en lonchas ibérico", "hummus manchego", "quinoa basmati",
+    // "zanahoria rojo", "raciones de tofu firme pochados". Ahora esos
+    // apellidos se van con el alimento. Solo los que describen AL ALIMENTO
+    // quitado (variedad, curación, color...); la preparación que vale para
+    // cualquiera ("al vapor", "cocido", "casero") se queda y se concuerda
+    // abajo con el género del sustituto.
+    const _APELLIDOS = '(?:romana|iceberg|trigueros|ib[eé]ric[oa]s?|serrano|dur[oa]s?|pochad[oa]s?|pelad[oa]s?|limpi[oa]s?|variad[oa]s?|basmati|arborio|bomba|manchego|curad[oa]s?|semicurad[oa]s?|tiern[oa]s?|parmesano|crema(?!\\s+de)|cherry|roj[oa]s?|verdes?|amarill[oa]s?|pintas?|blanc[oa]s?|semidesnatad[oa]|desnatad[oa]|enter[oa]|wassa|madur[oa]s?|sec[oa]s?|gratinad[oa]s?|proteic[oa]s?|poché|grandes?|pequeñ[oa]s?|integral(?:es)?|centeno|multicereal(?:es)?|fin[oa]s?|panadera|al natural|en conserva|en aceite|griego|light|\\d+\\s*%|certificad[ao]s?|sin (?:gluten|lactosa))';
+    // Sin sustituto el alimento se BORRA, y con él la preparación que lo
+    // describía: "con verduras salteadas" quedaba "con salteadas".
+    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
     const susMap = {};
     // Un sustituto sirve si no está vetado él mismo (ni por token ni por regex:
     // "pechuga de pollo" no vale si el cliente no come pollo).
@@ -13459,6 +13515,13 @@
       // con , queso crema y huevo".
       for (let paso = 0; s && !_permitido(s) && paso < 6; paso++) s = SUSTITUCIONES_NOCOMIDA[s.toLowerCase()];
       if (s && _permitido(s)) { susMap[i] = s; return; }
+      // Cadena agotada: sustituto de la familia entera, si lo hay y se puede.
+      for (const [familia, miembros] of Object.entries(FAMILIAS_ALIMENTOS)) {
+        const sf = SUSTITUCIONES_NOCOMIDA[familia];
+        // Solo alimentos con sustituto propio (cadena agotada), no nombres de
+        // plato de la familia: "revuelto" no es un alimento que sustituir.
+        if (sf && SUSTITUCIONES_NOCOMIDA[t] && miembros.includes(t) && _permitido(sf)) { susMap[i] = sf; return; }
+      }
       const raiz = _normAlimento(t);
       for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
         const claveN = _normTexto(clave);
@@ -13467,9 +13530,21 @@
         }
       }
     });
+    const regexesSust = regexes.map((re, i) => new RegExp('(?:' + re.source + ')(?:\\s+' + (susMap[i] ? _APELLIDOS : _DESCRIPCION_BORRADA) + ')*', re.flags));
     // Tras borrar un alimento sin sustituto pueden quedar preposiciones sueltas
     // delante de la puntuación ("sin grumos de .", "con , plátano").
-    const limpiar = s => s.replace(/,\s*,+/g, ',').replace(/\s+(de|del|con|y|e)\s*(?=[,.;])/g, '')
+    // Y si no hubo sustituto, se quitaba el alimento pero se quedaba su
+    // cantidad sola en la lista ("600g ,"): fuera también.
+    // Solo en la lista de ingredientes: en los pasos una cifra entre comas
+    // puede ser legítima.
+    const quitarCantidadesHuerfanas = s => s.replace(/(^|,)\s*\d+(?:[.,]\d+)?\s*(?:g|gr|kg|ml|l)?\s*(?=,|$)/gi, '$1');
+    // "rellena de acelgas con al horno" (quitadas las verduras), "Bocadillo de
+    // atún y (recuperación...)" (quitado el tomate).
+    const limpiar = s => s.replace(/,\s*,+/g, ',')
+      .replace(/\s+(?:con|y|e|de)\s+(?=(?:al|a la|a las)\s|\()/g, ' ')
+      // "Pasta con y atún" · "tostada, y jamón" · "pisto de" al final
+      .replace(/\s+(con|de)\s+(?:y|e)\s+/g, ' $1 ').replace(/,\s+(y|e)\s+/g, ' $1 ')
+      .replace(/\s+(?:con|y|e|de)\s*(?=$|\.)/g, '').replace(/\s+(de|del|con|y|e)\s*(?=[,.;])/g, '')
       .replace(/\s+de\s+(?=(con|y|e)\b)/g, ' ')
       .replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
     // El artículo que llevaba el alimento quitado no tiene por qué valer para
@@ -13484,6 +13559,30 @@
       return 'ms';
     };
     const _ARTICULOS = { ms: ['el', 'del', 'al'], fs: ['la', 'de la', 'a la'], mp: ['los', 'de los', 'a los'], fp: ['las', 'de las', 'a las'] };
+    // La preparación que se queda tras sustituir concuerda con el sustituto:
+    // "arroz integral cocido" -> "quinoa cocida", no "quinoa cocido".
+    const _FINAL_GENERO = { ms: 'o', fs: 'a', mp: 'os', fp: 'as' };
+    const concordarAdjetivos = (txt) => Object.values(susMap).reduce((acc, s) => {
+      const esc = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const fin = _FINAL_GENERO[_generoSust(s)];
+      // No tras "de": en "Pechuga de pavo rellena" o "Crema de calabaza
+      // casera" el adjetivo es del plato, no del sustituto.
+      return acc.replace(new RegExp('(?<!\\bde\\s)(' + esc + '\\s+)(crud|cocid|tostad|laminad|picad|rallad|asad|hervid|saltead|caser|fresc|trocead|cortad|batid|rellen)(?:o|a|os|as)\\b', 'gi'),
+        (m, pre, raiz) => pre + raiz + fin);
+    }, txt);
+    // Envases que no valen para el sustituto: "3 latas atún" -> "3 latas
+    // pechuga de pollo", "1 loncha queso" -> "1 loncha hummus", "2 tostadas de
+    // pan centeno" -> "2 tostadas de tortas de arroz centeno". Si el alimento
+    // rechazado es lo que va en el envase, se pasa antes a gramos con la misma
+    // tabla de pesos que usa "Ver macros".
+    const envasesAGramos = (ing) => ing.replace(
+      /(^|,\s*)(\d+(?:[.,]\d+)?)\s+(latas?|rebanadas?|lonchas?|tostadas?|tostas?)\s+(?:de\s+)?([^,]+)/gi,
+      (full, sep, n, envase, resto) => {
+        const esCabeza = regexes.some(re => { re.lastIndex = 0; const r = re.exec(resto); return !!r && r.index === 0; });
+        if (!esCabeza) return full;
+        const g = _gramosDeUnidad(`${n} ${envase} ${resto}`);
+        return g ? `${sep}${g.gramos}g ${resto}` : full;
+      });
     const concordarArticulos = (txt) => Object.values(susMap).reduce((acc, s) => {
       const esc = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const [art, deArt, aArt] = _ARTICULOS[_generoSust(s)];
@@ -13510,7 +13609,7 @@
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
         let nuevoNombre = opt.nombre;
-        let nuevoIng = opt.ingredientes;
+        let nuevoIng = envasesAGramos(opt.ingredientes);
         recetasActivas.forEach(([re, reemplazo]) => {
           nuevoNombre = nuevoNombre.replace(re, reemplazo);
           nuevoIng = nuevoIng.replace(re, reemplazo);
@@ -13520,8 +13619,8 @@
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
-        nuevoIng = _concordarSustitucion(limpiar(nuevoIng));
-        nuevoNombre = concordarArticulos(_concordarSustitucion(nuevoNombre))
+        nuevoIng = concordarAdjetivos(_concordarSustitucion(limpiar(quitarCantidadesHuerfanas(nuevoIng))));
+        nuevoNombre = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(nuevoNombre))))
           .replace(/\s+(con|de|y)\s*,\s*/g, ' $1 ').replace(/\s+de\s+(con|y)\s+/g, ' $1 ').replace(/\s*,\s*,/g, ',')
           .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
         // El nombre puede quedar empezando en minúscula si la palabra sustituida
@@ -13553,7 +13652,7 @@
             const reemplazo = susMap[i] || '';
             re.lastIndex = 0; ps = ps.replace(re, reemplazo);
           });
-          ps = concordarArticulos(_concordarSustitucion(limpiar(ps)));
+          ps = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(ps))));
           if (ps !== pasosOrig) nuevosPasos = ps;
         }
         const adaptada = { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
@@ -16673,7 +16772,7 @@
             op("Hamburguesa casera de ternera con arroz y aguacate", "180g ternera a la plancha, 100g arroz integral, 1/4 aguacate, lechuga, tomate", "544 kcal", "44g prot", "38g carbs", "24g grasa", "Medio · 20 min"),
             op("Fajitas de pollo con pimiento y cebolla", "2 tortillas de trigo, 200g pollo especiado, pimiento, cebolla, AOVE, lima", "536 kcal", "48g prot", "50g carbs", "16g grasa", "Medio · 20 min"),
             op("Poké bowl de salmón con arroz y edamame", "180g salmón fresco, 100g arroz, edamame, aguacate, pepino, soja, sésamo", "612 kcal", "42g prot", "48g carbs", "28g grasa", "Sin cocción · 10 min"),
-            op("Pollo al curry con arroz basmati", "200g pollo, 120g arroz basmati, leche coco light, curry, cebolla, tomate, cilantro", "560 kcal", "46g prot", "58g carbs", "16g grasa", "Medio · 25 min"),
+            op("Pollo al curry con arroz basmati", "200g pollo, 120g arroz basmati, 100ml leche de coco light, curry, cebolla, tomate, cilantro", "560 kcal", "46g prot", "58g carbs", "16g grasa", "Medio · 25 min"),
             op("Entrecot a la plancha con patata asada y guisantes", "200g entrecot de ternera, 200g patata asada, 100g guisantes, AOVE", "900 kcal", "60g prot", "57g carbs", "48g grasa", "Medio · 25 min"),
             op("Pasta con atún y tomate", "150g pasta integral, 2 latas atún, tomate frito casero, aceitunas", "600 kcal", "44g prot", "70g carbs", "16g grasa", "Fácil · 20 min"),
             op("Arroz con pollo al horno y verduras", "150g arroz, 200g pollo al horno, pimiento, cebolla, AOVE", "582 kcal", "46g prot", "68g carbs", "14g grasa", "Fácil · 30 min"),
@@ -16840,7 +16939,7 @@
               ? op("Lentejas estofadas con verduras", "180g lentejas, zanahoria, patata, pimiento, cebolla, pimentón ahumado, AOVE", "460 kcal", "28g prot", "62g carbs", "8g grasa", "Fácil · 35 min")
               : op("Lentejas con chorizo y verduras", "180g lentejas, 40g chorizo, zanahoria, patata, pimiento, pimentón", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
             op("Merluza al horno con patatas y pisto", "200g merluza, 120g patata, calabacín, tomate, pimiento, AOVE, limón", "384 kcal", "36g prot", "42g carbs", "8g grasa", "Fácil · 25 min"),
-            op("Arroz con pollo al curry y verduras", "180g pollo, 100g arroz basmati, leche coco light, curry, pimiento, cebolla", "494 kcal", "40g prot", "52g carbs", "14g grasa", "Medio · 25 min"),
+            op("Arroz con pollo al curry y verduras", "180g pollo, 100g arroz basmati, 100ml leche de coco light, curry, pimiento, cebolla", "494 kcal", "40g prot", "52g carbs", "14g grasa", "Medio · 25 min"),
             op("Garbanzos con atún, huevo y ensalada", "150g garbanzos, 1 lata atún, 1 huevo duro, ensalada variada, AOVE", "524 kcal", "42g prot", "44g carbs", "20g grasa", "Sin cocción · 8 min"),
             op("Pasta con pollo y pesto casero", "60g pasta integral cruda, 150g pollo a la plancha, pesto de albahaca casero, tomate cherry", "496 kcal", "40g prot", "48g carbs", "16g grasa", "Fácil · 20 min"),
             op("Salmón a la parrilla con quinoa y ensalada", "200g salmón, 150g quinoa cocida, ensalada con tomate, pepino y limón", "593 kcal", "48g prot", "35g carbs", "29g grasa", "Fácil · 20 min"),
@@ -17172,7 +17271,9 @@
           [/\bnata\b/gi, 'nata de coco'],
           [/\bmantequilla\b(?! de)/gi, 'AOVE'],
           [/\bleche (entera|semidesnatada|desnatada)/gi, 'leche $1 sin lactosa'],
-          [/\bleche\b(?! de (?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,.;:]*sin lactosa)/gi, 'leche sin lactosa']
+          // "(?:de )?" : en el recetario hay "leche coco light" sin el "de", y
+          // salía "leche sin lactosa coco light" (17 sept 2026).
+          [/\bleche\b(?! (?:de )?(?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,.;:]*sin lactosa)/gi, 'leche sin lactosa']
         );
       }
       if (sinFrutosSecos) {

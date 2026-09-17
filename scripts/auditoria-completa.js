@@ -250,8 +250,10 @@ if (sepMotor !== AG._SEPARADOR_ALIMENTOS.source) desincronizados.push('_SEPARADO
   const fn = n => _bloqueLlaves(TXT.indexOf('function ' + n + '('));
   const src = ['_normTexto', '_raizSinPlural', '_reAlimento'].map(n => 'function ' + n + TXT.slice(TXT.indexOf('function ' + n + '(') + ('function ' + n).length, TXT.indexOf('{', TXT.indexOf('function ' + n + '('))) + fn(n)).join('\n');
   let motor = null;
-  try { motor = new Function('_EQUIV_TILDE', src + '\nreturn { _normTexto, _raizSinPlural, _reAlimento };')(equivMotor); } catch (e) {}
-  const muestra = ['espárragos', 'Huevas', 'maiz', 'quinoa', 'nueces', 'piñones', 'queso fresco', 'Mejillones', 'judías', 'atún', 'Lácteos'];
+  const noEsMotor = _objetoMotor('_NO_ES_ESE_ALIMENTO');
+  if (!_mismo(noEsMotor, AG._NO_ES_ESE_ALIMENTO)) desincronizados.push('_NO_ES_ESE_ALIMENTO');
+  try { motor = new Function('_EQUIV_TILDE', '_NO_ES_ESE_ALIMENTO', src + '\nreturn { _normTexto, _raizSinPlural, _reAlimento };')(equivMotor, noEsMotor); } catch (e) {}
+  const muestra = ['espárragos', 'Huevas', 'maiz', 'quinoa', 'nueces', 'piñones', 'queso fresco', 'Mejillones', 'judías', 'atún', 'Lácteos', 'calabaza', 'leche', 'col'];
   const iguales = motor && muestra.every(w =>
     motor._normTexto(w) === AG._normTexto(w) &&
     motor._raizSinPlural(motor._normTexto(w)) === AG._raizSinPlural(AG._normTexto(w)) &&
