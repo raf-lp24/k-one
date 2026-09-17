@@ -25598,10 +25598,17 @@ Se coló: ${lista}`;
 
     const estadoColor = c.enOferta ? 'var(--jv-warn)' : c.estado==='past_due' ? 'var(--jv-bad)' :
       ['active','trialing'].includes(c.estado) ? 'var(--jv-ok)' : 'var(--jv-dim)';
+    // BUG REAL (17 sept 2026): sin la rama final del propio 'none', c.estado
+    // || 'Sin pago' colaba el valor interno de Stripe TAL CUAL en pantalla
+    // ('none', 'unpaid', 'incomplete'...) en vez de "Sin pago" -- 'none' es
+    // un string, no vacío, así que el || nunca llegaba a activarse para él.
+    // Y un cliente premium (is_beta) sin ninguna suscripción de Stripe detrás
+    // leía "Sin pago", que suena a que debe algo cuando no debe nada.
     const estadoTexto = c.enOferta ? 'Oferta 1,99€' : c.cancelaAlFinal ? 'Cancela al final' :
       c.estado === 'past_due' ? 'Pago fallido' :
       c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
-      c.estado === 'canceled' ? 'Cancelado' : c.estado || 'Sin pago';
+      c.estado === 'canceled' ? 'Cancelado' :
+      (c.estado === 'none' || !c.estado) ? (c.isBeta ? 'Premium (sin Stripe)' : 'Sin pago') : c.estado;
 
     // La salud del cliente abre la ficha con la cifra en grande: es el
     // resumen de "¿este cliente está bien o se me va?" en un solo golpe.
@@ -25767,8 +25774,25 @@ Se coló: ${lista}`;
       })()}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${row('Alta', _fmtFecha(c.alta))}
-        ${row(c.isBeta ? 'Expira premium' : 'Renueva', _fmtFecha(c.renovacion))}
+        ${(() => {
+          // BUG REAL (17 sept 2026, reportado por el usuario sobre un cliente
+          // real): esta fila cambiaba la ETIQUETA a "Expira premium" si el
+          // cliente es beta, pero seguía mostrando `c.renovacion`. Ese campo
+          // (admin-clientes.js) es `s?.current_period_end || p.beta_expires`
+          // -- prioriza la suscripción de Stripe. Un cliente con premium
+          // concedido (1 año) que ADEMÁS tiene una suscripción de Stripe
+          // detrás (p. ej. el mes de prueba gratis sin cancelar) enseñaba la
+          // fecha de cobro de Stripe bajo la etiqueta de premium: parecía
+          // que el premium caducaba en 1 mes cuando en realidad caduca en 1
+          // año, y el dato real (Stripe SÍ va a intentar cobrarle) se perdía
+          // -- se veía como si "tuviera que pagar" sin más contexto.
+          if (c.isBeta) return row('Expira premium', _fmtFecha(c.betaExpires),
+            c.betaExpires && new Date(c.betaExpires) < new Date() ? 'var(--jv-bad)' : 'var(--jv-warn)');
+          return row('Renueva', _fmtFecha(c.renovacion));
+        })()}
       </div>
+      ${c.isBeta && ['active', 'trialing'].includes(c.estado) && c.renovacion ? row('Aviso: además tiene una suscripción de Stripe activa, le cobrará el', _fmtFecha(c.renovacion),
+        'var(--jv-bad)') : ''}
       <div style="display:grid;grid-template-columns:1fr;gap:10px">
         ${row('Última conexión', _fmtRelativo(c.ultimaConexion) + (c.ultimaConexion ? ' · ' + _fmtFecha(c.ultimaConexion) : ''), _colorConexion(c.ultimaConexion))}
       </div>
@@ -25839,7 +25863,6 @@ Se coló: ${lista}`;
       ${c.alertaRazon ? row('Alerta activa', c.alertaRazon,
         c.alerta==='red' ? 'var(--jv-bad)' : c.alerta==='orange' ? '#FF9556' : 'var(--jv-warn)') : ''}
       ${row('Onboarding completado', c.onboarding ? '✓ Sí' : '✗ No', c.onboarding ? 'var(--jv-ok)' : 'var(--jv-faint)')}
-      ${c.isBeta && c.betaExpires ? row('Expira premium', _fmtFecha(c.betaExpires), new Date(c.betaExpires) < new Date() ? 'var(--jv-bad)' : 'var(--jv-warn)') : ''}
       <div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--jv-line)">
         <div class="jc-label" style="margin-bottom:8px">Nota privada (solo la ves tú)</div>
         <textarea id="jcNota" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid var(--jv-line);border-radius:12px;color:var(--jv-text);font-size:12.5px;padding:12px 14px;font-family:var(--jv-ui);resize:vertical;min-height:62px;outline:none;line-height:1.55" placeholder="Ej: llamó por lesión de rodilla · prefiere cenas rápidas · reactivar en enero...">${_esc(c.notaAdmin || '')}</textarea>
