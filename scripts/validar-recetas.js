@@ -37,6 +37,7 @@ const PESO_UNIDAD = [
   [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
   [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
   [/\bbarra\b/i, 100],
+  [/panes? wassa|wassa/i, 10], [/barrita/i, 50],
   [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
   [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200],
   [/latas?\b/i, 80],
