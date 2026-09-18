@@ -14858,7 +14858,13 @@
     // El ejercicio de sustitución tiene que existir donde entrena el cliente: no
     // sirve mandar "prensa de piernas" a quien entrena en el salón. `eq` elige la
     // versión de gimnasio, la de casa con material o la de peso corporal.
-    const _sinMat = (u.lugar || '').includes('sin material');
+    // "aire libre" (Running) faltaba aquí -- mismo criterio que ya usan rSinMat
+    // (plantilla de Running) y _entornoRot (rotación semanal) para el mismo
+    // "lugar": en un parque tampoco hay poleas ni máquinas. Sin esto, a un
+    // corredor lesionado que entrena al aire libre le llegaban sustituciones de
+    // gimnasio ("Patada de glúteo en polea", "Prensa de piernas") que no puede
+    // hacer donde entrena -- encontrado auditando el filtro de lesiones (18 sept).
+    const _sinMat = /sin material|aire libre/i.test(u.lugar || '');
     const _enCasa = (u.lugar || '').includes('casa');
     const eq = (gimnasio, conMaterial, sinMaterial) =>
       _sinMat ? sinMaterial : (_enCasa ? conMaterial : gimnasio);
