@@ -10728,7 +10728,7 @@
     // clamshells se escriben por repeticiones por lado, así que salía un
     // "Equilibrio en una pierna 3×10/lado".
     [/dead bug(?! lateral)/i, ['Bird dog', 'Superman']],
-    [/clamshells(?! con banda)/i, ['Círculos de tobillo', 'Lateral band walks']],
+    [/clamshells(?! con banda)/i, ['Abducción tumbado de lado', 'Lateral band walks']],
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
     // REGLA ELIMINADA (14 sept 2026). Su único consumidor vivo es el complejo
@@ -11877,6 +11877,9 @@
     [/pl[áa]tano/i, 120], [/huevos?\b/i, 55], [/claras?\b/i, 33], [/kiwis?\b/i, 75],
     [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
     [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
+    // "1 barra pan integral" (bocadillo) se quedaba sin peso -> "Ver macros"
+    // marcaba el pan como "al gusto" y el plato perdía la mitad de sus kcal.
+    [/\bbarra\b/i, 100],
     [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
     [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200],
     // "1 lata atún" se quedaba sin peso (no había regla para "lata"), así que
@@ -16414,7 +16417,7 @@
     // 2, dejando la ficha de "Ver macros" sin cuadrar con el propio plato.
     // Medido: 87% de coherencia en el recetario sin escalar, 29% despues de
     // que el motor ajustara las raciones.
-    const _UNIDAD_ENTERA = /^(huevos?|claras?|latas?|tostas?|tostadas?|rebanadas?|reba[ñn]adas?|panecillos?|tortitas?|tortas de arroz|scoops?|lonchas?|filetes?|panes wassa|kiwis?|mandarinas?|higos?|ciruelas?|d[áa]tiles?|puñados?|pu[ñn]ados?|cdas?|cdtas?|cucharadas?|cucharaditas?)\b/i;
+    const _UNIDAD_ENTERA = /^(huevos?|claras?|latas?|tostas?|tostadas?|rebanadas?|reba[ñn]adas?|panecillos?|barras?|tortitas?|tortas de arroz|scoops?|lonchas?|filetes?|panes wassa|kiwis?|mandarinas?|higos?|ciruelas?|d[áa]tiles?|puñados?|pu[ñn]ados?|cdas?|cdtas?|cucharadas?|cucharaditas?)\b/i;
     const _UNIDAD_MEDIOS = /^(pl[áa]tanos?|aguacates?|manzanas?|peras?|naranjas?|tomates?|melocotones?|melocot[óo]n|mangos?|boniatos?|patatas?|berenjenas?|calabacines?|calabac[íi]n|pimientos?|zanahorias?|granadas?|piezas?|unidades?)\b/i;
     // Concordancia: "2 huevo" no lo escribe nadie. Se pluraliza (o se vuelve
     // al singular) la palabra del alimento cuando la cantidad cambia de lado.
