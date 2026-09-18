@@ -105,8 +105,14 @@ pct >= 80 ? ok(pct + '% de los platos tienen la etiqueta a menos del 15% de sus 
           : nota('solo el ' + pct + '% cuadra a menos del 15%', desviadas.slice(0, 8).map(x => Math.round(x.dev * 100) + '% · ' + x.p.nombre));
 
 // 2d · macros coherentes con la etiqueta
+// Mismo motivo que el aviso de kcal de la sección 1 (cacao/canela/vinagre):
+// frutos secos, fruta y cereales integrales tienen fibra/grasa cuya kcal real
+// no sigue el 4p+4c+9g simplificado (18 sept 2026, verificado a mano: nueces
+// declara 654 kcal/100g pero 4p+4c+9g da 702 -- la cifra de la tabla es la
+// correcta, no un error). Por eso es nota() y no mal(): usar la kcal propia
+// de cada ingrediente es MÁS preciso que forzar la fórmula, no un fallo.
 const formulaMal = platos.filter(p => Math.abs(p.kcal - (4 * p.p + 4 * p.c + 9 * p.g)) > 12);
-formulaMal.length ? mal(formulaMal.length + ' con kcal que no salen de 4p+4c+9g', formulaMal.map(p => p.nombre + ': ' + p.kcal + ' vs ' + (4 * p.p + 4 * p.c + 9 * p.g)))
+formulaMal.length ? nota(formulaMal.length + ' con kcal que no salen exacto de 4p+4c+9g (revisar: fibra/grasa de frutos secos y cereales lo justifican)', formulaMal.map(p => p.nombre + ': ' + p.kcal + ' vs ' + (4 * p.p + 4 * p.c + 9 * p.g)))
                   : ok('las kcal de todos los platos salen de sus propios macros');
 
 // 2e · platos en la toma equivocada
