@@ -6955,12 +6955,12 @@
     <div id="renovacionResumen" style="background:var(--grafito);border:1px solid var(--humo);border-radius:10px;padding:16px;margin-bottom:20px"></div>
 
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">PESO ACTUAL (kg)</label>
+      <label for="renovPeso" style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;display:block;margin-bottom:6px">PESO ACTUAL (kg)</label>
       <div class="stepper-wrap" style="max-width:200px">
-        <button class="stepper-btn" onclick="stepVal('renovPeso',-0.5)">−</button>
+        <button class="stepper-btn" onclick="stepVal('renovPeso',-0.5)" aria-label="Restar peso">−</button>
         <input type="number" id="renovPeso" min="40" max="180" step="0.5" class="stepper-input">
         <span class="stepper-unit">kg</span>
-        <button class="stepper-btn" onclick="stepVal('renovPeso',0.5)">+</button>
+        <button class="stepper-btn" onclick="stepVal('renovPeso',0.5)" aria-label="Sumar peso">+</button>
       </div>
     </div>
 
@@ -7031,16 +7031,16 @@
         </div>
       </div>
       <div class="field">
-        <label>¿Cuál es tu peso actual?</label>
+        <label for="cp-peso">¿Cuál es tu peso actual?</label>
         <div class="cp-peso-widget">
-          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">−</button>
+          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(-1)" onmousedown="iniciarRepeticion(-1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()" aria-label="Restar peso">−</button>
           <div class="cp-peso-num">
             <input type="number" id="cp-peso" placeholder="70" min="40" max="180" step="0.5" oninput="sincronizarPesoSlider()">
             <span>kg</span>
           </div>
-          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()">+</button>
+          <button class="cp-peso-btn" type="button" onclick="ajustarPesoCambiarPlan(+1)" onmousedown="iniciarRepeticion(+1)" onmouseup="pararRepeticion()" onmouseleave="pararRepeticion()" aria-label="Sumar peso">+</button>
         </div>
-        <input type="range" id="cp-pesoSlider" min="40" max="180" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()">
+        <input type="range" id="cp-pesoSlider" min="40" max="180" step="1" class="cp-peso-slider" oninput="sincronizarPesoInput()" aria-label="Peso actual en kg">
       </div>
       <div class="field">
         <label>¿Qué enfoque nutricional prefieres?</label>
@@ -7066,7 +7066,7 @@
         <div class="field">
           <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <select id="cp-marcaDistancia" onchange="previsualizarRitmosCambioPlan()" style="flex:1;min-width:130px">
+            <select id="cp-marcaDistancia" onchange="previsualizarRitmosCambioPlan()" style="flex:1;min-width:130px" aria-label="Distancia de la carrera">
               <option value="">Distancia</option>
               <option value="5000">5 km</option>
               <option value="10000">10 km</option>
@@ -7081,9 +7081,9 @@
         </div>
         <!-- Evento/competición: añadir o actualizar la fecha activa la cuenta atrás del panel -->
         <div class="field">
-          <label>¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
+          <label for="cp-evento">¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
           <input type="text" id="cp-evento" placeholder="Hyrox Madrid, maratón de Valencia, competición de CrossFit...">
-          <input type="date" id="cp-eventoFecha" style="margin-top:8px;max-width:220px">
+          <input type="date" id="cp-eventoFecha" style="margin-top:8px;max-width:220px" aria-label="Fecha del evento">
           <span class="field-hint">Si nos das la fecha, te mostramos la cuenta atrás en tu panel.</span>
         </div>
         <div class="field">
@@ -7264,6 +7264,7 @@
         style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="alimentoGramos" value="100" min="1" max="2000" step="10" oninput="renderAlimentos()"
+          aria-label="Cantidad en gramos"
           style="width:58px;background:none;border:none;color:var(--blanco);font-size:14px;font-family:inherit;text-align:right">
         <span style="font-size:12px;color:var(--metal)">g</span>
       </div>
@@ -7285,6 +7286,7 @@
         style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="comidaExtraGramos" value="100" min="1" max="2000" step="10" oninput="renderComidaExtraLista()"
+          aria-label="Cantidad en gramos"
           style="width:58px;background:none;border:none;color:var(--blanco);font-size:14px;font-family:inherit;text-align:right">
         <span style="font-size:12px;color:var(--metal)">g</span>
       </div>
@@ -8399,12 +8401,12 @@
             <span class="field-hint" id="enfoqueMacrosHint">Te sugerimos un enfoque automáticamente al elegir tu objetivo, pero puedes cambiarlo cuando quieras.</span>
           </div>
           <div class="field">
-            <label>¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
+            <label for="evento">¿Tienes algún evento o fecha concreta como meta? <span class="optional">Opcional</span></label>
             <input type="text" id="evento" placeholder="Hyrox Madrid, maratón de Valencia, competición de CrossFit...">
             <!-- Fecha real (no solo texto libre): con ella se puede mostrar una
                  cuenta atrás de verdad en el panel, en vez de solo citarlo en el
                  mensaje de bienvenida. -->
-            <input type="date" id="eventoFecha" style="margin-top:8px;max-width:220px">
+            <input type="date" id="eventoFecha" style="margin-top:8px;max-width:220px" aria-label="Fecha del evento">
             <span class="field-hint">Si nos das la fecha, te mostramos la cuenta atrás en tu panel.</span>
           </div>
         </div>
@@ -8467,7 +8469,7 @@
           <div class="field" id="campoMarca">
             <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-              <select id="marcaDistancia" onchange="previsualizarRitmos()" style="flex:1;min-width:130px">
+              <select id="marcaDistancia" onchange="previsualizarRitmos()" style="flex:1;min-width:130px" aria-label="Distancia de la carrera">
                 <option value="">Distancia</option>
                 <option value="5000">5 km</option>
                 <option value="10000">10 km</option>
