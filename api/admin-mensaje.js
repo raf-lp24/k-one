@@ -3,7 +3,11 @@ const { capturarError } = require('./_sentry');
 // require('./notify') es solo un import de módulo (reutiliza enviarEmail),
 // no crea una función serverless nueva -- no cuenta para el límite de
 // Vercel (ya en 12/12), igual que ya hace stripe-webhook.js.
-const { enviarEmail } = require('./notify');
+// BUG REAL (18 sept 2026): faltaba enviarPushAUsuario en este import aunque
+// se llamaba más abajo -- ReferenceError silencioso (atrapado por el
+// try/catch vacío de alrededor), así que el push "Tienes respuesta" nunca
+// llegó a ningún cliente desde que se añadió esa notificación.
+const { enviarEmail, enviarPushAUsuario } = require('./notify');
 
 function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
