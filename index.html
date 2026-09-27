@@ -8724,14 +8724,16 @@
           </div>
         </div>
 
-        <!-- Aviso de pago fallido (past_due): el cobro de la renovación no pasó y Stripe
-             reintenta. El acceso sigue activo durante la gracia; pedimos actualizar tarjeta. -->
+        <!-- Aviso de pago fallido (past_due). Desde el 27 sept 2026 el acceso se corta
+             ya en el primer fallo (comprobarPaywall lo intercepta antes de llegar aquí),
+             así que este bloque queda como red de seguridad si alguna vez se renderiza
+             el dashboard con un pago pendiente por otra vía -- el texto refleja eso. -->
         <div id="avisoPagoPendiente" style="display:none;background:#2a1410;border:1px solid #c0392b;border-radius:10px;padding:18px 20px;margin-bottom:20px">
           <div style="display:flex;align-items:flex-start;gap:14px">
             <span style="font-size:22px;line-height:1.2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
             <div style="flex:1">
               <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">No hemos podido cobrar tu renovación</div>
-              <div style="font-size:13px;color:#e0b4ad;margin-bottom:14px;line-height:1.6">Tu acceso sigue activo, pero hay un problema con tu método de pago. Actualiza tu tarjeta para no perder tu plan; volveremos a intentar el cobro automáticamente.</div>
+              <div style="font-size:13px;color:#e0b4ad;margin-bottom:14px;line-height:1.6">Hay un problema con tu método de pago. Actualiza tu tarjeta para recuperar el acceso; volveremos a intentar el cobro automáticamente.</div>
               <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="gestionarSuscripcion()">Actualizar método de pago →</button>
             </div>
           </div>
@@ -23553,10 +23555,12 @@
       .maybeSingle();
     if (subErr) console.error('[syncProfile] Error leyendo subscriptions:', subErr.message);
     // 'past_due' = el cobro de la renovación falló y Stripe está reintentando (dunning).
-    // Damos un período de gracia: mantenemos el acceso mientras reintenta y avisamos
-    // al cliente para que actualice su tarjeta. Si Stripe agota los reintentos, la
-    // suscripción pasa a canceled/unpaid y entonces sí se corta el acceso.
-    const suscripcionStripeActiva = !!sub && ['active', 'trialing', 'past_due'].includes(sub.status);
+    // Decisión de negocio (27 sept 2026): se retira el período de gracia que
+    // mantenía el acceso mientras reintenta -- el acceso se corta ya en el
+    // primer fallo, no solo cuando Stripe agota los reintentos y pasa a
+    // canceled/unpaid. Vuelve solo en cuanto el cliente actualiza su tarjeta y
+    // Stripe cobra con éxito (webhook: past_due -> active).
+    const suscripcionStripeActiva = !!sub && ['active', 'trialing'].includes(sub.status);
     setCurrentUser({
       nombre: profile?.nombre || authUser.user_metadata?.nombre || '',
       email: authUser.email,
@@ -24382,8 +24386,11 @@
     const activo = tieneAccesoActivo(email);
     if (!activo) {
       const user = getCurrentUser();
-      // Si tenía suscripción real (no solo trial) y no ha hecho la encuesta, mostrársela primero
-      if (user && user.tieneSub && !userData.testimonioCompletado) {
+      // Si tenía suscripción real (no solo trial) y no ha hecho la encuesta, mostrársela primero.
+      // Excepto con un pago fallido: no es una baja, es un corte reversible en
+      // cuanto actualice la tarjeta -- preguntarle "qué tal tu experiencia" en
+      // ese momento no tiene sentido y solo añade fricción a arreglarlo.
+      if (user && user.tieneSub && !user.pagoPendiente && !userData.testimonioCompletado) {
         mostrarEncuestaOpinion(() => _mostrarPaywallInner(modal, user));
         return;
       }
@@ -24780,15 +24787,27 @@ Se coló: ${lista}`;
   function _mostrarPaywallInner(modal, user) {
     modal.classList.add('visible');
     if (!user) { user = getCurrentUser(); }
-    const primerMes = !(user && user.tieneSub);
+    // Pago fallido (past_due): no es "elige tu plan" ni "primer mes" -- ya
+    // tiene plan y ya pagó antes, solo falló el último cobro. El botón lleva
+    // al Portal de Stripe a actualizar la tarjeta, no a un checkout nuevo
+    // (create-checkout-session.js lo rechazaría: ya cuenta como "suscripción
+    // activa" a efectos de no duplicarla).
+    const pagoFallido = !!(user && user.pagoPendiente);
+    const primerMes = !pagoFallido && !(user && user.tieneSub);
     // Botón de cerrar: solo en renovación voluntaria (el cliente aún tiene acceso).
     const btnCerrar = document.getElementById('paywallCerrarVoluntario');
     if (btnCerrar) btnCerrar.style.display = _paywallVoluntario ? '' : 'none';
     document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
-    document.getElementById('paywallPlanChooser').style.display = primerMes ? 'none' : 'block';
+    document.getElementById('paywallPlanChooser').style.display = (primerMes || pagoFallido) ? 'none' : 'block';
     const titulo = document.getElementById('paywallTitulo');
     const desc = document.getElementById('paywallDesc');
     const btn = document.getElementById('paywallBtn');
+    if (pagoFallido) {
+      if (titulo) titulo.textContent = 'No hemos podido cobrar tu suscripción';
+      if (desc) desc.textContent = 'El último cobro ha sido rechazado por tu banco. Actualiza tu método de pago para recuperar el acceso a tu plan, tu seguimiento y el resto de funciones al momento.';
+      if (btn) btn.textContent = 'Actualizar método de pago →';
+      return;
+    }
     if (primerMes) {
       if (titulo) titulo.textContent = 'Tu plan está listo';
       if (desc) desc.textContent = 'Actívalo ahora: tu primer mes es gratis. Tú eliges cómo sigue después. Sin permanencia, cancela cuando quieras antes de que se cobre nada.';
@@ -24866,9 +24885,12 @@ Se coló: ${lista}`;
     }
   }
 
-  // Despacha el pago del paywall según el modo: primer mes (1,99€) o plan elegido.
+  // Despacha el pago del paywall según el modo: primer mes (1,99€), plan elegido,
+  // o -- si el bloqueo es por un pago fallido -- actualizar la tarjeta en el
+  // Portal de Stripe (nunca un checkout nuevo: ya tiene una suscripción).
   function pagarDesdePaywall() {
     const user = getCurrentUser();
+    if (user && user.pagoPendiente) { gestionarSuscripcion(); return; }
     const primerMes = !(user && user.tieneSub);
     if (primerMes) {
       _aplicarTipoPlanDeLaOferta();
