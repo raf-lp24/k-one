@@ -6640,8 +6640,8 @@
     <!-- Solo visible en renovación VOLUNTARIA (el cliente aún tiene acceso). El paywall
          obligatorio de fin de período no muestra esta X. -->
     <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()" aria-label="Cerrar">✕</button>
-    <div class="modal-title" id="paywallTitulo">Tu mes de prueba ha terminado</div>
-    <p class="modal-desc" id="paywallDesc">Has disfrutado de K-One por 1,99€ durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.</p>
+    <div class="modal-title" id="paywallTitulo">Tu plan está listo</div>
+    <p class="modal-desc" id="paywallDesc">Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.</p>
     <!-- Modo "primer mes gratis" (automático, sin código): el cliente elige aquí
          mismo a qué plan pasará al terminar los 30 días, para que no haya sorpresas. -->
     <div id="paywallOfertaBox" style="display:none">
@@ -7892,11 +7892,11 @@
 
   <div class="share-bar">
     <span class="share-bar-label">Compartir:</span>
-    <a class="share-btn share-btn--whatsapp" href="https://wa.me/?text=Mira%20este%20plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20%E2%80%94%20desde%201%2C99%E2%82%AC%2Fmes%20https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
+    <a class="share-btn share-btn--whatsapp" href="https://wa.me/?text=Mira%20este%20plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20%E2%80%94%20el%20primer%20mes%20es%20gratis%20https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp
     </a>
-    <a class="share-btn share-btn--x" href="https://x.com/intent/tweet?text=Plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20desde%201%2C99%E2%82%AC%2Fmes&url=https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
+    <a class="share-btn share-btn--x" href="https://x.com/intent/tweet?text=Plan%20de%20entrenamiento%20y%20nutrici%C3%B3n%20personalizado%20%E2%80%94%20el%20primer%20mes%20es%20gratis&url=https%3A%2F%2Fk-one.fit" target="_blank" rel="noopener noreferrer">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X
     </a>
@@ -8734,7 +8734,7 @@
             <div style="flex:1">
               <div style="font-weight:700;font-size:15px;color:var(--blanco);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">No hemos podido cobrar tu renovación</div>
               <div style="font-size:13px;color:#e0b4ad;margin-bottom:14px;line-height:1.6">Hay un problema con tu método de pago. Actualiza tu tarjeta para recuperar el acceso; volveremos a intentar el cobro automáticamente.</div>
-              <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="gestionarSuscripcion()">Actualizar método de pago →</button>
+              <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="gestionarSuscripcion()">Pagar la cuota pendiente →</button>
             </div>
           </div>
         </div>
@@ -10277,7 +10277,9 @@
         goTo('formulario');
         return;
       }
-      if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 1.99 });
+      // Sin importe: el primer mes es gratis. Antes mandaba 1,99 (la oferta
+      // antigua), inflando en Analytics el valor de cada plan generado.
+      if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 0 });
 
       // Guardar datos del usuario si está logueado
       const user = getCurrentUser();
@@ -19246,7 +19248,7 @@
         notasHTML += `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${generatedPlan.notasNutricion.map(n => `· ${n}`).join('<br>')}</div>`;
       }
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
-        notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${n}`).join('<br>')}</div></details>`;
+        notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${_esc(n)}`).join('<br>')}</div></details>`;
       }
       notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline;padding:12px 2px" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
       nutricionNotas.innerHTML = notasHTML;
@@ -21528,10 +21530,14 @@
     if (ofertaPeriod) ofertaPeriod.textContent = `30 días · Después ${KONE_PRICES.completo}/mes`;
     const trimPeriod = document.querySelector('[data-kp-period="trimestral"]');
     if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 4,99€/mes · Ahorras 9€`;
-    const paywallDesc = document.getElementById('paywallDesc');
-    if (paywallDesc) paywallDesc.textContent = `Has disfrutado de K-One por ${KONE_PRICES.oferta} durante tu primer mes. Elige cómo quieres pagar y continúa con tu plan, tu seguimiento y el resto de funciones.`;
+    // BUG REAL (27 sept 2026): aquí se escribía KONE_PRICES.oferta (1,99€) en
+    // la caja de precio del paywall. Esa caja SOLO se enseña a clientes nuevos
+    // (primer mes gratis, trial de Stripe sin cobro): el cliente veía en grande
+    // "1,99€ · primer mes" con el texto "tu primer mes es gratis" y el botón
+    // "Empezar gratis" al lado. El texto de paywallDesc lo pone siempre
+    // _mostrarPaywallInner según el caso, así que aquí ya no se toca.
     const ofertaSpan = document.querySelector('#paywallOfertaBox .price-amount span');
-    if (ofertaSpan) ofertaSpan.textContent = KONE_PRICES.oferta;
+    if (ofertaSpan) ofertaSpan.textContent = KONE_PRICES.primerMesGratis;
     _sincronizarPreciosJsonLd();
   }
 
@@ -23707,8 +23713,13 @@
 
     _codigoRegTimer = setTimeout(async () => {
       try {
-        const { data: referrerId } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: cod });
-        if (referrerId) {
+        // codigo_invitacion_existe solo dice sí/no. buscar_referrer_por_codigo
+        // devolvía el ID interno del dueño del código a cualquiera (ver
+        // supabase/migration-auditoria-27sept.sql); se usa solo como respaldo
+        // mientras esa migración no esté aplicada.
+        let { data: valido, error: errCod } = await supa.rpc('codigo_invitacion_existe', { p_codigo: cod });
+        if (errCod) ({ data: valido } = await supa.rpc('buscar_referrer_por_codigo', { p_codigo: cod }));
+        if (valido) {
           info.style.color = 'var(--brasa)';
           info.textContent = '✓ Código de invitación válido';
           return;
@@ -24808,8 +24819,8 @@ Se coló: ${lista}`;
     const btn = document.getElementById('paywallBtn');
     if (pagoFallido) {
       if (titulo) titulo.textContent = 'No hemos podido cobrar tu suscripción';
-      if (desc) desc.textContent = 'El último cobro ha sido rechazado por tu banco. Actualiza tu método de pago para recuperar el acceso a tu plan, tu seguimiento y el resto de funciones al momento.';
-      if (btn) btn.textContent = 'Actualizar método de pago →';
+      if (desc) desc.textContent = 'El último cobro ha sido rechazado por tu banco. Paga la cuota pendiente (puedes usar otra tarjeta, que quedará guardada para los siguientes meses) y recuperas al momento el acceso a tu plan, tu seguimiento y el resto de funciones.';
+      if (btn) btn.textContent = 'Pagar la cuota pendiente →';
       return;
     }
     if (primerMes) {
@@ -24967,7 +24978,10 @@ Se coló: ${lista}`;
       if (!data.url) throw new Error('No se recibió URL de pago');
       // El primer mes es gratis (trial de Stripe): mandar 1,99 a Analytics
       // inflaba el valor de pagos iniciados con dinero que no existe.
-      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 0 : 7.99 });
+      // Importe real del plan elegido (antes 7,99 fijo aunque fuera trimestral o solo nutrición).
+      const _pp = preciosPlan(tipoPlan);
+      const _valorPlan = parseFloat(((_pp[periodicidad] || _pp.mensual).precio || '').replace('€', '').replace(',', '.')) || 0;
+      if (typeof gtag === 'function') gtag('event', 'begin_checkout', { currency: 'EUR', value: oferta ? 0 : _valorPlan });
       window.location.href = data.url;
     } catch (e) {
       showToast('No se pudo iniciar el pago: ' + e.message, 5000);
