@@ -193,7 +193,7 @@
      orden de ejecución, solo adelanta la DESCARGA: cuando el parser llegue al
      <script> real ya lo tiene en caché, así que la pausa que queda es solo la
      de ejecutarlo (rápida), no la de ida y vuelta de red (lenta en 4G). -->
-<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous">
 <!-- Sora y Plus Jakarta Sans (9 variantes de grosor entre las dos) NO van aquí
      a propósito: solo las usa el panel de administración (Jarvis, variables
      --jv-display/--jv-ui), que ningún cliente ve nunca. Cargarlas para todo
@@ -9447,7 +9447,11 @@
      descargar/ejecutar un script remoto antes de pintar nada. Aquí, justo
      antes del script principal que lo necesita, solo bloquea este punto
      concreto (después de que el resto del HTML/CSS ya se ha parseado). -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Versión FIJA + integrity (SRI): con "@2" a secas cualquier versión 2.x nueva
+     (o una cuenta de npm comprometida) se ejecutaba aquí con acceso a la sesión
+     del cliente sin que nadie la revisara. Para actualizar: cambiar la versión
+     y recalcular el hash (openssl dgst -sha384 -binary | openssl base64 -A). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
 <script>
   // ===== SUPABASE =====
   const SUPABASE_URL = 'https://rfdrqbnzceudwclagjvp.supabase.co';
@@ -28830,12 +28834,34 @@ Se coló: ${lista}`;
       return sub;
     }
 
+    // "Los he apagado yo a propósito", recordado por usuario Y por dispositivo.
+    // BUG REAL (27 sept 2026, reportado en el ordenador): al desactivar, la
+    // suscripción del navegador se borra pero el PERMISO sigue concedido (no
+    // se puede revocar por código). Al refrescar, _resincronizarPushSubscription
+    // veía "permiso concedido + sin suscripción" -- la misma señal que deja iOS
+    // cuando revoca la suscripción por su cuenta -- y la recreaba sin
+    // preguntar: el interruptor volvía a aparecer encendido. Por dispositivo a
+    // propósito: se pueden querer apagados en el ordenador y encendidos en el móvil.
+    const _pushApagadoKey = uid => uid ? `kone_push_off_${uid}` : null;
+    function _marcarPushApagado(uid, apagado) {
+      try {
+        const k = _pushApagadoKey(uid);
+        if (!k) return;
+        if (apagado) localStorage.setItem(k, '1'); else localStorage.removeItem(k);
+      } catch (e) {}
+    }
+    function _pushApagadoPorUsuario(uid) {
+      try { const k = _pushApagadoKey(uid); return !!(k && localStorage.getItem(k)); }
+      catch (e) { return false; }
+    }
+
     window.activarNotificaciones = async function() {
       cerrarPushBanner();
       try {
         const permiso = await Notification.requestPermission();
         if (permiso !== 'granted') { showToast('No hemos podido activar los avisos.'); return; }
         await _suscribirPush();
+        _marcarPushApagado(_supaUserId, false);
         showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
@@ -28855,6 +28881,9 @@ Se coló: ${lista}`;
     // la fila se quedaría huérfana y el cron seguiría intentando mandarle
     // push a un endpoint que ya nadie escucha hasta que fallase con 404/410.
     window.desactivarNotificaciones = async function() {
+      // Antes de cualquier await: aunque algo de abajo falle, la decisión del
+      // usuario queda registrada y el próximo arranque no la deshace.
+      _marcarPushApagado(_supaUserId, true);
       try {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
@@ -28931,6 +28960,8 @@ Se coló: ${lista}`;
         if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
         const { data: { session } } = await supa.auth.getSession();
         if (!session?.user) return;               // sin sesión no hay a quién asociarla
+        // Apagados a propósito en este dispositivo: no se repara nada.
+        if (_pushApagadoPorUsuario(session.user.id)) return;
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         if (!sub) {
