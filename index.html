@@ -17283,7 +17283,12 @@
           [/harina de trigo/gi, 'harina de arroz'],
           [/crepes de trigo sarraceno/gi, 'crepes de harina de arroz'],
           [/lasaña de lentejas y berenjena/gi, 'pastel de lentejas y berenjena (sin placas de pasta)'],
-          [/tortillas? (integrales?|de trigo)/gi, 'tortilla de maíz'],
+          // BUG REAL (28 sept 2026): "integrales?" solo casa "integrale"/"integrales"
+          // (la "?" hace opcional la "s" final, no la "es" completa) -- nunca casaba
+          // "tortilla integral" en singular, que es como aparece en las 7 recetas
+          // reales que la usan. Un celíaco recibía "Wrap de maíz..." de nombre con
+          // "1 tortilla integral" (trigo) de ingrediente real. Debe ser "integral(es)?".
+          [/tortillas? (integral(es)?|de trigo)/gi, 'tortilla de maíz'],
           [/wrap integral/gi, 'wrap de maíz'],
           // Panes wassa son de centeno: no hay versión sin gluten, se cambia el plato.
           [/panes? wassa/gi, 'tortitas de arroz'],
