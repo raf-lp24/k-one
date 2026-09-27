@@ -11,7 +11,11 @@
 // index.html. El fetch es network-first, pero con mala cobertura sirve la
 // cacheada, y los moviles que la tuvieran de antes seguian viendo una version
 // sin el arreglo del interruptor de avisos.
-const CACHE_NAME = 'kone-v16';
+// v17 (28 sept 2026): auditoría completa -- el arreglo real de "apagar avisos
+// no se queda apagado", el de la tortilla de trigo en planes sin gluten, el
+// del portal de pago fallido, y la librería de Supabase con versión fija.
+// Cualquiera de estos con la copia vieja en caché sigue con el fallo.
+const CACHE_NAME = 'kone-v17';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
