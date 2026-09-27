@@ -147,6 +147,17 @@ const nombres = [...new Set(platos.map(p => p.nombre))];
 const sinPasos = nombres.filter(n => !conPasos.has(n));
 const pctPasos = Math.round((1 - sinPasos.length / nombres.length) * 100);
 console.log('  · ' + pctPasos + '% de las recetas tienen pasos escritos a mano (' + sinPasos.length + ' usan el texto genérico)');
+// Las de repostaje van fuera de los tres pools y son la PRIMERA opción de
+// cada día de entreno, así que un paso genérico ahí se ve siempre. Hasta el
+// 27 sept 2026 no se miraban: 18 de 24 salían con el texto genérico (las
+// renombraron de "antes del WOD" a "antes de entrenar" sin renombrar sus pasos).
+{
+  const iF = TXT.indexOf('let fuelingPreCarrera = ['), fF = TXT.indexOf('// OJO: estas 4 listas NO se añaden');
+  const repostaje = [...TXT.slice(iF, fF).matchAll(/op\('([^']+)'/g)].map(m => m[1]);
+  const sinPasosRep = repostaje.filter(n => !conPasos.has(n));
+  sinPasosRep.length ? mal(sinPasosRep.length + ' de ' + repostaje.length + ' recetas de repostaje sin pasos propios', sinPasosRep)
+                     : ok('las ' + repostaje.length + ' recetas de repostaje tienen sus pasos escritos a mano');
+}
 
 // ═══════════════════════ 3 · REPARTO Y CALIDAD POR OBJETIVO ═══════════════════════
 sec('3 · REPARTO DEL DÍA Y CALIDAD POR OBJETIVO');

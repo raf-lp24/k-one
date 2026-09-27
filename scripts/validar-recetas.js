@@ -83,11 +83,16 @@ module.exports = { analizar, buscarAlimento, ponerCantidades, ALIM };
 if (require.main === module) {
   // Linea base sobre TODAS las op() del archivo.
   const L = fs.readFileSync(RAIZ + '/index.html', 'utf8').split('\n');
-  const re = /^\s*op\("([^"]*)",\s*"([^"]*)",\s*"(\d+) kcal"/;
+  // Comillas dobles Y simples: las recetas de repostaje (fueling*) y el menú
+  // de reserva para alérgicos (platosSeguros) van con comillas simples y
+  // hasta el 27 sept 2026 este validador no las veía -- 11 de 51 tenían la
+  // etiqueta hasta un 30% desviada sin que nada avisara.
+  const re = /^\s*op\((["'])([^"']*)\1,\s*(["'])([^"']*)\3,\s*["'](\d+) kcal/;
   let total = 0, ok = 0, frases = 0, resueltas = 0, desviadas = [];
   for (const l of L) {
-    const m = re.exec(l);
-    if (!m) continue;
+    const mm = re.exec(l);
+    if (!mm) continue;
+    const m = [mm[0], mm[2], mm[4], mm[5]];
     total++;
     const a = analizar(m[2]);
     const nFrases = m[2].split(',').length;

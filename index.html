@@ -17129,7 +17129,7 @@
     let fuelingPostCarrera = [
       op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min'),
       op('Tosta de mermelada y queso batido (recarga tras tirada larga)', '2 tostadas pan blanco, 20g mermelada, 150g queso batido 0%', '290 kcal', '16g prot', '48g carbs', '3g grasa', 'Sin cocción · 3 min'),
-      op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '270 kcal', '15g prot', '42g carbs', '3g grasa', 'Sin cocción · 2 min'),
+      op('Dátiles con yogur griego (recarga tras tirada larga)', '4 dátiles, 200g yogur griego 0%, canela', '217 kcal', '21g prot', '31g carbs', '1g grasa', 'Sin cocción · 2 min'),
       op('Sándwich de pavo y miel (recarga tras tirada larga)', '2 rebanadas pan blanco, 60g pavo en lonchas, 10g miel', '260 kcal', '19g prot', '40g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Batido de leche con cacao y miel (recarga tras tirada larga)', '300ml leche semidesnatada, 10g cacao puro, 20g miel', '235 kcal', '12g prot', '37g carbs', '7g grasa', 'Fácil · 2 min'),
       op('Arroz con atún y tomate (recarga tras tirada larga)', '150g arroz blanco cocido, 1 lata atún al natural, 100g tomate', '305 kcal', '24g prot', '46g carbs', '2g grasa', 'Fácil · 5 min')
@@ -17139,15 +17139,21 @@
     // nutricionalmente el timing de carbohidrato+proteína pre/post sesión es el
     // mismo tanto si la sesión es un WOD como si es una tanda de fuerza.
     let fuelingPreWod = [
-      op('Arroz blanco con pollo y miel (90 min antes de entrenar)', '100g arroz blanco cocido, 120g pechuga de pollo, 1 cdta miel', '290 kcal', '30g prot', '32g carbs', '3g grasa', 'Fácil · 15 min'),
+      // Las tres "platos" de este pool son la COMIDA de los días de entreno (ver
+      // "FUELING DEL DÍA REAL"). Antes tenían tamaño de tentempié (~300 kcal y un
+      // solo hidrato) y al escalarlas a una comida entera salían "700g boniato
+      // asado, 3 huevos" o "500g pasta cocida" a un cliente normal de 70 kg
+      // (medido 27 sept 2026). Ahora parten de una comida real (~450-520 kcal)
+      // con el hidrato repartido. Macros calculados con scripts/componer.js.
+      op('Arroz blanco con pollo y miel (90 min antes de entrenar)', '150g arroz blanco cocido, 150g pechuga de pollo, 100g calabacín, 5g AOVE, 1 cdta miel', '446 kcal', '39g prot', '50g carbs', '10g grasa', 'Fácil · 15 min'),
       op('Tortitas de arroz con pavo y miel (90 min antes de entrenar)', '4 tortitas de arroz, 100g pavo en lonchas, 1 cda miel', '300 kcal', '26g prot', '38g carbs', '3g grasa', 'Sin cocción · 3 min'),
-      op('Boniato asado con huevo y jamón cocido (90 min antes de entrenar)', '150g boniato asado, 2 huevos, 40g jamón cocido', '310 kcal', '28g prot', '30g carbs', '8g grasa', 'Fácil · 20 min'),
-      op('Pasta con pavo y tomate (90 min antes de entrenar)', '100g pasta cocida, 100g pavo, 50g tomate frito casero', '310 kcal', '30g prot', '34g carbs', '3g grasa', 'Fácil · 15 min'),
+      op('Boniato asado y arroz con huevo y jamón cocido (90 min antes de entrenar)', '200g boniato asado, 100g arroz blanco cocido, 2 huevos, 50g jamón cocido', '517 kcal', '29g prot', '71g carbs', '13g grasa', 'Fácil · 20 min'),
+      op('Pasta con pavo y tomate (90 min antes de entrenar)', '180g pasta cocida, 130g pavo, 80g tomate frito casero, 100g calabacín', '456 kcal', '43g prot', '62g carbs', '4g grasa', 'Fácil · 15 min'),
       op('Bocadillo pequeño de pavo y tomate (90 min antes de entrenar)', '1 panecillo integral, 80g pavo en lonchas, 60g tomate', '265 kcal', '23g prot', '31g carbs', '5g grasa', 'Sin cocción · 4 min'),
       op('Yogur griego con avena y miel (90 min antes de entrenar)', '200g yogur griego 0%, 30g avena, 15g miel', '280 kcal', '24g prot', '40g carbs', '3g grasa', 'Sin cocción · 2 min')
     ];
     let fuelingPostWod = [
-      op('Batido de proteína con plátano y avena (recuperación post-entreno)', '1 scoop proteína, 1 plátano, 30g avena, agua o leche', '290 kcal', '29g prot', '42g carbs', '2g grasa', 'Fácil · 3 min'),
+      op('Batido de proteína con plátano y avena (recuperación post-entreno)', '1 scoop proteína, 1 plátano, 30g avena, agua', '352 kcal', '29g prot', '50g carbs', '4g grasa', 'Fácil · 3 min'),
       op('Queso batido con miel y tortitas de arroz (recuperación post-entreno)', '200g queso batido 0%, 2 tortitas de arroz, 15g miel', '260 kcal', '24g prot', '36g carbs', '2g grasa', 'Sin cocción · 2 min'),
       op('Skyr con plátano y canela (recuperación post-entreno)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min'),
       op('Bocadillo de atún y tomate (recuperación post-entreno)', '1 panecillo integral, 1 lata atún al natural, 60g tomate', '270 kcal', '26g prot', '29g carbs', '5g grasa', 'Sin cocción · 4 min'),
@@ -17441,12 +17447,12 @@
       const platosSeguros = (momento) => {
         const pool = {
           'Desayuno': [
-            op('Tortilla de tres huevos con espinacas y tomate', '3 huevos, 100g espinacas, 150g tomate, 10g AOVE', '320 kcal', '22g prot', '10g carbs', '22g grasa', 'Fácil · 8 min'),
-            op('Huevos revueltos con boniato y aguacate', '3 huevos, 150g boniato asado, 1/2 aguacate', '430 kcal', '22g prot', '32g carbs', '24g grasa', 'Fácil · 15 min'),
+            op('Tortilla de tres huevos con espinacas y tomate', '3 huevos, 100g espinacas, 150g tomate, 10g AOVE', '378 kcal', '25g prot', '11g carbs', '26g grasa', 'Fácil · 8 min'),
+            op('Huevos revueltos con boniato y aguacate', '3 huevos, 150g boniato asado, 1/2 aguacate', '547 kcal', '26g prot', '41g carbs', '31g grasa', 'Fácil · 15 min'),
             op('Bowl de fruta con semillas y miel', '1 plátano, 150g frutos rojos, 20g semillas de girasol, 15g miel', '330 kcal', '8g prot', '58g carbs', '10g grasa', 'Sin cocción · 3 min'),
-            op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '360 kcal', '32g prot', '8g carbs', '23g grasa', 'Fácil · 8 min'),
+            op('Revuelto de huevo con pavo y tomate', '3 huevos, 80g pavo en lonchas, 150g tomate, 10g AOVE', '443 kcal', '40g prot', '10g carbs', '27g grasa', 'Fácil · 8 min'),
             op('Bol de yogur de coco con fruta y semillas de calabaza', '200g yogur de coco, 1 plátano, 15g semillas de calabaza', '350 kcal', '6g prot', '46g carbs', '17g grasa', 'Sin cocción · 3 min'),
-            op('Salmón ahumado con aguacate y tomate', '80g salmón ahumado, 1/2 aguacate, 150g tomate', '340 kcal', '20g prot', '10g carbs', '25g grasa', 'Sin cocción · 5 min'),
+            op('Salmón ahumado con aguacate y tomate', '80g salmón ahumado, 1/2 aguacate, 150g tomate', '290 kcal', '18g prot', '14g carbs', '18g grasa', 'Sin cocción · 5 min'),
             op('Bol de arroz inflado con fruta y semillas de girasol', '40g arroz inflado, 1 plátano, 200ml bebida de arroz, 15g semillas de girasol', '310 kcal', '8g prot', '52g carbs', '9g grasa', 'Sin cocción · 3 min')
           ],
           'Media mañana': [
@@ -17457,10 +17463,10 @@
             op('Fruta variada con semillas de calabaza', '1 pieza de fruta, 1 mandarina, 15g semillas de calabaza', '180 kcal', '5g prot', '24g carbs', '8g grasa', 'Sin cocción · 1 min')
           ],
           'Comida': [
-            op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g verduras al vapor, 15g AOVE', '540 kcal', '48g prot', '52g carbs', '15g grasa', 'Fácil · 20 min'),
-            op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '540 kcal', '40g prot', '42g carbs', '24g grasa', 'Medio · 25 min'),
-            op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '470 kcal', '20g prot', '40g carbs', '26g grasa', 'Medio · 25 min'),
-            op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g verduras, AOVE', '520 kcal', '44g prot', '44g carbs', '16g grasa', 'Fácil · 30 min'),
+            op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g brócoli al vapor, 15g AOVE', '565 kcal', '53g prot', '41g carbs', '21g grasa', 'Fácil · 20 min'),
+            op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
+            op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '595 kcal', '26g prot', '53g carbs', '31g grasa', 'Medio · 25 min'),
+            op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g calabacín, AOVE', '639 kcal', '54g prot', '45g carbs', '27g grasa', 'Fácil · 30 min'),
             op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min')
           ],
           'Merienda': [
@@ -17471,7 +17477,7 @@
             op('Tortitas de arroz con plátano y canela', '3 tortitas de arroz, 1 plátano, canela', '230 kcal', '4g prot', '48g carbs', '2g grasa', 'Sin cocción · 2 min')
           ],
           'Cena': [
-            op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '420 kcal', '38g prot', '38g carbs', '12g grasa', 'Fácil · 25 min'),
+            op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '508 kcal', '46g prot', '54g carbs', '12g grasa', 'Fácil · 25 min'),
             op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
             op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),
             op('Rape a la plancha con calabacín y patata', '200g rape, 150g calabacín, 150g patata, AOVE', '380 kcal', '36g prot', '32g carbs', '12g grasa', 'Fácil · 20 min'),
@@ -22110,15 +22116,15 @@
     "Smoothie de plátano con avena certificada sin gluten": "Mete el plátano, la avena certificada sin gluten, la leche y canela en la batidora. Bate 30 segundos hasta que quede cremoso.",
     "Tostadas sin gluten con huevo revuelto y tomate": "Bate los huevos y revuélvelos en sartén antiadherente 2-3 min. Tuesta el pan sin gluten y sirve con el revuelto, el tomate y un chorrito de AOVE.",
     "Sopa de pollo con fideos de arroz y verduras": "Cuece el pollo en el caldo 15 min y desmecha. Añade la zanahoria y el apio troceados y cocina 8 min más. Incorpora los fideos de arroz los últimos 3-4 min. Espolvorea perejil.",
-    "Tortitas de arroz con pavo y miel (90 min antes del WOD)": "Coloca el pavo en lonchas sobre las tortitas de arroz y añade un chorrito de miel. Sin cocción. Cómelo 90 min antes del WOD.",
-    "Queso batido con miel y tortitas de arroz (recuperación post-WOD)": "Vierte el queso batido en un bol con un chorrito de miel. Sirve con las tortitas de arroz al lado. Tómalo justo después del WOD.",
-    "Boniato asado con huevo y jamón cocido (90 min antes del WOD)": "Precalienta el horno a 200°C y asa el boniato en dados 20-25 min. Cocina los huevos a la plancha o duros. Sirve con el jamón cocido.",
-    "Skyr con plátano y canela (recuperación post-WOD)": "Vierte el skyr en un bol. Añade el plátano en rodajas y espolvorea canela. Tómalo justo después del WOD.",
-    "Arroz blanco con pollo y miel (90 min antes del WOD)": "Cuece el arroz blanco. Plancha la pechuga de pollo sazonada 4-5 min por lado. Sirve con un toque de miel. Cómelo 90 min antes del WOD.",
-    "Batido de proteína con plátano y avena (recuperación post-WOD)": "Mete todos los ingredientes en la batidora. Bate 30 segundos. Tómalo justo después del WOD.",
-    "Skyr sin lactosa con plátano y canela (recuperación post-WOD)": "Vierte el skyr sin lactosa en un bol. Añade el plátano en rodajas y espolvorea canela.",
-    "Queso batido sin lactosa con miel y tortitas de arroz (recuperación post-WOD)": "Vierte el queso batido sin lactosa en un bol con un chorrito de miel. Sirve con las tortitas de arroz al lado.",
-    "Batido de proteína con plátano y avena certificada sin gluten (recuperación post-WOD)": "Mete todos los ingredientes en la batidora. Bate 30 segundos. Tómalo justo después del WOD.",
+    "Tortitas de arroz con pavo y miel (90 min antes de entrenar)": "Coloca el pavo en lonchas sobre las tortitas de arroz y añade un chorrito de miel. Sin cocción. Cómelo 90 min antes de entrenar.",
+    "Queso batido con miel y tortitas de arroz (recuperación post-entreno)": "Vierte el queso batido en un bol con un chorrito de miel. Sirve con las tortitas de arroz al lado. Tómalo justo después de entrenar.",
+    "Boniato asado y arroz con huevo y jamón cocido (90 min antes de entrenar)": "Precalienta el horno a 200°C y asa el boniato en dados 20-25 min. Calienta el arroz y cocina los huevos a la plancha o duros. Sirve todo con el jamón cocido. Cómelo 90 min antes de entrenar.",
+    "Skyr con plátano y canela (recuperación post-entreno)": "Vierte el skyr en un bol. Añade el plátano en rodajas y espolvorea canela. Tómalo justo después de entrenar.",
+    "Arroz blanco con pollo y miel (90 min antes de entrenar)": "Cuece el arroz blanco. Plancha la pechuga de pollo sazonada 4-5 min por lado y saltea el calabacín en dados con el AOVE. Sirve con un toque de miel. Cómelo 90 min antes de entrenar.",
+    "Batido de proteína con plátano y avena (recuperación post-entreno)": "Mete todos los ingredientes en la batidora. Bate 30 segundos. Tómalo justo después de entrenar.",
+    "Skyr sin lactosa con plátano y canela (recuperación post-entreno)": "Vierte el skyr sin lactosa en un bol. Añade el plátano en rodajas y espolvorea canela.",
+    "Queso batido sin lactosa con miel y tortitas de arroz (recuperación post-entreno)": "Vierte el queso batido sin lactosa en un bol con un chorrito de miel. Sirve con las tortitas de arroz al lado.",
+    "Batido de proteína con plátano y avena certificada sin gluten (recuperación post-entreno)": "Mete todos los ingredientes en la batidora. Bate 30 segundos. Tómalo justo después de entrenar.",
     "Crepes de avena con frutos rojos y yogur": "Bate la harina de avena, el huevo y la leche hasta obtener una masa fina. Cuece 2-3 crepes finas en sartén antiadherente 1-2 min por lado. Cubre con el yogur griego, los frutos rojos y un chorrito de miel.",
     // 47 recetas añadidas al nivelar los pools de comidas (todas las tomas
     // a 23 opciones). Con pasos propios para que no caigan en _pasoGenerico().
@@ -22299,7 +22305,19 @@
     "Tortilla de jamón con ensalada": "Bate los huevos con el jamón en dados. Cuaja en sartén antiadherente a fuego medio, dándole la vuelta a mitad como una tortilla. Sirve con la ensalada aliñada con AOVE.",
     "Pavo salteado con verduras al wok": "Saltea el pavo en tiras a fuego fuerte 2-3 min. Añade el brócoli y el pimiento y saltea 3-4 min más. Incorpora un chorro de salsa de soja y saltea 1 min más.",
     "Boquerones en vinagre con ensalada": "Sirve los boquerones en vinagre ya preparados junto a una ensalada de tomate y pimiento aliñada con AOVE. Sin cocción.",
-    "Crema de calabacín con pollo desmechado ligera": "Calienta la crema de calabacín a fuego suave. Sirve con el pollo desmechado por encima y un chorro de AOVE."
+    "Crema de calabacín con pollo desmechado ligera": "Calienta la crema de calabacín a fuego suave. Sirve con el pollo desmechado por encima y un chorro de AOVE.",
+    "Pan con mermelada y café (antes de tirada larga o series)": "Tuesta el pan y unta la mermelada. Acompaña con el café. Cómelo 60-90 min antes de la tirada o las series.",
+    "Copos de maíz con leche desnatada (antes de tirada larga o series)": "Sirve los copos de maíz en un bol y añade la leche desnatada fría. Tómalo 60-90 min antes de la tirada o las series.",
+    "Tortitas de arroz con miel y plátano (antes de tirada larga o series)": "Unta la miel sobre las tortitas de arroz y coloca el plátano en rodajas por encima. Sin cocción. Tómalo 60-90 min antes de la tirada o las series.",
+    "Sándwich de pavo y miel (recarga tras tirada larga)": "Coloca el pavo en lonchas entre las dos rebanadas de pan y añade un hilo de miel. Tómalo en la primera hora tras la tirada.",
+    "Batido de leche con cacao y miel (recarga tras tirada larga)": "Bate la leche con el cacao puro y la miel 20-30 segundos (o mézclalo bien con una cuchara). Tómalo en la primera hora tras la tirada.",
+    "Arroz con atún y tomate (recarga tras tirada larga)": "Calienta el arroz, escurre el atún y mézclalo con el tomate troceado. Tómalo en la primera hora tras la tirada.",
+    "Pasta con pavo y tomate (90 min antes de entrenar)": "Cuece la pasta al dente. Saltea el pavo en tiras con el calabacín en dados 5-6 min y añade el tomate frito casero. Mezcla con la pasta. Cómelo 90 min antes de entrenar.",
+    "Bocadillo pequeño de pavo y tomate (90 min antes de entrenar)": "Abre el panecillo, coloca el pavo en lonchas y el tomate en rodajas. Sin cocción. Cómelo 90 min antes de entrenar.",
+    "Yogur griego con avena y miel (90 min antes de entrenar)": "Vierte el yogur griego en un bol, añade la avena y un chorrito de miel. Sin cocción. Tómalo 90 min antes de entrenar.",
+    "Bocadillo de atún y tomate (recuperación post-entreno)": "Escurre el atún y ponlo en el panecillo con el tomate en rodajas. Sin cocción. Tómalo en la primera hora después de entrenar.",
+    "Requesón con miel y arándanos (recuperación post-entreno)": "Vierte el requesón en un bol, añade los arándanos y un chorrito de miel. Sin cocción. Tómalo en la primera hora después de entrenar.",
+    "Tortilla de claras con pan y mermelada (recuperación post-entreno)": "Cuaja las claras en una sartén antiadherente 2-3 min. Tuesta el pan y úntalo con la mermelada. Tómalo en la primera hora después de entrenar."
   };
 
   // Genera una preparación razonable para cualquier plato que no tenga una
