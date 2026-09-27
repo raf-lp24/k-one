@@ -176,6 +176,21 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Plan o periodicidad no válidos' });
     }
 
+    // Plan completo sin entreno posible = cobrar 7,99€ por lo que vale 4,99€.
+    // CrossFit/Hyrox son solo nutrición (el motor lo fuerza), y sin el bloque
+    // de entrenamiento respondido el motor no tiene nivel ni días con los que
+    // construir la rutina. La web ya no lo ofrece en esos casos; esto es la
+    // red de seguridad del servidor.
+    if (!String(tipoPlan).includes('Solo nutrici')) {
+      const { data: perfilPlan } = await supabaseAdmin
+        .from('profiles').select('userdata').eq('id', user.id).maybeSingle();
+      const ud = perfilPlan?.userdata || {};
+      const sinEntreno = [ud.nivel, ud.diasEntreno].some(v => !v || v === 'No especificado');
+      if (ud.onboardingCompletado && ud.tipoPlan && (sinEntreno || /hyrox|crossfit/i.test(ud.deporte || ''))) {
+        return res.status(400).json({ error: 'Tu plan es de solo nutrición. Para añadir entrenamiento, usa "Cambiar plan" en tu perfil y responde las preguntas de entrenamiento.' });
+      }
+    }
+
     const origin = process.env.APP_URL;
     if (!origin) return res.status(500).json({ error: 'APP_URL no configurada' });
 

@@ -24817,6 +24817,22 @@ Se coló: ${lista}`;
     const titulo = document.getElementById('paywallTitulo');
     const desc = document.getElementById('paywallDesc');
     const btn = document.getElementById('paywallBtn');
+    // "Entrenamiento + nutrición" solo si hay con qué construir el entreno.
+    // BUG REAL (27 sept 2026): quien eligió "Solo nutrición" no responde el
+    // bloque de entrenamiento, pero aquí podía cambiarse a plan completo: con
+    // CrossFit/Hyrox pagaba 7,99€ y el motor le seguía dando solo nutrición;
+    // con cualquier otro deporte le salía un plan de 5 días a nivel
+    // desconocido (fondos en paralelas a un sedentario). Para pasar a plan
+    // completo está "Cambiar plan", que sí pregunta días, nivel y lugar.
+    const _udPw = getUserData(user?.email || '')?.userData || userData || {};
+    const _sinEntrenoRespondido = [_udPw.nivel, _udPw.diasEntreno].some(v => !v || v === 'No especificado');
+    // Sin cuestionario cargado (tipoPlan vacío) no se oculta nada: ante la
+    // duda es peor empujar a "solo nutrición" a quien pidió plan completo.
+    const _ocultarCompleto = !!_udPw.tipoPlan && (_sinEntrenoRespondido || /hyrox|crossfit/i.test(_udPw.deporte || ''));
+    ['pw-ofertaTipo', 'pw-tipoPlan'].forEach(g => {
+      const op = document.querySelector(`#${g} [data-valor="completo"]`);
+      if (op) op.style.display = _ocultarCompleto ? 'none' : '';
+    });
     if (pagoFallido) {
       if (titulo) titulo.textContent = 'No hemos podido cobrar tu suscripción';
       if (desc) desc.textContent = 'El último cobro ha sido rechazado por tu banco. Paga la cuota pendiente (puedes usar otra tarjeta, que quedará guardada para los siguientes meses) y recuperas al momento el acceso a tu plan, tu seguimiento y el resto de funciones.';
@@ -24829,7 +24845,7 @@ Se coló: ${lista}`;
       if (btn) btn.textContent = 'Empezar gratis →';
       // Se preselecciona lo que eligió en el cuestionario, pero puede cambiarlo aquí.
       const tpActual = getUserData(user?.email || '')?.userData?.tipoPlan || userData.tipoPlan || '';
-      preseleccionarRadio('pw-ofertaTipo', tpActual.includes('Solo nutrición') ? 'Solo nutrición' : 'Entrenamiento + nutrición');
+      preseleccionarRadio('pw-ofertaTipo', (_ocultarCompleto || tpActual.includes('Solo nutrición')) ? 'Solo nutrición' : 'Entrenamiento + nutrición');
       actualizarAvisoOferta();
     } else {
       if (titulo) titulo.textContent = _paywallVoluntario ? 'Elige tu plan para continuar' : 'Tu primer mes ha terminado';
@@ -24841,7 +24857,7 @@ Se coló: ${lista}`;
       const tipoPlan = getUserData(email)?.userData?.tipoPlan || '';
       const periodicidad = getUserData(email)?.userData?.periodicidad || 'mensual';
       const esSoloNutri = tipoPlan.includes('Solo');
-      preseleccionarRadio('pw-tipoPlan', esSoloNutri ? 'Solo nutrición' : 'Entrenamiento + nutrición');
+      preseleccionarRadio('pw-tipoPlan', (_ocultarCompleto || esSoloNutri) ? 'Solo nutrición' : 'Entrenamiento + nutrición');
       actualizarOpcionesPeriodicidad(tipoPlan, 'pw-periodicidad');
       preseleccionarRadio('pw-periodicidad', periodicidad.charAt(0).toUpperCase() + periodicidad.slice(1));
       actualizarPrecioPaywall();
