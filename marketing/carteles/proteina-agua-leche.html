@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+  Carrusel de Instagram (1080x1350, 2 diapositivas): proteína con agua vs con
+  leche, en negro y naranja K-ONE. ?slide=1 portada, ?slide=2 comparativa.
+  Cifras: 30 g de whey (~118 kcal, ~24 g prot.) + 250 ml de agua o de leche
+  semidesnatada (~115 kcal, ~8 g prot., ~300 mg de calcio).
+  Captura: node ../cdp-shot.mjs "file:///.../proteina-agua-leche.html?slide=1" p1.png 1080 1350 1
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<style>
+  :root{--negro:#0c0a09;--naranja:#D1420E;--bone:#EDE8E1;--tinta:#140d0a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1350px;overflow:hidden;background:var(--negro);font-family:Bahnschrift,"Segoe UI",Arial,sans-serif}
+  .lienzo{position:relative;width:1080px;height:1350px;display:grid;grid-template-columns:1fr 1fr}
+  .izq{background:var(--negro);color:var(--bone)}
+  .der{background:var(--naranja);color:var(--tinta)}
+  .izq,.der{position:relative;display:flex;flex-direction:column;align-items:center}
+  /* Texto que cruza el corte: dos copias recortadas, crema a la izquierda y tinta a la derecha */
+  .cruza{position:absolute;left:0;right:0;text-align:center}
+  .cruza span{position:absolute;left:0;right:0}
+  .cruza .a{color:var(--bone);clip-path:inset(0 50% 0 0)}
+  .cruza .b{color:var(--tinta);clip-path:inset(0 0 0 50%)}
+  .marca{top:56px;font-family:Impact,sans-serif;font-size:74px;letter-spacing:3px;line-height:1}
+  .impact{font-family:Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:1}
+  .cond{font-variation-settings:"wdth" 75,"wght" 700}
+  .fuente{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:21px;letter-spacing:.3px}
+  .fuente .a{color:#8f867d}.fuente .b{color:rgba(20,13,10,.72)}
+  .pag{position:absolute;top:44px;right:44px;background:rgba(12,10,9,.85);color:var(--bone);border-radius:999px;padding:8px 18px;font-size:24px;font-variant-numeric:tabular-nums}
+
+  /* Diapositiva 1 */
+  .s1 .titulo{top:196px;font-size:118px;letter-spacing:1px}
+  .s1 .vs{top:650px;font-size:180px}
+  .s1 .izq svg,.s1 .der svg{width:440px;margin-top:400px}
+  .s1 .etq{font-size:100px;margin-top:34px}
+
+  /* Diapositiva 2 */
+  .s2 .izq svg,.s2 .der svg{width:230px;margin-top:176px}
+  .s2 .etq{font-size:80px;margin-top:26px}
+  .s2 ul{list-style:none;margin-top:34px;display:flex;flex-direction:column;gap:40px;align-items:center;padding:0 38px}
+  .s2 li{text-align:center;font-size:39px;line-height:1.1;text-transform:uppercase;text-wrap:balance}
+  .s2 li b{display:block;font-family:Impact,sans-serif;font-weight:400;font-size:62px;line-height:1;font-variant-numeric:tabular-nums}
+  .s2 .izq li b{color:var(--naranja)}
+  .s2 .der li b{color:var(--tinta)}
+  .s2 .izq li{color:var(--bone)}
+  .s2 .der li{color:var(--tinta)}
+  .cta{position:absolute;bottom:78px;left:0;right:0;text-align:center;font-size:30px}
+</style>
+<body>
+<div id="app"></div>
+<script>
+// Batidora (shaker) en SVG. liquido: color del líquido; opac: su opacidad;
+// burbujas: si lleva burbujitas (agua); fondoOscuro: ajusta el trazo.
+function shaker({ liquido, opac, burbujas, fondoOscuro }) {
+  const trazo = fondoOscuro ? '#EDE8E1' : '#140d0a';
+  const vidrio = fondoOscuro ? 'rgba(237,232,225,.10)' : 'rgba(255,255,255,.16)';
+  const b = burbujas ? [[150,300],[178,350],[140,390],[195,420],[165,460],[210,300]]
+    .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="#EDE8E1" opacity=".55"/>`).join('') : '';
+  return `<svg viewBox="0 0 400 560" aria-hidden="true">
+    <!-- cuerpo -->
+    <path d="M86 150 L314 150 L292 520 Q290 540 270 540 L130 540 Q110 540 108 520 Z" fill="${vidrio}" stroke="${trazo}" stroke-width="8" stroke-linejoin="round"/>
+    <!-- líquido -->
+    <path d="M97 250 L303 250 L292 520 Q290 532 270 532 L130 532 Q110 532 108 520 Z" fill="${liquido}" opacity="${opac}"/>
+    <ellipse cx="200" cy="250" rx="103" ry="12" fill="${liquido}" opacity="${Math.min(1, opac + .15)}" stroke="${trazo}" stroke-width="4" stroke-opacity=".5"/>
+    ${b}
+    <!-- brillo -->
+    <path d="M118 175 L108 500" stroke="#fff" stroke-width="12" stroke-linecap="round" opacity=".22"/>
+    <!-- tapa -->
+    <rect x="70" y="112" width="260" height="52" rx="14" fill="#1b1716" stroke="${trazo}" stroke-width="6"/>
+    <path d="M110 112 Q112 70 150 64 L250 64 Q288 70 290 112 Z" fill="#1b1716" stroke="${trazo}" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="168" y="26" width="64" height="44" rx="10" fill="#1b1716" stroke="${trazo}" stroke-width="6"/>
+    <path d="M250 70 Q300 20 318 70" fill="none" stroke="#1b1716" stroke-width="18" stroke-linecap="round"/>
+    <path d="M250 70 Q300 20 318 70" fill="none" stroke="${trazo}" stroke-width="4" stroke-linecap="round" opacity=".5"/>
+    <!-- cacito con proteína -->
+    <g transform="translate(-6 0)">
+      <path d="M20 424 L112 470" stroke="#C98A4B" stroke-width="22" stroke-linecap="round"/>
+      <path d="M20 424 L112 470" stroke="${trazo}" stroke-width="3" stroke-linecap="round" opacity=".35"/>
+      <path d="M92 470 L212 470 L200 540 Q198 552 184 552 L120 552 Q106 552 104 540 Z" fill="#E0A05C" stroke="${trazo}" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M96 472 Q112 420 152 418 Q196 420 208 472 Z" fill="#F4EEE4" stroke="${trazo}" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M130 446 Q150 432 176 444" stroke="#d8cfc2" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+}
+const AGUA = { liquido: '#A9C6D1', opac: .5, burbujas: true, fondoOscuro: true };
+const LECHE = { liquido: '#F6F1E8', opac: 1, burbujas: false, fondoOscuro: false };
+const cruza = (cls, txt) => `<div class="cruza ${cls}"><span class="a">${txt}</span><span class="b">${txt}</span></div>`;
+const marca = cruza('marca', 'K-ONE');
+
+const slide = new URLSearchParams(location.search).get('slide') || '1';
+const app = document.getElementById('app');
+if (slide === '1') {
+  app.innerHTML = `<div class="lienzo s1">
+    <div class="izq">${shaker(AGUA)}<div class="etq impact">Con agua</div></div>
+    <div class="der">${shaker(LECHE)}<div class="etq impact">Con leche</div></div>
+    ${marca}
+    ${cruza('titulo impact', 'Tomar proteína')}
+    ${cruza('vs impact', 'VS')}
+    <div class="pag">1/2</div>
+    <div class="fuente cond"><span class="a" style="position:absolute;left:0;width:50%">Desliza para ver las diferencias</span><span class="b" style="position:absolute;right:0;width:50%">con números reales →</span></div>
+  </div>`;
+} else {
+  app.innerHTML = `<div class="lienzo s2">
+    <div class="izq">${shaker(AGUA)}<div class="etq impact">Con agua</div>
+      <ul class="cond">
+        <li><b>~120 kcal</b>por batido</li>
+        <li><b>~24 g</b>de proteína</li>
+        <li>Más ligera y rápida de digerir</li>
+        <li>Mejor en etapa de definición</li>
+      </ul></div>
+    <div class="der">${shaker(LECHE)}<div class="etq impact">Con leche</div>
+      <ul class="cond">
+        <li><b>~235 kcal</b>por batido</li>
+        <li><b>~32 g</b>de proteína</li>
+        <li>+ calcio: un tercio del día</li>
+        <li>Más saciante, útil en volumen</li>
+      </ul></div>
+    ${marca}
+    <div class="pag">2/2</div>
+    <div class="cta cond"><span style="position:absolute;left:0;width:50%;color:#EDE8E1">Tus batidos, ya cuadrados</span><span style="position:absolute;right:0;width:50%;color:#140d0a">en tu plan · <b>k-one.fit</b></span></div>
+    <div class="fuente cond"><span class="a" style="position:absolute;left:0;width:50%">30 g de proteína whey + 250 ml</span><span class="b" style="position:absolute;right:0;width:50%">de agua o leche semidesnatada</span></div>
+  </div>`;
+}
+</script>
+</body>
