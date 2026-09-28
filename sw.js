@@ -24,7 +24,10 @@
 // aunque el cliente haya elegido menos, para que ningún plato salga con
 // más de 1 kg de un solo ingrediente. Quien generó su plan antes de este
 // cambio con la copia vieja en caché seguiría viendo el plan sin repartir.
-const CACHE_NAME = 'kone-v19';
+// v20 (28 sept 2026): la pregunta de comidas pasa de "¿cuántas veces comes?"
+// (el hábito) a "¿cuántas puedes hacer?" con 5 recomendado y marcado, y se
+// añade a "Cambiar plan" (antes no se podía cambiar después del registro).
+const CACHE_NAME = 'kone-v20';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

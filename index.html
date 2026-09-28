@@ -7064,6 +7064,15 @@
           <div class="radio-opt" onclick="selectRadio(this,'cp-enfoqueMacros'); marcarEnfoqueManualCambio();">Flexible / sin restricciones</div>
         </div>
       </div>
+      <div class="field">
+        <label>¿Cuántas comidas puedes hacer al día?</label>
+        <div class="radio-group" id="cp-comidas">
+          <div class="radio-opt" data-valor="4-5 veces" onclick="selectRadio(this,'cp-comidas')">5 comidas (recomendado)</div>
+          <div class="radio-opt" data-valor="4 veces" onclick="selectRadio(this,'cp-comidas')">4 — mi horario no da para 5</div>
+          <div class="radio-opt" data-valor="3 veces" onclick="selectRadio(this,'cp-comidas')">3 — mi horario no da para más</div>
+          <div class="radio-opt" data-valor="2 veces" onclick="selectRadio(this,'cp-comidas')">2 — mi horario no da para más</div>
+        </div>
+      </div>
       <div id="cp-entrenamientoSection">
         <div class="field">
           <label>¿Qué deporte quieres practicar?</label>
@@ -8354,13 +8363,20 @@
             <input type="text" id="noComida" placeholder="Pescado, vísceras, legumbres... lo que sea" aria-label="Alimentos que no te gustan">
           </div>
           <div class="field">
-            <label>¿Cuántas veces comes al día? <span class="required">Obligatorio</span></label>
+            <label>¿Cuántas comidas puedes hacer al día? <span class="required">Obligatorio</span></label>
+            <!-- Antes: "¿Cuántas veces comes al día?", sin nada marcado. Eso
+                 preguntaba el HÁBITO: quien se salta el desayuno marcaba "3
+                 veces" y recibía una dieta de 3 comidas, justo lo que un
+                 nutricionista no haría. Lo recomendable son 5; menos, solo si
+                 el horario no da. data-valor = lo que se guarda (mismos valores
+                 de siempre, para no tocar a quien ya respondió). -->
             <div class="radio-group" id="comidas">
-              <div class="radio-opt" onclick="selectRadio(this,'comidas')">2 veces</div>
-              <div class="radio-opt" onclick="selectRadio(this,'comidas')">3 veces</div>
-              <div class="radio-opt" onclick="selectRadio(this,'comidas')">4-5 veces</div>
-              <div class="radio-opt" onclick="selectRadio(this,'comidas')">Pico continuamente</div>
+              <div class="radio-opt selected" aria-checked="true" data-valor="4-5 veces" onclick="selectRadio(this,'comidas')">5 comidas (recomendado)</div>
+              <div class="radio-opt" data-valor="4 veces" onclick="selectRadio(this,'comidas')">4 — mi horario no da para 5</div>
+              <div class="radio-opt" data-valor="3 veces" onclick="selectRadio(this,'comidas')">3 — mi horario no da para más</div>
+              <div class="radio-opt" data-valor="2 veces" onclick="selectRadio(this,'comidas')">2 — mi horario no da para más</div>
             </div>
+            <span class="field-hint">Lo que recomendaría cualquier nutricionista son 5: desayuno, media mañana, comida, merienda y cena. Elige menos solo si tu trabajo o tu horario de verdad no te lo permite.</span>
           </div>
           <div class="field">
             <label>¿Cocinas en casa o comes fuera? <span class="optional">Opcional</span></label>
@@ -10131,7 +10147,7 @@
       sueno: getRadio('sueno'),
       dieta: getRadio('dieta'),
       noComida: document.getElementById('noComida')?.value || '',
-      comidas: getRadio('comidas'),
+      comidas: document.querySelector('#comidas .selected')?.dataset.valor || getRadio('comidas'),
       cocina: getRadio('cocina'),
       tipoPlan: getRadio('tipoPlan'),
       objetivo: getRadio('objetivo'),
@@ -17549,6 +17565,7 @@
     const TOMAS_POR_FRECUENCIA = {
       '2 veces': ['Comida', 'Cena'],
       '3 veces': ['Desayuno', 'Comida', 'Cena'],
+      '4 veces': ['Desayuno', 'Comida', 'Merienda', 'Cena'],
       '4-5 veces': ['Desayuno', 'Media mañana', 'Comida', 'Merienda', 'Cena'],
       'Pico continuamente': ['Desayuno', 'Media mañana', 'Comida', 'Merienda', 'Cena'],
     };
@@ -18276,7 +18293,7 @@
       const _tomas = (nutricion || []).length || 5;
       const _kcalPorToma = Math.round(kcalObj / _tomas);
       if (_kcalPorToma > 900) {
-        notasDeporte.push(`Tamaño de las raciones: repartes ${kcalObj} kcal en ${_tomas} tomas, así que a cada una le tocan unas ${_kcalPorToma} kcal. Es mucha comida de una sentada y vas a ver platos con raciones muy grandes. Si te cuesta terminarlos, no comas menos: reparte lo mismo en una toma más. Puedes cambiarlo en "Cambiar plan" → ¿cuántas veces comes al día?, y el menú se recalcula solo.`);
+        notasDeporte.push(`Tamaño de las raciones: repartes ${kcalObj} kcal en ${_tomas} tomas, así que a cada una le tocan unas ${_kcalPorToma} kcal. Es mucha comida de una sentada y vas a ver platos con raciones muy grandes. Si te cuesta terminarlos, no comas menos: reparte lo mismo en una toma más. Puedes cambiarlo en "Cambiar plan" → ¿Cuántas comidas puedes hacer al día?, y el menú se recalcula solo.`);
       }
     }
 
@@ -21416,7 +21433,8 @@
   function preseleccionarRadio(group, valor) {
     const opts = document.querySelectorAll(`#${group} .radio-opt`);
     opts.forEach(o => o.classList.remove('selected'));
-    const target = [...opts].find(o => o.textContent.trim() === (valor || '').trim());
+    const v = (valor || '').trim();
+    const target = [...opts].find(o => o.dataset.valor === v) || [...opts].find(o => o.textContent.trim() === v);
     if (target) target.classList.add('selected');
   }
 
@@ -22510,6 +22528,10 @@
       if (sl) sl.value = userData.peso ? parseFloat(userData.peso) : 70;
     }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
+    // "Pico continuamente" (opción retirada del cuestionario) ya da 5 tomas: se
+    // enseña como 5, que es lo que tiene.
+    const _comidasActual = ['4-5 veces', '4 veces', '3 veces', '2 veces'].includes(userData.comidas) ? userData.comidas : '4-5 veces';
+    preseleccionarRadio('cp-comidas', _comidasActual);
     updateDeporteOptionsPorPlan(tipoPlanActual, 'cp-deporte');
     preseleccionarRadio('cp-deporte', userData.deporte);
     // Marca de carrera guardada (si la dio), para poder actualizarla al mejorar
@@ -22655,6 +22677,11 @@
     userData.periodicidad = nuevaPeriodicidad;
     userData.objetivo = nuevoObjetivo;
     userData.enfoqueMacros = nuevoEnfoque || userData.enfoqueMacros;
+    // Si no la ha tocado y venía de "Pico continuamente", se queda como estaba
+    // (mismas 5 tomas); si la cambia, se guarda lo nuevo.
+    const _nuevasComidas = document.querySelector('#cp-comidas .selected')?.dataset.valor;
+    const _comidasAntes = ['4-5 veces', '4 veces', '3 veces', '2 veces'].includes(userData.comidas) ? userData.comidas : '4-5 veces';
+    if (_nuevasComidas && _nuevasComidas !== _comidasAntes) userData.comidas = _nuevasComidas;
     userData.deporte = nuevoDeporte;
     userData.diasEntreno = nuevosDias;
     userData.tiempoSesion = nuevoTiempo;
