@@ -19,7 +19,12 @@
 // (lo que leen ChatGPT/Perplexity/Google AI Overviews) estaba desincronizado
 // del FAQ visible: le faltaban 2 preguntas enteras (cobro a mitad de mes,
 // seguridad de datos) y 3 respuestas tenían texto más viejo que el real.
-const CACHE_NAME = 'kone-v18';
+// v19 (28 sept 2026): decisión de producto -- con calorías muy altas
+// (IMC>40 o peso muy alto, >4.000 kcal/día) el plan ahora fuerza 5 tomas
+// aunque el cliente haya elegido menos, para que ningún plato salga con
+// más de 1 kg de un solo ingrediente. Quien generó su plan antes de este
+// cambio con la copia vieja en caché seguiría viendo el plan sin repartir.
+const CACHE_NAME = 'kone-v19';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
