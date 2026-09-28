@@ -2,10 +2,17 @@
 <!--
   Contenido de la pantalla del móvil, fotograma a fotograma (1170x2532):
   inicio -> pulsa el icono de K-ONE -> la app se abre expandiéndose desde el
-  icono -> scroll por la semana. Se renderiza con cdp-frames.mjs y luego se
-  pega en perspectiva sobre la foto del móvil.
-  Las imágenes salen de /marketing/_tmp-movil/ (home.png, home_press.png,
-  app_tall.png, capturas reales de home-movil.html y de la app).
+  icono -> scroll por la app con paradas. Se renderiza con cdp-frames.mjs y
+  luego se pega en perspectiva sobre la pantalla de una foto de móvil (ver
+  memoria reference_app_en_pantalla_movil).
+
+  Parámetros de URL:
+    app=archivo.png   captura alta de la app a 3x (ancho 1170), en /marketing/_tmp-movil/
+    paradas=y:espera[:viaje],...   scroll en px CSS, segundos parado al llegar,
+                                   segundos del viaje hasta esa parada (0,9 por defecto)
+  window.DURACION = duración total en segundos (para pasársela a cdp-frames).
+  Imágenes en /marketing/_tmp-movil/: home.png, home_press.png (de
+  home-movil.html) y la captura de la app.
 -->
 <meta charset="utf-8">
 <style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
@@ -13,45 +20,60 @@
 <script>
 const W = 1170, H = 2532;
 const ctx = document.getElementById('c').getContext('2d');
+const q = new URLSearchParams(location.search);
 const IC = { x: 118.33 * 3, y: 294 * 3, w: 62 * 3, h: 62 * 3, r: 14 * 3 };
-const T = { tap: 1.0, open: 1.25, openEnd: 1.8, scroll: 2.4, scrollEnd: 4.4 };
-const SCROLL_TO = 1690;
+const T = { tap: 1.0, open: 1.25, openEnd: 1.8 };
+
+// Paradas -> tramos {t0, t1, y0, y1} (px de la imagen, a 3x)
+const paradas = (q.get('paradas') || '0:0.6,563:1.2:2.0').split(',').map(s => {
+  const [y, espera, viaje] = s.split(':').map(Number);
+  return { y: y * 3, espera, viaje: viaje || 0.9 };
+});
+const tramos = []; let t = T.openEnd, yPrev = paradas[0].y;
+paradas.forEach((p, i) => {
+  if (i > 0) { tramos.push({ t0: t, t1: t + p.viaje, y0: yPrev, y1: p.y }); t += p.viaje; }
+  tramos.push({ t0: t, t1: t + p.espera, y0: p.y, y1: p.y }); t += p.espera; yPrev = p.y;
+});
+window.DURACION = +t.toFixed(3);
 
 const img = src => { const i = new Image(); i.src = '/marketing/_tmp-movil/' + src; return i; };
-const home = img('home.png'), press = img('home_press.png'), app = img('app_tall.png'),
+const home = img('home.png'), press = img('home_press.png'), app = img(q.get('app') || 'app_tall.png'),
       icon = img('../../icon-192.png');
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const outQuart = p => 1 - Math.pow(1 - p, 4);
 const inOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 const lerp = (a, b, p) => a + (b - a) * p;
 
-function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function scrollEn(t) {
+  const tr = tramos.find(s => t >= s.t0 && t < s.t1) || tramos[tramos.length - 1];
+  const p = tr.t1 > tr.t0 ? inOut(clamp((t - tr.t0) / (tr.t1 - tr.t0), 0, 1)) : 1;
+  return Math.round(Math.min(lerp(tr.y0, tr.y1, p), app.naturalHeight - H));
+}
 
 function render(t) {
   ctx.clearRect(0, 0, W, H);
-  if (t < T.open) { ctx.drawImage(t < T.tap ? home : press, 0, 0, W, H); }
-  else if (t < T.openEnd) {
+  if (t < T.open) { ctx.drawImage(t < T.tap ? home : press, 0, 0, W, H); return; }
+  const y0 = paradas[0].y;
+  if (t < T.openEnd) {
     const p = outQuart(clamp((t - T.open) / (T.openEnd - T.open), 0, 1));
-    // Fondo: el inicio se aleja un poco y se oscurece, como en iOS
+    // Fondo: el inicio se aleja y se oscurece, como en iOS
     const s = lerp(1, 1.12, p), cx = IC.x + IC.w / 2, cy = IC.y + IC.h / 2;
     ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-cx, -cy);
     ctx.drawImage(press, 0, 0, W, H); ctx.restore();
     ctx.fillStyle = `rgba(0,0,0,${0.55 * p})`; ctx.fillRect(0, 0, W, H);
     // Ventana de la app creciendo desde el icono
     const x = lerp(IC.x, 0, p), y = lerp(IC.y, 0, p), w = lerp(IC.w, W, p), h = lerp(IC.h, H, p), r = lerp(IC.r, 60, p);
-    ctx.save(); rrect(x, y, w, h, r); ctx.clip();
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.clip();
     ctx.fillStyle = '#0b0b0b'; ctx.fillRect(x, y, w, h);
     ctx.globalAlpha = clamp((p - 0.15) / 0.35, 0, 1);
-    ctx.drawImage(app, 0, 0, W, H, x, y, w, h);
+    ctx.drawImage(app, 0, y0, W, H, x, y, w, h);
     ctx.globalAlpha = 1 - clamp(p / 0.3, 0, 1);
     const iw = Math.min(w, h) * 0.9;
     ctx.drawImage(icon, x + (w - iw) / 2, y + (h - iw) / 2, iw, iw);
     ctx.restore();
-  } else {
-    const p = inOut(clamp((t - T.scroll) / (T.scrollEnd - T.scroll), 0, 1));
-    const off = Math.round(SCROLL_TO * p);
-    ctx.drawImage(app, 0, off, W, H, 0, 0, W, H);
+    return;
   }
+  ctx.drawImage(app, 0, scrollEn(t), W, H, 0, 0, W, H);
 }
 window.render = render;
 const load = i => new Promise(r => { if (i.complete && i.naturalWidth) return r(); i.onload = r; i.onerror = r; });
