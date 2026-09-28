@@ -1640,7 +1640,7 @@ async function handlePost(req, res) {
                   <tr>
                     <td style="padding:14px 12px;background:#0A0A0A;border-bottom:1px solid #232323;vertical-align:top">
                       <div style="font-size:12px;color:#E8490F;font-weight:800;margin-bottom:4px">RECETARIO</div>
-                      <div style="font-size:11px;color:#8A8A8A;line-height:1.5">+200 recetas con instrucciones paso a paso. Rotación semanal para no repetir.</div>
+                      <div style="font-size:11px;color:#8A8A8A;line-height:1.5">+400 recetas con instrucciones paso a paso. Rotación semanal para no repetir.</div>
                     </td>
                     <td style="padding:14px 12px;background:#0A0A0A;border-bottom:1px solid #232323;border-left:1px solid #232323;vertical-align:top">
                       <div style="font-size:12px;color:#E8490F;font-weight:800;margin-bottom:4px">REGISTRO DE PESOS</div>
@@ -1802,7 +1802,7 @@ async function handlePost(req, res) {
         const primerNombre = (datos.nombre || '').split(' ')[0] || 'Cliente';
         destinatario = datos.email;
         asunto = `${primerNombre}, tu plan te está esperando — K-ONE`;
-        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes gratis, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +200, registro de pesos, check-in semanal, contador kcal, notas y lista de la compra.`;
+        resumen = `Email de bienvenida a ${datos.nombre} (${datos.email}). 3 pasos: rellenar cuestionario, activar primer mes gratis, empezar. Incluye 8 funciones del área de clientes: entrenamiento con vídeos, nutrición 5x5, recetario +400, registro de pesos, check-in semanal, contador kcal, notas y lista de la compra.`;
       } else if (tipo === 'mensaje') {
         destinatario = ADMIN_EMAIL;
         asunto = `Mensaje de ${datos.nombre}: ${datos.asunto}`;
