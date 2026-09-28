@@ -15,7 +15,11 @@
 // no se queda apagado", el de la tortilla de trigo en planes sin gluten, el
 // del portal de pago fallido, y la librería de Supabase con versión fija.
 // Cualquiera de estos con la copia vieja en caché sigue con el fallo.
-const CACHE_NAME = 'kone-v17';
+// v18 (28 sept 2026): auditoría AEO -- el FAQPage de datos estructurados
+// (lo que leen ChatGPT/Perplexity/Google AI Overviews) estaba desincronizado
+// del FAQ visible: le faltaban 2 preguntas enteras (cobro a mitad de mes,
+// seguridad de datos) y 3 respuestas tenían texto más viejo que el real.
+const CACHE_NAME = 'kone-v18';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
