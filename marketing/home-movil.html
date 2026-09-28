@@ -1,0 +1,84 @@
+<!doctype html>
+<!--
+  Pantalla de inicio de un móvil genérico (390x844) para los vídeos: el
+  cliente saca el móvil, pulsa el icono de K-ONE y se abre la app.
+  Iconos genéricos a propósito: ninguna marca que no sea K-ONE.
+  ?pulsado=1 oscurece el icono de K-ONE (el instante del toque).
+  Se captura con: node cdp-shot.mjs <url> salida.png 390 844 3
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:390px;height:844px;overflow:hidden;font-family:-apple-system,"Segoe UI",Inter,Arial,sans-serif;color:#fff}
+  html{background:
+    radial-gradient(120% 70% at 80% 10%, #5a2410 0%, rgba(90,36,16,0) 60%),
+    radial-gradient(90% 60% at 10% 90%, #3b1a0c 0%, rgba(59,26,12,0) 60%),
+    linear-gradient(180deg,#1a1210 0%,#0c0a09 100%);
+    background-size:390px 844px;background-repeat:no-repeat}
+  .status{height:54px;display:flex;align-items:center;justify-content:space-between;padding:14px 30px 0 34px;font-weight:600;font-size:16px}
+  .status .ico{display:flex;gap:6px;align-items:center}
+  .grid{display:grid;grid-template-columns:repeat(4,64px);justify-content:space-between;row-gap:26px;padding:22px 26px 0}
+  .app{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;letter-spacing:.1px;color:#f2f2f2;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+  .ic{width:62px;height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .ic svg{width:32px;height:32px}
+  .kone{background:#0b0b0b url('/icon-192.png') center/cover;border:.5px solid rgba(255,255,255,.12)}
+  .pulsado .kone{filter:brightness(.55);transform:scale(.93)}
+  .dock{position:absolute;left:14px;right:14px;bottom:14px;height:92px;border-radius:30px;background:rgba(255,255,255,.14);backdrop-filter:blur(20px);display:flex;justify-content:space-around;align-items:center;padding:0 12px}
+  .dots{position:absolute;bottom:118px;left:0;right:0;display:flex;justify-content:center;gap:7px}
+  .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+  .dots i:first-child{background:#fff}
+</style>
+<body>
+<div class="status"><span>20:14</span>
+  <span class="ico">
+    <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#fff"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#fff"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#fff"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#fff"/></svg>
+    <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5 5.6 8.9a3.4 3.4 0 0 1 4.8 0zM3.4 6.7a6.5 6.5 0 0 1 9.2 0l-1.4 1.4a4.5 4.5 0 0 0-6.4 0zM1.2 4.5a9.6 9.6 0 0 1 13.6 0l-1.4 1.4a7.6 7.6 0 0 0-10.8 0z" fill="#fff"/></svg>
+    <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="rgba(255,255,255,.5)"/><rect x="2" y="2" width="17" height="9" rx="2" fill="#fff"/><rect x="24.5" y="4.5" width="2" height="4" rx="1" fill="rgba(255,255,255,.5)"/></svg>
+  </span>
+</div>
+<div class="grid" id="grid"></div>
+<div class="dots"><i></i><i></i></div>
+<div class="dock" id="dock"></div>
+<script>
+const I = {
+  reloj:'<circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M16 9v7l5 3" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+  fotos:'<g fill-opacity=".9"><circle cx="16" cy="10" r="5" fill="#ffcf3f"/><circle cx="22" cy="16" r="5" fill="#3fbf6f"/><circle cx="16" cy="22" r="5" fill="#3f8fff"/><circle cx="10" cy="16" r="5" fill="#ff5a4a"/></g>',
+  mapa:'<path d="M5 9l7-3 8 3 7-3v17l-7 3-8-3-7 3z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M12 6v17M20 9v17" stroke="#fff" stroke-width="2"/>',
+  musica:'<path d="M13 22V9l11-3v13" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="10.5" cy="22" r="3" fill="#fff"/><circle cx="21.5" cy="19" r="3" fill="#fff"/>',
+  tiempo:'<circle cx="13" cy="13" r="5" fill="#ffd54a"/><path d="M11 25h12a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 11 25z" fill="#fff"/>',
+  correo:'<rect x="5" y="8" width="22" height="16" rx="3" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M6 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2"/>',
+  calendario:'<text x="16" y="12" font-size="7" text-anchor="middle" fill="#ff3b30" font-weight="700" font-family="Arial">LUN</text><text x="16" y="26" font-size="14" text-anchor="middle" fill="#111" font-weight="300" font-family="Arial">28</text>',
+  notas:'<rect x="7" y="5" width="18" height="22" rx="3" fill="#fff"/><path d="M11 12h10M11 16h10M11 20h6" stroke="#bbb" stroke-width="1.6"/>',
+  camara:'<rect x="5" y="10" width="22" height="15" rx="3" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="16" cy="17.5" r="4.5" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M12 10l2-3h4l2 3" fill="none" stroke="#fff" stroke-width="2.2"/>',
+  ajustes:'<circle cx="16" cy="16" r="4" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8 11 21M21 11l2.8-2.8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>',
+  telefono:'<path d="M10 6l4 5-2.5 2.5a13 13 0 0 0 7 7L21 18l5 4-2 3.5c-9 0-17-8-17-17z" fill="#fff"/>',
+  mensajes:'<path d="M16 7c-6 0-11 4-11 9 0 2.7 1.5 5 3.8 6.6L8 26l4.2-2c1.2.4 2.5.6 3.8.6 6 0 11-4 11-9s-5-8.6-11-8.6z" fill="#fff"/>',
+  navegador:'<circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M5 16h22M16 5c3.5 3 3.5 19 0 22M16 5c-3.5 3-3.5 19 0 22" fill="none" stroke="#fff" stroke-width="1.8"/>',
+  calc:'<rect x="8" y="5" width="16" height="22" rx="3" fill="none" stroke="#fff" stroke-width="2"/><rect x="11" y="8" width="10" height="5" rx="1" fill="#fff"/><g fill="#fff"><circle cx="12.5" cy="17" r="1.4"/><circle cx="19.5" cy="17" r="1.4"/><circle cx="12.5" cy="22" r="1.4"/><circle cx="19.5" cy="22" r="1.4"/></g>',
+  archivos:'<path d="M5 10a2 2 0 0 1 2-2h6l2 3h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" fill="#fff"/>',
+  salud:'<path d="M16 26s-10-6-10-13a5.5 5.5 0 0 1 10-3 5.5 5.5 0 0 1 10 3c0 7-10 13-10 13z" fill="#ff3b5c"/>'
+};
+const apps = [
+  ['Calendario','#fff','calendario'],['Fotos','#fff','fotos'],['Cámara','#3a3a3c','camara'],['Correo','#2f7cf6','correo'],
+  ['Reloj','#1c1c1e','reloj'],['Tiempo','#3b8fd9','tiempo'],['Mapas','#3aa55c','mapa'],['Notas','#f5c542','notas'],
+  ['Música','#f04a5a','musica'],['K-ONE','kone',null],['Salud','#fff','salud'],['Archivos','#2f7cf6','archivos'],
+  ['Calculadora','#2c2c2e','calc'],['Ajustes','#8e8e93','ajustes']
+];
+const grid = document.getElementById('grid');
+for (const [n, bg, k] of apps) {
+  const d = document.createElement('div'); d.className = 'app';
+  d.innerHTML = bg === 'kone'
+    ? '<div class="ic kone" id="kone"></div><span>K-ONE</span>'
+    : `<div class="ic" style="background:${bg}"><svg viewBox="0 0 32 32">${I[k]}</svg></div><span>${n}</span>`;
+  grid.appendChild(d);
+}
+const dock = document.getElementById('dock');
+for (const [bg, k] of [['#34c759','telefono'],['#2f7cf6','navegador'],['#34c759','mensajes'],['#f04a5a','musica']])
+  dock.innerHTML += `<div class="ic" style="background:${bg}"><svg viewBox="0 0 32 32">${I[k]}</svg></div>`;
+if (new URLSearchParams(location.search).get('pulsado')) document.body.classList.add('pulsado');
+// Para montar la animación de apertura: posición del icono en px CSS.
+const r = document.getElementById('kone').getBoundingClientRect();
+window.__ICONO = { x: r.x, y: r.y, w: r.width, h: r.height };
+</script>
+</body>

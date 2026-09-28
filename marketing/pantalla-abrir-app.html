@@ -1,0 +1,59 @@
+<!doctype html>
+<!--
+  Contenido de la pantalla del móvil, fotograma a fotograma (1170x2532):
+  inicio -> pulsa el icono de K-ONE -> la app se abre expandiéndose desde el
+  icono -> scroll por la semana. Se renderiza con cdp-frames.mjs y luego se
+  pega en perspectiva sobre la foto del móvil.
+  Las imágenes salen de /marketing/_tmp-movil/ (home.png, home_press.png,
+  app_tall.png, capturas reales de home-movil.html y de la app).
+-->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<canvas id="c" width="1170" height="2532"></canvas>
+<script>
+const W = 1170, H = 2532;
+const ctx = document.getElementById('c').getContext('2d');
+const IC = { x: 118.33 * 3, y: 294 * 3, w: 62 * 3, h: 62 * 3, r: 14 * 3 };
+const T = { tap: 1.0, open: 1.25, openEnd: 1.8, scroll: 2.4, scrollEnd: 4.4 };
+const SCROLL_TO = 1690;
+
+const img = src => { const i = new Image(); i.src = '/marketing/_tmp-movil/' + src; return i; };
+const home = img('home.png'), press = img('home_press.png'), app = img('app_tall.png'),
+      icon = img('../../icon-192.png');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const outQuart = p => 1 - Math.pow(1 - p, 4);
+const inOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const lerp = (a, b, p) => a + (b - a) * p;
+
+function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+
+function render(t) {
+  ctx.clearRect(0, 0, W, H);
+  if (t < T.open) { ctx.drawImage(t < T.tap ? home : press, 0, 0, W, H); }
+  else if (t < T.openEnd) {
+    const p = outQuart(clamp((t - T.open) / (T.openEnd - T.open), 0, 1));
+    // Fondo: el inicio se aleja un poco y se oscurece, como en iOS
+    const s = lerp(1, 1.12, p), cx = IC.x + IC.w / 2, cy = IC.y + IC.h / 2;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-cx, -cy);
+    ctx.drawImage(press, 0, 0, W, H); ctx.restore();
+    ctx.fillStyle = `rgba(0,0,0,${0.55 * p})`; ctx.fillRect(0, 0, W, H);
+    // Ventana de la app creciendo desde el icono
+    const x = lerp(IC.x, 0, p), y = lerp(IC.y, 0, p), w = lerp(IC.w, W, p), h = lerp(IC.h, H, p), r = lerp(IC.r, 60, p);
+    ctx.save(); rrect(x, y, w, h, r); ctx.clip();
+    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = clamp((p - 0.15) / 0.35, 0, 1);
+    ctx.drawImage(app, 0, 0, W, H, x, y, w, h);
+    ctx.globalAlpha = 1 - clamp(p / 0.3, 0, 1);
+    const iw = Math.min(w, h) * 0.9;
+    ctx.drawImage(icon, x + (w - iw) / 2, y + (h - iw) / 2, iw, iw);
+    ctx.restore();
+  } else {
+    const p = inOut(clamp((t - T.scroll) / (T.scrollEnd - T.scroll), 0, 1));
+    const off = Math.round(SCROLL_TO * p);
+    ctx.drawImage(app, 0, off, W, H, 0, 0, W, H);
+  }
+}
+window.render = render;
+const load = i => new Promise(r => { if (i.complete && i.naturalWidth) return r(); i.onload = r; i.onerror = r; });
+window.listo = Promise.all([home, press, app, icon].map(load)).then(() => { render(0); return true; });
+</script>

@@ -1,0 +1,45 @@
+<!doctype html>
+<!--
+  K-ONE · Reel "Plan Híbrido" — 1080x1920.
+
+  Copia de reel-entreno.html con los rótulos adaptados a Híbrido (fuerza +
+  resistencia en el mismo plan) y las capturas de estado-demo-hibrido.js
+  (cliente inventado "Laura"). Capturas 100% reales de la app, sin IA.
+
+  El motor de dibujo está en reel-motor.js, compartido con los otros reels.
+
+  Render:
+    .\generar-reel-hibrido.ps1
+-->
+<meta charset="utf-8">
+<title>K-ONE · Reel de plan híbrido</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap');
+  html,body{margin:0;padding:0;width:1080px;height:1920px;background:#000;overflow:hidden}
+  canvas{display:block}
+</style>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<span style="position:fixed;top:-400px;font-family:'Bebas Neue';font-size:100px">K-ONE</span>
+<span style="position:fixed;top:-400px;font-family:'Inter';font-size:40px">K-ONE</span>
+<script>
+window.REEL_CARPETA = '/marketing/_tmp-hibrido/';
+window.REEL_BEATS = [
+  { img: null,          t0: 0.0,  t1: 3.2,  sup: 'FUERZA + RESISTENCIA',
+    tit: 'SIN QUE SE\nPISEN ENTRE SÍ',   pie: 'Un plan semanal que reparte las dos cargas' },
+  { img: 'semana',      t0: 3.2,  t1: 7.6,  sup: 'TU SEMANA HÍBRIDA',
+    tit: 'GIMNASIO Y\nCARDIO, REPARTIDOS', pie: 'Fuerza, WOD y carrera cada uno en su día' },
+  { img: 'hoy',         t0: 7.6,  t1: 11.8, sup: 'LA SESIÓN DE HOY',
+    tit: 'ABRES Y\nYA SABES QUÉ TOCA',   pie: 'Calentamiento, bloques y por qué esta semana va así' },
+  { img: 'tarjeta',     t0: 11.8, t1: 16.0, sup: 'CADA BLOQUE',
+    tit: 'SERIES, REPS\nY RPE',          pie: 'El RPE te dice cuánto apretar. No vas a ciegas' },
+  { img: 'comosehace',  t0: 16.0, t1: 20.6, sup: '¿NO SABES HACERLO?',
+    tit: 'CÓMO SE HACE,\nPASO A PASO',   pie: 'Fotos del movimiento, músculos que trabaja y vídeo de técnica' },
+  { img: 'peso',        t0: 20.6, t1: 24.8, sup: 'APUNTA LO QUE LEVANTAS',
+    tit: 'TUS PESOS,\nGUARDADOS',        pie: 'La próxima vez ves lo que hiciste y si subes o no' },
+  { img: 'feedback',    t0: 24.8, t1: 29.6, sup: 'SI ALGO NO TE ENCAJA',
+    tit: 'CAMBIA EL\nEJERCICIO',         pie: 'Dices cómo te sientes y te proponemos alternativas al momento' }
+];
+</script>
+<script src="/marketing/reel-motor.js"></script>
+</body>
