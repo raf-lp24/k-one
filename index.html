@@ -7575,7 +7575,7 @@
         </picture>
         <span class="sport-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/></svg></span>
         <div class="sport-name">Running</div>
-        <p class="sport-desc">De 5km a maratón. Planes por fases con ritmos, distancias y zonas cardíacas.</p>
+        <p class="sport-desc">De 5km a maratón. Planes por fases con ritmos, distancias y zonas de esfuerzo.</p>
       </div>
       <div class="sport-card">
         <picture>
@@ -8277,6 +8277,27 @@
           <div class="field field-conditional" id="alergiaExtra" style="display:none">
             <label for="alergiaOtra">¿Cuál? <span class="optional">Opcional</span></label>
             <input type="text" id="alergiaOtra" placeholder="Cuéntanos a qué eres alérgico/a">
+          </div>
+          <!-- Cribado de seguridad (29 sept 2026, auditoría de entrenador): es lo
+               primero que pregunta cualquier profesional antes de poner un déficit
+               o intervalos intensos. Embarazo solo se enseña si el sexo no es
+               "Hombre" (actualizarPreguntaEmbarazo). -->
+          <div class="field" id="embarazoWrap" style="display:none">
+            <label>¿Estás embarazada, dando el pecho o has dado a luz hace menos de 6 meses? <span class="required">Obligatorio</span></label>
+            <div class="radio-group" id="embarazo">
+              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">No</div>
+              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">Embarazada</div>
+              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">Lactancia o posparto</div>
+            </div>
+            <span class="field-hint">En esta etapa tu cuerpo necesita más energía, no menos: no te pondremos déficit ni intervalos intensos.</span>
+          </div>
+          <div class="field">
+            <label>¿Tienes o has tenido un trastorno de la conducta alimentaria (anorexia, bulimia, atracones)? <span class="required">Obligatorio</span></label>
+            <div class="radio-group" id="tca">
+              <div class="radio-opt" onclick="selectRadio(this,'tca')">No</div>
+              <div class="radio-opt" onclick="selectRadio(this,'tca')">Sí</div>
+            </div>
+            <span class="field-hint">Es confidencial. Si es que sí, tu plan no llevará déficit calórico: comer bien y a tus horas va antes que cualquier cifra.</span>
           </div>
           <div class="field">
             <label for="operacion">¿Has sido operado de algo relevante? <span class="optional">Opcional</span></label>
@@ -9194,6 +9215,11 @@
               <input type="number" id="checkinPeso" step="0.1" min="20" max="400" placeholder="Ej: 78.5" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
               <span class="field-hint" style="display:block;margin-top:6px">Opcional. Es el dato que usamos para ajustar tus calorías si llevas varias semanas sin moverte hacia tu objetivo — sin esto no podemos saber si tu plan está funcionando de verdad.</span>
             </div>
+            <div class="checkin-q">
+              <label>Tu cintura (cm)</label>
+              <input type="number" id="checkinCintura" step="0.5" min="40" max="200" placeholder="Ej: 84" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
+              <span class="field-hint" style="display:block;margin-top:6px">Opcional. Mídela a la altura del ombligo, por la mañana y sin apretar la cinta. Si la báscula no se mueve pero la cintura baja, estás perdiendo grasa y ganando músculo, y así no te recortamos calorías sin motivo.</span>
+            </div>
             <div id="checkinEntrenoWrap">
               <div class="checkin-q">
                 <label>Días entrenados esta semana</label>
@@ -9688,7 +9714,7 @@
 
     if (deporte.includes('Running')) {
       split = 'Plan de Running';
-      desc  = 'Sesiones de rodaje por zonas de frecuencia cardíaca (base aeróbica, tempo, intervalos), adaptadas a tu nivel y tiempo disponible.';
+      desc  = 'Sesiones de rodaje por zonas de esfuerzo (base aeróbica, tempo, intervalos), adaptadas a tu nivel y tiempo disponible.';
     } else if (deporte.includes('Hyrox')) {
       split = 'Plan Hyrox';
       desc  = 'Combina trabajo de fuerza funcional y resistencia específica (ski erg, sled, remo, farmer carry...) estructurado por semanas progresivas.';
@@ -9822,7 +9848,19 @@
     updateBmrPanel();
   }
 
+  // La pregunta de embarazo/lactancia solo aparece si el sexo no es "Hombre".
+  // Va colgada de updateBmrPanel porque es lo que ya se llama al cambiar el sexo.
+  function actualizarPreguntaEmbarazo() {
+    const w = document.getElementById('embarazoWrap');
+    if (!w) return;
+    const sexo = document.getElementById('sexo')?.value || '';
+    const mostrar = !!sexo && sexo !== 'Hombre';
+    w.style.display = mostrar ? '' : 'none';
+    if (!mostrar) w.querySelectorAll('.radio-opt.selected').forEach(o => o.classList.remove('selected'));
+  }
+
   function updateBmrPanel() {
+    actualizarPreguntaEmbarazo();
     const panel = document.getElementById('bmrPanel');
     const sexo = document.getElementById('sexo').value;
     if (!sexo) { panel.style.display = 'none'; return; }
@@ -9913,7 +9951,10 @@
     1: [
       { type: 'radio', id: 'enfermedad' },
       { type: 'radio', id: 'lesion' },
-      { type: 'radio', id: 'alergia' }
+      { type: 'radio', id: 'alergia' },
+      // Solo obligatorio cuando se enseña (sexo distinto de "Hombre").
+      { type: 'radio', id: 'embarazo', siVisible: 'embarazoWrap' },
+      { type: 'radio', id: 'tca' }
     ],
     2: [],
     3: [
@@ -9965,6 +10006,10 @@
     fields.forEach(f => {
       const el = document.getElementById(f.id);
       if (!el) return;
+      if (f.siVisible) {
+        const w = document.getElementById(f.siVisible);
+        if (!w || w.style.display === 'none') { el.classList.remove('error'); return; }
+      }
       let valid = f.type === 'radio'
         ? !!el.querySelector('.selected')
         : el.value.toString().trim() !== '';
@@ -10139,6 +10184,9 @@
       lesionDetalle: document.getElementById('lesionDetalle')?.value || '',
       alergia: getRadio('alergia'),
       alergiaOtra: document.getElementById('alergiaOtra')?.value || '',
+      // Si la pregunta no se enseñó (sexo "Hombre"), 'No' en vez de 'No especificado'.
+      embarazo: document.getElementById('embarazoWrap')?.style.display === 'none' ? 'No' : getRadio('embarazo'),
+      tca: getRadio('tca'),
       operacion: document.getElementById('operacion')?.value || '',
       medicacion: document.getElementById('medicacion')?.value || '',
       trabajo: document.getElementById('trabajo')?.value || '',
@@ -13823,7 +13871,18 @@
 
     // OBJETIVO — se declaran aquí para que los planes de entrenamiento (más abajo)
     // y la nutrición (también más abajo) puedan usarlos sin TDZ.
-    const perdidaGrasa = objetivo.includes('Perder') || objetivo.includes('grasa');
+    // CRIBADO DE SEGURIDAD (29 sept 2026, auditoría de entrenador). Con
+    // embarazo, lactancia/posparto o un trastorno de la conducta alimentaria
+    // no se pone déficit aunque el objetivo elegido sea perder grasa: en las
+    // dos primeras el cuerpo necesita más energía, y en la tercera un plan de
+    // restricción es justo lo que puede hacer daño. Anular perdidaGrasa aquí
+    // arriba quita a la vez el déficit, los intervalos del remate y los
+    // circuitos metabólicos, sin tocarlos uno a uno.
+    const _embarazada = (u.embarazo || '').includes('Embarazada');
+    const _lactancia  = (u.embarazo || '').includes('Lactancia');
+    const _tca        = (u.tca || '') === 'Sí';
+    const _sinDeficit = _embarazada || _lactancia || _tca;
+    const perdidaGrasa = (objetivo.includes('Perder') || objetivo.includes('grasa')) && !_sinDeficit;
     const ganarMusculo = objetivo.includes('músculo') || objetivo.includes('Ganar');
     // Faltaba: en Gimnasio, quien pedía "Mejorar resistencia" recibía un plan de
     // hipertrofia SIN una sola serie de trabajo aeróbico (medido 7 sept 2026: 0
@@ -13838,6 +13897,9 @@
     // "Sentirme mejor en general" no activaba ninguna bandera: le llegaba,
     // letra por letra, el mismo plan que a quien quiere ganar musculo.
     const sentirseMejor = objetivo.includes('Sentirme');
+    // true cuando la semana sale de la plantilla de fuerza dedicada (sus
+    // repeticiones ya vienen escritas y el bloque "GANAR FUERZA" no las toca).
+    let _plantillaFuerza = false;
 
     // DATOS DE SALUD (lesiones, alergias, enfermedades, medicación) — se usan más abajo
     // para adaptar ejercicios y nutrición, no solo para mostrarlos.
@@ -13880,6 +13942,23 @@
     const pct1RM = base => Math.max(50, Math.min(92, base + _deltaPct1RM));
     const pctRango1RM = (lo, hi) => `${pct1RM(lo)}-${pct1RM(hi)}%`;
     const notasSalud = [];
+    // Notas que van a la pestaña de NUTRICIÓN en los planes completos. Las de
+    // notasSalud se pintan en "Tu plan, adaptado" del entreno ANTES de que se
+    // calcule la nutrición, así que lo que se añadía en la parte de comida no
+    // llegaba a verse (en solo nutrición, notasSalud ya es la nota de comida).
+    const notasComida = [];
+    // Cribado de seguridad: lo primero que se lee en las dos pestañas. Va en
+    // orden inverso (unshift) para que el embarazo quede arriba del todo.
+    const _notaCribado = t => { notasSalud.unshift(t); notasComida.unshift(t); };
+    if (_tca) {
+      _notaCribado('Nos indicaste un trastorno de la conducta alimentaria. Tu plan no lleva déficit y no te pediremos que recortes nada: su función es que comas de forma regular y suficiente. Te recomendamos seguirlo junto a tu psicólogo o dietista-nutricionista. Si pesarte o mirar las cantidades te genera ansiedad, puedes dejar de hacerlo: el plan sigue funcionando igual.');
+    }
+    if (_lactancia) {
+      _notaCribado('Nos indicaste lactancia o posparto reciente: tu plan no lleva déficit y suma unas 400 kcal al día, porque dar el pecho gasta energía. Si hace menos de 6 semanas del parto, o fue cesárea, espera al visto bueno de tu matrona antes de entrenar y empieza por el suelo pélvico. Si notas escapes de orina o un bulto en la tripa al hacer fuerza, para y consúltalo.');
+    }
+    if (_embarazada) {
+      _notaCribado('Nos indicaste que estás embarazada: tu plan no lleva déficit ni intervalos intensos. Antes de seguir el entrenamiento, coméntalo con tu matrona o ginecólogo. A partir del segundo trimestre evita los ejercicios tumbada boca arriba, las cargas máximas, aguantar la respiración y cualquier ejercicio con riesgo de caída o golpe en la tripa. De la comida hemos quitado los embutidos curados, los ahumados y los pescados grandes con más mercurio. Desde el segundo trimestre necesitarás unas 300 kcal más al día: tu matrona te dirá cuándo sumarlas.');
+    }
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
     // (dos personas idénticas en el cuestionario reciben orden de comidas y selección
@@ -14652,8 +14731,16 @@
       // ignoraba por completo el selector "Cardio final de tus sesiones", cuya
       // propia ayuda promete que aplica justo a este perfil (Gimnasio + perder
       // grasa). Ahora los dos remates son el mismo y salen del selector.
-      const finisher3 = perdidaGrasa ? _finisherInterval : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
-      const finisher4 = perdidaGrasa ? _finisherInterval : ((mejorarResistencia || sentirseMejor) ? _cardioZona2 : '');
+      // Con tensión alta o problemas cardíacos el remate va en zona 2 y no en
+      // intervalos (29 sept 2026, auditoría de entrenador): "30 s fuerte" desde
+      // la primera semana, a alguien que además suele empezar desde cero, es
+      // justo el esfuerzo que su médico querría ver primero. Embarazo y
+      // lactancia ya no tienen perdidaGrasa (cribado), pero sí les viene bien
+      // el cardio suave, así que se les deja el de zona 2.
+      const _sinIntervalos = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos');
+      const _conZona2 = mejorarResistencia || sentirseMejor || _embarazada || _lactancia || (perdidaGrasa && _sinIntervalos);
+      const finisher3 = (perdidaGrasa && !_sinIntervalos) ? _finisherInterval : (_conZona2 ? _cardioZona2 : '');
+      const finisher4 = finisher3;
       const sVol = ganarMusculo ? '4' : '3';
       const volP = ganarMusculo ? '5' : '4';
       const volA = ganarMusculo ? '4' : '3';
@@ -14777,6 +14864,59 @@
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
+        } else if (ganarFuerza && !enCasa) {
+          // FUERZA DE VERDAD (29 sept 2026, auditoría de entrenador). "Ganar
+          // fuerza" recibía el mismo split de culturismo que "Ganar músculo"
+          // (pecho y tríceps / espalda y bíceps / pierna...) con el primer
+          // ejercicio pasado a 5×5: sentadilla y banca UNA vez por semana, ni
+          // un solo peso muerto convencional y 30 series de pierna en un día.
+          // Eso es hipertrofia con un 5×5 delante, no un programa de fuerza.
+          // La fuerza en los básicos se gana practicándolos a menudo con
+          // volumen moderado: sentadilla y banca 2-3 veces por semana, peso
+          // muerto una (es el que más fatiga), y pocos accesorios. Las
+          // repeticiones ya vienen escritas aquí, así que el bloque "GANAR
+          // FUERZA" de más abajo no las reescribe (_plantillaFuerza).
+          _plantillaFuerza = true;
+          if (numDias === 3) {
+            semana = [
+              {dia:"Lunes", tipo:"Entrenamiento", resumen:"Fuerza A · Sentadilla y banca",
+               detalle:`Cuerpo completo · Sentadilla 5×5, Press banca 5×5, Remo con barra 3×8, Peso muerto rumano 3×8, Plancha 3×45s`,
+               etiqueta:"Fuerza"},
+              {dia:"Martes", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
+              {dia:"Miércoles", tipo:"Entrenamiento", resumen:"Fuerza B · Peso muerto y press militar",
+               detalle:`Cuerpo completo · Peso muerto 5×3, Press militar 5×5 (baja hasta "L" a 90°, no necesitas tocar los hombros), Dominadas 4×6, Sentadilla búlgara 3×8 por pierna, Face pull 3×15`,
+               etiqueta:"Fuerza"},
+              {dia:"Jueves", tipo:"Descanso", resumen:"Movilidad y stretching", detalle:"Movilidad 15 min: cadera (90/90), tobillo (rodilla a pared), hombros (band pull-apart), columna torácica (rotaciones a cuadrupedia). Foam rolling si tienes", etiqueta:"Descanso"},
+              {dia:"Viernes", tipo:"Entrenamiento", resumen:"Fuerza C · Volumen de los básicos",
+               detalle:`Cuerpo completo · Sentadilla 4×6 (unos kilos menos que el lunes), Press banca 4×6 (unos kilos menos que el lunes), Jalón en polea 3×8, Hip thrust 3×8, Plancha lateral 3×30s por lado`,
+               etiqueta:"Fuerza"},
+              {dia:"Sábado", tipo:"Descanso", resumen:"Descanso activo", detalle:"Paseo suave 20-30 min o actividad ligera que te apetezca. El objetivo es moverte sin generar fatiga", etiqueta:"Descanso"},
+              {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+            ];
+          } else {
+            // 4-5 días: torso/pierna dos veces. El quinto día es de accesorios
+            // ligeros, sin básicos, para no robar recuperación a los de fuerza.
+            semana = [
+              {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pierna A · Sentadilla",
+               detalle:`Piernas y core · Sentadilla 5×5, Peso muerto rumano 4×6, Prensa 3×8, Femoral tumbado 3×10, Elevación de gemelos 3×12, Plancha 3×45s`,
+               etiqueta:"Piernas"},
+              {dia:"Martes", tipo:"Entrenamiento", resumen:"Torso A · Press banca",
+               detalle:`Pecho, espalda, hombros · Press banca 5×5, Remo con barra 5×5, Press militar 3×6, Dominadas 3×6, Extensión de tríceps en polea 3×10, Face pull 3×15`,
+               etiqueta:"Empuje+Tracción"},
+              {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
+              {dia:"Jueves", tipo:"Entrenamiento", resumen:"Pierna B · Peso muerto",
+               detalle:`Piernas y core · Peso muerto 5×3, Sentadilla 3×5 (unos kilos menos que el lunes, técnica perfecta), Hip thrust 3×8, Femoral tumbado 3×10, Plancha lateral 3×30s por lado`,
+               etiqueta:"Piernas"},
+              {dia:"Viernes", tipo:"Entrenamiento", resumen:"Torso B · Press militar",
+               detalle:`Pecho, espalda, hombros · Press militar 5×5 (baja hasta "L" a 90°, no necesitas tocar los hombros), Press banca 4×6 (unos kilos menos que el martes), Dominadas 4×5, Remo con mancuerna a una mano 3×8 por lado, Fondos 3×8, Curl bíceps 3×10`,
+               etiqueta:"Empuje+Tracción"},
+              {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
+               resumen: numDias >= 5 ? "Accesorios · Puntos débiles" : "Descanso activo",
+               detalle: numDias >= 5 ? `Accesorios · Remo en polea baja 3×12, Elevaciones laterales 3×15 (sin impulso, aguanta 1s arriba), Curl martillo 3×12, Extensión de tríceps en polea 3×12, Rueda abdominal 3×10` : "Paseo suave 20-30 min o actividad ligera que te apetezca. El objetivo es moverte sin generar fatiga",
+               etiqueta: numDias >= 5 ? "Complemento" : "Descanso"},
+              {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
+            ];
+          }
         } else if (numDias === 3) {
           // Intermedio/Avanzado + 3 días → Push / Pull / Legs (orden correcto de recovery)
           semana = [
@@ -14806,57 +14946,41 @@
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
         } else {
-          // Intermedio/Avanzado + 4-5 días → Split clásico diferenciado por objetivo
+          // Intermedio/Avanzado + 4-5 días → Torso / Pierna, cada músculo DOS veces
+          // por semana (29 sept 2026, auditoría de entrenador).
+          //
+          // Antes era el split clásico de un músculo por día (pecho y tríceps /
+          // espalda y bíceps / pierna / hombro): cada grupo se entrenaba una sola
+          // vez a la semana y el día de pierna acumulaba ~30 series. Con el mismo
+          // volumen semanal, repartirlo en dos sesiones rinde más para crecer y
+          // fatiga menos cada día, así que es lo que se programa hoy a un
+          // intermedio con 4 días. Volumen semanal de esta plantilla (con volP/
+          // volA del objetivo): pecho ~11-13, espalda ~13-14, hombro ~9-12,
+          // cuádriceps ~13-14, isquios ~13-15 series.
+          //
+          // El ORDEN importa: el recorte por duración de la sesión se queda con
+          // los primeros ejercicios, así que cada día abre con sus básicos.
           semana = [
-            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Pecho y tríceps",
-             // Aquí había un CUARTO movimiento de empuje seguido (fondos), después
-             // de press banca + press inclinado + cruces y antes de DOS aislamientos
-             // de tríceps. Con el día de hombros del viernes (press militar +
-             // laterales + pájaros + face pull), el deltoides anterior acababa
-             // acumulando ~29 series semanales contando el trabajo indirecto —
-             // por encima del rango donde el volumen extra sigue aportando algo.
-             // Quitar los fondos reduce ese solapamiento sin tocar el estímulo
-             // real del pectoral, que ya lo cubren los dos press y el cruce.
-             detalle:`Pectoral, tríceps, hombro anterior · Press banca ${volP}×6, press inclinado con mancuernas ${volA}×10, cruces en polea 3×15, extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo), press francés 3×10 (codos fijos cerca de la cabeza, no los abras)${finisher4}`,
-             etiqueta:"Empuje"},
-            {dia:"Martes", tipo:"Entrenamiento", resumen:"Espalda y bíceps",
-             detalle:`Dorsal, trapecio, bíceps, manguito rotador · Dominadas ${volP}×6, remo con barra ${volA}×8, jalón en polea 3×10, face pull 4×15, curl bíceps ${volA}×10 (sin balanceo, aprieta en el pico de contracción), curl martillo 3×10 (control lento en la bajada)${finisher4}`,
-             etiqueta:"Tracción"},
-            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
-            {dia:"Jueves", tipo:"Entrenamiento", resumen:"Piernas y glúteos",
-             // REEQUILIBRIO CUÁDRICEPS/ISQUIOS (14 sept 2026). El día llevaba
-             // TRES ejercicios de cuádriceps (sentadilla, búlgara, prensa) y
-             // uno solo de isquios: 11 series contra 4 -- y con la rotación
-             // metiendo hip thrust en el hueco del peso muerto rumano, la
-             // semana se quedaba en 0,9 series de isquio. Se añade femoral
-             // tumbado como séptimo ejercicio (no se quita la prensa: sin
-             // ella el cuádriceps se caía a 8,5, por debajo de su mínimo).
-             // Queda igual que la plantilla de 3 días de más arriba, que ya
-             // estaba bien: 11 series de cuádriceps y 7 de isquios.
-             // El peso muerto rumano pasa a ${volP} (las mismas series que la
-             // sentadilla). En este split las piernas se entrenan UNA vez por
-             // semana, así que la bisagra de cadera es un básico del día, no un
-             // accesorio: con 3 series y una sesión corta, los isquios de la semana
-             // se quedaban en 3,3 series, por debajo del mínimo de 6 para no perder
-             // masa. Y va TERCERO a propósito: con poco tiempo la sesión se recorta
-             // a los primeros ejercicios, y este tiene que sobrevivir al recorte.
-             detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, hip thrust ${volA}×10, peso muerto rumano ${volP}×8, sentadilla búlgara 3×10 por pierna, prensa 3×12, femoral tumbado 3×12, elevación de gemelos 4×15${finisher4}`,
+            {dia:"Lunes", tipo:"Entrenamiento", resumen:"Torso A · Press banca y remo",
+             detalle:`Pecho, espalda, hombros, brazos · Press banca ${volP}×6, remo con barra ${volA}×8, press militar 3×8 (baja hasta "L" a 90°, no necesitas tocar los hombros), jalón en polea 3×10, elevaciones laterales 3×15 (sin impulso, aguanta 1s arriba), extensión de tríceps en polea 3×12 (baja completo, aprieta 1s abajo, sube resistiendo)${finisher4}`,
+             etiqueta:"Empuje+Tracción"},
+            {dia:"Martes", tipo:"Entrenamiento", resumen:"Pierna A · Sentadilla",
+             detalle:`Cuádriceps, isquios, glúteos, gemelos · Sentadilla ${volP}×6, peso muerto rumano ${volA}×8, prensa 3×12, femoral tumbado 3×12, elevación de gemelos 4×15, plancha 3×45s${finisher4}`,
              etiqueta:"Piernas"},
-            {dia:"Viernes", tipo:"Entrenamiento", resumen:"Hombros y core",
-             // La nota de "elevaciones laterales" se acortó de 13 a 9 palabras (misma
-             // idea técnica: sin impulso, controla la bajada). Con la nota larga
-             // original, CUALQUIERA de las 3 variantes que rota poolsEjercicio más
-             // abajo (17-24 palabras solo el nombre) superaba las 15 palabras que
-             // formatearSesion usa para separar "un ejercicio" de "un párrafo", y
-             // perdía la tarjeta de peso — no solo la variante "combo" que se arregló
-             // antes: las otras dos NUNCA se habían comprobado y estaban igual de rotas.
-             detalle:`Deltoides, manguito rotador, core · Press militar ${volP}×6 (baja hasta "L" a 90°, no necesitas tocar los hombros), elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), pájaros 3×15 (aprieta omóplatos, control excéntrico), face pull 3×15, plancha 4×45s, rueda abdominal 3×10${finisher4}`,
-             etiqueta:"Hombros"},
+            {dia:"Miércoles", tipo:"Descanso", resumen:"Recuperación activa", detalle:"20 min caminar suave o bici muy suave (zona 1, RPE 2-3) + movilidad: cadera (90/90), tobillo, hombros — 5 min", etiqueta:"Descanso"},
+            {dia:"Jueves", tipo:"Entrenamiento", resumen:"Torso B · Inclinado y dominadas",
+             detalle:`Pecho, espalda, hombros, brazos · Press inclinado con mancuernas ${volP}×10, dominadas ${volA}×6, press de hombro con mancuernas 3×10, remo en polea baja 3×12, cruces en polea 3×15, curl bíceps 3×10 (sin balanceo, aprieta arriba), face pull 3×15${finisher4}`,
+             etiqueta:"Empuje+Tracción"},
+            {dia:"Viernes", tipo:"Entrenamiento", resumen:"Pierna B · Peso muerto",
+             detalle:`Cuádriceps, isquios, glúteos, gemelos · Peso muerto ${volP}×5, hip thrust ${volA}×10, sentadilla búlgara 3×10 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, elevación de gemelos 4×15${finisher4}`,
+             etiqueta:"Piernas"},
             {dia:"Sábado", tipo: numDias >= 5 ? "Entrenamiento" : "Descanso",
-             resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios y core") : "Descanso",
+             resumen: numDias >= 5 ? (perdidaGrasa ? "Circuito metabólico" : "Accesorios · Hombro y brazos") : "Descanso",
+             // Las piernas ya van dos veces en la semana: el quinto día completa lo
+             // que menos volumen directo recibe (hombro lateral y posterior, brazos).
              detalle: numDias >= 5 ? (perdidaGrasa
                ? "Acondicionamiento · 5 rondas: 10 sentadillas goblet, 10 flexiones, 15 hip thrusts, 12 remo con mancuerna a una mano por lado, 30s plancha. Descanso 90s entre rondas"
-               : `Accesorios · Sentadilla búlgara 3×12 por pierna, extensión de cuádriceps 3×15, femoral tumbado 3×12, cruces en polea 3×15, encogimientos de hombro 3×12, plancha lateral 3×30s por lado`) : "",
+               : `Accesorios · Elevaciones laterales 4×15 (sin impulso, aguanta 1s arriba), pájaros 3×15 (aprieta omóplatos, control excéntrico), curl martillo 3×12 (control lento en la bajada), extensión de tríceps en polea 3×12, curl bíceps 3×12, rueda abdominal 3×10`) : "",
              etiqueta: numDias >= 5 ? (perdidaGrasa ? "Combinado" : "Complemento") : "Descanso"},
             {dia:"Domingo", tipo:"Descanso", resumen:"Recuperación total", detalle:"", etiqueta:"Descanso"}
           ];
@@ -15475,8 +15599,13 @@
         t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
         return t;
       };
-      semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aFuerza(d.detalle) } : d);
-      notasSalud.push((esPrincipiante
+      if (!_plantillaFuerza) {
+        semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aFuerza(d.detalle) } : d);
+      }
+      notasSalud.push(_plantillaFuerza
+        ? 'Tu objetivo es fuerza, así que tu semana gira alrededor de los tres levantamientos que la miden: sentadilla y press banca dos veces por semana (un día pesado y otro con unos kilos menos para practicar) y peso muerto una, que es el que más fatiga. Los básicos van a 3-5 repeticiones con carga alta y 2-3 minutos de descanso; sube el peso en cuanto completes todas las series limpias. Los accesorios son pocos a propósito: sirven para sostener los básicos, no para cansarte.'
+          + (_tramoDur === 'expres' ? ' En una sesión exprés no caben descansos largos: en los básicos descansa 90 segundos y no más.' : '')
+        : (esPrincipiante
         ? 'Tu objetivo es fuerza: los dos básicos de cada sesión van a 6 repeticiones con carga exigente (que la sexta cueste pero salga limpia) y descansas 2 minutos entre series. Empezando, la fuerza sube sobre todo por técnica, así que no busques el fallo: sube el peso cuando completes todas las series limpias.'
         : 'Tu objetivo es fuerza, no tamaño: los dos básicos de cada sesión van a 5 repeticiones con carga alta (deberías llegar justo a la quinta) y descansas 2-3 minutos entre series. Sube el peso en cuanto completes todas las series limpias.')
         + ' Los básicos no cambian de ejercicio de una semana a otra: la fuerza se gana repitiendo el mismo levantamiento. Los accesorios se quedan en repeticiones altas.'
@@ -15518,6 +15647,10 @@
         let t = texto.replace(/\([^)]*\)/g, m => { notas.push(m); return '\u0000' + (notas.length - 1) + '\u0000'; });
         t = t.replace(/([^,·]*?)(\d+)×(\d+)(?!\s*(?:s|seg|min|m)\b)/g, (m, nombre, ser, reps) => {
           if (parseInt(reps, 10) >= 8 || !BASICOS_HIPER.test(nombre)) return m;
+          // El peso muerto CONVENCIONAL se queda en 6 (29 sept 2026): a 8
+          // repeticiones con carga es donde la espalda baja se redondea por
+          // fatiga. Para el volumen de isquios ya está el rumano.
+          if (/peso muerto(?! rumano| con mancuernas| sumo)/i.test(nombre)) return parseInt(reps, 10) >= 6 ? m : nombre + ser + '×6';
           return nombre + ser + '×8';
         });
         t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
@@ -15527,6 +15660,13 @@
       notasSalud.push(sentirseMejor
         ? 'Tu objetivo es encontrarte mejor, así que los básicos van a 8 repeticiones con una carga que controles, no a 5 con carga máxima: para la salud rinde lo mismo, te recuperas antes y la sesión cabe en tu tiempo porque el descanso es más corto (unos 90 segundos). Acaba cada serie con 2-3 repeticiones de reserva.'
         : 'Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa 2 minutos entre series de básicos y 60-90 segundos en los accesorios.');
+    }
+
+    // 60 años o más (29 sept 2026, auditoría de entrenador): el plan era el
+    // mismo que a alguien de 35. A esta edad lo que más protege no es el
+    // volumen sino el equilibrio, la fuerza útil y progresar sin prisa.
+    if (!soloDieta && (parseFloat(u.edad) || 0) >= 60) {
+      notasSalud.push('A partir de los 60 hay tres cosas que valen más que cualquier récord. Equilibrio: al acabar cada sesión, 3 series de 30 segundos a una pierna por lado, junto a una pared o una silla para apoyarte si hace falta. Fuerza útil: levantarte de una silla sin manos y llevar peso en las dos manos (bolsas de la compra, mancuernas) son lo que más te protege de caídas. Y paciencia: sube el peso solo cuando todas las series salgan cómodas, de poco en poco. Si tomas medicación para la tensión o el corazón, coméntale a tu médico que has empezado a entrenar.');
     }
 
     if (!soloDieta) {
@@ -16206,12 +16346,26 @@
       // deportes a solo nutrición.
       : _deporteSoloNutricion ? 1.725
       : 1.375;
+    // AJUSTE (29 sept 2026, auditoría de entrenador). El factor solo miraba los
+    // DÍAS de entreno, no cuánto dura cada sesión, y los tramos de gimnasio
+    // estaban en la parte alta de la escala: 3 días ya contaban como "actividad
+    // moderada" (1,55, que en la escala clásica es 3-5 días de ejercicio) y 4
+    // días como casi "muy activo" (1,65). Medido con clientes tipo: un hombre de
+    // 60 años con 3 sesiones de 30-45 min en casa recibía 2.480 kcal de
+    // MANTENIMIENTO (lo realista son ~2.250) y un chico de 72 kg en volumen,
+    // 3.473 kcal los días de entreno -- más de 600 por encima de su gasto real.
+    // En un plan de oficina + gimnasio eso engorda, y el check-in tarda semanas
+    // en corregirlo. Ahora la fuerza va 1,375 / 1,45 / 1,55 / 1,6 por días y la
+    // duración de la sesión suma o resta un poco. Resistencia (running, Hyrox,
+    // CrossFit) no cambia: sus sesiones sí son de gasto alto.
+    const _ajusteDuracion = { expres: -0.05, corta: -0.025, media: 0, larga: 0.025, muyLarga: 0.05 }[_tramoDur] || 0;
     const factorAct = soloDieta ? factorActSolo
       : ((esHyrox || esCrossfit) && esAvanzado && numDias >= 5) ? 1.9
       : ((esHyrox || esCrossfit || esRunner) && numDias >= 4)   ? 1.725
-      : (numDias >= 4)  ? 1.65
-      : (numDias >= 3)  ? 1.55
-      : 1.375;
+      : ((numDias >= 5)  ? 1.6
+        : (numDias >= 4) ? 1.55
+        : (numDias >= 3) ? 1.45
+        : 1.375) + _ajusteDuracion;
 
     // NEAT por actividad laboral (jornada): el cuestionario lo pide diciendo
     // literalmente "para calcular el gasto calórico de tus días de descanso",
@@ -16254,7 +16408,15 @@
     // arreglan a la pequeña, que era donde estaba el problema.
     const _acotar = (v, min, max) => Math.round(Math.min(max, Math.max(min, v)));
     const _deficit   = _acotar(tdee * 0.18, 250, 500);
-    const _superavit = _acotar(tdee * 0.13, 200, 400);
+    // Superávit de 13% → 8% (29 sept 2026, auditoría de entrenador). Un
+    // intermedio gana como mucho 0,25-0,5% de su peso al mes en músculo; lo que
+    // sobra por encima de ~+300 kcal es grasa. Con 13% sobre un gasto ya alto,
+    // el volumen real salía de +500-700. Y "Ganar fuerza" lleva la mitad: la
+    // fuerza sube sobre todo por el sistema nervioso y la técnica, no por masa,
+    // así que basta con no ir en déficit y un margen pequeño.
+    const _superavit = ganarFuerza
+      ? _acotar(tdee * 0.04, 100, 200)
+      : _acotar(tdee * 0.08, 150, 300);
     // IMC ≥ 30: sin superávit aunque el objetivo sea ganar músculo o fuerza
     // (recomposición, ver la nota al cliente más arriba). Un +400 kcal a quien
     // ya tiene obesidad añade sobre todo grasa.
@@ -16275,6 +16437,10 @@
     if (u.ajusteCalorico) {
       kcalObj = Math.max(esMujer ? 1200 : 1500, kcalObj + u.ajusteCalorico);
     }
+
+    // Cribado de seguridad: lo que cambia en calorías y lo que se le explica.
+    // Dar el pecho gasta unas 400-500 kcal al día que Mifflin no cuenta.
+    if (_lactancia) kcalObj += 400;
 
     // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso.
     // OJO: lbm*2.4 sale por debajo de peso*protMultiplier (2.0-2.3 g/kg) para
@@ -16299,7 +16465,12 @@
     const lbm = esMujer
       ? (0.252 * pesoKg + 0.473 * altCm - 48.3)
       : (0.407 * pesoKg + 0.267 * altCm - 19.2);
-    const lbmProtMax = Math.round(lbm * 2.7);
+    // Con obesidad el tope baja a 2,2 g/kg de masa magra (29 sept 2026). El 2,7
+    // de Helms está medido en deportistas delgados preparando competición; en
+    // un principiante de 105 kg daba 190 g/día, un 35% de sus calorías: difícil
+    // de comer todos los días (y lo que no se cumple no sirve). Con 2,2 queda
+    // en ~155 g, que sigue protegiendo la masa magra en el déficit.
+    const lbmProtMax = Math.round(lbm * (_obesidad ? 2.2 : 2.7));
     const bmi = pesoKg / Math.pow(altCm / 100, 2);
     const conSobrepeso = bmi >= 25;
 
@@ -16323,7 +16494,10 @@
       ? (esRunner ? 2.0 : esMixto ? 2.3 : 2.2)
       : ganarMusculo
       ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
-      : (esRunner ? 1.4 : esMixto ? 1.8 : 1.6)) * (enfoqueAltoProt ? 1.15 : 1);
+      // Runner en mantenimiento 1,4 → 1,6 (29 sept 2026): 1,4 es el mínimo de
+      // la ISSN para resistencia, y el plan de running lleva además un día de
+      // fuerza por semana. Una corredora de 58 kg se quedaba en 81 g.
+      : (esRunner ? 1.6 : esMixto ? 1.8 : 1.6)) * (enfoqueAltoProt ? 1.15 : 1);
     // Peso de referencia para los gramos por kilo. Con obesidad (IMC ≥ 30) el
     // peso total infla proteína e hidratos sin sentido: medido, un hombre de
     // 180 kg y 1,90 m en mantenimiento recibía 288 g de proteína y 736 g de
@@ -16358,9 +16532,12 @@
     // raciones absurdas, y la ficha prometía 500 mientras el plan entregaba 384.
     // Un objetivo que no se cumple no es un objetivo. Con 4,5 el número que se
     // muestra es el que se sirve, y sigue dentro del rango de la ISSN.
+    // "Sentirme mejor" sin deporte de resistencia: 4,5 → 3,5 g/kg (29 sept
+    // 2026). 4,5 g/kg es una dosis de deportista que entrena duro a diario;
+    // a quien entrena 3 días por salud le dejaba la grasa por debajo del 20%.
     const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
-      : (perdidaGrasa ? 3.0 : ganarMusculo ? 4.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
+      : (perdidaGrasa ? 3.0 : ganarMusculo ? 4.5 : sentirseMejor ? 3.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
     let carbsObj = Math.round(pesoRef * carbsMultiplier);
 
     // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
@@ -16379,7 +16556,10 @@
     {
       const kcalProt = protObj * 4;
       const grasaG = (kcalObj - kcalProt - carbsObj * 4) / 9;
-      const grasaMin = Math.max(0.6 * pesoRef, (kcalObj * 0.18) / 9);
+      // Suelo subido de 0,6 g/kg y 18% a 0,7 g/kg (0,8 en mujeres) y 20%
+      // (29 sept 2026): el propio motor dice trabajar en 20-35%, y en mujeres
+      // la grasa muy baja es la primera que altera el ciclo menstrual.
+      const grasaMin = Math.max((esMujer ? 0.8 : 0.7) * pesoRef, (kcalObj * 0.20) / 9);
       const grasaMax = (kcalObj * (enfoqueBajoCarbo ? 0.55 : 0.35)) / 9;
       if (grasaG < grasaMin) {
         carbsObj = Math.max(0, Math.round((kcalObj - kcalProt - grasaMin * 9) / 4));
@@ -16489,11 +16669,21 @@
     // Ajusta el numero de las 1-2 primeras palabras ("manzana o pera" lleva dos).
     const _concordar = (resto, cantidad) => {
       const plural = cantidad > 1;
-      return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)( o ([A-Za-zÁÉÍÓÚáéíóúÑñ]+))?/, (todo, p1, conO, p2) => {
-        const n1 = plural ? _aPlural(p1) : _aSingular(p1);
-        if (!conO) return n1;
-        return n1 + ' o ' + (plural ? _aPlural(p2) : _aSingular(p2));
-      });
+      // El adjetivo que va pegado también concuerda (29 sept 2026): al bajar
+      // "2 huevos duros" a una pieza salía "1 huevo duros". Solo los adjetivos
+      // de cocina que de verdad aparecen detrás de una pieza contable.
+      const _ADJ = /^(dur|cocid|pequeñ|median|madur|sec|fresc|enter|congelad|asad|rallad|triguer)[oa]s?$|^grandes?$/i;
+      const conAdj = (palabra, sig) => {
+        const n = plural ? _aPlural(palabra) : _aSingular(palabra);
+        if (!sig || !_ADJ.test(sig)) return n + (sig ? ' ' + sig : '');
+        return n + ' ' + (plural ? _aPlural(sig) : _aSingular(sig));
+      };
+      // "plátano o manzana": las dos piezas concuerdan, como siempre.
+      if (/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+ o [A-Za-zÁÉÍÓÚáéíóúÑñ]+/.test(resto)) {
+        return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+) o ([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/, (todo, p1, p2) =>
+          (plural ? _aPlural(p1) : _aSingular(p1)) + ' o ' + (plural ? _aPlural(p2) : _aSingular(p2)));
+      }
+      return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)(?: ([A-Za-zÁÉÍÓÚáéíóúÑñ]+))?/, (todo, p1, adj) => conAdj(p1, adj));
     };
 
     // "3/4" se lee mejor que "0,75" en una lista de la compra.
@@ -17544,7 +17734,18 @@
     const _activas = { gluten: sinGluten, lactosa: sinLactosa };
     const _otraLimpia = u.alergia === 'Otra' ? _quitarAlergiasDedicadas(u.alergiaOtra, _activas) : '';
     const alergiaLibre = _otraLimpia ? _expandirAlergenoLibre(_otraLimpia) : '';
-    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre].filter(Boolean).join(', ');
+    // Embarazo: fuera embutidos curados y ahumados (toxoplasma, listeria) y los
+    // pescados grandes con más mercurio. Mismo filtro que "no como".
+    const _filtroEmbarazo = _embarazada ? 'jamón serrano, jamón ibérico, salmón ahumado, pez espada, emperador, atún rojo' : '';
+    // Hipertensión (29 sept 2026, auditoría de entrenador): el plan solo le
+    // decía que no aguantara la respiración, y su semana de comidas llevaba
+    // ~20 opciones con jamón serrano, ~20 con pavo en lonchas, salmón ahumado
+    // y salsa de soja. Lo primero que hace un nutricionista con la tensión
+    // alta es bajar la sal: fuera los curados y ahumados (los más salados), y
+    // lo que tiene versión baja en sal se pide así (más abajo).
+    const _hipertension = enfermedad.includes('Hipertensión');
+    const _filtroSal = _hipertension ? 'jamón serrano, jamón ibérico, salmón ahumado' : '';
+    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroEmbarazo, _filtroSal].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
     if (_redAlergenos && textoFiltro) {
       nutricion = nutricion.map(m => {
@@ -17553,6 +17754,21 @@
         const relleno = filtrarNoComida([{ momento: m.momento, opciones: _redAlergenos.platosSeguros(m.momento) }], textoFiltro)[0].opciones;
         return { ...m, opciones: relleno.length ? relleno : seguras };
       });
+    }
+    // Con hipertensión, lo procesado que tiene versión baja en sal se pide así.
+    // Solo en los ingredientes (no en el nombre del plato, que es la clave de
+    // sus pasos de receta), y conservando el nombre del alimento dentro para
+    // que "Ver macros" lo siga encontrando.
+    // (Se vuelve a pasar al final sobre nutricionPorDia: los platos de antes y
+    // después de entrenar entran más tarde y no pasan por aquí.)
+    const _bajoEnSal = t => (t || '')
+      .replace(/pavo en lonchas(?! bajo)/gi, m => m + ' bajo en sal')
+      .replace(/jamón cocido(?! bajo)/gi, m => m + ' bajo en sal')
+      .replace(/salsa de soja(?! baja)/gi, m => m + ' baja en sal');
+    const _tomasBajasEnSal = tomas => tomas.map(m => ({ ...m, opciones: m.opciones.map(o => ({ ...o, ingredientes: _bajoEnSal(o.ingredientes) })) }));
+    if (_hipertension) {
+      nutricion = _tomasBajasEnSal(nutricion);
+      (soloDieta ? notasSalud : notasComida).push('Tensión alta y comida: la sal es lo que más la sube. Hemos quitado del plan los embutidos curados y los ahumados, y el pavo, el jamón cocido y la salsa de soja van en su versión baja en sal. En casa, cocina sin salero (limón, ajo, especias y hierbas dan el sabor) y no pases de 5 g de sal al día contando la que ya traen el pan y los preparados. La fruta y la verdura de cada comida ayudan: su potasio contrarresta parte del sodio.');
     }
 
     // AJUSTE POR "¿CUÁNTAS VECES COMES AL DÍA?" (u.comidas)
@@ -18442,7 +18658,12 @@
       });
     });
 
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : [], notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
+    if (_hipertension) {
+      for (let i = 0; i < nutricionPorDia.length; i++) {
+        if (Array.isArray(nutricionPorDia[i])) nutricionPorDia[i] = _tomasBajasEnSal(nutricionPorDia[i]);
+      }
+    }
+    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
 
@@ -21222,7 +21443,7 @@
   // en mantenimiento) y se ajusta userData.ajusteCalorico en consecuencia.
   // Ajuste moderado (150 kcal) y no en cada check-in: hace falta tendencia de
   // 3 semanas, no un solo pesaje (agua, digestión, ciclo... meten ruido).
-  function evaluarYAjustarCalorias(pesoActual) {
+  function evaluarYAjustarCalorias(pesoActual, cinturaActual) {
     // Mismo rango biológico que ya usa guardarCambioPlan() para el peso --
     // el input del check-in tiene min/max en el HTML, pero eso no bloquea
     // escribir un valor a mano fuera de rango (0 y negativos son "truthy" en
@@ -21231,7 +21452,13 @@
     // abajo, y los hitos de peso (kilo1/kilo5/kilo10).
     if (!pesoActual || isNaN(pesoActual) || pesoActual < 30 || pesoActual > 300) return null;
     if (!userData.historialPeso) userData.historialPeso = [];
-    userData.historialPeso.push({ fecha: new Date().toISOString(), peso: pesoActual, semana: getSemanaActual() });
+    // La cintura va en el mismo registro (opcional, 29 sept 2026): con solo el
+    // peso, quien pierde grasa y gana músculo a la vez parece "estancado" y
+    // se le recortaban calorías justo cuando el plan estaba funcionando.
+    const _cint = parseFloat(cinturaActual);
+    const _registro = { fecha: new Date().toISOString(), peso: pesoActual, semana: getSemanaActual() };
+    if (_cint >= 40 && _cint <= 200) _registro.cintura = _cint;
+    userData.historialPeso.push(_registro);
     if (userData.historialPeso.length > 26) userData.historialPeso = userData.historialPeso.slice(-26);
 
     const hist = userData.historialPeso;
@@ -21253,6 +21480,11 @@
     const cambioSemanal = (ultimos3[ultimos3.length - 1].peso - ultimos3[0].peso) / semanas;
     const cambioPct = (cambioSemanal / ultimos3[0].peso) * 100;
 
+    // Embarazo, lactancia o TCA: nada de recortes automáticos por la báscula.
+    // En el embarazo subir de peso es lo esperado, y con un TCA un "hemos
+    // bajado tus calorías" es lo último que hay que enseñar (29 sept 2026).
+    if ((userData.embarazo || '').match(/Embarazada|Lactancia/) || userData.tca === 'Sí') return null;
+
     const objetivo = userData.objetivo || '';
     const perdidaGrasa = objetivo.includes('Perder') || objetivo.includes('grasa');
     const ganarMusculo = objetivo.includes('músculo') || objetivo.includes('Ganar');
@@ -21261,8 +21493,15 @@
     const PASO = 150, TOPE = 450;
     let nuevoAjuste = actual, mensaje = null;
 
+    // Cintura del primer y el último registro de la ventana, si los dos la tienen.
+    const _c0 = ultimos3[0].cintura, _c1 = ultimos3[ultimos3.length - 1].cintura;
+    const bajaCintura = (_c0 && _c1) ? _c0 - _c1 : 0;
+
     if (perdidaGrasa) {
-      if (cambioPct > -0.15) {
+      if (cambioPct > -0.15 && bajaCintura >= 1) {
+        // Báscula quieta, cintura bajando: recomposición. No se toca nada.
+        return `Tu peso apenas se ha movido en ${semanasTexto} semanas, pero tu cintura ha bajado ${String(Math.round(bajaCintura * 10) / 10).replace('.', ',')} cm: estás perdiendo grasa y ganando músculo a la vez. No tocamos tus calorías, el plan está funcionando.`;
+      } else if (cambioPct > -0.15) {
         nuevoAjuste = Math.max(actual - PASO, -TOPE);
         mensaje = `Llevas ${semanasTexto} semanas prácticamente sin bajar de peso. Hemos reducido tus calorías objetivo en ${PASO} kcal/día para reactivar la pérdida.`;
       } else if (cambioPct < -1.0) {
@@ -21361,7 +21600,7 @@
       if (nota && nota.trim()) {
         userData.progreso.ultimaNota = nota.trim();
       }
-      const mensajeCalorias = evaluarYAjustarCalorias(pesoCheckin);
+      const mensajeCalorias = evaluarYAjustarCalorias(pesoCheckin, document.getElementById('checkinCintura')?.value);
       if (mensajeCalorias) respuesta += ` ${mensajeCalorias}`;
 
       if (!userData.historialEntrenos) userData.historialEntrenos = [];

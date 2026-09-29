@@ -29,7 +29,10 @@
 // añade a "Cambiar plan" (antes no se podía cambiar después del registro).
 // v21 (29 sept 2026): "Avisos de entreno" y "Avisos de registro" dejan de ser
 // el mismo interruptor; el de entreno se guarda en la cuenta (userdata).
-const CACHE_NAME = 'kone-v21';
+// v22 (29 sept 2026): auditoría de entrenador -- cribado de embarazo/TCA,
+// fuerza de verdad, torso/pierna, calorías y proteína afinadas, sal con
+// tensión alta y cintura en el check-in.
+const CACHE_NAME = 'kone-v22';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
