@@ -2,8 +2,7 @@
 <!--
   Carrusel de Instagram (1080x1350, 2 diapositivas): proteína con agua vs con
   leche, en negro y naranja K-ONE. ?slide=1 portada, ?slide=2 comparativa.
-  Cifras: 30 g de whey (~118 kcal, ~24 g prot.) + 250 ml de agua o de leche
-  semidesnatada (~115 kcal, ~8 g prot., ~300 mg de calcio).
+  Sin cifras a propósito: mismo formato que el carrusel de referencia.
   Captura: node ../cdp-shot.mjs "file:///.../proteina-agua-leche.html?slide=1" p1.png 1080 1350 1
 -->
 <meta charset="utf-8">
@@ -29,21 +28,18 @@
   .pag{position:absolute;top:44px;right:44px;background:rgba(12,10,9,.85);color:var(--bone);border-radius:999px;padding:8px 18px;font-size:24px;font-variant-numeric:tabular-nums}
 
   /* Diapositiva 1 */
-  .s1 .titulo{top:196px;font-size:118px;letter-spacing:1px}
-  .s1 .vs{top:650px;font-size:180px}
-  .s1 .izq svg,.s1 .der svg{width:440px;margin-top:400px}
+  .s1 .titulo{top:220px;font-size:122px;letter-spacing:1px}
+  .s1 .vs{top:700px;font-size:180px}
+  .s1 .izq svg,.s1 .der svg{width:450px;margin-top:450px}
   .s1 .etq{font-size:100px;margin-top:34px}
 
   /* Diapositiva 2 */
-  .s2 .izq svg,.s2 .der svg{width:230px;margin-top:176px}
-  .s2 .etq{font-size:80px;margin-top:26px}
-  .s2 ul{list-style:none;margin-top:34px;display:flex;flex-direction:column;gap:40px;align-items:center;padding:0 38px}
-  .s2 li{text-align:center;font-size:39px;line-height:1.1;text-transform:uppercase;text-wrap:balance}
-  .s2 li b{display:block;font-family:Impact,sans-serif;font-weight:400;font-size:62px;line-height:1;font-variant-numeric:tabular-nums}
-  .s2 .izq li b{color:var(--naranja)}
-  .s2 .der li b{color:var(--tinta)}
-  .s2 .izq li{color:var(--bone)}
-  .s2 .der li{color:var(--tinta)}
+  .s2 .izq svg,.s2 .der svg{width:250px;margin-top:170px}
+  .s2 .etq{font-size:88px;margin-top:30px}
+  .s2 ul{list-style:none;margin-top:44px;display:flex;flex-direction:column;gap:44px;align-items:center;padding:0 44px}
+  .s2 li{text-align:center;font-size:42px;font-weight:700;line-height:1.12;text-transform:uppercase;text-wrap:balance;letter-spacing:.3px}
+  .s2 .izq li{color:var(--naranja)}
+  .s2 .der li{color:#FFF1E2}
   .cta{position:absolute;bottom:78px;left:0;right:0;text-align:center;font-size:30px}
 </style>
 <body>
@@ -96,28 +92,27 @@ if (slide === '1') {
     ${cruza('titulo impact', 'Tomar proteína')}
     ${cruza('vs impact', 'VS')}
     <div class="pag">1/2</div>
-    <div class="fuente cond"><span class="a" style="position:absolute;left:0;width:50%">Desliza para ver las diferencias</span><span class="b" style="position:absolute;right:0;width:50%">con números reales →</span></div>
   </div>`;
 } else {
   app.innerHTML = `<div class="lienzo s2">
     <div class="izq">${shaker(AGUA)}<div class="etq impact">Con agua</div>
-      <ul class="cond">
-        <li><b>~120 kcal</b>por batido</li>
-        <li><b>~24 g</b>de proteína</li>
-        <li>Más ligera y rápida de digerir</li>
-        <li>Mejor en etapa de definición</li>
+      <ul>
+        <li>Más rápida absorción</li>
+        <li>Menos calorías</li>
+        <li>Ideal en etapa de definición</li>
+        <li>Fácil de digerir</li>
+        <li>Sabor más ligero</li>
       </ul></div>
     <div class="der">${shaker(LECHE)}<div class="etq impact">Con leche</div>
-      <ul class="cond">
-        <li><b>~235 kcal</b>por batido</li>
-        <li><b>~32 g</b>de proteína</li>
-        <li>+ calcio: un tercio del día</li>
-        <li>Más saciante, útil en volumen</li>
+      <ul>
+        <li>Aporta calcio y vitaminas</li>
+        <li>Más proteínas y nutrientes</li>
+        <li>Mejor saciedad</li>
+        <li>Útil en etapa de volumen</li>
+        <li>Sabor más cremoso</li>
       </ul></div>
     ${marca}
     <div class="pag">2/2</div>
-    <div class="cta cond"><span style="position:absolute;left:0;width:50%;color:#EDE8E1">Tus batidos, ya cuadrados</span><span style="position:absolute;right:0;width:50%;color:#140d0a">en tu plan · <b>k-one.fit</b></span></div>
-    <div class="fuente cond"><span class="a" style="position:absolute;left:0;width:50%">30 g de proteína whey + 250 ml</span><span class="b" style="position:absolute;right:0;width:50%">de agua o leche semidesnatada</span></div>
   </div>`;
 }
 </script>
