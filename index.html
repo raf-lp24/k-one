@@ -11496,11 +11496,142 @@
     'slider hamstring curl': 'https://www.youtube.com/results?search_query=slider+hamstring+curl',
   };
 
-  function getVideoUrl(nombreEjercicio) {
-    const n = nombreEjercicio.toLowerCase().trim();
-    for (const [key, url] of Object.entries(VIDEOS_EJERCICIOS)) {
-      if (n.includes(key)) return url;
+  // VÍDEO DE TÉCNICA CONCRETO POR EJERCICIO (29 sept 2026). Antes "Ver vídeo"
+  // llevaba SIEMPRE a una búsqueda de YouTube (VIDEOS_EJERCICIOS de arriba
+  // solo guarda búsquedas): el cliente caía en una lista de resultados al azar,
+  // a veces en inglés o de otro ejercicio. Ahora cada ejercicio que genera el
+  // motor (medido: 140 nombres distintos sobre 1.728 planes, ~95 ejercicios
+  // reales) abre un vídeo elegido a mano: en español, de técnica, corto y de
+  // canales con buena reputación.
+  //
+  // [patrón sin tildes, id del vídeo, canal - título]. De lo concreto a lo
+  // general: si dos reglas casan en la MISMA posición gana la que va antes
+  // ("sentadilla goblet" antes que "sentadilla"); si casan en posiciones
+  // distintas gana la que empieza antes en el nombre, así "Jalón en polea o
+  // remo australiano" abre el jalón y no el remo. VIDEOS_EJERCICIOS se queda
+  // para las sugerencias de "Añadir ejercicio" y la búsqueda de reserva.
+  const VIDEO_TECNICA = [
+    ['peso muerto rumano con mancuern|peso muerto rumano mancuern', 'yxLk9X5C7RU', 'DrVíctorLópez - PMR con mancuernas'],
+    ['peso muerto sumo', 'VjcxPlAYReA', 'Élite - Peso muerto sumo con mancuerna'],
+    ['peso muerto rumano|\\brdl\\b', 'rjvlSfZ-PQw', 'Fit Generation - Peso muerto rumano'],
+    ['peso muerto (con )?mancuern', 'RMycTD5LU74', 'Fitness Consciente - Peso muerto con mancuernas'],
+    ['peso muerto', '7Sjfm61-HC4', 'Jeremy Ethier ES - Peso muerto'],
+    ['sentadilla bulgara', 'Xfa3Ql_NwmE', 'ATHLEAN-X ES - Sentadilla búlgara'],
+    ['sentadilla (copa )?sumo', 'TOZryI1I0tE', 'Sergiteda - Sentadilla sumo con mancuerna'],
+    ['sentadilla hack|hack squat', 'NEyKZhc5u5A', 'Sergiteda - Sentadilla hack'],
+    ['sentadillas? con salto|squat jumps?|jump squats?', '2VoHEWxXG4s', 'Facu Neyra - Sentadilla con salto'],
+    ['sentadilla goblet|sentadilla copa|\\bgoblet\\b', 'FgnAl9Yx4c4', 'Método Momentum - Sentadilla goblet'],
+    ['sentadilla', 'qsAkuNORgmk', 'Jeremy Ethier ES - Sentadilla'],
+    ['gemelos? en prensa|prensa de gemelo', 'mROxEgJV5D0', 'Fit Kamp - Gemelo en prensa'],
+    ['gemelos? sentado', 'Z27RhPA66_8', 'Luis Carballo - Gemelo sentado'],
+    ['gemelos? en escalon', '0guUs90hUiY', 'Proet - Gemelos sobre escalón'],
+    ['gemelo|talones? de pie|elevacion de talones', '1BL4681pIz4', 'Proet - Elevación de gemelos de pie'],
+    ['prensa', 'xvCynwyNoP4', 'Andrés Vázquez PT - Prensa'],
+    ['hip thrust a una pierna|hip thrust unilateral', 'DFIVNdnVrEk', 'Fitness Consciente - Hip thrust a una pierna'],
+    ['puente (de )?gluteos? a una pierna', 'pBM5Mwk6KL0', 'SER - Puente a una pierna'],
+    ['hip thrust con mancuerna', '1f7jzx2fMso', 'The Unit Marbella - Hip thrust con mancuerna'],
+    ['hip thrust|empuje de cadera', 'efe-QObKAZU', 'Dra. Isabel Junio - Hip thrust con barra'],
+    ['puente (de )?gluteo', 'oDXM-a-gBt8', 'Móveo Fisioterapia - Puente de glúteo'],
+    ['patada de gluteo', 'EIst_zqP2dg', 'Galvistrainer - Patada de glúteo'],
+    ['zancada cruzada|curtsy', 'pJE4dq-cyYo', 'Carlos Online Coach - Zancada cruzada'],
+    ['zancadas? lateral', '6mDKhdmTjao', 'Javier Giménez - Zancada lateral'],
+    ['zancadas? inversa|zancadas? (hacia )?atras', 'wF96HPOuf7E', 'Proet - Zancada inversa'],
+    ['split squat|zancada estatica', 'xfjksBPIic8', 'Amauri Villalba Fisio - Split squat'],
+    ['zancada|\\blunge', 'Xcfs_3DMKlc', 'Bestcycling - Zancada'],
+    ['step.?ups?', 'CpKJ1B4iNwc', 'Galvistrainer - Step ups'],
+    ['extension(es)? de (cuadriceps|piernas)', 'DI34ngDC8FU', 'Fitness Consciente - Extensión de cuádriceps'],
+    // "curl femoral" al principio de cada patrón: si no, el "\bcurl\b" genérico
+    // de bíceps casa en la posición 0 y ganaba al "femoral" de la posición 5.
+    ['curl femoral (tumbado )?con mancuerna|femoral (tumbado )?con mancuerna', 'OiwpfNn1zqA', 'David Ritter - Curl femoral con mancuerna'],
+    ['curl femoral sentado|femoral sentado', 'CBCPBnMzsMI', 'Vitar Club - Curl femoral sentado'],
+    ['curl femoral|femoral|curl de isquio|leg curl', '9xbBr5Ytl8c', 'Vitar Club - Curl femoral tumbado'],
+    ['press declinado en maquina', '3NJbpijIPUU', 'Sergiteda - Press declinado en máquina'],
+    ['press (de banca |banca )?declinado', 'NNz3_wUMrvI', 'Myprotein ES - Press declinado'],
+    ['press inclinado en multipower', 'iqozyy1KzvQ', 'Guillermo Fernández - Press inclinado en multipower'],
+    ['press inclinado en maquina', 'XTfRuAWB_Ho', 'Sergiteda - Press inclinado en máquina'],
+    ['press inclinado', 'MkMf308jXww', 'Guillermo Fernández - Press inclinado con mancuernas'],
+    ['press cerrado con mancuerna|squeeze press', 'JGsZ7Zxinko', 'Luis Carballo - Squeeze press'],
+    ['press arnold', '5FZBdIRfgm4', 'Fit Kamp - Press Arnold'],
+    ['press (militar|de hombros?) con mancuerna', 'GELRUlUSxeI', 'Dra. Isabel Junio - Press de hombros con mancuernas'],
+    ['press militar', 'BShy9IEmrPg', 'Ninolift - Press militar con barra'],
+    ['press (de banca |banca )?(plano )?con mancuerna|press de banca o mancuernas', '5wN-99Fny5Q', 'Jeremy Ethier ES - Press con mancuernas'],
+    ['press (cerrado |de pecho )?en maquina', 'N7DjfGB8-xY', 'Fitness Consciente - Press de pecho en máquina'],
+    ['contractor|pec ?deck|aperturas en maquina', 'R4GslAvpPE0', 'Javi NewBody - Contractora de pecho'],
+    ['press (de )?banca', 'jlFl7WJ1TzI', 'Jeremy Ethier ES - Press de banca'],
+    ['aperturas en polea|cruces? (de|en) poleas?', 'WNtBIde3Qks', 'ATHLEAN-X ES - Cruce de poleas'],
+    ['aperturas', 'AYWpCfLcYYg', 'Bilbo Team - Aperturas con mancuernas'],
+    ['fondos (en banco|entre sillas|en silla)', 'H6r0fh2-YNU', 'Javi NewBody - Fondos en banco'],
+    ['fondos', 'CkX5QdEz4IE', 'NeofitTv - Fondos en paralelas'],
+    ['flexion(es)? con pies elevados|flexion declinada', '4vzeg9wCbtg', 'Zonapablo - Flexión con pies elevados'],
+    ['flexion', 'b2UagYWNErY', 'Blue Man - Flexiones'],
+    ['elevaciones? frontal', 'joO2vLGujcA', 'Powerexplosive - Elevaciones frontales'],
+    ['elevaciones? laterales?|combo lateral', 'hgLpdwMtEEs', 'Jesús López Trainer - Elevaciones laterales'],
+    ['pajaros|deltoides posterior', 'RG_41P2hP0s', 'Zonapablo - Pájaros'],
+    ['face pull con banda', 'w06tVYSLH20', 'Paco The Fisio - Face pull con goma'],
+    ['face pull', 'X-xCQ1gh-kA', 'HSN - Face pull'],
+    ['encogimientos', 'qlIv6nW5kHU', 'Método Momentum - Encogimientos'],
+    ['dominadas? asistidas?', 'HNVzNWBGDrU', 'Lakbarz - Dominadas con banda elástica'],
+    ['dominada', 'ZZbQ8x9BW4U', 'Oswal Candela - Dominadas'],
+    ['jalon con banda', 'cX1AoSUeIwg', 'Proet - Jalón con banda elástica'],
+    ['jalon', 'x2Y6Mb41zjY', 'Andrés Vázquez PT - Jalón al pecho'],
+    ['remo australiano|remo invertido', 'AIM_qZjSFUU', 'Zonapablo - Remo invertido'],
+    ['remo en t\\b', 'KgEZTNLBMMQ', 'DrVíctorLópez - Remo en T'],
+    ['remo con mancuerna|remo mancuerna', 'Pkr1WW3p05A', 'ATHLEAN-X ES - Remo con mancuerna'],
+    ['remo en polea|remo gironda|remo sentado en polea', 'Z8umZlW9ZM4', 'Galvistrainer - Remo en polea baja'],
+    ['remo en maquina|remo con apoyo', 'FOusO8JMU3Q', 'Fitness Consciente - Remo en máquina'],
+    ['remo con banda', 'mm4Oob4g3zU', 'YoPRO - Remo con banda'],
+    ['remo con barra|remo pendlay', '3uiWjik2yEQ', 'Técnicas Gymtopz - Remo con barra'],
+    ['curl martillo con cuerda|curl martillo en polea', '54mQ9iCmmXQ', 'Smartraining - Curl martillo en polea'],
+    ['curl martillo', 'OPqe0kCxmR8', 'One Minute Tutorial - Curl martillo'],
+    ['curl (de biceps |biceps )?con banda', '_Sq4GXkkzi0', 'Entrenador de hábitos - Curl con banda'],
+    ['curl (de biceps |biceps )?en polea|curl en polea', 'BNxez0L-9LQ', 'Carlos Online Coach - Curl en polea baja'],
+    ['curl (de biceps |biceps )?con barra', 'no-dXip-rJM', 'Proet - Curl con barra Z'],
+    ['\\bcurl\\b', 'qERAhN-qpaU', 'Guillermo Fernández - Curl de bíceps con mancuernas'],
+    ['patada de triceps', 'i_38xEoC5wA', 'Jon James Cano - Patada de tríceps'],
+    ['extension de triceps con banda', 'v3uVtjVASzs', 'Luis Carballo - Tríceps con banda'],
+    ['extension de triceps (sobre|por encima)|triceps (sobre|por encima de) la cabeza', 'fQ-KB40W3d8', 'Guillermo Fernández - Tríceps sobre la cabeza'],
+    ['extension de triceps|triceps en polea', 'uZg6VtRhwQY', 'Zonapablo - Tríceps en polea con cuerda'],
+    ['press frances', 'PTO862T8U7Y', 'Entrenamiento Diferencial - Press francés'],
+    ['plancha lateral', '45t3tTcRcKE', 'APTA Vital Sport - Plancha lateral'],
+    ['plancha inver', 'ZNAxdJ6Bt00', 'XHIT Daily - Plancha inversa'],
+    ['copenhag', 'hT7gP5gMAxA', 'Xim van Stokkum - Plancha Copenhague'],
+    ['plancha', 'd0atctiI7Vw', 'DeportesUncomo - Plancha'],
+    ['dead bug|bicho muerto', '4XLEnwUr1d8', 'Bodybuilding.com - Dead bug'],
+    ['bird dog|perro pajaro', 'QABW99qPiNM', 'Muscle & Motion - Bird dog'],
+    ['hollow', 'E58napCEGEw', 'Domein - Hollow body'],
+    ['pallof', 'c-byXbLkWzY', 'Zonapablo - Press Pallof'],
+    ['rueda abdominal', 'xIzWGVYFAH8', 'Aitor Alonso - Rueda abdominal'],
+    ['elevacion(es)? de piernas', 'mSejp5qK1pc', 'Ofit Live - Elevación de piernas'],
+    ['superman', '69BwVQjsM_c', 'Ejercita-T - Superman'],
+    ['overhead carry', '54POVWkWjEs', '[P]rehab - Overhead carry'],
+    ['suitcase', '58zoUXlwDRM', 'Vitar Club - Suitcase carry'],
+    ['farmer|granjero', 'X5ZRWP_AHPw', 'CuídatePlus - Paseo del granjero'],
+    ['sled|trineo', '_prbhPS0WKg', 'CuídatePlus - Empuje de trineo'],
+    ['box jump|salto al cajon', 'c-Yonc6lzUs', 'DeportesUncomo - Box jump'],
+    ['broad jump|salto horizontal', 'CJvChSADmmI', 'S4S - Salto horizontal'],
+    ['band walk|monster walk', 'oAd4R-MM7Is', 'Centro 3D10 - Monster walk'],
+    ['butt kick|talones al gluteo', 'J_oS8KIKM8g', 'RedolatRunningTeam - Talón-glúteo'],
+    ['\\bskips?\\b|skipping|high knees', 'pBhcWdCu9xQ', 'Raúl Ortega - Skipping'],
+  ].map(([p, id, t]) => [new RegExp(p), id, t]);
+
+  // Devuelve [id, título] del vídeo de técnica, o null si no hay uno elegido.
+  function videoTecnica(nombreEjercicio) {
+    const n = (nombreEjercicio || '').toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+    let mejor = null, mejorPos = Infinity;
+    for (const [re, id, t] of VIDEO_TECNICA) {
+      const m = re.exec(n);
+      if (m && m.index < mejorPos) { mejor = [id, t]; mejorPos = m.index; }
     }
+    return mejor;
+  }
+
+  function getVideoUrl(nombreEjercicio) {
+    const v = videoTecnica(nombreEjercicio);
+    if (v) return `https://www.youtube.com/watch?v=${v[0]}`;
+    // Ejercicio sin vídeo elegido (uno que el cliente añade a mano, por
+    // ejemplo): búsqueda en español como hasta ahora.
     return `https://www.youtube.com/results?search_query=${encodeURIComponent(nombreEjercicio + ' técnica correcta')}`;
   }
 
