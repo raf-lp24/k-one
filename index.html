@@ -6734,7 +6734,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px">
           <span style="font-family:var(--jv-ui);font-size:12.5px;color:var(--jv-dim);font-weight:600">Avisos de registro</span>
           <label class="jv-toggle-switch">
-            <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos push cuando se registra un cliente nuevo" data-hint-on="Te avisamos al momento cuando se registre un cliente nuevo.">
+            <input type="checkbox" class="push-toggle-input" data-push-tipo="registro" onchange="onPushToggleChange(this)" aria-label="Avisos push cuando se registra un cliente nuevo" data-hint-on="Te avisamos al momento cuando se registre un cliente nuevo.">
             <span class="jv-toggle-slider"></span>
           </label>
         </div>
@@ -8630,7 +8630,7 @@
           <div class="push-toggle-row">
             <span class="push-toggle-label"><span>⬡</span> Avisos de entreno</span>
             <label class="push-toggle-switch">
-              <input type="checkbox" class="push-toggle-input" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día">
+              <input type="checkbox" class="push-toggle-input" data-push-tipo="entreno" onchange="onPushToggleChange(this)" aria-label="Avisos de entreno cuando no has marcado nada en el día">
               <span class="push-toggle-slider"></span>
             </label>
           </div>
@@ -28965,14 +28965,44 @@ Se coló: ${lista}`;
       catch (e) { return false; }
     }
 
-    window.activarNotificaciones = async function() {
+    // Recordatorio diario de entreno: preferencia de la CUENTA, guardada en
+    // userData (profiles.userdata), no en el navegador. BUG REAL (29 sept
+    // 2026, reportado por el admin en ordenador y móvil: "apago los avisos de
+    // entreno y al entrar vuelven a estar puestos"). "Avisos de entreno" y
+    // "Avisos de registro" (Jarvis) eran el MISMO interruptor por dentro: los
+    // dos solo miraban si el navegador tenía suscripción push. Apagar uno
+    // apagaba el otro, encender los de registro volvía a encender los de
+    // entreno, y el cron mandaba el recordatorio a cualquiera con suscripción.
+    // Ahora la suscripción es "este dispositivo puede recibir avisos" y esta
+    // preferencia decide si el cron manda el de entreno (api/notify.js la lee).
+    function _avisosEntrenoActivos() {
+      try { return !userData || userData.avisosEntreno !== false; } catch (e) { return true; }
+    }
+    function _guardarPrefAvisosEntreno(activos) {
+      try {
+        if (!userData || typeof userData !== 'object') return;
+        if ((userData.avisosEntreno !== false) === activos) return;
+        userData.avisosEntreno = activos;
+        const user = getCurrentUser();
+        if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      } catch (e) {
+        console.warn('[push] no se pudo guardar la preferencia de avisos de entreno:', e.message);
+      }
+    }
+
+    // tipo: 'entreno' (recordatorio diario, el del banner y el del menú del
+    // cliente) o 'registro' (avisos de alta nueva, solo en Jarvis).
+    window.activarNotificaciones = async function(tipo = 'entreno') {
       cerrarPushBanner();
       try {
         const permiso = await Notification.requestPermission();
         if (permiso !== 'granted') { showToast('No hemos podido activar los avisos.'); return; }
         await _suscribirPush();
         _marcarPushApagado(_supaUserId, false);
-        showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
+        if (tipo === 'entreno') _guardarPrefAvisosEntreno(true);
+        showToast(tipo === 'registro'
+          ? 'Avisos de registro activados en este dispositivo.'
+          : 'Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
         showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
@@ -29035,9 +29065,38 @@ Se coló: ${lista}`;
       // única que decide el estado final de "disabled" -- si el navegador
       // acaba de bloquear el permiso, tiene que quedar deshabilitado con su
       // pista, no reactivarse a ciegas contradiciendo lo que el texto dice.
-      if (checkbox.checked) await activarNotificaciones();
-      else await desactivarNotificaciones();
-      _pushToggleBusy = false;
+      const tipo = checkbox.dataset.pushTipo || 'entreno';
+      try {
+        if (tipo === 'registro') {
+          // Sin suscripción en este dispositivo no llega nada, tampoco el de
+          // entreno: su interruptor se pintará apagado, que es lo que pasa.
+          if (checkbox.checked) await activarNotificaciones('registro');
+          else await desactivarNotificaciones();
+        } else if (checkbox.checked) {
+          // Si el dispositivo ya estaba suscrito (el admin con los de registro
+          // puestos) basta con la preferencia; si no, hay que suscribirlo.
+          let yaSuscrito = false;
+          try { yaSuscrito = !!(await (await navigator.serviceWorker.ready).pushManager.getSubscription()); } catch (e) {}
+          if (yaSuscrito && Notification.permission === 'granted') {
+            _guardarPrefAvisosEntreno(true);
+            showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
+            await actualizarBotonNotificaciones();
+          } else {
+            await activarNotificaciones('entreno');
+          }
+        } else {
+          _guardarPrefAvisosEntreno(false);
+          if (_adminVerificado) {
+            // El admin conserva la suscripción para los avisos de registro.
+            showToast('Avisos de entreno desactivados.');
+            await actualizarBotonNotificaciones();
+          } else {
+            await desactivarNotificaciones();
+          }
+        }
+      } finally {
+        _pushToggleBusy = false;
+      }
     };
 
     // Decide qué mostrar en CADA interruptor de avisos que haya en la página
@@ -29074,6 +29133,10 @@ Se coló: ${lista}`;
         if (_pushApagadoPorUsuario(session.user.id)) return;
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
+        // Un cliente con los de entreno apagados en su cuenta no quiere ningún
+        // aviso: aunque este navegador haya perdido la marca local (datos del
+        // sitio borrados), no se le vuelve a suscribir por su cuenta.
+        if (!sub && !_adminVerificado && !_avisosEntrenoActivos()) return;
         if (!sub) {
           // BUG REAL (12 sept 2026, reportado: avisos que dejan de llegar sin
           // avisar en iPhone con la app instalada). Hasta ahora, si iOS
@@ -29286,16 +29349,19 @@ Se coló: ${lista}`;
           return;
         }
         input.disabled = false;
-        input.checked = !!sub;
+        // El de entreno necesita además la preferencia de la cuenta: el admin
+        // puede tener el dispositivo suscrito solo por los de registro.
+        const encendido = !!sub && (input.dataset.pushTipo !== 'entreno' || _avisosEntrenoActivos());
+        input.checked = encendido;
         if (hint) {
           // Si no hay texto que enseñar (data-hint-on vacío o sin poner),
           // se esconde del todo -- si no, quedaba un hueco vacío con su
           // padding, como un renglón en blanco debajo del interruptor.
-          const texto = sub ? (input.dataset.hintOn || '') : '';
+          const texto = encendido ? (input.dataset.hintOn || '') : '';
           hint.textContent = texto;
           hint.style.display = texto ? '' : 'none';
         }
-        if (btnPrueba) btnPrueba.style.display = sub ? '' : 'none';
+        if (btnPrueba) btnPrueba.style.display = encendido ? '' : 'none';
       });
     };
 

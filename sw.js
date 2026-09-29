@@ -27,7 +27,9 @@
 // v20 (28 sept 2026): la pregunta de comidas pasa de "¿cuántas veces comes?"
 // (el hábito) a "¿cuántas puedes hacer?" con 5 recomendado y marcado, y se
 // añade a "Cambiar plan" (antes no se podía cambiar después del registro).
-const CACHE_NAME = 'kone-v20';
+// v21 (29 sept 2026): "Avisos de entreno" y "Avisos de registro" dejan de ser
+// el mismo interruptor; el de entreno se guarda en la cuenta (userdata).
+const CACHE_NAME = 'kone-v21';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

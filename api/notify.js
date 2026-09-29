@@ -466,6 +466,11 @@ async function handleCronRetencion(req, res) {
             if (!p || !p.email || yaAvisadoHoy.has(p.email)) continue;
             const ud = p.userdata || {};
             if (!ud.onboardingCompletado) continue;
+            // Apagados desde el interruptor "Avisos de entreno". Tener
+            // suscripción ya no basta: el admin la conserva para los avisos de
+            // registro aunque no quiera el recordatorio (ver
+            // _guardarPrefAvisosEntreno en index.html).
+            if (ud.avisosEntreno === false) continue;
             // ANTES: solo `subscriptions.status` active/trialing. Eso dejaba
             // FUERA del aviso diario a todo el que tiene el acceso concedido a
             // mano (is_beta + beta_expires desde Jarvis): invitados, betas y —
