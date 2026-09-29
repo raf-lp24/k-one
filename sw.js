@@ -32,7 +32,9 @@
 // v22 (29 sept 2026): auditoría de entrenador -- cribado de embarazo/TCA,
 // fuerza de verdad, torso/pierna, calorías y proteína afinadas, sal con
 // tensión alta y cintura en el check-in.
-const CACHE_NAME = 'kone-v22';
+// v23 (29 sept 2026): vídeo de técnica concreto por ejercicio y recuadro
+// 'Tu plan, adaptado' con 3 notas visibles (el resto plegadas).
+const CACHE_NAME = 'kone-v23';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

@@ -13941,6 +13941,30 @@
     return 0; // fija
   }
 
+  // Recuadro "Tu plan, adaptado" (29 sept 2026). Con varios datos de salud y
+  // hábitos se juntaban 7-9 párrafos seguidos encima del entreno de hoy y el
+  // cliente acababa sin leer ninguno. Ahora se ordenan por importancia
+  // (seguridad > salud/lesión/alergia > objetivo y bloque > el resto) y solo
+  // se ven las 3 primeras; las demás, plegadas en "Ver N consejos más".
+  // Sin ningún </div> por dentro: regenerarEntrenamientoHoy() recupera este
+  // recuadro del plan guardado cortando en el primer </div>.
+  function _prioridadNota(n) {
+    if (/^Nos indicaste (que estás embarazada|lactancia|un trastorno)/.test(n)) return 0;
+    if (/(lesi[oó]n|rodilla|espalda|hombro|hipertensi|tensi[oó]n alta|diabetes|card[ií]ac|medicaci|operad|alergia|gluten|lactosa|frutos secos)/i.test(n)) return 1;
+    if (/^(Tu objetivo es|Tus ritmos|A partir de los 60|Semana de descarga|Según tu feedback|Con tu peso y altura)/.test(n)) return 2;
+    return 3;
+  }
+  function renderNotasAdaptado(notas, margen) {
+    if (!notas || !notas.length) return '';
+    const orden = notas.map((n, i) => [n, i]).sort((a, b) => (_prioridadNota(a[0]) - _prioridadNota(b[0])) || (a[1] - b[1])).map(x => x[0]);
+    const VISIBLES = 3;
+    const vista = orden.slice(0, VISIBLES), resto = orden.slice(VISIBLES);
+    const masHTML = resto.length
+      ? `<details class="notas-mas"><summary style="cursor:pointer;color:var(--brasa);font-weight:600;margin-top:8px;font-size:12.5px">Ver ${resto.length} ${resto.length === 1 ? 'consejo más' : 'consejos más'}</summary>${resto.map(n => `· ${n}`).join('<br>')}</details>`
+      : '';
+    return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${vista.map(n => `· ${n}`).join('<br>')}${masHTML}</div>`;
+  }
+
   function buildPlanFromData(u) {
     // Hyrox y CrossFit se venden SOLO como nutrición: el entrenamiento lo hace
     // el cliente en su box. El formulario ya oculta esos dos deportes cuando el
@@ -14081,6 +14105,10 @@
     // Cribado de seguridad: lo primero que se lee en las dos pestañas. Va en
     // orden inverso (unshift) para que el embarazo quede arriba del todo.
     const _notaCribado = t => { notasSalud.unshift(t); notasComida.unshift(t); };
+    // Notas de COMIDA (alergias, apetito, hambre...): en solo nutrición van con
+    // las demás; en el plan completo, a la pestaña de nutrición y no al entreno,
+    // que es donde se leen al elegir los platos (29 sept 2026).
+    const _notaComida = t => (soloDieta ? notasSalud : notasComida).push(t);
     if (_tca) {
       _notaCribado('Nos indicaste un trastorno de la conducta alimentaria. Tu plan no lleva déficit y no te pediremos que recortes nada: su función es que comas de forma regular y suficiente. Te recomendamos seguirlo junto a tu psicólogo o dietista-nutricionista. Si pesarte o mirar las cantidades te genera ansiedad, puedes dejar de hacerlo: el plan sigue funcionando igual.');
     }
@@ -15614,14 +15642,14 @@
     {
       const _imcNota = (parseFloat(u.peso) || 70) / Math.pow((parseFloat(u.altura) || 170) / 100, 2);
       if (_imcNota >= 30 && ganarMusculo) {
-        notasSalud.push('Con tu peso y altura, lo que más rinde para ganar músculo es comer a mantenimiento, no con superávit: el entrenamiento de fuerza con proteína suficiente construye músculo mientras se va perdiendo grasa (recomposición). Por eso tus calorías están en tu gasto real. Cuando tu IMC baje de 30, el plan pasa a superávit solo.');
+        _notaComida('Con tu peso y altura, lo que más rinde para ganar músculo es comer a mantenimiento, no con superávit: el entrenamiento de fuerza con proteína suficiente construye músculo mientras se va perdiendo grasa (recomposición). Por eso tus calorías están en tu gasto real. Cuando tu IMC baje de 30, el plan pasa a superávit solo.');
       }
     }
     if (sinGluten) {
-      notasSalud.push('Tu plan de comidas evita ingredientes con gluten (pan, pasta y avena estándar sustituidos por versiones sin gluten).');
+      _notaComida('Tu plan de comidas evita ingredientes con gluten (pan, pasta y avena estándar sustituidos por versiones sin gluten).');
     }
     if (sinLactosa) {
-      notasSalud.push('Tu plan de comidas sustituye los lácteos con lactosa por versiones sin lactosa o vegetales.');
+      _notaComida('Tu plan de comidas sustituye los lácteos con lactosa por versiones sin lactosa o vegetales.');
     }
 
     // El estrés y el sueño se preguntan en el cuestionario ("Tu vida") pero no
@@ -15633,18 +15661,18 @@
     // conviene saberlo.
     const estres = (u.estres || '').toLowerCase();
     if (perdidaGrasa && (estres.includes('alto') || estres.includes('muy alto'))) {
-      notasSalud.push('Nos indicaste un nivel de estrés alto: el cortisol elevado aumenta el apetito y las ganas de picar entre horas. Prioriza la saciedad (proteína y verdura en cada comida) antes que recortar más calorías si notas que te cuesta mantener el déficit.');
+      _notaComida('Nos indicaste un nivel de estrés alto: el cortisol elevado aumenta el apetito y las ganas de picar entre horas. Prioriza la saciedad (proteína y verdura en cada comida) antes que recortar más calorías si notas que te cuesta mantener el déficit.');
     }
     const sueno = (u.sueno || '').toLowerCase();
     if (sueno.includes('menos de 6h')) {
-      notasSalud.push('Nos indicaste que duermes menos de 6 horas: dormir poco descontrola las hormonas del hambre (más grelina, menos leptina) y hace más difícil seguir cualquier plan de nutrición. Si puedes, prioriza el descanso — es tan importante como la comida.');
+      _notaComida('Nos indicaste que duermes menos de 6 horas: dormir poco descontrola las hormonas del hambre (más grelina, menos leptina) y hace más difícil seguir cualquier plan de nutrición. Si puedes, prioriza el descanso — es tan importante como la comida.');
     }
 
     if (sinFrutosSecos) {
-      notasSalud.push('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
+      _notaComida('Tu plan de comidas evita frutos secos y cremas derivadas, sustituidos por semillas.');
     }
     if (alergiaSalud.includes('Otra')) {
-      notasSalud.push('Nos indicaste una alergia o intolerancia alimentaria. Tu plan de comidas ya tiene en cuenta esta información y evita los ingredientes problemáticos. Ante cualquier duda, consulta con un profesional.');
+      _notaComida('Nos indicaste una alergia o intolerancia alimentaria. Tu plan de comidas ya tiene en cuenta esta información y evita los ingredientes problemáticos. Ante cualquier duda, consulta con un profesional.');
     }
 
     // ── RITMOS REALES a partir de la marca del cliente ──────────────────────
@@ -16439,7 +16467,7 @@
     }
 
     if (!soloDieta && notasSalud.length) {
-      entrenamiento_hoy = `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${notasSalud.map(n => `· ${n}`).join('<br>')}</div>` + entrenamiento_hoy;
+      entrenamiento_hoy = renderNotasAdaptado(notasSalud, 20) + entrenamiento_hoy;
     }
 
     // NUTRICIÓN con 5 opciones por comida
@@ -19655,7 +19683,7 @@
     if (nutricionNotas) {
       let notasHTML = '';
       if (generatedPlan.notasNutricion && generatedPlan.notasNutricion.length) {
-        notasHTML += `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${generatedPlan.notasNutricion.map(n => `· ${n}`).join('<br>')}</div>`;
+        notasHTML += renderNotasAdaptado(generatedPlan.notasNutricion, 16);
       }
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
         notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${_esc(n)}`).join('<br>')}</div></details>`;
