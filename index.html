@@ -7128,6 +7128,16 @@
           </div>
         </div>
         <div class="field">
+          <label>¿A qué hora sueles entrenar? <span class="optional">Opcional</span></label>
+          <div class="radio-group" id="cp-horaEntreno">
+            <div class="radio-opt" data-valor="manana" onclick="selectRadio(this,'cp-horaEntreno')">Por la mañana (antes de las 11h)</div>
+            <div class="radio-opt" data-valor="mediodia" onclick="selectRadio(this,'cp-horaEntreno')">A mediodía (11-14h)</div>
+            <div class="radio-opt" data-valor="tarde" onclick="selectRadio(this,'cp-horaEntreno')">Por la tarde (15-18h)</div>
+            <div class="radio-opt" data-valor="noche" onclick="selectRadio(this,'cp-horaEntreno')">Por la noche (después de las 18h)</div>
+            <div class="radio-opt" data-valor="varia" onclick="selectRadio(this,'cp-horaEntreno')">Cambia según el día</div>
+          </div>
+        </div>
+        <div class="field">
           <label>¿Cuál es tu nivel actual?</label>
           <div class="radio-group" id="cp-nivel">
             <div class="radio-opt" onclick="selectRadio(this,'cp-nivel')">Principiante, empiezo desde cero</div>
@@ -8550,6 +8560,17 @@
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">60-90 min</div>
               <div class="radio-opt" onclick="selectRadio(this,'tiempoSesion')">Más de 90 min</div>
             </div>
+          </div>
+          <div class="field" id="horaEntrenoWrap">
+            <label>¿A qué hora sueles entrenar? <span class="optional">Opcional</span></label>
+            <div class="radio-group" id="horaEntreno">
+              <div class="radio-opt" data-valor="manana" onclick="selectRadio(this,'horaEntreno')">Por la mañana (antes de las 11h)</div>
+              <div class="radio-opt" data-valor="mediodia" onclick="selectRadio(this,'horaEntreno')">A mediodía (11-14h)</div>
+              <div class="radio-opt" data-valor="tarde" onclick="selectRadio(this,'horaEntreno')">Por la tarde (15-18h)</div>
+              <div class="radio-opt" data-valor="noche" onclick="selectRadio(this,'horaEntreno')">Por la noche (después de las 18h)</div>
+              <div class="radio-opt" data-valor="varia" onclick="selectRadio(this,'horaEntreno')">Cambia según el día</div>
+            </div>
+            <span class="field-hint">Colocamos la comida de antes de entrenar y la de después en la toma que toca según tu hora.</span>
           </div>
           <div class="field">
             <label>¿Cuál es tu nivel actual? <span class="required">Obligatorio</span></label>
@@ -10212,6 +10233,8 @@
         : getRadio('deporte'),
       diasEntreno: getRadio('diasEntreno'),
       tiempoSesion: getRadio('tiempoSesion'),
+      // Opcional: manana | mediodia | tarde | noche | varia ('' si no contesta).
+      horaEntreno: document.querySelector('#horaEntreno .selected')?.dataset.valor || '',
       nivel: getRadio('nivel'),
       lugar: getRadio('lugar'),
       // Frecuencia/intensidad de quien elige "Solo nutrición" — se usa para el
@@ -18064,6 +18087,48 @@
       // proposito: no justifica forzar carga previa ni batido de recuperacion.
       const diaEsDuroCorredor = d => ['Intensidad', 'Umbral', 'Volumen', 'Fondo', 'Fortalecimiento'].includes(d.etiqueta) || /tirada larga|umbral|vo2|interval|series|fartlek/i.test(d.resumen || '');
       const diaEsWod = d => d.etiqueta === 'WOD' || /wod|metcon|amrap|emom|complejo|circuito|simulacro|chipper/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
+      // HORA DE ENTRENO (29 sept 2026): el plato de "antes de entrenar" iba
+      // siempre en la Comida y el de recuperación en la Merienda, se entrenara
+      // a las 7 de la mañana o a las 9 de la noche. Ahora cada franja tiene su
+      // hueco: quien entrena por la mañana toma algo ligero en el desayuno y se
+      // recupera en la media mañana; a mediodía y por la noche, un tentempié
+      // previo y la comida/cena siguiente hace de recuperación (sin plato extra,
+      // que en una toma grande saldría descomunal). "Por la tarde", "cambia según
+      // el día" o sin contestar dejan lo de siempre.
+      const _horaEnt = u.horaEntreno || '';
+      const _huecosHora = base => {
+        const runner = base.pre === 'Desayuno';
+        if (_horaEnt === 'manana')   return { pre: 'Desayuno', post: 'Media mañana', ligero: true };
+        if (_horaEnt === 'mediodia') return { pre: 'Media mañana', post: null, ligero: true };
+        if (_horaEnt === 'noche' || (runner && _horaEnt === 'tarde')) return { pre: 'Merienda', post: null, ligero: true };
+        return { ...base, ligero: false };
+      };
+      // Solo los platos pequeños valen para una toma que no es la comida, y su
+      // etiqueta deja de decir 90 min (con un tentempié bastan 45-60).
+      const _ligeros = lista => lista
+        .filter(o => /yogur|tortitas|bocadillo peque|pan con mermelada|copos/i.test(o.nombre))
+        .map(o => {
+          const pasos = o.pasos || RECETA_PASOS[o.nombre];
+          return {
+            ...o,
+            nombre: o.nombre.replace('(90 min antes de entrenar)', '(45-60 min antes de entrenar)'),
+            ...(pasos ? { pasos: pasos.replace('90 min antes', '45-60 min antes') } : {}),
+          };
+        });
+      const _preWodLigero = _ligeros(fuelingPreWod);
+      {
+        const _tomasActivas = TOMAS_POR_FRECUENCIA[_forzando5Tomas ? '4-5 veces' : u.comidas] || TOMAS_POR_FRECUENCIA['4-5 veces'];
+        const _hueco = _huecosHora({ pre: 'Comida', post: 'Merienda' });
+        const _notaHora = {
+          manana: 'Entrenas por la mañana: en tus días de entreno el desayuno es fácil de digerir (hidrato y proteína, poca grasa y fibra) para tomarlo 45-60 min antes de empezar, y la media mañana es tu comida de recuperación, con proteína y algo de hidrato.',
+          mediodia: 'Entrenas a mediodía: en tus días de entreno la media mañana es un tentempié ligero para tomar 45-60 min antes, y la comida de después hace de recuperación.',
+          noche: 'Entrenas por la noche: en tus días de entreno la merienda es un tentempié ligero para tomar 45-60 min antes, y la cena hace de recuperación. Si te cuesta dormir después de entrenar, mejor una cena sencilla y sin exceso de grasa.',
+        }[_horaEnt];
+        if (_notaHora && _hueco.ligero && _tomasActivas.includes(_hueco.pre) &&
+            (esGimnasio || esRunner || esHyrox || esCrossfit || esCombinacion)) {
+          _notaComida(_notaHora);
+        }
+      }
       semana.forEach((d, i) => {
         const dm = nutricionPorDia[i];
         // El filtro de alérgenos puede haber vaciado alguna de estas listas; sin el
@@ -18087,13 +18152,16 @@
           // 2026). Con la semana dentro, el pool entero acaba rotando.
           if (m) m.opciones = [lista[(semilla + i + Math.max(1, semanaActual)) % lista.length], ...m.opciones].slice(0, 5);
         };
+        const _fuelear = (base, pre, preLigero, post) => {
+          const h = _huecosHora(base);
+          if (h.pre) forzar(dm, h.pre, h.ligero ? preLigero : pre);
+          if (h.post) forzar(dm, h.post, post);
+        };
         if (esRunner && diaEsDuroCorredor(d)) {
-          forzar(dm, 'Desayuno', fuelingPreCarrera);
-          forzar(dm, 'Merienda', fuelingPostCarrera);
+          _fuelear({ pre: 'Desayuno', post: 'Merienda' }, fuelingPreCarrera, fuelingPreCarrera, fuelingPostCarrera);
         }
         if ((esHyrox || esCrossfit || esCombinacion) && diaEsWod(d)) {
-          forzar(dm, 'Comida', fuelingPreWod);
-          forzar(dm, 'Merienda', fuelingPostWod);
+          _fuelear({ pre: 'Comida', post: 'Merienda' }, fuelingPreWod, _preWodLigero, fuelingPostWod);
         }
         // Híbrido recibía repostaje SOLO en días tipo WOD/metcon, así que sus
         // días de fuerza y sus sesiones largas se quedaban sin comida previa ni
@@ -18111,15 +18179,13 @@
         const _ETIQUETAS_FUERZA = ['Fuerza', 'Empuje+Tracción', 'Piernas', 'Complemento', 'Híbrido', 'Umbral', 'Fortalecimiento'];
         if (esCombinacion && d.tipo === 'Entrenamiento' && !diaEsWod(d) &&
             (_ETIQUETAS_FUERZA.includes(d.etiqueta) || /fuerza|sesi[óo]n larga/i.test(d.resumen || ''))) {
-          forzar(dm, 'Comida', fuelingPreWod);
-          forzar(dm, 'Merienda', fuelingPostWod);
+          _fuelear({ pre: 'Comida', post: 'Merienda' }, fuelingPreWod, _preWodLigero, fuelingPostWod);
         }
         // Gimnasio/Fuerza no tenía ninguna comida de repostaje ligada al día real
         // de entreno (antes solo corredores/Hyrox/CrossFit la recibían) — el
         // aviso de proteína+creatina en "Hoy" no toca el menú real del día.
         if (esGimnasio && d.tipo === 'Entrenamiento') {
-          forzar(dm, 'Comida', fuelingPreWod);
-          forzar(dm, 'Merienda', fuelingPostWod);
+          _fuelear({ pre: 'Comida', post: 'Merienda' }, fuelingPreWod, _preWodLigero, fuelingPostWod);
         }
       });
     }
@@ -22944,6 +23010,7 @@
     if (cpEvF) cpEvF.value = userData.eventoFecha || '';
     preseleccionarRadio('cp-diasEntreno', userData.diasEntreno);
     preseleccionarRadio('cp-tiempoSesion', userData.tiempoSesion);
+    preseleccionarRadio('cp-horaEntreno', userData.horaEntreno);
     preseleccionarRadio('cp-nivel', userData.nivel);
     updateLugarOptions(userData.deporte || 'Gimnasio / Fuerza', 'cp-lugar');
     preseleccionarRadio('cp-lugar', userData.lugar);
@@ -23083,6 +23150,7 @@
     userData.deporte = nuevoDeporte;
     userData.diasEntreno = nuevosDias;
     userData.tiempoSesion = nuevoTiempo;
+    userData.horaEntreno = document.querySelector('#cp-horaEntreno .selected')?.dataset.valor || '';
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
     userData.preferenciaCardioFinisher = nuevoCardioFinisher || 'Automático (rota cada bloque)';
