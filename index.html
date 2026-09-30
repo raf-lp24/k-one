@@ -7073,6 +7073,48 @@
           <div class="radio-opt" data-valor="2 veces" onclick="selectRadio(this,'cp-comidas')">2 — mi horario no da para más</div>
         </div>
       </div>
+      <!-- Salud y alimentación (30 sept 2026): antes solo se podían decir en el
+           cuestionario inicial. Si el cliente descubre una intolerancia, deja un
+           alimento o le diagnostican tensión alta, lo cambia aquí: el plan se
+           rehace al guardar y Thor lo vuelve a revisar al momento. -->
+      <div class="field">
+        <label>¿Tienes alguna alergia o intolerancia?</label>
+        <div class="radio-group" id="cp-alergia">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-alergia'); _cpMostrarOtra('cp-alergia')">No</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-alergia'); _cpMostrarOtra('cp-alergia')">Gluten</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-alergia'); _cpMostrarOtra('cp-alergia')">Lactosa</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-alergia'); _cpMostrarOtra('cp-alergia')">Frutos secos</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-alergia'); _cpMostrarOtra('cp-alergia')">Otra</div>
+        </div>
+        <input type="text" id="cp-alergiaOtra" aria-label="Qué otra alergia" placeholder="¿Cuál? Marisco, huevo, soja..." style="display:none;margin-top:8px">
+      </div>
+      <div class="field">
+        <label>¿Sigues alguna dieta?</label>
+        <div class="radio-group" id="cp-dieta">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-dieta')">Como de todo</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-dieta')">Sin gluten</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-dieta')">Sin lactosa</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="cp-noComida">¿Hay alimentos que no quieras comer?</label>
+        <input type="text" id="cp-noComida" placeholder="Pescado, vísceras, legumbres... lo que sea">
+      </div>
+      <div class="field">
+        <label>¿Tienes alguna enfermedad diagnosticada?</label>
+        <div class="radio-group" id="cp-enfermedad">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-enfermedad'); _cpMostrarOtra('cp-enfermedad')">No</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-enfermedad'); _cpMostrarOtra('cp-enfermedad')">Diabetes</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-enfermedad'); _cpMostrarOtra('cp-enfermedad')">Hipertensión</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-enfermedad'); _cpMostrarOtra('cp-enfermedad')">Problemas cardíacos</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-enfermedad'); _cpMostrarOtra('cp-enfermedad')">Otra</div>
+        </div>
+        <input type="text" id="cp-enfermedadOtra" aria-label="Qué otra enfermedad" placeholder="¿Cuál?" style="display:none;margin-top:8px">
+      </div>
+      <div class="field">
+        <label for="cp-medicacion">¿Tomas medicación habitual?</label>
+        <input type="text" id="cp-medicacion" placeholder="Déjalo en blanco si no tomas nada">
+      </div>
       <!-- Solo nutrición: cuánto entrena por su cuenta (era imposible de cambiar
            sin rehacer el cuestionario, y decide el gasto calórico). -->
       <div id="cp-soloSection" style="display:none">
@@ -23268,6 +23310,14 @@
     document.body.style.overflow = '';
   }
 
+  function _cpMostrarOtra(grupo) {
+    const inp = document.getElementById(grupo + 'Otra');
+    if (!inp) return;
+    const sel = document.querySelector('#' + grupo + ' .selected')?.textContent.trim() || '';
+    inp.style.display = sel === 'Otra' ? '' : 'none';
+    if (sel !== 'Otra') inp.value = '';
+  }
+
   function toggleCpEntrenamiento(ocultar) {
     const sec = document.getElementById('cp-entrenamientoSection');
     if (sec) sec.style.display = ocultar ? 'none' : '';
@@ -23310,6 +23360,12 @@
     const esSoloNutri = tipoPlanActual.includes('Solo');
     preseleccionarRadio('cp-tipoPlan', tipoPlanActual);
     toggleCpEntrenamiento(esSoloNutri);
+    preseleccionarRadio('cp-alergia', userData.alergia || 'No');
+    preseleccionarRadio('cp-dieta', userData.dieta && userData.dieta !== 'No especificado' ? userData.dieta : 'Como de todo');
+    preseleccionarRadio('cp-enfermedad', userData.enfermedad || 'No');
+    [['cp-alergiaOtra', 'alergiaOtra'], ['cp-noComida', 'noComida'], ['cp-enfermedadOtra', 'enfermedadOtra'], ['cp-medicacion', 'medicacion']]
+      .forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.value = userData[k] || ''; });
+    _cpMostrarOtra('cp-alergia'); _cpMostrarOtra('cp-enfermedad');
     preseleccionarRadio('cp-deporteSolo', (userData.deporte && userData.deporte !== 'No especificado') ? userData.deporte : 'No entreno, llevo una vida sedentaria');
     preseleccionarRadio('cp-actividadSolo', userData.actividadSolo);
     preseleccionarRadio('cp-horaEntrenoSolo', userData.horaEntreno);
@@ -23474,6 +23530,16 @@
     userData.tipoPlan = nuevoTipoPlan;
     userData.periodicidad = nuevaPeriodicidad;
     userData.objetivo = nuevoObjetivo;
+    // Salud y alimentación: lo que cambia qué platos puede comer.
+    {
+      const _v = id => (document.getElementById(id)?.value || '').trim();
+      const _al = getRadio('cp-alergia'), _di = getRadio('cp-dieta'), _en = getRadio('cp-enfermedad');
+      if (_al) { userData.alergia = _al; userData.alergiaOtra = _al === 'Otra' ? _v('cp-alergiaOtra') : ''; }
+      if (_di) userData.dieta = _di;
+      if (_en) { userData.enfermedad = _en; userData.enfermedadOtra = _en === 'Otra' ? _v('cp-enfermedadOtra') : ''; }
+      userData.noComida = _v('cp-noComida');
+      userData.medicacion = _v('cp-medicacion');
+    }
     userData.enfoqueMacros = nuevoEnfoque || userData.enfoqueMacros;
     // Si no la ha tocado y venía de "Pico continuamente", se queda como estaba
     // (mismas 5 tomas); si la cambia, se guarda lo nuevo.
@@ -23505,7 +23571,7 @@
 
     // Si el recálculo del plan fallara, avisar y no dejar el modal congelado en silencio.
     try {
-      generatedPlan = buildPlanFromData(userData);
+      _actualizarPlanAlMotor();
       buildDashboard();
     } catch (e) {
       console.error('Error recalculando el plan:', e);
@@ -24337,7 +24403,7 @@
     try {
       const p = data.plan || {}, u = data.userData || {};
       const s = JSON.stringify([p.nutricion || null, p.nutricionPorDia || null,
-        u.noComida || '', u.alergia || '', u.alergiaOtra || '', u.dieta || '']);
+        u.noComida || '', u.alergia || '', u.alergiaOtra || '', u.dieta || '', u.enfermedad || '']);
       let h = 5381;
       for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
       return (h >>> 0).toString(36) + '.' + s.length;
@@ -25529,6 +25595,15 @@
       hallazgos = j.hallazgos || null;
     } catch (e) { return; }
     if (!hallazgos || !hallazgos.length) return;
+    // Thor revisa el plan guardado en el servidor, que puede ir un paso por detrás
+    // del que se acaba de poner al día en este dispositivo (_actualizarPlanAlMotor):
+    // solo cuentan los platos que SIGUEN en el plan actual.
+    try {
+      const actuales = new Set();
+      (generatedPlan?.nutricionPorDia || [generatedPlan?.nutricion || []]).forEach(d => (d || []).forEach(m => (m.opciones || []).forEach(o => actuales.add(o.nombre))));
+      hallazgos = hallazgos.filter(h => !h.plato || actuales.has(h.plato));
+    } catch (e) {}
+    if (!hallazgos.length) return;
     _avisoFiltroHallazgos = hallazgos;
 
     // Misma huella que usa el motor del servidor (palabra + plato + campo),
@@ -25561,7 +25636,10 @@
       ? palabras.slice(0, -1).join(', ') + ' y ' + palabras[palabras.length - 1]
       : (palabras[0] || '');
     const textoEl = document.getElementById('avisoFiltroTexto');
-    if (textoEl) textoEl.textContent = `Nos dijiste que no comes ${listaTexto}, pero se ha colado en tu plan de nutrición por un fallo nuestro al generarlo.`;
+    const _porSal = hallazgos.every(h => /tensi[oó]n/i.test(h.motivo || ''));
+    if (textoEl) textoEl.textContent = _porSal
+      ? `Con la tensión alta tu plan no debería llevar ${listaTexto}, pero se ha colado por un fallo nuestro al generarlo.`
+      : `Nos dijiste que no comes ${listaTexto}, pero se ha colado en tu plan de nutrición por un fallo nuestro al generarlo.`;
     const listaEl = document.getElementById('avisoFiltroLista');
     if (listaEl) listaEl.innerHTML = items;
 
