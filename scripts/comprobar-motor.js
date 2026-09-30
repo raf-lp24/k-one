@@ -13,6 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const { crearMotor } = require('../lib/motor-servidor');
 const { auditarPlan } = require('../lib/normalizador-alimentos');
+const { analizar } = require('./validar-recetas');
+const verMacros = { total: 0, fuera: 0 };
 
 const N = parseInt(process.argv[2], 10) || 600;
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
@@ -121,6 +123,13 @@ function revisar(u) {
           if (!(num(o.kcal) > 0)) fallos.push(`día ${d + 1}, ${t.momento}, «${o.nombre}»: sin kcal`);
           if (!(num(o.prot) >= 0) || !(num(o.carbs) >= 0) || !(num(o.grasa) >= 0)) fallos.push(`día ${d + 1}, ${t.momento}, «${o.nombre}»: faltan macros`);
           if (!o.ingredientes) fallos.push(`día ${d + 1}, ${t.momento}, «${o.nombre}»: sin ingredientes`);
+          // "0,5 scoop" se parte en "0" y "5 scoop" (la lista va separada por comas).
+          else if (o.ingredientes.split(',').some(x => /^\s*\d+\s*$/.test(x))) fallos.push(`«${o.nombre}»: una cantidad partida por una coma (${o.ingredientes})`);
+          // Lo que verá el cliente en "Ver macros": suma de ingredientes frente a la etiqueta.
+          else {
+            const a = analizar(o.ingredientes);
+            if (!a.sinDatos.length && a.kcal >= 80) { verMacros.total++; if (Math.abs(num(o.kcal) / a.kcal - 1) > 0.15) verMacros.fuera++; }
+          }
         });
       });
     });
@@ -149,4 +158,10 @@ casos.forEach((u, i) => {
   }
 });
 console.log(`\n${casos.length} planes generados en ${((Date.now() - t0) / 1000).toFixed(1)} s · ${malos === 0 ? '✔ todos correctos' : '✘ ' + malos + ' con fallos'}`);
-process.exit(malos ? 1 : 0);
+// "Ver macros" le dice al cliente si las cantidades suman lo que pone el plato:
+// hasta el 30 sept 2026 no cuadraba en el 45 % de los platos (ver
+// _conciliar en index.html). Se tolera un 10 % (medidas caseras, redondeos).
+const pctFuera = verMacros.total ? verMacros.fuera / verMacros.total : 0;
+const verMacrosMal = pctFuera > 0.10;
+console.log(`${verMacrosMal ? '✘' : '✔'} "Ver macros" cuadra con la etiqueta (±15 %) en el ${(100 - pctFuera * 100).toFixed(1)} % de ${verMacros.total} platos (mínimo 90 %)`);
+process.exit(malos || verMacrosMal ? 1 : 0);

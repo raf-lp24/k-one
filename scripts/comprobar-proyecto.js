@@ -74,6 +74,16 @@ for (const [nombre, p] of Object.entries(precios)) {
 const t33 = (html.match(/3\.3\. Precios[\s\S]{0,900}/) || [''])[0];
 /14,99/.test(t33) ? ok('Términos 3.3 incluye el trimestral') : mal('Términos 3.3 no menciona el plan trimestral 14,99 €');
 
+// 7b. La tabla de alimentos incrustada en index.html (la usa el motor para que
+// las cantidades cuadren con "Ver macros") es una copia exacta de data/alimentos.json.
+{
+  const m = html.match(/\/\*ALIMENTOS\*\/([\s\S]*?)\/\*FIN_ALIMENTOS\*\//);
+  const fuente = JSON.stringify(JSON.parse(leer('data/alimentos.json')));
+  !m ? mal('index.html sin la tabla de alimentos incrustada (/*ALIMENTOS*/)')
+    : m[1] === fuente ? ok('tabla de alimentos incrustada = data/alimentos.json')
+    : mal('la tabla incrustada no coincide con data/alimentos.json: node scripts/incrustar-alimentos.js');
+}
+
 // 8. Páginas por tema: existen, tienen su canonical, título/descripción de tamaño
 // razonable, una ruta limpia en vercel.json y entrada en el sitemap.
 {
