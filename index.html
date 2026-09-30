@@ -8289,18 +8289,7 @@
             <input type="text" id="alergiaOtra" placeholder="Cuéntanos a qué eres alérgico/a">
           </div>
           <!-- Cribado de seguridad (29 sept 2026, auditoría de entrenador): es lo
-               primero que pregunta cualquier profesional antes de poner un déficit
-               o intervalos intensos. Embarazo solo se enseña si el sexo no es
-               "Hombre" (actualizarPreguntaEmbarazo). -->
-          <div class="field" id="embarazoWrap" style="display:none">
-            <label>¿Estás embarazada, dando el pecho o has dado a luz hace menos de 6 meses? <span class="required">Obligatorio</span></label>
-            <div class="radio-group" id="embarazo">
-              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">No</div>
-              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">Embarazada</div>
-              <div class="radio-opt" onclick="selectRadio(this,'embarazo')">Lactancia o posparto</div>
-            </div>
-            <span class="field-hint">En esta etapa tu cuerpo necesita más energía, no menos: no te pondremos déficit ni intervalos intensos.</span>
-          </div>
+               primero que pregunta cualquier profesional antes de poner un déficit. -->
           <div class="field">
             <label>¿Tienes o has tenido un trastorno de la conducta alimentaria (anorexia, bulimia, atracones)? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="tca">
@@ -9869,19 +9858,7 @@
     updateBmrPanel();
   }
 
-  // La pregunta de embarazo/lactancia solo aparece si el sexo no es "Hombre".
-  // Va colgada de updateBmrPanel porque es lo que ya se llama al cambiar el sexo.
-  function actualizarPreguntaEmbarazo() {
-    const w = document.getElementById('embarazoWrap');
-    if (!w) return;
-    const sexo = document.getElementById('sexo')?.value || '';
-    const mostrar = !!sexo && sexo !== 'Hombre';
-    w.style.display = mostrar ? '' : 'none';
-    if (!mostrar) w.querySelectorAll('.radio-opt.selected').forEach(o => o.classList.remove('selected'));
-  }
-
   function updateBmrPanel() {
-    actualizarPreguntaEmbarazo();
     const panel = document.getElementById('bmrPanel');
     const sexo = document.getElementById('sexo').value;
     if (!sexo) { panel.style.display = 'none'; return; }
@@ -9973,8 +9950,6 @@
       { type: 'radio', id: 'enfermedad' },
       { type: 'radio', id: 'lesion' },
       { type: 'radio', id: 'alergia' },
-      // Solo obligatorio cuando se enseña (sexo distinto de "Hombre").
-      { type: 'radio', id: 'embarazo', siVisible: 'embarazoWrap' },
       { type: 'radio', id: 'tca' }
     ],
     2: [],
@@ -10205,8 +10180,6 @@
       lesionDetalle: document.getElementById('lesionDetalle')?.value || '',
       alergia: getRadio('alergia'),
       alergiaOtra: document.getElementById('alergiaOtra')?.value || '',
-      // Si la pregunta no se enseñó (sexo "Hombre"), 'No' en vez de 'No especificado'.
-      embarazo: document.getElementById('embarazoWrap')?.style.display === 'none' ? 'No' : getRadio('embarazo'),
       tca: getRadio('tca'),
       operacion: document.getElementById('operacion')?.value || '',
       medicacion: document.getElementById('medicacion')?.value || '',
@@ -13972,7 +13945,7 @@
   // Sin ningún </div> por dentro: regenerarEntrenamientoHoy() recupera este
   // recuadro del plan guardado cortando en el primer </div>.
   function _prioridadNota(n) {
-    if (/^Nos indicaste (que estás embarazada|lactancia|un trastorno)/.test(n)) return 0;
+    if (/^Nos indicaste (un trastorno)/.test(n)) return 0;
     if (/(lesi[oó]n|rodilla|espalda|hombro|hipertensi|tensi[oó]n alta|diabetes|card[ií]ac|medicaci|operad|alergia|gluten|lactosa|frutos secos)/i.test(n)) return 1;
     if (/^(Tu objetivo es|Tus ritmos|A partir de los 60|Semana de descarga|Según tu feedback|Con tu peso y altura)/.test(n)) return 2;
     return 3;
@@ -14049,17 +14022,14 @@
 
     // OBJETIVO — se declaran aquí para que los planes de entrenamiento (más abajo)
     // y la nutrición (también más abajo) puedan usarlos sin TDZ.
-    // CRIBADO DE SEGURIDAD (29 sept 2026, auditoría de entrenador). Con
-    // embarazo, lactancia/posparto o un trastorno de la conducta alimentaria
-    // no se pone déficit aunque el objetivo elegido sea perder grasa: en las
-    // dos primeras el cuerpo necesita más energía, y en la tercera un plan de
-    // restricción es justo lo que puede hacer daño. Anular perdidaGrasa aquí
-    // arriba quita a la vez el déficit, los intervalos del remate y los
-    // circuitos metabólicos, sin tocarlos uno a uno.
-    const _embarazada = (u.embarazo || '').includes('Embarazada');
-    const _lactancia  = (u.embarazo || '').includes('Lactancia');
+    // CRIBADO DE SEGURIDAD (29 sept 2026, auditoría de entrenador). Con un
+    // trastorno de la conducta alimentaria no se pone déficit aunque el objetivo
+    // elegido sea perder grasa: un plan de restricción es justo lo que puede
+    // hacer daño. Anular perdidaGrasa aquí arriba quita a la vez el déficit, los
+    // intervalos del remate y los circuitos metabólicos, sin tocarlos uno a uno.
+    // (Embarazo y lactancia se preguntaron un día y se retiraron: 30 sept 2026.)
     const _tca        = (u.tca || '') === 'Sí';
-    const _sinDeficit = _embarazada || _lactancia || _tca;
+    const _sinDeficit = _tca;
     const perdidaGrasa = (objetivo.includes('Perder') || objetivo.includes('grasa')) && !_sinDeficit;
     const ganarMusculo = objetivo.includes('músculo') || objetivo.includes('Ganar');
     // Faltaba: en Gimnasio, quien pedía "Mejorar resistencia" recibía un plan de
@@ -14106,11 +14076,11 @@
 
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
-    // Sin series, intervalos ni metcons (30 sept 2026): con tensión alta, problemas
-    // cardíacos, embarazo o lactancia, Running e Híbrido sustituyen la sesión de
-    // calidad por zona 2, quitan strides y pliometría y cambian el metcon por un
-    // circuito suave. Antes solo el gimnasio lo hacía (el remate en zona 2).
-    const _sinIntensidad = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos') || _embarazada || _lactancia;
+    // Sin series, intervalos ni metcons (30 sept 2026): con tensión alta o
+    // problemas cardíacos, Running e Híbrido sustituyen la sesión de calidad por
+    // zona 2, quitan strides y pliometría y cambian el metcon por un circuito
+    // suave. Antes solo el gimnasio lo hacía (el remate en zona 2).
+    const _sinIntensidad = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos');
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
     // Semana y bloque del mesociclo. Se declaran aquí arriba porque los planes por
@@ -14131,7 +14101,7 @@
     // llegaba a verse (en solo nutrición, notasSalud ya es la nota de comida).
     const notasComida = [];
     // Cribado de seguridad: lo primero que se lee en las dos pestañas. Va en
-    // orden inverso (unshift) para que el embarazo quede arriba del todo.
+    // orden inverso (unshift) para que el más importante quede arriba del todo.
     const _notaCribado = t => { notasSalud.unshift(t); notasComida.unshift(t); };
     // Notas de COMIDA (alergias, apetito, hambre...): en solo nutrición van con
     // las demás; en el plan completo, a la pestaña de nutrición y no al entreno,
@@ -14139,12 +14109,6 @@
     const _notaComida = t => (soloDieta ? notasSalud : notasComida).push(t);
     if (_tca) {
       _notaCribado('Nos indicaste un trastorno de la conducta alimentaria. Tu plan no lleva déficit y no te pediremos que recortes nada: su función es que comas de forma regular y suficiente. Te recomendamos seguirlo junto a tu psicólogo o dietista-nutricionista. Si pesarte o mirar las cantidades te genera ansiedad, puedes dejar de hacerlo: el plan sigue funcionando igual.');
-    }
-    if (_lactancia) {
-      _notaCribado('Nos indicaste lactancia o posparto reciente: tu plan no lleva déficit y suma unas 400 kcal al día, porque dar el pecho gasta energía. Si hace menos de 6 semanas del parto, o fue cesárea, espera al visto bueno de tu matrona antes de entrenar y empieza por el suelo pélvico. Si notas escapes de orina o un bulto en la tripa al hacer fuerza, para y consúltalo.');
-    }
-    if (_embarazada) {
-      _notaCribado('Nos indicaste que estás embarazada: tu plan no lleva déficit ni intervalos intensos. Antes de seguir el entrenamiento, coméntalo con tu matrona o ginecólogo. A partir del segundo trimestre evita los ejercicios tumbada boca arriba, las cargas máximas, aguantar la respiración y cualquier ejercicio con riesgo de caída o golpe en la tripa. De la comida hemos quitado los embutidos curados, los ahumados, el pescado crudo (poké) y los pescados grandes con más mercurio. Desde el segundo trimestre necesitarás unas 300 kcal más al día: tu matrona te dirá cuándo sumarlas.');
     }
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
@@ -14933,11 +14897,9 @@
       // Con tensión alta o problemas cardíacos el remate va en zona 2 y no en
       // intervalos (29 sept 2026, auditoría de entrenador): "30 s fuerte" desde
       // la primera semana, a alguien que además suele empezar desde cero, es
-      // justo el esfuerzo que su médico querría ver primero. Embarazo y
-      // lactancia ya no tienen perdidaGrasa (cribado), pero sí les viene bien
-      // el cardio suave, así que se les deja el de zona 2.
+      // justo el esfuerzo que su médico querría ver primero.
       const _sinIntervalos = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos');
-      const _conZona2 = mejorarResistencia || sentirseMejor || _embarazada || _lactancia || (perdidaGrasa && _sinIntervalos);
+      const _conZona2 = mejorarResistencia || sentirseMejor || (perdidaGrasa && _sinIntervalos);
       const finisher3 = (perdidaGrasa && !_sinIntervalos) ? _finisherInterval : (_conZona2 ? _cardioZona2 : '');
       const finisher4 = finisher3;
       const sVol = ganarMusculo ? '4' : '3';
@@ -16637,10 +16599,6 @@
       kcalObj = Math.max(esMujer ? 1200 : 1500, kcalObj + u.ajusteCalorico);
     }
 
-    // Cribado de seguridad: lo que cambia en calorías y lo que se le explica.
-    // Dar el pecho gasta unas 400-500 kcal al día que Mifflin no cuenta.
-    if (_lactancia) kcalObj += 400;
-
     // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso.
     // OJO: lbm*2.4 sale por debajo de peso*protMultiplier (2.0-2.3 g/kg) para
     // prácticamente cualquier persona, tenga o no sobrepeso -- con un IMC normal
@@ -17933,9 +17891,6 @@
     const _activas = { gluten: sinGluten, lactosa: sinLactosa };
     const _otraLimpia = u.alergia === 'Otra' ? _quitarAlergiasDedicadas(u.alergiaOtra, _activas) : '';
     const alergiaLibre = _otraLimpia ? _expandirAlergenoLibre(_otraLimpia) : '';
-    // Embarazo: fuera embutidos curados y ahumados (toxoplasma, listeria) y los
-    // pescados grandes con más mercurio. Mismo filtro que "no como".
-    const _filtroEmbarazo = _embarazada ? 'jamón serrano, jamón ibérico, lomo embuchado, cecina, salchichón, fuet, sobrasada, salmón ahumado, pavo ahumada, pavo ahumado, poké bowl, poke bowl, pez espada, emperador, atún rojo' : '';
     // Hipertensión (29 sept 2026, auditoría de entrenador): el plan solo le
     // decía que no aguantara la respiración, y su semana de comidas llevaba
     // ~20 opciones con jamón serrano, ~20 con pavo en lonchas, salmón ahumado
@@ -17944,7 +17899,7 @@
     // lo que tiene versión baja en sal se pide así (más abajo).
     const _hipertension = enfermedad.includes('Hipertensión');
     const _filtroSal = _hipertension ? 'jamón serrano, jamón ibérico, salmón ahumado' : '';
-    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroEmbarazo, _filtroSal].filter(Boolean).join(', ');
+    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroSal].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
     if (_redAlergenos && textoFiltro) {
       nutricion = nutricion.map(m => {
@@ -21722,10 +21677,9 @@
     const cambioSemanal = (ultimos3[ultimos3.length - 1].peso - ultimos3[0].peso) / semanas;
     const cambioPct = (cambioSemanal / ultimos3[0].peso) * 100;
 
-    // Embarazo, lactancia o TCA: nada de recortes automáticos por la báscula.
-    // En el embarazo subir de peso es lo esperado, y con un TCA un "hemos
-    // bajado tus calorías" es lo último que hay que enseñar (29 sept 2026).
-    if ((userData.embarazo || '').match(/Embarazada|Lactancia/) || userData.tca === 'Sí') return null;
+    // Con un TCA, un "hemos bajado tus calorías" es lo último que hay que
+    // enseñar: nada de recortes automáticos por la báscula (29 sept 2026).
+    if (userData.tca === 'Sí') return null;
 
     const objetivo = userData.objetivo || '';
     const perdidaGrasa = objetivo.includes('Perder') || objetivo.includes('grasa');

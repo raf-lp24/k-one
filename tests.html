@@ -272,19 +272,15 @@ async function correr() {
   }
 
   // ───────────────────────── C2. SALUD: intensidad y comida segura ─────────────────────────
-  // (30 sept 2026) Con tensión alta, problemas cardíacos, embarazo o lactancia,
-  // Running e Híbrido no llevan series, intervalos, metcons ni pliometría; y en
-  // el embarazo no salen embutidos curados, ahumados ni pescado crudo.
+  // (30 sept 2026) Con tensión alta o problemas cardíacos, Running e Híbrido no
+  // llevan series, intervalos, metcons ni pliometría.
   {
     const INTENSO = /hiit|tabata|all.?out|sprint|stride|fartlek|vo2|umbral|threshold|cruise|cuesta|intervalo|series[: ]|escalera|metcon|amrap|emom|burpee|kb swing|hang clean|power clean|rpe ?[789]|cronometra|jumps|skips|pliom|bounding|pogo|hops|comba/i;
-    const CURADO = /jamón serrano|jamón ibérico|lomo embuchado|cecina|salchichón|fuet|sobrasada|salmón ahumado|pavo ahumad|poké|poke\b|pez espada|emperador|atún rojo/i;
     const perfiles = [
       { nombre: 'Hipertensión', extra: { enfermedad: 'Hipertensión' } },
       { nombre: 'Problemas cardíacos', extra: { enfermedad: 'Problemas cardíacos' } },
-      { nombre: 'Embarazada', extra: { sexo: 'Mujer', embarazo: 'Embarazada' } },
-      { nombre: 'Lactancia', extra: { sexo: 'Mujer', embarazo: 'Lactancia o posparto' } },
     ];
-    const malos = [], malComida = [];
+    const malos = [];
     perfiles.forEach(pf => ['Running', 'Híbrido'].forEach(deporte => ['Principiante, empiezo desde cero', 'Llevo algo de tiempo', 'Avanzado'].forEach(nivel => ['Perder grasa', 'Ganar músculo'].forEach(objetivo => {
       const u = perfilBase(Object.assign({ deporte, nivel, objetivo, diasEntreno: '5+ días', lugar: deporte === 'Running' ? 'Al aire libre' : 'Gimnasio', email: 'test-salud@x.com' }, pf.extra));
       let plan;
@@ -293,15 +289,9 @@ async function correr() {
         const m = ((d.resumen || '') + ' ' + (d.detalle || '')).match(INTENSO);
         if (m) malos.push(`${pf.nombre} · ${deporte} · ${nivel.slice(0, 8)} · ${d.dia}: "${m[0]}"`);
       });
-      if (pf.nombre === 'Embarazada') {
-        const c = JSON.stringify(plan.nutricionPorDia).match(CURADO);
-        if (c) malComida.push(`${deporte}/${objetivo}: "${c[0]}"`);
-      }
     }))));
-    test('Salud (seguridad)', 'Sin series, intervalos ni metcons con hipertensión, cardíacos, embarazo o lactancia',
+    test('Salud (seguridad)', 'Sin series, intervalos ni metcons con hipertensión o problemas cardíacos',
       malos.length === 0, malos.length ? malos.slice(0, 6).join('\n') : `Verificado en ${perfiles.length * 2 * 3 * 2} planes de Running e Híbrido.`);
-    test('Salud (seguridad)', 'Embarazo: sin embutidos curados, ahumados ni pescado crudo en la comida',
-      malComida.length === 0, malComida.length ? malComida.slice(0, 6).join('\n') : 'Ningún plato de riesgo en 12 planes.');
   }
 
   // ───────────────────────── D. RECETARIO completo ─────────────────────────
