@@ -977,6 +977,10 @@ async function handleCronRetencion(req, res) {
       const vistos = new Set();
       let revisados = 0;
       let planesActualizados = 0;
+      // La función tiene 60 s en total y esto va antes de los avisos y emails:
+      // a los 35 s se deja de poner planes al día (los que queden, mañana o al
+      // abrir la app). Los que llevan un hallazgo se regeneran siempre.
+      const inicioAuditoria = Date.now();
       let motorServidor = null, huellaServidor = null;
       try {
         motorServidor = await obtenerMotor();
@@ -1013,7 +1017,7 @@ async function handleCronRetencion(req, res) {
           // se puede cargar, se sigue solo auditando, como antes.
           // Tope por pasada para no pasarse del tiempo del cron: los que queden se
           // actualizan en la siguiente (o al abrir la app). Los que tienen hallazgo, siempre.
-          if (motorServidor && (hallazgos.length || (planesActualizados < 200 && p.plan && p.plan.motorVersion !== huellaServidor))) {
+          if (motorServidor && (hallazgos.length || (planesActualizados < 200 && Date.now() - inicioAuditoria < 35000 && p.plan && p.plan.motorVersion !== huellaServidor))) {
             try {
               if (await actualizarPlanCliente(supa, p, motorServidor, { forzar: hallazgos.length > 0 })) {
                 planesActualizados++;
