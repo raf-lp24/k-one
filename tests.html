@@ -294,6 +294,24 @@ async function correr() {
       malos.length === 0, malos.length ? malos.slice(0, 6).join('\n') : `Verificado en ${perfiles.length * 2 * 3 * 2} planes de Running e Híbrido.`);
   }
 
+  // ───────────────────────── C3. SOLO NUTRICIÓN ─────────────────────────
+  // (30 sept 2026) Sin entrenar no hay músculo que construir: "Ganar músculo" o
+  // "Ganar fuerza" van a mantenimiento y con proteína de no deportista; y el plan
+  // no lleva semana ni entreno de hoy.
+  {
+    const fallos = [];
+    ['Ganar músculo', 'Ganar fuerza', 'Perder grasa', 'Sentirme mejor en general'].forEach(objetivo => ['Hombre', 'Mujer'].forEach(sexo => [55, 80, 105].forEach(peso => {
+      const u = perfilBase({ tipoPlan: 'Solo nutrición, sin entrenamiento', deporte: 'No especificado', actividadSolo: 'No entreno / muy poca actividad', objetivo, sexo, peso, altura: sexo === 'Mujer' ? 165 : 178, email: 'test-solo@x.com' });
+      let p;
+      try { p = win.buildPlanFromData(u); } catch (e) { fallos.push('ERROR ' + e.message); return; }
+      if (!p.soloDieta || (p.semana || []).length || p.entrenamiento_hoy) fallos.push(`${objetivo}/${sexo}/${peso}: lleva entreno`);
+      if (/Ganar/.test(objetivo) && p.kcalObj > Math.max(p.tdee, sexo === 'Mujer' ? 1200 : 1500) + 1) fallos.push(`${objetivo}/${sexo}/${peso}: superávit ${p.kcalObj} vs ${p.tdee}`);
+      if (p.protObj / peso > 1.9 && p.protObj > 100) fallos.push(`${objetivo}/${sexo}/${peso}: proteína ${(p.protObj / peso).toFixed(2)} g/kg`);
+    })));
+    test('Solo nutrición', 'Sin entrenar: sin entreno en el plan, sin superávit y con proteína de no deportista',
+      fallos.length === 0, fallos.length ? fallos.slice(0, 6).join('\n') : 'Verificado en 24 perfiles sedentarios.');
+  }
+
   // ───────────────────────── D. RECETARIO completo ─────────────────────────
   // Usa el propio abrirRecetario() de la app (igual que lo vería un cliente real)
   // en vez de leer RECETA_PASOS directamente: es un `const` de nivel superior de

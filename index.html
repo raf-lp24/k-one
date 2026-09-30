@@ -7073,6 +7073,30 @@
           <div class="radio-opt" data-valor="2 veces" onclick="selectRadio(this,'cp-comidas')">2 — mi horario no da para más</div>
         </div>
       </div>
+      <!-- Solo nutrición: cuánto entrena por su cuenta (era imposible de cambiar
+           sin rehacer el cuestionario, y decide el gasto calórico). -->
+      <div id="cp-soloSection" style="display:none">
+        <div class="field">
+          <label>¿Entrenas por tu cuenta?</label>
+          <div class="radio-group" id="cp-deporteSolo">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">No entreno, llevo una vida sedentaria</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">Gimnasio / Fuerza</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">Running</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">Hyrox</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">CrossFit</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-deporteSolo')">Híbrido</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>¿Con qué frecuencia?</label>
+          <div class="radio-group" id="cp-actividadSolo">
+            <div class="radio-opt" onclick="selectRadio(this,'cp-actividadSolo')">No entreno / muy poca actividad</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-actividadSolo')">Ligero (1-2 días/semana)</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-actividadSolo')">Moderado (3-4 días/semana)</div>
+            <div class="radio-opt" onclick="selectRadio(this,'cp-actividadSolo')">Intenso (5+ días/semana)</div>
+          </div>
+        </div>
+      </div>
       <div id="cp-entrenamientoSection">
         <div class="field">
           <label>¿Qué deporte quieres practicar?</label>
@@ -8480,7 +8504,7 @@
              menos calorías de las que realmente gasta. -->
         <div class="form-grid full" id="bloqueSoloNutricion" style="gap:20px;display:none">
           <div class="field">
-            <label>¿Entrenas por tu cuenta (aparte de con nosotros)? <span class="required">Obligatorio</span></label>
+            <label>¿Entrenas por tu cuenta? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="deporteSolo">
               <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">No entreno, llevo una vida sedentaria</div>
               <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Gimnasio / Fuerza</div>
@@ -9323,7 +9347,7 @@
           <div id="informeSemanal"></div>
         </div>
 
-        <div class="progress-section">
+        <div class="progress-section" id="progFuerza">
           <div class="progress-title">Evolución de fuerza</div>
           <p class="field-hint" style="margin-bottom:16px">Elige un ejercicio y mira cómo ha subido el peso que levantas.</p>
           <div id="graficoFuerzaWrap"></div>
@@ -9335,7 +9359,7 @@
           <div id="graficoPesoWrap"></div>
         </div>
 
-        <div class="progress-section">
+        <div class="progress-section" id="progCalendario">
           <div class="progress-title">Calendario de constancia</div>
           <p class="field-hint" style="margin-bottom:16px">Cada casilla es un día. El naranja es un entreno completado.</p>
           <div id="calendarioConstancia"></div>
@@ -9393,7 +9417,7 @@
           <div class="section-banner-content">
             <div class="dash-greeting">Tu agenda</div>
             <h2 class="dash-title">Notas</h2>
-            <p class="dash-subtitle">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
+            <p class="dash-subtitle" id="notasSubtitulo">Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.</p>
           </div>
         </div>
 
@@ -13253,7 +13277,9 @@
     "K-One no te da un plan. Te da una herramienta. El trabajo es tuyo."
   ];
 
-  function getMensajeDia() {
+  // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
+  // nadie te viera"...) porque el cliente no entrena con nosotros (30 sept 2026).
+  function getMensajeDia(soloNutri) {
     const inicio = new Date(new Date().getFullYear(), 0, 0);
     const dayOfYear = Math.floor((Date.now() - inicio) / 86400000);
     const racha = calcularRachaDias ? calcularRachaDias() : 0;
@@ -13266,7 +13292,11 @@
       ];
       return streakMsgs[dayOfYear % streakMsgs.length];
     }
-    return MENSAJES_DIA[dayOfYear % MENSAJES_DIA.length];
+    const _RE_ENTRENO = /entren|gimnasio|repetici|series|sudor|\bbarra\b/i;
+    const lista = soloNutri
+      ? MENSAJES_DIA.filter(x => !_RE_ENTRENO.test(x) || /plato|alimentaci/i.test(x))
+      : MENSAJES_DIA;
+    return lista[dayOfYear % lista.length];
   }
 
   // OJO: estas listas se auditaron contra los 314 alimentos reales de
@@ -13976,6 +14006,9 @@
     // todos los planes, en vez de fiarlo a la pantalla.
     const _deporteSoloNutricion = /hyrox|crossfit/i.test(u.deporte || '');
     const soloDieta = (u.tipoPlan || '').includes('Solo nutrición') || _deporteSoloNutricion;
+    // Solo nutrición y "No entreno": ver el bloque de calorías (sin superávit ni
+    // proteína de deportista) y las notas de salud (sin consejos de "entrenar").
+    const _sedentarioSolo = soloDieta && !_deporteSoloNutricion && /no entreno/i.test(u.actividadSolo || '');
     const deporte = u.deporte || 'Gimnasio / Fuerza';
     const nivel = u.nivel || 'Principiante, empiezo desde cero';
     const objetivo = u.objetivo || 'Sentirme mejor en general';
@@ -14217,7 +14250,7 @@
     }
 
     // MENSAJE DEL DÍA — rotación determinista diaria (60 frases + especiales por racha)
-    const mensaje_dia = getMensajeDia();
+    const mensaje_dia = getMensajeDia(soloDieta);
 
     // ENTRENAMIENTO HOY: se genera al final a partir del primer día de la semana
     // (semana[0] = "Lunes"), para que "Hoy" y "Plan semanal" muestren siempre lo mismo.
@@ -15599,12 +15632,19 @@
     // notasNutricion ya recoge notasSalud completo para soloDieta (más abajo,
     // en el return) -- solo hacía falta que estos push() no vivieran atrapados
     // en el bloque de solo-entrenamiento.
+    // Con solo nutrición y sin entrenar, los avisos de "esfuerzos máximos" o "antes
+    // de entrenar" no pintan nada (30 sept 2026): la nota habla de comida.
     if (enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos')) {
-      notasSalud.push('Nos indicaste que tienes problemas cardíacos. Antes de hacer trabajo de alta intensidad (AMRAPs, WODs, series), consulta con tu médico. Empieza siempre conservador y prioriza controlar la frecuencia cardíaca.');
+      notasSalud.push(_sedentarioSolo
+        ? 'Nos indicaste que tienes problemas cardíacos. Si tu médico te ha pautado una dieta concreta (baja en sal, en grasas...), manda él sobre este plan. Y antes de empezar a hacer ejercicio consúltalo con él y empieza siempre conservador.'
+        : 'Nos indicaste que tienes problemas cardíacos. Antes de hacer trabajo de alta intensidad (AMRAPs, WODs, series), consulta con tu médico. Empieza siempre conservador y prioriza controlar la frecuencia cardíaca.');
     } else if (enfermedad.includes('Hipertensión')) {
-      notasSalud.push('Nos indicaste hipertensión. Evita aguantar la respiración en esfuerzos máximos (apnea) y los bloqueos isométricos muy largos; prioriza repeticiones moderadas con respiración continua.');
+      if (!_sedentarioSolo) notasSalud.push('Nos indicaste hipertensión. Evita aguantar la respiración en esfuerzos máximos (apnea) y los bloqueos isométricos muy largos; prioriza repeticiones moderadas con respiración continua.');
     } else if (enfermedad.includes('Diabetes')) {
-      notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
+      if (!_sedentarioSolo) notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
+      // La diabetes condiciona sobre todo la comida, y hasta ahora no había ni una
+      // línea sobre ella (solo consejos de entreno). Va con las notas de comida.
+      _notaComida('Nos indicaste diabetes. Reparte los hidratos entre todas las tomas en vez de concentrarlos en una, prioriza los de absorción lenta (legumbres, avena, arroz integral, pasta al dente, verdura y fruta entera) y deja los zumos, los dulces y las bebidas azucaradas. Este plan no sustituye a tu médico ni a tu pauta de medicación: si usas insulina u otros fármacos, ajústalo con quien te los recetó.');
     } else if (enfermedad.includes('Otra')) {
       // Se cita lo que escribió, igual que ya hacen las notas de medicación y
       // de operación. El campo "¿Cuál?" se guardaba y se enseñaba en Jarvis,
@@ -15622,7 +15662,9 @@
       // pinta con innerHTML en "Hoy": sin escapar, un cliente podía meter
       // HTML/JS en su propia medicación y ejecutarlo en su propio dashboard
       // (mismo patrón de XSS almacenado que el de "Añadir ejercicio").
-      notasSalud.push(`Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
+      notasSalud.push(_sedentarioSolo
+        ? `Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos cambian el apetito, retienen líquidos o interaccionan con ciertos alimentos: ante cualquier duda sobre tu alimentación, consulta con quien te la recetó.`
+        : `Nos indicaste que tomas medicación (${_esc(medicacion)}). Algunos medicamentos afectan al ritmo cardíaco, la energía o la recuperación — escucha a tu cuerpo y, ante cualquier duda, consulta con quien te la recetó antes de subir la intensidad.`);
     }
 
     // El cuestionario pregunta por operaciones ("menisco, hernia discal...") y
@@ -16510,6 +16552,12 @@
       // deportes a solo nutrición.
       : _deporteSoloNutricion ? 1.725
       : 1.375;
+    // Solo nutrición y "No entreno" (30 sept 2026, auditoría): sin ejercicio de
+    // fuerza no hay músculo que construir, así que "Ganar músculo/fuerza" no lleva
+    // superávit (solo sumaría grasa), la proteína baja de 2,0-2,2 g/kg a 1,6-1,8 y
+    // los hidratos a 3,5 g/kg. CrossFit/Hyrox no entran: entrenan por definición.
+    // (_sedentarioSolo se declara arriba, junto a soloDieta, porque las notas de
+    // salud también lo necesitan.)
     // AJUSTE (29 sept 2026, auditoría de entrenador). El factor solo miraba los
     // DÍAS de entreno, no cuánto dura cada sesión, y los tramos de gimnasio
     // estaban en la parte alta de la escala: 3 días ya contaban como "actividad
@@ -16590,9 +16638,13 @@
     if (perdidaGrasa) {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee - _deficit);
     } else if (ganarMusculo) {
-      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + (_obesidad ? 0 : _superavit));
+      kcalObj = Math.max(esMujer ? 1200 : 1500, tdee + ((_obesidad || _sedentarioSolo) ? 0 : _superavit));
     } else {
       kcalObj = Math.max(esMujer ? 1200 : 1500, tdee); // equilibrio = TDEE real calculado, no valor fijo
+    }
+
+    if (_sedentarioSolo && ganarMusculo) {
+      notasSalud.push('Nos dices que no entrenas: sin ejercicio de fuerza el cuerpo no construye músculo, y comer de más solo suma grasa. Por eso tu plan va a mantenimiento, con proteína suficiente. Cuando empieces a entrenar fuerza (con nosotros o por tu cuenta), cámbialo en «Cambiar plan» y sumamos el superávit.');
     }
 
     // Recalibración por tendencia real de peso (evaluarYAjustarCalorias, en el
@@ -16650,14 +16702,15 @@
     const enfoqueTxt = (u.enfoqueMacros || '').toLowerCase();
     const enfoqueAltoProt  = enfoqueTxt.includes('alto en prote');
     const enfoqueBajoCarbo = enfoqueTxt.includes('bajo en carbohidratos');
-    const protMultiplier = (perdidaGrasa
+    const _protBase = (perdidaGrasa
       ? (esRunner ? 2.0 : esMixto ? 2.3 : 2.2)
       : ganarMusculo
       ? (esRunner ? 1.8 : esMixto ? 2.2 : 2.0)
       // Runner en mantenimiento 1,4 → 1,6 (29 sept 2026): 1,4 es el mínimo de
       // la ISSN para resistencia, y el plan de running lleva además un día de
       // fuerza por semana. Una corredora de 58 kg se quedaba en 81 g.
-      : (esRunner ? 1.6 : esMixto ? 1.8 : 1.6)) * (enfoqueAltoProt ? 1.15 : 1);
+      : (esRunner ? 1.6 : esMixto ? 1.8 : 1.6));
+    const protMultiplier = (_sedentarioSolo ? Math.min(_protBase, perdidaGrasa ? 1.8 : 1.6) : _protBase) * (enfoqueAltoProt ? 1.15 : 1);
     // Peso de referencia para los gramos por kilo. Con obesidad (IMC ≥ 30) el
     // peso total infla proteína e hidratos sin sentido: medido, un hombre de
     // 180 kg y 1,90 m en mantenimiento recibía 288 g de proteína y 736 g de
@@ -16697,7 +16750,7 @@
     // a quien entrena 3 días por salud le dejaba la grasa por debajo del 20%.
     const carbsMultiplier = (carbsAltos
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
-      : (perdidaGrasa ? 3.0 : ganarMusculo ? 4.5 : sentirseMejor ? 3.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
+      : (perdidaGrasa ? 3.0 : _sedentarioSolo ? 3.5 : ganarMusculo ? 4.5 : sentirseMejor ? 3.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
     let carbsObj = Math.round(pesoRef * carbsMultiplier);
 
     // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
@@ -18563,7 +18616,7 @@
       // llevo una vida sedentaria" (deporte='No especificado' desde el
       // formulario), asi que ningún esXxx de arriba encaja.
       notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
-      notasDeporte.push('Suplementación: si entrenas fuerza por tu cuenta, la creatina monohidrato (5g/día, todos los días) es el suplemento con más evidencia científica. Si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
+      notasDeporte.push('Movimiento: sin entrenar, lo que más suma es caminar a diario (unos 7.000-10.000 pasos) y levantarte cada hora si trabajas sentado. Si más adelante quieres ganar músculo o tonificar, la fuerza dos días a la semana es lo que más cambia el cuerpo: entonces puedes cambiar tu plan en «Cambiar plan». Y si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
     }
     if (!soloDieta) {
       notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
@@ -18932,6 +18985,12 @@
       });
     });
 
+    if (_sedentarioSolo) {
+      const _sinEntreno = m => { if (m && /entren/i.test(m.porque || '')) m.porque = 'Snack de tarde: con algo de proteína para llegar a la cena sin hambre.'; };
+      nutricion.forEach(_sinEntreno);
+      nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(_sinEntreno));
+    }
+
     if (_hipertension) {
       for (let i = 0; i < nutricionPorDia.length; i++) {
         if (Array.isArray(nutricionPorDia[i])) nutricionPorDia[i] = _tomasBajasEnSal(nutricionPorDia[i]);
@@ -19136,7 +19195,11 @@
     // Header
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
     document.getElementById('dashSubtitle').textContent = generatedPlan.bienvenida;
-    document.getElementById('motivationText').textContent = `"${generatedPlan.mensaje_dia}"`;
+    // El "mensaje del día" se calcula al pintar: el del plan guardado se quedaba
+    // congelado (el plan solo se regenera al renovar el menú) y era siempre el mismo.
+    let _msgDia = generatedPlan.mensaje_dia;
+    try { _msgDia = getMensajeDia(!!generatedPlan.soloDieta); } catch (e) {}
+    document.getElementById('motivationText').textContent = `"${_msgDia}"`;
 
     // Progresión real (semana actual y día de hoy), no fijo en "Semana 1 · Día 1".
     // La semana se cuenta desde la fecha de registro del email (no depende del check-in).
@@ -19164,15 +19227,20 @@
       const lunesDate = new Date(hoyDate);
       lunesDate.setDate(hoyDate.getDate() - ((hoyDate.getDay() + 6) % 7));
       lunesDate.setHours(0,0,0,0);
-      const entrenosSemana = (userData.entrenosCompletados || []).filter(fecha => {
-        const d = new Date(fecha);
-        return d >= lunesDate;
-      }).length;
-      const diasPlan = parseInt(userData.diasEntreno) || 3;
+      // Solo nutrición: lo que se cumple son los DÍAS DE COMIDA confirmados (0/7),
+      // no entrenos que ese cliente no tiene (antes: 0% y "0/3 días" para siempre).
+      const _soloN = !!generatedPlan.soloDieta;
+      const entrenosSemana = _soloN
+        ? (userData.diasConfirmados || []).filter(Boolean).length
+        : (userData.entrenosCompletados || []).filter(fecha => {
+            const d = new Date(fecha);
+            return d >= lunesDate;
+          }).length;
+      const diasPlan = _soloN ? 7 : (parseInt(userData.diasEntreno) || 3);
       const pct = diasPlan > 0 ? Math.min(100, Math.round((entrenosSemana / diasPlan) * 100)) : 0;
       statAdherenciaEl.innerHTML = `${pct}<span style="font-size:22px">%</span>`;
       if (statAdherenciaSubEl) statAdherenciaSubEl.textContent =
-        pct >= 100 ? 'Semana completada. Enorme.' : `${entrenosSemana}/${diasPlan} días esta semana`;
+        pct >= 100 ? 'Semana completada. Enorme.' : (_soloN ? `${entrenosSemana}/${diasPlan} días de comida confirmados` : `${entrenosSemana}/${diasPlan} días esta semana`);
       const barEl = document.getElementById('railAdherenciaBar');
       if (barEl) barEl.style.width = pct + '%';
       // Bloques de la racha: un bloque por día entrenado esta semana (7 = L-D)
@@ -19254,6 +19322,7 @@
         const tomas = generatedPlan.nutricion.length;
         const opciones = generatedPlan.nutricion[0]?.opciones?.length || 0;
         const objetivo = (userData.objetivo || '').toLowerCase();
+        const _sedentario = !!generatedPlan.soloDieta && /no entreno/i.test(userData.actividadSolo || '') && !/crossfit|hyrox/i.test(userData.deporte || '');
 
         const frases = [];
 
@@ -19266,6 +19335,10 @@
         // razón proteger músculo en déficit que construirlo en superávit.
         if (objetivo.includes('perder')) {
           frases.push('Esa proteína es lo que protege tu músculo mientras pierdes grasa: sin ella bajarías peso, pero parte de lo que perderías sería músculo.');
+        } else if (_sedentario) {
+          frases.push('Como no entrenas, la proteína ayuda a conservar tu músculo y a controlar el hambre; y las calorías se quedan en tu gasto, porque sin ejercicio de fuerza comer de más solo suma grasa.');
+        } else if ((objetivo.includes('ganar músculo') || objetivo.includes('ganar musculo')) && generatedPlan.tdee && kcal <= generatedPlan.tdee * 1.02) {
+          frases.push('Tus calorías se quedan en tu gasto, sin superávit, a propósito: con tu punto de partida el músculo se construye sin sumar grasa, y comer de más solo engordaría.');
         } else if (objetivo.includes('ganar músculo') || objetivo.includes('ganar musculo')) {
           frases.push('Las calorías van por encima de tu gasto a propósito: construir músculo sin ese margen no funciona, por mucho que entrenes.');
         } else if (objetivo.includes('fuerza')) {
@@ -19832,6 +19905,15 @@
     if (entrenoWrap) entrenoWrap.style.display = esSoloDietaPlan ? 'none' : '';
     const navHoy = document.getElementById('nav-hoy');
     if (navHoy) navHoy.style.display = '';
+    ['progFuerza', 'progCalendario'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = esSoloDietaPlan ? 'none' : ''; });
+    // El aviso diario de un plan solo nutrición habla de comidas, no de entrenos.
+    document.querySelectorAll('[data-push-tipo="entreno"]').forEach(inp => {
+      const lab = inp.closest('.push-toggle-row')?.querySelector('.push-toggle-label');
+      if (lab) lab.innerHTML = esSoloDietaPlan ? '<span>⬡</span> Aviso diario de comidas' : '<span>⬡</span> Avisos de entreno';
+      inp.setAttribute('aria-label', esSoloDietaPlan ? 'Aviso diario con tus comidas del día' : 'Avisos de entreno cuando no has marcado nada en el día');
+    });
+    const notasSub = document.getElementById('notasSubtitulo');
+    if (notasSub) notasSub.textContent = esSoloDietaPlan ? 'Apunta sensaciones, recetas que te han gustado o cualquier cosa que quieras recordar.' : 'Apunta pesos, sensaciones, ideas para tu próximo entreno o cualquier cosa que quieras recordar.';
     const nutriCambiarPlan = document.getElementById('nutriCambiarPlan');
     if (nutriCambiarPlan) nutriCambiarPlan.style.display = esSoloDietaPlan ? '' : 'none';
     if (esSoloDietaPlan) {
@@ -20261,10 +20343,32 @@
     return racha;
   }
 
+  // Solo nutrición: refresca el rail de "Hoy" (adherencia y racha) al confirmar
+  // un día de comida, sin reconstruir el panel entero.
+  function _actualizarRailSolo() {
+    const conf = (userData.diasConfirmados || []).filter(Boolean).length;
+    const pct = Math.min(100, Math.round(conf / 7 * 100));
+    const el = document.getElementById('statAdherencia');
+    if (el) el.innerHTML = `${pct}<span style="font-size:22px">%</span>`;
+    const sub = document.getElementById('statAdherenciaSub');
+    if (sub) sub.textContent = pct >= 100 ? 'Semana completada. Enorme.' : `${conf}/7 días de comida confirmados`;
+    const bar = document.getElementById('railAdherenciaBar');
+    if (bar) bar.style.width = pct + '%';
+    document.querySelectorAll('#rachaBlocks i').forEach((b, i) => b.classList.toggle('on', i < conf));
+    actualizarRacha();
+  }
+
   function actualizarRacha() {
     const el = document.getElementById('rachaDias');
     const label = document.getElementById('rachaDiasLabel');
     if (!el) return;
+    // Solo nutrición: la racha son las semanas con los 7 días de comida confirmados.
+    if (generatedPlan && generatedPlan.soloDieta) {
+      const sem = userData.semanasNutricionCompletas || 0;
+      el.textContent = String(sem);
+      if (label) label.textContent = sem === 1 ? 'semana con los 7 días confirmados' : 'semanas con los 7 días confirmados';
+      return;
+    }
     const racha = calcularRachaDias();
     el.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> ${racha}`;
     if (label) label.textContent = racha === 1 ? 'día seguido entrenando' : 'días seguidos entrenando';
@@ -21418,6 +21522,24 @@
     records.sort((a, b) => (b.ahora - b.antes) - (a.ahora - a.antes));
 
     const semana = userData.progreso?.semana || 1;
+    // Solo nutrición: el informe habla de comida y peso, no de cargas.
+    if (generatedPlan && generatedPlan.soloDieta) {
+      const conf = (userData.diasConfirmados || []).filter(Boolean).length;
+      const hp = (userData.historialPeso || []).filter(h => h && !isNaN(parseFloat(h.peso)));
+      let filaPeso = '';
+      if (hp.length >= 2) {
+        const ini = parseFloat(hp[0].peso), fin = parseFloat(hp[hp.length - 1].peso), d = fin - ini;
+        filaPeso = `<div class="informe-record"><span class="informe-record-nombre">Peso desde tu primer registro</span><span class="informe-record-cambio">${ini} → <strong>${fin} kg</strong> (${d > 0 ? '+' : ''}${d.toFixed(1)})</span></div>`;
+      }
+      cont.innerHTML = `
+        <div class="informe-eyebrow">Tu comida · Semana ${semana}</div>
+        <div class="informe-records">
+          <div class="informe-record"><span class="informe-record-nombre">Días de comida confirmados</span><span class="informe-record-cambio"><strong>${conf}/7</strong></span></div>
+          <div class="informe-record"><span class="informe-record-nombre">Semanas con los 7 días confirmados</span><span class="informe-record-cambio"><strong>${userData.semanasNutricionCompletas || 0}</strong></span></div>
+          ${filaPeso}
+        </div>`;
+      return;
+    }
     const flechaSVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>';
 
     const recordsHTML = records.length
@@ -21442,7 +21564,9 @@
     if (!list) return;
     const notas = userData.notas || [];
     if (notas.length === 0) {
-      list.innerHTML = '<div class="notes-empty">Aún no tienes notas. Apunta aquí pesos, sensaciones o ideas para tu próximo entreno.</div>';
+      list.innerHTML = (generatedPlan && generatedPlan.soloDieta)
+        ? '<div class="notes-empty">Aún no tienes notas. Apunta aquí sensaciones, recetas que te han gustado o ideas para tu semana.</div>'
+        : '<div class="notes-empty">Aún no tienes notas. Apunta aquí pesos, sensaciones o ideas para tu próximo entreno.</div>';
       return;
     }
     list.innerHTML = notas.map((nota, idx) => {
@@ -22993,6 +23117,8 @@
   function toggleCpEntrenamiento(ocultar) {
     const sec = document.getElementById('cp-entrenamientoSection');
     if (sec) sec.style.display = ocultar ? 'none' : '';
+    const solo = document.getElementById('cp-soloSection');
+    if (solo) solo.style.display = ocultar ? '' : 'none';
   }
 
   let _pesoRepInterval = null;
@@ -23030,6 +23156,8 @@
     const esSoloNutri = tipoPlanActual.includes('Solo');
     preseleccionarRadio('cp-tipoPlan', tipoPlanActual);
     toggleCpEntrenamiento(esSoloNutri);
+    preseleccionarRadio('cp-deporteSolo', (userData.deporte && userData.deporte !== 'No especificado') ? userData.deporte : 'No entreno, llevo una vida sedentaria');
+    preseleccionarRadio('cp-actividadSolo', userData.actividadSolo);
     const periodicidadTexto = (userData.periodicidad || 'mensual');
     preseleccionarRadio('cp-periodicidad', periodicidadTexto.charAt(0).toUpperCase() + periodicidadTexto.slice(1));
     actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
@@ -23197,6 +23325,14 @@
     const _comidasAntes = ['4-5 veces', '4 veces', '3 veces', '2 veces'].includes(userData.comidas) ? userData.comidas : '4-5 veces';
     if (_nuevasComidas && _nuevasComidas !== _comidasAntes) userData.comidas = _nuevasComidas;
     userData.deporte = nuevoDeporte;
+    // Solo nutrición: lo que entrena por su cuenta (mismo criterio que el cuestionario:
+    // "No entreno" se guarda como deporte "No especificado").
+    if (esSoloNutriNuevo) {
+      const _dSolo = getRadio('cp-deporteSolo');
+      const _aSolo = getRadio('cp-actividadSolo');
+      if (_dSolo) userData.deporte = _dSolo.startsWith('No entreno') ? 'No especificado' : _dSolo;
+      if (_aSolo) userData.actividadSolo = _aSolo;
+    }
     userData.diasEntreno = nuevosDias;
     userData.tiempoSesion = nuevoTiempo;
     userData.horaEntreno = document.querySelector('#cp-horaEntreno .selected')?.dataset.valor || '';
@@ -23238,7 +23374,7 @@
       // mensaje viejo la contradecía.
       msgPago = ' Sigues pagando el precio actual hasta tu próxima renovación; a partir de ahí se aplica el nuevo plan/precio, sin cargos extra ahora.';
     }
-    showToast('Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.' + msgPago);
+    showToast((esSoloNutriNuevo ? 'Tu plan se ha actualizado: calorías, macros y comidas recalculadas.' : 'Tu plan se ha actualizado: entrenamiento, nutrición y plan semanal recalculados.') + msgPago);
   }
 
   // ===== SELECCIÓN DE OPCIÓN DE COMIDA =====
@@ -23293,6 +23429,7 @@
     userData.comidasSemana = comidasSemana;
     guardarProgresoUsuario();
     actualizarBotonesNutriDia();
+    if (generatedPlan && generatedPlan.soloDieta) { try { _actualizarRailSolo(); } catch (e) {} }
     const siguiente = diasConfirmados.indexOf(false);
     if (siguiente >= 0 && siguiente < 7) {
       const diaConfirmado = diaNutriActual;
