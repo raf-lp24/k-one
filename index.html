@@ -6522,7 +6522,7 @@
 
     <div class="auth-field" style="margin-bottom:12px">
       <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TE INVITÓ UN AMIGO? <span style="color:var(--metal-claro)">(opcional)</span></div>
-      <input type="text" id="reg-codigoInvitacion" placeholder="Código de invitación" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
+      <input type="text" id="reg-codigoInvitacion" aria-label="Código de invitación" placeholder="Código de invitación" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
         oninput="comprobarCodigoRegistro()">
       <div id="reg-codigoInfo" style="display:none;font-size:12px;margin-top:7px;line-height:1.5"></div>
       <div style="font-size:11px;color:var(--metal);margin-top:6px;line-height:1.5">Código de un amigo que te invitó a K-ONE.</div>
@@ -6641,7 +6641,7 @@
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
       <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
       <div id="recetarioNotaCiclo" style="display:none;font-size:12px;color:var(--metal-claro);background:rgba(209,66,14,.07);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:14px;line-height:1.5"></div>
-      <input type="text" id="recetarioBuscador" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
+      <input type="text" id="recetarioBuscador" aria-label="Buscar receta" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
     <div id="recetarioContenido"></div>
   </div>
@@ -6808,12 +6808,12 @@
           </div>
           <div style="font-family:var(--jv-ui);font-size:10.5px;font-weight:700;color:var(--jv-faint);letter-spacing:.07em;text-transform:uppercase;margin-top:10px;width:100%">Estudio de mercado</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
-            <select id="adminFiltroPlan" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
+            <select id="adminFiltroPlan" aria-label="Filtrar por plan" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
               <option value="">Plan: todos</option>
               <option value="completo">Completo</option>
               <option value="nutricion">Solo nutrición</option>
             </select>
-            <select id="adminFiltroDeporte" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
+            <select id="adminFiltroDeporte" aria-label="Filtrar por deporte" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
               <option value="">Deporte: todos</option>
               <option value="Gimnasio">Gimnasio</option>
               <option value="Running">Running</option>
@@ -6821,19 +6821,19 @@
               <option value="Hyrox">Hyrox</option>
               <option value="Híbrido">Híbrido</option>
             </select>
-            <select id="adminFiltroObjetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
+            <select id="adminFiltroObjetivo" aria-label="Filtrar por objetivo" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
               <option value="">Objetivo: todos</option>
               <option value="Perder">Perder grasa</option>
               <option value="músculo">Ganar músculo</option>
               <option value="mejor">Sentirme mejor</option>
             </select>
-            <select id="adminFiltroEntrenos" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
+            <select id="adminFiltroEntrenos" aria-label="Filtrar por entrenos" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
               <option value="">Entrenos: todos</option>
               <option value="0">0 entrenos</option>
               <option value="1-5">1-5 entrenos</option>
               <option value="6+">6+ entrenos</option>
             </select>
-            <select id="adminFiltroPrecio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
+            <select id="adminFiltroPrecio" aria-label="Filtrar por precio" onchange="filtrarAdminTipo(_adminFiltro.tipo)" class="jv-select">
               <option value="">Precio: todos</option>
               <option value="Oferta 1,99">Oferta 1,99€</option>
               <option value="Mensual 7,99">Mensual 7,99€</option>
@@ -6927,11 +6927,11 @@
         <span id="adminEmailsCount" class="jv-chip" style="background:rgba(255,95,46,.13);color:var(--jv-accent-2);border:1px solid rgba(255,95,46,.25);text-transform:none;letter-spacing:0;font-size:11.5px"></span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">
-        <input id="emailFiltroTexto" type="text" placeholder="Buscar email, asunto o contenido..." oninput="renderAdminEmails()" style="flex:1;min-width:190px;background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:999px;color:var(--jv-text);font-size:12.5px;padding:9px 16px;font-family:var(--jv-ui);font-weight:500;outline:none">
-        <select id="emailFiltroTipo" onchange="renderAdminEmails()" class="jv-select"><option value="">Todos los tipos</option></select>
-        <select id="emailFiltroEstado" onchange="renderAdminEmails()" class="jv-select"><option value="">Vistos y sin ver</option><option value="pendiente">Solo sin ver</option><option value="gestionado">Solo vistos</option></select>
-        <input id="emailFiltroDesde" type="date" onchange="renderAdminEmails()" title="Desde esta fecha" class="jv-date">
-        <input id="emailFiltroHasta" type="date" onchange="renderAdminEmails()" title="Hasta esta fecha" class="jv-date">
+        <input id="emailFiltroTexto" aria-label="Buscar email o asunto" type="text" placeholder="Buscar email, asunto o contenido..." oninput="renderAdminEmails()" style="flex:1;min-width:190px;background:var(--jv-glass);border:1px solid var(--jv-line);border-radius:999px;color:var(--jv-text);font-size:12.5px;padding:9px 16px;font-family:var(--jv-ui);font-weight:500;outline:none">
+        <select id="emailFiltroTipo" aria-label="Filtrar por tipo" onchange="renderAdminEmails()" class="jv-select"><option value="">Todos los tipos</option></select>
+        <select id="emailFiltroEstado" aria-label="Filtrar por estado" onchange="renderAdminEmails()" class="jv-select"><option value="">Vistos y sin ver</option><option value="pendiente">Solo sin ver</option><option value="gestionado">Solo vistos</option></select>
+        <input id="emailFiltroDesde" aria-label="Desde" type="date" onchange="renderAdminEmails()" title="Desde esta fecha" class="jv-date">
+        <input id="emailFiltroHasta" aria-label="Hasta" type="date" onchange="renderAdminEmails()" title="Hasta esta fecha" class="jv-date">
         <button onclick="limpiarFiltrosEmail()" class="jv-btn jv-btn-ghost">Limpiar</button>
         <button onclick="eliminarEmailsFiltrados()" title="Elimina todos los emails que coinciden con los filtros de arriba (útil para vaciar de golpe los digests acumulados)" class="jv-btn jv-btn-danger-solid">Eliminar filtrados</button>
       </div>
@@ -7095,7 +7095,7 @@
               <option value="21097">Media maratón</option>
               <option value="42195">Maratón</option>
             </select>
-            <input type="text" id="cp-marcaTiempo" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmosCambioPlan()"
+            <input type="text" id="cp-marcaTiempo" aria-label="Tiempo de tu última carrera" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmosCambioPlan()"
                    inputmode="decimal" autocomplete="off" style="flex:1;min-width:130px">
           </div>
           <span class="field-hint">Minutos y segundos separados por un punto, por ejemplo 48.30. Para media maratón o maratón usa horas.minutos.segundos, por ejemplo 1.35.20. Si has mejorado tu marca, actualízala aquí y recalculamos tus ritmos de rodaje, umbral y series.</span>
@@ -7200,7 +7200,7 @@
     <p class="modal-desc">Se repetirá cada semana este día hasta que lo quites.</p>
     <div class="auth-field" style="position:relative">
       <label>Nombre del ejercicio</label>
-      <input type="text" id="extraEjNombre" placeholder="Curl concentrado, estiramientos de cadera..." autocomplete="off"
+      <input type="text" id="extraEjNombre" aria-label="Nombre del ejercicio" placeholder="Curl concentrado, estiramientos de cadera..." autocomplete="off"
         oninput="filtrarSugerenciasEjercicio(this.value)" onblur="setTimeout(ocultarSugerenciasEjercicio,150)">
       <div id="extraEjSugerencias" class="sugerencias-dropdown"></div>
     </div>
@@ -7209,13 +7209,13 @@
         <label>Series <span class="optional">Opcional</span></label>
         <div class="peso-stepper" style="width:100%;height:53px">
           <button type="button" class="peso-btn" style="height:100%" onclick="ajustarSeriesExtra(-1)" aria-label="Restar una serie">−</button>
-          <input type="number" class="peso-input" style="flex:1;width:auto;height:100%;font-size:15px" id="extraEjSeries" min="1" max="20" step="1" inputmode="numeric" placeholder="3">
+          <input type="number" class="peso-input" style="flex:1;width:auto;height:100%;font-size:15px" id="extraEjSeries" aria-label="Series" min="1" max="20" step="1" inputmode="numeric" placeholder="3">
           <button type="button" class="peso-btn" style="height:100%" onclick="ajustarSeriesExtra(1)" aria-label="Sumar una serie">+</button>
         </div>
       </div>
       <div class="auth-field" style="flex:1">
         <label>Reps <span class="optional">Opcional</span></label>
-        <input type="text" id="extraEjReps" maxlength="10" placeholder="12">
+        <input type="text" id="extraEjReps" aria-label="Repeticiones" maxlength="10" placeholder="12">
       </div>
     </div>
     <button class="btn-primary" style="width:100%;padding:14px;margin-top:8px" onclick="guardarAnadirEjercicio()">Añadir</button>
@@ -7234,7 +7234,7 @@
       <span class="encuesta-star" onclick="seleccionarEstrella(4)">★</span>
       <span class="encuesta-star" onclick="seleccionarEstrella(5)">★</span>
     </div>
-    <textarea class="encuesta-textarea" id="encuestaTexto" placeholder="¿Qué es lo que más te ha aportado? (opcional)"></textarea>
+    <textarea class="encuesta-textarea" id="encuestaTexto" aria-label="Tu respuesta" placeholder="¿Qué es lo que más te ha aportado? (opcional)"></textarea>
     <label class="encuesta-check-label">
       <input type="checkbox" id="encuestaAutorizar" checked>
       Autorizo que mi opinión aparezca en la web con mi nombre, edad y plan contratado
@@ -7252,11 +7252,11 @@
     <div style="display:flex;gap:12px;margin-bottom:14px">
       <div style="flex:1">
         <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Nombre</label>
-        <input type="text" id="opPublicaNombre" placeholder="Tu nombre" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box">
+        <input type="text" id="opPublicaNombre" aria-label="Tu nombre" placeholder="Tu nombre" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box">
       </div>
       <div style="width:80px">
         <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Edad</label>
-        <input type="number" id="opPublicaEdad" placeholder="—" min="14" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
+        <input type="number" id="opPublicaEdad" aria-label="Tu edad" placeholder="—" min="14" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
       </div>
     </div>
     <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Valoración</label>
@@ -7268,7 +7268,7 @@
       <span class="encuesta-star" onclick="seleccionarEstrellaPublica(5)">★</span>
     </div>
     <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Tu opinión</label>
-    <textarea class="encuesta-textarea" id="opPublicaTexto" placeholder="¿Qué te parece K-One? Cualquier cosa vale."></textarea>
+    <textarea class="encuesta-textarea" id="opPublicaTexto" aria-label="Tu opinión" placeholder="¿Qué te parece K-One? Cualquier cosa vale."></textarea>
     <button class="btn-primary" style="width:100%" onclick="enviarOpinionPublica()">Enviar opinión →</button>
     <button class="encuesta-skip" onclick="document.getElementById('modalOpinionPublica').classList.remove('visible')">Cancelar</button>
   </div>
@@ -7292,7 +7292,7 @@
     <div class="modal-title" style="font-size:20px">Buscador de alimentos</div>
     <p class="modal-desc" style="margin-bottom:12px">Macros por 100 g según la base oficial de la USDA. Escribe para buscar y ajusta la cantidad.</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input type="text" id="alimentoBuscar" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderAlimentos()"
+      <input type="text" id="alimentoBuscar" aria-label="Buscar alimento" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderAlimentos()"
         style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="alimentoGramos" value="100" min="1" max="2000" step="10" oninput="renderAlimentos()"
@@ -7314,7 +7314,7 @@
     <div class="modal-title" style="font-size:20px">Añade tu comida</div>
     <p class="modal-desc" style="margin-bottom:12px">Busca el alimento, ajusta la cantidad y tócalo para añadirlo como una opción más de esta toma. Los macros salen de la tabla oficial de la USDA, igual que el resto del plan.</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input type="text" id="comidaExtraBuscar" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderComidaExtraLista()"
+      <input type="text" id="comidaExtraBuscar" aria-label="Buscar alimento" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderComidaExtraLista()"
         style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="comidaExtraGramos" value="100" min="1" max="2000" step="10" oninput="renderComidaExtraLista()"
@@ -7370,7 +7370,7 @@
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Objetivo cumplido">Ya conseguí mi objetivo</label>
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Otro">Otra cosa</label>
     </div>
-    <textarea id="cancelarSubTexto2" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:18px"></textarea>
+    <textarea id="cancelarSubTexto2" aria-label="Cuéntanos el motivo" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:18px"></textarea>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button style="flex:1;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarModalCancelar()">Seguir con mi plan</button>
       <button id="btnConfirmarCancelar" style="flex:1;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px" onclick="confirmarCancelarSuscripcion()">Sí, cancelar suscripción</button>
@@ -8257,7 +8257,7 @@
           </div>
           <div class="field field-conditional" id="enfermedadExtra" style="display:none">
             <label>¿Cuál? <span class="optional">Opcional</span></label>
-            <input type="text" id="enfermedadOtra" placeholder="Cuéntanos qué enfermedad para adaptar el plan">
+            <input type="text" id="enfermedadOtra" aria-label="Qué enfermedad tienes" placeholder="Cuéntanos qué enfermedad para adaptar el plan">
           </div>
           <div class="field">
             <label>¿Tienes alguna lesión activa ahora mismo? <span class="required">Obligatorio</span></label>
@@ -8323,7 +8323,7 @@
         <div class="form-grid full" style="gap:20px">
           <div class="field">
             <label>¿A qué te dedicas? <span class="optional">Opcional</span></label>
-            <input type="text" id="trabajo" placeholder="Oficina, hostelería, construcción, estudiante...">
+            <input type="text" id="trabajo" aria-label="A qué te dedicas" placeholder="Oficina, hostelería, construcción, estudiante...">
           </div>
           <div class="field">
             <label>¿Cómo es tu jornada laboral? <span class="optional">Opcional</span></label>
@@ -11552,6 +11552,7 @@
     ['press militar', 'BShy9IEmrPg', 'Ninolift - Press militar con barra'],
     ['press (de banca |banca )?(plano )?con mancuerna|press de banca o mancuernas', '5wN-99Fny5Q', 'Jeremy Ethier ES - Press con mancuernas'],
     ['press (cerrado |de pecho )?en maquina', 'N7DjfGB8-xY', 'Fitness Consciente - Press de pecho en máquina'],
+    ['press cerrado|press de banca cerrado|agarre (cerrado|estrecho)', 'gDSJb6mwJg4', 'Guillermo Fernández - Press cerrado'],
     ['contractor|pec ?deck|aperturas en maquina', 'R4GslAvpPE0', 'Javi NewBody - Contractora de pecho'],
     ['press (de )?banca', 'jlFl7WJ1TzI', 'Jeremy Ethier ES - Press de banca'],
     ['aperturas en polea|cruces? (de|en) poleas?', 'WNtBIde3Qks', 'ATHLEAN-X ES - Cruce de poleas'],
@@ -11561,7 +11562,9 @@
     ['flexion(es)? con pies elevados|flexion declinada', '4vzeg9wCbtg', 'Zonapablo - Flexión con pies elevados'],
     ['flexion', 'b2UagYWNErY', 'Blue Man - Flexiones'],
     ['elevaciones? frontal', 'joO2vLGujcA', 'Powerexplosive - Elevaciones frontales'],
+    ['elevaciones? (laterales? )?en polea', 'fKxKgslS408', 'Andrés Vázquez PT - Elevaciones laterales en polea'],
     ['elevaciones? laterales?|combo lateral', 'hgLpdwMtEEs', 'Jesús López Trainer - Elevaciones laterales'],
+    ['(kettlebell|kb|pesa rusa) swings?|\\bswings?\\b', '0GKf0FM9HOM', 'HardXFit - Kettlebell swing'],
     ['pajaros|deltoides posterior', 'RG_41P2hP0s', 'Zonapablo - Pájaros'],
     ['face pull con banda', 'w06tVYSLH20', 'Paco The Fisio - Face pull con goma'],
     ['face pull', 'X-xCQ1gh-kA', 'HSN - Face pull'],
@@ -14360,7 +14363,7 @@
         : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.';
 
       const _diaFuerza = () => ({
-        resumen: (esAvanzado && !_sinIntensidad) ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
+        resumen: (esAvanzado && !_sinIntensidad && !_lesionZonaRodilla) ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
         detalle: fuerzaCorredorObjetivo,
         etiqueta: 'Fortalecimiento'
       });
@@ -14731,7 +14734,7 @@
         const cardioDia = esAvanzado && !sentirseMejor && !_sinIntensidad ? _calidadHib() : _zona2();
         const full = _fuerza('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER);
         const sup = _fuerza(esAvanzado ? 'Fuerza · Tren superior + carries' : 'Fuerza · Tren superior', esAvanzado ? _SUP_AV : _SUP_INTER);
-        const inf = _fuerza(esAvanzado && !_sinIntensidad ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
+        const inf = _fuerza(esAvanzado && !_sinIntensidad && !_lesionZonaRodilla ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
         if (numDias <= 2) { _planHib[0] = full; _planHib[3] = _metcon(); }
         else if (numDias === 3) { _planHib[0] = full; _planHib[2] = cardioDia; _planHib[4] = _metcon(); }
         else if (numDias === 4) { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[5] = _metcon(); }
@@ -18816,6 +18819,38 @@
     // TIENE que ser grande (es el mismo día en menos tomas), y con el tope de
     // 1,9 la opción que no llegaba se quedaba corta -- con 2 comidas y
     // superávit, la primera opción de cada toma dejaba el día en el 72%.
+    // LIMPIEZA DE LA SEMANA ANTES DE ESCALAR (30 sept 2026, auditoría).
+    //  · Un filtro de alergia puede dejar dos platos con el MISMO nombre en una
+    //    toma ("Lentejas estofadas" y "Garbanzos estofados" -> "Quinoa estofadas"
+    //    x2): se quita el repetido.
+    //  · La primera opción de dos tomas del mismo día no puede ser el mismo
+    //    plato (medido: ~12 % de los planes tenían el mismo filete en la comida
+    //    y en la cena). Se intercambia con la siguiente distinta. Los platos de
+    //    repostaje (antes/después de entrenar) se quedan donde están a propósito.
+    {
+      const _esRepostaje = n => /antes de entrenar|antes de tirada|post-entreno|recarga tras|recuperaci[óo]n/i.test(n || '');
+      nutricionPorDia.forEach(tomasDia => {
+        const primeros = new Set();
+        tomasDia.forEach(m => {
+          if (!Array.isArray(m.opciones)) return;
+          const vistos = new Set();
+          m.opciones = m.opciones.filter(o => { if (vistos.has(o.nombre)) return false; vistos.add(o.nombre); return true; });
+          if (m.opciones.length > 1 && primeros.has(m.opciones[0].nombre) && !_esRepostaje(m.opciones[0].nombre)) {
+            const j = m.opciones.findIndex(o => !primeros.has(o.nombre));
+            if (j > 0) { const t = m.opciones[0]; m.opciones[0] = m.opciones[j]; m.opciones[j] = t; }
+          }
+          primeros.add(m.opciones[0].nombre);
+        });
+      });
+    }
+    // RACIÓN PROTEICA RAZONABLE (30 sept 2026, auditoría). Escalar cada plato
+    // hasta el presupuesto de su toma daba, a clientes de 100+ kg, "920 g de
+    // bacalao" o "1 kg de pechuga de pavo" en un solo plato (una receta de 330
+    // kcal x3). Ahora la carne o el pescado no pasan de RACION_PROT_MAX_G y lo
+    // que falta hasta el presupuesto de la toma lo pone una guarnición de
+    // hidrato (arroz o patata cocida, la que el cliente no haya excluido).
+    const RACION_PROT_MAX_G = 320;
+    const _PROT_ANIMAL = /pechuga|pollo|pavo|ternera|solomillo|salmón|salmon|merluza|bacalao|dorada|lubina|lenguado|rodaballo|rape|emperador|atún|atun|conejo|cerdo|lomo|carne picada|sardina|caballa|trucha|gambas|langostinos|calamar|pulpo|sepia/i;
     const _yaNormalizadas = new Set();
     nutricionPorDia.forEach((tomasDia, iDia) => {
       const objetivoDia = kcalObjPorDia[iDia] || kcalObj;
@@ -18838,11 +18873,20 @@
           // comida) puede crecer hasta la ración de su toma sin llegar a nada
           // absurdo: 300 kcal × 3 = 900. El tope bajo es para bases grandes.
           const tope = k < 450 ? Math.max(topeEscala, tomasDia.length <= 2 ? 4.5 : 3.0) : topeEscala;
-          const f = Math.min(tope, Math.max(0.5, objetivoToma / k));
-          if (Math.abs(f - 1) < 0.04) return;
-          const p = Math.max(0, Math.round((parseInt(o.prot) || 0) * f));
-          const c = Math.max(0, Math.round((parseInt(o.carbs) || 0) * f));
-          const g = Math.max(0, Math.round((parseInt(o.grasa) || 0) * f));
+          let f = Math.min(tope, Math.max(0.5, objetivoToma / k));
+          let _capado = false;
+          {
+            let gMax = 0;
+            (o.ingredientes || '').split(',').forEach(x => {
+              const mm = x.trim().match(/^(\d+(?:[.,]\d+)?)\s?g\s+(.*)$/);
+              if (mm && _PROT_ANIMAL.test(mm[2])) gMax = Math.max(gMax, parseFloat(mm[1].replace(',', '.')));
+            });
+            if (gMax > 0 && gMax * f > RACION_PROT_MAX_G) { f = Math.max(0.5, RACION_PROT_MAX_G / gMax); _capado = true; }
+          }
+          if (Math.abs(f - 1) < 0.04 && !_capado) return;
+          let p = Math.max(0, Math.round((parseInt(o.prot) || 0) * f));
+          let c = Math.max(0, Math.round((parseInt(o.carbs) || 0) * f));
+          let g = Math.max(0, Math.round((parseInt(o.grasa) || 0) * f));
           o.prot = `${p}g prot`;
           o.carbs = `${c}g carbs`;
           o.grasa = `${g}g grasa`;
@@ -18851,6 +18895,39 @@
           // de "Ver macros" volveria a no cuadrar con lo que pone el plato,
           // que es justo lo que se acaba de arreglar en el recetario.
           o.ingredientes = scaleIngredientes(o.ingredientes, f);
+          // Aceite: un plato no lleva más de 25 g (45 g eran 400 kcal de aceite
+          // en una pasta). Lo que sobra se quita de la grasa del plato.
+          o.ingredientes = o.ingredientes.split(',').map(x => {
+            const mm = x.match(/^(\s*)(\d+)g (AOVE|aceite[^,]*)$/i);
+            if (!mm || +mm[2] <= 25) return x;
+            g = Math.max(0, g - (+mm[2] - 25));
+            o.grasa = `${g}g grasa`;
+            o.kcal = `${Math.round(p * 4 + c * 4 + g * 9)} kcal`;
+            return `${mm[1]}25g ${mm[3]}`;
+          }).join(',');
+          if (_capado) {
+            const falta = objetivoToma - (p * 4 + c * 4 + g * 9);
+            // Con enfoque "Bajo en carbohidratos" la guarnición es aguacate, no
+            // hidrato: no se contradice el enfoque.
+            if (falta > 150) {
+              const noArroz = /arroz/i.test(textoFiltro), noPatata = /patata/i.test(textoFiltro);
+              const bajoCarbs = u.enfoqueMacros === 'Bajo en carbohidratos';
+              const lado = bajoCarbs ? (/aguacate/i.test(textoFiltro) ? null : { n: 'aguacate', k: 1.6, p: 0.02, c: 0.09, g: 0.15, max: 200 })
+                : !noArroz ? { n: 'arroz blanco cocido', k: 1.30, p: 0.027, c: 0.28, g: 0.003, max: 400 }
+                : !noPatata ? { n: 'patata cocida', k: 0.86, p: 0.02, c: 0.19, g: 0.001, max: 500 } : null;
+              if (lado) {
+                const gr = Math.min(lado.max, Math.round(falta / lado.k / 10) * 10);
+                if (gr >= 50) {
+                  p += Math.round(gr * lado.p); c += Math.round(gr * lado.c); g += Math.round(gr * lado.g);
+                  o.prot = `${p}g prot`; o.carbs = `${c}g carbs`; o.grasa = `${g}g grasa`;
+                  o.kcal = `${Math.round(p * 4 + c * 4 + g * 9)} kcal`;
+                  o.ingredientes = `${o.ingredientes}, ${gr}g ${lado.n}`;
+                  const _pasosBase = o.pasos || (typeof RECETA_PASOS !== 'undefined' ? RECETA_PASOS[o.nombre] : '');
+                  if (_pasosBase) o.pasos = `${_pasosBase} Acompaña el plato con ${lado.n}.`;
+                }
+              }
+            }
+          }
         });
       });
     });
