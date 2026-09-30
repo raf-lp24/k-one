@@ -14106,6 +14106,11 @@
 
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
+    // Sin series, intervalos ni metcons (30 sept 2026): con tensión alta, problemas
+    // cardíacos, embarazo o lactancia, Running e Híbrido sustituyen la sesión de
+    // calidad por zona 2, quitan strides y pliometría y cambian el metcon por un
+    // circuito suave. Antes solo el gimnasio lo hacía (el remate en zona 2).
+    const _sinIntensidad = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos') || _embarazada || _lactancia;
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
     // Semana y bloque del mesociclo. Se declaran aquí arriba porque los planes por
@@ -14139,7 +14144,7 @@
       _notaCribado('Nos indicaste lactancia o posparto reciente: tu plan no lleva déficit y suma unas 400 kcal al día, porque dar el pecho gasta energía. Si hace menos de 6 semanas del parto, o fue cesárea, espera al visto bueno de tu matrona antes de entrenar y empieza por el suelo pélvico. Si notas escapes de orina o un bulto en la tripa al hacer fuerza, para y consúltalo.');
     }
     if (_embarazada) {
-      _notaCribado('Nos indicaste que estás embarazada: tu plan no lleva déficit ni intervalos intensos. Antes de seguir el entrenamiento, coméntalo con tu matrona o ginecólogo. A partir del segundo trimestre evita los ejercicios tumbada boca arriba, las cargas máximas, aguantar la respiración y cualquier ejercicio con riesgo de caída o golpe en la tripa. De la comida hemos quitado los embutidos curados, los ahumados y los pescados grandes con más mercurio. Desde el segundo trimestre necesitarás unas 300 kcal más al día: tu matrona te dirá cuándo sumarlas.');
+      _notaCribado('Nos indicaste que estás embarazada: tu plan no lleva déficit ni intervalos intensos. Antes de seguir el entrenamiento, coméntalo con tu matrona o ginecólogo. A partir del segundo trimestre evita los ejercicios tumbada boca arriba, las cargas máximas, aguantar la respiración y cualquier ejercicio con riesgo de caída o golpe en la tripa. De la comida hemos quitado los embutidos curados, los ahumados, el pescado crudo (poké) y los pescados grandes con más mercurio. Desde el segundo trimestre necesitarás unas 300 kcal más al día: tu matrona te dirá cuándo sumarlas.');
     }
 
     // SEMILLA estable por usuario: da variedad entre clientes con el mismo perfil
@@ -14292,7 +14297,7 @@
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
           : 'Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, lateral band walks 3×12/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s'
-        : esAvanzado
+        : (esAvanzado && !_sinIntensidad)
           ? rSinMat
             // Los gemelos faltaban SOLO en esta variante (avanzado al aire
             // libre): el intermedio al aire libre sí los lleva y el avanzado en
@@ -14372,7 +14377,7 @@
       // Strides y cuestas fuera con la rodilla tocada: son aceleraciones casi a
       // sprint y bajadas al trote, el impacto que el aviso de lesión dice haber
       // quitado. Y fuera de la sesión exprés, donde no caben.
-      const _conStrides = !_lesionZonaRodilla && _tramoDur !== 'expres';
+      const _conStrides = !_lesionZonaRodilla && _tramoDur !== 'expres' && !_sinIntensidad;
       const _strides = (n, metros, nota) => _conStrides ? `. Al acabar: ${n} strides de ${metros}m (${nota})` : '';
       const durSuave = _escalarDur(_RUN_DUR.suave[0] + _extraAv, _RUN_DUR.suave[1] + _extraAv, _multVolumenRun, _TOPE_RUN - (_conStrides ? 5 : 0));
       const durLarga = _escalarDur(_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv, _multVolumenRun);
@@ -14391,7 +14396,7 @@
         : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.';
 
       const _diaFuerza = () => ({
-        resumen: esAvanzado ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
+        resumen: (esAvanzado && !_sinIntensidad) ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
         detalle: fuerzaCorredorObjetivo,
         etiqueta: 'Fortalecimiento'
       });
@@ -14498,10 +14503,15 @@
         };
       };
       // El fartlek suave solo entra cuando ya corre 5 min seguidos (escalón 3).
-      const _calidadPrinc = () => _paso >= 3
+      const _calidadPrinc = () => (_paso >= 3 && !_sinIntensidad)
         ? { resumen: 'Fartlek suave · Juego de ritmos', etiqueta: 'Intensidad',
             detalle: `Fartlek introductorio · ${_tramoDur === 'expres' ? 3 : 5} min trote suave o caminando rápido de calentamiento. Luego: ${_tramoDur === 'expres' ? 4 : 6} × (1 min a ritmo alegre + 2 min caminando o trotando muy suave). Ritmo alegre = algo por encima de conversacional, puedes hablar con frases cortas. Cierre: ${_tramoDur === 'expres' ? 2 : 5} min caminando${_conStrides ? ' + 4 strides de 50m (aceleración progresiva, no sprint)' : ''}` }
         : _runWalk(0, 'tecnica');
+      // Sustituye a la sesión de calidad cuando no toca intensidad (_sinIntensidad).
+      const _rodajeContinuo = () => ({
+        resumen: 'Rodaje continuo · Zona 2', etiqueta: 'Cardio',
+        detalle: `Rodaje continuo · ${durSuave} a zona 2 (RPE 3-4), ritmo conversacional: tienes que poder hablar todo el rato. Si te falta el aire, camina un minuto y sigue${_extraSuave}`
+      });
       const _cardioSinImpacto = () => ({
         resumen: 'Cardio sin impacto', etiqueta: 'Cardio',
         detalle: rSinMat
@@ -14521,7 +14531,7 @@
         // del martes eran dos días exigentes seguidos para alguien que empieza.
         else { _plan[0] = _runWalk(0); _plan[1] = _diaFuerza(); _plan[3] = _calidadPrinc(); _plan[4] = _cardioSinImpacto(); _plan[5] = _runWalk(2, 'largo'); }
       } else {
-        const calidad = sentirseMejor ? _calidadSalud() : esAvanzado ? _calidadAvanzado() : _calidadIntermedio();
+        const calidad = _sinIntensidad ? _rodajeContinuo() : sentirseMejor ? _calidadSalud() : esAvanzado ? _calidadAvanzado() : _calidadIntermedio();
         if (numDias <= 2) { _plan[2] = calidad; _plan[5] = _tiradaLarga(); }
         else if (numDias === 3) { _plan[0] = _quiereFuerza ? _diaFuerza() : _rodajeSuave(); _plan[2] = calidad; _plan[5] = _tiradaLarga(); }
         else if (numDias === 4) { _plan[0] = _rodajeSuave(); _plan[2] = calidad; _plan[3] = _diaFuerza(); _plan[5] = _tiradaLarga(); }
@@ -14540,6 +14550,10 @@
       semana = _DIAS_RUN.map((dia, i) => _plan[i]
         ? { dia, tipo: 'Entrenamiento', resumen: _plan[i].resumen, detalle: _plan[i].detalle, etiqueta: _plan[i].etiqueta }
         : { dia, tipo: 'Descanso', resumen: _DESCANSOS_RUN[i].resumen, detalle: _DESCANSOS_RUN[i].detalle, etiqueta: 'Descanso' });
+
+      if (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos')) {
+        notasSalud.push('Por tu salud cardiovascular, tu plan de carrera no lleva series, cuestas ni intervalos intensos: todo el cardio va a ritmo conversacional. Antes de subir la intensidad, coméntalo con tu médico.');
+      }
 
       // Sin día de fuerza (2-3 días): se le dice qué hacer, porque en corredores
       // es lo que más lesiones previene.
@@ -14603,7 +14617,7 @@
       // ── Cardio en zona 2 ──
       const _Z2 = { expres: [15, 20], corta: [25, 35], media: [35, 45], larga: [45, 60], muyLarga: [50, 70] }[_tramoDur];
       const _extraRes = _resistenciaHib ? 5 : 0;
-      const _conStridesHib = !_lesionZonaRodilla && _TOPE_HIB >= 60;
+      const _conStridesHib = !_lesionZonaRodilla && _TOPE_HIB >= 60 && !_sinIntensidad;
       const _modalidadZ2 = _casaHib
         ? (_lesionZonaRodilla ? 'de caminata rápida en cuesta, al aire libre' : 'de carrera suave o caminata rápida en cuesta, al aire libre')
         // La lista va entre paréntesis: fuera, "carrera, bici y remo" se partía
@@ -14643,7 +14657,7 @@
       // "Perder grasa": remate corto de acondicionamiento en los días de fuerza
       // (no en exprés, donde no cabe; nunca al principiante).
       const _emomFin = { expres: 0, corta: 6, media: 8, larga: 10, muyLarga: 10 }[_tramoDur];
-      const _finGrasa = perdidaGrasa && !esPrincipiante && _emomFin
+      const _finGrasa = perdidaGrasa && !esPrincipiante && _emomFin && !_sinIntensidad
         ? `. Finisher: EMOM ${_emomFin} min alternando 12 KB swings y 8 burpees`
         : '';
       const _fuerza = (resumen, detalle) => ({ resumen, detalle: detalle + _finGrasa, etiqueta: 'Fuerza' });
@@ -14669,7 +14683,7 @@
         ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
         : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
-      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_plioHibAv}, A-skips 3×20m, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
+      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_sinIntensidad ? 'zancada caminando con mancuernas 3×10 por pierna' : `${_plioHibAv}, A-skips 3×20m`}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
 
       // ── Metcon / circuito ──
       // Cardio entre rondas: más metros si el objetivo es resistencia; en casa,
@@ -14717,7 +14731,7 @@
           detalle: `Complejo con barra "The Bear" ${r} rondas: power clean + front squat + push press + back squat + press militar × 5 reps ininterrumpidas. Sube peso cada ronda.${emom ? ` Post: EMOM ${emom} min: min1: 12 KB swings · min2: 8 burpees · min3: ${cardio3}` : ''}${_colaGrasa}`
         };
       };
-      const _metcon = () => sentirseMejor ? _circuitoModerado() : (esAvanzado && !_casaHib ? _theBear() : _complejoDB());
+      const _metcon = () => _sinIntensidad ? _circuitoSuave() : sentirseMejor ? _circuitoModerado() : (esAvanzado && !_casaHib ? _theBear() : _complejoDB());
 
       // ── Cardio del principiante: run/walk que progresa cada 3 semanas ──
       const _PASO_HIB = [{ c: 1, a: 2 }, { c: 2, a: 1 }, { c: 3, a: 1 }, { c: 5, a: 1 }][Math.min(3, Math.floor((Math.max(1, semanaActual) - 1) / 3))];
@@ -14750,14 +14764,17 @@
         else if (numDias === 4) { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[5] = _circuitoSuave(); }
         else { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[4] = _cardioSuavePrinc(); _planHib[5] = _circuitoSuave(); }
       } else {
-        const cardioDia = esAvanzado && !sentirseMejor ? _calidadHib() : _zona2();
+        const cardioDia = esAvanzado && !sentirseMejor && !_sinIntensidad ? _calidadHib() : _zona2();
         const full = _fuerza('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER);
         const sup = _fuerza(esAvanzado ? 'Fuerza · Tren superior + carries' : 'Fuerza · Tren superior', esAvanzado ? _SUP_AV : _SUP_INTER);
-        const inf = _fuerza(esAvanzado ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
+        const inf = _fuerza(esAvanzado && !_sinIntensidad ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
         if (numDias <= 2) { _planHib[0] = full; _planHib[3] = _metcon(); }
         else if (numDias === 3) { _planHib[0] = full; _planHib[2] = cardioDia; _planHib[4] = _metcon(); }
         else if (numDias === 4) { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[5] = _metcon(); }
         else { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[4] = _sesionLarga(); _planHib[5] = _metcon(); }
+      }
+      if (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos')) {
+        notasSalud.push('Por tu salud cardiovascular, tu plan híbrido no lleva series, metcons a contrarreloj ni intervalos intensos: el cardio va en zona 2 y el circuito a un ritmo que puedas mantener (RPE 6). Antes de subir la intensidad, coméntalo con tu médico.');
       }
       const _DIAS_HIB = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
       const _DESCANSOS_HIB = [
@@ -17185,7 +17202,7 @@
             op("Bol de arroz con leche, huevo y plátano", "60g arroz crudo, 250ml leche entera, 1 huevo, 1 plátano, canela, miel", "568 kcal", "24g prot", "82g carbs", "16g grasa", "Fácil · 20 min"),
             op("Batido de leche entera, avena, plátano y cacahuete", "300ml leche entera, 50g avena, 1 plátano, 20g crema de cacahuete", "588 kcal", "26g prot", "76g carbs", "20g grasa", "Fácil · 3 min"),
             op("Sándwich de pavo, queso y huevo", "3 rebanadas pan integral, 60g pavo, 30g queso, 1 huevo a la plancha", "542 kcal", "38g prot", "48g carbs", "22g grasa", "Fácil · 10 min"),
-            op("Tostadas con salmón, queso crema y huevo", "3 rebanadas centeno, 80g salmón ahumado, 30g queso crema, 1 huevo pochado", "546 kcal", "36g prot", "42g carbs", "26g grasa", "Fácil · 10 min"),
+            op("Tostadas con salmón ahumado, queso crema y huevo", "3 rebanadas centeno, 80g salmón ahumado, 30g queso crema, 1 huevo pochado", "546 kcal", "36g prot", "42g carbs", "26g grasa", "Fácil · 10 min"),
             op("Bol de skyr con granola y frutos rojos", "200g skyr natural, 40g granola, 80g frutos rojos, 10g semillas de chía, miel", "445 kcal", "30g prot", "52g carbs", "13g grasa", "Sin cocción · 3 min"),
             op("Huevos revueltos con queso, jamón y pan integral", "3 huevos, 30g queso, 40g jamón cocido, 2 rebanadas pan integral", "528 kcal", "38g prot", "40g carbs", "24g grasa", "Fácil · 10 min"),
             // Desayunos densos en carbohidratos: es la toma donde más fácil
@@ -17918,7 +17935,7 @@
     const alergiaLibre = _otraLimpia ? _expandirAlergenoLibre(_otraLimpia) : '';
     // Embarazo: fuera embutidos curados y ahumados (toxoplasma, listeria) y los
     // pescados grandes con más mercurio. Mismo filtro que "no como".
-    const _filtroEmbarazo = _embarazada ? 'jamón serrano, jamón ibérico, salmón ahumado, pez espada, emperador, atún rojo' : '';
+    const _filtroEmbarazo = _embarazada ? 'jamón serrano, jamón ibérico, lomo embuchado, cecina, salchichón, fuet, sobrasada, salmón ahumado, pavo ahumada, pavo ahumado, poké bowl, poke bowl, pez espada, emperador, atún rojo' : '';
     // Hipertensión (29 sept 2026, auditoría de entrenador): el plan solo le
     // decía que no aguantara la respiración, y su semana de comidas llevaba
     // ~20 opciones con jamón serrano, ~20 con pavo en lonchas, salmón ahumado
@@ -22741,6 +22758,7 @@
     "Bol de arroz con leche, huevo y plátano": "Cuece el arroz en la leche a fuego suave 20-25 min removiendo, hasta que esté cremoso. Fuera del fuego, incorpora el huevo batido removiendo rápido para que no cuaje en trozos. Sirve con el plátano en rodajas, canela y un hilo de miel.",
     "Batido de leche entera, avena, plátano y cacahuete": "Mete la leche, la avena, el plátano y la crema de cacahuete en la batidora. Bate 30-40 segundos hasta que quede homogéneo, sin grumos de avena.",
     "Sándwich de pavo, queso y huevo": "Cocina el huevo a la plancha 2-3 min. Monta el sándwich con el pan, el pavo, el queso y el huevo. Si quieres, tuéstalo en sartén 1-2 min por lado para que el queso se funda.",
+    "Tostadas con salmón ahumado, queso crema y huevo": "Escalfa el huevo en agua casi hirviendo con un chorrito de vinagre 3 min para que quede pochado. Tuesta el pan de centeno, unta el queso crema y añade el salmón ahumado. Corona con el huevo.",
     "Tostadas con salmón, queso crema y huevo": "Escalfa el huevo en agua casi hirviendo con un chorrito de vinagre 3 min para que quede pochado. Tuesta el pan de centeno, unta el queso crema y añade el salmón ahumado. Corona con el huevo.",
     "Bol de skyr con granola y frutos rojos": "Vierte el skyr en un bol. Añade los frutos rojos y las semillas de chía. Termina con la granola justo antes de comer y un hilo de miel.",
     "Huevos revueltos con queso, jamón y pan integral": "Saltea el jamón en dados 1 min. Bate los huevos, añádelos a la sartén junto al queso y cuaja a fuego medio removiendo, que quede cremoso. Tuesta el pan y sirve al lado.",
