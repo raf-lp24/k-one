@@ -3,7 +3,7 @@
 // alimentos.json y cuanto se desvia la suma real de las kcal declaradas.
 // Es la misma comprobacion que ve el cliente al pulsar "Ver macros".
 const fs = require('fs');
-const RAIZ = 'C:/Users/Usuario/Desktop/Rafa Personl/Proyetos/Fragua';
+const RAIZ = require('path').join(__dirname, '..');
 const ALIM = JSON.parse(fs.readFileSync(RAIZ + '/data/alimentos.json', 'utf8'));
 const CLAVES = Object.keys(ALIM).sort((a, b) => b.length - a.length);
 const CANT_DEFECTO = require('./cant-defecto');
