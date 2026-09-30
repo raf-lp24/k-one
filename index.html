@@ -19363,6 +19363,17 @@
     // con otra) se pone al día aquí (30 sept 2026). Ver _actualizarPlanAlMotor().
     if ((generatedPlan.cicloCarbs === undefined || generatedPlan.motorVersion !== _huellaMotor())
         && userData && userData.peso && userData.altura && userData.edad) {
+      // Si el plan lo puso al día el SERVIDOR (lib/motor-servidor.js, con la web
+      // publicada) y aquí la huella es otra, lo normal es que esta pestaña lleve
+      // abierta desde antes del último despliegue: se recarga UNA vez para coger
+      // la versión nueva en vez de "rebajar" el plan con el motor viejo.
+      let _recargado = false;
+      try { _recargado = sessionStorage.getItem('kone_recarga_motor') === generatedPlan.motorServidor; } catch (e) {}
+      if (generatedPlan.motorServidor && !_recargado) {
+        try { sessionStorage.setItem('kone_recarga_motor', generatedPlan.motorServidor); } catch (e) {}
+        location.reload();
+        return;
+      }
       try { _actualizarPlanAlMotor(); } catch (e) { console.warn('[motor] no se pudo actualizar el plan:', e.message); }
     }
 

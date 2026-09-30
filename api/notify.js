@@ -10,6 +10,7 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
+const { obtenerMotor, actualizarPlanCliente } = require('../lib/motor-servidor');
 const { avisoDelDia } = require('../lib/aviso-del-dia');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
@@ -973,6 +974,14 @@ async function handleCronRetencion(req, res) {
       const guardar = [], borrar = [];
       const vistos = new Set();
       let revisados = 0;
+      let planesActualizados = 0;
+      let motorServidor = null, huellaServidor = null;
+      try {
+        motorServidor = await obtenerMotor();
+        huellaServidor = motorServidor.huella();
+      } catch (e) {
+        console.warn('[notify-cron] motor del servidor no disponible, solo se audita:', e.message);
+      }
       // PostgREST corta en 1000 filas por consulta si no se pide explícito:
       // por debajo de eso una sola consulta ya lo trae todo, pero por encima
       // se perdería a los clientes de más sin avisar de nada -- ni error ni
@@ -995,6 +1004,22 @@ async function handleCronRetencion(req, res) {
           } catch (e) {
             console.warn('[notify-cron] auditoría de', p.id, 'falló:', e.message);
             continue;
+          }
+          // Plan de un motor anterior, o con algo que no debería llevar: se
+          // regenera aquí con el motor publicado y se vuelve a revisar, sin
+          // esperar a que el cliente abra la app (30 sept 2026). Si el motor no
+          // se puede cargar, se sigue solo auditando, como antes.
+          // Tope por pasada para no pasarse del tiempo del cron: los que queden se
+          // actualizan en la siguiente (o al abrir la app). Los que tienen hallazgo, siempre.
+          if (motorServidor && (hallazgos.length || (planesActualizados < 200 && p.plan && p.plan.motorVersion !== huellaServidor))) {
+            try {
+              if (await actualizarPlanCliente(supa, p, motorServidor, { forzar: hallazgos.length > 0 })) {
+                planesActualizados++;
+                hallazgos = auditarPlan(p.userdata || {}, p.plan);
+              }
+            } catch (e) {
+              console.warn('[notify-cron] no se pudo regenerar el plan de', p.id, e.message);
+            }
           }
           if (hallazgos.length) {
             clientesConHallazgo++;
@@ -1027,7 +1052,7 @@ async function handleCronRetencion(req, res) {
       } else {
         console.warn('[notify-cron] auditoría: falta la tabla auditorias_clientes (aplica supabase/migration-auditorias-clientes.sql):', rPrev.error.message);
       }
-      console.log(`[notify-cron] Auditoría: ${revisados} planes revisados, ${clientesConHallazgo} con hallazgo, ${borrar.length} cerrados`);
+      console.log(`[notify-cron] Auditoría: ${revisados} planes revisados, ${planesActualizados} puestos al día, ${clientesConHallazgo} con hallazgo, ${borrar.length} cerrados`);
     } catch (eAud) {
       console.error('[notify-cron] auditoría error:', eAud.message);
       capturarError(eAud, { fn: 'notify-cron-auditoria' });
