@@ -13,6 +13,13 @@ const NIVELES_PREMIO = {
   fuego:  { min: 15, pct: 10, semanasMin: 4 },
   hierro: { min: 22, pct: 20, semanasMin: 12 },
 };
+// Solo nutrición: no puede conseguir los 18 hitos de entrenar, así que el umbral
+// se escala a lo que sí está a su alcance (22 de 40, el 55 %): 15 -> 8, 22 -> 12.
+// Igual de exigente en proporción; mismo descuento y mismas semanas mínimas.
+const NIVELES_PREMIO_SOLO = {
+  fuego:  { min: 8,  pct: 10, semanasMin: 4 },
+  hierro: { min: 12, pct: 20, semanasMin: 12 },
+};
 
 // Crea (si no existe) y devuelve el cupón reutilizable de un nivel.
 async function ensureCoupon(stripe, pct) {
@@ -34,8 +41,7 @@ async function ensureCoupon(stripe, pct) {
  * Devuelve { status, body } para que el endpoint lo reenvíe tal cual.
  */
 async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
-  const premio = NIVELES_PREMIO[nivel];
-  if (!premio) return { status: 400, body: { error: 'Nivel no válido' } };
+  if (!NIVELES_PREMIO[nivel]) return { status: 400, body: { error: 'Nivel no válido' } };
 
   // Los hitos se RECALCULAN aquí; nunca se usa el mapa `hitos` del cliente.
   const { data: profile } = await supabaseAdmin
@@ -51,15 +57,6 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
     .select('id', { count: 'exact', head: true })
     .eq('referrer_id', user.id)
     .eq('estado', 'pagado');
-
-  const verif = contarHitosVerificados(userdata, user.created_at, referidosPagados || 0);
-
-  if (verif.semanas < premio.semanasMin) {
-    return { status: 400, body: { error: `Este nivel necesita al menos ${premio.semanasMin} semanas de cuenta (llevas ${verif.semanas})` } };
-  }
-  if (verif.total < premio.min) {
-    return { status: 400, body: { error: `Este nivel se desbloquea con ${premio.min} hitos verificados (llevas ${verif.total})` } };
-  }
 
   // Suscripción activa del usuario
   const { data: sub } = await supabaseAdmin
@@ -88,6 +85,20 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
   const subscription = await stripe.subscriptions.retrieve(subId);
   if (!['active', 'trialing'].includes(subscription.status)) {
     return { status: 404, body: { error: 'No se encontró una suscripción activa' } };
+  }
+
+  // ¿Plan solo nutrición? Se decide por el PRECIO real de la suscripción en Stripe,
+  // no por lo que diga el perfil (que lo escribe el navegador).
+  const precioNutricion = process.env.STRIPE_PRICE_NUTRICION_MENSUAL;
+  const esNutricion = !!precioNutricion && (subscription.items?.data || []).some(i => i.price && i.price.id === precioNutricion);
+  const premio = (esNutricion ? NIVELES_PREMIO_SOLO : NIVELES_PREMIO)[nivel];
+
+  const verif = contarHitosVerificados(userdata, user.created_at, referidosPagados || 0, esNutricion);
+  if (verif.semanas < premio.semanasMin) {
+    return { status: 400, body: { error: `Este nivel necesita al menos ${premio.semanasMin} semanas de cuenta (llevas ${verif.semanas})` } };
+  }
+  if (verif.total < premio.min) {
+    return { status: 400, body: { error: `Este nivel se desbloquea con ${premio.min} hitos verificados (llevas ${verif.total})` } };
   }
 
   // Cerrojo atómico contra doble canje: la clave primaria (user_id, nivel) de
@@ -144,4 +155,4 @@ async function canjearNivelHitos({ stripe, supabaseAdmin, user, nivel }) {
   return { status: 200, body: { ok: true, pct: premio.pct, hitosVerificados: verif.total } };
 }
 
-module.exports = { canjearNivelHitos, NIVELES_PREMIO };
+module.exports = { canjearNivelHitos, NIVELES_PREMIO, NIVELES_PREMIO_SOLO };

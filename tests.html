@@ -312,6 +312,26 @@ async function correr() {
       fallos.length === 0, fallos.length ? fallos.slice(0, 6).join('\n') : 'Verificado en 24 perfiles sedentarios.');
   }
 
+  // Solo nutrición que entrena por su cuenta: la comida de antes y de después de
+  // entrenar sale SOLO en los días que dijo, y en el hueco que toca por su hora.
+  {
+    const fallos = [];
+    [['manana', 'Desayuno'], ['mediodia', 'Media mañana'], ['noche', 'Merienda'], ['tarde', 'Comida']].forEach(([hora, hueco]) => {
+      const dias = [1, 3, 5];
+      const u = perfilBase({ tipoPlan: 'Solo nutrición, sin entrenamiento', deporte: 'Gimnasio / Fuerza', actividadSolo: 'Moderado (3-4 días/semana)', objetivo: 'Ganar músculo', diasEntrenoSolo: dias, horaEntreno: hora, comidas: '4-5 veces', email: 'test-solo-fuel@x.com' });
+      let p;
+      try { p = win.buildPlanFromData(u); } catch (e) { fallos.push('ERROR ' + e.message); return; }
+      p.nutricionPorDia.forEach((dia, i) => {
+        const m = dia.find(x => x.momento === hueco);
+        const tiene = !!m && /antes de entrenar/i.test(m.opciones[0].nombre);
+        if (dias.includes(i) && !tiene) fallos.push(`${hora}: falta el plato previo el día ${i} en ${hueco}`);
+        if (!dias.includes(i) && dia.some(x => /antes de entrenar|recuperaci[óo]n post/i.test(x.opciones[0].nombre))) fallos.push(`${hora}: plato de entreno en un día sin entreno (${i})`);
+      });
+    });
+    test('Solo nutrición', 'Entrena por su cuenta: comida previa y de recuperación solo en sus días y en su hueco',
+      fallos.length === 0, fallos.length ? fallos.slice(0, 6).join('\n') : 'Verificado con 4 franjas horarias.');
+  }
+
   // ───────────────────────── D. RECETARIO completo ─────────────────────────
   // Usa el propio abrirRecetario() de la app (igual que lo vería un cliente real)
   // en vez de leer RECETA_PASOS directamente: es un `const` de nivel superior de

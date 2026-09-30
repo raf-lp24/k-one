@@ -7096,6 +7096,28 @@
             <div class="radio-opt" onclick="selectRadio(this,'cp-actividadSolo')">Intenso (5+ días/semana)</div>
           </div>
         </div>
+        <div class="field">
+          <label>Si entrenas: ¿qué días? <span class="optional">Opcional</span></label>
+          <div class="radio-group" id="cp-diasEntrenoSolo">
+            <div class="radio-opt" data-dia="0" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Lunes" style="min-width:44px;text-align:center">L</div>
+              <div class="radio-opt" data-dia="1" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Martes" style="min-width:44px;text-align:center">M</div>
+              <div class="radio-opt" data-dia="2" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Miércoles" style="min-width:44px;text-align:center">X</div>
+              <div class="radio-opt" data-dia="3" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Jueves" style="min-width:44px;text-align:center">J</div>
+              <div class="radio-opt" data-dia="4" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Viernes" style="min-width:44px;text-align:center">V</div>
+              <div class="radio-opt" data-dia="5" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Sábado" style="min-width:44px;text-align:center">S</div>
+              <div class="radio-opt" data-dia="6" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Domingo" style="min-width:44px;text-align:center">D</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Si entrenas: ¿a qué hora? <span class="optional">Opcional</span></label>
+          <div class="radio-group" id="cp-horaEntrenoSolo">
+            <div class="radio-opt" data-valor="manana" onclick="selectRadio(this,'cp-horaEntrenoSolo')">Por la mañana (antes de las 11h)</div>
+              <div class="radio-opt" data-valor="mediodia" onclick="selectRadio(this,'cp-horaEntrenoSolo')">A mediodía (11-14h)</div>
+              <div class="radio-opt" data-valor="tarde" onclick="selectRadio(this,'cp-horaEntrenoSolo')">Por la tarde (15-18h)</div>
+              <div class="radio-opt" data-valor="noche" onclick="selectRadio(this,'cp-horaEntrenoSolo')">Por la noche (después de las 18h)</div>
+              <div class="radio-opt" data-valor="varia" onclick="selectRadio(this,'cp-horaEntrenoSolo')">Cambia según el día</div>
+          </div>
+        </div>
       </div>
       <div id="cp-entrenamientoSection">
         <div class="field">
@@ -8015,8 +8037,8 @@
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1420E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
   </div>
   <div class="push-banner-body">
-    <span class="push-banner-title">Avisos de entreno</span>
-    <span class="push-banner-sub">Solo los días que no hayas entrenado. Se apagan cuando quieras.</span>
+    <span class="push-banner-title" id="pushBannerTitulo">Avisos de entreno</span>
+    <span class="push-banner-sub" id="pushBannerSub">Solo los días que no hayas entrenado. Se apagan cuando quieras.</span>
   </div>
   <button class="push-banner-close" onclick="cerrarPushBanner()" aria-label="Ahora no">&times;</button>
   <button class="push-banner-cta" onclick="activarNotificaciones()">Activar</button>
@@ -8506,24 +8528,51 @@
           <div class="field">
             <label>¿Entrenas por tu cuenta? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="deporteSolo">
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">No entreno, llevo una vida sedentaria</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Gimnasio / Fuerza</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Running</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Hyrox</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">CrossFit</div>
-              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo')">Híbrido</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">No entreno, llevo una vida sedentaria</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">Gimnasio / Fuerza</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">Running</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">Hyrox</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">CrossFit</div>
+              <div class="radio-opt" onclick="selectRadio(this,'deporteSolo'); actualizarSoloEntrenoExtra()">Híbrido</div>
             </div>
             <span class="field-hint">No generamos rutina para este plan, pero la proteína, los carbohidratos y la hidratación que necesitas no son iguales si eres sedentario, vas al gimnasio, corres o haces CrossFit/Hyrox.</span>
           </div>
           <div class="field">
             <label>¿Con qué frecuencia? <span class="required">Obligatorio</span></label>
             <div class="radio-group" id="actividadSolo">
-              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="Trabajo de oficina o similar, sin entrenar de forma regular">No entreno / muy poca actividad</div>
-              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="1-2 sesiones semanales">Ligero (1-2 días/semana)</div>
-              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="3-4 sesiones semanales">Moderado (3-4 días/semana)</div>
-              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo')" data-hint="5+ sesiones semanales, o deporte muy exigente">Intenso (5+ días/semana)</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo'); actualizarSoloEntrenoExtra()" data-hint="Trabajo de oficina o similar, sin entrenar de forma regular">No entreno / muy poca actividad</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo'); actualizarSoloEntrenoExtra()" data-hint="1-2 sesiones semanales">Ligero (1-2 días/semana)</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo'); actualizarSoloEntrenoExtra()" data-hint="3-4 sesiones semanales">Moderado (3-4 días/semana)</div>
+              <div class="radio-opt" onclick="selectRadio(this,'actividadSolo'); actualizarSoloEntrenoExtra()" data-hint="5+ sesiones semanales, o deporte muy exigente">Intenso (5+ días/semana)</div>
             </div>
             <span class="field-hint">Con esto calculamos bien tus calorías objetivo — sin este dato, tu plan de nutrición podría quedarse corto o pasado.</span>
+          </div>
+          <!-- Solo si entrena por su cuenta: con los días y la hora colocamos la
+               comida de antes y de después de entrenar, como en el plan completo. -->
+          <div id="soloEntrenoExtra" style="display:none">
+            <div class="field">
+              <label>¿Qué días sueles entrenar? <span class="optional">Opcional</span></label>
+              <div class="radio-group" id="diasEntrenoSolo">
+              <div class="radio-opt" data-dia="0" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Lunes" style="min-width:44px;text-align:center">L</div>
+              <div class="radio-opt" data-dia="1" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Martes" style="min-width:44px;text-align:center">M</div>
+              <div class="radio-opt" data-dia="2" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Miércoles" style="min-width:44px;text-align:center">X</div>
+              <div class="radio-opt" data-dia="3" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Jueves" style="min-width:44px;text-align:center">J</div>
+              <div class="radio-opt" data-dia="4" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Viernes" style="min-width:44px;text-align:center">V</div>
+              <div class="radio-opt" data-dia="5" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Sábado" style="min-width:44px;text-align:center">S</div>
+              <div class="radio-opt" data-dia="6" onclick="this.classList.toggle('selected')" role="checkbox" aria-label="Domingo" style="min-width:44px;text-align:center">D</div>
+              </div>
+              <span class="field-hint">Con tus días y tu hora, esos días llevan una comida de antes de entrenar y otra de recuperación.</span>
+            </div>
+            <div class="field">
+              <label>¿A qué hora sueles entrenar? <span class="optional">Opcional</span></label>
+              <div class="radio-group" id="horaEntrenoSolo">
+              <div class="radio-opt" data-valor="manana" onclick="selectRadio(this,'horaEntrenoSolo')">Por la mañana (antes de las 11h)</div>
+              <div class="radio-opt" data-valor="mediodia" onclick="selectRadio(this,'horaEntrenoSolo')">A mediodía (11-14h)</div>
+              <div class="radio-opt" data-valor="tarde" onclick="selectRadio(this,'horaEntrenoSolo')">Por la tarde (15-18h)</div>
+              <div class="radio-opt" data-valor="noche" onclick="selectRadio(this,'horaEntrenoSolo')">Por la noche (después de las 18h)</div>
+              <div class="radio-opt" data-valor="varia" onclick="selectRadio(this,'horaEntrenoSolo')">Cambia según el día</div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="form-grid full" id="bloqueEntrenoCompleto" style="gap:20px">
@@ -10090,6 +10139,18 @@
 
   // El plan "Solo nutrición" no rellena deporte/nivel/lugar (no genera rutina),
   // pero sí necesita decir cuánta actividad hace por su cuenta para el TDEE.
+  // Solo nutrición: los días y la hora de entreno solo se preguntan a quien entrena
+  // por su cuenta (deporte y frecuencia distintos de "No entreno").
+  function actualizarSoloEntrenoExtra() {
+    const w = document.getElementById('soloEntrenoExtra');
+    if (!w) return;
+    const dep = document.querySelector('#deporteSolo .selected')?.textContent || '';
+    const act = document.querySelector('#actividadSolo .selected')?.textContent || '';
+    const entrena = !!dep && !!act && !dep.startsWith('No entreno') && !act.startsWith('No entreno');
+    w.style.display = entrena ? '' : 'none';
+    if (!entrena) w.querySelectorAll('.radio-opt.selected').forEach(o => o.classList.remove('selected'));
+  }
+
   function esSoloDieta() {
     return (document.querySelector('#tipoPlan .selected')?.textContent || '').includes('Solo nutrición');
   }
@@ -10231,7 +10292,11 @@
       diasEntreno: getRadio('diasEntreno'),
       tiempoSesion: getRadio('tiempoSesion'),
       // Opcional: manana | mediodia | tarde | noche | varia ('' si no contesta).
-      horaEntreno: document.querySelector('#horaEntreno .selected')?.dataset.valor || '',
+      horaEntreno: (esSoloDieta()
+        ? document.querySelector('#horaEntrenoSolo .selected')?.dataset.valor
+        : document.querySelector('#horaEntreno .selected')?.dataset.valor) || '',
+      // Solo nutrición que entrena por su cuenta: qué días (0 = lunes ... 6 = domingo).
+      diasEntrenoSolo: esSoloDieta() ? [...document.querySelectorAll('#diasEntrenoSolo .radio-opt.selected')].map(e => +e.dataset.dia) : [],
       nivel: getRadio('nivel'),
       lugar: getRadio('lugar'),
       // Frecuencia/intensidad de quien elige "Solo nutrición" — se usa para el
@@ -18106,7 +18171,24 @@
     // fuerzan como primera opción justo el día de la semana que SÍ tiene una
     // tirada larga/series o un WOD — el resto de días siguen con la rotación
     // normal, sin forzar nada.
-    if (!soloDieta && semana.length === 7) {
+    // Solo nutrición que entrena por su cuenta (30 sept 2026): no tiene rutina, pero
+    // sí quiere su comida de antes y de después de entrenar. Con los días que dijo
+    // (o unos por defecto según su frecuencia) se monta una semana solo para esto.
+    const _entrenaSolo = soloDieta && !_sedentarioSolo && (esGimnasio || esRunner || esCombinacion || esCrossfit || esHyrox);
+    let _semanaFuel = semana;
+    if (_entrenaSolo) {
+      let dias = Array.isArray(u.diasEntrenoSolo) ? [...new Set(u.diasEntrenoSolo.map(Number).filter(n => n >= 0 && n <= 6))] : [];
+      if (!dias.length) {
+        const act = (u.actividadSolo || '').toLowerCase();
+        const n = _deporteSoloNutricion && u.diasEntreno ? numDias
+          : act.includes('intenso') ? 5 : act.includes('moderado') ? 3 : act.includes('ligero') ? 2 : 3;
+        dias = { 1: [2], 2: [1, 4], 3: [0, 2, 4], 4: [0, 1, 3, 4], 5: [0, 1, 2, 3, 4] }[Math.min(5, Math.max(1, n))];
+      }
+      const etiq = esRunner ? 'Intensidad' : (esCrossfit || esHyrox) ? 'WOD' : 'Fuerza';
+      _semanaFuel = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia, i) =>
+        ({ dia, tipo: dias.includes(i) ? 'Entrenamiento' : 'Descanso', etiqueta: dias.includes(i) ? etiq : 'Descanso', resumen: '', detalle: '' }));
+    }
+    if ((!soloDieta || _entrenaSolo) && _semanaFuel.length === 7) {
       // Se decide por ETIQUETA, que es un campo fijo, y no por el resumen, que
       // es una frase escrita a mano y cambia con cada plantilla. Antes se
       // quedaban fuera el dia de Fondo (tirada progresiva, que si justifica
@@ -18157,7 +18239,7 @@
           _notaComida(_notaHora);
         }
       }
-      semana.forEach((d, i) => {
+      _semanaFuel.forEach((d, i) => {
         const dm = nutricionPorDia[i];
         // El filtro de alérgenos puede haber vaciado alguna de estas listas; sin el
         // guard, `lista[x % 0]` daba NaN y se colaba un `undefined` como primera
@@ -21087,25 +21169,43 @@
     { key: 'leyenda', nombre: 'Leyenda', min: 30, premio: 'Título Leyenda K-ONE' },
   ];
 
+  // Solo nutrición (30 sept 2026): 18 de los 40 hitos exigen entrenar con nosotros
+  // y ese cliente no puede conseguirlos. No se le enseñan, y sus niveles se
+  // escalan a los 22 que sí puede conseguir (el 55 %). El servidor aplica los
+  // mismos umbrales según el PRECIO de la suscripción (api/_hitosReward.js).
+  const HITOS_SOLO_EXCLUIDOS = [
+    'primer_entreno', 'tres_entrenos', 'diez_entrenos', 'racha5', 'la_vuelta', 'veinte_entrenos',
+    'racha14', 'cincuenta', 'cien', 'doscientos', 'primer_feedback_entreno', 'primer_peso',
+    'progresion_peso', 'diez_pct_fuerte', 'cinco_ejercicios_reg', 'racha21', 'racha30', 'trescientos',
+  ];
+  const NIVELES_HITOS_SOLO_MIN = { chispa: 3, brasa: 6, fuego: 8, hierro: 12, leyenda: 17 };
+  const _hitosSolo = () => !!(generatedPlan && generatedPlan.soloDieta);
+  const _nivelesHitos = () => _hitosSolo()
+    ? NIVELES_HITOS.map(nv => ({ ...nv, min: NIVELES_HITOS_SOLO_MIN[nv.key] }))
+    : NIVELES_HITOS;
+
   function renderNivelHitos(defs) {
     const cont = document.getElementById('hitosNivel');
     if (!cont) return;
-    const n = Object.keys(userData.hitos || {}).length;
+    const NIV = _nivelesHitos();
+    const n = _hitosSolo()
+      ? Object.keys(userData.hitos || {}).filter(k => !HITOS_SOLO_EXCLUIDOS.includes(k)).length
+      : Object.keys(userData.hitos || {}).length;
     const total = defs.length;
     let actual = null;
-    NIVELES_HITOS.forEach(nv => { if (n >= nv.min) actual = nv; });
-    const siguiente = NIVELES_HITOS.find(nv => n < nv.min) || null;
+    NIV.forEach(nv => { if (n >= nv.min) actual = nv; });
+    const siguiente = NIV.find(nv => n < nv.min) || null;
     const canjeados = userData.hitosNivelesCanjeados || {};
 
     const base = actual ? actual.min : 0;
     const pctBar = siguiente ? Math.min(100, Math.round(((n - base) / (siguiente.min - base)) * 100)) : 100;
 
-    const chips = NIVELES_HITOS.map(nv => {
+    const chips = NIV.map(nv => {
       const done = n >= nv.min;
       return `<span title="${nv.premio}" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;border-radius:999px;padding:4px 11px;border:1px solid ${done ? 'var(--brasa)' : 'var(--humo)'};color:${done ? 'var(--brasa)' : 'var(--metal)'};${done ? 'background:rgba(209,66,14,0.10);' : ''}">${nv.nombre} · ${nv.min}</span>`;
     }).join('');
 
-    const botones = NIVELES_HITOS.filter(nv => nv.pct && n >= nv.min).map(nv => {
+    const botones = NIV.filter(nv => nv.pct && n >= nv.min).map(nv => {
       if (canjeados[nv.key]) {
         return `<span style="font-size:12px;color:var(--brasa)">✓ ${nv.pct}% de tu cuota ya canjeado (nivel ${nv.nombre})</span>`;
       }
@@ -21181,7 +21281,8 @@
   function renderHitos() {
     const list = document.getElementById('milestonesList');
     if (!list) return;
-    const { defs, changed } = calcularHitos();
+    const { defs: todosLosHitos, changed } = calcularHitos();
+    const defs = _hitosSolo() ? todosLosHitos.filter(d => !HITOS_SOLO_EXCLUIDOS.includes(d.key)) : todosLosHitos;
     renderNivelHitos(defs);
     let proximoAsignado = false;
     const visibles = [];
@@ -23158,6 +23259,8 @@
     toggleCpEntrenamiento(esSoloNutri);
     preseleccionarRadio('cp-deporteSolo', (userData.deporte && userData.deporte !== 'No especificado') ? userData.deporte : 'No entreno, llevo una vida sedentaria');
     preseleccionarRadio('cp-actividadSolo', userData.actividadSolo);
+    preseleccionarRadio('cp-horaEntrenoSolo', userData.horaEntreno);
+    document.querySelectorAll('#cp-diasEntrenoSolo .radio-opt').forEach(o => o.classList.toggle('selected', (userData.diasEntrenoSolo || []).includes(+o.dataset.dia)));
     const periodicidadTexto = (userData.periodicidad || 'mensual');
     preseleccionarRadio('cp-periodicidad', periodicidadTexto.charAt(0).toUpperCase() + periodicidadTexto.slice(1));
     actualizarOpcionesPeriodicidad(tipoPlanActual, 'cp-periodicidad');
@@ -23332,10 +23435,13 @@
       const _aSolo = getRadio('cp-actividadSolo');
       if (_dSolo) userData.deporte = _dSolo.startsWith('No entreno') ? 'No especificado' : _dSolo;
       if (_aSolo) userData.actividadSolo = _aSolo;
+      userData.horaEntreno = document.querySelector('#cp-horaEntrenoSolo .selected')?.dataset.valor || '';
+      userData.diasEntrenoSolo = [...document.querySelectorAll('#cp-diasEntrenoSolo .radio-opt.selected')].map(e => +e.dataset.dia);
     }
     userData.diasEntreno = nuevosDias;
     userData.tiempoSesion = nuevoTiempo;
-    userData.horaEntreno = document.querySelector('#cp-horaEntreno .selected')?.dataset.valor || '';
+    // (con solo nutrición la hora ya se guardó arriba, desde su propio apartado)
+    if (!esSoloNutriNuevo) userData.horaEntreno = document.querySelector('#cp-horaEntreno .selected')?.dataset.valor || '';
     userData.nivel = nuevoNivel;
     userData.lugar = nuevoLugar;
     userData.preferenciaCardioFinisher = nuevoCardioFinisher || 'Automático (rota cada bloque)';
@@ -29538,6 +29644,12 @@ Se coló: ${lista}`;
         const pwaBanner = document.getElementById('pwaInstallBanner');
         if (pwaBanner && pwaBanner.style.display !== 'none') { setTimeout(intentar, 6000); return; }
         const banner = document.getElementById('pushInstallBanner');
+        // Solo nutrición: el aviso llega CADA día y habla de comidas (30 sept 2026).
+        if (typeof generatedPlan !== 'undefined' && generatedPlan && generatedPlan.soloDieta) {
+          const bt = document.getElementById('pushBannerTitulo'), bs = document.getElementById('pushBannerSub');
+          if (bt) bt.textContent = 'Aviso diario de comidas';
+          if (bs) bs.textContent = 'Cada día, tu menú listo. Se apaga cuando quieras.';
+        }
         if (banner) banner.style.display = '';
         _pushBannerChainActiva = false;
       };
@@ -29654,7 +29766,9 @@ Se coló: ${lista}`;
         if (tipo === 'entreno') _guardarPrefAvisosEntreno(true);
         showToast(tipo === 'registro'
           ? 'Avisos de registro activados en este dispositivo.'
-          : 'Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
+          : ((typeof generatedPlan !== 'undefined' && generatedPlan && generatedPlan.soloDieta)
+              ? 'Aviso diario activado. Cada día te recordaremos tus comidas.'
+              : 'Avisos activados. Te avisaremos solo los días que no hayas entrenado.'));
       } catch (e) {
         console.warn('[push] Error activando notificaciones:', e.message);
         showToast('No se pudieron activar los avisos. Inténtalo de nuevo.', 4000);
@@ -29731,7 +29845,7 @@ Se coló: ${lista}`;
           try { yaSuscrito = !!(await (await navigator.serviceWorker.ready).pushManager.getSubscription()); } catch (e) {}
           if (yaSuscrito && Notification.permission === 'granted') {
             _guardarPrefAvisosEntreno(true);
-            showToast('Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
+            showToast((typeof generatedPlan !== 'undefined' && generatedPlan && generatedPlan.soloDieta) ? 'Aviso diario activado. Cada día te recordaremos tus comidas.' : 'Avisos activados. Te avisaremos solo los días que no hayas entrenado.');
             await actualizarBotonNotificaciones();
           } else {
             await activarNotificaciones('entreno');
@@ -29740,7 +29854,7 @@ Se coló: ${lista}`;
           _guardarPrefAvisosEntreno(false);
           if (_adminVerificado) {
             // El admin conserva la suscripción para los avisos de registro.
-            showToast('Avisos de entreno desactivados.');
+            showToast((typeof generatedPlan !== 'undefined' && generatedPlan && generatedPlan.soloDieta) ? 'Aviso diario desactivado.' : 'Avisos de entreno desactivados.');
             await actualizarBotonNotificaciones();
           } else {
             await desactivarNotificaciones();

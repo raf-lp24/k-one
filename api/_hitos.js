@@ -56,7 +56,17 @@ function rachaDesdeFechas(setFechas) {
  * @param {number} referidosPagados nº de referidos pagados (tabla referidos)
  * @returns {{claves: string[], total: number, semanas: number, entrenos: number}}
  */
-function contarHitosVerificados(userdata, createdAt, referidosPagados) {
+// Hitos que exigen entrenar con nosotros (sesiones, rachas, cargas). Un cliente de
+// solo nutrición no puede conseguirlos: no cuentan para él, y sus umbrales de
+// nivel se escalan a los hitos que sí puede conseguir (ver NIVELES_PREMIO_SOLO
+// en _hitosReward.js). Misma lista que HITOS_SOLO_EXCLUIDOS en index.html.
+const HITOS_ENTRENO = [
+  'primer_entreno', 'tres_entrenos', 'diez_entrenos', 'racha5', 'la_vuelta', 'veinte_entrenos',
+  'racha14', 'cincuenta', 'cien', 'doscientos', 'primer_feedback_entreno', 'primer_peso',
+  'progresion_peso', 'diez_pct_fuerte', 'cinco_ejercicios_reg', 'racha21', 'racha30', 'trescientos',
+];
+
+function contarHitosVerificados(userdata, createdAt, referidosPagados, soloNutricion) {
   const u = userdata || {};
   const altaMs = Date.parse(createdAt) || Date.now();
   const semanasReales = Math.floor((Date.now() - altaMs) / (7 * DIA_MS)) + 1;
@@ -124,6 +134,31 @@ function contarHitosVerificados(userdata, createdAt, referidosPagados) {
     return 0;
   })();
 
+  // Semanas con los 7 días de comida confirmados: contador que escribe el cliente,
+  // acotado por las semanas reales de cuenta (como el resto de señales).
+  const semNutri = Math.min(Math.max(0, Math.floor(Number(u.semanasNutricionCompletas) || 0)), semanasReales);
+
+  // Pesajes: entradas de historialPeso con fecha válida, una por día como mucho.
+  const pesajes = new Set(
+    (Array.isArray(u.historialPeso) ? u.historialPeso : [])
+      .filter(x => x && Number(x.peso) > 0 && fechaValida(x.fecha, altaMs))
+      .map(x => String(x.fecha).slice(0, 10))
+  ).size;
+
+  // "La vuelta": una racha de 5+ días ya cerrada y, después, otra vez a entrenar.
+  // Mismo criterio que _huboVueltaTrasRacha() de index.html, sobre fechas validadas.
+  const huboVuelta = (() => {
+    const orden = [...fechas].sort();
+    if (orden.length < 2) return false;
+    const largos = [];
+    let ini = 0;
+    for (let i = 1; i <= orden.length; i++) {
+      const seguido = i < orden.length && (Date.parse(orden[i] + 'T12:00:00Z') - Date.parse(orden[i - 1] + 'T12:00:00Z')) === DIA_MS;
+      if (!seguido) { largos.push(i - ini); ini = i; }
+    }
+    return largos.slice(0, -1).some(len => len >= 5);
+  })();
+
   // Descuento por referidos: de la tabla `referidos`, no del cliente.
   const descuentoRef = Math.min((referidosPagados || 0) * 5, 15);
 
@@ -163,10 +198,20 @@ function contarHitosVerificados(userdata, createdAt, referidosPagados) {
     trescientos:          totalEntrenos >= 300,
     dos_anios:            semanas >= 105,
     testimonio_dejado:    !!u.testimonio,
+    // Estos siete los enseñaba el cliente pero el servidor no los reconocía, así
+    // que no contaban para los niveles con descuento (30 sept 2026).
+    semana_nutricion_completa: semNutri >= 1,
+    mes_nutricion:        semNutri >= 4,
+    kilo10:               kilos >= 10,
+    constancia_bascula:   pesajes >= 8,
+    progreso_compartido:  !!u.progresoCompartido,
+    primer_feedback_entreno: Array.isArray(u.variantPreferences) && u.variantPreferences.length >= 1,
+    la_vuelta:            huboVuelta,
   };
+  if (soloNutricion) HITOS_ENTRENO.forEach(k => { delete reglas[k]; });
 
   const claves = Object.keys(reglas).filter(k => reglas[k]);
   return { claves, total: claves.length, semanas, entrenos: totalEntrenos, racha };
 }
 
-module.exports = { contarHitosVerificados };
+module.exports = { contarHitosVerificados, HITOS_ENTRENO };
