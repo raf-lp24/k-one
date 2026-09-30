@@ -14059,6 +14059,60 @@
     return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${vista.map(n => `· ${n}`).join('<br>')}${masHTML}</div>`;
   }
 
+  // VERSIÓN DEL MOTOR (30 sept 2026). Cada plan guardado lleva la huella del motor
+  // que lo generó. Al abrir la app, si el motor ha cambiado desde entonces (un
+  // filtro nuevo de alergia o de sal, raciones, notas...), el plan se regenera
+  // solo con los mismos datos del cliente: nadie tiene que darle a "Regenerar
+  // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
+  // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
+  // el cambio está fuera de esta función.
+  const MOTOR_REV = 1;
+  let _huellaMotorCache = null;
+  function _huellaMotor() {
+    if (_huellaMotorCache) return _huellaMotorCache;
+    const src = buildPlanFromData.toString() + '|' + filtrarNoComida.toString() + '|' + MOTOR_REV;
+    let h = 2166136261;
+    for (let i = 0; i < src.length; i++) { h ^= src.charCodeAt(i); h = Math.imul(h, 16777619); }
+    _huellaMotorCache = (h >>> 0).toString(36);
+    return _huellaMotorCache;
+  }
+
+  // Regenera el plan guardado con el motor actual conservando lo que el cliente
+  // ya había elegido esa semana: las elecciones de comida van por índice, así que
+  // se vuelven a buscar POR NOMBRE en el plan nuevo. Si un plato ya no existe (el
+  // arreglo lo ha quitado), esa toma vuelve a la primera opción y ese día deja de
+  // estar confirmado, para que el cliente lo revise.
+  function _actualizarPlanAlMotor() {
+    const viejo = generatedPlan;
+    const nuevo = buildPlanFromData(userData);
+    const sem = Array.isArray(userData.comidasSemana) && userData.comidasSemana.length === 7 ? userData.comidasSemana : null;
+    if (sem && Array.isArray(viejo.nutricionPorDia) && Array.isArray(nuevo.nutricionPorDia)) {
+      const conf = Array.isArray(userData.diasConfirmados) && userData.diasConfirmados.length === 7 ? userData.diasConfirmados : null;
+      userData.comidasSemana = sem.map((idxs, d) => {
+        const tomasV = viejo.nutricionPorDia[d] || [], tomasN = nuevo.nutricionPorDia[d] || [];
+        let cambio = false;
+        const res = tomasN.map((mN, t) => {
+          const mV = tomasV.find(x => x.momento === mN.momento);
+          const posV = mV ? tomasV.indexOf(mV) : -1;
+          const iV = posV >= 0 && Array.isArray(idxs) ? (idxs[posV] || 0) : 0;
+          const nombre = mV && mV.opciones[iV] ? mV.opciones[iV].nombre : null;
+          const iN = nombre ? mN.opciones.findIndex(o => o.nombre === nombre) : -1;
+          if (iN < 0) { cambio = true; return 0; }
+          return iN;
+        });
+        if (cambio && conf) conf[d] = false;
+        return res;
+      });
+      if (conf) userData.diasConfirmados = conf;
+      comidasSemana = userData.comidasSemana;
+      if (conf) diasConfirmados = conf;
+      comidasSeleccionadas = [...(comidasSemana[diaNutriActual] || [])];
+    }
+    generatedPlan = nuevo;
+    const _u = getCurrentUser();
+    if (_u) saveUserData(_u.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+
   function buildPlanFromData(u) {
     // Hyrox y CrossFit se venden SOLO como nutrición: el entrenamiento lo hace
     // el cliente en su box. El formulario ya oculta esos dos deportes cuando el
@@ -19078,7 +19132,7 @@
         if (Array.isArray(nutricionPorDia[i])) nutricionPorDia[i] = _tomasBajasEnSal(nutricionPorDia[i]);
       }
     }
-    return { bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
+    return { motorVersion: _huellaMotor(), bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
 
@@ -19263,12 +19317,11 @@
     // hidratos los días de entreno" mientras los platos siguen todos iguales.
     // Regenerar es seguro y ya se hace en _refrescarMenuNutricion(): las
     // elecciones de comidas del cliente van por índice y no se pierden.
-    if (generatedPlan.cicloCarbs === undefined && userData && userData.peso && userData.altura && userData.edad) {
-      try {
-        generatedPlan = buildPlanFromData(userData);
-        const _u = getCurrentUser();
-        if (_u) saveUserData(_u.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
-      } catch (e) { /* si falla, se sigue mostrando el plan guardado tal cual */ }
+    // Y en general: cualquier plan generado con un motor anterior (sin huella o
+    // con otra) se pone al día aquí (30 sept 2026). Ver _actualizarPlanAlMotor().
+    if ((generatedPlan.cicloCarbs === undefined || generatedPlan.motorVersion !== _huellaMotor())
+        && userData && userData.peso && userData.altura && userData.edad) {
+      try { _actualizarPlanAlMotor(); } catch (e) { console.warn('[motor] no se pudo actualizar el plan:', e.message); }
     }
 
     actualizarBtnCancelar();
