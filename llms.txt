@@ -20,6 +20,10 @@
 ## Enlaces
 
 - Web: https://k-one.fit/
+- Plan de gimnasio: https://k-one.fit/gimnasio
+- Plan de running: https://k-one.fit/running
+- Plan híbrido (fuerza + resistencia): https://k-one.fit/hibrido
+- Solo nutrición: https://k-one.fit/solo-nutricion
 - Preguntas frecuentes: https://k-one.fit/#faq
 - Precios: https://k-one.fit/#pricing
 - Cómo funciona: https://k-one.fit/#how

@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    { "source": "/running", "destination": "/running.html" },
+    { "source": "/gimnasio", "destination": "/gimnasio.html" },
+    { "source": "/hibrido", "destination": "/hibrido.html" },
+    { "source": "/solo-nutricion", "destination": "/solo-nutricion.html" }
+  ],
   "redirects": [
     { "source": "/lib/:path*", "destination": "/", "permanent": false }
   ],

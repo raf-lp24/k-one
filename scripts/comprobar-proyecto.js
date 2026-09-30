@@ -74,5 +74,28 @@ for (const [nombre, p] of Object.entries(precios)) {
 const t33 = (html.match(/3\.3\. Precios[\s\S]{0,900}/) || [''])[0];
 /14,99/.test(t33) ? ok('Términos 3.3 incluye el trimestral') : mal('Términos 3.3 no menciona el plan trimestral 14,99 €');
 
+// 8. Páginas por tema: existen, tienen su canonical, título/descripción de tamaño
+// razonable, una ruta limpia en vercel.json y entrada en el sitemap.
+{
+  const vj = JSON.parse(leer('vercel.json'));
+  const sitemap = leer('sitemap.xml');
+  for (const [ruta, archivo] of [['/running', 'running.html'], ['/gimnasio', 'gimnasio.html'], ['/hibrido', 'hibrido.html'], ['/solo-nutricion', 'solo-nutricion.html']]) {
+    if (!fs.existsSync(path.join(raiz, archivo))) { mal('falta ' + archivo + ' (node scripts/generar-paginas.js)'); continue; }
+    const h = leer(archivo);
+    const title = (h.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '';
+    const desc = (h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+    const canon = (h.match(/<link rel="canonical" href="([^"]*)"/) || [])[1] || '';
+    const rew = (vj.rewrites || []).some(r => r.source === ruta && r.destination === '/' + archivo);
+    const problemas = [];
+    if (canon !== 'https://k-one.fit' + ruta) problemas.push('canonical=' + canon);
+    if (title.length < 20 || title.length > 65) problemas.push('título de ' + title.length + ' caracteres');
+    if (desc.length < 80 || desc.length > 160) problemas.push('descripción de ' + desc.length + ' caracteres');
+    if (!rew) problemas.push('sin rewrite en vercel.json');
+    if (!sitemap.includes('<loc>https://k-one.fit' + ruta + '</loc>')) problemas.push('no está en sitemap.xml');
+    if ((h.match(/<h1[ >]/g) || []).length !== 1) problemas.push('no tiene exactamente un h1');
+    problemas.length ? mal(archivo + ': ' + problemas.join(', ')) : ok(archivo + ' correcta (' + ruta + ')');
+  }
+}
+
 console.log('\n' + (fallos ? '✘ ' + fallos + ' comprobaciones falladas' : '✔ Proyecto correcto'));
 process.exit(fallos ? 1 : 0);
