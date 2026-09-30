@@ -5,7 +5,7 @@
 ## Qué ofrece
 
 - Plan de entrenamiento personalizado (rutinas con progresión de cargas, adaptadas a deporte, nivel, lesiones y tiempo disponible) para Gimnasio/Fuerza, Running e Híbrido.
-- Plan de nutrición personalizado (5 comidas al día por defecto, o 2-3 si el usuario lo prefiere; 5 opciones por comida, macros calculados, lista de la compra automática, recetario con 400+ recetas) para los 5 deportes soportados, incluidos Hyrox y CrossFit. Adapta alergias e intolerancias (gluten, lactosa, frutos secos y otras escritas por el usuario) y alimentos que no come.
+- Plan de nutrición personalizado (5 comidas al día recomendadas, o 4, 3 o 2 si el horario del usuario no da para más; 5 opciones por comida, macros calculados, lista de la compra automática, recetario con 400+ recetas) para los 5 deportes soportados, incluidos Hyrox y CrossFit. Adapta alergias e intolerancias (gluten, lactosa, frutos secos y otras escritas por el usuario) y alimentos que no come.
 - Para Hyrox y CrossFit solo se ofrece el plan de nutrición (sin entrenamiento generado): pensado para quien ya entrena en su box y quiere que la alimentación acompañe esa carga.
 - Check-in semanal: el usuario cuenta cómo le fue (energía, descanso, adherencia) y el plan de la semana siguiente se ajusta.
 - Seguimiento de progreso: registro de pesos por ejercicio, fotos mensuales, hitos y racha.

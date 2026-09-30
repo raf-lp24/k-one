@@ -131,7 +131,7 @@
         {
           "@type": "Question",
           "name": "¿Qué pasa después del mes gratis?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
         },
         {
           "@type": "Question",
@@ -2573,6 +2573,9 @@
     flex-wrap: wrap;
   }
   .footer-links a {
+    /* Zona táctil mínima de 24px (WCAG 2.2) sin cambiar cómo se ve. */
+    display: inline-block;
+    padding: 4px 0;
     font-size: 12px;
     color: var(--metal);
     font-family: 'DM Mono', monospace;
@@ -7344,7 +7347,7 @@
       </div>
       <div style="width:80px">
         <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Edad</label>
-        <input type="number" id="opPublicaEdad" aria-label="Tu edad" placeholder="—" min="14" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
+        <input type="number" id="opPublicaEdad" aria-label="Tu edad" placeholder="—" min="18" max="99" style="width:100%;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;text-align:center">
       </div>
     </div>
     <label style="font-size:11px;color:var(--metal);display:block;margin-bottom:4px">Valoración</label>
@@ -7856,8 +7859,8 @@
         <div class="price-badge">Más popular</div>
         <div class="price-tag">Trimestral</div>
         <div class="price-amount" data-kp="trimestral">14,99€</div>
-        <div class="price-period" data-kp-period="trimestral">Primer mes gratis · Después cada 3 meses · 4,99€/mes · Ahorras 9€</div>
-        <p class="price-desc">Menos de 10€ al mes. Un trimestre es donde empieza el cambio real: tiempo suficiente para que el plan se ajuste a ti y notes la diferencia.</p>
+        <div class="price-period" data-kp-period="trimestral">Primer mes gratis · Después cada 3 meses · 5€/mes · Ahorras 9€</div>
+        <p class="price-desc">Sale a 5€ al mes. Un trimestre es donde empieza el cambio real: tiempo suficiente para que el plan se ajuste a ti y notes la diferencia.</p>
         <ul class="price-features">
           <li>Todo lo del plan mensual</li>
           <li>Precio más bajo (−38% vs mensual)</li>
@@ -7920,7 +7923,7 @@
     <div class="faq-grid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes gratis?</summary>
-        <p class="faq-a">Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
+        <p class="faq-a">Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
@@ -8055,7 +8058,7 @@
 
 <!-- BANNER DE COOKIES (RGPD) -->
 <div id="cookieBanner" class="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
-  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica se usan de forma anónima. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color:var(--brasa);text-decoration:none">Más información</a></p>
+  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color:var(--brasa);text-decoration:none">Más información</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0">
     <button onclick="rechazarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
     <button onclick="aceptarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
@@ -8096,7 +8099,7 @@
     <button class="legal-back" onclick="goTo(getCurrentUser() ? 'dashboard' : 'landing')">← Volver</button>
 
     <h2 class="legal-h1">Aviso legal y privacidad</h2>
-    <div class="legal-updated">Última actualización: 14 de junio de 2026</div>
+    <div class="legal-updated">Última actualización: 30 de septiembre de 2026</div>
 
     <div class="legal-disclaimer">
       <p><strong>Aviso de salud importante.</strong> K-One ofrece orientación deportiva y nutricional personalizada de carácter general, generada de forma automática a partir de los datos que tú facilitas. <strong>No constituye consejo médico, diagnóstico ni tratamiento</strong>, y no sustituye la valoración de un profesional sanitario. Antes de iniciar cualquier programa de ejercicio o cambio en tu alimentación —especialmente si tienes lesiones, enfermedades, alergias o tomas medicación— consulta con tu médico. Si notas dolor, mareo o malestar durante el entrenamiento, detente y busca atención médica.</p>
@@ -8133,7 +8136,7 @@
       <ul>
         <li><strong>Datos identificativos y de contacto:</strong> nombre y correo electrónico.</li>
         <li><strong>Datos de perfil físico y de actividad:</strong> edad, sexo, peso, altura, objetivo, deporte, nivel, disponibilidad y hábitos (trabajo, sueño, estrés, alimentación).</li>
-        <li><strong>Categorías especiales de datos (datos de salud — art. 9 RGPD):</strong> enfermedades, lesiones, operaciones, alergias y medicación que declares para adaptar tu plan. Estos datos solo se tratan con tu <strong>consentimiento explícito</strong>.</li>
+        <li><strong>Categorías especiales de datos (datos de salud — art. 9 RGPD):</strong> enfermedades, lesiones, operaciones, alergias, medicación y antecedentes de trastornos de la conducta alimentaria que declares para adaptar tu plan. Estos datos solo se tratan con tu <strong>consentimiento explícito</strong>.</li>
         <li><strong>Datos de uso:</strong> entrenamientos marcados, check-ins, pesos registrados y progreso.</li>
       </ul>
 
@@ -8155,10 +8158,11 @@
       <ul>
         <li><strong>Supabase Inc.</strong> (AWS EU) — alojamiento, base de datos y autenticación. Datos almacenados en la UE.</li>
         <li><strong>Stripe Inc.</strong> (certificado PCI DSS Nivel 1) — gestión de pagos y suscripciones.</li>
+        <li><strong>Vercel Inc.</strong> — alojamiento de la web y de las funciones del servidor (pagos, avisos y la puesta al día automática de tu plan cuando mejoramos el sistema, que usa los datos de tu cuestionario).</li>
         <li><strong>Resend Inc.</strong> — envío de emails transaccionales (bienvenida, retención, notificaciones).</li>
-        <li><strong>Google LLC</strong> (Google Analytics) — analítica anónima de uso del servicio.</li>
+        <li><strong>Google LLC</strong> (Google Analytics) — analítica de uso del servicio, agregada y sin tu nombre ni tu email; solo si la aceptas en el aviso de cookies.</li>
       </ul>
-      <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
+      <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
       <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
@@ -8172,9 +8176,9 @@
       <h3>3.1. Objeto</h3>
       <p>K-One presta un servicio de generación automática de planes de entrenamiento y nutrición personalizados a partir de los datos del usuario, mediante un sistema basado en reglas (no es asesoramiento profesional individualizado).</p>
       <h3>3.2. Registro y edad mínima</h3>
-      <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud. El servicio está dirigido a personas mayores de 18 años. Si eres menor de edad, necesitas el consentimiento y la supervisión de tu padre, madre o tutor legal para usar la plataforma, especialmente por tratarse de un servicio que recoge datos de salud.</p>
+      <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud. El servicio es solo para personas mayores de 18 años: al registrarte confirmas que lo eres. Al tratarse de un servicio que recoge datos de salud, no está disponible para menores de edad.</p>
       <h3>3.3. Precios, pago y prueba</h3>
-      <p>El primer mes es gratuito para todos los planes. Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario y se realiza el primer cobro: plan completo (7,99€/mes) o solo nutrición (4,99€/mes). El usuario puede cambiar de plan o cancelar desde su perfil en cualquier momento, incluido durante el mes gratuito, antes de que se realice ningún cobro. El cambio de plan se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). Los precios incluyen los impuestos aplicables.</p>
+      <p>El primer mes es gratuito para todos los planes. Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario y se realiza el primer cobro: plan completo (7,99€/mes o 14,99€ cada 3 meses) o solo nutrición (4,99€/mes). El usuario puede cambiar de plan o cancelar desde su perfil en cualquier momento, incluido durante el mes gratuito, antes de que se realice ningún cobro. El cambio de plan se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). Los precios incluyen los impuestos aplicables.</p>
       <h3>3.4. Cancelación y política de reembolso</h3>
       <p>Puedes cancelar tu suscripción en cualquier momento desde tu perfil, sin permanencia, sin llamadas y sin formularios. La cancelación detiene futuras renovaciones y el acceso se mantiene activo hasta el final del período ya facturado.</p>
       <p>Las cuotas abonadas no son reembolsables. Al tratarse de un servicio digital de acceso inmediato (plan personalizado generado al instante), el usuario reconoce que el servicio se presta desde el momento de la activación. Conforme al artículo 103.m) del Real Decreto Legislativo 1/2007, el derecho de desistimiento no es aplicable a contenidos digitales cuya ejecución haya comenzado con el consentimiento expreso del consumidor. No obstante, si consideras que ha habido un error en el cobro, contacta con nosotros en <a href="mailto:k.one.fit26@gmail.com" style="color:var(--brasa)">k.one.fit26@gmail.com</a> y lo revisaremos.</p>
@@ -8188,7 +8192,7 @@
       <h2>4. Política de cookies</h2>
       <p>Esta web usa dos tipos de cookies:</p>
       <p><strong>Cookies técnicas (Supabase Auth)</strong> — necesarias para gestionar tu autenticación y mantener la sesión activa. Son estrictamente necesarias para el funcionamiento del servicio y no requieren consentimiento previo según el art. 22.2 LSSI.</p>
-      <p><strong>Cookies de analítica (Google Analytics)</strong> — miden el uso del servicio de forma anónima para mejorar la experiencia. No se usan con fines publicitarios ni de seguimiento individualizado.</p>
+      <p><strong>Cookies de analítica (Google Analytics)</strong> — miden el uso del servicio de forma agregada (sin tu nombre ni tu email) para mejorar la experiencia, y solo se activan si las aceptas. No se usan con fines publicitarios ni de seguimiento individualizado.</p>
       <p>No se usan cookies publicitarias ni de terceros con fines comerciales. Tus datos de perfil, plan y preferencias se almacenan en servidores de Supabase en la UE (infraestructura cloud con acuerdos DPA conformes con el RGPD).</p>
     </section>
 
@@ -8279,7 +8283,7 @@
             <label for="edad">Edad</label>
             <div class="stepper-wrap">
               <button class="stepper-btn" onclick="stepVal('edad',-1)" aria-label="Restar edad">−</button>
-              <input type="number" id="edad" min="14" max="80" value="28" class="stepper-input" oninput="updateBmrPanel()">
+              <input type="number" id="edad" min="18" max="80" value="28" class="stepper-input" oninput="updateBmrPanel()">
               <span class="stepper-unit">años</span>
               <button class="stepper-btn" onclick="stepVal('edad',1)" aria-label="Sumar edad">+</button>
             </div>
@@ -8640,7 +8644,7 @@
                 <option value="21097">Media maratón</option>
                 <option value="42195">Maratón</option>
               </select>
-              <input type="text" id="marcaTiempo" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmos()"
+              <input type="text" id="marcaTiempo" aria-label="Tiempo de tu última carrera" placeholder="Tiempo (ej: 48.30)" oninput="previsualizarRitmos()"
                      inputmode="decimal" autocomplete="off" style="flex:1;min-width:130px">
             </div>
             <span class="field-hint">Minutos y segundos separados por un punto, por ejemplo 48.30. Para media maratón o maratón usa horas.minutos.segundos, por ejemplo 1.35.20. Si nos lo das, calculamos tus ritmos exactos de cada sesión (rodaje, umbral, series) en min/km. Si no, usamos referencias por sensación.</span>
@@ -8724,7 +8728,7 @@
           <span id="userAvatarLetter">A</span>
           <span class="avatar-cam" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
         </div>
-        <input type="file" id="fotoPerfilInput" accept="image/*" style="display:none" onchange="subirFotoPerfil(event)">
+        <input type="file" id="fotoPerfilInput" aria-label="Subir foto de perfil" accept="image/*" style="display:none" onchange="subirFotoPerfil(event)">
         <div>
           <div class="user-name" id="userName">Tu perfil</div>
           <div class="user-goal" id="userGoal">Cargando...</div>
@@ -8940,7 +8944,7 @@
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <div style="display:flex;align-items:center;gap:8px;background:#111;border:1px solid #333;border-radius:8px;padding:8px 14px">
                   <span style="font-size:13px;color:#aaa">Peso actual</span>
-                  <input type="number" id="inputPesoRecalculo" placeholder="—" min="30" max="300" step="0.1" style="width:64px;background:transparent;border:none;color:var(--blanco);font-size:16px;font-weight:700;text-align:center;outline:none">
+                  <input type="number" id="inputPesoRecalculo" aria-label="Tu peso actual en kg" placeholder="—" min="30" max="300" step="0.1" style="width:64px;background:transparent;border:none;color:var(--blanco);font-size:16px;font-weight:700;text-align:center;outline:none">
                   <span style="font-size:13px;color:#aaa">kg</span>
                 </div>
                 <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="confirmarRecalculoPeso()">Actualizar plan →</button>
@@ -8993,7 +8997,7 @@
                 <label class="chip-baja"><input type="radio" name="motivoBaja" value="Objetivo cumplido">Ya conseguí mi objetivo</label>
                 <label class="chip-baja"><input type="radio" name="motivoBaja" value="Otro">Otra cosa</label>
               </div>
-              <textarea id="bannerMotivoBajaTexto" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:14px"></textarea>
+              <textarea id="bannerMotivoBajaTexto" aria-label="Por qué te das de baja" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:14px"></textarea>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn-primary" id="btnEnviarMotivoBaja" style="padding:9px 20px;font-size:13px" onclick="enviarMotivoBaja()">Enviar →</button>
                 <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="descartarMotivoBaja()">Prefiero no decirlo</button>
@@ -9337,12 +9341,12 @@
           <div class="checkin-questions">
             <div class="checkin-q">
               <label>Tu peso actual (kg)</label>
-              <input type="number" id="checkinPeso" step="0.1" min="20" max="400" placeholder="Ej: 78.5" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
+              <input type="number" id="checkinPeso" aria-label="Tu peso esta semana en kg" step="0.1" min="20" max="400" placeholder="Ej: 78.5" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
               <span class="field-hint" style="display:block;margin-top:6px">Opcional. Es el dato que usamos para ajustar tus calorías si llevas varias semanas sin moverte hacia tu objetivo — sin esto no podemos saber si tu plan está funcionando de verdad.</span>
             </div>
             <div class="checkin-q">
               <label>Tu cintura (cm)</label>
-              <input type="number" id="checkinCintura" step="0.5" min="40" max="200" placeholder="Ej: 84" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
+              <input type="number" id="checkinCintura" aria-label="Tu cintura en cm" step="0.5" min="40" max="200" placeholder="Ej: 84" style="max-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--humo);background:var(--carbon);color:var(--blanco);font-size:14px">
               <span class="field-hint" style="display:block;margin-top:6px">Opcional. Mídela a la altura del ombligo, por la mañana y sin apretar la cinta. Si la báscula no se mueve pero la cintura baja, estás perdiendo grasa y ganando músculo, y así no te recortamos calorías sin motivo.</span>
             </div>
             <div id="checkinEntrenoWrap">
@@ -9388,7 +9392,7 @@
             </div>
             <div class="checkin-q">
               <label>¿Algo que contarnos?</label>
-              <textarea class="checkin-textarea" id="checkinNota" placeholder="Lesión nueva, cambio de horario, semana dura... lo que sea."></textarea>
+              <textarea class="checkin-textarea" id="checkinNota" aria-label="Algo que debamos saber de tu semana" placeholder="Lesión nueva, cambio de horario, semana dura... lo que sea."></textarea>
             </div>
           </div>
           <div style="margin-top:32px">
@@ -9459,7 +9463,7 @@
         <div class="progress-section">
           <div class="progress-title">Fotos mensuales</div>
           <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan solo en este dispositivo, nadie más las ve, y te ayudan a ver tu evolución mes a mes.</p>
-          <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
+          <input type="file" id="fotoInput" aria-label="Subir foto de progreso" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
           <div class="fotos-nav" id="fotosNav"></div>
           <div class="photos-grid" id="photosGrid"></div>
         </div>
@@ -10132,7 +10136,7 @@
       // igualmente -- ese dato entra directo en el cálculo de TDEE/BMR
       // (Mifflin-St Jeor) y desajusta todo el plan de calorías.
       if (valid && f.id === 'edad') {
-        const v = parseInt(el.value); valid = v >= 14 && v <= 80;
+        const v = parseInt(el.value); valid = v >= 18 && v <= 80;
       } else if (valid && f.id === 'peso') {
         const v = parseFloat(el.value); valid = v >= 40 && v <= 180;
       } else if (valid && f.id === 'altura') {
@@ -10144,7 +10148,7 @@
 
     if (firstInvalid) {
       if (!silent) {
-        const rangeErrors = { edad: 'Introduce una edad entre 14 y 80 años.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
+        const rangeErrors = { edad: 'K-ONE es solo para mayores de 18 años: introduce una edad entre 18 y 80.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
         showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -22431,7 +22435,7 @@
     const ofertaPeriod = document.querySelector('[data-kp-period="oferta"]');
     if (ofertaPeriod) ofertaPeriod.textContent = `30 días · Después ${KONE_PRICES.completo}/mes`;
     const trimPeriod = document.querySelector('[data-kp-period="trimestral"]');
-    if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 4,99€/mes · Ahorras 9€`;
+    if (trimPeriod) trimPeriod.textContent = `Cada 3 meses · 5€/mes · Ahorras 9€`;
     // BUG REAL (27 sept 2026): aquí se escribía KONE_PRICES.oferta (1,99€) en
     // la caja de precio del paywall. Esa caja SOLO se enseña a clientes nuevos
     // (primer mes gratis, trial de Stripe sin cobro): el cliente veía en grande
