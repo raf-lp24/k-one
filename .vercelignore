@@ -30,3 +30,6 @@ scripts/
 
 # Fuentes de imagenes sin optimizar
 IMAGEN K-one.png
+
+# Configuración de GitHub (comprobaciones automáticas): no es parte de la web
+.github/

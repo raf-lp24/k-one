@@ -239,7 +239,9 @@ function _entrenosSemanaAnterior(ud, ahora) {
 // puede regenerar varias veces seguidas al terminar el cuestionario o al
 // cambiar de plan. Si aun así se pasa, no se pierde nada: el cron de las 09:00
 // revisa a todos igualmente.
-const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5, auditar_plan: 20 };
+// error_cliente: los fallos de JavaScript que avisa el navegador (ver el primer
+// <script> de index.html); cada navegador manda pocos, así que 10/hora sobra.
+const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5, auditar_plan: 20, error_cliente: 10 };
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 
 // Vercel pone la IP real del cliente en x-forwarded-for (primer valor de la
@@ -1224,6 +1226,39 @@ async function handlePost(req, res) {
     }
   } catch (_) {
     if (origin) return res.status(403).json({ error: 'Origen no permitido' });
+  }
+
+  // ERROR EN EL NAVEGADOR DE UN CLIENTE (30 sept 2026) -- hasta ahora los fallos
+  // de JavaScript en el móvil de un cliente solo los veía el cliente. El primer
+  // <script> de index.html manda aquí el mensaje, el archivo:línea, la pantalla
+  // y el navegador (sin datos personales). Sin sesión a propósito: el fallo
+  // puede saltar antes de iniciarla. Por eso todo va acotado: texto recortado,
+  // 10 avisos por hora y por IP, y el push al admin es UNO por error distinto
+  // y hora, con un máximo de 5 pushes por hora en total, para que nadie pueda
+  // usar esto para llenarte el móvil. Siempre 200: al navegador no le importa.
+  if ((req.body || {}).tipo === 'error_cliente') {
+    try {
+      const limpiar = (v, n) => String(v || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').slice(0, n);
+      const b = req.body;
+      const msg = limpiar(b.mensaje, 300), origen = limpiar(b.origen, 200);
+      const pantalla = limpiar(b.pantalla, 40), ua = limpiar(b.ua, 160);
+      if (!msg) return res.status(200).json({ ok: true });
+      if (await estaLimitadoPorTasa(req, 'error_cliente')) return res.status(200).json({ ok: true });
+      console.error('[error-cliente]', JSON.stringify({ msg, origen, pantalla, ua }));
+      capturarError(new Error('navegador: ' + msg), { origen, pantalla, ua });
+      const huella = require('crypto').createHash('sha256').update(msg + '|' + origen).digest('hex').slice(0, 16);
+      if (!(await superaLimite('error_cliente_push:' + huella, 1)) && !(await superaLimite('error_cliente_push_total', 5))) {
+        await enviarPushAAdmins({
+          title: 'K-ONE · Error en el navegador de un cliente',
+          body: msg.slice(0, 120) + (pantalla ? ' (pantalla: ' + pantalla + ')' : ''),
+          url: '/'
+        });
+      }
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      console.warn('[notify] error_cliente:', e.message);
+      return res.status(200).json({ ok: false });
+    }
   }
 
   // PUSH DE PRUEBA -- va ANTES de exigir RESEND_API_KEY a propósito: el push y

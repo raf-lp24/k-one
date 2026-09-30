@@ -1,0 +1,31 @@
+# Comprobaciones automáticas en cada subida a GitHub (y en cada pull request).
+# Si algo falla, GitHub lo marca con una ✘ roja en el commit y te avisa por email.
+# OJO: Vercel despliega igualmente; esto avisa, no bloquea. Para pasarlo en local:
+#   npm test
+name: Comprobar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Estructura: límite de 12 funciones de Vercel, sintaxis de api/ y lib/,
+      # JSON válidos, FAQ = JSON-LD, ids repetidos, precios coherentes.
+      - name: Estructura del proyecto
+        run: node scripts/comprobar-proyecto.js
+      # ~600 planes con combinaciones de alergias, enfermedades, lesiones,
+      # deportes y objetivos: ninguno puede llevar un alimento prohibido (Thor).
+      - name: Planes de muestra (motor + Thor)
+        run: node scripts/comprobar-motor.js 600
+      # Tabla de alimentos, recetario, reparto por objetivo y agente de auditoría.
+      - name: Auditoría de nutrición y entrenamiento
+        run: node scripts/auditoria-completa.js

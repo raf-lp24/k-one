@@ -239,6 +239,49 @@
     gtag('config', GA_MEASUREMENT_ID);
   }
   try { if (localStorage.getItem('kone_cookies_ok') === '1') cargarGA(); } catch(e) {}
+
+  // Eventos del embudo para Analytics. Sin consentimiento GA no se carga, así que
+  // esto no envía nada (solo se acumula en dataLayer, que nadie lee).
+  function kEvento(nombre, params) {
+    try { if (typeof gtag === 'function') gtag('event', nombre, params || {}); } catch (e) {}
+  }
+
+  // Avisa al servidor de los errores de JavaScript que le saltan a un cliente,
+  // para enterarnos antes de que escriba. Sin datos personales: solo el mensaje,
+  // el archivo/línea, en qué pantalla estaba y el navegador. Va aquí (antes de
+  // la app) para cazar también los fallos al cargar el script grande.
+  (function () {
+    var enviados = 0, vistos = {};
+    function pantallaActual() {
+      try { var a = document.querySelector('.screen.active'); return a ? a.id : ''; } catch (e) { return ''; }
+    }
+    function informar(mensaje, origen) {
+      try {
+        mensaje = String(mensaje || '').slice(0, 300);
+        origen = String(origen || '').slice(0, 200);
+        // Ruido que no es nuestro: extensiones del navegador, scripts de otros
+        // dominios ("Script error." sin detalle) y avisos inofensivos.
+        if (!mensaje || /^Script error\.?$/i.test(mensaje)) return;
+        if (/ResizeObserver loop|Non-Error promise rejection|Load failed|Failed to fetch|NetworkError|cancelled|AbortError/i.test(mensaje)) return;
+        if (/^(chrome|moz|safari)-extension:|^webkit-masked-url:/.test(origen)) return;
+        var clave = mensaje + '|' + origen;
+        if (vistos[clave] || enviados >= 5) return;
+        vistos[clave] = 1; enviados++;
+        fetch('/api/notify', {
+          method: 'POST', keepalive: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'error_cliente', mensaje: mensaje, origen: origen, pantalla: pantallaActual(), ua: (navigator.userAgent || '').slice(0, 160) })
+        }).catch(function () {});
+      } catch (e) {}
+    }
+    window.addEventListener('error', function (ev) {
+      informar(ev.message, (ev.filename || '') + ':' + (ev.lineno || 0));
+    });
+    window.addEventListener('unhandledrejection', function (ev) {
+      var r = ev.reason;
+      informar('Promesa rechazada: ' + (r && r.message ? r.message : r), r && r.stack ? String(r.stack).split('\n')[1] : '');
+    });
+  })();
 </script>
 <style>
   :root {
@@ -8036,10 +8079,10 @@
   <footer>
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
     <div class="footer-links">
-      <a href="#" onclick="goToLegal('aviso-legal'); return false;">Aviso legal</a>
-      <a href="#" onclick="goToLegal('privacidad'); return false;">Privacidad</a>
-      <a href="#" onclick="goToLegal('terminos'); return false;">Términos</a>
-      <a href="#" onclick="goToLegal('cookies'); return false;">Cookies</a>
+      <a href="/#aviso-legal" onclick="goToLegal('aviso-legal'); return false;">Aviso legal</a>
+      <a href="/#privacidad" onclick="goToLegal('privacidad'); return false;">Privacidad</a>
+      <a href="/#terminos" onclick="goToLegal('terminos'); return false;">Términos</a>
+      <a href="/#cookies" onclick="goToLegal('cookies'); return false;">Cookies</a>
     </div>
 
     <!-- Las redes salen del renglon de enlaces legales: ahi el icono de
@@ -9680,7 +9723,12 @@
   const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   // ===== NAVEGACIÓN SCREENS =====
+  let _ultimaPantallaEvento = '';
   function goTo(screenId) {
+    if (screenId !== _ultimaPantallaEvento) { _ultimaPantallaEvento = screenId; kEvento('pantalla', { pantalla: screenId }); }
+    if (screenId !== 'legal' && /^#(aviso-legal|privacidad|terminos|cookies)$/.test(location.hash)) {
+      try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {}
+    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
@@ -9726,6 +9774,7 @@
   function goToLegal(seccion) {
     goTo('legal');
     if (seccion) {
+      try { history.replaceState(history.state, '', '#' + seccion); } catch (e) {}
       requestAnimationFrame(() => {
         document.getElementById(seccion)?.scrollIntoView({ behavior: 'auto', block: 'start' });
       });
@@ -10149,6 +10198,7 @@
     if (firstInvalid) {
       if (!silent) {
         const rangeErrors = { edad: 'K-ONE es solo para mayores de 18 años: introduce una edad entre 18 y 80.', peso: 'Introduce un peso entre 40 y 180 kg.', altura: 'Introduce una altura entre 140 y 210 cm.' };
+        kEvento('quiz_campo_sin_rellenar', { bloque: currentBlock + 1, campo: firstInvalid.id || '' });
         showToast(rangeErrors[firstInvalid.id] || 'Completa los campos obligatorios marcados en rojo antes de continuar.');
         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -10250,6 +10300,7 @@
     goTo('formulario');
     updateProgress();
     history.pushState({ screen: 'formulario', block: 0 }, '', '');
+    kEvento('quiz_inicio');
   }
 
   function goToBlock(target) {
@@ -10264,6 +10315,7 @@
 
   function nextBlock() {
     if (!validateBlock(currentBlock)) return;
+    kEvento('quiz_bloque_completado', { bloque: currentBlock + 1 });
     if (currentBlock < totalBlocks - 1) {
       document.querySelector(`.form-block[data-block="${currentBlock}"]`).classList.remove('active');
       currentBlock++;
@@ -10488,6 +10540,7 @@
       // Sin importe: el primer mes es gratis. Antes mandaba 1,99 (la oferta
       // antigua), inflando en Analytics el valor de cada plan generado.
       if (typeof gtag === 'function') gtag('event', 'generate_lead', { currency: 'EUR', value: 0 });
+      kEvento('plan_generado', { tipo: esSoloDieta() ? 'solo_nutricion' : 'completo' });
 
       // Guardar datos del usuario si está logueado
       const user = getCurrentUser();
@@ -22137,6 +22190,7 @@
   }
 
   function submitCheckin() {
+    kEvento('checkin_enviado');
     const nota = document.getElementById('checkinNota').value;
     const pesoCheckin = parseFloat(document.getElementById('checkinPeso')?.value);
     const dias = document.querySelector('#rating-dias .selected')?.textContent || '0';
@@ -28184,6 +28238,7 @@ Se coló: ${lista}`;
   function cancelarSuscripcion() {
     const user = getCurrentUser();
     if (!user) return;
+    kEvento('baja_iniciada');
     _fechaFinCancelacion = user.fechaPago
       ? new Date(user.fechaPago).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
       : 'el final de tu período actual';
@@ -28220,6 +28275,7 @@ Se coló: ${lista}`;
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al cancelar');
+      kEvento('baja_confirmada');
 
       const sel = document.querySelector('#cancelarSubChips input[name="cancelarMotivoBaja"]:checked');
       const motivo = sel ? sel.value : '';
@@ -29575,7 +29631,16 @@ Se coló: ${lista}`;
     }
   }).observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
 
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest && ev.target.closest('button[onclick*="goTo(\'bienvenida\')"]');
+    if (!b) return;
+    const zona = b.closest('nav, header, footer, section, [id]');
+    kEvento('cta_empezar', { zona: (zona && (zona.id || zona.tagName.toLowerCase())) || 'landing', texto: (b.textContent || '').trim().slice(0, 30) });
+  });
+
   window.onload = async () => {
+    // Se lee antes de nada: goTo() borra el hash legal al salir de esa pantalla.
+    const _hashLegal = (location.hash || '').slice(1);
     _sincronizarPrecios();
     cargarTestimoniosLanding();
     mostrarCookieBanner();
@@ -29681,6 +29746,9 @@ Se coló: ${lista}`;
         goTo('landing');
       }
     }
+
+    // Enlaces directos a los textos legales (k-one.fit/#privacidad, etc.).
+    if (['aviso-legal', 'privacidad', 'terminos', 'cookies'].includes(_hashLegal)) goToLegal(_hashLegal);
 
     // Vuelta desde Stripe con pago completado: el webhook puede tardar 1-5s en actualizar
     // subscriptions en Supabase. Reintentamos syncProfile cada 2s hasta confirmar acceso.
