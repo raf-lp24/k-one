@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/lib/:path*", "destination": "/", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/sw.js",
