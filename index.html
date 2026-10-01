@@ -7545,6 +7545,13 @@
           </span>
           Sin permanencia
         </span>
+        <span id="heroRating" style="display:none">
+          <span class="trust-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 L14.6 9 L21 9.6 L16.2 13.9 L17.6 20.3 L12 17 L6.4 20.3 L7.8 13.9 L3 9.6 L9.4 9 Z"/>
+            </svg>
+          </span>
+        </span>
       </div>
     </div>
   </section>
@@ -28836,6 +28843,19 @@ Se coló: ${lista}`;
         return;
       }
       _actualizarReviewSchema(data);
+      // Nota media junto a los distintivos de confianza, con el mismo formato que ellos.
+      // Solo la nota: NO se enseña cuántas opiniones hay (decisión del 1 oct 2026). Se
+      // calcula con las opiniones publicadas y solo se muestra con 5 o más, para que la
+      // media diga algo.
+      try {
+        const chipNota = document.getElementById('heroRating');
+        if (chipNota && data.length >= 5) {
+          const media = data.reduce((acc, r) => acc + Math.max(1, Math.min(5, r.estrellas || 5)), 0) / data.length;
+          [...chipNota.childNodes].filter(n => n.nodeType === 3).forEach(n => n.remove());
+          chipNota.appendChild(document.createTextNode('Valoración ' + media.toFixed(1).replace('.', ',') + ' de 5'));
+          chipNota.style.display = '';
+        }
+      } catch (e) {}
       const carousel = document.getElementById('testimonialsCarousel');
       const empty = document.getElementById('testimonialsEmpty');
       if (carousel) carousel.style.display = '';
