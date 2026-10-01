@@ -48,7 +48,7 @@ Además `tests.html` (20 pruebas en el navegador; abrir con el servidor local). 
 Crear un monitor gratuito en UptimeRobot (o similar): tipo **HTTP(s) con palabra clave**, URL `https://k-one.fit/`, palabra clave `K-ONE`, cada 5 minutos, aviso por email. Si se quiere vigilar también el cobro: monitor sobre `https://k-one.fit/api/is-admin` con método POST (responde `{"isAdmin":false}`).
 
 ## Privacidad
-El cliente puede **descargar sus datos** y **eliminar su cuenta** desde el menú del panel (`api/_eliminarCuenta.js`: cancela Stripe, borra fotos, mensajes, emails, lead y el usuario; la cascada de la base de datos borra el resto). No se borran los datos de facturación de Stripe ni las opiniones ya publicadas (se quitan a petición por email).
+El cliente puede **eliminar su cuenta** desde el menú del panel (la copia de sus datos se pide por email) (`api/_eliminarCuenta.js`: cancela Stripe, borra fotos, mensajes, emails, lead y el usuario; la cascada de la base de datos borra el resto). No se borran los datos de facturación de Stripe ni las opiniones ya publicadas (se quitan a petición por email).
 
 ## Pendiente conocido
 - «Bajo en carbohidratos» queda en ~38 % de las calorías en hidratos (hacen falta platos más grasos en el recetario).

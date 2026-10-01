@@ -171,7 +171,7 @@
         {
           "@type": "Question",
           "name": "¿Mis datos están seguros?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento." }
         },
         {
           "@type": "Question",
@@ -7419,7 +7419,6 @@
     <div class="modal-title" style="font-size:19px" id="eliminarCuentaTitulo">¿Eliminar tu cuenta?</div>
     <p class="modal-desc" style="margin-bottom:12px">Se borrarán para siempre tu cuenta, tu plan, tu progreso, tus fotos y tus mensajes. <strong style="color:var(--blanco)">No se puede deshacer.</strong></p>
     <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:14px">Si tienes una suscripción, se cancela en el momento y no se te volverá a cobrar. Solo conservamos lo que la ley nos obliga a guardar (los datos de facturación que gestiona Stripe).</p>
-    <button type="button" onclick="descargarMisDatos()" style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:12.5px;cursor:pointer;padding:10px 14px;margin-bottom:16px;width:100%">Descargar una copia de mis datos antes</button>
     <label for="eliminarCuentaConfirm" style="display:block;font-size:12.5px;color:var(--metal-claro);margin-bottom:6px">Para confirmar, escribe <strong style="color:var(--blanco)">ELIMINAR</strong>:</label>
     <input type="text" id="eliminarCuentaConfirm" autocomplete="off" autocapitalize="characters" oninput="actualizarBotonEliminar()" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:var(--blanco);font-size:15px;margin-bottom:16px">
     <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -7558,7 +7557,6 @@
           <div class="hero-price-txt">
             <span class="hero-price-label"><span class="hero-price-dot" aria-hidden="true"></span>Oferta del mes</span>
             <span class="hero-price-main">Primer mes <b>gratis</b></span>
-            <span class="hero-price-sub">Después, desde <span data-kp="nutricion">4,99€</span>/mes</span>
           </div>
           <span class="hero-price-arrow" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
@@ -7928,7 +7926,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Mis datos están seguros?</summary>
-        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento.</p>
+        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
@@ -8142,7 +8140,7 @@
       <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
-      <p>Desde tu perfil puedes <strong>descargar una copia de tus datos</strong> («Descargar mis datos») y <strong>eliminar tu cuenta y tus datos</strong> («Eliminar mi cuenta»): se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar.</p>
+      <p>Desde tu perfil puedes <strong>eliminar tu cuenta y tus datos</strong> («Eliminar mi cuenta»): se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar.</p>
       <p>Además puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
       <h3>2.8. Seguridad</h3>
@@ -8770,9 +8768,6 @@
             Enviarme un aviso de prueba
           </button>
         </div>
-        <button class="logout-btn" onclick="descargarMisDatos()" style="color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
-          <span>⬡</span> Descargar mis datos
-        </button>
         <button class="logout-btn" onclick="abrirEliminarCuenta()" style="color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Eliminar mi cuenta
         </button>
@@ -28508,38 +28503,7 @@ Se coló: ${lista}`;
     document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
   }
 
-  // ===== TUS DATOS (RGPD): descargar una copia y eliminar la cuenta =====
-  async function descargarMisDatos() {
-    const user = getCurrentUser();
-    if (!user) return;
-    const copia = {
-      generado: new Date().toISOString(),
-      nota: 'Copia de los datos que K-ONE guarda de tu cuenta.',
-      cuenta: { nombre: user.nombre || '', email: user.email || '' },
-      cuestionario_y_registros: userData || {},
-      plan_generado: generatedPlan || null
-    };
-    try {
-      if (_supaUserId) {
-        const [sub, msg, hitos] = await Promise.all([
-          supa.from('subscriptions').select('status, plan, current_period_start, current_period_end, cancel_at_period_end').eq('user_id', _supaUserId).maybeSingle(),
-          supa.from('mensajes_cliente').select('asunto, mensaje, respuesta, created_at').eq('user_id', _supaUserId),
-          supa.from('hitos_canjes').select('*').eq('user_id', _supaUserId)
-        ]);
-        copia.suscripcion = sub.data || null;
-        copia.mensajes = msg.data || [];
-        copia.hitos_canjeados = hitos.data || [];
-      }
-    } catch (e) { copia.aviso = 'No se pudieron incluir los mensajes y la suscripción: ' + e.message; }
-    const blob = new Blob([JSON.stringify(copia, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'mis-datos-k-one.json';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    showToast('Copia de tus datos descargada.', 3500);
-  }
-
+  // ===== ELIMINAR LA CUENTA (RGPD, derecho de supresión) =====
   function abrirEliminarCuenta() {
     if (!getCurrentUser()) return;
     kEvento('eliminar_cuenta_iniciado');
