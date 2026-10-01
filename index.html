@@ -329,6 +329,8 @@
        leyéndose como el mismo naranja "brasa". */
     --brasa: #D1420E;
     --brasa-oscura: #C03A08;
+    /* Naranja para TEXTO sobre fondos oscuros: --brasa da 3,1-4,2:1 (mínimo AA 4,5:1). */
+    --brasa-txt: #F26A36;
     --metal: #8A8A8A;
     --metal-claro: #B5B2AD;
     --humo: #3A3A3A;
@@ -576,7 +578,7 @@
 
   .logo:hover { opacity: 0.75; }
 
-  .logo span { color: var(--brasa); }
+  .logo span { color: var(--brasa-txt); }
 
   .nav-links { display: flex; gap: 32px; align-items: center; }
   .nav-link {
@@ -1167,7 +1169,7 @@
     font-size: 13px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 12px;
     padding-left: 14px;
     border-left: 2px solid var(--brasa);
@@ -1184,7 +1186,7 @@
 
   .hero-title em {
     font-style: normal;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     display: block;
   }
 
@@ -1231,7 +1233,7 @@
     height: 28px;
     background: rgba(209,66,14,0.16);
     border-radius: 50%;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     flex-shrink: 0;
   }
   /* El trazo del SVG está pensado para un viewBox de 24: a 13px quedaba en
@@ -1272,7 +1274,7 @@
     font-size: clamp(64px, 11vw, 92px);
     line-height: 1;
     letter-spacing: 1px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     white-space: nowrap;
   }
 
@@ -1406,7 +1408,7 @@
     font-family: 'DM Mono', monospace;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   /* Fondo decorativo gym en toda la landing */
@@ -1476,7 +1478,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
   .pillar-icon svg { width: 30px; height: 30px; }
 
@@ -1556,7 +1558,7 @@
     font-size: 13px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 12px;
     padding-left: 14px;
     border-left: 2px solid var(--brasa);
@@ -1571,7 +1573,7 @@
   }
   .app-copy-title em {
     font-style: normal;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
   .app-features {
     display: flex;
@@ -1594,7 +1596,7 @@
     align-items: center;
     justify-content: center;
   }
-  .feature-badge svg { width: 22px; height: 22px; stroke: var(--brasa); color: var(--brasa); }
+  .feature-badge svg { width: 22px; height: 22px; stroke: var(--brasa); color: var(--brasa-txt); }
   .feature-text-title {
     font-family: 'DM Mono', monospace;
     font-size: 13px;
@@ -1693,7 +1695,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 19px;
     line-height: 1;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     flex-shrink: 0;
   }
   .today-hero-countdown-label {
@@ -1727,7 +1729,7 @@
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 10px;
   }
   .today-hero-title {
@@ -1792,7 +1794,7 @@
   .pill-activo {
     display: inline-flex; align-items: center; gap: 8px;
     background: rgba(209,66,14,0.10); border: 1px solid rgba(209,66,14,0.4);
-    color: var(--brasa); border-radius: 999px; padding: 6px 14px;
+    color: var(--brasa-txt); border-radius: 999px; padding: 6px 14px;
     font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
   }
   .pill-activo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brasa); box-shadow: 0 0 8px var(--brasa); }
@@ -1818,7 +1820,7 @@
   }
   .rail-card-head svg { width: 17px; height: 17px; stroke: var(--metal); }
   .rail-big { font-family: 'Bebas Neue', sans-serif; font-size: 46px; line-height: 0.9; color: var(--blanco); }
-  .rail-big.brasa { color: var(--brasa); }
+  .rail-big.brasa { color: var(--brasa-txt); }
   .rail-bar { height: 7px; border-radius: 4px; background: var(--grafito); overflow: hidden; margin-top: 14px; }
   .rail-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--brasa), #FF6A2B); transition: width .6s ease; }
   .rail-sub { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--metal); margin-top: 12px; line-height: 1.6; }
@@ -1919,7 +1921,7 @@
     font-size: 8px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 7px;
   }
 
@@ -1957,7 +1959,7 @@
     color: var(--blanco);
     font-weight: 400;
   }
-  .mock-adapt strong { color: var(--brasa); font-weight: 600; }
+  .mock-adapt strong { color: var(--brasa-txt); font-weight: 600; }
 
   /* HOW IT WORKS */
   .how {
@@ -2018,14 +2020,14 @@
     font-size: 86px;
     line-height: 0.82;
     letter-spacing: 1px;
-    color: #4A403A;
+    color: #7A6A60;
     margin-bottom: 14px;
     display: block;
     transition: color 0.3s;
   }
-  .step:hover .step-num { color: var(--brasa); }
+  .step:hover .step-num { color: var(--brasa-txt); }
   [data-theme="light"] .step-num { color: #D8D0C6; }
-  [data-theme="light"] .step:hover .step-num { color: var(--brasa); }
+  [data-theme="light"] .step:hover .step-num { color: var(--brasa-txt); }
 
   .step-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -2105,7 +2107,7 @@
     margin-bottom: 20px;
     display: block;
   }
-  .sport-icon svg { width: 40px; height: 40px; stroke: var(--brasa); color: var(--brasa); display: block; }
+  .sport-icon svg { width: 40px; height: 40px; stroke: var(--brasa); color: var(--brasa-txt); display: block; }
   .hybrid-callout-icon svg { width: 34px; height: 34px; stroke: var(--brasa); }
   .dash-nav-icon svg { width: 18px; height: 18px; stroke: currentColor; vertical-align: middle; }
 
@@ -2122,7 +2124,7 @@
     letter-spacing: 0.5px;
     font-weight: 500;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     border: 1px solid var(--brasa);
     border-radius: 20px;
     padding: 2px 8px;
@@ -2222,7 +2224,7 @@
     content: '✓';
     position: absolute;
     left: 0;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-weight: 700;
     font-size: 12px;
   }
@@ -2264,7 +2266,7 @@
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 16px;
   }
 
@@ -2378,7 +2380,7 @@
   .testimonials-nav--next { right: -24px; }
 
   .testimonial-stars {
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-size: 14px;
     letter-spacing: 3px;
     margin-bottom: 20px;
@@ -2427,7 +2429,7 @@
     margin-top: 3px;
     letter-spacing: 0.3px;
   }
-  .testimonial-role b { color: var(--brasa); font-weight: 700; }
+  .testimonial-role b { color: var(--brasa-txt); font-weight: 700; }
 
   .landing-cta-float {
     display: none;
@@ -2540,7 +2542,7 @@
   .faq-q::after {
     content: '+';
     font-size: 20px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     flex-shrink: 0;
     transition: transform 0.2s;
     font-family: 'Inter', sans-serif;
@@ -2583,7 +2585,7 @@
 
   .philosophy-quote em {
     font-style: normal;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .philosophy-sub {
@@ -2693,7 +2695,7 @@
     color: #fff;
   }
   .share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .share-btn--whatsapp { background: #25D366; }
+  .share-btn--whatsapp { background: #25D366; color: #0A0A0A; }
   .share-btn--x { background: #000; border: 1px solid #333; }
   .share-btn--copy { background: var(--acero); border: 1px solid var(--humo); color: var(--blanco); }
 
@@ -2718,6 +2720,7 @@
     border: none;
   }
   .legal-back:hover { color: var(--blanco-puro); }
+  .legal-back { padding: 6px 0; margin: -6px 0; }
   .legal-h1 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(32px, 6vw, 52px);
@@ -2775,7 +2778,7 @@
     font-size: 24px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 4px;
   }
   .legal-section h3 {
@@ -2793,7 +2796,7 @@
   .legal-section ul { margin: 0 0 14px; padding-left: 20px; }
   .legal-section li { margin-bottom: 6px; }
   .legal-section strong { color: var(--blanco); }
-  .legal-section a { color: var(--brasa); text-decoration: underline; }
+  .legal-section a { color: var(--brasa-txt); text-decoration: underline; }
 
   /* ===================== FORMULARIO ===================== */
   #formulario {
@@ -2923,7 +2926,7 @@
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 12px;
   }
 
@@ -2982,7 +2985,7 @@
      "opcional" y dice justo lo contrario. Ahora se distinguen. */
   .field .required {
     font-size: 10px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     letter-spacing: 0;
     text-transform: none;
     margin-left: 6px;
@@ -3027,7 +3030,7 @@
     line-height: 1;
     user-select: none;
   }
-  .cp-peso-btn:hover { border-color: var(--brasa); color: var(--brasa); background: rgba(209,66,14,.1); }
+  .cp-peso-btn:hover { border-color: var(--brasa); color: var(--brasa-txt); background: rgba(209,66,14,.1); }
   .cp-peso-btn:active { transform: scale(.88); }
   .cp-peso-num {
     flex: 1;
@@ -3130,7 +3133,7 @@
     height: 48px;
     background: transparent;
     border: none;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-size: 22px;
     font-weight: 700;
     cursor: pointer;
@@ -3222,7 +3225,7 @@
     font-size: 11px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 8px;
   }
 
@@ -3236,7 +3239,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 26px;
     letter-spacing: 1px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .bmr-panel-note {
@@ -3299,10 +3302,10 @@
     border-radius: 10px;
     padding: 14px 18px;
   }
-  .rutina-preview-label { font-size: 11px; font-weight: 700; color: var(--brasa); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .rutina-preview-label { font-size: 11px; font-weight: 700; color: var(--brasa-txt); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
   .rutina-preview-split { font-size: 15px; font-weight: 700; color: var(--blanco-puro); margin-bottom: 6px; }
   .rutina-preview-desc { font-size: 12px; color: var(--ceniza); line-height: 1.55; }
-  .rutina-preview-nota { font-size: 11px; color: var(--brasa); margin-top: 8px; font-style: italic; display: none; }
+  .rutina-preview-nota { font-size: 11px; color: var(--brasa-txt); margin-top: 8px; font-style: italic; display: none; }
 
   .radio-opt input, .check-opt input { display: none; }
 
@@ -3363,7 +3366,7 @@
     transition: color 0.2s, transform 0.2s;
   }
 
-  .back-to-landing:hover { color: var(--brasa); transform: translateX(-2px); }
+  .back-to-landing:hover { color: var(--brasa-txt); transform: translateX(-2px); }
 
   .dash-user {
     display: flex;
@@ -3500,7 +3503,7 @@
     font-weight: 700;
     font-size: 12px;
     letter-spacing: 1px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     text-transform: uppercase;
     margin-bottom: 8px;
   }
@@ -3544,7 +3547,7 @@
   .plan-porque-eyebrow {
     font-family: 'DM Mono', monospace;
     font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
-    color: var(--brasa); margin-bottom: 8px;
+    color: var(--brasa-txt); margin-bottom: 8px;
   }
   .plan-porque-titulo {
     font-family: 'Bebas Neue', sans-serif;
@@ -3563,7 +3566,7 @@
   }
   .plan-porque-mas {
     background: none; border: none; padding: 6px 0 0;
-    color: var(--brasa); font-family: 'Inter', sans-serif;
+    color: var(--brasa-txt); font-family: 'Inter', sans-serif;
     font-size: 12.5px; font-weight: 600; cursor: pointer;
     /* 44px de alto tactil minimo, que es lo que se puede pulsar comodo en movil */
     min-height: 34px;
@@ -3579,7 +3582,7 @@
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     margin-bottom: 10px;
   }
 
@@ -3620,7 +3623,7 @@
   .stat-card-value {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 36px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     line-height: 1;
   }
 
@@ -3691,7 +3694,7 @@
      web (DM Mono + acento brasa, como .entreno-bloque-num), en vez del "1. 2."
      por defecto del navegador que no encajaba con el resto del diseño. */
   .paso-ejercicio { display: flex; gap: 10px; align-items: flex-start; }
-  .paso-ejercicio-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brasa); flex-shrink: 0; padding-top: 2px; }
+  .paso-ejercicio-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brasa-txt); flex-shrink: 0; padding-top: 2px; }
 
   /* Consejos de técnica dentro de "Cómo se hace" -- antes vivían como texto
      suelto debajo de casi cada ejercicio del plan (sobraba visualmente,
@@ -3699,7 +3702,7 @@
      ejercicio dentro de la ficha, donde tiene sentido consultarlo. */
   .ejercicio-consejos-list { margin: 0; padding-left: 18px; color: var(--metal-claro); font-size: 13px; line-height: 1.6; }
   .ejercicio-consejos-list li { margin-bottom: 6px; }
-  .ejercicio-consejos-list li::marker { color: var(--brasa); }
+  .ejercicio-consejos-list li::marker { color: var(--brasa-txt); }
   .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
   .ej-foto { margin: 0; }
   .ej-foto img {
@@ -3716,12 +3719,12 @@
     display: flex; align-items: baseline; gap: 9px; flex-shrink: 0;
     font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal);
   }
-  .alimento-macros b { color: var(--brasa); font-size: 14px; }
+  .alimento-macros b { color: var(--brasa-txt); font-size: 14px; }
   .alimento-fila-click { cursor: pointer; border-radius: 8px; transition: background .15s; }
   .alimento-fila-click:hover { background: rgba(209,66,14,0.08); }
   .comida-extra-badge {
     font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .5px;
-    color: var(--brasa); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
+    color: var(--brasa-txt); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
     text-transform: uppercase; margin-left: 6px; vertical-align: middle;
   }
   /* Resultados de USDA/Open Food Facts en vivo cuando el alimento no está en
@@ -3790,7 +3793,7 @@
     font-weight: 700;
     font-size: 11px;
     letter-spacing: 1px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     text-transform: uppercase;
     margin-bottom: 14px;
   }
@@ -3812,7 +3815,7 @@
   #nutriResumen .stat-card-value {
     font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: .85; color: var(--blanco);
   }
-  #nutriResumen .stat-card:first-child .stat-card-value { color: var(--brasa); }
+  #nutriResumen .stat-card:first-child .stat-card-value { color: var(--brasa-txt); }
   #nutriResumen .stat-card-sub {
     font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .5px;
     text-transform: uppercase; color: var(--metal); margin-top: 8px;
@@ -3896,7 +3899,7 @@
 
   .week-day-row.expanded .week-day-toggle {
     transform: rotate(180deg);
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .week-day-info {
@@ -3917,7 +3920,7 @@
     gap: 10px;
   }
 
-  .week-day-row.today .week-day-name { color: var(--brasa); }
+  .week-day-row.today .week-day-name { color: var(--brasa-txt); }
 
   .week-day-type {
     font-family: 'Bebas Neue', sans-serif;
@@ -3932,7 +3935,7 @@
 
   .week-day-muscles {
     font-size: 12px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-weight: 600;
     letter-spacing: 0.3px;
     line-height: 1.5;
@@ -3945,7 +3948,7 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     background: rgba(209,66,14,0.15);
-    color: var(--brasa);
+    color: var(--brasa-txt);
     padding: 5px 12px;
     font-family: 'DM Mono', monospace;
     margin-top: auto;
@@ -4006,7 +4009,7 @@
     display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
     text-transform: uppercase; color: var(--metal); margin-bottom: 3px;
   }
-  .ejercicio-rpe .v { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--brasa); }
+  .ejercicio-rpe .v { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--brasa-txt); }
 
   /* Tarjeta de ejercicio con el diseño nuevo (miniatura + series/reps/peso) */
   .ejercicio-card {
@@ -4059,14 +4062,14 @@
   }
   .prog-sug-v {
     font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .5px;
-    color: var(--brasa); line-height: 1;
+    color: var(--brasa-txt); line-height: 1;
   }
   .prog-usar {
     background: transparent; border: 1px solid var(--humo); color: var(--metal-claro);
     border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 600;
     font-family: inherit; cursor: pointer; transition: border-color .2s, color .2s;
   }
-  .prog-usar:hover { border-color: var(--brasa); color: var(--brasa); }
+  .prog-usar:hover { border-color: var(--brasa); color: var(--brasa-txt); }
   .prog-motivo { font-size: 11.5px; color: var(--metal); line-height: 1.55; }
   .prog-feedback { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .prog-feedback-k {
@@ -4122,7 +4125,7 @@
     align-items: center;
     justify-content: center;
   }
-  .ejercicio-extra-quitar:hover { border-color: var(--brasa); color: var(--brasa); }
+  .ejercicio-extra-quitar:hover { border-color: var(--brasa); color: var(--brasa-txt); }
   .btn-anadir-ejercicio {
     width: 100%;
     margin-top: 10px;
@@ -4137,7 +4140,7 @@
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s;
   }
-  .btn-anadir-ejercicio:hover { border-color: var(--brasa); color: var(--brasa); }
+  .btn-anadir-ejercicio:hover { border-color: var(--brasa); color: var(--brasa-txt); }
 
   @media (max-width: 560px) {
     /* En móvil la miniatura va pequeña y cuadrada: estirada a lo alto parecía un vídeo vertical */
@@ -4178,7 +4181,7 @@
     background: rgba(209,66,14,0.14);
     border: 1px solid rgba(209,66,14,0.35);
     border-radius: 999px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-family: inherit;
     font-size: 11px;
     font-weight: 700;
@@ -4268,7 +4271,7 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     white-space: nowrap;
   }
   .peso-ultimo:empty { display: none; }
@@ -4351,7 +4354,7 @@
 
   .meal-block-selected {
     font-size: 12px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .meal-block-right {
@@ -4379,7 +4382,7 @@
 
   .meal-block.expanded .meal-block-toggle {
     transform: rotate(180deg);
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .meal-block-count {
@@ -4442,7 +4445,7 @@
     text-transform: uppercase;
   }
 
-  .meal-preview-pill.selected .meal-preview-num { color: var(--brasa); }
+  .meal-preview-pill.selected .meal-preview-num { color: var(--brasa-txt); }
 
   .meal-preview-name {
     font-size: 11px;
@@ -4514,7 +4517,7 @@
     font-family: 'DM Mono', monospace;
     font-size: 8px;
     letter-spacing: 1.5px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   /* INGREDIENTE */
@@ -4600,7 +4603,7 @@
     text-transform: uppercase;
   }
 
-  .meal-option.selected .meal-opt-num { color: var(--brasa); }
+  .meal-option.selected .meal-opt-num { color: var(--brasa-txt); }
 
   .meal-opt-name {
     font-size: 14px;
@@ -4688,7 +4691,7 @@
   .checkin-week {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     background: rgba(209,66,14,0.1);
     padding: 6px 12px;
     border-radius: 6px;
@@ -4817,7 +4820,7 @@
   .checkin-summary-stat-value {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .checkin-summary-stat-label {
@@ -4853,7 +4856,7 @@
     font-weight: 700;
     font-size: 10px;
     letter-spacing: 1.2px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     text-transform: uppercase;
     margin-bottom: 16px;
   }
@@ -4958,7 +4961,7 @@
     font-size: 11px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     padding-left: 12px;
     border-left: 2px solid var(--brasa);
     margin-bottom: 14px;
@@ -5020,7 +5023,7 @@
     font-size: 10px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--brasa);
+    color: var(--brasa-txt);
   }
 
   .photo-slot-label {
@@ -5078,7 +5081,7 @@
     text-transform: uppercase;
     background: var(--carbon);
     border: 1px solid var(--humo);
-    color: var(--brasa);
+    color: var(--brasa-txt);
     padding: 7px 14px;
     cursor: pointer;
     transition: background 0.2s;
@@ -5125,7 +5128,7 @@
     font-size: 9px;
     letter-spacing: 1px;
     background: rgba(209,66,14,0.15);
-    color: var(--brasa);
+    color: var(--brasa-txt);
     padding: 3px 8px;
     border-radius: 4px;
   }
@@ -5157,7 +5160,7 @@
   .milestones-summary::-webkit-details-marker { display: none; }
   .milestones-summary::after { content: '↓'; }
   .milestones-details[open] .milestones-summary::after { content: '↑'; }
-  .milestones-summary:hover { border-color: var(--brasa); color: var(--brasa); }
+  .milestones-summary:hover { border-color: var(--brasa); color: var(--brasa-txt); }
 
   /* ENTRENO COMPLETADO */
   .entreno-completado-badge {
@@ -5185,7 +5188,7 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-completado:hover { border-color: var(--brasa); color: var(--brasa); }
+  .btn-completado:hover { border-color: var(--brasa); color: var(--brasa-txt); }
   .btn-completado.completado {
     background: var(--brasa);
     border-color: var(--brasa);
@@ -5226,7 +5229,7 @@
     height: 34px;
     border-radius: 50%;
     background: rgba(209,66,14,0.10);
-    color: var(--brasa);
+    color: var(--brasa-txt);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -5286,7 +5289,7 @@
   .conv-list { display: flex; flex-direction: column; gap: 14px; margin: 0 0 24px; }
   .conv-hilo { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; overflow: hidden; }
   .conv-hilo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--humo); }
-  .conv-hilo-asunto { font-size: 11px; font-weight: 700; color: var(--brasa); text-transform: uppercase; letter-spacing: .03em; }
+  .conv-hilo-asunto { font-size: 11px; font-weight: 700; color: var(--brasa-txt); text-transform: uppercase; letter-spacing: .03em; }
   .conv-hilo-fecha { font-size: 11px; color: var(--metal); font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .conv-hilo-msgs { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
   .conv-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.5; box-sizing: border-box; white-space: pre-wrap; word-break: break-word; }
@@ -5345,7 +5348,7 @@
   .nota-content { flex: 1; min-width: 0; }
   .nota-date {
     font-size: 11px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
     margin-bottom: 6px;
@@ -5363,7 +5366,7 @@
     transition: all 0.2s;
     flex-shrink: 0;
   }
-  .nota-delete:hover { border-color: var(--brasa); color: var(--brasa); }
+  .nota-delete:hover { border-color: var(--brasa); color: var(--brasa-txt); }
   .nota-edit:hover { border-color: var(--metal-claro); color: var(--blanco); }
 
   .nota-edit-input {
@@ -5417,7 +5420,7 @@
     color: var(--blanco);
   }
 
-  .loading-logo span { color: var(--brasa); }
+  .loading-logo span { color: var(--brasa-txt); }
 
   .loading-bar {
     width: 200px;
@@ -5634,7 +5637,7 @@
     transition: opacity 0.2s;
   }
   .auth-logo:hover { opacity: 0.75; }
-  .auth-logo span { color: var(--brasa); }
+  .auth-logo span { color: var(--brasa-txt); }
 
   /* BIENVENIDA */
   .welcome-title {
@@ -5646,7 +5649,7 @@
     margin-bottom: 12px;
   }
 
-  .welcome-title em { font-style: normal; color: var(--brasa); display: block; }
+  .welcome-title em { font-style: normal; color: var(--brasa-txt); display: block; }
 
   .welcome-sub {
     font-size: 14px;
@@ -5710,7 +5713,7 @@
   }
 
   .auth-subtitle a {
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -5772,7 +5775,7 @@
     color: var(--blanco);
     cursor: pointer;
   }
-  .sugerencia-item:hover, .sugerencia-item.activa { background: var(--grafito); color: var(--brasa); }
+  .sugerencia-item:hover, .sugerencia-item.activa { background: var(--grafito); color: var(--brasa-txt); }
   .auth-field input.valid { border-color: #27ae60; }
 
   .auth-error {
@@ -5900,7 +5903,7 @@
   }
 
   .auth-check-label a {
-    color: var(--brasa);
+    color: var(--brasa-txt);
     cursor: pointer;
   }
 
@@ -5927,7 +5930,7 @@
     border-bottom: 1px dotted var(--metal);
     transition: color 0.2s, border-color 0.2s;
   }
-  .auth-forgot span:hover { color: var(--brasa); border-color: var(--brasa); }
+  .auth-forgot span:hover { color: var(--brasa-txt); border-color: var(--brasa); }
 
   /* VOLVER (auth screens) */
   .auth-back {
@@ -5944,11 +5947,13 @@
     cursor: pointer;
     transition: color 0.2s;
   }
+  .auth-back { padding: 6px 0; margin-bottom: -6px; min-height: 24px; }
+  .auth-forgot span { padding: 4px 0; }
   .auth-back .auth-back-arrow {
     display: inline-block;
     transition: transform 0.2s;
   }
-  .auth-back:hover { color: var(--brasa); }
+  .auth-back:hover { color: var(--brasa-txt); }
   .auth-back:hover .auth-back-arrow { transform: translateX(-4px); }
 
   /* MODAL FORGOT */
@@ -5998,7 +6003,7 @@
     line-height: 1;
     user-select: none;
   }
-  .encuesta-star.activa { color: var(--brasa); }
+  .encuesta-star.activa { color: var(--brasa-txt); }
   .encuesta-textarea {
     width: 100%;
     background: var(--grafito);
@@ -6058,7 +6063,7 @@
     font-family: 'DM Mono', monospace;
     font-size: 11px;
     letter-spacing: 1px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     text-transform: uppercase;
   }
   .recetario-section-hora {
@@ -6150,7 +6155,7 @@
   .receta-pasos-label {
     font-family: 'DM Mono', monospace;
     font-size: 9px;
-    color: var(--brasa);
+    color: var(--brasa-txt);
     letter-spacing: 0.8px;
     text-transform: uppercase;
     margin-bottom: 5px;
@@ -6164,7 +6169,7 @@
     border-radius: 10px;
     background: rgba(209,66,14,0.10);
     border: 1px solid rgba(209,66,14,0.4);
-    color: var(--brasa);
+    color: var(--brasa-txt);
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     font-size: 12.5px;
@@ -6175,7 +6180,7 @@
   .btn-recetario:hover { background: rgba(209,66,14,0.2); border-color: var(--brasa); transform: translateY(-1px); }
   .btn-recetario svg { width: 15px; height: 15px; flex-shrink: 0; }
   /* Enlace inline naranja para llamar la atención sobre el recetario dentro del texto */
-  .link-recetario { color: var(--brasa); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .link-recetario { color: var(--brasa-txt); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
   .link-recetario:hover { opacity: 0.82; }
 
   .modal-close {
@@ -6716,7 +6721,7 @@
   <div class="modal-box modal-box-recetario">
     <button class="modal-close" onclick="cerrarRecetario()" aria-label="Cerrar">✕</button>
     <div style="margin-bottom:20px">
-      <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:var(--brasa);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
+      <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color: var(--brasa-txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
       <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
       <div id="recetarioNotaCiclo" style="display:none;font-size:12px;color:var(--metal-claro);background:rgba(209,66,14,.07);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:14px;line-height:1.5"></div>
@@ -7509,7 +7514,7 @@
       <button class="btn-primary" id="btnPedirRegeneracion" style="flex:1;padding:12px 20px;font-size:13px" onclick="pedirRegeneracionPlan()">Sí, regenérame el plan ya →</button>
       <button style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--metal);font-size:13px;cursor:pointer;padding:12px 16px" onclick="descartarAvisoFiltro()">Ahora no</button>
     </div>
-    <p style="font-size:11.5px;color:var(--metal);text-align:center;margin:14px 0 0">¿Prefieres contarnos algo más antes? Escríbenos desde <a onclick="descartarAvisoFiltro();showSection('contacto')" style="color:var(--brasa);cursor:pointer;text-decoration:underline">Contacto</a>.</p>
+    <p style="font-size:11.5px;color:var(--metal);text-align:center;margin:14px 0 0">¿Prefieres contarnos algo más antes? Escríbenos desde <a onclick="descartarAvisoFiltro();showSection('contacto')" style="color: var(--brasa-txt);cursor:pointer;text-decoration:underline">Contacto</a>.</p>
   </div>
 </div>
 
@@ -7551,9 +7556,9 @@
     <button class="modal-close" onclick="document.getElementById('modalInfoEjercicio').classList.remove('visible')" aria-label="Cerrar">✕</button>
     <div class="modal-title" style="font-size:20px" id="infoEjercicioTitulo">Ejercicio</div>
     <div id="infoEjercicioFotos" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px"></div>
-    <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin:16px 0 8px">MÚSCULOS TRABAJADOS</div>
+    <div style="font-size:11px;color: var(--brasa-txt);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin:16px 0 8px">MÚSCULOS TRABAJADOS</div>
     <div id="infoEjercicioMusculos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
-    <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CÓMO SE HACE</div>
+    <div style="font-size:11px;color: var(--brasa-txt);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CÓMO SE HACE</div>
     <div id="infoEjercicioPasos" style="margin:0 0 18px;color:var(--metal-claro);font-size:13.5px;line-height:1.55;display:flex;flex-direction:column;gap:10px"></div>
     <div id="infoEjercicioConsejos" style="display:none;margin:0 0 18px"></div>
     <div id="infoEjercicioSustituir" style="display:none"></div>
@@ -8138,7 +8143,7 @@
 
 <!-- BANNER DE COOKIES (RGPD) -->
 <div id="cookieBanner" class="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
-  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color:var(--brasa);text-decoration:none">Más información</a></p>
+  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color: var(--brasa-txt);text-decoration:none">Más información</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0">
     <button onclick="rechazarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
     <button onclick="aceptarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
@@ -8261,7 +8266,7 @@
       <p>El primer mes es gratuito para todos los planes. Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario y se realiza el primer cobro: plan completo (7,99€/mes o 14,99€ cada 3 meses) o solo nutrición (4,99€/mes). El usuario puede cambiar de plan o cancelar desde su perfil en cualquier momento, incluido durante el mes gratuito, antes de que se realice ningún cobro. El cambio de plan se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). Los precios incluyen los impuestos aplicables.</p>
       <h3>3.4. Cancelación y política de reembolso</h3>
       <p>Puedes cancelar tu suscripción en cualquier momento desde tu perfil, sin permanencia, sin llamadas y sin formularios. La cancelación detiene futuras renovaciones y el acceso se mantiene activo hasta el final del período ya facturado.</p>
-      <p>Las cuotas abonadas no son reembolsables. Al tratarse de un servicio digital de acceso inmediato (plan personalizado generado al instante), el usuario reconoce que el servicio se presta desde el momento de la activación. Conforme al artículo 103.m) del Real Decreto Legislativo 1/2007, el derecho de desistimiento no es aplicable a contenidos digitales cuya ejecución haya comenzado con el consentimiento expreso del consumidor. No obstante, si consideras que ha habido un error en el cobro, contacta con nosotros en <a href="mailto:k.one.fit26@gmail.com" style="color:var(--brasa)">k.one.fit26@gmail.com</a> y lo revisaremos.</p>
+      <p>Las cuotas abonadas no son reembolsables. Al tratarse de un servicio digital de acceso inmediato (plan personalizado generado al instante), el usuario reconoce que el servicio se presta desde el momento de la activación. Conforme al artículo 103.m) del Real Decreto Legislativo 1/2007, el derecho de desistimiento no es aplicable a contenidos digitales cuya ejecución haya comenzado con el consentimiento expreso del consumidor. No obstante, si consideras que ha habido un error en el cobro, contacta con nosotros en <a href="mailto:k.one.fit26@gmail.com" style="color: var(--brasa-txt)">k.one.fit26@gmail.com</a> y lo revisaremos.</p>
       <h3>3.5. Exención de responsabilidad</h3>
       <p>El usuario realiza la actividad física bajo su propia responsabilidad. K-One no se responsabiliza de lesiones o problemas de salud derivados del uso del servicio. El plan se genera con un sistema basado en reglas a partir de lo que el usuario declara en el cuestionario, no sustituye el criterio de un profesional sanitario. Consulta siempre a tu médico antes de empezar un programa de ejercicio o cambiar tu alimentación, especialmente si tienes una enfermedad diagnosticada, estás embarazada o tienes cualquier condición que pueda verse afectada por el esfuerzo físico o un cambio de dieta.</p>
       <h3>3.6. Modificaciones</h3>
@@ -8838,7 +8843,7 @@
         </div>
       </nav>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--humo);display:flex;flex-direction:column;gap:4px">
-        <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color:var(--brasa);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+        <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color: var(--brasa-txt);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Panel de admin
         </button>
         <!-- Oculto para cuentas sin suscripción real en Stripe (beta o
@@ -8966,10 +8971,10 @@
             <div style="flex:1;min-width:200px">
               <div style="font-size:12px;font-weight:600;color:var(--blanco);margin-bottom:2px">Invita amigos → 5€/amigo en tu 2ª cuota <span style="font-size:10px;color:var(--metal)">(máx. 15€)</span></div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-                <span id="codigoReferido" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--brasa);letter-spacing:1px">---</span>
+                <span id="codigoReferido" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color: var(--brasa-txt);letter-spacing:1px">---</span>
                 <button onclick="copiarCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">Copiar</button>
                 <button onclick="compartirCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer">WhatsApp</button>
-                <span style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace"><span id="refPagados" style="color:var(--brasa);font-weight:700">0</span>/3</span>
+                <span style="font-size:10px;color:var(--metal);font-family:'DM Mono',monospace"><span id="refPagados" style="color: var(--brasa-txt);font-weight:700">0</span>/3</span>
               </div>
             </div>
             <button onclick="this.closest('#bannerReferidos').style.display='none'" style="background:none;border:none;color:var(--metal);font-size:14px;cursor:pointer;padding:0;line-height:1;align-self:flex-start">✕</button>
@@ -9199,11 +9204,11 @@
             </div>
             <div style="font-size:12.5px;color:var(--metal-claro);line-height:1.5;margin-bottom:14px"><b style="color:var(--blanco)">5€</b> por cada amigo que se una con tu código (máx. 15€ en tu cuota).</div>
             <div style="display:flex;align-items:center;gap:8px;background:var(--negro);border:1px solid var(--humo);border-radius:9px;padding:11px 13px;margin-bottom:10px">
-              <span id="railCodigoReferido" style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--brasa);letter-spacing:1.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">---</span>
+              <span id="railCodigoReferido" style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color: var(--brasa-txt);letter-spacing:1.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">---</span>
               <button onclick="copiarCodigoReferido()" style="background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;flex-shrink:0">Copiar</button>
             </div>
             <button onclick="compartirCodigoReferido()" style="width:100%;background:var(--brasa);color:#fff;border:none;border-radius:9px;padding:11px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Compartir por WhatsApp</button>
-            <div class="rail-sub" style="text-align:center"><span id="railRefPagados" style="color:var(--brasa);font-weight:700">0</span>/3 amigos · <span id="railRefDescuento">0€</span> ganados</div>
+            <div class="rail-sub" style="text-align:center"><span id="railRefPagados" style="color: var(--brasa-txt);font-weight:700">0</span>/3 amigos · <span id="railRefDescuento">0€</span> ganados</div>
           </div>
 
           <!-- Los clientes que pagan entran aqui todos los dias y son los mas
@@ -11939,7 +11944,7 @@
     const consejosEl = document.getElementById('infoEjercicioConsejos');
     if (info.consejos && info.consejos.length) {
       consejosEl.innerHTML = `
-        <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CONSEJOS</div>
+        <div style="font-size:11px;color: var(--brasa-txt);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:1.5px;margin-bottom:10px">CONSEJOS</div>
         <ul class="ejercicio-consejos-list">${info.consejos.map(c => `<li>${_esc(c)}</li>`).join('')}</ul>`;
       consejosEl.style.display = '';
     } else {
@@ -12121,7 +12126,7 @@
     const porCat = {};
     items.forEach(a => { (porCat[a.cat] = porCat[a.cat] || []).push(a); });
     cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
-      <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${cat.toUpperCase()}</div>
+      <div style="font-size:10px;color: var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${cat.toUpperCase()}</div>
       ${arr.map(a => `
         <div class="alimento-fila">
           <span class="alimento-nombre">${a.n}</span>
@@ -12159,7 +12164,7 @@
     const porCat = {};
     items.forEach(([k, a]) => { (porCat[a.cat] = porCat[a.cat] || []).push([k, a]); });
     cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
-      <div style="font-size:10px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${_esc(cat.toUpperCase())}</div>
+      <div style="font-size:10px;color: var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${_esc(cat.toUpperCase())}</div>
       ${arr.map(([k, a]) => `
         <div class="alimento-fila alimento-fila-click" onclick="agregarComidaExtra('${_esc(k.replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}')">
           <span class="alimento-nombre">${_esc(a.n)}</span>
@@ -12549,7 +12554,7 @@
             <div class="ejercicio-fila-controls">
               <div class="peso-stepper" onclick="event.stopPropagation()">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,-1.5)" aria-label="Restar 1,5 kg">−</button>
-                <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0"
+                <input type="number" class="peso-input" step="0.5" min="0" inputmode="decimal" placeholder="0" aria-label="Peso en kg: ${nombreSafe}"
                   data-ejercicio="${keyAttr}" data-nombre="${nombreSafe}"${valorAttr} onclick="event.stopPropagation()" onchange="guardarPesoEjercicio(this)">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarPeso(this,1.5)" aria-label="Sumar 1,5 kg">+</button>
                 <span class="peso-unit">kg</span>
@@ -12707,7 +12712,7 @@
             <div class="ejercicio-fila-controls">
               <div class="peso-stepper" onclick="event.stopPropagation()">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,-${paso},${min})" aria-label="Restar">−</button>
-                <input type="number" class="peso-input marca-input" step="${paso}" min="${min}" inputmode="numeric" placeholder="0"
+                <input type="number" class="peso-input marca-input" step="${paso}" min="${min}" inputmode="numeric" placeholder="0" aria-label="${etiquetaUnidad === 'segundos' ? 'Segundos' : 'Repeticiones'}: ${nombreMostradoSafe}"
                   data-ejercicio="${keyAttr}" data-nombre="${nombreMostradoSafe}" data-unidad="${unidad}" value="${valorActual}" onclick="event.stopPropagation()" onchange="guardarMarcaEjercicio(this)">
                 <button type="button" class="peso-btn" onclick="event.stopPropagation();ajustarMarca(this,${paso},${min})" aria-label="Sumar">+</button>
                 <span class="peso-unit">${unidad === 's' ? 'seg' : 'reps'}</span>
@@ -14211,7 +14216,7 @@
     const VISIBLES = 3;
     const vista = orden.slice(0, VISIBLES), resto = orden.slice(VISIBLES);
     const masHTML = resto.length
-      ? `<details class="notas-mas"><summary style="cursor:pointer;color:var(--brasa);font-weight:600;margin-top:8px;font-size:12.5px">Ver ${resto.length} ${resto.length === 1 ? 'consejo más' : 'consejos más'}</summary>${resto.map(n => `· ${n}`).join('<br>')}</details>`
+      ? `<details class="notas-mas"><summary style="cursor:pointer;color: var(--brasa-txt);font-weight:600;margin-top:8px;font-size:12.5px">Ver ${resto.length} ${resto.length === 1 ? 'consejo más' : 'consejos más'}</summary>${resto.map(n => `· ${n}`).join('<br>')}</details>`
       : '';
     return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${vista.map(n => `· ${n}`).join('<br>')}${masHTML}</div>`;
   }
@@ -18095,7 +18100,8 @@
       const neutralizar = (txt) => txt
         .replace(/avena certificada sin gluten/gi, '·')
         .replace(/harina de (arroz|maíz|garbanzos?|almendra)/gi, '·')
-        .replace(/(tortitas?|fideos|galletas|tortilla|wrap|pan|tostas?|tostadas?) de (arroz|maíz)/gi, '·')
+        .replace(/(tortitas?|tortas?) de (arroz|maíz)( integral(es)?)? tostad[ao]s?/gi, '·')
+        .replace(/(tortitas?|tortas?|fideos|galletas|tortilla|wrap|pan|tostas?|tostadas?) de (arroz|maíz)/gi, '·')
         .replace(/[\wáéíóúñ]+(\s+[\wáéíóúñ]+)*?\s+sin gluten/gi, '·')
         .replace(/salsa de soja sin gluten \(tamari\)/gi, '·')
         .replace(/yogur de coco[^,]*/gi, '·')
@@ -19372,6 +19378,12 @@
             let co = _bajoCarbs ? buscar(_GRASA_D, pr.i) : (buscar(_CARB_D, pr.i) || buscar(_GRASA_D, pr.i));
             // Con "bajo en carbohidratos" el hidrato solo compensa si hay que QUITARLO.
             if (!co && _bajoCarbs && dif > 0) co = buscar(_CARB_D, pr.i);
+            // Las cantidades del texto y la etiqueta pueden llevar escalas distintas
+            // (la etiqueta se calibró aparte): solo se mueve proteína si la fuente
+            // principal aporta una parte coherente de la etiqueta, y nunca se deja
+            // un plato con menos de la mitad (ni con 0 g) de la proteína que tenía.
+            const aporte = pr.gr * pr.d[1];
+            if (aporte < 0.45 * p || aporte > 1.4 * p) return;
             const kP = _kpg(pr.d);
             let dx = dif / pr.d[1];
             dx = Math.max(pr.gr * 0.55 - pr.gr, Math.min(Math.min(pr.gr * 1.8, pr.d[4] || 600) - pr.gr, dx));
@@ -19407,7 +19419,9 @@
             // Si el redondeo de unidades descuadra más de un 10 % las kcal, no se toca.
             const dK = rdx * kP + rdy * (co ? _kpg(co.d) : 0);
             if (Math.abs(dK) > 0.1 * kcal) return;
-            p = Math.max(0, Math.round(p + rdx * pr.d[1] + (co ? rdy * co.d[1] : 0)));
+            const pNuevo = Math.round(p + rdx * pr.d[1] + (co ? rdy * co.d[1] : 0));
+            if (pNuevo < Math.max(6, 0.5 * p)) return;
+            p = pNuevo;
             c = Math.max(0, Math.round(c + rdx * pr.d[2] + (co ? rdy * co.d[2] : 0)));
             g = Math.max(0, Math.round(g + rdx * pr.d[3] + (co ? rdy * co.d[3] : 0)));
             const escribir = (sel, n) => {
@@ -19500,6 +19514,27 @@
       };
       nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => (m.opciones || []).forEach(_conciliar)));
       (nutricion || []).forEach(m => (m.opciones || []).forEach(_conciliar));
+      // Verdura: ningún plato lleva más de 450 g de una sola (600 g si es una
+      // crema o una sopa). Con 2-3 comidas al día un plato de crema de baja
+      // densidad se escalaba hasta 1,1 kg de calabacín. Aporta muy pocas kcal,
+      // así que la diferencia con la etiqueta es de unas decenas.
+      const _VERDURA = /^(calabac[ií]n|calabaza|br[oó]coli|coliflor|champi[ñn]ones?|setas|jud[ií]as verdes|espinacas|lechuga|pepino|tomate|pimientos?|berenjena|puerro|cebolla|zanahoria|coles? de bruselas|repollo|col|acelgas?|esp[aá]rragos?|apio|ensalada|verduras?|calabac[ií]n)\b/i;
+      // Lácteo (yogur, postre de soja, skyr...): 500 g como máximo (un plato de
+      // yogur de coco salía con 990 g en un día de 2 comidas).
+      const _LACTEO = /^(yogur|postre|skyr|k[eé]fir|queso batido|reques[oó]n|queso cottage|leche|bebida)/i;
+      const _topeVerdura = o => {
+        const tope = /crema|sopa|gazpacho|salmorejo|caldo/i.test(o.nombre || '') ? 600 : 450;
+        o.ingredientes = (o.ingredientes || '').split(',').map(x => {
+          const mm = x.match(/^(\s*)(\d+)(g|ml)(\s+)(.+)$/);
+          if (!mm) return x;
+          const limite = _LACTEO.test(mm[5]) ? 500 : _VERDURA.test(mm[5]) ? tope : 0;
+          return limite && +mm[2] > limite ? `${mm[1]}${limite}${mm[3]}${mm[4]}${mm[5]}` : x;
+        }).join(',');
+      };
+      const _topadas = new Set();
+      const _topar = o => { if (o && !_topadas.has(o)) { _topadas.add(o); _topeVerdura(o); } };
+      nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => (m.opciones || []).forEach(_topar)));
+      (nutricion || []).forEach(m => (m.opciones || []).forEach(_topar));
     }
     return { motorVersion: _huellaMotor(), bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
@@ -20327,7 +20362,7 @@
             <div class="macro-bar-row"><span class="macro-bar-label">Grasa</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(grasaNum/maxMacro*100)}%;background:#27ae60"></div></div><span class="macro-bar-val">${grasaNum}g</span></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
-            <span class="meal-opt-kcal" style="font-size:14px;color:var(--brasa);font-weight:600">${opt.kcal}</span>
+            <span class="meal-opt-kcal" style="font-size:14px;color: var(--brasa-txt);font-weight:600">${opt.kcal}</span>
             <span style="display:flex;align-items:center;gap:10px">
               <span style="font-size:11px;color:var(--metal)">⏱ ${opt.prep}</span>
               <button type="button" class="ejercicio-info-btn js-macros-btn" title="De dónde salen estos macros"
@@ -21635,12 +21670,12 @@
 
     const chips = NIV.map(nv => {
       const done = n >= nv.min;
-      return `<span title="${nv.premio}" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;border-radius:999px;padding:4px 11px;border:1px solid ${done ? 'var(--brasa)' : 'var(--humo)'};color:${done ? 'var(--brasa)' : 'var(--metal)'};${done ? 'background:rgba(209,66,14,0.10);' : ''}">${nv.nombre} · ${nv.min}</span>`;
+      return `<span title="${nv.premio}" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;border-radius:999px;padding:4px 11px;border:1px solid ${done ? 'var(--brasa)' : 'var(--humo)'};color:${done ? 'var(--brasa-txt)' : 'var(--metal)'};${done ? 'background:rgba(209,66,14,0.10);' : ''}">${nv.nombre} · ${nv.min}</span>`;
     }).join('');
 
     const botones = NIV.filter(nv => nv.pct && n >= nv.min).map(nv => {
       if (canjeados[nv.key]) {
-        return `<span style="font-size:12px;color:var(--brasa)">✓ ${nv.pct}% de tu cuota ya canjeado (nivel ${nv.nombre})</span>`;
+        return `<span style="font-size:12px;color: var(--brasa-txt)">✓ ${nv.pct}% de tu cuota ya canjeado (nivel ${nv.nombre})</span>`;
       }
       return `<button class="btn-primary" style="font-size:12px;padding:9px 16px" onclick="reclamarNivelHito('${nv.key}', this)">Canjear ${nv.pct}% de mi próxima cuota</button>`;
     }).join('<br>');
@@ -21655,7 +21690,7 @@
           <div style="text-align:right;font-size:12px;color:var(--metal)">
             ${siguiente
               ? `Siguiente nivel: <b style="color:var(--blanco)">${siguiente.nombre}</b> a los ${siguiente.min} hitos<br>${siguiente.premio}`
-              : `<span style="color:var(--brasa)">Nivel máximo alcanzado</span>`}
+              : `<span style="color: var(--brasa-txt)">Nivel máximo alcanzado</span>`}
           </div>
         </div>
         <div style="height:7px;border-radius:999px;background:rgba(255,255,255,0.07);margin:14px 0 12px;overflow:hidden"><div style="height:100%;width:${pctBar}%;background:var(--brasa)"></div></div>
@@ -22695,7 +22730,7 @@
     );
     if (!r) { box.style.display = 'none'; return; }
     box.style.display = 'block';
-    box.innerHTML = `<strong style="color:var(--brasa)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
+    box.innerHTML = `<strong style="color: var(--brasa-txt)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
       `Rodaje suave <strong>${r.facil}/km</strong> · Umbral <strong>${r.umbral}/km</strong> · Series <strong>${r.intervalos}/km</strong>`;
   }
 
@@ -22709,7 +22744,7 @@
     );
     if (!r) { box.style.display = 'none'; return; }
     box.style.display = 'block';
-    box.innerHTML = `<strong style="color:var(--brasa)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
+    box.innerHTML = `<strong style="color: var(--brasa-txt)">Tus ritmos (VDOT ${r.vdot})</strong><br>` +
       `Rodaje suave <strong>${r.facil}/km</strong> · Umbral <strong>${r.umbral}/km</strong> · Series <strong>${r.intervalos}/km</strong>`;
   }
 
@@ -24327,7 +24362,7 @@
       htmlCats += `
         <div style="margin-bottom:20px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--humo)">
-            <span style="display:inline-flex;color:var(--brasa)">${catIcons[cat] || catIconOtros}</span>
+            <span style="display:inline-flex;color: var(--brasa-txt)">${catIcons[cat] || catIconOtros}</span>
             <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--blanco)">${cat.toUpperCase()}</span>
             <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);margin-left:auto">${items.length}</span>
           </div>
@@ -24338,7 +24373,7 @@
                 <div style="color:var(--blanco);font-size:14px;font-weight:500">${i.nombre}</div>
               </div>
               <div style="text-align:right;flex-shrink:0">
-                <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--brasa);font-weight:700">${i.cant}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:13px;color: var(--brasa-txt);font-weight:700">${i.cant}</div>
               </div>
             </label>`).join('')}
         </div>`;
@@ -24363,7 +24398,7 @@
             <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--metal-claro)"><span style="font-weight:700;color:var(--blanco)">g/kg</span>&nbsp;peso</span>
             <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--metal-claro)"><span style="font-weight:700;color:var(--blanco)">ml/l</span>&nbsp;volumen</span>
             <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--metal-claro)"><span style="font-weight:700;color:var(--blanco)">c/n</span>&nbsp;cantidad necesaria</span>
-            <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--metal-claro)"><span style="font-weight:700;color:var(--brasa)">al gusto</span>&nbsp;condimento</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--metal-claro)"><span style="font-weight:700;color: var(--brasa-txt)">al gusto</span>&nbsp;condimento</span>
           </div>
         </div>
 
@@ -25276,10 +25311,10 @@
           aviso.id = 'emailConfirmAviso';
           aviso.style.cssText = 'background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center';
           aviso.innerHTML = `
-            <div style="font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:12px;color:var(--blanco)">K-<span style="color:var(--brasa)">ONE</span></div>
+            <div style="font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:12px;color:var(--blanco)">K-<span style="color: var(--brasa-txt)">ONE</span></div>
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <p style="margin:0 0 8px;font-weight:600;color:var(--blanco);font-size:15px">Revisa tu correo</p>
-            <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color:var(--brasa)">${_esc(email)}</strong></p>
+            <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color: var(--brasa-txt)">${_esc(email)}</strong></p>
             <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí.</p>
           `;
           loginCard.insertBefore(aviso, loginCard.children[2]);
@@ -25628,11 +25663,11 @@
     const resumenEl = document.getElementById('renovacionResumen');
     if (resumenEl) {
       resumenEl.innerHTML = `
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--brasa);letter-spacing:1px;margin-bottom:10px">RESUMEN DEL MES ANTERIOR</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color: var(--brasa-txt);letter-spacing:1px;margin-bottom:10px">RESUMEN DEL MES ANTERIOR</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div><div style="font-size:11px;color:var(--metal)">Entrenos</div><div style="font-size:20px;font-weight:700;color:#27ae60">${entrenosTotal}</div></div>
           <div><div style="font-size:11px;color:var(--metal)">Semana</div><div style="font-size:20px;font-weight:700;color:var(--blanco)">${semana}</div></div>
-          <div><div style="font-size:11px;color:var(--metal)">Racha</div><div style="font-size:20px;font-weight:700;color:var(--brasa)">${racha} días</div></div>
+          <div><div style="font-size:11px;color:var(--metal)">Racha</div><div style="font-size:20px;font-weight:700;color: var(--brasa-txt)">${racha} días</div></div>
           <div><div style="font-size:11px;color:var(--metal)">Peso último</div><div style="font-size:20px;font-weight:700;color:var(--blanco)">${pesoActual} kg</div></div>
         </div>`;
     }
@@ -27099,7 +27134,7 @@ Se coló: ${lista}`;
         avisoEl.style.display = '';
       } else if (_premiumOcultos > 0) {
         avisoEl.innerHTML = `${_premiumOcultos} cliente${_premiumOcultos === 1 ? '' : 's'} premium sin mostrar · `
-          + `<button onclick="filtrarAdminTipo('premium')" style="background:none;border:none;padding:0;color:var(--brasa);font:inherit;cursor:pointer;text-decoration:underline">ver</button>`;
+          + `<button onclick="filtrarAdminTipo('premium')" style="background:none;border:none;padding:0;color: var(--brasa-txt);font:inherit;cursor:pointer;text-decoration:underline">ver</button>`;
         avisoEl.style.display = '';
       } else {
         avisoEl.style.display = 'none';
@@ -29476,7 +29511,7 @@ Se coló: ${lista}`;
           <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:4px;color:var(--blanco)">
             Cambiar: ${data.nombre}
           </div>
-          <div style="font-size:11px;color:var(--brasa);font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
+          <div style="font-size:11px;color: var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
             // Elige una variante
           </div>
           <div style="display:flex;flex-direction:column;gap:8px" id="variants-${key}">
@@ -30088,7 +30123,7 @@ Se coló: ${lista}`;
         } else {
           txt.innerHTML = 'Instala K-ONE como app para acceder más rápido desde tu pantalla de inicio.';
           if (deferredPrompt) {
-            txt.innerHTML += ' <a onclick="window._pwaInstall()" style="color:#D1420E;cursor:pointer;font-weight:600;text-decoration:underline">Instalar ahora</a>';
+            txt.innerHTML += ' <a onclick="window._pwaInstall()" style="color:#F26A36;cursor:pointer;font-weight:600;text-decoration:underline">Instalar ahora</a>';
           } else {
             txt.innerHTML += ' Toca <strong style="color:#fff">⋮</strong> y luego <strong style="color:#fff">"Instalar app"</strong>.';
           }

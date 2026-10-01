@@ -314,6 +314,8 @@ desincronizados.length
     ['lactosa, yogur de coco y bebida de avena', { alergia: 'Lactosa' }, plan('Yogur de coco (sin lactosa) con fruta', '200g yogur de coco (sin lactosa), 200ml bebida de avena', 'Mezcla el yogur de coco con la fruta.'), false],
     ['sin lactosa, leche suelta en los pasos', { dieta: 'Sin lactosa' }, plan('Batido de caseína', '200ml leche sin lactosa, proteína aislada de suero (sin lactosa)', 'Mete la leche en la batidora. Bate 30 segundos. Añade la proteína aislada de suero (sin lactosa).'), true],
     ['gluten, pan sin gluten de centeno', { alergia: 'Gluten' }, plan('Tostada', '2 rebanadas de pan sin gluten', 'Tuesta el pan sin gluten de centeno. Añade tomate.'), true],
+    ['gluten, tortas de arroz "tostadas" (adjetivo, no pan)', { alergia: 'Gluten' }, plan('Tortilla de huevos con tortas de arroz', '3 huevos, 2 tortas de arroz', 'Cuaja la tortilla. Sirve con las tortas de arroz tostadas.'), false],
+    ['gluten, tostadas de pan de verdad', { alergia: 'Gluten' }, plan('Tortilla con tostadas', '3 huevos, 2 tostadas', 'Sirve con las tostadas.'), true],
     ['gluten, bocadillo con panecillo sin gluten', { alergia: 'Gluten' }, plan('Mini bocadillo de jamón con tomate', '1 panecillo sin gluten, 30g jamón, tomate', 'Abre el panecillo sin gluten y rellena.'), false],
     ['gluten, bocadillo con pan normal', { alergia: 'Gluten' }, plan('Bocadillo de jamón', '1 barra de pan, 30g jamón', 'Abre el pan.'), true],
     ['sin gluten, patatas panadera', { dieta: 'Sin gluten' }, plan('Merluza con patatas panadera', '200g merluza, 200g patata panadera', 'Hornea las patatas panadera 20 min.'), false],
