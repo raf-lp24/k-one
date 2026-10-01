@@ -1069,49 +1069,91 @@
     stroke-width: 2.4;
   }
 
+  /* RECUADRO "OFERTA DEL MES" (rediseño 1 oct 2026). Antes: un rectángulo de 550 px
+     con "GRATIS" enorme y "Solo el primer mes" flotando en medio, sin nada que dijera
+     que se puede pulsar. Ahora es una tarjeta compacta con el lenguaje de la web:
+     etiqueta en DM Mono con punto, la oferta en Bebas, el precio de después en
+     pequeño y una flecha en círculo naranja como el resto de botones. */
   .hero-price {
     display: inline-flex;
     align-items: center;
-    gap: 16px;
-    padding: 24px 44px;
-    background: rgba(209,66,14,0.08);
-    border: 2px solid var(--brasa);
-    border-radius: 6px;
+    gap: 20px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 16px 16px 16px 22px;
+    background: linear-gradient(135deg, rgba(209,66,14,0.16), rgba(209,66,14,0.04) 65%);
+    border: 1px solid rgba(209,66,14,0.45);
+    border-radius: 14px;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
-
   .hero-price:hover,
   .hero-price:focus-visible {
-    background: rgba(209,66,14,0.18);
+    border-color: var(--brasa-txt);
     transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(209,66,14,0.28);
+    box-shadow: 0 12px 30px rgba(209,66,14,0.22);
     outline: none;
   }
-
-  /* En pantallas de 320-360 px el recuadro (44 px de relleno a cada lado) se salía
-     10 px por la derecha. */
-  @media (max-width: 380px) {
-    .hero-price { padding: 20px 26px; gap: 12px; max-width: 100%; box-sizing: border-box; }
+  .hero-price:focus-visible { box-shadow: 0 0 0 3px rgba(242,106,54,0.45), 0 12px 30px rgba(209,66,14,0.22); }
+  .hero-price-txt { display: flex; flex-direction: column; min-width: 0; }
+  .hero-price-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--brasa-txt);
+    margin-bottom: 6px;
+  }
+  .hero-price-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--brasa-txt);
+    box-shadow: 0 0 0 4px rgba(242,106,54,0.18);
+    flex-shrink: 0;
   }
   .hero-price-main {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(64px, 11vw, 92px);
-    line-height: 1;
+    font-size: clamp(34px, 4.2vw, 44px);
+    line-height: 0.95;
     letter-spacing: 1px;
-    color: var(--brasa-txt);
+    color: var(--blanco-puro);
     white-space: nowrap;
   }
-
-  .hero-price-label {
-    display: block;
+  .hero-price-main b { color: var(--brasa-txt); font-weight: 400; }
+  .hero-price-sub {
+    margin-top: 7px;
     font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--blanco);
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    color: var(--metal-claro);
+  }
+  .hero-price-arrow {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--brasa);
+    color: #fff;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+  .hero-price-arrow svg { width: 20px; height: 20px; }
+  .hero-price:hover .hero-price-arrow { transform: translateX(3px); }
+  @media (max-width: 520px) {
+    .hero-price { width: 100%; justify-content: space-between; gap: 14px; padding: 14px 14px 14px 18px; }
+    .hero-price-main { font-size: 36px; }
+    .hero-price-sub { font-size: 11px; }
+    .hero-price-arrow { width: 42px; height: 42px; }
+  }
+  @media (max-width: 360px) {
+    .hero-price { gap: 10px; padding: 14px 12px 14px 16px; }
+    .hero-price-main { font-size: 30px; }
+    .hero-price-arrow { width: 38px; height: 38px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-price, .hero-price-arrow { transition: none; }
+    .hero-price:hover, .hero-price:hover .hero-price-arrow { transform: none; }
   }
 
   .hero-visual {
@@ -7513,8 +7555,14 @@
              "bienvenida" (con la opción de "ya tengo cuenta") que sí usan
              todos los demás. Ambas cosas corregidas. -->
         <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes gratis. Crear cuenta nueva" onclick="goTo('bienvenida')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('bienvenida');}">
-          <div class="hero-price-main"><span class="hero-price-label">Oferta del mes</span>Gratis</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--metal-claro);margin-top:2px">Solo el primer mes</div>
+          <div class="hero-price-txt">
+            <span class="hero-price-label"><span class="hero-price-dot" aria-hidden="true"></span>Oferta del mes</span>
+            <span class="hero-price-main">Primer mes <b>gratis</b></span>
+            <span class="hero-price-sub">Después, desde <span data-kp="nutricion">4,99€</span>/mes</span>
+          </div>
+          <span class="hero-price-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </span>
         </div>
       </div>
       <div class="hero-trust">
