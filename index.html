@@ -6477,12 +6477,12 @@
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="welcome-title">
-      ¿Es tu primera<br>
-      <em>vez aquí?</em>
+      Tu plan en<br>
+      <em>3 minutos</em>
     </h2>
-    <p class="welcome-sub">Tu proceso empieza con una decisión. Crear una cuenta te lleva menos de dos minutos.</p>
+    <p class="welcome-sub">Responde unas preguntas sobre ti y te enseñamos tu plan. La cuenta la creas al final, solo si te convence.</p>
     <div class="welcome-btns">
-      <button class="btn-primary" onclick="goTo('registro')">Crear cuenta nueva</button>
+      <button class="btn-primary" onclick="empezarCuestionario()">Empezar el cuestionario</button>
       <div class="welcome-divider"><span>o</span></div>
       <button class="btn-ghost" onclick="goTo('login')">Ya tengo cuenta · Entrar</button>
     </div>
@@ -6496,8 +6496,10 @@
   <div class="auth-texture"></div>
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
-    <h2 class="auth-title">Crear cuenta</h2>
-    <p class="auth-subtitle">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
+    <h2 class="auth-title" id="registroTitulo">Crear cuenta</h2>
+    <p class="auth-subtitle" id="registroSubtitulo">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
+    <!-- Con el cuestionario hecho como invitado: su adelanto y para qué es la cuenta. -->
+    <div id="registroPlanListo" style="display:none"></div>
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
@@ -6590,7 +6592,8 @@
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Bienvenido/a</h2>
-    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('registro')">Créala aquí →</a></p>
+    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="empezarCuestionario()">Haz tu plan aquí →</a></p>
+    <p id="loginPlanPendiente" style="display:none;margin:-6px 0 18px;font-size:12px;line-height:1.5;color:var(--metal-claro);background:rgba(209,66,14,0.08);border:1px solid rgba(209,66,14,0.35);border-radius:10px;padding:10px 12px">Tienes un plan recién hecho en este dispositivo. Si tu cuenta todavía no tiene plan, se lo guardamos al entrar.</p>
 
     <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
     <div class="auth-field">
@@ -8434,6 +8437,7 @@
           <div class="form-block-tag">Bloque 01</div>
           <h2 class="form-block-title">Tu cuerpo</h2>
           <p class="form-block-desc">Empezamos con lo básico. Sin esto no hay plan posible.</p>
+          <p id="formNotaInvitado" style="display:none;margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--metal)">No hace falta cuenta para empezar. Tus respuestas se quedan en este dispositivo hasta que decidas guardar tu plan.</p>
         </div>
         <div class="form-grid">
           <div class="field">
@@ -9840,6 +9844,7 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     window.scrollTo(0,0);
+    if (screenId === 'registro' || screenId === 'login') { try { _pintarPlanPendiente(); } catch (e) {} }
     const btnVolver = document.getElementById('btnVolverDashboard');
     if (btnVolver) {
       const user = getCurrentUser();
@@ -10408,7 +10413,9 @@
     goTo('formulario');
     updateProgress();
     history.pushState({ screen: 'formulario', block: 0 }, '', '');
-    kEvento('quiz_inicio');
+    const _notaInv = document.getElementById('formNotaInvitado');
+    if (_notaInv) _notaInv.style.display = getCurrentUser() ? 'none' : '';
+    kEvento('quiz_inicio', { invitado: getCurrentUser() ? 'no' : 'si' });
   }
 
   function goToBlock(target) {
@@ -10654,6 +10661,14 @@
       const user = getCurrentUser();
       if (user) {
         saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+      } else {
+        // CUESTIONARIO ANTES DE LA CUENTA (1 oct 2026): quien lo hace sin cuenta
+        // no entra al panel (sería el plan entero sin pagar). Se guarda en este
+        // dispositivo y se le lleva a crear la cuenta con el adelanto delante.
+        _guardarPlanPendiente(userData, generatedPlan);
+        kEvento('plan_invitado', { tipo: esSoloDieta() ? 'solo_nutricion' : 'completo' });
+        goTo('registro');
+        return;
       }
 
       // El paywall se comprobaba DESPUÉS de construir el dashboard entero
@@ -25312,8 +25327,14 @@
 
     if (!ok) return;
 
+    // Si ya hizo el cuestionario, sus respuestas van con el alta: si confirma el
+    // email en otro navegador (o en el de la app de correo), _entrarTrasAutenticar()
+    // las recupera de ahí y rehace el plan. Se borran de los metadatos al guardarlo.
+    const _pend = _leerPlanPendiente();
+    const _metaAlta = { nombre };
+    if (_pend && _pend.userData) _metaAlta.cuestionario = _pend.userData;
     const { data, error } = await supa.auth.signUp({
-      email, password: pass, options: { data: { nombre }, emailRedirectTo: window.location.origin }
+      email, password: pass, options: { data: _metaAlta, emailRedirectTo: window.location.origin }
     });
 
     if (error) {
@@ -25385,6 +25406,7 @@
             <p style="margin:0 0 8px;font-weight:600;color:var(--blanco);font-size:15px">Revisa tu correo</p>
             <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color: var(--brasa-txt)">${_esc(email)}</strong></p>
             <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí. Si no lo ves, mira también en <strong style="color:var(--metal-claro)">spam o promociones</strong>.</p>
+            ${_pend ? '<p style="margin:10px 0 0;color:var(--metal-claro);font-size:12px">Tu plan queda guardado: al confirmar y entrar lo tendrás listo, sin repetir el cuestionario.</p>' : ''}
             <button type="button" id="btnReenviarConfirmacion" onclick="reenviarConfirmacion(${JSON.stringify(email).replace(/"/g, '&quot;')})" style="margin-top:14px;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:12px;cursor:pointer;padding:10px 16px">No me ha llegado: reenviar el correo</button>
           `;
           loginCard.insertBefore(aviso, loginCard.children[2]);
@@ -25417,8 +25439,8 @@
     }
     showToast('Cuenta creada. Bienvenido/a a K-One.');
 
-    // Un usuario recién registrado nunca tiene datos previos: al cuestionario.
-    enterFormulario();
+    // Si ya hizo el cuestionario, se guarda su plan; si no, al cuestionario.
+    await _entrarTrasAutenticar(data.user);
   }
 
   // ===== CUENTA DE TEST (solo desarrollo local) =====
@@ -25550,13 +25572,8 @@
     document.getElementById('login-pass').value = '';
 
     try {
-      const existingData = getUserData(email);
-      if (existingData && existingData.plan) {
-        loadUserDashboard(email);
-        goTo('dashboard');
-      } else {
-        enterFormulario();
-      }
+      const { data: { session: _sesLogin } } = await supa.auth.getSession();
+      await _entrarTrasAutenticar(_sesLogin && _sesLogin.user);
     } catch (e) {
       console.error('Error cargando datos tras login:', e);
       enterFormulario();
@@ -26245,9 +26262,16 @@ Se coló: ${lista}`;
     let plan = (typeof generatedPlan !== 'undefined' && generatedPlan) || null;
     if (!plan) { const u = getCurrentUser(); plan = (u && getUserData(u.email)?.plan) || null; }
     if (!plan || !(plan.kcalObj > 0)) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.innerHTML = '<div style="background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:14px 14px 12px;margin:14px 0 4px">' + _htmlAdelantoPlan(plan, 'UN ADELANTO DE TU PLAN') + '</div>';
+    box.style.display = 'block';
+  }
+
+  // Lo que se enseña del plan antes de tener acceso: cifras, primera sesión y tres
+  // comidas. Lo usan el paywall y la pantalla de registro tras el cuestionario.
+  function _htmlAdelantoPlan(plan, etiqueta) {
     const chip = (valor, texto) => `<div style="flex:1 1 76px;background:var(--grafito);border:1px solid var(--humo);border-radius:10px;padding:8px 6px;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:var(--blanco-puro)">${_esc(valor)}</div><div style="font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--metal);margin-top:3px">${_esc(texto)}</div></div>`;
     const sesiones = Array.isArray(plan.semana) && !plan.soloDieta ? plan.semana.filter(d => /entren/i.test(d.tipo || '')) : [];
-    let html = `<div style="font-size:11px;color:var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:1.5px;margin:2px 0 8px">UN ADELANTO DE TU PLAN</div>
+    let html = `<div style="font-size:11px;color:var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:1.5px;margin:2px 0 8px">${_esc(etiqueta)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">${chip(plan.kcalObj, 'kcal al día')}${plan.protObj ? chip(plan.protObj + ' g', 'proteína') : ''}${sesiones.length ? chip(sesiones.length, sesiones.length === 1 ? 'sesión / semana' : 'sesiones / semana') : ''}</div>`;
     if (sesiones[0] && sesiones[0].resumen) {
       html += `<div style="font-size:13px;color:var(--metal-claro);margin-bottom:8px"><span style="color:var(--blanco)">Tu primera sesión:</span> ${_esc(sesiones[0].dia || '')} · ${_esc(sesiones[0].resumen)}</div>`;
@@ -26258,8 +26282,106 @@ Se coló: ${lista}`;
       html += `<div style="font-size:13px;color:var(--blanco);margin-bottom:4px">Un día de tus comidas:</div><ul style="list-style:none;margin:0 0 8px;padding:0">${muestra.map(t => `<li style="font-size:12.5px;color:var(--metal-claro);padding:3px 0;display:flex;gap:8px;justify-content:space-between"><span><span style="color:var(--blanco)">${_esc(t.momento)}</span> · ${_esc(t.opciones[0].nombre)}</span><span style="white-space:nowrap;color:var(--metal)">${_esc(t.opciones[0].kcal || '')}</span></li>`).join('')}</ul>`;
     }
     html += `<p style="font-size:11.5px;color:var(--metal);line-height:1.5;margin:0">Es solo una muestra: dentro tienes los 7 días completos${plan.soloDieta ? '' : ', cada ejercicio explicado'}, 5 opciones por comida y la lista de la compra.</p>`;
-    box.innerHTML = `<div style="background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:14px 14px 12px;margin:14px 0 4px">${html}</div>`;
-    box.style.display = 'block';
+    return html;
+  }
+
+  // ===== CUESTIONARIO ANTES DE LA CUENTA (1 oct 2026) =====
+  // Antes había que crear la cuenta (y confirmar el email) para poder empezar el
+  // cuestionario. Ahora se responde sin cuenta, se ve el adelanto del plan y la
+  // cuenta se pide al final, para guardarlo. Entre medias el plan vive en este
+  // dispositivo (y sus respuestas, en los metadatos del alta: ver registrar()).
+  const CLAVE_PLAN_PENDIENTE = 'kone_plan_pendiente';
+  const CADUCIDAD_PLAN_PENDIENTE = 14 * 24 * 3600 * 1000;
+
+  function _guardarPlanPendiente(ud, plan) {
+    try { localStorage.setItem(CLAVE_PLAN_PENDIENTE, JSON.stringify({ userData: ud, plan, creado: Date.now() })); } catch (e) {}
+  }
+  function _leerPlanPendiente() {
+    try {
+      const p = JSON.parse(localStorage.getItem(CLAVE_PLAN_PENDIENTE) || 'null');
+      if (!p || !p.userData || typeof p.userData !== 'object') return null;
+      if (!p.creado || Date.now() - p.creado > CADUCIDAD_PLAN_PENDIENTE) { _borrarPlanPendiente(); return null; }
+      return p;
+    } catch (e) { return null; }
+  }
+  function _borrarPlanPendiente() {
+    try { localStorage.removeItem(CLAVE_PLAN_PENDIENTE); } catch (e) {}
+  }
+
+  function empezarCuestionario() {
+    const u = getCurrentUser();
+    if (u && _supaUserId) {
+      const g = getUserData(u.email);
+      if (g && g.plan) { loadUserDashboard(u.email); goTo('dashboard'); return; }
+      enterFormulario();
+      return;
+    }
+    // Ya lo hizo en este dispositivo: a guardarlo (con opción de rehacerlo).
+    if (_leerPlanPendiente()) { goTo('registro'); return; }
+    enterFormulario();
+  }
+
+  function rehacerCuestionario() {
+    _borrarPlanPendiente();
+    enterFormulario();
+  }
+
+  function _pintarPlanPendiente() {
+    const p = _leerPlanPendiente();
+    const caja = document.getElementById('registroPlanListo');
+    const titulo = document.getElementById('registroTitulo');
+    const sub = document.getElementById('registroSubtitulo');
+    const avisoLogin = document.getElementById('loginPlanPendiente');
+    if (avisoLogin) avisoLogin.style.display = p ? '' : 'none';
+    if (!caja) return;
+    if (!p || !p.plan || !(p.plan.kcalObj > 0)) {
+      caja.style.display = 'none'; caja.innerHTML = '';
+      if (titulo) titulo.textContent = 'Crear cuenta';
+      if (sub) sub.innerHTML = '¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra aquí →</a>';
+      return;
+    }
+    if (titulo) titulo.textContent = 'Tu plan está listo';
+    if (sub) sub.innerHTML = 'Crea tu cuenta para guardarlo y empezar tu primer mes gratis. ¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra →</a>';
+    caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(209,66,14,0.4);border-radius:12px;padding:14px 14px 12px;margin:0 0 20px;text-align:left">'
+      + _htmlAdelantoPlan(p.plan, 'TU PLAN, CON TUS RESPUESTAS')
+      + '<button type="button" onclick="rehacerCuestionario()" style="margin-top:10px;background:none;border:none;padding:4px 0;color:var(--metal);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Rehacer el cuestionario</button></div>';
+    caja.style.display = 'block';
+  }
+
+  // Tras crear la cuenta o entrar: si la cuenta ya tiene plan, ese manda (no se
+  // pisa con uno hecho como invitado). Si no lo tiene y hay uno pendiente (en este
+  // dispositivo o en los metadatos del alta), se guarda en la cuenta y se abre;
+  // el muro de pago sale como siempre. Si no hay nada, al cuestionario.
+  async function _entrarTrasAutenticar(authUser) {
+    const user = getCurrentUser();
+    if (!user) { goTo('landing'); return; }
+    const email = user.email;
+    const guardado = getUserData(email);
+    const pend = _leerPlanPendiente();
+    const meta = authUser && authUser.user_metadata && authUser.user_metadata.cuestionario;
+    const limpiarMeta = () => { if (meta) { try { supa.auth.updateUser({ data: { cuestionario: null } }).catch(() => {}); } catch (e) {} } };
+    if (guardado && guardado.plan) {
+      _borrarPlanPendiente(); limpiarMeta();
+      loadUserDashboard(email);
+      goTo('dashboard');
+      return;
+    }
+    let cuest = pend && pend.userData;
+    let plan = pend && pend.plan;
+    if (!cuest && meta && typeof meta === 'object') { cuest = meta; plan = null; }
+    if (!cuest) { enterFormulario(); return; }
+    userData = cuest;
+    if (!plan) {
+      try { plan = buildPlanFromData(userData); } catch (e) { console.error('[plan-pendiente] no se pudo rehacer:', e); enterFormulario(); return; }
+    }
+    generatedPlan = plan;
+    await saveUserData(email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    _borrarPlanPendiente(); limpiarMeta();
+    kEvento('plan_guardado_cuenta');
+    loadUserDashboard(email);
+    goTo('dashboard');
+    if (tieneAccesoActivo(email) && !userData.onboardingCompletado && !userData._planRegenerado) startOnboarding();
+    userData._planRegenerado = true;
   }
 
   function _mostrarPaywallInner(modal, user) {
@@ -30464,7 +30586,7 @@ Se coló: ${lista}`;
           loadUserDashboard(user.email);
           goTo('dashboard');
         } else {
-          enterFormulario();
+          await _entrarTrasAutenticar(session && session.user);
         }
       } catch (e) {
         console.error('Error cargando dashboard:', e);
@@ -30474,7 +30596,9 @@ Se coló: ${lista}`;
       const goParam = new URLSearchParams(window.location.search).get('go');
       if (goParam === 'registro') {
         window.history.replaceState({}, '', window.location.pathname);
-        goTo('registro');
+        // Los enlaces de las páginas de deporte y de los emails llevan aquí:
+        // ahora el alta empieza por el cuestionario, no por la cuenta.
+        goTo('bienvenida');
       } else {
         goTo('landing');
       }
