@@ -171,7 +171,7 @@
         {
           "@type": "Question",
           "name": "¿Mis datos están seguros?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento." }
         },
         {
           "@type": "Question",
@@ -337,185 +337,6 @@
     --blanco: #F0EDE8;
     --blanco-puro: #FFFFFF;
   }
-  [data-theme="light"] {
-    --negro: #F8F6F3;
-    --carbon: #FFFFFF;
-    --grafito: #F0ECE6;
-    --acero: #EDE9E3;
-    --metal: #5A5A5A;
-    /* #777 daba 4.48:1 sobre --carbon y solo 4.39:1 sobre --negro (#F8F6F3), por debajo
-       del mínimo AA (4.5:1) para texto normal -- se usa en más de 50 sitios como texto
-       secundario a 11-13px, ninguno llega al umbral de "texto grande". #6E6E6E da 4.72:1
-       y 5.10:1 respectivamente. */
-    --metal-claro: #6E6E6E;
-    --humo: #E0DCD5;
-    --blanco: #1A1A1A;
-    --blanco-puro: #111111;
-  }
-
-  /* ══════ MODO CLARO ══════ */
-  /* Paleta: fondo crema #F8F6F3, cards #FFF, texto #1A1A1A, secundario #5A5A5A, bordes #E0DCD5, acento #D1420E */
-
-  /* 1. NUCLEAR: todo texto negro, todo borde suave, todo fondo inline → blanco */
-  [data-theme="light"] * { color: #1A1A1A !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] *[style] { background: #FFF !important; }
-  [data-theme="light"] [style*="background:#D1420E"] { background: #D1420E !important; }
-  [data-theme="light"] [style*="background:#27ae60"] { background: #27ae60 !important; }
-  [data-theme="light"] [style*="background:#e74c3c"] { background: #e74c3c !important; }
-  [data-theme="light"] [style*="background:#151515"] { background: #F0ECE6 !important; }
-  [data-theme="light"] [style*="background:#D1420E"] * { color: #FFF !important; }
-  [data-theme="light"] [style*="background:#27ae60"] * { color: #FFF !important; }
-  [data-theme="light"] [style*="background:#e74c3c"] * { color: #FFF !important; }
-  [data-theme="light"] [style*="background:linear-gradient(135deg,#D1420E"] { background: linear-gradient(135deg,#D1420E,#ff6b2b) !important; }
-  [data-theme="light"] [style*="background:rgba(209,66,14"] { background-color: rgba(209,66,14,0.06) !important; }
-  [data-theme="light"] [style*="background:rgba(39,174,96"] { background-color: rgba(39,174,96,0.06) !important; }
-  [data-theme="light"] [style*="background:#151515"] { background-color: #F0ECE6 !important; }
-
-  /* 2. FONDOS principales */
-  [data-theme="light"], [data-theme="light"] body { background: #F8F6F3 !important; }
-  [data-theme="light"] .dash-sidebar { background: #FFF !important; border-right: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .dash-section, [data-theme="light"] .dash-main { background: #F8F6F3 !important; }
-  [data-theme="light"] .dash-header, [data-theme="light"] .motivation-card { background: #FFF !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .stat-card { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .nav { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .hero { background: #F8F6F3 !important; }
-  [data-theme="light"] footer { background: #EDE9E3 !important; }
-  [data-theme="light"] #modalAdmin { background: #F8F6F3 !important; }
-
-  /* 3. CARDS y bloques */
-  [data-theme="light"] .price-card, [data-theme="light"] .pillar-card,
-  [data-theme="light"] .meal-block, [data-theme="light"] .meal-option,
-  [data-theme="light"] .checkin-card, [data-theme="light"] .modal-box,
-  [data-theme="light"] .notes-form, [data-theme="light"] .week-day-row,
-  [data-theme="light"] .notes-empty { background: #FFF !important; border-color: #E0DCD5 !important; }
-
-  /* 4. INPUTS */
-  [data-theme="light"] input, [data-theme="light"] textarea, [data-theme="light"] select { background: #FFF !important; border-color: #D5D0C8 !important; color: #1A1A1A !important; }
-  [data-theme="light"] input::placeholder, [data-theme="light"] textarea::placeholder { color: #AAA !important; }
-
-  /* 5. BOTONES — naranja y verde mantienen texto blanco */
-  [data-theme="light"] .btn-primary { background: #D1420E !important; color: #FFF !important; border-color: #D1420E !important; }
-  [data-theme="light"] .btn-completado { background: #27ae60 !important; color: #FFF !important; border-color: #27ae60 !important; }
-  [data-theme="light"] .btn-ghost { background: transparent !important; border-color: #D5D0C8 !important; color: #5A5A5A !important; }
-  [data-theme="light"] .btn-ghost:hover { background: #F0ECE6 !important; }
-  /* Jarvis mantiene su superficie oscura también en tema claro: es el panel
-     interno del negocio, con paleta propia (ver bloque JARVIS más abajo), no
-     una pantalla de cliente. Por eso aquí no hay overrides de tema claro. */
-  [data-theme="light"] button[style*="background:#D1420E"], [data-theme="light"] button[style*="background:#27ae60"] { color: #FFF !important; }
-
-  /* 6. SIDEBAR nav */
-  [data-theme="light"] .dash-nav-item { color: #5A5A5A !important; }
-  [data-theme="light"] .dash-nav-item:hover { background: #F0ECE6 !important; color: #1A1A1A !important; }
-  [data-theme="light"] .dash-nav-item.active { background: rgba(209,66,14,0.08) !important; }
-  [data-theme="light"] .dash-nav-item.active, [data-theme="light"] .dash-nav-item.active * { color: #D1420E !important; }
-  [data-theme="light"] .dash-user { background: #F8F6F3 !important; border: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .logout-btn { color: #5A5A5A !important; }
-  [data-theme="light"] .logout-btn:hover { background: #F0ECE6 !important; }
-
-  /* 7. ACENTOS de marca — preservar colores */
-  [data-theme="light"] .motivation-label, [data-theme="light"] .dash-greeting { color: #D1420E !important; }
-  [data-theme="light"] [style*="color:#D1420E"] { color: #D1420E !important; }
-  [data-theme="light"] [style*="color:#27ae60"] { color: #27ae60 !important; }
-  [data-theme="light"] [style*="color:#e74c3c"] { color: #e74c3c !important; }
-  [data-theme="light"] [style*="color:#f39c12"] { color: #f39c12 !important; }
-  [data-theme="light"] .logo { color: #1A1A1A !important; }
-  [data-theme="light"] .logo span, [data-theme="light"] .logo .brasa { color: #D1420E !important; }
-  [data-theme="light"] .auth-logo { color: #1A1A1A !important; }
-  [data-theme="light"] .auth-logo span { color: #D1420E !important; }
-
-  /* 8. ELEMENTOS interactivos con estado */
-  [data-theme="light"] .radio-opt { background: #F5F2EE !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .radio-opt.selected { border-color: #D1420E !important; background: rgba(209,66,14,0.06) !important; }
-  [data-theme="light"] .week-tab, [data-theme="light"] .nutri-dia,
-  [data-theme="light"] .meal-preview-pill, [data-theme="light"] .rating-btn,
-  [data-theme="light"] .fotos-nav-btn, [data-theme="light"] .contacto-motivo { background: #F0ECE6 !important; color: #5A5A5A !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .week-tab.active, [data-theme="light"] .nutri-dia.active,
-  [data-theme="light"] .meal-preview-pill.selected, [data-theme="light"] .rating-btn.selected,
-  [data-theme="light"] .fotos-nav-btn.active, [data-theme="light"] .contacto-motivo.selected { background: #D1420E !important; border-color: #D1420E !important; }
-  [data-theme="light"] .week-tab.active *, [data-theme="light"] .nutri-dia.active *,
-  [data-theme="light"] .meal-preview-pill.selected *, [data-theme="light"] .rating-btn.selected *,
-  [data-theme="light"] .fotos-nav-btn.active *, [data-theme="light"] .contacto-motivo.selected * { color: #FFF !important; }
-  [data-theme="light"] .meal-option.selected { border-color: #D1420E !important; background: rgba(209,66,14,0.04) !important; }
-
-  /* 9. OTROS */
-  [data-theme="light"] .photo-slot { background: #F0ECE6 !important; border: 1px dashed #D5D0C8 !important; }
-  [data-theme="light"] .milestone { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] .entreno-completado-badge { background: rgba(39,174,96,0.08) !important; }
-  [data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.35) !important; }
-  [data-theme="light"] #toast { background: #1A1A1A !important; }
-  [data-theme="light"] #toast * { color: #FFF !important; }
-  [data-theme="light"] #cookieBanner { background: #1A1A1A !important; }
-  [data-theme="light"] #cookieBanner * { color: #FFF !important; }
-  [data-theme="light"] .ejercicio-check { background: #FFF !important; }
-  [data-theme="light"] .section-title, [data-theme="light"] .hero-title { color: #1A1A1A !important; }
-  [data-theme="light"] .faq-q { color: #1A1A1A !important; }
-  [data-theme="light"] .faq-a { color: #5A5A5A !important; }
-  [data-theme="light"] .mobile-menu { background: #FFF !important; }
-  [data-theme="light"] #kcalDiarioBar { background: #FFF !important; border: 1px solid #E0DCD5 !important; }
-  [data-theme="light"] #kcalDiarioFill { background: #D1420E !important; }
-  [data-theme="light"] .nutri-resumen-label { color: #D1420E !important; }
-  [data-theme="light"] .stat-card-label { color: #5A5A5A !important; }
-  [data-theme="light"] .nutri-dia:hover { background: #E0DCD5 !important; }
-  [data-theme="light"] .nutri-dia.selected { background: #D1420E !important; border-color: #D1420E !important; }
-  [data-theme="light"] .nutri-dia.selected * { color: #FFF !important; }
-  [data-theme="light"] .nutri-dia.has-selection { border-color: #D1420E !important; }
-  [data-theme="light"] .peso-btn, [data-theme="light"] .stepper-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
-  [data-theme="light"] .peso-btn:hover, [data-theme="light"] .stepper-btn:hover { background: #D5D0C8 !important; }
-  [data-theme="light"] .peso-input, [data-theme="light"] .stepper-input { background: #FFF !important; color: #1A1A1A !important; }
-  [data-theme="light"] .cp-peso-btn { background: #E8E8E8 !important; color: #1A1A1A !important; border-color: #D0D0D0 !important; }
-  [data-theme="light"] .cp-peso-btn:hover { background: #D5D0C8 !important; }
-  [data-theme="light"] .macro-bar-track { background: #E0DCD5 !important; }
-  [data-theme="light"] .macro-bar-fill { background-color: inherit !important; }
-  [data-theme="light"] .macro-bar-fill[style*="background:var(--brasa)"] { background: #D1420E !important; }
-  [data-theme="light"] .macro-bar-fill[style*="background:#f0a500"] { background: #f0a500 !important; }
-  [data-theme="light"] .macro-bar-fill[style*="background:#27ae60"] { background: #27ae60 !important; }
-  [data-theme="light"] #modalAdmin button[style*="background:#D1420E"] { background: #D1420E !important; color: #FFF !important; }
-  [data-theme="light"] #modalAdmin button[style*="Cerrar"],
-  [data-theme="light"] #modalAdmin button:last-child { background: revert !important; }
-  [data-theme="light"] .meal-block-header:hover { background: #F0ECE6 !important; }
-  [data-theme="light"] .meal-option:hover { background: #F8F6F3 !important; transform: translateY(-1px); }
-  [data-theme="light"] .meal-preview-pill:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .week-day-row:hover { background: #F8F6F3 !important; }
-  [data-theme="light"] .radio-opt:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .contacto-motivo:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .rating-btn:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .week-tab:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .pillar-card:hover { background: #F8F6F3 !important; }
-  [data-theme="light"] .sport-card:hover { background: #F8F6F3 !important; }
-  [data-theme="light"] .photo-slot:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .fotos-nav-btn:hover { background: #EDE9E3 !important; }
-  [data-theme="light"] .dash-nav-item:hover { background: #F0ECE6 !important; }
-
-  /* 10. MOBILE — barra superior, sidebar, auth, formulario, scrollbar */
-  [data-theme="light"] .dash-mobile-bar { background: #FFF !important; border-bottom-color: #E0DCD5 !important; }
-  [data-theme="light"] .dash-menu-btn { border-color: #D5D0C8 !important; color: #1A1A1A !important; }
-  [data-theme="light"] .dash-overlay.open { background: rgba(0,0,0,0.2) !important; }
-  [data-theme="light"] .auth-bg { background: radial-gradient(ellipse 50% 60% at 20% 50%, rgba(209,66,14,0.06) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 80% 20%, rgba(209,66,14,0.04) 0%, transparent 60%) !important; }
-  [data-theme="light"] .auth-texture { background-image: none !important; }
-  [data-theme="light"] #bienvenida, [data-theme="light"] #registro, [data-theme="light"] #login { background: #F8F6F3 !important; }
-  [data-theme="light"] .auth-card input { background: #FFF !important; border-color: #D5D0C8 !important; color: #1A1A1A !important; }
-  [data-theme="light"] .auth-card label, [data-theme="light"] .auth-card p { color: #5A5A5A !important; }
-  [data-theme="light"] .auth-card a { color: #D1420E !important; }
-  [data-theme="light"] .form-nav { background: #FFF !important; border-top-color: #E0DCD5 !important; }
-  [data-theme="light"] .form-sidebar { background: #FFF !important; }
-  [data-theme="light"] .form-main { background: #F8F6F3 !important; }
-  [data-theme="light"] .form-progress-mobile { color: #5A5A5A !important; }
-  [data-theme="light"] .landing-nav { background: rgba(255,255,255,0.97) !important; border-bottom-color: #E0DCD5 !important; }
-  [data-theme="light"] .nav-link { color: #5A5A5A !important; }
-  [data-theme="light"] .nav-link:hover { color: #D1420E !important; }
-  [data-theme="light"] .testimonial-card { background: #FFF !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .sport-card { background: #FFF !important; border-color: #E0DCD5 !important; }
-  [data-theme="light"] .price-card { border-color: #E0DCD5 !important; }
-  [data-theme="light"] .price-card.featured { border-color: #D1420E !important; }
-  [data-theme="light"] ::-webkit-scrollbar-track { background: #F8F6F3; }
-  [data-theme="light"] ::-webkit-scrollbar-thumb { background: #D5D0C8; }
-  [data-theme="light"] .share-btn--copy { background: #F0ECE6 !important; border-color: #E0DCD5 !important; color: #1A1A1A !important; }
-  [data-theme="light"] .philosophy { border-top-color: #E0DCD5 !important; }
-  [data-theme="light"] .philosophy-quote { color: #1A1A1A !important; }
-  [data-theme="light"] .week-preview-note { border-left-color: #E0DCD5 !important; color: #5A5A5A !important; }
-  [data-theme="light"] .week-day-row.today { background: rgba(209,66,14,0.04) !important; }
-  [data-theme="light"] .lead-magnet-form input { background: #FFF !important; border-color: #D5D0C8 !important; color: #1A1A1A !important; }
-  [data-theme="light"] .modal-box { background: #FFF !important; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1138,7 +959,6 @@
     object-position: center 35%;
     filter: brightness(0.55) saturate(0.9);
   }
-  [data-theme="light"] .hero-photo { display: none; }
 
   .hero-bg {
     position: absolute;
@@ -1876,10 +1696,6 @@
   .section-banner-content { position: relative; z-index: 2; padding: 22px 24px; }
   .section-banner .dash-title { color: var(--blanco-puro); text-transform: uppercase; margin-bottom: 6px; }
   .section-banner .dash-subtitle { color: #cfccc6; max-width: 640px; }
-  /* En tema claro el banner sigue siendo foto oscura con texto blanco */
-  [data-theme="light"] .section-banner .dash-title { color: #FFF !important; }
-  [data-theme="light"] .section-banner .dash-subtitle { color: #cfccc6 !important; }
-  [data-theme="light"] .section-banner { background: #111 !important; border-color: #111 !important; }
 
   .phone-frame-group {
     display: flex;
@@ -2031,8 +1847,6 @@
     transition: color 0.3s;
   }
   .step:hover .step-num { color: var(--brasa-txt); }
-  [data-theme="light"] .step-num { color: #D8D0C6; }
-  [data-theme="light"] .step:hover .step-num { color: var(--brasa-txt); }
 
   .step-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -2101,11 +1915,6 @@
   }
   .sport-card:hover .sport-photo { filter: grayscale(0.5) brightness(0.5); transform: scale(1.04); }
   .sport-card > .sport-icon, .sport-card > .sport-name, .sport-card > .sport-desc { position: relative; z-index: 2; }
-  /* En tema claro las cards con foto siguen siendo oscuras: el texto va en blanco */
-  [data-theme="light"] .sport-card { background: #111 !important; border-color: #111 !important; }
-  [data-theme="light"] .sport-card:hover { background: #111 !important; }
-  [data-theme="light"] .sport-card .sport-name { color: #fff !important; }
-  [data-theme="light"] .sport-card .sport-desc { color: #bbb !important; }
 
   .sport-icon {
     font-size: 32px;
@@ -3577,9 +3386,6 @@
     min-height: 34px;
   }
   .plan-porque-mas:hover { text-decoration: underline; }
-  [data-theme="light"] .plan-porque {
-    background: #FFF; border-color: #E0DCD5;
-  }
 
   .motivation-label {
     font-family: 'Inter', sans-serif;
@@ -5309,11 +5115,6 @@
   .conv-hilo-reply input:focus { border-color: var(--brasa); }
   .conv-hilo-reply button { background: var(--brasa); border: none; color: #fff; width: 38px; flex-shrink: 0; border-radius: 10px; cursor: pointer; font-size: 16px; }
   .conv-hilo-reply button:disabled { opacity: .5; cursor: default; }
-  [data-theme="light"] .conv-hilo { background: #fff; border-color: #E0DCD5; }
-  [data-theme="light"] .conv-msg-admin { background: #F0ECE6; border-color: #E0DCD5; color: #262421; }
-  [data-theme="light"] .conv-msg-cliente { color: #262421; }
-  [data-theme="light"] .conv-hilo-reply { background: #FAF8F5; }
-  [data-theme="light"] .conv-hilo-reply input { color: #262421; }
 
   .notes-form {
     background: var(--carbon);
@@ -7557,6 +7358,22 @@
   </div>
 </div>
 
+<!-- MODAL ELIMINAR CUENTA (1 oct 2026): derecho de supresión sin tener que escribirnos. -->
+<div class="modal-overlay" id="modalEliminarCuenta" onclick="if(event.target===this)cerrarEliminarCuenta()">
+  <div class="modal-box" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="eliminarCuentaTitulo">
+    <div class="modal-title" style="font-size:19px" id="eliminarCuentaTitulo">¿Eliminar tu cuenta?</div>
+    <p class="modal-desc" style="margin-bottom:12px">Se borrarán para siempre tu cuenta, tu plan, tu progreso, tus fotos y tus mensajes. <strong style="color:var(--blanco)">No se puede deshacer.</strong></p>
+    <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:14px">Si tienes una suscripción, se cancela en el momento y no se te volverá a cobrar. Solo conservamos lo que la ley nos obliga a guardar (los datos de facturación que gestiona Stripe).</p>
+    <button type="button" onclick="descargarMisDatos()" style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:12.5px;cursor:pointer;padding:10px 14px;margin-bottom:16px;width:100%">Descargar una copia de mis datos antes</button>
+    <label for="eliminarCuentaConfirm" style="display:block;font-size:12.5px;color:var(--metal-claro);margin-bottom:6px">Para confirmar, escribe <strong style="color:var(--blanco)">ELIMINAR</strong>:</label>
+    <input type="text" id="eliminarCuentaConfirm" autocomplete="off" autocapitalize="characters" oninput="actualizarBotonEliminar()" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:var(--blanco);font-size:15px;margin-bottom:16px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button style="flex:1 1 140px;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarEliminarCuenta()">Mantener mi cuenta</button>
+      <button id="btnConfirmarEliminar" disabled style="flex:1 1 140px;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px;opacity:.45" onclick="confirmarEliminarCuenta()">Eliminar para siempre</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -8043,7 +7860,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Mis datos están seguros?</summary>
-        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
+        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
@@ -8257,7 +8074,8 @@
       <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
-      <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+      <p>Desde tu perfil puedes <strong>descargar una copia de tus datos</strong> («Descargar mis datos») y <strong>eliminar tu cuenta y tus datos</strong> («Eliminar mi cuenta»): se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar.</p>
+      <p>Además puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
       <h3>2.8. Seguridad</h3>
       <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. Tus datos se almacenan de forma cifrada en servidores seguros en la nube (Supabase, infraestructura AWS en la UE). La comunicación entre tu navegador y nuestros servidores viaja cifrada mediante HTTPS/TLS. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1, y en ningún momento almacenamos datos de tarjeta en nuestros sistemas. Además, tu propio dispositivo guarda una copia local de tu plan y tus datos (incluidos los de salud que hayas facilitado) para que la app cargue más rápido sin depender siempre de la conexión; si usas un ordenador o móvil compartido, cierra sesión al terminar para no dejar esa copia accesible a otra persona.</p>
@@ -8884,6 +8702,12 @@
             Enviarme un aviso de prueba
           </button>
         </div>
+        <button class="logout-btn" onclick="descargarMisDatos()" style="color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
+          <span>⬡</span> Descargar mis datos
+        </button>
+        <button class="logout-btn" onclick="abrirEliminarCuenta()" style="color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
+          <span>⬡</span> Eliminar mi cuenta
+        </button>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
         </button>
@@ -28562,6 +28386,85 @@ Se coló: ${lista}`;
     document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
   }
 
+  // ===== TUS DATOS (RGPD): descargar una copia y eliminar la cuenta =====
+  async function descargarMisDatos() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const copia = {
+      generado: new Date().toISOString(),
+      nota: 'Copia de los datos que K-ONE guarda de tu cuenta.',
+      cuenta: { nombre: user.nombre || '', email: user.email || '' },
+      cuestionario_y_registros: userData || {},
+      plan_generado: generatedPlan || null
+    };
+    try {
+      if (_supaUserId) {
+        const [sub, msg, hitos] = await Promise.all([
+          supa.from('subscriptions').select('status, plan, current_period_start, current_period_end, cancel_at_period_end').eq('user_id', _supaUserId).maybeSingle(),
+          supa.from('mensajes_cliente').select('asunto, mensaje, respuesta, created_at').eq('user_id', _supaUserId),
+          supa.from('hitos_canjes').select('*').eq('user_id', _supaUserId)
+        ]);
+        copia.suscripcion = sub.data || null;
+        copia.mensajes = msg.data || [];
+        copia.hitos_canjeados = hitos.data || [];
+      }
+    } catch (e) { copia.aviso = 'No se pudieron incluir los mensajes y la suscripción: ' + e.message; }
+    const blob = new Blob([JSON.stringify(copia, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mis-datos-k-one.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    showToast('Copia de tus datos descargada.', 3500);
+  }
+
+  function abrirEliminarCuenta() {
+    if (!getCurrentUser()) return;
+    kEvento('eliminar_cuenta_iniciado');
+    const inp = document.getElementById('eliminarCuentaConfirm');
+    if (inp) inp.value = '';
+    actualizarBotonEliminar();
+    document.getElementById('modalEliminarCuenta')?.classList.add('visible');
+    if (inp) setTimeout(() => inp.focus(), 50);
+  }
+  function cerrarEliminarCuenta() {
+    document.getElementById('modalEliminarCuenta')?.classList.remove('visible');
+  }
+  function actualizarBotonEliminar() {
+    const ok = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim().toUpperCase() === 'ELIMINAR';
+    const b = document.getElementById('btnConfirmarEliminar');
+    if (b) { b.disabled = !ok; b.style.opacity = ok ? '1' : '.45'; b.style.cursor = ok ? 'pointer' : 'not-allowed'; }
+  }
+  async function confirmarEliminarCuenta() {
+    const conf = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim();
+    if (conf.toUpperCase() !== 'ELIMINAR') return;
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
+    const btn = document.getElementById('btnConfirmarEliminar');
+    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
+    try {
+      const res = await fetch('/api/update-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ accion: 'eliminar-cuenta', confirmacion: conf })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar la cuenta');
+      kEvento('eliminar_cuenta_confirmado');
+      try { await supa.auth.signOut({ scope: 'local' }); } catch (e) {}
+      // Fuera todo lo guardado en este dispositivo, salvo la decisión de cookies.
+      try {
+        const cookies = localStorage.getItem('kone_cookies_ok');
+        localStorage.clear(); sessionStorage.clear();
+        if (cookies) localStorage.setItem('kone_cookies_ok', cookies);
+      } catch (e) {}
+      location.replace('/?cuenta=eliminada');
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Eliminar para siempre'; }
+      showToast(e.message, 7000);
+    }
+  }
+
   function cerrarModalCancelar() {
     document.getElementById('modalCancelarSuscripcion')?.classList.remove('visible');
   }
@@ -29640,10 +29543,10 @@ Se coló: ${lista}`;
   // Hubo un selector claro/oscuro completo (toggleTheme/actualizarBotonTema);
   // se retiró porque no había ningún botón que lo llamara ni los elementos
   // #themeIcon/#themeLabel que actualizaba -- quedaba como código muerto sin
-  // ningún efecto real. El CSS [data-theme="light"] se deja tal cual (no hace
-  // daño, solo no se alcanza nunca) por si se retoma el modo claro más
-  // adelante; lo que sí se limpia aquí es el localStorage de quien lo activó
-  // antes de esta decisión.
+  // ningún efecto real. El CSS [data-theme="light"] (144 reglas, ~16 KB, que
+  // nunca se aplicaban) se quitó el 1 oct 2026; está en el historial de git por
+  // si se retoma el modo claro. Lo que sí se limpia aquí es el localStorage de
+  // quien lo activó antes de esta decisión.
   (function() {
     // Modo claro desactivado — forzar oscuro siempre
     document.documentElement.removeAttribute('data-theme');
@@ -29955,6 +29858,10 @@ Se coló: ${lista}`;
   });
 
   window.onload = async () => {
+    if (new URLSearchParams(location.search).get('cuenta') === 'eliminada') {
+      history.replaceState({}, '', location.pathname);
+      setTimeout(() => showToast('Tu cuenta y tus datos se han eliminado. Gracias por haber estado en K-ONE.', 8000), 600);
+    }
     // Se lee antes de nada: goTo() borra el hash legal al salir de esa pantalla.
     const _hashLegal = (location.hash || '').slice(1);
     _sincronizarPrecios();

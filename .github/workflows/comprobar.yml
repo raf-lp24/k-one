@@ -22,6 +22,9 @@ jobs:
       # JSON válidos, FAQ = JSON-LD, ids repetidos, precios coherentes.
       - name: Estructura del proyecto
         run: node scripts/comprobar-proyecto.js
+      # Borrado de cuenta del cliente (Stripe y base de datos simulados).
+      - name: Eliminar cuenta
+        run: node scripts/probar-eliminar-cuenta.js
       # ~600 planes con combinaciones de alergias, enfermedades, lesiones,
       # deportes y objetivos: ninguno puede llevar un alimento prohibido (Thor).
       - name: Planes de muestra (motor + Thor)

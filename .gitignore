@@ -20,3 +20,6 @@ marketing/Videos/*.mp4
 # Archivos locales que no pertenecen al repo del sitio
 .claude/
 *.docx
+
+# Copias de seguridad bajadas con scripts/copia-seguridad.js (datos de clientes: nunca a git)
+copias/

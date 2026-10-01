@@ -4,6 +4,7 @@ const {
   adquirirCandadoSuscripcion
 } = require('./_stripeHelpers');
 const { canjearNivelHitos } = require('./_hitosReward');
+const { eliminarCuenta } = require('./_eliminarCuenta');
 const { capturarError } = require('./_sentry');
 
 // Cambia el precio de la suscripción activa SIN prorrateo: crea un
@@ -39,6 +40,14 @@ module.exports = async (req, res) => {
     // ─── Canje de recompensa por nivel de hitos ───
     if (req.body.accion === 'canjear-hito') {
       const r = await canjearNivelHitos({ stripe, supabaseAdmin, user, nivel: req.body.nivel });
+      return res.status(r.status).json(r.body);
+    }
+
+    // ─── Eliminar la cuenta y los datos del propio cliente (ver _eliminarCuenta.js) ───
+    if (req.body.accion === 'eliminar-cuenta') {
+      let avisarAdmin = null;
+      try { avisarAdmin = require('./notify').enviarPushAAdmins; } catch (_) {}
+      const r = await eliminarCuenta({ stripe, supabaseAdmin, user, confirmacion: req.body.confirmacion, avisarAdmin });
       return res.status(r.status).json(r.body);
     }
 

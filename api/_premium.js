@@ -15,6 +15,8 @@ const { getStripe } = require('./_stripeHelpers');
 // admin de "Baja de un cliente" cuando la cancelación la ha provocado él mismo
 // al darle premium.
 const MOTIVO_CANCELACION_PREMIUM = 'premium_kone';
+// Igual, cuando es el propio cliente quien elimina su cuenta (api/_eliminarCuenta.js).
+const MOTIVO_CUENTA_ELIMINADA = 'cuenta_eliminada';
 
 function fechaExpiraPremium() {
   const expira = new Date();
@@ -136,6 +138,7 @@ async function reconciliarPremium(supabaseAdmin) {
 module.exports = {
   reconciliarPremium,
   MOTIVO_CANCELACION_PREMIUM,
+  MOTIVO_CUENTA_ELIMINADA,
   fechaExpiraPremium,
   premiumVigente,
   detenerCobrosStripe,
