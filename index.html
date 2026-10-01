@@ -29625,7 +29625,11 @@ Se coló: ${lista}`;
   }, 45 * 60 * 1000);
 
   // ===== INIT =====
-  window.onerror = function() {
+  window.onerror = function(mensaje, fuente) {
+    // Errores de código ajeno (el puente del WebView de Instagram/Facebook, una
+    // extensión...) no son un fallo de la app: no se le pone un cartel al cliente.
+    if (/postMessage|Java object is gone|JavaBridge|webkit\.messageHandlers|__gCrWeb/i.test(String(mensaje || ''))
+        || (fuente && String(fuente).indexOf(location.host) === -1)) return;
     var hasVisible = document.querySelector('.screen.active') ||
                      document.querySelector('.screen[style*="display: block"], .screen[style*="display:block"]');
     if (!hasVisible) {
