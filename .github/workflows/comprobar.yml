@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # Dependencias (el borrado de cuenta carga el código real de api/, que usa Stripe y Supabase).
+      - run: npm ci --omit=dev
       # Estructura: límite de 12 funciones de Vercel, sintaxis de api/ y lib/,
       # JSON válidos, FAQ = JSON-LD, ids repetidos, precios coherentes.
       - name: Estructura del proyecto
