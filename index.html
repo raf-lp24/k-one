@@ -7545,7 +7545,6 @@
           </span>
           Sin permanencia
         </span>
-        <span id="heroRating" style="display:none"></span>
       </div>
     </div>
   </section>
@@ -28837,16 +28836,6 @@ Se coló: ${lista}`;
         return;
       }
       _actualizarReviewSchema(data);
-      // Nota media junto al botón de empezar: prueba social con datos reales, y solo
-      // cuando hay suficientes opiniones para que el número diga algo (5 o más).
-      try {
-        const chipNota = document.getElementById('heroRating');
-        if (chipNota && data.length >= 5) {
-          const media = data.reduce((acc, r) => acc + Math.max(1, Math.min(5, r.estrellas || 5)), 0) / data.length;
-          chipNota.textContent = '★ ' + media.toFixed(1).replace('.', ',') + ' · ' + data.length + ' opiniones de clientes';
-          chipNota.style.display = '';
-        }
-      } catch (e) {}
       const carousel = document.getElementById('testimonialsCarousel');
       const empty = document.getElementById('testimonialsEmpty');
       if (carousel) carousel.style.display = '';
