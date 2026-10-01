@@ -17,7 +17,7 @@
 <meta property="og:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Se ajusta cada semana según tu progreso. Primer mes gratis.">
 <meta property="og:locale" content="es_ES">
 <meta property="og:image" content="https://k-one.fit/og-image.png">
-<meta property="og:image:width" content="1200">
+<meta property="og:image:width" content="1290">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
@@ -46,7 +46,7 @@
       "logo": {
         "@type": "ImageObject",
         "url": "https://k-one.fit/og-image.png",
-        "width": 1200,
+        "width": 1290,
         "height": 630
       },
       "contactPoint": {
@@ -1269,6 +1269,11 @@
     outline: none;
   }
 
+  /* En pantallas de 320-360 px el recuadro (44 px de relleno a cada lado) se salía
+     10 px por la derecha. */
+  @media (max-width: 380px) {
+    .hero-price { padding: 20px 26px; gap: 12px; max-width: 100%; box-sizing: border-box; }
+  }
   .hero-price-main {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(64px, 11vw, 92px);
@@ -1806,7 +1811,7 @@
   .hoy-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; align-items: start; }
   .hoy-rail { display: flex; flex-direction: column; gap: 14px; }
   @media (max-width: 980px) {
-    .hoy-grid { grid-template-columns: 1fr; }
+    .hoy-grid { grid-template-columns: minmax(0, 1fr); }
     .hoy-rail { flex-direction: row; flex-wrap: wrap; }
     .hoy-rail .rail-card { flex: 1; min-width: 46%; }
   }
@@ -4343,7 +4348,9 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
   }
+  @media (max-width: 360px) { .meal-block-header { padding: 16px 14px; gap: 10px; } }
 
   .meal-block-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -24406,16 +24413,16 @@
           ${htmlCats}
         </div>
 
-        <div style="padding:12px 20px;border-top:1px solid var(--humo);flex-shrink:0;display:flex;gap:8px">
-          <button class="btn-primary" style="flex:1;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="descargarListaCompra()">
+        <div style="padding:12px 20px;border-top:1px solid var(--humo);flex-shrink:0;display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn-primary" style="flex:1 1 84px;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="descargarListaCompra()">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Descargar
           </button>
-          <button class="btn-ghost" style="flex:1;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="copiarListaCompra()">
+          <button class="btn-ghost" style="flex:1 1 84px;padding:10px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="copiarListaCompra()">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copiar
           </button>
-          <button class="btn-ghost" style="flex:1;padding:10px;font-size:12px" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
+          <button class="btn-ghost" style="flex:1 1 84px;padding:10px;font-size:12px" onclick="this.closest('.modal-overlay').remove()">Cerrar</button>
         </div>
       </div>`;
     document.body.appendChild(modal);
