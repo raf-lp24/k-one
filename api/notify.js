@@ -1254,7 +1254,10 @@ async function handlePost(req, res) {
       if (!(await superaLimite('error_cliente_push:' + huella, 1)) && !(await superaLimite('error_cliente_push_total', 5))) {
         await enviarPushAAdmins({
           title: 'K-ONE · Error en el navegador de un cliente',
-          body: msg.slice(0, 120) + (pantalla ? ' (pantalla: ' + pantalla + ')' : ''),
+          body: msg.slice(0, 110) + (pantalla ? ' · pantalla: ' + pantalla : '') + ' · ' + (
+            /Instagram/i.test(ua) ? 'Instagram' : /FBAN|FBAV|FB_IAB/i.test(ua) ? 'Facebook' : /musical_ly|TikTok|BytedanceWebview/i.test(ua) ? 'TikTok'
+              : /CriOS|Chrome/i.test(ua) ? 'Chrome' : /Firefox|FxiOS/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : 'otro navegador')
+            + (/Android/i.test(ua) ? ' Android' : /iPhone|iPad/i.test(ua) ? ' iPhone' : '') + (origen ? ' · ' + origen.split('/').pop().slice(0, 40) : ''),
           url: '/'
         });
       }

@@ -264,6 +264,13 @@
         if (!mensaje || /^Script error\.?$/i.test(mensaje)) return;
         if (/ResizeObserver loop|Non-Error promise rejection|Load failed|Failed to fetch|NetworkError|cancelled|AbortError/i.test(mensaje)) return;
         if (/^(chrome|moz|safari)-extension:|^webkit-masked-url:/.test(origen)) return;
+        // Navegadores dentro de apps (Instagram, Facebook, TikTok...) inyectan su
+        // propio código y sus fallos llegaban como si fueran nuestros (1 oct 2026:
+        // "Error invoking postMessage", del puente Java del WebView de Android).
+        if (/postMessage|Java object is gone|JavaBridge|webkit\.messageHandlers|__gCrWeb|instantSearchSDKJSBridge/i.test(mensaje)) return;
+        // Solo cuenta lo que sale de NUESTROS archivos: el origen tiene que ser
+        // este dominio (la app, sw.js...). Sin origen o de otro sitio, no es nuestro.
+        if (origen.indexOf(location.host) === -1) return;
         var clave = mensaje + '|' + origen;
         if (vistos[clave] || enviados >= 5) return;
         vistos[clave] = 1; enviados++;
@@ -279,7 +286,9 @@
     });
     window.addEventListener('unhandledrejection', function (ev) {
       var r = ev.reason;
-      informar('Promesa rechazada: ' + (r && r.message ? r.message : r), r && r.stack ? String(r.stack).split('\n')[1] : '');
+      // La primera línea de la traza que venga de nuestro dominio (si no hay, no es nuestro).
+      var linea = r && r.stack ? String(r.stack).split('\n').filter(function (l) { return l.indexOf(location.host) !== -1; })[0] : '';
+      informar('Promesa rechazada: ' + (r && r.message ? r.message : r), linea ? linea.trim() : '');
     });
   })();
 </script>
