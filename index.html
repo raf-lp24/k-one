@@ -225,6 +225,30 @@
      consentimiento guardado de una visita anterior (cargarGAsiConsentido, más
      abajo) o en cuanto el usuario pulsa "Aceptar" en el banner. -->
 <script>
+  // Navegadores que NO dejan guardar datos (bloqueo de cookies/datos de sitios,
+  // algunos navegadores dentro de apps): cada localStorage.getItem lanzaba
+  // SecurityError y la app se rompía (no se abría ninguna sección del panel).
+  // Se sustituye por una memoria temporal: funciona todo, pero al cerrar la
+  // pestaña se pierde la sesión (se avisa al cliente al cargar, ver onload).
+  (function () {
+    try { var k = '__kone_prueba'; window.localStorage.setItem(k, '1'); window.localStorage.removeItem(k); }
+    catch (e) {
+      var datos = {};
+      var mem = {
+        getItem: function (k) { return Object.prototype.hasOwnProperty.call(datos, k) ? datos[k] : null; },
+        setItem: function (k, v) { datos[k] = String(v); },
+        removeItem: function (k) { delete datos[k]; },
+        clear: function () { datos = {}; },
+        key: function (i) { return Object.keys(datos)[i] || null; },
+        get length() { return Object.keys(datos).length; }
+      };
+      try {
+        Object.defineProperty(window, 'localStorage', { value: mem, configurable: true });
+        Object.defineProperty(window, 'sessionStorage', { value: mem, configurable: true });
+        window.__almacenamientoEnMemoria = true;
+      } catch (e2) {}
+    }
+  })();
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   var GA_MEASUREMENT_ID = 'G-E3F6NJ4TH6';
@@ -29894,15 +29918,14 @@ Se coló: ${lista}`;
     document.getElementById('login-pass')?.addEventListener('keydown', e => { if(e.key==='Enter') login(); });
     document.getElementById('reg-pass2')?.addEventListener('keydown', e => { if(e.key==='Enter') registrar(); });
 
-    // Diagnóstico temporal: si localStorage no funciona en este navegador/modo
-    // (p.ej. al abrir el archivo con file://), nada de login/registro persistirá.
-    try {
-      localStorage.setItem('k1_storage_test', '1');
-      if (localStorage.getItem('k1_storage_test') !== '1') throw new Error('localStorage no persiste');
-      localStorage.removeItem('k1_storage_test');
-    } catch (e) {
-      console.error('localStorage no disponible:', e);
-      showToast('Aviso: este navegador bloquea el guardado local en archivos abiertos con file://. Los datos no se guardarán.', 6000);
+    // Si el navegador no deja guardar datos (ver el primer <script>), la app
+    // funciona con una memoria temporal: se le dice al cliente qué pasa y qué
+    // hacer, en vez de que la sesión desaparezca sin explicación al volver.
+    if (window.__almacenamientoEnMemoria) {
+      const enApp = /Instagram|FBAN|FBAV|FB_IAB|musical_ly|TikTok|BytedanceWebview/i.test(navigator.userAgent || '');
+      showToast(enApp
+        ? 'Estás en el navegador de la app y no deja guardar tu sesión. Para no tener que volver a entrar, abre k-one.fit en Chrome o Safari.'
+        : 'Tu navegador no deja guardar datos de esta web: si cierras la pestaña tendrás que volver a entrar. Puedes permitirlo en los ajustes de privacidad del navegador.', 9000);
     }
 
     // Si vuelve de un enlace de recuperación de contraseña, Supabase emite este
