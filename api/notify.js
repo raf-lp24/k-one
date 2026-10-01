@@ -1151,43 +1151,83 @@ async function handleCronRetencion(req, res) {
     } catch (digestErr) { console.error('[notify] digest admin error:', digestErr.message); }
 
 
-    // BACKUP DIARIO: snapshot de profiles + subscriptions → Supabase Storage
+    // BACKUP DIARIO → Supabase Storage (bucket "backups", privado).
+    //
+    // 1 oct 2026: antes guardaba profiles COMPLETOS, y cada plan pesa unos
+    // 87 KB (con 200 clientes, 17 MB al día y sin borrar nunca nada: el 1 GB
+    // gratuito se llenaba en ~2 meses y las copias fallaban sin que nadie se
+    // enterase). Ahora:
+    //  · Los planes NO se guardan: salen del motor a partir de userdata, que sí
+    //    se guarda (se pueden regenerar con "Regenerar plan" o el cron).
+    //  · Se leen por páginas de 200 (memoria acotada) y se quita el plan al leer.
+    //  · Entran también mensajes, hitos, referidos, invitaciones, opiniones y leads
+    //    (cada tabla por separado: si una falta o falla, el resto se guarda igual).
+    //  · Se borran las copias de más de 30 días.
+    //  · Si la copia falla, te llega un push (antes solo un log que nadie lee).
     let backupOk = false;
     try {
-      // Ninguna de las 3 comprobaba `error` explícitamente (supabase-js no
-      // lanza) -- si cualquiera fallaba de forma transitoria, `data` quedaba
-      // `undefined`, caía al `|| []`, y el backup se subía igual con arrays
-      // vacíos. `uploadErr` sí se comprobaba, pero el upload en sí no falla
-      // por subir un JSON vacío -- así que `backupOk` se reportaba `true`
-      // (log: "backup: OK") con un backup del día inservible, sin que nadie
-      // se enterase.
-      const rProfiles = await supa.from('profiles').select('*');
-      const rSubs = await supa.from('subscriptions').select('*');
+      const TAM = 200;
+      const leerTabla = async (tabla, cols, opciones = {}) => {
+        const filas = [];
+        for (let desde = 0; ; desde += TAM) {
+          let q = supa.from(tabla).select(cols);
+          if (opciones.orden) q = q.order(opciones.orden, { ascending: false });
+          const r = await q.range(desde, desde + TAM - 1);
+          if (r.error) return { error: r.error };
+          const pag = r.data || [];
+          pag.forEach(x => { if (opciones.sinPlan) delete x.plan; filas.push(x); });
+          if (pag.length < TAM || filas.length >= (opciones.max || 50000)) break;
+        }
+        return { data: filas };
+      };
+      const rProfiles = await leerTabla('profiles', '*', { sinPlan: true });
+      const rSubs = await leerTabla('subscriptions', '*');
       const rEmails = await supa.from('email_log').select('id, tipo, destinatario, asunto, created_at').order('created_at', { ascending: false }).limit(500);
+      // Obligatorias: sin perfiles y suscripciones la copia no sirve de nada.
       const erroresBackup = [rProfiles, rSubs, rEmails].map(r => r.error).filter(Boolean);
       if (erroresBackup.length) {
         throw new Error('Consulta fallida al preparar el backup: ' + erroresBackup.map(e => e.message).join(' | '));
       }
-      const allProfiles = rProfiles.data, allSubs = rSubs.data, allEmails = rEmails.data;
+      // Opcionales: una tabla que aún no existe no tumba la copia.
+      const extras = {}, extrasFallidas = [];
+      for (const t of ['mensajes_cliente', 'mensajes_respuestas', 'hitos_canjes', 'referidos', 'invitaciones_premium', 'testimonios', 'leads', 'push_subscriptions']) {
+        try {
+          const r = await leerTabla(t, '*');
+          if (r.error) extrasFallidas.push(t + ': ' + r.error.message); else extras[t] = r.data;
+        } catch (e) { extrasFallidas.push(t + ': ' + e.message); }
+      }
       const backup = {
         fecha: ahora.toISOString(),
-        totalClientes: (allProfiles || []).length,
-        totalSuscripciones: (allSubs || []).length,
-        profiles: allProfiles || [],
-        subscriptions: allSubs || [],
-        emailLog: allEmails || []
+        nota: 'Sin planes: se regeneran con el motor a partir de profiles.userdata.',
+        totalClientes: rProfiles.data.length,
+        totalSuscripciones: rSubs.data.length,
+        profiles: rProfiles.data,
+        subscriptions: rSubs.data,
+        emailLog: rEmails.data || [],
+        ...extras,
+        tablasNoGuardadas: extrasFallidas
       };
       const fileName = `backup-${ahora.toISOString().slice(0,10)}.json`;
       const { error: uploadErr } = await supa.storage
         .from('backups')
-        .upload(fileName, JSON.stringify(backup, null, 2), {
+        .upload(fileName, JSON.stringify(backup), {
           contentType: 'application/json',
           upsert: true
         });
-      if (uploadErr) console.error('[notify-cron] backup upload error:', uploadErr.message);
-      else backupOk = true;
+      if (uploadErr) throw new Error('subida: ' + uploadErr.message);
+      backupOk = true;
+      if (extrasFallidas.length) console.warn('[notify-cron] backup: tablas no guardadas:', extrasFallidas.join(' | '));
+      // Limpieza: fuera las copias de más de 30 días (el nombre lleva la fecha).
+      try {
+        const { data: archivos } = await supa.storage.from('backups').list('', { limit: 1000 });
+        const limite = new Date(ahora.getTime() - 30 * 86400000).toISOString().slice(0, 10);
+        const viejos = (archivos || []).map(a => a.name).filter(n => /^backup-\d{4}-\d{2}-\d{2}\.json$/.test(n) && n.slice(7, 17) < limite);
+        if (viejos.length) await supa.storage.from('backups').remove(viejos);
+      } catch (eLimpia) { console.warn('[notify-cron] backup: no se pudo limpiar lo antiguo:', eLimpia.message); }
     } catch (bErr) {
       console.error('[notify-cron] backup error:', bErr.message);
+      capturarError(bErr, { fn: 'notify-cron-backup' });
+      try { await enviarPushAAdmins({ title: 'K-ONE · La copia de seguridad ha fallado', body: String(bErr.message).slice(0, 140), url: '/' }); } catch (_) {}
     }
 
     console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
