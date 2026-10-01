@@ -171,7 +171,7 @@
         {
           "@type": "Question",
           "name": "¿Mis datos están seguros?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento." }
         },
         {
           "@type": "Question",
@@ -7413,21 +7413,6 @@
   </div>
 </div>
 
-<!-- MODAL ELIMINAR CUENTA (1 oct 2026): derecho de supresión sin tener que escribirnos. -->
-<div class="modal-overlay" id="modalEliminarCuenta" onclick="if(event.target===this)cerrarEliminarCuenta()">
-  <div class="modal-box" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="eliminarCuentaTitulo">
-    <div class="modal-title" style="font-size:19px" id="eliminarCuentaTitulo">¿Eliminar tu cuenta?</div>
-    <p class="modal-desc" style="margin-bottom:12px">Se borrarán para siempre tu cuenta, tu plan, tu progreso, tus fotos y tus mensajes. <strong style="color:var(--blanco)">No se puede deshacer.</strong></p>
-    <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:14px">Si tienes una suscripción, se cancela en el momento y no se te volverá a cobrar. Solo conservamos lo que la ley nos obliga a guardar (los datos de facturación que gestiona Stripe).</p>
-    <label for="eliminarCuentaConfirm" style="display:block;font-size:12.5px;color:var(--metal-claro);margin-bottom:6px">Para confirmar, escribe <strong style="color:var(--blanco)">ELIMINAR</strong>:</label>
-    <input type="text" id="eliminarCuentaConfirm" autocomplete="off" autocapitalize="characters" oninput="actualizarBotonEliminar()" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:var(--blanco);font-size:15px;margin-bottom:16px">
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button style="flex:1 1 140px;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarEliminarCuenta()">Mantener mi cuenta</button>
-      <button id="btnConfirmarEliminar" disabled style="flex:1 1 140px;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px;opacity:.45" onclick="confirmarEliminarCuenta()">Eliminar para siempre</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -7926,7 +7911,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Mis datos están seguros?</summary>
-        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes eliminar tu cuenta y tus datos tú mismo desde tu perfil, en cualquier momento.</p>
+        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
@@ -8140,8 +8125,7 @@
       <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
-      <p>Desde tu perfil puedes <strong>eliminar tu cuenta y tus datos</strong> («Eliminar mi cuenta»): se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar.</p>
-      <p>Además puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+      <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
       <h3>2.8. Seguridad</h3>
       <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. Tus datos se almacenan de forma cifrada en servidores seguros en la nube (Supabase, infraestructura AWS en la UE). La comunicación entre tu navegador y nuestros servidores viaja cifrada mediante HTTPS/TLS. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1, y en ningún momento almacenamos datos de tarjeta en nuestros sistemas. Además, tu propio dispositivo guarda una copia local de tu plan y tus datos (incluidos los de salud que hayas facilitado) para que la app cargue más rápido sin depender siempre de la conexión; si usas un ordenador o móvil compartido, cierra sesión al terminar para no dejar esa copia accesible a otra persona.</p>
@@ -8768,9 +8752,6 @@
             Enviarme un aviso de prueba
           </button>
         </div>
-        <button class="logout-btn" onclick="abrirEliminarCuenta()" style="color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
-          <span>⬡</span> Eliminar mi cuenta
-        </button>
         <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
           <span>⬡</span> Cancelar suscripción
         </button>
@@ -28503,54 +28484,6 @@ Se coló: ${lista}`;
     document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
   }
 
-  // ===== ELIMINAR LA CUENTA (RGPD, derecho de supresión) =====
-  function abrirEliminarCuenta() {
-    if (!getCurrentUser()) return;
-    kEvento('eliminar_cuenta_iniciado');
-    const inp = document.getElementById('eliminarCuentaConfirm');
-    if (inp) inp.value = '';
-    actualizarBotonEliminar();
-    document.getElementById('modalEliminarCuenta')?.classList.add('visible');
-    if (inp) setTimeout(() => inp.focus(), 50);
-  }
-  function cerrarEliminarCuenta() {
-    document.getElementById('modalEliminarCuenta')?.classList.remove('visible');
-  }
-  function actualizarBotonEliminar() {
-    const ok = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim().toUpperCase() === 'ELIMINAR';
-    const b = document.getElementById('btnConfirmarEliminar');
-    if (b) { b.disabled = !ok; b.style.opacity = ok ? '1' : '.45'; b.style.cursor = ok ? 'pointer' : 'not-allowed'; }
-  }
-  async function confirmarEliminarCuenta() {
-    const conf = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim();
-    if (conf.toUpperCase() !== 'ELIMINAR') return;
-    const { data: { session } } = await supa.auth.getSession();
-    if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
-    const btn = document.getElementById('btnConfirmarEliminar');
-    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
-    try {
-      const res = await fetch('/api/update-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-        body: JSON.stringify({ accion: 'eliminar-cuenta', confirmacion: conf })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar la cuenta');
-      kEvento('eliminar_cuenta_confirmado');
-      try { await supa.auth.signOut({ scope: 'local' }); } catch (e) {}
-      // Fuera todo lo guardado en este dispositivo, salvo la decisión de cookies.
-      try {
-        const cookies = localStorage.getItem('kone_cookies_ok');
-        localStorage.clear(); sessionStorage.clear();
-        if (cookies) localStorage.setItem('kone_cookies_ok', cookies);
-      } catch (e) {}
-      location.replace('/?cuenta=eliminada');
-    } catch (e) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Eliminar para siempre'; }
-      showToast(e.message, 7000);
-    }
-  }
-
   function cerrarModalCancelar() {
     document.getElementById('modalCancelarSuscripcion')?.classList.remove('visible');
   }
@@ -29957,10 +29890,6 @@ Se coló: ${lista}`;
   });
 
   window.onload = async () => {
-    if (new URLSearchParams(location.search).get('cuenta') === 'eliminada') {
-      history.replaceState({}, '', location.pathname);
-      setTimeout(() => showToast('Tu cuenta y tus datos se han eliminado. Gracias por haber estado en K-ONE.', 8000), 600);
-    }
     // Se lee antes de nada: goTo() borra el hash legal al salir de esa pantalla.
     const _hashLegal = (location.hash || '').slice(1);
     _sincronizarPrecios();
