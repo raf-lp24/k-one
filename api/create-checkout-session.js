@@ -1,6 +1,7 @@
 const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { premiumVigente, concederPremium } = require('./_premium');
+const { pruebaYaUsada } = require('./_pruebaGratis');
 
 // Crea una sesión de Stripe Checkout (suscripción) para el plan/periodicidad
 // elegidos por el usuario logueado y devuelve la URL a la que redirigir.
@@ -134,6 +135,17 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Ya tienes una suscripción activa. Gestiona tu plan desde el panel de tu cuenta.' });
     }
 
+    // MES GRATIS UNA VEZ POR EMAIL (ver _pruebaGratis.js): quien borró su cuenta y
+    // se registra otra vez con el mismo email es un usuario nuevo sin historial en
+    // Stripe, pero su email ya tuvo suscripción. Sin prueba. Antes de cobrarle sin
+    // avisar, se le pregunta: la web le enseña que el cobro empieza hoy y solo
+    // sigue si acepta (aceptoSinPrueba). Va ANTES del candado para que el segundo
+    // intento, ya aceptado, no choque con el candado del primero.
+    const pruebaUsada = !tieneHistorial && await pruebaYaUsada(supabaseAdmin, user.email);
+    if (pruebaUsada && req.body.aceptoSinPrueba !== true) {
+      return res.status(200).json({ pruebaUsada: true });
+    }
+
     // SEGURIDAD: candado anti doble-click/doble-pestaña. El guard de arriba
     // (yaTieneActiva) no sirve para esto: la suscripción real de Stripe solo
     // existe al COMPLETAR el checkout, no al crear la sesión, así que dos
@@ -204,7 +216,7 @@ module.exports = async (req, res) => {
     // cliente sin historial real en Stripe, sin depender de que nadie escriba
     // ningún código. Se suscribe DIRECTAMENTE a su plan real desde el día 1,
     // con un periodo de prueba que retrasa el primer cobro.
-    const diasPrueba = !tieneHistorial ? 30 : 0;
+    const diasPrueba = (!tieneHistorial && !pruebaUsada) ? 30 : 0;
     const subscriptionData = { metadata: { supabase_user_id: user.id } };
     if (diasPrueba) subscriptionData.trial_period_days = diasPrueba;
 

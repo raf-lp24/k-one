@@ -1,4 +1,5 @@
 const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { marcarPruebaUsada } = require('./_pruebaGratis');
 const { capturarError } = require('./_sentry');
 // require('./notify') es solo un import de módulo (reutiliza enviarEmail),
 // no crea una función serverless nueva -- no cuenta para el límite de
@@ -221,6 +222,16 @@ module.exports = async (req, res) => {
       // "on delete cascade", así que borrar primero el usuario de Auth ya las
       // limpia solas; los deletes explícitos de abajo quedan como red de
       // seguridad (no fallan si la fila ya no existe).
+      // Si tuvo suscripción, su email no vuelve a tener mes gratis al registrarse
+      // otra vez (ver _pruebaGratis.js). Se mira antes de borrar Auth, que es
+      // donde está el email aunque el perfil no lo tenga.
+      if (sub?.stripe_subscription_id) {
+        let emailPrueba = emailBorrar;
+        if (!emailPrueba) {
+          try { const { data: au } = await supabaseAdmin.auth.admin.getUserById(userId); emailPrueba = au?.user?.email || null; } catch (_) {}
+        }
+        await marcarPruebaUsada(supabaseAdmin, emailPrueba);
+      }
       const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
       if (authErr) {
         console.error('[admin-mensaje] borrar_cliente auth error:', authErr);

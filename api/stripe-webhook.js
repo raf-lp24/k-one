@@ -1,6 +1,7 @@
 const { getStripe, getSupabaseAdmin, getSubscriptionPeriod } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA } = require('./_premium');
+const { marcarPruebaUsada } = require('./_pruebaGratis');
 // Push al móvil del admin para lo que de verdad urge (pago fallido, baja).
 // Hasta ahora el webhook solo mandaba emails AL CLIENTE: de un pago fallido
 // o una baja, el dueño solo se enteraba al día siguiente por el digest.
@@ -191,6 +192,20 @@ module.exports = async (req, res) => {
         }
 
         await upsertFromSubscription(supabaseAdmin, subscription, userId);
+
+        // Este email ya ha tenido suscripción: no vuelve a tener mes gratis aunque
+        // borre la cuenta y se registre otra vez (ver _pruebaGratis.js). Se usa el
+        // email de la cuenta (el de registro), no el que escriba en Stripe.
+        try {
+          let emailCuenta = null;
+          if (userId) {
+            const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
+            emailCuenta = u?.user?.email || null;
+          }
+          await marcarPruebaUsada(supabaseAdmin, emailCuenta || session.customer_details?.email || session.customer_email);
+        } catch (ePrueba) {
+          console.warn('[stripe-webhook] no se pudo anotar la prueba usada:', ePrueba.message);
+        }
 
         // REFERIDOS: si este usuario fue referido, acreditar 5€ al referrer (max 15€)
         // PAUSADO (2026-08): ver el mismo aviso en index.html (cargarReferidos). Se

@@ -10,10 +10,14 @@
 //     suscripción, hitos, avisos push, referidos, canjes y avisos de Thor.
 // Si algo falla después del paso 1 se puede reintentar sin problema (todo es idempotente).
 //
+// Tampoco se borra la huella del email en `pruebas_usadas` (SHA-256, no el email): es lo que
+// impide borrar la cuenta y registrarse otra vez para repetir el mes gratis.
+//
 // Lo que NO se borra: los datos de facturación que guarda Stripe (obligación fiscal, así lo
 // dice la política de privacidad) y las opiniones ya publicadas con consentimiento (no llevan
 // enlace a la cuenta; se retiran escribiendo a k.one.fit26@gmail.com).
 const { MOTIVO_CUENTA_ELIMINADA } = require('./_premium');
+const { marcarPruebaUsada } = require('./_pruebaGratis');
 
 const ESTADOS_VIVOS = ['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'paused'];
 
@@ -38,6 +42,9 @@ async function eliminarCuenta({ stripe, supabaseAdmin, user, confirmacion, avisa
           await stripe.subscriptions.cancel(s.id, { cancellation_details: { comment: MOTIVO_CUENTA_ELIMINADA } });
         }
       }
+      // Si ya tuvo suscripción, su email no vuelve a tener mes gratis al registrarse
+      // de nuevo (ver _pruebaGratis.js). Lo único que queda es una huella del email.
+      if (lista.data.some(s => s.status !== 'incomplete_expired')) await marcarPruebaUsada(supabaseAdmin, email, log);
     }
   } catch (e) {
     log.error('[eliminar-cuenta] Stripe:', e.message);
