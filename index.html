@@ -171,7 +171,7 @@
         {
           "@type": "Question",
           "name": "¿Mis datos están seguros?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde «Gestionar suscripción», en cualquier momento." }
         },
         {
           "@type": "Question",
@@ -5827,6 +5827,36 @@
     max-width: 400px;
     position: relative;
   }
+  /* PANEL "GESTIONAR SUSCRIPCIÓN" (1 oct 2026). Antes el botón abría directamente
+     el portal de Stripe, que solo sabe de tarjetas y facturas. Ahora es un panel
+     propio: estado del plan arriba y, debajo, todo lo que el cliente puede hacer
+     con su suscripción y con sus datos. */
+  #modalMiSuscripcion .modal-box { max-width: 460px; padding: 34px 26px 26px; max-height: 92vh; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .ms-estado { background: linear-gradient(135deg, rgba(209,66,14,0.14), rgba(209,66,14,0.03) 70%); border: 1px solid rgba(209,66,14,0.35); border-radius: 14px; padding: 16px 18px; margin: 4px 0 22px; }
+  .ms-etiqueta { font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .ms-plan { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1.05; letter-spacing: 0.5px; color: var(--blanco-puro); margin: 6px 0 10px; }
+  .ms-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--metal-claro); background: rgba(255,255,255,0.05); border: 1px solid var(--humo); border-radius: 999px; padding: 5px 11px; }
+  .ms-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ms-color, #4CAF7A); flex-shrink: 0; }
+  .ms-pill[data-tono="aviso"] { --ms-color: #E0A43A; }
+  .ms-pill[data-tono="mal"] { --ms-color: #E8776A; }
+  .ms-pill[data-tono="neutro"] { --ms-color: var(--metal); }
+  .ms-grupo { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--metal); margin: 18px 0 8px; }
+  .ms-lista { display: flex; flex-direction: column; gap: 6px; }
+  .ms-fila { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: rgba(255,255,255,0.025); border: 1px solid var(--humo); border-radius: 12px; padding: 13px 14px; color: var(--blanco); font-family: inherit; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+  .ms-fila:hover, .ms-fila:focus-visible { border-color: rgba(242,106,54,0.6); background: rgba(209,66,14,0.06); outline: none; }
+  .ms-fila:disabled { opacity: .55; cursor: wait; }
+  .ms-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(209,66,14,0.12); color: var(--brasa-txt); flex-shrink: 0; }
+  .ms-ico svg { width: 17px; height: 17px; }
+  .ms-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .ms-tit { font-size: 14px; font-weight: 600; }
+  .ms-sub { font-size: 12px; color: var(--metal); line-height: 1.4; }
+  .ms-chev { color: var(--metal); flex-shrink: 0; }
+  .ms-fila.ms-peligro .ms-ico { background: rgba(232,119,106,0.1); color: #E8776A; }
+  .ms-fila.ms-peligro .ms-tit { color: #E8776A; }
+  .ms-fila.ms-peligro:hover, .ms-fila.ms-peligro:focus-visible { border-color: #5A2A2A; background: rgba(232,119,106,0.05); }
+  .ms-fila.ms-destacada { border-color: rgba(224,164,58,0.55); }
+  @media (max-width: 420px) { #modalMiSuscripcion .modal-box { padding: 30px 16px 18px; } .ms-fila { padding: 12px; gap: 12px; } }
+  @media (prefers-reduced-motion: reduce) { .ms-fila { transition: none; } }
   /* El paywall del primer mes lleva adelanto del plan + garantías: en un móvil bajo
      no cabe entero, así que se desplaza por dentro (el botón siempre se alcanza). */
   #modalPaywall .modal-box { max-height: 92vh; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -7413,6 +7443,73 @@
   </div>
 </div>
 
+<!-- MODAL GESTIONAR SUSCRIPCIÓN (1 oct 2026): estado del plan + todo lo que el
+     cliente puede hacer con su suscripción y sus datos. Las filas que dependen de
+     Stripe se enseñan u ocultan en _pintarMiSuscripcion(). -->
+<div class="modal-overlay" id="modalMiSuscripcion" onclick="if(event.target===this)cerrarMiSuscripcion()">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="msTitulo">
+    <button class="modal-close" onclick="cerrarMiSuscripcion()" aria-label="Cerrar">✕</button>
+    <div class="modal-title" id="msTitulo" style="font-size:20px">Tu suscripción</div>
+    <div class="ms-estado">
+      <span class="ms-etiqueta">Plan actual</span>
+      <div class="ms-plan" id="msPlan">—</div>
+      <span class="ms-pill" id="msEstado">—</span>
+    </div>
+    <div class="ms-grupo">Suscripción</div>
+    <div class="ms-lista">
+      <button type="button" class="ms-fila" id="msFilaCambiar" onclick="cerrarMiSuscripcion(); abrirModalCambiarPlan()">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11"/><path d="M4 17h7"/><circle cx="18" cy="7" r="2.5"/><circle cx="14" cy="17" r="2.5"/><path d="M17 17h3"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Cambiar de plan</span><span class="ms-sub" id="msFilaCambiarSub">Solo nutrición o completo, mensual o trimestral, otro objetivo</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="ms-fila" id="msFilaPago" onclick="abrirPortalPago(this)">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Tarjeta y facturas</span><span class="ms-sub" id="msFilaPagoSub">Cambia tu método de pago o descarga tus facturas</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="ms-fila" id="msFilaReactivar" onclick="reactivarDesdePanel(this)">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Seguir con mi suscripción</span><span class="ms-sub" id="msFilaReactivarSub">Anula la cancelación sin ningún cargo nuevo</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="ms-fila" id="msFilaCancelar" onclick="cerrarMiSuscripcion(); cancelarSuscripcion()">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Cancelar suscripción</span><span class="ms-sub" id="msFilaCancelarSub">Mantienes el acceso hasta el final del período</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="ms-grupo">Tus datos</div>
+    <div class="ms-lista">
+      <button type="button" class="ms-fila" id="msFilaDescargar" onclick="descargarMisDatos()">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Descargar mis datos</span><span class="ms-sub" id="msFilaDescargarSub">Tu cuestionario, plan, registros y mensajes en un archivo</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="ms-fila ms-peligro" id="msFilaEliminar" onclick="cerrarMiSuscripcion(); abrirEliminarCuenta()">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l1 13h9l1-13"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Eliminar mi cuenta</span><span class="ms-sub" id="msFilaEliminarSub">Borra tu cuenta y todos tus datos para siempre</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR CUENTA (1 oct 2026): derecho de supresión sin tener que escribirnos. -->
+<div class="modal-overlay" id="modalEliminarCuenta" onclick="if(event.target===this)cerrarEliminarCuenta()">
+  <div class="modal-box" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="eliminarCuentaTitulo">
+    <div class="modal-title" style="font-size:19px" id="eliminarCuentaTitulo">¿Eliminar tu cuenta?</div>
+    <p class="modal-desc" style="margin-bottom:12px">Se borrarán para siempre tu cuenta, tu plan, tu progreso, tus fotos y tus mensajes. <strong style="color:var(--blanco)">No se puede deshacer.</strong></p>
+    <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:14px">Si tienes una suscripción, se cancela en el momento y no se te volverá a cobrar. Solo conservamos lo que la ley nos obliga a guardar (los datos de facturación que gestiona Stripe).</p>
+    <button type="button" onclick="descargarMisDatos()" style="background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:12.5px;cursor:pointer;padding:10px 14px;margin-bottom:16px;width:100%">Descargar una copia de mis datos antes</button>
+    <label for="eliminarCuentaConfirm" style="display:block;font-size:12.5px;color:var(--metal-claro);margin-bottom:6px">Para confirmar, escribe <strong style="color:var(--blanco)">ELIMINAR</strong>:</label>
+    <input type="text" id="eliminarCuentaConfirm" autocomplete="off" autocapitalize="characters" oninput="actualizarBotonEliminar()" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:var(--blanco);font-size:15px;margin-bottom:16px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button style="flex:1 1 140px;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarEliminarCuenta()">Mantener mi cuenta</button>
+      <button id="btnConfirmarEliminar" disabled style="flex:1 1 140px;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px;opacity:.45" onclick="confirmarEliminarCuenta()">Eliminar para siempre</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FICHA DE EJERCICIO (instrucciones + músculos) -->
 <div class="modal-overlay" id="modalInfoEjercicio" onclick="if(event.target===this)this.classList.remove('visible')">
   <div class="modal-box" style="max-width:520px;max-height:82vh;overflow-y:auto">
@@ -7911,7 +8008,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Mis datos están seguros?</summary>
-        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes solicitar la eliminación de tus datos en cualquier momento.</p>
+        <p class="faq-a">Sí. Tus datos se almacenan cifrados en servidores seguros en la UE. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1. En ningún momento almacenamos datos de tarjeta. Puedes descargar una copia de tus datos o eliminar tu cuenta y tus datos tú mismo desde «Gestionar suscripción», en cualquier momento.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Cómo funciona la lista de la compra?</summary>
@@ -8125,7 +8222,8 @@
       <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend y Google pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
-      <p>Puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+      <p>Desde tu cuenta, en <strong>«Gestionar suscripción»</strong>, puedes <strong>descargar una copia de tus datos</strong> y <strong>eliminar tu cuenta y tus datos</strong>: se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar.</p>
+      <p>Además puedes ejercer tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar tu consentimiento, escribiendo a k.one.fit26@gmail.com. Si consideras que no hemos atendido correctamente tu solicitud, puedes reclamar ante la <strong>Agencia Española de Protección de Datos</strong> (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
       <h3>2.8. Seguridad</h3>
       <p>Aplicamos medidas técnicas y organizativas razonables para proteger tus datos. Tus datos se almacenan de forma cifrada en servidores seguros en la nube (Supabase, infraestructura AWS en la UE). La comunicación entre tu navegador y nuestros servidores viaja cifrada mediante HTTPS/TLS. Los pagos se procesan a través de Stripe, certificado PCI DSS Nivel 1, y en ningún momento almacenamos datos de tarjeta en nuestros sistemas. Además, tu propio dispositivo guarda una copia local de tu plan y tus datos (incluidos los de salud que hayas facilitado) para que la app cargue más rápido sin depender siempre de la conexión; si usas un ordenador o móvil compartido, cierra sesión al terminar para no dejar esa copia accesible a otra persona.</p>
@@ -8721,14 +8819,11 @@
         <button class="logout-btn" id="btnPanelAdmin" onclick="abrirPanelAdmin()" style="display:none;color: var(--brasa-txt);border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Panel de admin
         </button>
-        <!-- Oculto para cuentas sin suscripción real en Stripe (beta o
-             concedidas a mano): create-portal-session.js exige
-             stripe_customer_id y devuelve 404 si no lo hay, así que a esas
-             cuentas el botón solo les daba un error de "no tienes suscripción
-             asociada" -- exactamente lo que le pasaba a azuqueca1@hotmail.com
-             (11 sept 2026). Mismo criterio que ya usa actualizarBtnCancelar()
-             para el botón de cancelar, ver más abajo. -->
-        <button class="logout-btn" id="btnGestionarSub" onclick="gestionarSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
+        <!-- Abre el panel propio (abrirMiSuscripcion). Lo que necesita una
+             suscripción real de Stripe (tarjeta/facturas, cancelar) solo se
+             enseña dentro si la hay: create-portal-session.js devuelve 404 sin
+             stripe_customer_id (le pasaba a azuqueca1@hotmail.com, 11 sept). -->
+        <button class="logout-btn" id="btnGestionarSub" onclick="abrirMiSuscripcion()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Gestionar suscripción
         </button>
         <!-- Oculto hasta que actualizarBotonNotificaciones() sepa el estado
@@ -8752,9 +8847,6 @@
             Enviarme un aviso de prueba
           </button>
         </div>
-        <button class="logout-btn" id="btnCancelarSub" onclick="cancelarSuscripcion()" style="display:none;color:var(--metal);font-size:11px;border:none;border-radius:8px;padding:8px 14px">
-          <span>⬡</span> Cancelar suscripción
-        </button>
         <button class="logout-btn" onclick="logout()" style="border:none;border-radius:8px;padding:10px 14px;font-size:12px">
           <span>⬡</span> Cerrar sesión
         </button>
@@ -24789,6 +24881,9 @@
       inicioPeriodo: sub?.current_period_start || null,
       // Pago de la renovación pendiente/fallido: mostrar aviso para actualizar la tarjeta.
       pagoPendiente: !!(sub && sub.status === 'past_due'),
+      // Estado tal cual de Stripe ('trialing', 'active'...): el panel de la suscripción
+      // distingue "mes gratis, primer cobro el X" de "activa, se renueva el X".
+      estadoSub: (sub && sub.status) || null,
       // ¿Se cancelará al final del período? (oferta 1,99€ o cancelación). Para avisar antes de que expire.
       cancelaAlFinal: !!(sub && sub.cancel_at_period_end),
       // ¿Ha pasado ya alguna vez por el pago? Si no, el paywall ofrece el primer mes a 1,99€.
@@ -26280,12 +26375,11 @@ Se coló: ${lista}`;
   // Muestra u oculta el botón de cancelar según el estado de la suscripción
   function actualizarBtnCancelar() {
     const user = getCurrentUser();
-    const btn = document.getElementById('btnCancelarSub');
-    if (btn) btn.style.display = (user && user.suscripcionActiva && user.tieneSub && !user.isBeta) ? '' : 'none';
-    // Mismo criterio: "Gestionar suscripción" abre el Portal de Stripe, que
-    // necesita un stripe_customer_id real -- sin él solo da un error.
+    // "Gestionar suscripción" abre el panel propio, útil para cualquiera con
+    // cuenta (descargar/eliminar datos, cambiar de plan). Lo que depende de
+    // Stripe se decide dentro, en _pintarMiSuscripcion().
     const btnGestion = document.getElementById('btnGestionarSub');
-    if (btnGestion) btnGestion.style.display = (user && user.tieneSub && !user.isBeta) ? '' : 'none';
+    if (btnGestion) btnGestion.style.display = user ? '' : 'none';
     actualizarBtnAdmin();
   }
 
@@ -28484,6 +28578,170 @@ Se coló: ${lista}`;
     document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
   }
 
+  // ===== PANEL "GESTIONAR SUSCRIPCIÓN" =====
+  function _fechaLarga(f) {
+    if (!f) return '';
+    const d = new Date(f);
+    return isNaN(d) ? '' : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function _pintarMiSuscripcion() {
+    const u = getCurrentUser() || {};
+    const tipo = (userData && userData.tipoPlan) || '';
+    const per = (userData && userData.periodicidad) || '';
+    const nombre = tipo.includes('Solo') ? 'Solo nutrición' : (tipo ? 'Plan completo' : 'K-ONE');
+    const perTxt = per ? ' · ' + per.charAt(0).toUpperCase() + per.slice(1) : '';
+    document.getElementById('msPlan').textContent = u.isBeta ? 'Acceso premium' : nombre + perTxt;
+
+    const fecha = _fechaLarga(u.fechaPago);
+    const conStripe = !!(u.tieneSub && !u.isBeta);
+    let estado = 'Sin suscripción activa', tono = 'neutro';
+    if (u.isBeta) { estado = fecha ? 'Sin coste · hasta el ' + fecha : 'Sin coste'; tono = 'ok'; }
+    else if (u.pagoPendiente) { estado = 'Pago pendiente: el último cobro no se pudo hacer'; tono = 'mal'; }
+    else if (u.suscripcionActiva && u.cancelaAlFinal) { estado = 'Cancelada · tu acceso sigue hasta el ' + (fecha || 'final del período'); tono = 'aviso'; }
+    else if (u.suscripcionActiva && u.estadoSub === 'trialing') { estado = 'Mes gratis · primer cobro el ' + (fecha || 'final de la prueba'); tono = 'ok'; }
+    else if (u.suscripcionActiva && conStripe) { estado = 'Activa · se renueva el ' + (fecha || 'final del período'); tono = 'ok'; }
+    else if (u.suscripcionActiva) { estado = 'Activa'; tono = 'ok'; }
+    const pill = document.getElementById('msEstado');
+    pill.textContent = estado;
+    pill.dataset.tono = tono;
+
+    const ver = (id, si) => { const el = document.getElementById(id); if (el) el.style.display = si ? '' : 'none'; };
+    ver('msFilaPago', conStripe);
+    ver('msFilaCancelar', conStripe && u.suscripcionActiva && !u.cancelaAlFinal);
+    ver('msFilaReactivar', conStripe && u.suscripcionActiva && u.cancelaAlFinal);
+    const pago = document.getElementById('msFilaPago');
+    if (pago) pago.classList.toggle('ms-destacada', !!u.pagoPendiente);
+    const pagoSub = document.getElementById('msFilaPagoSub');
+    if (pagoSub) pagoSub.textContent = u.pagoPendiente ? 'Actualiza tu tarjeta para recuperar el acceso' : 'Cambia tu método de pago o descarga tus facturas';
+    const cancSub = document.getElementById('msFilaCancelarSub');
+    if (cancSub) cancSub.textContent = 'Mantienes el acceso hasta el ' + (fecha || 'final del período');
+  }
+
+  function abrirMiSuscripcion() {
+    if (!getCurrentUser()) return;
+    _pintarMiSuscripcion();
+    document.getElementById('modalMiSuscripcion')?.classList.add('visible');
+  }
+  function cerrarMiSuscripcion() {
+    document.getElementById('modalMiSuscripcion')?.classList.remove('visible');
+  }
+
+  async function abrirPortalPago(btn) {
+    if (btn) btn.disabled = true;
+    try { await gestionarSuscripcion(); } finally { if (btn) btn.disabled = false; }
+  }
+
+  // Anula una cancelación programada sin cobrar nada (mismo endpoint que el aviso
+  // de renovación). Si Stripe pide elegir plan y pagar, abre el paywall voluntario.
+  async function reactivarDesdePanel(btn) {
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000); return; }
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch('/api/reactivate-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo reactivar');
+      if (data.reactivated || data.noChange) {
+        await syncProfileFromSupabase(session.user);
+        // El webhook de Stripe puede tardar unos segundos en reflejarlo en la BD.
+        const u2 = getCurrentUser();
+        if (u2) setCurrentUser({ ...u2, cancelaAlFinal: false });
+        _pintarMiSuscripcion();
+        showToast('Listo: tu suscripción sigue activa. No se ha hecho ningún cargo nuevo.', 6000);
+        return;
+      }
+      cerrarMiSuscripcion();
+      abrirRenovacionVoluntaria();
+    } catch (e) {
+      showToast('No se pudo reactivar: ' + e.message, 6000);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // ===== TUS DATOS (RGPD): descargar una copia y eliminar la cuenta =====
+  async function descargarMisDatos() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const copia = {
+      generado: new Date().toISOString(),
+      nota: 'Copia de los datos que K-ONE guarda de tu cuenta.',
+      cuenta: { nombre: user.nombre || '', email: user.email || '' },
+      cuestionario_y_registros: userData || {},
+      plan_generado: generatedPlan || null
+    };
+    try {
+      if (_supaUserId) {
+        const [sub, msg, hitos] = await Promise.all([
+          supa.from('subscriptions').select('status, plan, current_period_start, current_period_end, cancel_at_period_end').eq('user_id', _supaUserId).maybeSingle(),
+          supa.from('mensajes_cliente').select('asunto, mensaje, respuesta, created_at').eq('user_id', _supaUserId),
+          supa.from('hitos_canjes').select('*').eq('user_id', _supaUserId)
+        ]);
+        copia.suscripcion = sub.data || null;
+        copia.mensajes = msg.data || [];
+        copia.hitos_canjeados = hitos.data || [];
+      }
+    } catch (e) { copia.aviso = 'No se pudieron incluir los mensajes y la suscripción: ' + e.message; }
+    const blob = new Blob([JSON.stringify(copia, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mis-datos-k-one.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    showToast('Copia de tus datos descargada.', 3500);
+  }
+
+  function abrirEliminarCuenta() {
+    if (!getCurrentUser()) return;
+    kEvento('eliminar_cuenta_iniciado');
+    const inp = document.getElementById('eliminarCuentaConfirm');
+    if (inp) inp.value = '';
+    actualizarBotonEliminar();
+    document.getElementById('modalEliminarCuenta')?.classList.add('visible');
+    if (inp) setTimeout(() => inp.focus(), 50);
+  }
+  function cerrarEliminarCuenta() {
+    document.getElementById('modalEliminarCuenta')?.classList.remove('visible');
+  }
+  function actualizarBotonEliminar() {
+    const ok = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim().toUpperCase() === 'ELIMINAR';
+    const b = document.getElementById('btnConfirmarEliminar');
+    if (b) { b.disabled = !ok; b.style.opacity = ok ? '1' : '.45'; b.style.cursor = ok ? 'pointer' : 'not-allowed'; }
+  }
+  async function confirmarEliminarCuenta() {
+    const conf = (document.getElementById('eliminarCuentaConfirm')?.value || '').trim();
+    if (conf.toUpperCase() !== 'ELIMINAR') return;
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
+    const btn = document.getElementById('btnConfirmarEliminar');
+    if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
+    try {
+      const res = await fetch('/api/update-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ accion: 'eliminar-cuenta', confirmacion: conf })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar la cuenta');
+      kEvento('eliminar_cuenta_confirmado');
+      try { await supa.auth.signOut({ scope: 'local' }); } catch (e) {}
+      // Fuera todo lo guardado en este dispositivo, salvo la decisión de cookies.
+      try {
+        const cookies = localStorage.getItem('kone_cookies_ok');
+        localStorage.clear(); sessionStorage.clear();
+        if (cookies) localStorage.setItem('kone_cookies_ok', cookies);
+      } catch (e) {}
+      location.replace('/?cuenta=eliminada');
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Eliminar para siempre'; }
+      showToast(e.message, 7000);
+    }
+  }
+
   function cerrarModalCancelar() {
     document.getElementById('modalCancelarSuscripcion')?.classList.remove('visible');
   }
@@ -28533,8 +28791,8 @@ Se coló: ${lista}`;
         _cerrarMotivoBaja(motivo || 'solo_texto');
       }
 
-      const btnPanel = document.getElementById('btnCancelarSub');
-      if (btnPanel) { btnPanel.style.display = 'none'; }
+      const uCancel = getCurrentUser();
+      if (uCancel) setCurrentUser({ ...uCancel, cancelaAlFinal: true });
       cerrarModalCancelar();
       showToast(`Suscripción cancelada. Tu acceso sigue activo hasta el ${_fechaFinCancelacion}.`, 6000);
     } catch (e) {
@@ -29890,6 +30148,10 @@ Se coló: ${lista}`;
   });
 
   window.onload = async () => {
+    if (new URLSearchParams(location.search).get('cuenta') === 'eliminada') {
+      history.replaceState({}, '', location.pathname);
+      setTimeout(() => showToast('Tu cuenta y tus datos se han eliminado. Gracias por haber estado en K-ONE.', 8000), 600);
+    }
     // Se lee antes de nada: goTo() borra el hash legal al salir de esa pantalla.
     const _hashLegal = (location.hash || '').slice(1);
     _sincronizarPrecios();
