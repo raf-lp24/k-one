@@ -131,7 +131,7 @@
         {
           "@type": "Question",
           "name": "¿Qué pasa después del mes gratis?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Te avisamos por email unos días antes, y puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
         },
         {
           "@type": "Question",
@@ -5785,6 +5785,11 @@
     max-width: 400px;
     position: relative;
   }
+  /* El paywall del primer mes lleva adelanto del plan + garantías: en un móvil bajo
+     no cabe entero, así que se desplaza por dentro (el botón siempre se alcanza). */
+  #modalPaywall .modal-box { max-height: 92vh; max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* El botón de activar se queda pegado abajo mientras se lee el adelanto: no hay que buscarlo. */
+  #modalPaywall #paywallBtn { position: sticky; bottom: 10px; z-index: 3; box-shadow: 0 0 0 10px var(--carbon); }
   .modal-box-wide {
     max-width: 640px;
     max-height: 85vh;
@@ -6547,6 +6552,7 @@
     <button class="modal-close" id="paywallCerrarVoluntario" style="display:none" onclick="cerrarPaywallVoluntario()" aria-label="Cerrar">✕</button>
     <div class="modal-title" id="paywallTitulo">Tu plan está listo</div>
     <p class="modal-desc" id="paywallDesc">Elige cómo quieres continuar con tu plan, tu seguimiento y el resto de funciones.</p>
+    <div id="paywallAdelanto" style="display:none"></div>
     <!-- Modo "primer mes gratis" (automático, sin código): el cliente elige aquí
          mismo a qué plan pasará al terminar los 30 días, para que no haya sorpresas. -->
     <div id="paywallOfertaBox" style="display:none">
@@ -6585,6 +6591,13 @@
       <p class="field-hint" id="paywallDetalle" style="margin-bottom:8px"></p>
     </div>
     <button class="btn-primary" id="paywallBtn" style="width:100%;padding:14px;margin-top:16px" onclick="pagarDesdePaywall()">Continuar con K-One →</button>
+    <!-- Solo en el primer mes gratis: lo que más frena es dejar la tarjeta, así que se dice
+         claro qué pasa con ella (y se cumple: el cron avisa antes del primer cobro). -->
+    <div id="paywallGarantia" style="display:none;margin-top:14px;padding:12px 14px;border:1px solid var(--humo);border-radius:10px;background:var(--carbon)">
+      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> <strong style="color:var(--blanco)">Hoy no se cobra nada.</strong> La tarjeta solo sirve para reservar tu plan.</p>
+      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Te avisamos por email antes del primer cobro.</p>
+      <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Cancelas en un clic desde tu perfil, sin llamadas ni explicaciones.</p>
+    </div>
     <p class="field-hint" style="text-align:center;margin-top:14px">Pago seguro · Cancela cuando quieras · Sin permanencia</p>
     <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--blanco);font-family:'DM Mono',monospace;cursor:pointer" onclick="logout()">Cerrar sesión</p>
   </div>
@@ -7532,6 +7545,7 @@
           </span>
           Sin permanencia
         </span>
+        <span id="heroRating" style="display:none"></span>
       </div>
     </div>
   </section>
@@ -7828,7 +7842,7 @@
     <div class="faq-grid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes gratis?</summary>
-        <p class="faq-a">Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
+        <p class="faq-a">Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Te avisamos por email unos días antes, y puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
@@ -25146,7 +25160,8 @@
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <p style="margin:0 0 8px;font-weight:600;color:var(--blanco);font-size:15px">Revisa tu correo</p>
             <p style="margin:0;color:var(--metal-claro);font-size:13px;line-height:1.6">Hemos enviado un enlace de confirmación a<br><strong style="color: var(--brasa-txt)">${_esc(email)}</strong></p>
-            <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí.</p>
+            <p style="margin:12px 0 0;color:var(--metal);font-size:11px">Haz clic en el enlace del email y después inicia sesión aquí. Si no lo ves, mira también en <strong style="color:var(--metal-claro)">spam o promociones</strong>.</p>
+            <button type="button" id="btnReenviarConfirmacion" onclick="reenviarConfirmacion(${JSON.stringify(email).replace(/"/g, '&quot;')})" style="margin-top:14px;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:12px;cursor:pointer;padding:10px 16px">No me ha llegado: reenviar el correo</button>
           `;
           loginCard.insertBefore(aviso, loginCard.children[2]);
         }
@@ -25228,6 +25243,27 @@
       saveUserData(TEST_EMAIL, { userData: testUserData, plan: testPlan, savedAt: new Date().toISOString() });
     }
     return data;
+  }
+
+  // Reenvío del correo de confirmación (el paso donde más gente se queda a medias: el
+  // correo tarda, cae en spam o se escribió mal). Con espera de 60 s entre envíos.
+  let _reenvioHasta = 0;
+  async function reenviarConfirmacion(email) {
+    const btn = document.getElementById('btnReenviarConfirmacion');
+    if (Date.now() < _reenvioHasta) { showToast('Espera un momento antes de volver a pedirlo.', 3000); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    try {
+      const { error } = await supa.auth.resend({ type: 'signup', email, options: { emailRedirectTo: window.location.origin } });
+      if (error) throw error;
+      _reenvioHasta = Date.now() + 60000;
+      showToast('Te lo hemos vuelto a enviar. Mira también en spam o promociones.', 6000);
+      if (btn) btn.textContent = 'Reenviado: revisa tu correo';
+      setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'No me ha llegado: reenviar el correo'; } }, 60000);
+    } catch (e) {
+      const limite = /rate|seconds|too many/i.test(e.message || '');
+      showToast(limite ? 'Acabas de pedirlo: espera un minuto y vuelve a probar.' : 'No hemos podido reenviarlo ahora. Escríbenos a k.one.fit26@gmail.com y te ayudamos.', 7000);
+      if (btn) { btn.disabled = false; btn.textContent = 'No me ha llegado: reenviar el correo'; }
+    }
   }
 
   // ===== LOGIN =====
@@ -25973,6 +26009,35 @@ Se coló: ${lista}`;
     if (btnCerrar) btnCerrar.style.display = 'none';
   }
 
+  // ADELANTO DEL PLAN en el paywall del primer mes (1 oct 2026). Antes el cliente
+  // creaba cuenta, confirmaba el email, contestaba 6 bloques y metía la tarjeta
+  // sin haber visto NADA de su plan: "Tu plan está listo" era un cartel vacío.
+  // Aquí se enseña una muestra pequeña y real (sus cifras, su primera sesión y
+  // tres platos de su primer día); el plan entero —7 días, 5 opciones por comida,
+  // lista de la compra— sigue detrás del paso de activar el mes gratis.
+  function _pintarAdelantoPaywall() {
+    const box = document.getElementById('paywallAdelanto');
+    if (!box) return;
+    let plan = (typeof generatedPlan !== 'undefined' && generatedPlan) || null;
+    if (!plan) { const u = getCurrentUser(); plan = (u && getUserData(u.email)?.plan) || null; }
+    if (!plan || !(plan.kcalObj > 0)) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    const chip = (valor, texto) => `<div style="flex:1 1 76px;background:var(--grafito);border:1px solid var(--humo);border-radius:10px;padding:8px 6px;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:var(--blanco-puro)">${_esc(valor)}</div><div style="font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--metal);margin-top:3px">${_esc(texto)}</div></div>`;
+    const sesiones = Array.isArray(plan.semana) && !plan.soloDieta ? plan.semana.filter(d => /entren/i.test(d.tipo || '')) : [];
+    let html = `<div style="font-size:11px;color:var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:1.5px;margin:2px 0 8px">UN ADELANTO DE TU PLAN</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">${chip(plan.kcalObj, 'kcal al día')}${plan.protObj ? chip(plan.protObj + ' g', 'proteína') : ''}${sesiones.length ? chip(sesiones.length, sesiones.length === 1 ? 'sesión / semana' : 'sesiones / semana') : ''}</div>`;
+    if (sesiones[0] && sesiones[0].resumen) {
+      html += `<div style="font-size:13px;color:var(--metal-claro);margin-bottom:8px"><span style="color:var(--blanco)">Tu primera sesión:</span> ${_esc(sesiones[0].dia || '')} · ${_esc(sesiones[0].resumen)}</div>`;
+    }
+    const tomas = (plan.nutricionPorDia && plan.nutricionPorDia[0]) || [];
+    const muestra = ['Desayuno', 'Comida', 'Cena'].map(m => tomas.find(t => t.momento === m)).filter(t => t && t.opciones && t.opciones[0]);
+    if (muestra.length) {
+      html += `<div style="font-size:13px;color:var(--blanco);margin-bottom:4px">Un día de tus comidas:</div><ul style="list-style:none;margin:0 0 8px;padding:0">${muestra.map(t => `<li style="font-size:12.5px;color:var(--metal-claro);padding:3px 0;display:flex;gap:8px;justify-content:space-between"><span><span style="color:var(--blanco)">${_esc(t.momento)}</span> · ${_esc(t.opciones[0].nombre)}</span><span style="white-space:nowrap;color:var(--metal)">${_esc(t.opciones[0].kcal || '')}</span></li>`).join('')}</ul>`;
+    }
+    html += `<p style="font-size:11.5px;color:var(--metal);line-height:1.5;margin:0">Es solo una muestra: dentro tienes los 7 días completos${plan.soloDieta ? '' : ', cada ejercicio explicado'}, 5 opciones por comida y la lista de la compra.</p>`;
+    box.innerHTML = `<div style="background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:14px 14px 12px;margin:14px 0 4px">${html}</div>`;
+    box.style.display = 'block';
+  }
+
   function _mostrarPaywallInner(modal, user) {
     modal.classList.add('visible');
     if (!user) { user = getCurrentUser(); }
@@ -25987,6 +26052,9 @@ Se coló: ${lista}`;
     const btnCerrar = document.getElementById('paywallCerrarVoluntario');
     if (btnCerrar) btnCerrar.style.display = _paywallVoluntario ? '' : 'none';
     document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
+    const _gar = document.getElementById('paywallGarantia'); if (_gar) _gar.style.display = primerMes ? 'block' : 'none';
+    if (primerMes) { try { _pintarAdelantoPaywall(); } catch (e) { console.warn('[paywall] adelanto:', e.message); } }
+    else { const _ad = document.getElementById('paywallAdelanto'); if (_ad) { _ad.style.display = 'none'; _ad.innerHTML = ''; } }
     document.getElementById('paywallPlanChooser').style.display = (primerMes || pagoFallido) ? 'none' : 'block';
     const titulo = document.getElementById('paywallTitulo');
     const desc = document.getElementById('paywallDesc');
@@ -28769,6 +28837,16 @@ Se coló: ${lista}`;
         return;
       }
       _actualizarReviewSchema(data);
+      // Nota media junto al botón de empezar: prueba social con datos reales, y solo
+      // cuando hay suficientes opiniones para que el número diga algo (5 o más).
+      try {
+        const chipNota = document.getElementById('heroRating');
+        if (chipNota && data.length >= 5) {
+          const media = data.reduce((acc, r) => acc + Math.max(1, Math.min(5, r.estrellas || 5)), 0) / data.length;
+          chipNota.textContent = '★ ' + media.toFixed(1).replace('.', ',') + ' · ' + data.length + ' opiniones de clientes';
+          chipNota.style.display = '';
+        }
+      } catch (e) {}
       const carousel = document.getElementById('testimonialsCarousel');
       const empty = document.getElementById('testimonialsEmpty');
       if (carousel) carousel.style.display = '';

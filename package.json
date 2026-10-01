@@ -4,7 +4,7 @@
   "private": true,
   "description": "K-ONE — funciones serverless de Vercel (Stripe + Supabase)",
   "scripts": {
-    "test": "node scripts/comprobar-proyecto.js && node scripts/probar-eliminar-cuenta.js && node scripts/comprobar-motor.js && node scripts/auditoria-completa.js"
+    "test": "node scripts/comprobar-proyecto.js && node scripts/probar-eliminar-cuenta.js && node scripts/probar-cron.js && node scripts/comprobar-motor.js && node scripts/auditoria-completa.js"
   },
   "dependencies": {
     "@sentry/node": "^10.75.3",

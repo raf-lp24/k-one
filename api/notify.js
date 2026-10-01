@@ -375,7 +375,7 @@ async function handleCronRetencion(req, res) {
         perfiles = r.data;
       }
     }
-    const { data: subs } = await supa.from('subscriptions').select('user_id, status');
+    const { data: subs } = await supa.from('subscriptions').select('user_id, status, plan, current_period_end, cancel_at_period_end');
     const subByUser = {};
     (subs || []).forEach(s => { subByUser[s.user_id] = s; });
 
@@ -385,7 +385,7 @@ async function handleCronRetencion(req, res) {
       (users || []).forEach(u => { if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at; });
     } catch (_) {}
 
-    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d']);
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
 
@@ -551,6 +551,58 @@ async function handleCronRetencion(req, res) {
           }
         }
       } catch (pushBlockErr) { console.error('[notify-cron] push diario error:', pushBlockErr.message); }
+    }
+
+    // AVISO ANTES DEL PRIMER COBRO (1 oct 2026). Quien se apunta con el mes gratis deja
+    // la tarjeta y a los 30 días se le cobra solo. Sin aviso previo, ese cobro es una
+    // sorpresa para quien se olvidó (reclamaciones, devoluciones y mala fama), y saber
+    // que habrá aviso es justo lo que hace más fácil dejar la tarjeta hoy. Se manda UNA
+    // vez, cuando faltan 3 días o menos para que termine la prueba, a quien sigue en
+    // prueba y no la ha cancelado. Va por el cron y no por el evento trial_will_end de
+    // Stripe para no depender de activarlo a mano en el panel de Stripe.
+    let enviadosPrimerCobro = 0;
+    {
+      const ETIQUETA_PLAN = {};
+      [['STRIPE_PRICE_COMPLETO_MENSUAL', 'el plan completo: 7,99 € al mes'],
+       ['STRIPE_PRICE_COMPLETO_TRIMESTRAL', 'el plan completo: 14,99 € cada 3 meses'],
+       ['STRIPE_PRICE_NUTRICION_MENSUAL', 'el plan Solo nutrición: 4,99 € al mes']
+      ].forEach(([env, texto]) => { if (process.env[env]) ETIQUETA_PLAN[process.env[env]] = texto; });
+      const tresDias = ahora.getTime() + 3 * 86400000;
+      for (const p of (sinEmail ? [] : (perfiles || []))) {
+        try {
+          const sub = subByUser[p.id];
+          if (!p.email || !sub || sub.status !== 'trialing' || sub.cancel_at_period_end || !sub.current_period_end) continue;
+          if (p.is_beta) continue; // premium concedido: no se le cobra
+          const fin = new Date(sub.current_period_end).getTime();
+          if (!(fin > ahora.getTime() && fin <= tresDias)) continue;
+          if (yaEnviado.has(`aviso_primer_cobro:${p.email}`)) continue;
+          const nombre = p.nombre || (p.userdata && p.userdata.nombre) || '';
+          const primerNombre = nombre.split(' ')[0] || 'Hola';
+          const fecha = new Date(fin).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Madrid' });
+          const plan = ETIQUETA_PLAN[sub.plan];
+          const html = emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu mes gratis termina el ${esc(fecha)}</h1>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Solo un aviso, sin sorpresas: el <span style="color:#F0EDE8;font-weight:500">${esc(fecha)}</span> termina tu primer mes gratis en K-ONE${plan ? ` y, si sigues, se te cobrará ${esc(plan)}` : ' y empezará tu cuota'}.</p>
+              <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">LO QUE PUEDES HACER</div>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Seguir:</span> no tienes que hacer nada.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Cambiar de plan:</span> desde tu perfil, y se aplica en el siguiente período.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No continuar:</span> pulsa «Cancelar suscripción» en el menú de tu perfil antes de esa fecha y no se te cobrará nada.</p>
+              </div>
+              <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 18px">Si tienes cualquier duda, responde a este correo y te ayudamos.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ABRIR MI PERFIL</a>
+            </div>`);
+          const asunto = `${primerNombre}, tu mes gratis termina el ${fecha}`;
+          await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });
+          await supa.from('email_log').insert({ tipo: 'aviso_primer_cobro', destinatario: p.email, asunto, html, datos: JSON.stringify({ resumen: `Aviso de fin de prueba (${fecha})` }) });
+          yaEnviado.add(`aviso_primer_cobro:${p.email}`);
+          enviadosPrimerCobro++;
+        } catch (ePC) { console.warn('[notify-cron] aviso primer cobro:', ePC.message); }
+      }
     }
 
     let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0;
@@ -1231,7 +1283,7 @@ async function handleCronRetencion(req, res) {
     }
 
     console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosResumen, pushEnviados, backupOk });
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     capturarError(err, { fn: 'notify-cron' });

@@ -27,6 +27,9 @@ jobs:
       # Borrado de cuenta del cliente (Stripe y base de datos simulados).
       - name: Eliminar cuenta
         run: node scripts/probar-eliminar-cuenta.js
+      # El aviso diario de las 09:00 entero, 8 días simulados (emails, push, copia de seguridad, planes al día).
+      - name: Cron diario
+        run: node scripts/probar-cron.js
       # ~600 planes con combinaciones de alergias, enfermedades, lesiones,
       # deportes y objetivos: ninguno puede llevar un alimento prohibido (Thor).
       - name: Planes de muestra (motor + Thor)

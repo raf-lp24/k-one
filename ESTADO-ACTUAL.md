@@ -18,13 +18,13 @@ Web de entrenamiento y nutrición personalizados en **https://k-one.fit**. Prime
 | Servicios | Vercel (hosting + funciones + cron 09:00 UTC), Supabase (Auth, Postgres con RLS, Storage), Stripe (cobros), Resend (emails), Web Push, Sentry, Google Analytics (solo con consentimiento). |
 
 ## Lo que hace el cron de las 09:00 (`GET /api/notify`)
-Avisos push de entreno · emails de retención (día 1, día 8, reenganche 7/14/21 días, resumen semanal) · **puesta al día de los planes** con el motor actual (y revisión de Thor) · resumen para el admin · **copia de seguridad** en Storage (bucket `backups`, privado). Se prueba entero con una base de datos simulada; ver «Pruebas».
+Avisos push de entreno · emails de retención (día 1, día 8, reenganche 7/14/21 días, resumen semanal) · **puesta al día de los planes** con el motor actual (y revisión de Thor) · resumen para el admin · **copia de seguridad** en Storage (bucket `backups`, privado). Incluye el **aviso antes del primer cobro** (a quien sigue en prueba, sin cancelar, a 3 días o menos). Se prueba entero con una base de datos simulada; ver «Pruebas».
 
 ## Pruebas — pasar siempre antes de subir
 ```
 npm test
 ```
-Encadena: estructura del proyecto (`comprobar-proyecto.js`: ≤12 funciones, sintaxis, JSON, FAQ = JSON-LD, precios, tabla de alimentos incrustada, páginas SEO) → borrado de cuenta (`probar-eliminar-cuenta.js`) → ~600 planes con el motor real y Thor (`comprobar-motor.js`, incluye que «Ver macros» cuadre ≥90 %) → auditoría de alimentos y recetario (`auditoria-completa.js`).
+Encadena: estructura del proyecto (`comprobar-proyecto.js`: ≤12 funciones, sintaxis, JSON, FAQ = JSON-LD, precios, tabla de alimentos incrustada, páginas SEO) → borrado de cuenta (`probar-eliminar-cuenta.js`) → el cron de las 09:00 entero con 8 días simulados (`probar-cron.js`) → ~600 planes con el motor real y Thor (`comprobar-motor.js`, incluye que «Ver macros» cuadre ≥90 %) → auditoría de alimentos y recetario (`auditoria-completa.js`).
 Además `tests.html` (20 pruebas en el navegador; abrir con el servidor local). GitHub Actions lo pasa en cada subida y avisa si falla, **pero no bloquea el despliegue**.
 
 ## Reglas que hay que respetar
