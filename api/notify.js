@@ -1247,6 +1247,12 @@ async function handlePost(req, res) {
       const msg = limpiar(b.mensaje, 300), origen = limpiar(b.origen, 200);
       const pantalla = limpiar(b.pantalla, 40), ua = limpiar(b.ua, 160);
       if (!msg) return res.status(200).json({ ok: true });
+      // Lo mismo que filtra el navegador, aquí también: una web guardada en un
+      // móvil desde antes de ese filtro sigue mandando el ruido de los
+      // navegadores internos de Instagram/Facebook/TikTok (WebView de Android) y
+      // acabaría en Sentry y en tu móvil como si fuera un fallo nuestro.
+      if (/postMessage|Java object is gone|JavaBridge|webkit\.messageHandlers|__gCrWeb|instantSearchSDKJSBridge/i.test(msg)) return res.status(200).json({ ok: true });
+      if (origen && !/k-one\.fit|localhost|vercel\.app/i.test(origen)) return res.status(200).json({ ok: true });
       if (await estaLimitadoPorTasa(req, 'error_cliente')) return res.status(200).json({ ok: true });
       console.error('[error-cliente]', JSON.stringify({ msg, origen, pantalla, ua }));
       capturarError(new Error('navegador: ' + msg), { origen, pantalla, ua });
