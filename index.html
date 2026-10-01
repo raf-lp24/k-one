@@ -28852,7 +28852,7 @@ Se coló: ${lista}`;
         if (chipNota && data.length >= 5) {
           const media = data.reduce((acc, r) => acc + Math.max(1, Math.min(5, r.estrellas || 5)), 0) / data.length;
           [...chipNota.childNodes].filter(n => n.nodeType === 3).forEach(n => n.remove());
-          chipNota.appendChild(document.createTextNode('Valoración ' + media.toFixed(1).replace('.', ',') + ' de 5'));
+          chipNota.appendChild(document.createTextNode('Valoración ' + media.toFixed(1).replace('.', ',')));
           chipNota.style.display = '';
         }
       } catch (e) {}
