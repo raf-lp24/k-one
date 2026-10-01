@@ -34,7 +34,7 @@ begin
   return loc || '@' || dom;
 end $$;
 
-revoke all on function public.normalizar_email_prueba(text) from anon, authenticated;
+revoke all on function public.normalizar_email_prueba(text) from public, anon, authenticated;
 
 -- Relleno inicial: todos los clientes actuales que ya han tenido suscripción.
 insert into public.pruebas_usadas (email_hash)
