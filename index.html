@@ -10956,14 +10956,44 @@
     { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in cada fin de semana', text: 'Cinco minutos: tu peso, cómo te has encontrado y cuántos días entrenaste. Con eso ajustamos tu plan de la semana siguiente. Cuando toque, te lo recordamos en Hoy.' },
     { section: 'progreso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 15 L11 10 L14 13 L19 6"/></svg>', title: 'Tu progreso, y el resto en «Más»', text: 'En Progreso ves cómo suben tus pesos, tu evolución, tus fotos y tus hitos. Notas, Contacto y tu suscripción están en «Más» (en el ordenador, en el menú de la izquierda). Si tienes cualquier duda, escríbenos: te contesta una persona.' }
   ];
+  // NOVEDADES (2 oct 2026): versión corta del tutorial para quien YA era cliente
+  // antes del rediseño, que no vuelve a ver el tutorial completo. Sale una sola
+  // vez (userData.novedadesVisto). Cuando haya otras novedades, se cambia el id.
+  const NOVEDADES_ID = 'area-oct-2026';
+  const NOVEDADES_STEPS = [
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L19 8.2l-3.8 3.4 1.1 5L12 14.3 7.7 16.6l1.1-5L5 8.2l5.1-.6z"/></svg>', title: 'Hemos renovado tu área', text: 'Ahora Hoy reúne tu sesión, tus comidas del día (que puedes marcar cuando las hagas) y tu racha de días seguidos. En el móvil tienes una barra abajo para ir a Hoy, Entreno, Comida y Progreso; Notas, Contacto y tu suscripción están en «Más».' },
+    { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>', title: 'Nuevo: modo entrenamiento', text: 'Pulsa «Empezar entrenamiento» y te guiamos ejercicio a ejercicio a pantalla completa, con el peso que usaste la última vez. Marca cada serie con el ✓ y el descanso arranca solo; al terminar verás tus kilos movidos y tus récords.' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg>', title: 'Y el check-in te avisa', text: 'Cuando toque tu check-in semanal, te saldrá una tarjeta en Hoy. Todo lo demás sigue donde estaba: tu plan, tus pesos y tus comidas no cambian.' }
+  ];
+  let _modoTour = 'completo';
+
   // Los pasos que tocan a este cliente (Solo nutrición no ve los de entrenamiento).
   function _pasosTour() {
     const solo = !!(generatedPlan && generatedPlan.soloDieta);
-    return ONBOARDING_STEPS.filter(p => !(solo && p.soloEntreno));
+    const base = _modoTour === 'novedades' ? NOVEDADES_STEPS : ONBOARDING_STEPS;
+    return base.filter(p => !(solo && p.soloEntreno));
+  }
+
+  function startNovedades() {
+    if (document.getElementById('onboardingModal')?.classList.contains('visible')) return;
+    if (document.querySelector('.modal-overlay.visible')) return; // paywall, encuesta...
+    _modoTour = 'novedades';
+    onboardingStepIdx = 0;
+    document.getElementById('onboardingModal').classList.add('visible');
+    renderOnboardingStep();
+    kEvento('novedades_vistas');
+  }
+  // Se llama al cargar el panel: solo a quien ya hizo el tutorial antes del
+  // rediseño, tiene acceso y no lo ha visto todavía.
+  function comprobarNovedades(email) {
+    if (!userData || !userData.onboardingCompletado || userData.novedadesVisto === NOVEDADES_ID) return;
+    if (!tieneAccesoActivo(email)) return;
+    setTimeout(startNovedades, 1500);
   }
   let onboardingStepIdx = 0;
 
   function startOnboarding() {
+    _modoTour = 'completo';
     onboardingStepIdx = 0;
     document.getElementById('onboardingModal').classList.add('visible');
     renderOnboardingStep();
@@ -10976,8 +11006,8 @@
     document.getElementById('onboardingIcon').innerHTML = step.icon;
     document.getElementById('onboardingTitle').textContent = step.title;
     document.getElementById('onboardingText').textContent = step.text;
-    document.getElementById('onboardingStepLabel').textContent = `Paso ${onboardingStepIdx + 1} de ${_pasos.length}`;
-    document.getElementById('onboardingNextBtn').textContent = onboardingStepIdx === _pasos.length - 1 ? 'Empezar →' : 'Siguiente →';
+    document.getElementById('onboardingStepLabel').textContent = `${_modoTour === 'novedades' ? 'Novedad' : 'Paso'} ${onboardingStepIdx + 1} de ${_pasos.length}`;
+    document.getElementById('onboardingNextBtn').textContent = onboardingStepIdx === _pasos.length - 1 ? (_modoTour === 'novedades' ? 'Entendido →' : 'Empezar →') : 'Siguiente →';
     document.getElementById('onboardingDots').innerHTML = _pasos.map((_, i) =>
       `<span class="onboarding-dot ${i === onboardingStepIdx ? 'active' : ''}"></span>`).join('');
   }
@@ -10999,7 +11029,10 @@
     document.getElementById('onboardingModal').classList.remove('visible');
     showSection('hoy');
     userData.onboardingCompletado = true;
-    if (typeof gtag === 'function') gtag('event', 'tutorial_complete');
+    // Quien acaba de hacer el tutorial nuevo ya conoce las novedades.
+    userData.novedadesVisto = NOVEDADES_ID;
+    if (typeof gtag === 'function' && _modoTour !== 'novedades') gtag('event', 'tutorial_complete');
+    _modoTour = 'completo';
     const user = getCurrentUser();
     if (user) {
       saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
@@ -26416,6 +26449,7 @@
     comprobarPaywall(email);
     comprobarRenovacionMensual();
     try { _comprobarTarjetaPrueba(); } catch (e) {}
+    try { comprobarNovedades(email); } catch (e) {}
     comprobarRecordatorioCheckin();
     // Antes solo se ocultaba dentro del "if (generatedPlan) { if
     // (tieneAccesoActivo) {...} }" -- si saved no existía, o existía sin

@@ -35,7 +35,7 @@
     peso: 79, altura: 179, objetivo: 'Ganar músculo', deporte: 'Gimnasio / Fuerza',
     diasEntreno: '4', experiencia: 'Intermedio', lugar: 'Gimnasio', lesion: 'Ninguna',
     alergia: 'No', dieta: 'Como de todo', noComida: '', comidas: '5 veces',
-    onboardingCompletado: true, tipoPlan: 'Plan completo: entrenamiento + nutrición',
+    onboardingCompletado: true, novedadesVisto: 'area-oct-2026', tipoPlan: 'Plan completo: entrenamiento + nutrición',
     rotacionMenu: 'semanal',
     // Racha y adherencia con datos: si van a cero, las tarjetas del lateral
     // salen vacias y no se ve para que sirven.
