@@ -4596,13 +4596,30 @@
     text-align: center;
   }
 
+  /* Etiqueta "Paso 2 de 10" / "Novedad 1 de 3": la misma píldora con punto que
+     usa la web ("Programa activo", "Oferta del mes"), no un texto gris suelto. */
   .onboarding-step-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 10.5px;
+    font-weight: 500;
     letter-spacing: 2px;
-    color: var(--metal);
+    color: var(--brasa-txt);
     text-transform: uppercase;
+    background: rgba(209,66,14,0.10);
+    border: 1px solid rgba(209,66,14,0.4);
+    border-radius: 999px;
+    padding: 6px 14px;
     margin-bottom: 20px;
+  }
+  .onboarding-step-label::before {
+    content: '';
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--brasa);
+    box-shadow: 0 0 8px var(--brasa);
+    flex-shrink: 0;
   }
 
   .onboarding-icon { font-size: 36px; margin-bottom: 12px; }
