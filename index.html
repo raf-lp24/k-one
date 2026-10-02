@@ -1696,9 +1696,8 @@
   }
   .pill-activo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brasa); box-shadow: 0 0 8px var(--brasa); }
   .hoy-semana { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; color: var(--metal); text-transform: uppercase; }
-  .hoy-peso { text-align: right; flex-shrink: 0; }
-  .hoy-peso .hp-l { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
-  .hoy-peso .hp-v { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 0.9; color: var(--blanco); }
+  .hoy-frase { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgba(242,106,54,0.18); font-size: 15px; line-height: 1.55; font-style: italic; color: var(--blanco); max-width: 62ch; }
+  .hoy-frase:empty { display: none; }
 
   /* HOY EN EL MÓVIL (2 oct 2026): la cabecera ocupaba la primera pantalla entera
      (título enorme, texto motivacional de 6 líneas y el peso) y la sesión del día
@@ -1713,8 +1712,7 @@
     #section-hoy .hoy-pill-row { margin: 8px 0 0; gap: 10px; }
     #section-hoy .hoy-pill-row .pill-activo { padding: 4px 10px; font-size: 9px; }
     #section-hoy .hoy-semana { display: none; }
-    #section-hoy .hoy-peso .hp-l { font-size: 9px; margin-bottom: 3px; }
-    #section-hoy .hoy-peso .hp-v { font-size: 28px; }
+    #section-hoy .hoy-frase { margin-top: 12px; padding-top: 11px; font-size: 13.5px; line-height: 1.5; }
   }
 
   /* ===== REDISEÑO DEL ÁREA DE CLIENTES (2 oct 2026, prototipo aprobado) ===== */
@@ -1807,6 +1805,17 @@
   .ses-serie.actual .ses-marcar { border-color: var(--brasa-txt); color: var(--brasa-txt); }
   .ses-serie.hecha { border-color: rgba(76,175,122,.35); background: rgba(76,175,122,.06); }
   .ses-serie.hecha .ses-marcar { background: #4CAF7A; border-color: #4CAF7A; color: #fff; }
+  .ses-ajuste { display: flex; gap: 10px; }
+  .ses-aj-g { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--carbon); border: 1px solid var(--humo); border-radius: 12px; padding: 6px 6px 6px 12px; }
+  .ses-aj-g > span { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
+  .ses-aj-ctl { display: flex; align-items: center; gap: 4px; }
+  .ses-aj-ctl b { min-width: 22px; text-align: center; font-size: 15px; color: var(--blanco); }
+  .ses-aj-ctl button { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--humo); background: var(--negro); color: var(--metal-claro); font-size: 17px; cursor: pointer; }
+  .ses-aj-ctl button:disabled { opacity: .35; cursor: default; }
+  .ses-aj-g input { width: 64px; height: 34px; border-radius: 9px; border: 1px solid var(--humo); background: var(--negro); color: var(--blanco); text-align: center; font-size: 15px; font-weight: 600; font-family: inherit; }
+  .ses-aj-g input:focus, .ses-aj-ctl button:focus-visible { outline: none; border-color: var(--brasa-txt); }
+  .ses-anadir { width: 100%; background: none; border: 1px dashed var(--humo); border-radius: 12px; padding: 13px; color: var(--metal-claro); font-size: 13.5px; font-family: inherit; cursor: pointer; }
+  .ses-anadir:hover, .ses-anadir:focus-visible { border-color: var(--brasa-txt); color: var(--blanco); outline: none; }
   .ses-simple { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 14px; font-size: 14px; color: var(--metal-claro); line-height: 1.55; }
   .ses-fb { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 12px; }
   .ses-fb p { margin: 0 0 9px; font-size: 13px; color: var(--metal-claro); }
@@ -1921,6 +1930,10 @@
   .rail-blocks i { flex: 1; height: 20px; border-radius: 4px; background: var(--grafito); }
   .rail-blocks i.on { background: linear-gradient(180deg, #FF6A2B, var(--brasa)); }
   .rail-macros { display: flex; gap: 8px; margin-top: 16px; }
+  .rail-peso { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--humo); }
+  .rail-peso span { white-space: nowrap; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--metal); }
+  .rail-peso b { white-space: nowrap; font-family: 'Bebas Neue', sans-serif; font-size: 26px; font-weight: 400; line-height: 1; color: var(--blanco); }
+  .rk-kcal:empty + .rail-peso, body.ocultar-kcal .rail-peso { margin-top: 0; padding-top: 0; border-top: 0; }
   .rail-macros > div { flex: 1; text-align: center; padding: 10px 4px; background: var(--grafito); border-radius: 9px; }
   .rail-macros span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
   .rail-macros b { font-family: 'Bebas Neue', sans-serif; font-size: 22px; font-weight: 400; color: var(--blanco); margin-top: 3px; display: block; }
@@ -4751,7 +4764,9 @@
   body.ocultar-kcal #nutriResumen,
   body.ocultar-kcal #enfoqueNutricional,
   body.ocultar-kcal #kcalDiarioBar,
-  body.ocultar-kcal #railKcalCard,
+  body.ocultar-kcal #railKcalCard .rk-kcal,
+  body.ocultar-kcal .hc-obj,
+  body.ocultar-kcal .hc-kcal,
   body.ocultar-kcal .meal-preview-kcal,
   body.ocultar-kcal .meal-opt-macros-visual,
   body.ocultar-kcal .meal-opt-kcal,
@@ -9262,11 +9277,10 @@
               </div>
               <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
             </div>
-            <div class="hoy-peso">
-              <div class="hp-l">Peso actual</div>
-              <div class="hp-v" id="statPesoActual">—</div>
-            </div>
           </div>
+          <!-- Frase del día (2 oct 2026): antes iba en una tarjeta aparte más abajo;
+               ahora ocupa el hueco que dejó el peso, que pasó a la tarjeta de kcal. -->
+          <p class="hoy-frase" id="motivationText"></p>
         </div>
 
         <div class="hoy-grid">
@@ -9337,12 +9351,6 @@
           </div>
         </div>
 
-        <div class="motivation-card">
-          <div class="motivation-label">Mensaje del día</div>
-          <div class="motivation-text" id="motivationText">
-            "El primer día no requiere ganas. Requiere decisión. Ya la tomaste."
-          </div>
-        </div>
 
         <!-- Aviso de pago fallido (past_due). Desde el 27 sept 2026 el acceso se corta
              ya en el primer fallo (comprobarPaywall lo intercepta antes de llegar aquí),
@@ -9526,6 +9534,7 @@
                racha ya sale en la cabecera de Hoy (#hoyRacha). -->
 
           <div class="rail-card" id="railKcalCard">
+            <div class="rk-kcal">
             <div class="rail-card-head"><span>Kcal objetivo</span>
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3 3 5 3 8a3 3 0 0 1-6 0c0-1 .5-2 1-3"/><path d="M12 22a6 6 0 0 0 6-6c0-2-1-4-2-5"/><path d="M12 22a6 6 0 0 1-6-6c0-2 1-4 2-5"/></svg>
             </div>
@@ -9536,6 +9545,8 @@
               <div><span>Grasa</span><b id="railGrasa">—</b></div>
             </div>
             <div class="rail-sub" id="railKcalSub">objetivo diario</div>
+            </div>
+            <div class="rail-peso"><span>Peso actual</span><b id="statPesoActual">—</b></div>
           </div>
 
           <div class="rail-card">
@@ -13272,6 +13283,7 @@
   }
 
   function cerrarAnadirEjercicio() {
+    _sesAnadiendo = false;
     document.getElementById('modalAnadirEjercicio').classList.remove('visible');
     ocultarSugerenciasEjercicio();
     _extraEjercicioDia = null;
@@ -13288,8 +13300,10 @@
     if (!userData.ejerciciosExtra[_extraEjercicioDia]) userData.ejerciciosExtra[_extraEjercicioDia] = [];
     userData.ejerciciosExtra[_extraEjercicioDia].push(texto);
 
+    const desdeSesion = _sesAnadiendo;
     cerrarAnadirEjercicio();
     refrescarVistasEjercicios();
+    if (desdeSesion) { _sesAnadiendo = true; _sesRecargarTrasAnadir(); }
     const user = getCurrentUser();
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
@@ -20238,7 +20252,7 @@
     // ── KPIs adicionales ──────────────────────────────────────────────────────
     // Peso actual
     const statPesoEl = document.getElementById('statPesoActual');
-    if (statPesoEl) statPesoEl.textContent = userData.peso ? `${userData.peso} kg` : '—';
+    if (statPesoEl) statPesoEl.textContent = userData.peso ? `${String(userData.peso).replace('.', ',')} kg` : '—';
 
     // Adherencia: días completados esta semana vs días planificados (rail derecho)
     const statAdherenciaEl = document.getElementById('statAdherencia');
@@ -20958,7 +20972,7 @@
     return r <= 6 ? 150 : r <= 10 ? 120 : r <= 14 ? 90 : 60;
   }
   function _sesGuardar() {
-    try { localStorage.setItem(_SES_CLAVE(), JSON.stringify({ idx: _ses.idx, inicio: _ses.inicio, fin: _ses.fin || null, pasos: _ses.pasos.map(p => ({ key: p.key || p.nombre, hechas: p.hechas, kg: p.kg })) })); } catch (e) {}
+    try { localStorage.setItem(_SES_CLAVE(), JSON.stringify({ idx: _ses.idx, inicio: _ses.inicio, fin: _ses.fin || null, pasos: _ses.pasos.map(p => ({ key: p.key || p.nombre, hechas: p.hechas, kg: p.kg, series: p.series, reps: p.reps })) })); } catch (e) {}
   }
   function sesAbrir() {
     const pasos = _sesLeerEjercicios();
@@ -20969,6 +20983,9 @@
       const g = guardado && guardado.pasos && guardado.pasos[i];
       const mismo = g && g.key === (p.key || p.nombre);
       if (p.tipo === 'peso') {
+        // Series y repeticiones cambiadas a mano durante la sesión (solo para hoy).
+        if (mismo && g.series >= 1 && g.series <= 12) p.series = g.series;
+        if (mismo && g.reps) p.reps = String(g.reps);
         p.hechas = mismo && Array.isArray(g.hechas) ? g.hechas.slice(0, p.series) : [];
         while (p.hechas.length < p.series) p.hechas.push(false);
         const entry = userData.pesosEjercicios && userData.pesosEjercicios[p.key];
@@ -21049,6 +21066,9 @@
         + '<div class="ses-kg"><button type="button" onclick="sesKg(-1.5)" aria-label="Restar peso">−</button><input type="number" inputmode="decimal" step="0.5" min="0" value="' + _esc(String(p.kg === '' ? '' : p.kg)) + '" placeholder="kg" aria-label="Kilos" onchange="sesKgValor(this.value)"><button type="button" onclick="sesKg(1.5)" aria-label="Sumar peso">+</button></div>'
         + '<span class="ses-reps">' + _esc(p.reps) + '<small>reps</small></span>'
         + '<button type="button" class="ses-marcar" onclick="sesMarcar(' + i + ')" aria-pressed="' + hecha + '" aria-label="Marcar serie ' + (i + 1) + '">' + check + '</button></div>').join('') + '</div>';
+      // Ajustar el ejercicio de hoy: más o menos series y otras repeticiones.
+      h += '<div class="ses-ajuste"><div class="ses-aj-g"><span>Series</span><div class="ses-aj-ctl"><button type="button" onclick="sesSeries(-1)" aria-label="Quitar una serie"' + (p.series <= 1 || p.hechas[p.series - 1] ? ' disabled' : '') + '>−</button><b>' + p.series + '</b><button type="button" onclick="sesSeries(1)" aria-label="Añadir una serie"' + (p.series >= 12 ? ' disabled' : '') + '>+</button></div></div>'
+        + '<div class="ses-aj-g"><span>Reps</span><input type="text" maxlength="8" value="' + _esc(p.reps) + '" aria-label="Repeticiones de este ejercicio" onchange="sesReps(this.value)"></div></div>';
       if (_sesPasoHecho(p) && Number(p.kg) > 0) {
         const sensHoy = (entry && entry.historial || []).find(x => x.fecha === hoy)?.sensacion || '';
         const opt = (v, t) => '<button type="button" class="' + (sensHoy === v ? 'on' : '') + '" onclick="sesValorar(\'' + v + '\')">' + t + '</button>';
@@ -21057,6 +21077,7 @@
     } else {
       h += '</div><div class="ses-simple">' + _esc(p.texto || 'Sigue las indicaciones de tu plan.') + '</div>';
     }
+    h += '<button type="button" class="ses-anadir" onclick="sesAnadirEjercicio()">+ Añadir un ejercicio a la sesión</button>';
     cuerpo.innerHTML = h;
     cuerpo.scrollTop = 0;
     // Foto de la ficha (la misma de «Cómo se hace»), si la hay
@@ -21110,6 +21131,46 @@
     _sesGuardar();
     _sesPintar();
   }
+  // Series y reps de hoy: solo cambian esta sesión (se guardan con ella), no el plan.
+  function sesSeries(d) {
+    const p = _ses && _ses.pasos[_ses.idx];
+    if (!p || p.tipo !== 'peso') return;
+    if (d > 0 && p.series < 12) { p.series++; p.hechas.push(false); }
+    if (d < 0 && p.series > 1 && !p.hechas[p.series - 1]) { p.series--; p.hechas.pop(); }
+    _sesGuardar(); _sesPintar();
+  }
+  function sesReps(v) {
+    const p = _ses && _ses.pasos[_ses.idx];
+    const t = String(v || '').trim().slice(0, 8);
+    if (!p || !t) { _sesPintar(); return; }
+    p.reps = t;
+    _sesGuardar(); _sesPintar();
+  }
+  // Añadir un ejercicio sin salir de la sesión: la misma ventana de "Tus
+  // ejercicios" (nombre + series + reps, se repite cada semana ese día). Al
+  // guardarlo se vuelve a leer la sesión, que conserva lo ya hecho.
+  let _sesAnadiendo = false;
+  function sesAnadirEjercicio() {
+    const dia = generatedPlan && generatedPlan.semana && generatedPlan.semana[getIndiceDiaHoy()];
+    if (!dia || !dia.dia) return;
+    _sesAnadiendo = true;
+    abrirAnadirEjercicio(dia.dia);
+  }
+  function _sesRecargarTrasAnadir() {
+    if (!_sesAnadiendo || !_ses) return;
+    _sesAnadiendo = false;
+    const antes = _ses.pasos.length, idx = _ses.idx;
+    _sesGuardar();
+    try { if (_sesWake) _sesWake.release(); } catch (e) {}
+    _sesWake = null;
+    sesAbrir();
+    if (_ses && _ses.pasos.length > antes) {
+      _ses.idx = Math.min(idx, _ses.pasos.length - 1);
+      _sesGuardar(); _sesPintar();
+      showToast('Añadido al final de la sesión.');
+    }
+  }
+
   function sesValorar(v) {
     const p = _ses.pasos[_ses.idx];
     guardarSensacionEjercicio(p.key, p.nombre, v);
