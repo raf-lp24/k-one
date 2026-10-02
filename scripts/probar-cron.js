@@ -38,6 +38,7 @@ function perfil(i, extra = {}) {
 let n = 0;
 perfil(n++, { alta: -1.2, ud: { peso: '', onboardingCompletado: false }, conPlan: false });                 // 24h sin cuestionario
 perfil(n++, { alta: -9, sub: null });                                         // 8-9 días sin pagar
+const sinTarjeta = perfil(n++, { alta: -1.5, ud: { onboardingCompletado: false } });   // cuestionario hecho, parado en la tarjeta
 perfil(n++, { alta: -40, visto: -8, sub: 'active', push: true });             // inactivo 8d
 perfil(n++, { alta: -40, visto: -15, sub: 'active' });                        // 15d
 perfil(n++, { alta: -40, visto: -22, sub: 'trialing' });                      // 22d
@@ -146,6 +147,10 @@ console.log('auditorias_clientes abiertas:', T.auditorias_clientes.length);
   if (conMotorViejo > 1) malos.push(conMotorViejo + ' planes siguen con el motor anterior (solo se admite el cliente sin datos)');
   if (/pollo/i.test(JSON.stringify(rev.plan.nutricionPorDia))) malos.push('el plan de no como pollo sigue llevando pollo');
   if (ult.profiles.some(p => 'plan' in p)) malos.push('la copia de seguridad lleva planes');
+  const aSinTarjeta = T.email_log.filter(e => e.destinatario === sinTarjeta.email).map(e => e.tipo);
+  console.log('cliente parado en la tarjeta recibe:', aSinTarjeta.join(', ') || 'nada');
+  if (!aSinTarjeta.includes('retencion_tarjeta')) malos.push('quien hizo el cuestionario y no metió la tarjeta no recibe el email de la tarjeta');
+  if (aSinTarjeta.includes('retencion_dia3')) malos.push('a quien ya hizo el cuestionario se le pide que lo complete');
   console.log('\n' + (malos.length ? '✘ ' + malos.join(' · ') : '✔ Cron correcto'));
   process.exit(malos.length ? 1 : 0);
 })().catch(e => { console.log = console.__proto__.log; console.log('FALLO DEL SCRIPT', e.stack); });

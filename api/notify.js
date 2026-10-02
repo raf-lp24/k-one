@@ -362,6 +362,7 @@ async function handleCronRetencion(req, res) {
     const hace1d = new Date(ahora.getTime() - 1 * 86400000).toISOString();
     const hace8d = new Date(ahora.getTime() - 8 * 86400000).toISOString();
     const hace9d = new Date(ahora.getTime() - 9 * 86400000).toISOString();
+    const hace30d = new Date(ahora.getTime() - 30 * 86400000).toISOString();
 
     // supabase-js no lanza: devuelve {data, error}. Si last_seen aún no existe,
     // reintentar sin esa columna para no dejar el cron entero sin perfiles.
@@ -385,7 +386,7 @@ async function handleCronRetencion(req, res) {
       (users || []).forEach(u => { if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at; });
     } catch (_) {}
 
-    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'retencion_tarjeta', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
 
@@ -605,7 +606,7 @@ async function handleCronRetencion(req, res) {
       }
     }
 
-    let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0;
+    let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0, enviadosTarjeta = 0;
 
     // Las tres fases de email se saltan enteras si no hay RESEND_API_KEY;
     // el push de arriba ya se ha mandado, que es lo que importa.
@@ -626,8 +627,59 @@ async function handleCronRetencion(req, res) {
       const email = p.email;
       if (!email) continue;
 
+      // ¿Ha hecho el cuestionario? BUG REAL (2 oct 2026): esto se decidía con
+      // ud.onboardingCompletado, que solo se pone al terminar el TOUR del panel,
+      // y el tour solo sale con acceso (después de meter la tarjeta). Resultado:
+      // a quien hizo el cuestionario y se paró en la tarjeta le llegaba "completa
+      // el cuestionario" (que ya había hecho) y NUNCA el de "activa tu plan" del
+      // día 8. Justo el grupo que el dueño veía quedarse sin pagar.
+      const cuestionarioHecho = !!ud.onboardingCompletado || !!(ud.tipoPlan && ud.objetivo && ud.objetivo !== 'No especificado');
+      // Nunca ha tenido suscripción (no es una baja): los de abajo son para quien
+      // aún no ha empezado, no para quien ya probó y se fue.
+      const nuncaSuscrito = !sub || !sub.status || ['none', 'incomplete', 'incomplete_expired'].includes(sub.status);
+
+      // A LAS 24H CON EL PLAN HECHO Y SIN TARJETA: lo que frena aquí es la
+      // tarjeta ("si es gratis, ¿para qué la quieren?"). Se responde eso, sin más.
+      // Solo para altas del último mes, para no escribir de golpe a cuentas viejas.
+      if (p.created_at < hace1d && p.created_at >= hace30d && cuestionarioHecho && !tieneAcceso && nuncaSuscrito
+          && !yaEnviado.has(`retencion_tarjeta:${email}`)) {
+        const deporteT = ud.tipoPlan && String(ud.tipoPlan).includes('Solo') ? 'Solo nutrición' : (ud.deporte || 'Tu plan');
+        const objetivoT = ud.objetivo || 'Tu objetivo';
+        const htmlTarjeta = emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu plan está hecho. Te falta un paso.</h1>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Ya tienes tu plan de K-ONE generado (<span style="color:#F0EDE8">${esc(deporteT)} · ${esc(objetivoT)}</span>). Para empezar a usarlo solo falta activar tu primer mes gratis.</p>
+              <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">¿POR QUÉ PEDIMOS LA TARJETA SI ES GRATIS?</div>
+                <p style="margin:0 0 10px;font-size:13px;color:#B5B2AD;line-height:1.6">Para que, si te gusta, tu plan siga sin cortes al terminar el mes. Y nada más:</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Hoy no se cobra nada.</span> Los primeros 30 días son gratis.</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Te avisamos por email unos días antes del primer cobro.</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Cancelas desde tu perfil en un momento, sin llamadas ni permanencia.</p>
+                <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> El pago lo procesa Stripe: nosotros nunca vemos ni guardamos tu tarjeta.</p>
+              </div>
+              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">¿Alguna duda? Responde a este email y te contesta una persona.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTIVAR MI MES GRATIS</a>
+            </div>
+          `);
+        try {
+          await enviarEmail(apiKey, {
+            from: 'K-ONE <equipo@k-one.fit>',
+            reply_to: ADMIN_EMAIL,
+            to: email,
+            subject: `${esc(primerNombre)}, tu plan está hecho: te falta un paso`,
+            html: htmlTarjeta
+          });
+          await supa.from('email_log').insert({ tipo: 'retencion_tarjeta', destinatario: email, asunto: 'Tu plan está hecho: te falta un paso', html: htmlTarjeta, datos: JSON.stringify({ nombre, deporte: deporteT, objetivo: objetivoT, resumen: 'Plan hecho sin activar (24h): por qué pedimos la tarjeta.' }) });
+          yaEnviado.add(`retencion_tarjeta:${email}`);
+          enviadosTarjeta++;
+        } catch (eT) { console.warn('[notify-cron] email tarjeta:', eT.message); }
+      }
+
       // A LAS 24H: registrado hace 24h o más, NO completó cuestionario, NO tiene sub activa.
-      if (p.created_at < hace1d && !ud.onboardingCompletado && !tieneAcceso) {
+      if (p.created_at < hace1d && !cuestionarioHecho && !tieneAcceso) {
         if (yaEnviado.has(`retencion_dia3:${email}`)) continue;
         const htmlDia3 = emailWrapper(`
             <div style="padding:28px 28px 0">
@@ -663,7 +715,7 @@ async function handleCronRetencion(req, res) {
       }
 
       // DÍA 8: registrado hace 8-9 días, SÍ completó cuestionario, NO tiene sub activa
-      if (p.created_at >= hace9d && p.created_at < hace8d && ud.onboardingCompletado && !tieneAcceso) {
+      if (p.created_at >= hace9d && p.created_at < hace8d && cuestionarioHecho && !tieneAcceso && nuncaSuscrito) {
         if (yaEnviado.has(`retencion_dia8:${email}`)) continue;
         const deporte = ud.deporte || 'Tu deporte';
         const objetivo = ud.objetivo || 'Tu objetivo';
@@ -1283,7 +1335,7 @@ async function handleCronRetencion(req, res) {
     }
 
     console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosTarjeta, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     capturarError(err, { fn: 'notify-cron' });
