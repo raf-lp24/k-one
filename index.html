@@ -9522,14 +9522,8 @@
             <div class="rail-sub" id="statAdherenciaSub">días esta semana</div>
           </div>
 
-          <div class="rail-card">
-            <div class="rail-card-head"><span>Racha</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg>
-            </div>
-            <div class="rail-big" id="rachaDias">0</div>
-            <div class="rail-sub" id="rachaDiasLabel">días seguidos entrenando</div>
-            <div class="rail-blocks" id="rachaBlocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
+          <!-- La tarjeta "Racha" se quitó el 2 oct 2026 (lo pidió el usuario): la
+               racha ya sale en la cabecera de Hoy (#hoyRacha). -->
 
           <div class="rail-card" id="railKcalCard">
             <div class="rail-card-head"><span>Kcal objetivo</span>
@@ -21839,11 +21833,10 @@
   function actualizarRacha() {
     const el = document.getElementById('rachaDias');
     const label = document.getElementById('rachaDiasLabel');
-    if (!el) return;
     // Solo nutrición: la racha son las semanas con los 7 días de comida confirmados.
     if (generatedPlan && generatedPlan.soloDieta) {
       const sem = userData.semanasNutricionCompletas || 0;
-      el.textContent = String(sem);
+      if (el) el.textContent = String(sem);
       if (label) label.textContent = sem === 1 ? 'semana con los 7 días confirmados' : 'semanas con los 7 días confirmados';
       return;
     }
@@ -21853,6 +21846,7 @@
       chip.style.display = racha > 0 ? '' : 'none';
       chip.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c-4.4 0-8-3.1-8-7.6 0-3.3 2.1-5.6 3.8-7.4.4-.4 1.1-.1 1.1.5 0 1.3.6 2.6 1.7 3.2.2-3.4 2.2-6.4 4.6-8.6.4-.4 1.1-.1 1.1.5 0 2.3 1.3 3.8 2.6 5.3 1.2 1.4 2.1 3 2.1 5.1C21 18.9 16.4 22 12 22z"/></svg>' + racha + (racha === 1 ? ' día' : ' días');
     }
+    if (!el) return;
     el.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" aria-hidden="true"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg> ${racha}`;
     if (label) label.textContent = racha === 1 ? 'día seguido entrenando' : 'días seguidos entrenando';
   }
