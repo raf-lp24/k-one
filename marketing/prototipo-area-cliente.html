@@ -1,0 +1,344 @@
+<!doctype html>
+<!--
+  PROTOTIPO del rediseño del área de clientes (2 oct 2026). No es la app: es una
+  maqueta para decidir antes de tocar nada. Datos del cliente de demostración
+  (Marcos, ganar músculo, semana 2). Se puede tocar: las series se marcan y arranca
+  el temporizador de descanso.
+  Captura:  node marketing/cdp-shot.mjs "http://localhost:8080/marketing/prototipo-area-cliente.html" marketing/prototipo-area-cliente.png 1760 1010 1
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-ONE · Prototipo del área de clientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --negro:#0A0A0A; --carbon:#141414; --grafito:#1C1C1C; --humo:#2A2A2A; --brasa:#D1420E; --brasa2:#F26A36; --hueso:#F0EDE8; --metal:#8A8A8A; --metal2:#B5B2AD; --verde:#4CAF7A; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#050505; color:var(--hueso); font-family:'Inter',sans-serif; padding:28px 32px 36px; min-width:1760px; }
+  .titulo { display:flex; align-items:baseline; gap:18px; margin-bottom:22px; }
+  .titulo h1 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:2px; }
+  .titulo h1 span { color:var(--brasa2); }
+  .titulo p { font-family:'DM Mono',monospace; font-size:13px; color:var(--metal); letter-spacing:1px; }
+  .fila { display:flex; gap:34px; align-items:flex-start; }
+  .col { width:390px; }
+  .etq { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--brasa2); margin:0 0 10px 4px; }
+  .etq b { color:var(--metal2); font-weight:400; text-transform:none; letter-spacing:.3px; margin-left:8px; }
+  .movil { position:relative; width:390px; height:844px; border-radius:44px; background:var(--negro); border:1px solid #262626; box-shadow:0 30px 80px rgba(0,0,0,.6), inset 0 0 0 6px #111; overflow:hidden; }
+  .pant { position:absolute; inset:6px; border-radius:38px; overflow:hidden; background:var(--negro); display:flex; flex-direction:column; }
+  .estado { height:40px; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:0 26px; font-size:13px; font-weight:600; }
+  .contenido { flex:1; overflow:hidden; padding:4px 16px 0; display:flex; flex-direction:column; gap:12px; }
+  .mono { font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; }
+  .bebas { font-family:'Bebas Neue',sans-serif; letter-spacing:.5px; }
+  .tarjeta { background:var(--carbon); border:1px solid var(--humo); border-radius:18px; padding:16px; }
+  svg { display:block; }
+
+  /* --- barra inferior --- */
+  .barra { flex-shrink:0; height:78px; border-top:1px solid #1f1f1f; background:rgba(14,14,14,.96); display:grid; grid-template-columns:repeat(5,1fr); padding:8px 6px 18px; }
+  .tab { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; font-size:10.5px; color:var(--metal); font-weight:500; }
+  .tab svg { width:22px; height:22px; }
+  .tab.on { color:var(--brasa2); }
+  .tab.on::before { content:''; position:absolute; }
+
+  /* --- HOY --- */
+  .franja { display:flex; justify-content:space-between; align-items:center; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:2px; }
+  .logo span { color:var(--brasa2); }
+  .avatar { width:34px; height:34px; border-radius:50%; background:var(--brasa); display:grid; place-items:center; font-weight:700; font-size:14px; }
+  .saludo { display:flex; justify-content:space-between; align-items:flex-end; }
+  .saludo h2 { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:.95; letter-spacing:.5px; }
+  .saludo .sub { font-size:12px; color:var(--metal2); margin-top:4px; }
+  .racha { display:flex; align-items:center; gap:6px; background:rgba(209,66,14,.12); border:1px solid rgba(242,106,54,.45); border-radius:999px; padding:6px 12px 6px 9px; font-weight:700; font-size:13px; }
+  .racha svg { width:18px; height:18px; color:var(--brasa2); }
+  .sesion { position:relative; border-radius:20px; overflow:hidden; padding:18px; background:linear-gradient(180deg, rgba(10,10,10,.15), rgba(10,10,10,.92) 70%), url('../img/landing/gym-hero.jpg') center 35%/cover; border:1px solid var(--humo); min-height:236px; display:flex; flex-direction:column; justify-content:flex-end; }
+  .sesion .eye { font-size:10.5px; color:var(--brasa2); }
+  .sesion h3 { font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:.95; margin:6px 0 10px; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .chip { font-size:11.5px; color:var(--hueso); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:5px 10px; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; border:none; border-radius:14px; padding:15px; font-weight:700; font-size:14px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; font-family:'DM Mono',monospace; }
+  .btn.pri { background:var(--brasa); color:#fff; box-shadow:0 12px 28px -12px rgba(209,66,14,.8); }
+  .btn.sec { background:none; border:1px solid var(--humo); color:var(--hueso); }
+  .btn svg { width:16px; height:16px; }
+  .comidas .cab { display:flex; justify-content:space-between; align-items:baseline; }
+  .comidas .cab .mono { font-size:10.5px; color:var(--brasa2); }
+  .comidas .cab span:last-child { font-size:11px; color:var(--metal); font-family:'DM Mono',monospace; }
+  .barrita { height:5px; border-radius:9px; background:rgba(255,255,255,.08); margin:10px 0 6px; overflow:hidden; }
+  .barrita i { display:block; height:100%; width:40%; background:var(--brasa); border-radius:9px; }
+  .com { display:flex; align-items:center; gap:11px; padding:8px 0; border-top:1px solid rgba(255,255,255,.06); }
+  .tick { width:24px; height:24px; border-radius:50%; border:1.5px solid var(--humo); flex-shrink:0; display:grid; place-items:center; color:transparent; }
+  .tick.si { background:var(--brasa); border-color:var(--brasa); color:#fff; }
+  .tick svg { width:12px; height:12px; }
+  .com .t { font-size:13px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .com .t small { display:block; font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:1.3px; color:var(--metal); text-transform:uppercase; }
+  .com.hecha .t { color:var(--metal2); text-decoration:line-through; text-decoration-color:rgba(242,106,54,.6); }
+  .checkin { display:flex; gap:12px; align-items:center; border-color:rgba(224,164,58,.5); background:rgba(224,164,58,.06); }
+  .checkin .ic { width:38px; height:38px; border-radius:12px; background:rgba(224,164,58,.15); color:#E0A43A; display:grid; place-items:center; flex-shrink:0; }
+  .checkin .ic svg { width:19px; height:19px; }
+  .checkin b { font-size:13.5px; display:block; }
+  .checkin span { font-size:12px; color:var(--metal2); }
+
+  /* --- MODO ENTRENAMIENTO --- */
+  .top-sesion { display:flex; align-items:center; justify-content:space-between; }
+  .cerrar { width:34px; height:34px; border-radius:50%; background:var(--grafito); display:grid; place-items:center; color:var(--metal2); }
+  .cerrar svg { width:16px; height:16px; }
+  .pasos { display:flex; gap:4px; flex:1; margin:0 14px; }
+  .pasos i { flex:1; height:4px; border-radius:4px; background:var(--humo); }
+  .pasos i.ok { background:var(--brasa); }
+  .pasos i.ahora { background:linear-gradient(90deg, var(--brasa) 50%, var(--humo) 50%); }
+  .crono { font-family:'DM Mono',monospace; font-size:12px; color:var(--metal2); }
+  .foto-ej { height:150px; border-radius:16px; background:url('../data/ej-img/peso-muerto-sumo/1.jpg') center 30%/cover; filter:grayscale(.8) contrast(1.05) brightness(.8); position:relative; }
+  .foto-ej .ver { position:absolute; right:10px; bottom:10px; filter:none; background:rgba(10,10,10,.75); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:6px 11px; font-size:11.5px; display:flex; align-items:center; gap:6px; }
+  .foto-ej .ver svg { width:13px; height:13px; }
+  .ej-nom { font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:.95; }
+  .ej-meta { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .ej-meta span { font-size:11.5px; color:var(--metal2); background:var(--grafito); border-radius:8px; padding:5px 9px; }
+  .ej-meta span b { color:var(--hueso); }
+  .series { display:flex; flex-direction:column; gap:7px; }
+  .serie { display:grid; grid-template-columns:34px 1fr 1fr 46px; gap:8px; align-items:center; background:var(--carbon); border:1px solid var(--humo); border-radius:13px; padding:8px 8px 8px 12px; }
+  .serie .n { font-family:'DM Mono',monospace; font-size:12px; color:var(--metal); }
+  .caja { background:var(--negro); border:1px solid var(--humo); border-radius:9px; padding:7px 10px; font-size:15px; font-weight:600; display:flex; justify-content:space-between; align-items:baseline; }
+  .caja small { font-size:10px; color:var(--metal); font-weight:500; }
+  .marcar { height:38px; border-radius:11px; border:1.5px solid var(--humo); background:none; color:var(--metal); display:grid; place-items:center; cursor:pointer; }
+  .marcar svg { width:17px; height:17px; }
+  .serie.hecha { border-color:rgba(76,175,122,.35); background:rgba(76,175,122,.06); }
+  .serie.hecha .marcar { background:var(--verde); border-color:var(--verde); color:#fff; }
+  .serie.actual { border-color:rgba(242,106,54,.7); }
+  .serie.actual .marcar { border-color:var(--brasa2); color:var(--brasa2); }
+  .ultima { font-size:11.5px; color:var(--metal); display:flex; align-items:center; gap:6px; }
+  .ultima b { color:var(--metal2); }
+  .descanso { position:absolute; left:12px; right:12px; bottom:14px; background:#1a120c; border:1px solid rgba(242,106,54,.55); border-radius:18px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 -10px 40px rgba(0,0,0,.6); }
+  .anillo { width:52px; height:52px; flex-shrink:0; position:relative; }
+  .anillo svg { width:52px; height:52px; transform:rotate(-90deg); }
+  .anillo span { position:absolute; inset:0; display:grid; place-items:center; font-family:'DM Mono',monospace; font-size:12.5px; font-weight:500; }
+  .descanso .tx { flex:1; }
+  .descanso .tx b { display:block; font-size:13.5px; }
+  .descanso .tx span { font-size:11.5px; color:var(--metal2); }
+  .mini { background:var(--grafito); border:1px solid var(--humo); color:var(--hueso); border-radius:10px; padding:8px 10px; font-size:12px; cursor:pointer; font-family:inherit; }
+
+  /* --- RESUMEN --- */
+  .fin-top { text-align:center; padding-top:18px; }
+  .medalla { width:84px; height:84px; margin:0 auto 12px; border-radius:50%; background:radial-gradient(circle at 50% 40%, rgba(242,106,54,.35), rgba(209,66,14,.08) 70%); border:1.5px solid rgba(242,106,54,.6); display:grid; place-items:center; color:var(--brasa2); }
+  .medalla svg { width:40px; height:40px; }
+  .fin-top h2 { font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:.95; }
+  .fin-top p { font-size:13px; color:var(--metal2); margin-top:6px; }
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .stat { background:var(--carbon); border:1px solid var(--humo); border-radius:14px; padding:12px; }
+  .stat .v { font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:1; }
+  .stat .k { font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:var(--metal); text-transform:uppercase; margin-top:4px; }
+  .stat.dest { border-color:rgba(242,106,54,.55); background:rgba(209,66,14,.08); }
+  .stat.dest .v { color:var(--brasa2); }
+  .record { display:flex; align-items:center; gap:10px; font-size:13px; padding:9px 12px; background:rgba(76,175,122,.07); border:1px solid rgba(76,175,122,.3); border-radius:12px; }
+  .record svg { width:18px; height:18px; color:var(--verde); flex-shrink:0; }
+  .record b { color:var(--hueso); }
+  .pregunta { font-size:13px; color:var(--metal2); text-align:center; }
+  .opc { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .opc span { text-align:center; font-size:12.5px; padding:11px 4px; border-radius:12px; border:1px solid var(--humo); background:var(--carbon); }
+  .opc span.on { border-color:var(--brasa2); color:var(--brasa2); background:rgba(209,66,14,.08); }
+
+  /* --- ENTRENO (calendario) --- */
+  .semana-tit { display:flex; justify-content:space-between; align-items:center; }
+  .semana-tit h2 { font-family:'Bebas Neue',sans-serif; font-size:32px; }
+  .flechas { display:flex; gap:6px; }
+  .flechas span { width:32px; height:32px; border-radius:10px; background:var(--grafito); display:grid; place-items:center; color:var(--metal2); }
+  .flechas svg { width:15px; height:15px; }
+  .dias { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .d { text-align:center; padding:8px 0 9px; border-radius:12px; background:var(--carbon); border:1px solid var(--humo); }
+  .d small { display:block; font-family:'DM Mono',monospace; font-size:10px; color:var(--metal); }
+  .d b { font-size:15px; display:block; margin:3px 0 5px; }
+  .d i { display:block; width:7px; height:7px; border-radius:50%; margin:0 auto; background:var(--humo); }
+  .d.ent i { background:var(--brasa2); }
+  .d.hecho i { background:var(--verde); }
+  .d.hoy { border-color:var(--brasa2); background:rgba(209,66,14,.1); }
+  .lista { display:flex; flex-direction:column; gap:8px; }
+  .item { display:flex; align-items:center; gap:12px; background:var(--carbon); border:1px solid var(--humo); border-radius:14px; padding:12px 13px; }
+  .item .dd { width:44px; flex-shrink:0; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--metal); text-transform:uppercase; }
+  .item .dd b { display:block; font-family:'Inter'; font-size:15px; letter-spacing:0; color:var(--hueso); margin-top:2px; }
+  .item .x { flex:1; min-width:0; }
+  .item .x b { display:block; font-size:14px; }
+  .item .x span { font-size:11.5px; color:var(--metal); }
+  .estadoE { font-size:10.5px; font-family:'DM Mono',monospace; padding:4px 8px; border-radius:999px; }
+  .estadoE.ok { color:var(--verde); background:rgba(76,175,122,.1); }
+  .estadoE.hoy { color:var(--brasa2); background:rgba(209,66,14,.12); }
+  .item.descanso2 { opacity:.55; }
+  .item.hoy { border-color:rgba(242,106,54,.6); }
+  .nota { font-size:12px; color:var(--metal); line-height:1.5; }
+
+  .pie { margin-top:22px; display:grid; grid-template-columns:repeat(4, 390px); gap:34px; }
+  .pie p { font-size:13px; color:var(--metal2); line-height:1.55; }
+  .pie p b { color:var(--hueso); }
+</style>
+<body>
+<div class="titulo"><h1>K-<span>ONE</span> · Área de clientes</h1><p>PROTOTIPO DEL REDISEÑO · DATOS DE DEMOSTRACIÓN · LAS SERIES SE PUEDEN MARCAR</p></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-hoy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-entreno" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5h3v5H2zM19 9.5h3v5h-3zM5 7.5h3v9H5zM16 7.5h3v9h-3zM8 12h8"/></symbol>
+  <symbol id="i-comida" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></symbol>
+  <symbol id="i-prog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 15 L11 10 L14 13 L19 6"/></symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></symbol>
+  <symbol id="i-llama" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c-4.4 0-8-3.1-8-7.6 0-3.3 2.1-5.6 3.8-7.4.4-.4 1.1-.1 1.1.5 0 1.3.6 2.6 1.7 3.2.2-3.4 2.2-6.4 4.6-8.6.4-.4 1.1-.1 1.1.5 0 2.3 1.3 3.8 2.6 5.3 1.2 1.4 2.1 3 2.1 5.1C21 18.9 16.4 22 12 22z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+</svg>
+
+<div class="fila">
+
+  <!-- 1. HOY -->
+  <div class="col">
+    <div class="etq">1 · Hoy <b>con barra inferior</b></div>
+    <div class="movil"><div class="pant">
+      <div class="estado"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="contenido">
+        <div class="franja"><div class="logo">K-<span>ONE</span></div><div class="avatar">M</div></div>
+        <div class="saludo">
+          <div><div class="mono" style="font-size:10.5px;color:var(--brasa2)">Viernes · Semana 2</div><h2>Hola, Marcos</h2><div class="sub">Ganar músculo · 79 kg</div></div>
+          <div class="racha"><svg><use href="#i-llama"/></svg>2 días</div>
+        </div>
+        <div class="sesion">
+          <div class="eye mono">Tu sesión de hoy · 6 ejercicios</div>
+          <h3>Pierna B<br>Isquios y glúteos</h3>
+          <div class="chips"><span class="chip">65 min</span><span class="chip">Esfuerzo alto</span><span class="chip">Gimnasio</span></div>
+          <button class="btn pri"><svg><use href="#i-play"/></svg>Empezar entrenamiento</button>
+        </div>
+        <div class="tarjeta comidas">
+          <div class="cab"><span class="mono">Tus comidas de hoy</span><span>2 de 5 · 3.229 kcal</span></div>
+          <div class="barrita"><i></i></div>
+          <div class="com hecha"><span class="tick si"><svg><use href="#i-check"/></svg></span><span class="t"><small>Desayuno · 7:30</small>Burrito de huevo, pavo y queso</span></div>
+          <div class="com hecha"><span class="tick si"><svg><use href="#i-check"/></svg></span><span class="t"><small>Media mañana · 10:30</small>Tortitas de arroz con queso y pavo</span></div>
+          <div class="com"><span class="tick"></span><span class="t"><small>Comida · 14:00</small>Boniato y arroz con huevo y jamón</span></div>
+        </div>
+        <div class="tarjeta checkin"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg></span><div><b>Check-in de la semana</b><span>El domingo: 5 minutos y ajustamos tu plan.</span></div></div>
+      </div>
+      <div class="barra">
+        <div class="tab on"><svg><use href="#i-hoy"/></svg>Hoy</div>
+        <div class="tab"><svg><use href="#i-entreno"/></svg>Entreno</div>
+        <div class="tab"><svg><use href="#i-comida"/></svg>Comida</div>
+        <div class="tab"><svg><use href="#i-prog"/></svg>Progreso</div>
+        <div class="tab"><svg><use href="#i-mas"/></svg>Más</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 2. MODO ENTRENAMIENTO -->
+  <div class="col">
+    <div class="etq">2 · Modo entrenamiento <b>serie a serie</b></div>
+    <div class="movil"><div class="pant">
+      <div class="estado"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="contenido" style="gap:11px">
+        <div class="top-sesion"><span class="cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><div class="pasos"><i class="ok"></i><i class="ahora"></i><i></i><i></i><i></i><i></i></div><span class="crono">18:42</span></div>
+        <div class="foto-ej"><span class="ver"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>Cómo se hace</span></div>
+        <div>
+          <div class="mono" style="font-size:10.5px;color:var(--brasa2)">Ejercicio 2 de 6</div>
+          <div class="ej-nom">Peso muerto sumo con mancuernas</div>
+          <div class="ej-meta"><span><b>4 × 12</b> repeticiones</span><span>Esfuerzo <b>9/10</b> · te queda 1</span><span>Descanso <b>2:00</b></span></div>
+        </div>
+        <div class="ultima"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>La última vez: <b>20 kg × 12</b> · hoy prueba 22 kg</div>
+        <div class="series" id="series"></div>
+      </div>
+      <div class="descanso" id="descanso">
+        <div class="anillo"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" fill="none" stroke="#2A2A2A" stroke-width="5"/><circle id="arco" cx="26" cy="26" r="22" fill="none" stroke="#F26A36" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="40"/></svg><span id="reloj">1:24</span></div>
+        <div class="tx"><b>Descansa</b><span id="desTx">Siguiente: serie 3 · 22 kg × 12</span></div>
+        <button class="mini" onclick="sumar()">+15 s</button><button class="mini" onclick="saltar()">Saltar</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 3. RESUMEN -->
+  <div class="col">
+    <div class="etq">3 · Al terminar <b>celebrar y preguntar una vez</b></div>
+    <div class="movil"><div class="pant">
+      <div class="estado"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="contenido" style="gap:12px">
+        <div class="fin-top"><div class="medalla"><svg><use href="#i-llama"/></svg></div><h2>Sesión completada</h2><p>Pierna B · 64 min · llevas <b style="color:var(--brasa2)">3 días seguidos</b></p></div>
+        <div class="stats">
+          <div class="stat dest"><div class="v">4.320 kg</div><div class="k">Movidos hoy</div></div>
+          <div class="stat"><div class="v">24</div><div class="k">Series hechas</div></div>
+          <div class="stat"><div class="v">6 / 6</div><div class="k">Ejercicios</div></div>
+          <div class="stat"><div class="v">+2</div><div class="k">Récords</div></div>
+        </div>
+        <div class="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l5-5 4 4 5-6"/><path d="M16 10h5v5"/></svg><span>Récord en <b>peso muerto sumo</b>: 22 kg × 12 (antes 20)</span></div>
+        <div class="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l5-5 4 4 5-6"/><path d="M16 10h5v5"/></svg><span>Récord en <b>hip thrust</b>: 40 kg × 10 (antes 35)</span></div>
+        <div class="pregunta">¿Cómo te ha ido la sesión en general?</div>
+        <div class="opc"><span>Me sobró</span><span class="on">Justo</span><span>No llegué</span></div>
+        <div class="nota" style="text-align:center">Con tu respuesta ajustamos las cargas de la próxima sesión.</div>
+        <button class="btn pri" style="margin-top:auto;margin-bottom:16px">Volver a hoy</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 4. ENTRENO -->
+  <div class="col">
+    <div class="etq">4 · Entreno <b>calendario, sin duplicar Hoy</b></div>
+    <div class="movil"><div class="pant">
+      <div class="estado"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="contenido">
+        <div class="semana-tit"><div><div class="mono" style="font-size:10.5px;color:var(--brasa2)">Bloque 1 · semana 2 de 4</div><h2>Tu semana</h2></div><div class="flechas"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></span></div></div>
+        <div class="dias">
+          <div class="d hecho"><small>L</small><b>28</b><i></i></div>
+          <div class="d hecho"><small>M</small><b>29</b><i></i></div>
+          <div class="d"><small>X</small><b>30</b><i></i></div>
+          <div class="d hecho"><small>J</small><b>1</b><i></i></div>
+          <div class="d hoy ent"><small>V</small><b>2</b><i></i></div>
+          <div class="d"><small>S</small><b>3</b><i></i></div>
+          <div class="d"><small>D</small><b>4</b><i></i></div>
+        </div>
+        <div class="lista">
+          <div class="item"><div class="dd">Lun<b>28</b></div><div class="x"><b>Torso A · Empuje y tirón</b><span>Pecho, espalda, hombros · 6 ejercicios</span></div><span class="estadoE ok">Hecho</span></div>
+          <div class="item"><div class="dd">Mar<b>29</b></div><div class="x"><b>Pierna A · Cuádriceps y glúteos</b><span>6 ejercicios · 60 min</span></div><span class="estadoE ok">Hecho</span></div>
+          <div class="item descanso2"><div class="dd">Mié<b>30</b></div><div class="x"><b>Descanso</b><span>Caminar 20 min y movilidad</span></div></div>
+          <div class="item"><div class="dd">Jue<b>1</b></div><div class="x"><b>Torso B · Variante</b><span>Pecho, espalda, brazos · 6 ejercicios</span></div><span class="estadoE ok">Hecho</span></div>
+          <div class="item hoy"><div class="dd">Vie<b>2</b></div><div class="x"><b>Pierna B · Isquios y glúteos</b><span>Toca para empezar</span></div><span class="estadoE hoy">Hoy</span></div>
+          <div class="item descanso2"><div class="dd">Sáb<b>3</b></div><div class="x"><b>Descanso</b><span>Recuperación activa</span></div></div>
+        </div>
+        <div class="nota">Cada día se abre para ver sus ejercicios. Los pesos se apuntan solo en la sesión, desde Hoy.</div>
+      </div>
+      <div class="barra">
+        <div class="tab"><svg><use href="#i-hoy"/></svg>Hoy</div>
+        <div class="tab on"><svg><use href="#i-entreno"/></svg>Entreno</div>
+        <div class="tab"><svg><use href="#i-comida"/></svg>Comida</div>
+        <div class="tab"><svg><use href="#i-prog"/></svg>Progreso</div>
+        <div class="tab"><svg><use href="#i-mas"/></svg>Más</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="pie">
+  <p><b>Abres y lo tienes.</b> Racha arriba, la sesión con su botón y tus comidas marcables. El check-in solo aparece cuando toca. Notas, contacto y suscripción, en «Más».</p>
+  <p><b>Una cosa cada vez.</b> Foto, series y repeticiones, el peso de la última vez y una sugerencia. Marcas la serie y arranca el descanso. Sin bajar por una página de 2.000 px.</p>
+  <p><b>Que se note que lo has hecho.</b> Kilos movidos, récords y racha. El «cómo fue» se pregunta una vez por sesión, no seis veces por ejercicio.</p>
+  <p><b>Entreno es el mapa, Hoy es donde se entrena.</b> La semana de un vistazo, lo hecho en verde, días en «L M X J V S D», nombres claros («Torso», «Pierna»).</p>
+</div>
+
+<script>
+  // Series del ejercicio actual: se pueden marcar y arranca el descanso.
+  const series = [ { kg: 22, rep: 12, hecha: true }, { kg: 22, rep: 12, hecha: true }, { kg: 22, rep: 12, hecha: false }, { kg: 22, rep: 12, hecha: false } ];
+  const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  function pintar() {
+    const actual = series.findIndex(s => !s.hecha);
+    document.getElementById('series').innerHTML = series.map((s, i) => `
+      <div class="serie ${s.hecha ? 'hecha' : ''} ${i === actual ? 'actual' : ''}">
+        <span class="n">S${i + 1}</span>
+        <span class="caja">${s.kg}<small>kg</small></span>
+        <span class="caja">${s.rep}<small>reps</small></span>
+        <button class="marcar" onclick="marcar(${i})" aria-label="Marcar serie ${i + 1}">${check}</button>
+      </div>`).join('');
+  }
+  let restante = 84, total = 120, t = null;
+  function reloj() {
+    const m = Math.floor(restante / 60), s = String(restante % 60).padStart(2, '0');
+    document.getElementById('reloj').textContent = m + ':' + s;
+    document.getElementById('arco').setAttribute('stroke-dashoffset', String(138.2 * (1 - restante / total)));
+    document.getElementById('descanso').style.display = restante > 0 ? 'flex' : 'none';
+  }
+  function arrancar(seg) { restante = seg; total = seg; reloj(); clearInterval(t); t = setInterval(() => { restante = Math.max(0, restante - 1); reloj(); if (!restante) clearInterval(t); }, 1000); }
+  function marcar(i) {
+    series[i].hecha = !series[i].hecha; pintar();
+    const sig = series.findIndex(s => !s.hecha);
+    document.getElementById('desTx').textContent = sig >= 0 ? `Siguiente: serie ${sig + 1} · ${series[sig].kg} kg × ${series[sig].rep}` : 'Ejercicio terminado · siguiente: hip thrust';
+    if (series[i].hecha) arrancar(120);
+  }
+  function sumar() { restante += 15; total = Math.max(total, restante); reloj(); }
+  function saltar() { restante = 0; reloj(); }
+  pintar(); reloj();
+  if (!/captura/.test(location.search)) { clearInterval(t); t = setInterval(() => { restante = Math.max(0, restante - 1); reloj(); if (!restante) clearInterval(t); }, 1000); }
+</script>
+</body>
