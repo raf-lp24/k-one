@@ -665,14 +665,13 @@ ${bloqueOpciones}
             <div style="padding:28px 28px 0">
               <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu plan está hecho. Te falta un paso.</h1>
               <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
-              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Ya tienes tu plan de K-ONE generado (<span style="color:#F0EDE8">${esc(deporteT)} · ${esc(objetivoT)}</span>). Para empezar a usarlo solo falta activar tu primer mes gratis.</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Ya tienes tu plan de K-ONE generado (<span style="color:#F0EDE8">${esc(deporteT)} · ${esc(objetivoT)}</span>). Para empezar a usarlo solo falta activar tu primer mes gratis: un botón, y sin tarjeta.</p>
               <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
-                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">¿POR QUÉ PEDIMOS LA TARJETA SI ES GRATIS?</div>
-                <p style="margin:0 0 10px;font-size:13px;color:#B5B2AD;line-height:1.6">Para que, si te gusta, tu plan siga sin cortes al terminar el mes. Y nada más:</p>
-                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Hoy no se cobra nada.</span> Los primeros 30 días son gratis.</p>
-                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Te avisamos por email unos días antes del primer cobro.</p>
-                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Cancelas desde tu perfil en un momento, sin llamadas ni permanencia.</p>
-                <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> El pago lo procesa Stripe: nosotros nunca vemos ni guardamos tu tarjeta.</p>
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">TU MES GRATIS, SIN TARJETA</div>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No te pedimos tarjeta.</span> Entras, pulsas «Empezar mi mes gratis» y ya tienes tu plan.</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> 30 días con todo: entrenamiento, nutrición, check-in semanal y seguimiento.</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Unos días antes de que termine te avisamos para que decidas si sigues.</p>
+                <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">&#10003;</span> Si no haces nada, el mes termina y no se cobra nada.</p>
               </div>
               <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">¿Alguna duda? Responde a este email y te contesta una persona.</p>
             </div>
@@ -685,10 +684,10 @@ ${bloqueOpciones}
             from: 'K-ONE <equipo@k-one.fit>',
             reply_to: ADMIN_EMAIL,
             to: email,
-            subject: `${esc(primerNombre)}, tu plan está hecho: te falta un paso`,
+            subject: `${esc(primerNombre)}, tu plan está hecho: empieza gratis y sin tarjeta`,
             html: htmlTarjeta
           });
-          await supa.from('email_log').insert({ tipo: 'retencion_tarjeta', destinatario: email, asunto: 'Tu plan está hecho: te falta un paso', html: htmlTarjeta, datos: JSON.stringify({ nombre, deporte: deporteT, objetivo: objetivoT, resumen: 'Plan hecho sin activar (24h): por qué pedimos la tarjeta.' }) });
+          await supa.from('email_log').insert({ tipo: 'retencion_tarjeta', destinatario: email, asunto: 'Tu plan está hecho: empieza gratis y sin tarjeta', html: htmlTarjeta, datos: JSON.stringify({ nombre, deporte: deporteT, objetivo: objetivoT, resumen: 'Plan hecho sin activar (24h): mes gratis sin tarjeta.' }) });
           yaEnviado.add(`retencion_tarjeta:${email}`);
           enviadosTarjeta++;
         } catch (eT) { console.warn('[notify-cron] email tarjeta:', eT.message); }
@@ -755,7 +754,7 @@ ${bloqueOpciones}
               <div style="background:#0A0A0A;border:1px solid #232323;border-left:3px solid #E8490F;border-radius:0 10px 10px 0;padding:14px 18px;margin:0 0 20px">
                 <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#F0EDE8;font-weight:500">La diferencia entre querer y hacer es empezar.</span> Tu plan ya está hecho — solo falta que lo actives.</p>
               </div>
-              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">Primer mes <span style="color:#E8490F;font-weight:600;font-size:16px">gratis</span> · Sin código · Sin permanencia · Cancela cuando quieras</p>
+              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">Primer mes <span style="color:#E8490F;font-weight:600;font-size:16px">gratis</span> · Sin tarjeta · Sin permanencia · Cancela cuando quieras</p>
             </div>
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ACTIVAR MI PLAN</a>
