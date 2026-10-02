@@ -3816,7 +3816,18 @@
   }
   .alimento-macros b { color: var(--brasa-txt); font-size: 14px; }
   .alimento-fila-click { cursor: pointer; border-radius: 8px; transition: background .15s; }
-  .alimento-fila-click:hover { background: rgba(209,66,14,0.08); }
+  .alimento-fila-click:hover, .alimento-fila-click:focus-visible { background: rgba(209,66,14,0.08); outline: none; }
+  .plato-extra { background: var(--carbon); border: 1px solid rgba(242,106,54,.45); border-radius: 12px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .plato-cab { display: flex; justify-content: space-between; align-items: baseline; }
+  .plato-cab span { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .plato-cab b { font-family: 'Bebas Neue', sans-serif; font-size: 24px; font-weight: 400; color: var(--blanco); }
+  .plato-fila { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--blanco); }
+  .plato-fila > span:first-child { flex: 1; min-width: 0; }
+  .plato-k { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal); white-space: nowrap; }
+  .plato-fila button { background: none; border: none; color: var(--metal); cursor: pointer; font-size: 13px; padding: 4px 6px; }
+  .plato-macros { font-size: 11.5px; color: var(--metal-claro); }
+  #comidaExtraNombre { background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); padding: 10px 12px; font-size: 13.5px; font-family: inherit; border-radius: 8px; }
+  .plato-guardar { width: 100%; padding: 12px; }
   .comida-extra-badge {
     font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .5px;
     color: var(--brasa-txt); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
@@ -7711,7 +7722,8 @@
   <div class="modal-box" style="max-width:560px;max-height:84vh;display:flex;flex-direction:column">
     <button class="modal-close" onclick="cerrarAnadirComida()" aria-label="Cerrar">✕</button>
     <div class="modal-title" style="font-size:20px">Añade tu comida</div>
-    <p class="modal-desc" style="margin-bottom:12px">Busca el alimento, ajusta la cantidad y tócalo para añadirlo como una opción más de esta toma. Los macros salen de la tabla oficial de la USDA, igual que el resto del plan.</p>
+    <p class="modal-desc" style="margin-bottom:12px">Busca cada alimento, pon los gramos y tócalo para meterlo en tu plato. Calculamos las calorías y los macros del plato entero con la tabla oficial de la USDA, igual que el resto del plan.</p>
+    <div class="plato-extra" id="comidaExtraPlato" style="display:none"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <input type="text" id="comidaExtraBuscar" aria-label="Buscar alimento" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderComidaExtraLista()"
         style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
@@ -12573,6 +12585,9 @@
   // Reutiliza la misma tabla /data/alimentos.json que el buscador de arriba —
   // así los macros de lo que añade el cliente son datos reales, no una
   // estimación de la IA (que podría desajustar el cálculo de calorías del día).
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target && e.target.classList && e.target.classList.contains('alimento-fila-click')) e.target.click();
+  });
   function renderComidaExtraLista() {
     const cont = document.getElementById('comidaExtraLista');
     if (!cont || !_alimentos) return;
@@ -12595,7 +12610,7 @@
     cont.innerHTML = Object.entries(porCat).map(([cat, arr]) => `
       <div style="font-size:10px;color: var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:2px;margin:14px 0 6px">${_esc(cat.toUpperCase())}</div>
       ${arr.map(([k, a]) => `
-        <div class="alimento-fila alimento-fila-click" onclick="agregarComidaExtra('${_esc(k.replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}')">
+        <div class="alimento-fila alimento-fila-click" role="button" tabindex="0" onclick="anadirAlPlato('${_esc(k.replace(/\\/g,'\\\\').replace(/'/g,"\\'"))}')">
           <span class="alimento-nombre">${_esc(a.n)}</span>
           <span class="alimento-macros">
             <b>${Math.round(a.kcal * f)}</b> kcal
@@ -12608,6 +12623,47 @@
   }
 
   let _comidaExtraMealIdx = null;
+  // "Tu plato" (2 oct 2026): antes cada comida propia era UN solo alimento y,
+  // como en una toma solo se elige una opción, "salmón con arroz" contaba la
+  // mitad de las calorías. Ahora el cliente junta varios alimentos con sus
+  // gramos y se guarda una sola opción con la suma.
+  let _platoExtra = [];
+  function _macrosPlato() {
+    return _platoExtra.reduce((t, it) => {
+      const a = _alimentos[it.key]; const f = it.gramos / 100;
+      t.kcal += a.kcal * f; t.p += a.p * f; t.c += a.c * f; t.g += a.g * f; return t;
+    }, { kcal: 0, p: 0, c: 0, g: 0 });
+  }
+  function anadirAlPlato(key) {
+    if (!_alimentos || !_alimentos[key]) return;
+    const gramos = Math.max(1, Math.min(2000, parseInt(document.getElementById('comidaExtraGramos')?.value) || 100));
+    const ya = _platoExtra.find(it => it.key === key);
+    if (ya) ya.gramos = Math.min(2000, ya.gramos + gramos); else _platoExtra.push({ key, gramos });
+    _pintarPlato();
+    const b = document.getElementById('comidaExtraBuscar');
+    if (b) { b.value = ''; renderComidaExtraLista(); }
+  }
+  function quitarDelPlato(i) { _platoExtra.splice(i, 1); _pintarPlato(); }
+  function _pintarPlato() {
+    const box = document.getElementById('comidaExtraPlato');
+    if (!box) return;
+    if (!_platoExtra.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    const m = _macrosPlato();
+    const nombreAuto = _platoExtra.map(it => _alimentos[it.key].n).join(' + ');
+    const previo = document.getElementById('comidaExtraNombre')?.value || '';
+    box.innerHTML = '<div class="plato-cab"><span>Tu plato</span><b>' + Math.round(m.kcal) + ' kcal</b></div>'
+      + _platoExtra.map((it, i) => '<div class="plato-fila"><span>' + it.gramos + ' g · ' + _esc(_alimentos[it.key].n) + '</span><span class="plato-k">' + Math.round(_alimentos[it.key].kcal * it.gramos / 100) + ' kcal</span><button type="button" onclick="quitarDelPlato(' + i + ')" aria-label="Quitar ' + _esc(_alimentos[it.key].n) + '">✕</button></div>').join('')
+      + '<div class="plato-macros">Proteína ' + Math.round(m.p) + ' g · Carbohidratos ' + Math.round(m.c) + ' g · Grasa ' + Math.round(m.g) + ' g</div>'
+      + '<input type="text" id="comidaExtraNombre" maxlength="60" aria-label="Nombre del plato (opcional)" placeholder="Nombre (opcional): ' + _esc(nombreAuto.slice(0, 40)) + '" value="' + _esc(previo) + '">'
+      + '<button type="button" class="btn-primary plato-guardar" onclick="guardarPlatoExtra()">Añadir a esta comida</button>';
+    box.style.display = '';
+  }
+  // Compatibilidad: añadir un alimento suelto y guardarlo ya (lo usan las pruebas).
+  function agregarComidaExtra(key) {
+    _platoExtra = [];
+    anadirAlPlato(key);
+    guardarPlatoExtra();
+  }
 
   async function abrirAnadirComida(mealIdx) {
     _comidaExtraMealIdx = mealIdx;
@@ -12619,6 +12675,8 @@
     const gramosInput = document.getElementById('comidaExtraGramos');
     if (buscar) buscar.value = '';
     if (gramosInput) gramosInput.value = '100';
+    _platoExtra = [];
+    _pintarPlato();
     renderComidaExtraLista();
     document.getElementById('modalAnadirComida').classList.add('visible');
     if (buscar && window.innerWidth > 768) setTimeout(() => buscar.focus(), 50);
@@ -12627,6 +12685,8 @@
   function cerrarAnadirComida() {
     document.getElementById('modalAnadirComida').classList.remove('visible');
     _comidaExtraMealIdx = null;
+    _platoExtra = [];
+    _pintarPlato();
   }
 
   // El texto de "ingredientes" usa la CLAVE de búsqueda (p.ej. "pechuga de
@@ -12635,19 +12695,21 @@
   // comas — con el nombre bonito ahí, "300g Pollo, pechuga" se partía en dos
   // trozos rotos. La clave además es justo lo que _buscarAlimento() sabe
   // encontrar, así el desglose sale exacto sin ningún caso especial.
-  function agregarComidaExtra(key) {
-    const a = _alimentos && _alimentos[key];
-    if (!a || _comidaExtraMealIdx === null) return;
-    const gramos = Math.max(1, parseInt(document.getElementById('comidaExtraGramos')?.value) || 100);
-    const f = gramos / 100;
+  function guardarPlatoExtra() {
+    if (!_platoExtra.length || _comidaExtraMealIdx === null) return;
+    const m = _macrosPlato();
+    // Texto libre del cliente: se limpia AQUÍ porque el nombre de una opción se pinta
+    // sin escapar en varios sitios (tarjetas de comida, receta, lista, impresión).
+    const nombreLibre = (document.getElementById('comidaExtraNombre')?.value || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
     const opcion = {
       custom: true,
-      nombre: a.n,
-      ingredientes: `${gramos}g ${key}`,
-      kcal: Math.round(a.kcal * f),
-      prot: Math.round(a.p * f),
-      carbs: Math.round(a.c * f),
-      grasa: Math.round(a.g * f),
+      nombre: nombreLibre || _platoExtra.map(it => _alimentos[it.key].n).join(' + '),
+      // Claves de búsqueda separadas por comas: es lo que lee "Ver macros".
+      ingredientes: _platoExtra.map(it => `${it.gramos}g ${it.key}`).join(', '),
+      kcal: Math.round(m.kcal),
+      prot: Math.round(m.p),
+      carbs: Math.round(m.c),
+      grasa: Math.round(m.g),
       prep: 'Tu elección'
     };
 
@@ -12656,9 +12718,16 @@
     if (!userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx]) userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx] = [];
     userData.comidasExtra[diaNutriActual][_comidaExtraMealIdx].push(opcion);
 
+    const mealIdx = _comidaExtraMealIdx;
     cerrarAnadirComida();
     renderNutritionGrid(diaNutriActual);
-    showToast('Añadido — ya puedes elegirlo como opción de esta toma.');
+    // Queda ELEGIDA directamente (2 oct 2026): si el cliente se molesta en
+    // añadirla es porque se la va a comer. Así cuentan sus kcal en el día y
+    // sale en "Tus comidas de hoy" sin un paso más.
+    const opcs = (generatedPlan._nutricionActiva || generatedPlan.nutricion)[mealIdx]?.opciones || [];
+    const nuevoIdx = opcs.findIndex(o => o.custom && o._extraIdx === userData.comidasExtra[diaNutriActual][mealIdx].length - 1);
+    if (nuevoIdx >= 0) selectMealOptionPreview(mealIdx, nuevoIdx);
+    showToast(nuevoIdx >= 0 ? 'Añadido y elegido para esta comida.' : 'Añadido: ya puedes elegirlo como opción de esta toma.');
     const user = getCurrentUser();
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
