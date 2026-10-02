@@ -1700,6 +1700,46 @@
   .hoy-peso .hp-l { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); margin-bottom: 6px; }
   .hoy-peso .hp-v { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 0.9; color: var(--blanco); }
 
+  /* HOY EN EL MÓVIL (2 oct 2026): la cabecera ocupaba la primera pantalla entera
+     (título enorme, texto motivacional de 6 líneas y el peso) y la sesión del día
+     quedaba debajo. Ahora es una franja compacta y lo primero es qué toca hoy. */
+  @media (max-width: 768px) {
+    #section-hoy .hoy-header { padding: 14px 16px; margin-bottom: 14px; }
+    #section-hoy .hoy-header .dash-greeting { margin-bottom: 4px; font-size: 11px; }
+    #section-hoy .hoy-header .kone-save-badge { display: none; }
+    #section-hoy .hoy-header-grid { flex-wrap: nowrap; align-items: center; gap: 12px; }
+    #section-hoy .hoy-header .dash-title { font-size: 26px; line-height: 1; margin: 0; }
+    #section-hoy .hoy-header .dash-subtitle { display: none; }
+    #section-hoy .hoy-pill-row { margin: 8px 0 0; gap: 10px; }
+    #section-hoy .hoy-pill-row .pill-activo { padding: 4px 10px; font-size: 9px; }
+    #section-hoy .hoy-semana { display: none; }
+    #section-hoy .hoy-peso .hp-l { font-size: 9px; margin-bottom: 3px; }
+    #section-hoy .hoy-peso .hp-v { font-size: 28px; }
+  }
+
+  /* COMIDAS DE HOY en la pestaña Hoy */
+  .hoy-comidas { background: var(--carbon); border: 1px solid var(--humo); border-radius: 16px; padding: 18px 18px 14px; margin: 0 0 20px; }
+  .hc-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .hc-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .hc-obj { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal); letter-spacing: .5px; white-space: nowrap; }
+  .hc-prog { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; font-size: 12.5px; color: var(--metal-claro); }
+  .hc-barra { flex: 1; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+  .hc-barra i { display: block; height: 100%; background: var(--brasa); border-radius: 999px; transition: width .25s ease; }
+  .hc-lista { display: flex; flex-direction: column; }
+  .hc-fila { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  .hc-check { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--humo); background: none; color: transparent; display: grid; place-items: center; flex-shrink: 0; cursor: pointer; transition: background .15s, border-color .15s; }
+  .hc-check svg { width: 15px; height: 15px; }
+  .hc-check:hover, .hc-check:focus-visible { border-color: var(--brasa-txt); outline: none; }
+  .hc-fila.hecha .hc-check { background: var(--brasa); border-color: var(--brasa); color: #fff; }
+  .hc-txt { flex: 1; min-width: 0; }
+  .hc-mom { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); }
+  .hc-nom { font-size: 14px; color: var(--blanco); line-height: 1.35; margin-top: 2px; overflow-wrap: anywhere; }
+  .hc-fila.hecha .hc-nom { color: var(--metal-claro); text-decoration: line-through; text-decoration-color: rgba(242,106,54,.6); }
+  .hc-kcal { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--metal); white-space: nowrap; }
+  .hc-ver { margin-top: 10px; width: 100%; background: none; border: 1px solid var(--humo); border-radius: 10px; padding: 11px 12px; color: var(--blanco); font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .hc-ver:hover { border-color: var(--brasa-txt); }
+  @media (prefers-reduced-motion: reduce) { .hc-barra i, .hc-check { transition: none; } }
+
   .hoy-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; align-items: start; }
   .hoy-rail { display: flex; flex-direction: column; gap: 14px; }
   @media (max-width: 980px) {
@@ -9067,6 +9107,11 @@
             </button>
           </div>
         </div>
+
+        <!-- COMIDAS DE HOY (2 oct 2026): las que el cliente eligió para hoy en Nutrición
+             (o la primera opción si no ha elegido), marcables como hechas. Así tiene el
+             día entero en una pantalla. La pinta _pintarComidasHoy(). -->
+        <div class="hoy-comidas" id="hoyComidas" style="display:none"></div>
 
         <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
         <!-- Esquinas redondeadas a 14px para ir a juego con las tarjetas
@@ -20208,6 +20253,72 @@
     // vegetariano, embutido, estrés/sueño...), ni se mostraba/ocultaba
     // correctamente el check-in semanal según el tipo de plan.
     buildDashboardNutricionExtra();
+    try { _pintarComidasHoy(); } catch (e) { console.warn('[hoy] comidas de hoy:', e.message); }
+  }
+
+  // ===== COMIDAS DE HOY (pestaña Hoy) =====
+  function _fechaHoyISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  // Las tomas de hoy con la opción que el cliente eligió en Nutrición (incluidas las
+  // comidas que añadió él), sin tocar el plan: es solo lectura.
+  function _comidasDeHoy() {
+    if (!generatedPlan || !generatedPlan.nutricion) return [];
+    const dia = (new Date().getDay() + 6) % 7;
+    const tomas = (generatedPlan.nutricionPorDia && generatedPlan.nutricionPorDia[dia]) || generatedPlan.nutricion;
+    const elegidas = (Array.isArray(userData.comidasSemana) && userData.comidasSemana[dia]) || [];
+    return tomas.map((t, i) => {
+      const base = (t.opciones || []).filter(o => !o.custom);
+      const extras = (userData.comidasExtra && userData.comidasExtra[dia] && userData.comidasExtra[dia][i]) || [];
+      const todas = base.concat(extras);
+      const op = todas[elegidas[i]] || todas[0];
+      return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '' } : null;
+    }).filter(Boolean);
+  }
+  function _pintarComidasHoy() {
+    const caja = document.getElementById('hoyComidas');
+    if (!caja) return;
+    const comidas = _comidasDeHoy();
+    if (!comidas.length) { caja.style.display = 'none'; return; }
+    const hoy = _fechaHoyISO();
+    const hechas = (userData.comidasHechas && userData.comidasHechas[hoy]) || [];
+    const n = comidas.filter((_, i) => hechas[i]).length;
+    const dia = (new Date().getDay() + 6) % 7;
+    const obj = (generatedPlan.kcalObjPorDia && generatedPlan.kcalObjPorDia[dia]) || generatedPlan.kcalObj;
+    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    caja.innerHTML = '<div class="hc-cab"><span class="hc-eyebrow">Tus comidas de hoy</span>'
+      + (obj ? '<span class="hc-obj">Objetivo ' + _esc(Number(obj).toLocaleString('es-ES')) + ' kcal</span>' : '') + '</div>'
+      + '<div class="hc-prog"><span>' + (n === comidas.length ? 'Todas hechas. Bien.' : n + ' de ' + comidas.length + ' hechas') + '</span>'
+      + '<span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(n / comidas.length * 100) + '%"></i></span></div>'
+      + '<div class="hc-lista">' + comidas.map((c, i) => {
+        const h = !!hechas[i];
+        return '<div class="hc-fila' + (h ? ' hecha' : '') + '">'
+          + '<button type="button" class="hc-check" onclick="marcarComidaHoy(' + i + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + c.momento) + '">' + check + '</button>'
+          + '<div class="hc-txt"><div class="hc-mom">' + _esc(c.momento) + (c.hora ? ' · ' + _esc(c.hora) : '') + '</div><div class="hc-nom">' + _esc(c.nombre) + '</div></div>'
+          + (c.kcal ? '<span class="hc-kcal">' + _esc(c.kcal) + '</span>' : '') + '</div>';
+      }).join('') + '</div>'
+      + '<button type="button" class="hc-ver" onclick="irANutricionHoy()">Ver recetas y cambiar comidas →</button>';
+    caja.style.display = '';
+  }
+  function marcarComidaHoy(i) {
+    const hoy = _fechaHoyISO();
+    const todas = userData.comidasHechas && typeof userData.comidasHechas === 'object' ? userData.comidasHechas : {};
+    // Solo se guardan las dos últimas semanas: es un registro del día, no un histórico.
+    const limite = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
+    Object.keys(todas).forEach(k => { if (k < limite) delete todas[k]; });
+    const dia = Array.isArray(todas[hoy]) ? todas[hoy] : [];
+    dia[i] = !dia[i];
+    todas[hoy] = dia;
+    userData.comidasHechas = todas;
+    if (dia[i]) kEvento('comida_hecha', { toma: i });
+    _pintarComidasHoy();
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+  function irANutricionHoy() {
+    showSection('nutricion');
+    try { seleccionarDiaNutri((new Date().getDay() + 6) % 7); } catch (e) {}
   }
 
   // Rellena la tarjeta "Tu entrenamiento de hoy" con los datos reales del plan.
@@ -24147,6 +24258,7 @@
 
     actualizarResumenNutricional();
     try { actualizarKcalDiario(); } catch(e) { console.warn('[nutricion] actualizarKcalDiario:', e.message); }
+    try { _pintarComidasHoy(); } catch (e) {}
   }
 
   let diasConfirmados = [false,false,false,false,false,false,false];
