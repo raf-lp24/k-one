@@ -34,7 +34,8 @@
 // tensión alta y cintura en el check-in.
 // v23 (29 sept 2026): vídeo de técnica concreto por ejercicio y recuadro
 // 'Tu plan, adaptado' con 3 notas visibles (el resto plegadas).
-const CACHE_NAME = 'kone-v65';
+// v66 (2 oct 2026): 'Tu plan, adaptado' y 'Después de entrenar' plegados del todo.
+const CACHE_NAME = 'kone-v66';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

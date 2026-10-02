@@ -1845,10 +1845,14 @@
 
   /* COMIDAS DE HOY en la pestaña Hoy */
   .hoy-comidas { background: var(--carbon); border: 1px solid var(--humo); border-radius: 16px; padding: 18px 18px 14px; margin: 0 0 20px; }
-  .hc-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-  .hc-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
-  .hc-obj { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal); letter-spacing: .5px; white-space: nowrap; }
-  .hc-prog { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; font-size: 12.5px; color: var(--metal-claro); }
+  .hc-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 4px; }
+  .hc-eyebrow { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .hc-tit { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; letter-spacing: .5px; color: var(--blanco); margin-top: 6px; }
+  .hc-obj { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+  .hc-obj .k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
+  .hc-obj .v { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; letter-spacing: .5px; color: var(--blanco); margin-top: 4px; }
+  .hc-obj .v small { font-size: 15px; color: var(--metal-claro); margin-left: 3px; }
+  .hc-prog { display: flex; align-items: center; gap: 10px; margin: 12px 0 10px; font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal-claro); }
   .hc-barra { flex: 1; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
   .hc-barra i { display: block; height: 100%; background: var(--brasa); border-radius: 999px; transition: width .25s ease; }
   .hc-lista { display: flex; flex-direction: column; }
@@ -1858,13 +1862,39 @@
   .hc-check:hover, .hc-check:focus-visible { border-color: var(--brasa-txt); outline: none; }
   .hc-fila.hecha .hc-check { background: var(--brasa); border-color: var(--brasa); color: #fff; }
   .hc-txt { flex: 1; min-width: 0; }
-  .hc-mom { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); }
-  .hc-nom { font-size: 14px; color: var(--blanco); line-height: 1.35; margin-top: 2px; overflow-wrap: anywhere; }
-  .hc-fila.hecha .hc-nom { color: var(--metal-claro); text-decoration: line-through; text-decoration-color: rgba(242,106,54,.6); }
-  .hc-kcal { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--metal); white-space: nowrap; }
-  .hc-ver { margin-top: 10px; width: 100%; background: none; border: 1px solid var(--humo); border-radius: 10px; padding: 11px 12px; color: var(--blanco); font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .hc-mom { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); }
+  .hc-mom b { color: var(--brasa-txt); font-weight: 500; }
+  .hc-nom { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .4px; line-height: 1.05; color: var(--blanco); margin-top: 4px; overflow-wrap: anywhere; }
+  .hc-fila.hecha .hc-nom { color: var(--metal); text-decoration: line-through; text-decoration-color: rgba(242,106,54,.6); text-decoration-thickness: 2px; }
+  .hc-nota { display: inline-block; margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal-claro); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; padding: 3px 10px; }
+  .hc-kcal { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+  .hc-kcal .v { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; color: var(--blanco); }
+  .hc-kcal .k { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); margin-top: 3px; }
+  .hc-fila.hecha .hc-kcal .v { color: var(--metal); }
+  .hc-ver { margin-top: 12px; width: 100%; background: none; border: 1px solid var(--humo); border-radius: 10px; padding: 12px; color: var(--blanco); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; }
   .hc-ver:hover { border-color: var(--brasa-txt); }
   @media (prefers-reduced-motion: reduce) { .hc-barra i, .hc-check { transition: none; } }
+
+  /* RECUADROS PLEGABLES del entreno ("Tu plan, adaptado", "Después de entrenar"):
+     cerrados de inicio para que Hoy no sea un muro de texto (2 oct 2026). */
+  .plg > summary { list-style: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .plg > summary::-webkit-details-marker { display: none; }
+  .plg > summary:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 4px; border-radius: 4px; }
+  .plg-eye { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); white-space: nowrap; }
+  .plg-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .plg-res { font-size: 13px; color: var(--metal-claro); line-height: 1.4; }
+  .plg-chev { width: 16px; height: 16px; flex-shrink: 0; color: var(--metal-claro); transition: transform .2s ease; }
+  .plg[open] .plg-chev { transform: rotate(180deg); }
+  .plg-cuerpo { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: var(--metal-claro); }
+  .plg-caja { background: rgba(76,175,122,0.06); border-left: 3px solid #4CAF7A; border-radius: 0 12px 12px 0; padding: 12px 16px; margin-bottom: 16px; }
+  .plg.verde .plg-eye { color: #4CAF7A; }
+  @media (prefers-reduced-motion: reduce) { .plg-chev { transition: none; } }
+
+  /* Título del día dentro del entreno ("Viernes" + nombre de la sesión) */
+  .dia-tit { margin: 6px 0 16px; }
+  .dia-tit-eye { display: block; font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .dia-tit-nom { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; letter-spacing: .5px; color: var(--blanco); margin-top: 6px; }
+  .dia-tit-nom button { text-decoration-color: rgba(242,106,54,.55) !important; text-decoration-thickness: 2px !important; text-underline-offset: 5px !important; }
 
   .hoy-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; align-items: start; }
   .hoy-rail { display: flex; flex-direction: column; gap: 14px; }
@@ -13830,9 +13860,11 @@
     const protMin = Math.round(pesoActualKg * 0.3);
     const protMax = Math.round(pesoActualKg * 0.4);
     const postEntrenoTxt = esRunnerHoy
-      ? 'Después de entrenar: hidratos + proteína en los 60 min siguientes (por ejemplo, plátano con leche o yogur) — repone glucógeno y ayuda a recuperar.'
-      : `Después de entrenar: ${protMin}-${protMax}g de proteína (según tu peso) + 5g de creatina monohidrato en agua o batido — es el combo con más evidencia para recuperar y ganar fuerza.`;
-    const postEntrenoHTML = `<div style="background:rgba(39,174,96,0.06);border-left:3px solid #27ae60;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--metal-claro)">${postEntrenoTxt}</div>`;
+      ? 'Hidratos + proteína en los 60 min siguientes (por ejemplo, plátano con leche o yogur): repone glucógeno y ayuda a recuperar.'
+      : `${protMin}-${protMax} g de proteína (según tu peso) + 5 g de creatina monohidrato en agua o batido: es el combo con más evidencia para recuperar y ganar fuerza.`;
+    const postEntrenoRes = esRunnerHoy ? 'Hidratos + proteína' : `${protMin}-${protMax} g de proteína + creatina`;
+    // Plegado (2 oct 2026): el título y el resumen bastan para recordarlo.
+    const postEntrenoHTML = `<div class="plg-caja"><details class="plg verde"><summary><span class="plg-txt"><span class="plg-eye">Después de entrenar</span><span class="plg-res">${postEntrenoRes}</span></span>${_CHEV_PLG}</summary><p class="plg-cuerpo">${postEntrenoTxt}</p></details></div>`;
 
     return postEntrenoHTML +
       `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
@@ -14635,15 +14667,35 @@
     if (/^(Tu objetivo es|Tus ritmos|A partir de los 60|Semana de descarga|Según tu feedback|Con tu peso y altura)/.test(n)) return 2;
     return 3;
   }
+  // 2 oct 2026: el recuadro entero va plegado (antes 3 notas a la vista) porque
+  // seguía ocupando media pantalla. Solo se abre solo si hay un aviso de
+  // seguridad (prioridad 0), que no puede quedar escondido.
+  const _CHEV_PLG = '<svg class="plg-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   function renderNotasAdaptado(notas, margen) {
     if (!notas || !notas.length) return '';
     const orden = notas.map((n, i) => [n, i]).sort((a, b) => (_prioridadNota(a[0]) - _prioridadNota(b[0])) || (a[1] - b[1])).map(x => x[0]);
-    const VISIBLES = 3;
-    const vista = orden.slice(0, VISIBLES), resto = orden.slice(VISIBLES);
-    const masHTML = resto.length
-      ? `<details class="notas-mas"><summary style="cursor:pointer;color: var(--brasa-txt);font-weight:600;margin-top:8px;font-size:12.5px">Ver ${resto.length} ${resto.length === 1 ? 'consejo más' : 'consejos más'}</summary>${resto.map(n => `· ${n}`).join('<br>')}</details>`
-      : '';
-    return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:14px 18px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><strong>Tu plan, adaptado</strong><br>${vista.map(n => `· ${n}`).join('<br>')}${masHTML}</div>`;
+    const abierto = _prioridadNota(orden[0]) === 0 ? ' open' : '';
+    const n = orden.length;
+    return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><details class="plg"${abierto}><summary><span class="plg-txt"><span class="plg-eye">Tu plan, adaptado</span><span class="plg-res">${n} ${n === 1 ? 'consejo' : 'consejos'} para ti</span></span>${_CHEV_PLG}</summary><p class="plg-cuerpo">${orden.map(x => `· ${x}`).join('<br>')}</p></details></div>`;
+  }
+  // Los planes guardados antes del 2 oct traen el recuadro viejo dentro de
+  // entrenamiento_hoy: se sacan sus notas y se vuelve a pintar con el nuevo.
+  function _migrarNotaAdaptado(html) {
+    if (!html || html.includes('class="plg"') || !html.includes('<strong>Tu plan, adaptado</strong>')) return html;
+    const m = html.match(/margin-bottom:(\d+)px/);
+    const cuerpo = html.split('<strong>Tu plan, adaptado</strong><br>')[1].replace(/<\/div>$/, '')
+      .replace(/<details class="notas-mas"><summary[^>]*>[\s\S]*?<\/summary>/, '<br>').replace(/<\/details>/, '');
+    const notas = [];
+    cuerpo.split('<br>').forEach(t => {
+      if (t.startsWith('· ')) notas.push(t.slice(2));
+      else if (t.trim() && notas.length) notas[notas.length - 1] += '<br>' + t;
+    });
+    return notas.length ? renderNotasAdaptado(notas, m ? +m[1] : 20) : html;
+  }
+  // Cabecera del entreno del día: "VIERNES" en pequeño y la sesión en grande,
+  // como el resto de títulos de la web (antes era un texto en negrita suelto).
+  function _tituloDiaHTML(dia, sesionHTML) {
+    return `<div class="dia-tit"><span class="dia-tit-eye">${_esc(dia || '')}</span><span class="dia-tit-nom">${sesionHTML}</span></div>`;
   }
 
   // VERSIÓN DEL MOTOR (30 sept 2026). Cada plan guardado lleva la huella del motor
@@ -17216,7 +17268,7 @@
     // con el mismo formato y nivel de detalle que se usa en "Plan semanal"
     const diaHoy = semana[getIndiceDiaHoy()];
     if (!soloDieta && semana.length > 0 && diaHoy.tipo === 'Entrenamiento') {
-      entrenamiento_hoy = `<strong>${diaHoy.dia} — ${resumenTappable(diaHoy.resumen)}</strong><br><br>${formatearSesion(diaHoy)}`;
+      entrenamiento_hoy = _tituloDiaHTML(diaHoy.dia, resumenTappable(diaHoy.resumen)) + formatearSesion(diaHoy);
     }
 
     if (!soloDieta && notasSalud.length) {
@@ -20450,7 +20502,7 @@
       // Sin entrenamiento: no se rellena ni se tocan los botones (el bloque está oculto).
     } else if (esDescansoHoy) {
       document.getElementById('todayContent').innerHTML = generatedPlan.entrenamiento_hoy +
-        `<strong>${diaHoyPlan.dia} — ${_esc(_nombreSesion(diaHoyPlan.resumen))}</strong><br><br>Hoy toca descanso. Aprovecha para recuperar: duerme bien, hidrátate y, si te apetece, dale un paseo suave.`;
+        _tituloDiaHTML(diaHoyPlan.dia, _esc(_nombreSesion(diaHoyPlan.resumen))) + `Hoy toca descanso. Aprovecha para recuperar: duerme bien, hidrátate y, si te apetece, dale un paseo suave.`;
       if (btnCompletado) btnCompletado.style.display = 'none';
       if (btnFeedback) btnFeedback.style.display = 'none';
     } else {
@@ -20556,16 +20608,22 @@
     const dia = (new Date().getDay() + 6) % 7;
     const obj = (generatedPlan.kcalObjPorDia && generatedPlan.kcalObjPorDia[dia]) || generatedPlan.kcalObj;
     const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-    caja.innerHTML = '<div class="hc-cab"><span class="hc-eyebrow">Tus comidas de hoy</span>'
-      + (obj ? '<span class="hc-obj">Objetivo ' + _esc(Number(obj).toLocaleString('es-ES')) + ' kcal</span>' : '') + '</div>'
+    caja.innerHTML = '<div class="hc-cab"><div><span class="hc-eyebrow">Nutrición · hoy</span><div class="hc-tit">Tus comidas de hoy</div></div>'
+      + (obj ? '<div class="hc-obj"><span class="k">Objetivo</span><span class="v">' + _esc(Number(obj).toLocaleString('es-ES')) + '<small>kcal</small></span></div>' : '') + '</div>'
       + '<div class="hc-prog"><span>' + (n === comidas.length ? 'Todas hechas. Bien.' : n + ' de ' + comidas.length + ' hechas') + '</span>'
       + '<span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(n / comidas.length * 100) + '%"></i></span></div>'
       + '<div class="hc-lista">' + comidas.map((c, i) => {
         const h = !!hechas[i];
+        // "Arroz con pollo (90 min antes de entrenar)": la aclaración va aparte,
+        // en una etiqueta, y el nombre queda limpio para el título.
+        const pm = String(c.nombre).match(/^(.*\S)\s*\(([^()]+)\)\s*$/);
+        const nom = pm ? { nombre: pm[1], nota: pm[2] } : { nombre: c.nombre, nota: '' };
+        const kc = String(c.kcal || '').replace(/\s*kcal\s*$/i, '');
         return '<div class="hc-fila' + (h ? ' hecha' : '') + '">'
           + '<button type="button" class="hc-check" onclick="marcarComidaHoy(' + i + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + c.momento) + '">' + check + '</button>'
-          + '<div class="hc-txt"><div class="hc-mom">' + _esc(c.momento) + (c.hora ? ' · ' + _esc(c.hora) : '') + '</div><div class="hc-nom">' + _esc(c.nombre) + '</div></div>'
-          + (c.kcal ? '<span class="hc-kcal">' + _esc(c.kcal) + '</span>' : '') + '</div>';
+          + '<div class="hc-txt"><div class="hc-mom">' + _esc(c.momento) + (c.hora ? ' · <b>' + _esc(c.hora) + '</b>' : '') + '</div><div class="hc-nom">' + _esc(nom.nombre) + '</div>'
+          + (nom.nota ? '<span class="hc-nota">' + _esc(nom.nota) + '</span>' : '') + '</div>'
+          + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '') + '</div>';
       }).join('') + '</div>'
       + '<button type="button" class="hc-ver" onclick="irANutricionHoy()">Ver recetas y cambiar comidas →</button>';
     caja.style.display = '';
@@ -26487,12 +26545,12 @@
     const diaHoy = plan.semana[getIndiceDiaHoy()];
     let notaHTML = '';
     const match = (plan.entrenamiento_hoy || '').match(/^<div style="background:rgba\(209,66,14,0\.08\)[^>]*>[\s\S]*?<\/div>/);
-    if (match) notaHTML = match[0];
+    if (match) notaHTML = _migrarNotaAdaptado(match[0]);
     if (diaHoy.tipo !== 'Entrenamiento') {
       plan.entrenamiento_hoy = notaHTML;
       return;
     }
-    plan.entrenamiento_hoy = notaHTML + `<strong>${diaHoy.dia} — ${resumenTappable(diaHoy.resumen)}</strong><br><br>${formatearSesion(diaHoy)}`;
+    plan.entrenamiento_hoy = notaHTML + _tituloDiaHTML(diaHoy.dia, resumenTappable(diaHoy.resumen)) + formatearSesion(diaHoy);
   }
 
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
