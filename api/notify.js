@@ -261,6 +261,14 @@ function _ejerciciosDeDetalle(detalle) {
   partes.push(actual);
   return partes.map(p => p.trim()).filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1));
 }
+// Mismo nombre claro que la app (_nombreSesion en index.html): "Upper/Lower" es jerga.
+function nombreSesion(t) {
+  return String(t || '')
+    .replace(/\bUpper\b/g, 'Torso').replace(/\bLower\b/g, 'Pierna')
+    .replace(/^Push\b/, 'Empuje').replace(/^Pull\b/, 'Tirón').replace(/^Legs\b/, 'Pierna')
+    .replace(/\bFull Body\b/gi, 'Cuerpo completo')
+    .replace(/ \+ /g, ' y ');
+}
 function htmlPlanInvitado(plan, appUrl) {
   const semana = Array.isArray(plan.semana) ? plan.semana : [];
   const sesiones = plan.soloDieta ? [] : semana.filter(d => /entren/i.test(d.tipo || ''));
@@ -277,7 +285,7 @@ function htmlPlanInvitado(plan, appUrl) {
     const ej = _ejerciciosDeDetalle(primera.detalle).slice(0, 5);
     h += `<div style="background:#0A0A0A;border:1px solid #232323;border-radius:12px;padding:16px 18px;margin:0 0 12px">
         <div style="font-size:10px;letter-spacing:2px;color:#E8490F;margin-bottom:8px">TU PRIMERA SESIÓN · ${esc(String(primera.dia || '').toUpperCase())}</div>
-        <div style="font-size:15px;font-weight:700;color:#F0EDE8;margin-bottom:8px">${esc(primera.resumen || '')}</div>
+        <div style="font-size:15px;font-weight:700;color:#F0EDE8;margin-bottom:8px">${esc(nombreSesion(primera.resumen || ''))}</div>
         ${ej.map(e => `<div style="font-size:13px;color:#B5B2AD;padding:4px 0;border-top:1px solid #1E1E1E">${esc(e)}</div>`).join('')}
       </div>`;
   }
