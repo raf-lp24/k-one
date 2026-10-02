@@ -34,7 +34,7 @@
 // tensión alta y cintura en el check-in.
 // v23 (29 sept 2026): vídeo de técnica concreto por ejercicio y recuadro
 // 'Tu plan, adaptado' con 3 notas visibles (el resto plegadas).
-const CACHE_NAME = 'kone-v64';
+const CACHE_NAME = 'kone-v65';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -109,7 +109,9 @@ self.addEventListener('push', e => {
       // etiqueta llega EN SILENCIO (sin sonido ni vibración): si el cliente no
       // había quitado la de ayer, la de hoy se cambiaba sin que se enterara.
       tag: datos.tag || 'kone-aviso',
-      renotify: true
+      renotify: true,
+      // Fin del descanso: vibración más larga, que se note con el móvil en el bolsillo.
+      ...(datos.tag === 'kone-descanso' ? { vibrate: [300, 150, 300, 150, 300] } : {})
     })
   );
 });

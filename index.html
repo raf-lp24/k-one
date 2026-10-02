@@ -20822,6 +20822,66 @@
   // valoraciones con las MISMAS funciones de siempre (guardarPesoEjercicio,
   // guardarSensacionEjercicio): la progresión autorregulada no cambia.
   let _ses = null, _sesTimer = null, _sesDesc = null, _sesWake = null, _sesGuardandoPeso = false;
+  let _sesAviso = null, _sesAudio = null;
+
+  // AVISO DE FIN DE DESCANSO con el móvil bloqueado: lo manda el servidor (ver
+  // tipo 'descanso' en api/notify.js) por los mismos avisos push de siempre.
+  // Solo si el cliente los tiene activados; si no, se le sugiere una vez.
+  async function _sesProgramarAviso(seg, texto) {
+    _sesCancelarAviso();
+    if (!seg) return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      try {
+        if (!localStorage.getItem('kone_hint_descanso')) {
+          localStorage.setItem('kone_hint_descanso', '1');
+          showToast('Activa «Avisos de entreno» en el menú y te avisaremos al acabar el descanso aunque bloquees el móvil.', 7000);
+        }
+      } catch (e) {}
+      return;
+    }
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      const id = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      _sesAviso = id;
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ tipo: 'descanso', id, segundos: Math.round(seg), titulo: 'Se acabó el descanso', cuerpo: texto || 'A por la siguiente serie. ¡Vamos!' })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+  async function _sesCancelarAviso() {
+    const id = _sesAviso;
+    _sesAviso = null;
+    if (!id) return;
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      fetch('/api/notify', {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ tipo: 'descanso', accion: 'cancelar', id })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+  // Pitido corto al acabar el descanso con la app a la vista (el audio se
+  // "desbloquea" en el toque del ✓, que es un gesto del usuario).
+  function _sesAudioListo() {
+    try { _sesAudio = _sesAudio || new (window.AudioContext || window.webkitAudioContext)(); if (_sesAudio.state === 'suspended') _sesAudio.resume(); } catch (e) {}
+  }
+  function _sesPitido() {
+    try {
+      const ctx = _sesAudio; if (!ctx) return;
+      [0, 0.28].forEach(t => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        const t0 = ctx.currentTime + t;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.2);
+        o.start(t0); o.stop(t0 + 0.22);
+      });
+    } catch (e) {}
+  }
   const _SES_CLAVE = () => 'kone_sesion_' + getFechaHoyISO();
 
   function _sesLeerEjercicios() {
@@ -20987,6 +21047,7 @@
   function sesMarcar(i) {
     const p = _ses.pasos[_ses.idx];
     p.hechas[i] = !p.hechas[i];
+    _sesAudioListo();
     if (p.tipo === 'peso' && p.hechas[i]) {
       _sesGuardarPeso(p);
       const quedan = p.hechas.some(x => !x);
@@ -21056,7 +21117,8 @@
   // Temporizador de descanso
   function sesDescansoEmpezar(seg, texto) {
     if (!seg) return;
-    _sesDesc = { total: seg, fin: Date.now() + seg * 1000 };
+    _sesDesc = { total: seg, fin: Date.now() + seg * 1000, texto: texto || '' };
+    _sesProgramarAviso(seg, _sesTextoAviso());
     document.getElementById('sesDescTit').textContent = 'Descansa';
     document.getElementById('sesDescTx').textContent = texto || '';
     document.getElementById('sesDescanso').classList.add('visible');
@@ -21071,6 +21133,9 @@
     document.getElementById('sesArco').setAttribute('stroke-dashoffset', String(144.5 * (1 - rest / _sesDesc.total)));
     if (rest <= 0) {
       clearInterval(_sesDesc.t);
+      // Lo está viendo: no hace falta la notificación, basta con pitido y vibración.
+      _sesCancelarAviso();
+      if (document.visibilityState === 'visible') _sesPitido();
       document.getElementById('sesDescTit').textContent = '¡A por la siguiente!';
       try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
       setTimeout(() => { if (_sesDesc && Date.now() >= _sesDesc.fin) sesDescansoFin(true); }, 2500);
@@ -21080,11 +21145,25 @@
     if (!_sesDesc) return;
     _sesDesc.fin = Math.max(_sesDesc.fin, Date.now()) + seg * 1000;
     _sesDesc.total = Math.max(_sesDesc.total, Math.ceil((_sesDesc.fin - Date.now()) / 1000));
+    _sesProgramarAviso(Math.ceil((_sesDesc.fin - Date.now()) / 1000), _sesTextoAviso());
     clearInterval(_sesDesc.t); _sesDesc.t = setInterval(_sesDescansoTick, 250);
     document.getElementById('sesDescTit').textContent = 'Descansa';
     _sesDescansoTick();
   }
+  // Texto de la notificación: qué toca ahora ("Serie 3 de Extensión de cuádriceps · 35 kg").
+  function _sesTextoAviso() {
+    try {
+      const p = _ses && _ses.pasos[_ses.idx];
+      if (!p) return '';
+      const sig = p.hechas.indexOf(false);
+      if (p.tipo === 'peso' && sig >= 0) return 'Serie ' + (sig + 1) + ' de ' + p.nombre + (Number(p.kg) > 0 ? ' · ' + _fmtKg(p.kg) + ' kg' : '') + '. ¡Vamos!';
+      const n = _ses.pasos[_ses.idx + 1];
+      return n ? 'Siguiente ejercicio: ' + n.nombre + '. ¡Vamos!' : 'Última serie hecha. ¡A terminar!';
+    } catch (e) { return ''; }
+  }
+
   function sesDescansoFin(silencioso) {
+    _sesCancelarAviso();
     if (_sesDesc) clearInterval(_sesDesc.t);
     _sesDesc = null;
     document.getElementById('sesDescanso')?.classList.remove('visible');
@@ -31406,6 +31485,16 @@ Se coló: ${lista}`;
     }
 
     // Tarjeta del mes gratis: vuelta de Stripe (ok/cancelada) o enlace del email (anadir).
+    const sesionParam = new URLSearchParams(window.location.search).get('sesion');
+    if (sesionParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => {
+        try {
+          const g = JSON.parse(localStorage.getItem('kone_sesion_' + getFechaHoyISO()) || 'null');
+          if (g && !g.fin && document.getElementById('dashboard')?.classList.contains('active')) sesAbrir();
+        } catch (e) {}
+      }, 1200);
+    }
     const tarjetaParam = new URLSearchParams(window.location.search).get('tarjeta');
     if (tarjetaParam) {
       window.history.replaceState({}, '', window.location.pathname);

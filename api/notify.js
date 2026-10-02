@@ -1496,6 +1496,42 @@ async function handlePost(req, res) {
   // 10 avisos por hora y por IP, y el push al admin es UNO por error distinto
   // y hora, con un máximo de 5 pushes por hora en total, para que nadie pueda
   // usar esto para llenarte el móvil. Siempre 200: al navegador no le importa.
+  // FIN DEL DESCANSO (2 oct 2026). Con la pantalla bloqueada el móvil congela la
+  // web y el temporizador del modo entrenamiento no puede avisar. Al marcar una
+  // serie, la app pide aquí un aviso para dentro de N segundos: se espera ese
+  // tiempo y se manda la notificación a los dispositivos del PROPIO cliente.
+  // Anular: el aviso es una "ficha" en rate_limits_contador (check_rate_limit con
+  // límite 1): la primera llamada que la reclama gana. Si el cliente vuelve a la
+  // app, salta el descanso o marca la siguiente serie, la app la reclama antes
+  // (accion 'cancelar') y aquí ya no se envía nada.
+  if ((req.body || {}).tipo === 'descanso') {
+    try {
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
+      const b = req.body || {};
+      if (typeof b.id !== 'string' || !/^\d{13}-[a-z0-9]{4,12}$/.test(b.id)) return res.status(400).json({ error: 'id no válido' });
+      const clave = 'descanso:' + user.id + ':' + b.id;
+      const ventana = new Date(Math.floor(Number(b.id.split('-')[0]) / 3600000) * 3600000).toISOString();
+      const reclamar = async () => { const { data, error } = await supa.rpc('check_rate_limit', { p_clave: clave, p_limite: 1, p_ventana: ventana }); return !error && data === true; };
+      if (b.accion === 'cancelar') { await reclamar(); return res.status(200).json({ ok: true }); }
+      const seg = Math.round(Number(b.segundos));
+      if (!(seg >= 5 && seg <= 280)) return res.status(400).json({ error: 'segundos fuera de rango' });
+      if (await superaLimite('descanso_usuario:' + user.id, 150)) return res.status(429).json({ error: 'Demasiados avisos' });
+      const limpiar = (v, n) => String(v || '').replace(/[\u0000-\u001f\u007f<>]+/g, ' ').trim().slice(0, n);
+      const titulo = limpiar(b.titulo, 60) || 'Se acabó el descanso';
+      const cuerpo = limpiar(b.cuerpo, 140) || 'A por la siguiente serie.';
+      // +1,5 s: si el cliente está mirando la app, su "cancelar" llega antes.
+      await new Promise(r => setTimeout(r, (seg + 1.5) * 1000));
+      if (!(await reclamar())) return res.status(200).json({ ok: true, cancelado: true });
+      const enviados = await enviarPushAUsuario(user.id, { title: titulo, body: cuerpo, url: '/?sesion=1', tag: 'kone-descanso' });
+      return res.status(200).json({ ok: true, enviados });
+    } catch (e) {
+      console.error('[notify] descanso:', e.message);
+      return res.status(500).json({ error: 'No se pudo programar el aviso' });
+    }
+  }
+
   if ((req.body || {}).tipo === 'plan_invitado') {
     try {
       const b = req.body || {};
