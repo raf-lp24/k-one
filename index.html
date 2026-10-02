@@ -215,7 +215,35 @@
      en cuanto el backend confirma que el usuario es admin (ver
      _cargarFuentesAdmin, llamada desde actualizarBtnAdmin) — con margen de
      sobra antes de que le dé tiempo a pulsar el botón y abrir el panel. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<!-- VELOCIDAD (2 oct 2026): la hoja de fuentes de Google ya no bloquea el primer
+     pintado: se pide como "preload" y se aplica al llegar. Mientras, el texto sale
+     con la fuente del sistema y cambia solo (display=swap). -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"></noscript>
+<!-- VELOCIDAD (2 oct 2026): la portada ya viene visible en el HTML (antes todas las
+     pantallas estaban ocultas hasta que la app entera -- 1,5 MB de JS -- arrancaba
+     en window.onload, y en un móvil con 4G lento no se veía NADA durante ~7 s).
+     Quien ya tiene sesión en este dispositivo no debe ver la portada un instante
+     antes de su panel: esto lo detecta ANTES de pintar y la oculta; goTo() quita
+     la marca en cuanto la app decide qué pantalla enseñar. -->
+<script>try{if(localStorage.getItem('k1_current_user')||/access_token|type=recovery/.test(location.hash)||Object.keys(localStorage).some(function(k){return /^sb-.*-auth-token$/.test(k)}))document.documentElement.className+=' con-sesion'}catch(e){}</script>
+<!-- Mientras la app (1,5 MB de JS) termina de cargar, la portada ya se ve y se puede
+     tocar: estos sustitutos guardan el último botón pulsado ("Empieza ahora", "Entrar",
+     el plan de ejemplo...) y window.onload lo ejecuta en cuanto la app está lista. Las
+     funciones de verdad, declaradas más abajo, sustituyen a estas al cargar. El menú
+     móvil y los saltos de sección funcionan ya, sin esperar. -->
+<script>
+(function () {
+  var cola = window.__colaPortada = [];
+  function encolar(n) { return function () { cola.push([n, [].slice.call(arguments)]); document.documentElement.classList.add('portada-esperando'); }; }
+  ['goTo', 'goToLegal', 'abrirPlanEjemplo', 'entrarODashboard', 'abrirOpinionPublica'].forEach(function (n) { if (!window[n]) window[n] = encolar(n); });
+  function $(id) { return document.getElementById(id); }
+  window.scrollToSection = function (id) { var e = $(id); if (e) e.scrollIntoView({ behavior: 'smooth' }); };
+  window.toggleMobileMenu = function () { var a = $('navToggle'), b = $('mobileMenu'); if (a) a.classList.toggle('active'); if (b) b.classList.toggle('active'); };
+  window.closeMobileMenu = function () { var a = $('navToggle'), b = $('mobileMenu'); if (a) a.classList.remove('active'); if (b) b.classList.remove('active'); };
+  window.scrollTestimonials = function (d) { var t = document.querySelector('.testimonials-track'); if (!t) return; var c = t.querySelector('.testimonial-card'); t.scrollBy({ left: d * (c ? c.offsetWidth + 2 : 380), behavior: 'smooth' }); };
+})();
+</script>
 <script>if(location.hostname==='k-one.fit'){var _ce=console.error;console.error=function(){if(typeof arguments[0]==='string'&&/Error (guardando|cargando|reseteando|recalculando|preparando|restaurando)/i.test(arguments[0]))return;_ce.apply(console,arguments)}}</script>
 <!-- Google Analytics: NO se carga aquí a ciegas. Antes se ejecutaba en cuanto
      cargaba la página, sin esperar a que el usuario aceptara o rechazara
@@ -376,6 +404,8 @@
     flex-direction: column;
   }
   #landing.active { display: flex; }
+  html.con-sesion #landing, html.con-sesion .gym-bg-deco { display: none !important; }
+  html.portada-esperando, html.portada-esperando * { cursor: progress !important; }
 
   .landing-nav {
     padding: 28px 40px;
@@ -7625,7 +7655,7 @@
   </picture>
 </div>
 
-<div class="screen" id="landing" tabindex="-1">
+<div class="screen active" id="landing" tabindex="-1">
   <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
   <nav class="landing-nav">
     <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
@@ -9848,14 +9878,15 @@
 
   // ===== NAVEGACIÓN SCREENS =====
   let _ultimaPantallaEvento = '';
-  function goTo(screenId) {
+  function goTo(screenId, opciones) {
     if (screenId !== _ultimaPantallaEvento) { _ultimaPantallaEvento = screenId; kEvento('pantalla', { pantalla: screenId }); }
     if (screenId !== 'legal' && /^#(aviso-legal|privacidad|terminos|cookies)$/.test(location.hash)) {
       try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {}
     }
+    document.documentElement.classList.remove('con-sesion', 'portada-esperando');
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
-    window.scrollTo(0,0);
+    if (!(opciones && opciones.mantenerScroll)) window.scrollTo(0,0);
     if (screenId === 'registro' || screenId === 'login') { try { _pintarPlanPendiente(); } catch (e) {} }
     const btnVolver = document.getElementById('btnVolverDashboard');
     if (btnVolver) {
@@ -30738,7 +30769,14 @@ Se coló: ${lista}`;
         // ahora el alta empieza por el cuestionario, no por la cuenta.
         goTo('bienvenida');
       } else {
-        goTo('landing');
+        // La portada ya se veía desde el primer instante: no se sube arriba a quien
+        // ya estaba leyendo. Si pulsó algo mientras cargaba la app, se hace ahora.
+        goTo('landing', { mantenerScroll: true });
+        const pulsado = (window.__colaPortada || []).slice(-1)[0];
+        window.__colaPortada = [];
+        if (pulsado && typeof window[pulsado[0]] === 'function') {
+          try { window[pulsado[0]].apply(null, pulsado[1]); } catch (e) { console.warn('[portada] botón pendiente:', e.message); }
+        }
       }
     }
 

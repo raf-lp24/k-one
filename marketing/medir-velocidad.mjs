@@ -20,6 +20,7 @@ const cmd = (method, params = {}) => new Promise(res => { const i = ++id; pend.s
 const ev = async e => (await cmd('Runtime.evaluate', { expression: e, awaitPromise: true, returnByValue: true })).result?.result?.value;
 
 await cmd('Page.enable'); await cmd('Network.enable'); await cmd('Runtime.enable');
+await cmd('Network.setBypassServiceWorker', { bypass: true });
 await cmd('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
 await cmd('Emulation.setCPUThrottlingRate', { rate: 4 });
 await cmd('Network.emulateNetworkConditions', { offline: false, latency: 150, downloadThroughput: 1.6 * 1024 * 1024 / 8, uploadThroughput: 750 * 1024 / 8 });
