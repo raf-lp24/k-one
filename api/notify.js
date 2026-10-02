@@ -241,7 +241,61 @@ function _entrenosSemanaAnterior(ud, ahora) {
 // revisa a todos igualmente.
 // error_cliente: los fallos de JavaScript que avisa el navegador (ver el primer
 // <script> de index.html); cada navegador manda pocos, así que 10/hora sobra.
-const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5, auditar_plan: 20, error_cliente: 10 };
+const RATE_LIMITS = { lead: 5, mensaje: 3, bienvenida: 5, auditar_plan: 20, error_cliente: 10, plan_invitado: 3 };
+
+// "Envíame mi plan por email" (2 oct 2026): quien hace el cuestionario sin cuenta
+// puede pedir su adelanto por email. El plan se genera AQUÍ con el motor real a
+// partir de sus respuestas: el email nunca lleva texto que venga del navegador,
+// así que no sirve para mandar spam con el remitente de K-ONE.
+function _ejerciciosDeDetalle(detalle) {
+  const txt = String(detalle || '');
+  const i = txt.indexOf(' · ');
+  const cuerpo = i >= 0 ? txt.slice(i + 3) : txt;
+  const partes = []; let prof = 0, actual = '';
+  for (const c of cuerpo) {
+    if (c === '(') prof++;
+    if (c === ')') prof = Math.max(0, prof - 1);
+    if (c === ',' && prof === 0) { partes.push(actual); actual = ''; continue; }
+    actual += c;
+  }
+  partes.push(actual);
+  return partes.map(p => p.trim()).filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1));
+}
+function htmlPlanInvitado(plan, appUrl) {
+  const semana = Array.isArray(plan.semana) ? plan.semana : [];
+  const sesiones = plan.soloDieta ? [] : semana.filter(d => /entren/i.test(d.tipo || ''));
+  const primera = sesiones[0];
+  const idx = primera ? semana.indexOf(primera) : 0;
+  const tomas = (plan.nutricionPorDia && (plan.nutricionPorDia[idx] || plan.nutricionPorDia[0])) || plan.nutricion || [];
+  const muestra = ['Desayuno', 'Comida', 'Cena'].map(m => tomas.find(t => t && t.momento === m)).filter(t => t && t.opciones && t.opciones[0]);
+  const celda = (v, t) => `<td style="padding:5px;width:33%"><div style="background:#1E1E1E;border-radius:8px;padding:12px 6px;text-align:center"><div style="font-size:20px;font-weight:700;color:#F0EDE8">${esc(String(v))}</div><div style="font-size:10px;color:#8A8A8A;letter-spacing:1px;text-transform:uppercase;margin-top:3px">${esc(t)}</div></div></td>`;
+  let h = `<div style="padding:28px 28px 0">
+      <h1 style="color:#F0EDE8;font-size:21px;font-weight:700;margin:0 0 10px">Tu plan de K-ONE</h1>
+      <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">Aquí lo tienes, calculado con tus respuestas. Es un adelanto: dentro tienes la semana entera, cada ejercicio explicado, 5 opciones por comida y la lista de la compra.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 16px"><tr>${celda(plan.kcalObj || '', 'kcal al día')}${plan.protObj ? celda(plan.protObj + ' g', 'proteína') : ''}${sesiones.length ? celda(sesiones.length, 'sesiones/semana') : ''}</tr></table>`;
+  if (primera) {
+    const ej = _ejerciciosDeDetalle(primera.detalle).slice(0, 5);
+    h += `<div style="background:#0A0A0A;border:1px solid #232323;border-radius:12px;padding:16px 18px;margin:0 0 12px">
+        <div style="font-size:10px;letter-spacing:2px;color:#E8490F;margin-bottom:8px">TU PRIMERA SESIÓN · ${esc(String(primera.dia || '').toUpperCase())}</div>
+        <div style="font-size:15px;font-weight:700;color:#F0EDE8;margin-bottom:8px">${esc(primera.resumen || '')}</div>
+        ${ej.map(e => `<div style="font-size:13px;color:#B5B2AD;padding:4px 0;border-top:1px solid #1E1E1E">${esc(e)}</div>`).join('')}
+      </div>`;
+  }
+  if (muestra.length) {
+    h += `<div style="background:#0A0A0A;border:1px solid #232323;border-radius:12px;padding:16px 18px;margin:0 0 18px">
+        <div style="font-size:10px;letter-spacing:2px;color:#E8490F;margin-bottom:8px">UN DÍA DE TUS COMIDAS</div>
+        ${muestra.map(t => `<div style="font-size:13px;color:#B5B2AD;padding:5px 0;border-top:1px solid #1E1E1E"><span style="color:#F0EDE8">${esc(t.momento)}</span> · ${esc(t.opciones[0].nombre || '')} <span style="color:#8A8A8A">· ${esc(t.opciones[0].kcal || '')}</span></div>`).join('')}
+      </div>`;
+  }
+  h += `<p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;text-align:center">Tu primer mes es <span style="color:#E8490F;font-weight:600">gratis y sin tarjeta</span>.</p>
+      <p style="margin:0 0 20px;font-size:12px;color:#8A8A8A;text-align:center;line-height:1.6">Si abres el enlace en el mismo móvil u ordenador donde hiciste el cuestionario, tu plan ya estará ahí. Si no, repetirlo te lleva 3 minutos.</p>
+    </div>
+    <div style="padding:0 28px 28px;text-align:center">
+      <a href="${appUrl}/?go=registro" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">GUARDAR MI PLAN Y EMPEZAR GRATIS</a>
+      <p style="margin:16px 0 0;font-size:11px;color:#5A5A5A">Te escribiremos una sola vez más, dentro de dos días, para recordártelo. Nada más.</p>
+    </div>`;
+  return emailWrapper(h);
+}
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 
 // Vercel pone la IP real del cliente en x-forwarded-for (primer valor de la
@@ -386,7 +440,7 @@ async function handleCronRetencion(req, res) {
       (users || []).forEach(u => { if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at; });
     } catch (_) {}
 
-    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'retencion_tarjeta', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'retencion_tarjeta', 'recordatorio_plan_invitado', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
 
@@ -620,6 +674,41 @@ ${bloqueOpciones}
           enviadosPrimerCobro++;
         } catch (ePC) { console.warn('[notify-cron] aviso primer cobro:', ePC.message); }
       }
+    }
+
+    // RECORDATORIO A QUIEN PIDIÓ SU PLAN POR EMAIL SIN CREAR CUENTA: uno solo, a
+    // los 2 días, y solo si sigue sin cuenta con ese email.
+    let enviadosPlanInvitado = 0;
+    if (!sinEmail) {
+      try {
+        const hace2d = new Date(ahora.getTime() - 2 * 86400000).toISOString();
+        const hace3d = new Date(ahora.getTime() - 3 * 86400000).toISOString();
+        const { data: pedidos } = await supa.from('email_log').select('destinatario, created_at')
+          .eq('tipo', 'plan_invitado').gte('created_at', hace3d).lt('created_at', hace2d);
+        const conCuenta = new Set((perfiles || []).map(p => String(p.email || '').toLowerCase()));
+        const yaEnEsta = new Set();
+        for (const pd of (pedidos || [])) {
+          const em = String(pd.destinatario || '').toLowerCase();
+          if (!em || conCuenta.has(em) || yaEnEsta.has(em) || yaEnviado.has(`recordatorio_plan_invitado:${em}`)) continue;
+          yaEnEsta.add(em);
+          const htmlRec = emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 16px">Tu plan sigue esperándote</h1>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hace un par de días hiciste tu cuestionario en K-ONE y te enviamos tu plan. Solo te falta guardarlo para empezar a usarlo.</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 18px">El primer mes es <span style="color:#F0EDE8">gratis y sin tarjeta</span>: entras, creas tu cuenta y lo tienes. Si no te convence, no pagas nada.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}/?go=registro" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">GUARDAR MI PLAN</a>
+              <p style="margin:16px 0 0;font-size:11px;color:#5A5A5A">Es el último correo que te mandamos sobre esto.</p>
+            </div>`);
+          try {
+            await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: em, subject: 'Tu plan de K-ONE sigue esperándote', html: htmlRec });
+            await supa.from('email_log').insert({ tipo: 'recordatorio_plan_invitado', destinatario: em, asunto: 'Tu plan de K-ONE sigue esperándote', html: htmlRec, datos: JSON.stringify({ resumen: 'Recordatorio único a los 2 días a un invitado que pidió su plan por email.' }) });
+            yaEnviado.add(`recordatorio_plan_invitado:${em}`);
+            enviadosPlanInvitado++;
+          } catch (eR) { console.warn('[notify-cron] recordatorio plan invitado:', eR.message); }
+        }
+      } catch (ePI) { console.warn('[notify-cron] recordatorios de plan invitado:', ePI.message); }
     }
 
     let enviados3 = 0, enviados8 = 0, enviadosReenganche = 0, enviadosTarjeta = 0;
@@ -1350,7 +1439,7 @@ ${bloqueOpciones}
     }
 
     console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosTarjeta, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosTarjeta, enviadosPlanInvitado, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     capturarError(err, { fn: 'notify-cron' });
@@ -1399,6 +1488,40 @@ async function handlePost(req, res) {
   // 10 avisos por hora y por IP, y el push al admin es UNO por error distinto
   // y hora, con un máximo de 5 pushes por hora en total, para que nadie pueda
   // usar esto para llenarte el móvil. Siempre 200: al navegador no le importa.
+  if ((req.body || {}).tipo === 'plan_invitado') {
+    try {
+      const b = req.body || {};
+      const email = String(b.email || '').trim().toLowerCase().slice(0, 200);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return res.status(400).json({ error: 'Email no válido' });
+      if (b.acepta !== true) return res.status(400).json({ error: 'Falta tu conformidad para enviarte el plan.' });
+      const ud = b.cuestionario && typeof b.cuestionario === 'object' && !Array.isArray(b.cuestionario) ? b.cuestionario : null;
+      if (!ud || JSON.stringify(ud).length > 12000) return res.status(400).json({ error: 'Faltan tus respuestas del cuestionario.' });
+      if (await estaLimitadoPorTasa(req, 'plan_invitado') || await superaLimite('plan_invitado_email:' + email, 2)) {
+        return res.status(429).json({ error: 'Ya te lo hemos enviado. Mira en tu correo (y en spam).' });
+      }
+      const apiKeyPI = process.env.RESEND_API_KEY;
+      if (!apiKeyPI) return res.status(503).json({ error: 'El envío de emails no está disponible ahora mismo.' });
+      const motorPI = await obtenerMotor();
+      const plan = motorPI.generar(ud);
+      if (!plan || !(plan.kcalObj > 0)) return res.status(400).json({ error: 'No se ha podido generar tu plan con esas respuestas.' });
+      const html = htmlPlanInvitado(plan, APP_URL);
+      const asunto = 'Tu plan de K-ONE (gratis y sin tarjeta)';
+      await enviarEmail(apiKeyPI, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: email, subject: asunto, html });
+      const supa = getSupabaseAdmin();
+      try { await supa.from('leads').insert({ email }); } catch (_) {}
+      try {
+        await supa.from('email_log').insert({ tipo: 'plan_invitado', destinatario: email, asunto, html,
+          datos: JSON.stringify({ resumen: `Plan enviado a un invitado sin cuenta (${String(ud.tipoPlan || '').slice(0, 40)} · ${String(ud.objetivo || '').slice(0, 30)}).` }) });
+      } catch (_) {}
+      try { await enviarPushAAdmins({ title: 'K-ONE · Plan enviado por email', body: 'Alguien ha hecho el cuestionario sin cuenta y ha pedido su plan por email.', url: '/' }); } catch (_) {}
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      console.error('[notify] plan_invitado:', e.message);
+      capturarError(e, { fn: 'notify-plan-invitado' });
+      return res.status(500).json({ error: 'No hemos podido enviarlo ahora. Prueba en un momento.' });
+    }
+  }
+
   if ((req.body || {}).tipo === 'error_cliente') {
     try {
       const limpiar = (v, n) => String(v || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').slice(0, n);

@@ -8307,6 +8307,8 @@
       <h3>2.3. Finalidad</h3>
       <p>Tratamos tus datos para crear y adaptar tu plan de entrenamiento y nutrición, gestionar tu cuenta y suscripción, y prestarte el servicio. Los datos de salud se usan exclusivamente para personalizar y excluir ejercicios o alimentos que no te convengan.</p>
 
+      <p>Si haces el cuestionario sin crear cuenta y nos pides tu plan por email, usamos tus respuestas solo en ese momento para generarlo y enviártelo; no las guardamos. Guardamos tu email para mandarte un único recordatorio dos días después.</p>
+
       <h3>2.4. Base jurídica</h3>
       <ul>
         <li><strong>Ejecución del contrato</strong> (art. 6.1.b RGPD) para la prestación del servicio y la gestión de tu cuenta.</li>
@@ -26332,6 +26334,35 @@ Se coló: ${lista}`;
     enterFormulario();
   }
 
+  async function enviarPlanPorEmail(ev) {
+    if (ev) ev.preventDefault();
+    const p = _leerPlanPendiente();
+    const input = document.getElementById('planEmailInput');
+    const nota = document.getElementById('planEmailNota');
+    const btn = document.getElementById('planEmailBtn');
+    const email = (input && input.value || '').trim().toLowerCase();
+    if (!p || !p.userData) { showToast('No encontramos tu cuestionario en este dispositivo. Vuelve a hacerlo, son 3 minutos.', 5000); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { if (nota) nota.textContent = 'Revisa el email: no parece válido.'; return false; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    try {
+      const r = await fetch('/api/notify', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'plan_invitado', email, acepta: true, cuestionario: p.userData })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'No se pudo enviar');
+      kEvento('plan_por_email');
+      if (nota) nota.innerHTML = '<span style="color:var(--blanco)">Enviado a ' + _esc(email) + '.</span> Si no lo ves, mira en spam o promociones. Cuando quieras, crea tu cuenta aquí abajo y lo guardas.';
+      const regEmail = document.getElementById('reg-email');
+      if (regEmail && !regEmail.value) regEmail.value = email;
+      if (btn) btn.textContent = 'Enviado ✓';
+    } catch (e) {
+      if (nota) nota.textContent = e.message;
+      if (btn) { btn.disabled = false; btn.textContent = 'Enviármelo'; }
+    }
+    return false;
+  }
+
   function rehacerCuestionario() {
     _borrarPlanPendiente();
     enterFormulario();
@@ -26353,9 +26384,16 @@ Se coló: ${lista}`;
     }
     if (titulo) titulo.textContent = 'Tu plan está listo';
     if (sub) sub.innerHTML = 'Crea tu cuenta para guardarlo y empezar tu primer mes gratis. ¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra →</a>';
-    caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(209,66,14,0.4);border-radius:12px;padding:14px 14px 12px;margin:0 0 20px;text-align:left">'
+    caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(209,66,14,0.4);border-radius:12px;padding:14px 14px 12px;margin:0 0 14px;text-align:left">'
       + _htmlAdelantoPlan(p.plan, 'TU PLAN, CON TUS RESPUESTAS')
-      + '<button type="button" onclick="rehacerCuestionario()" style="margin-top:10px;background:none;border:none;padding:4px 0;color:var(--metal);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Rehacer el cuestionario</button></div>';
+      + '<button type="button" onclick="rehacerCuestionario()" style="margin-top:10px;background:none;border:none;padding:4px 0;color:var(--metal);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Rehacer el cuestionario</button></div>'
+      // ENVÍAME MI PLAN (2 oct 2026): para quien no quiere crear la cuenta todavía.
+      + '<form id="planEmailForm" onsubmit="return enviarPlanPorEmail(event)" style="margin:0 0 22px;padding:12px 14px;border:1px dashed var(--humo);border-radius:12px;text-align:left">'
+      + '<div style="font-size:13px;color:var(--blanco);margin-bottom:8px">¿Prefieres pensarlo? Te mandamos tu plan por email.</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="planEmailInput" required autocomplete="email" placeholder="tu@email.com" aria-label="Tu email para recibir el plan" style="flex:1 1 180px;min-width:0;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-size:14px">'
+      + '<button type="submit" id="planEmailBtn" class="btn-ghost" style="padding:10px 16px;font-size:12px">Enviármelo</button></div>'
+      + '<p id="planEmailNota" style="margin:8px 0 0;font-size:11px;color:var(--metal);line-height:1.5">Al pulsar te enviamos tu plan y un único recordatorio dentro de 2 días. Nada más.</p>'
+      + '</form>';
     caja.style.display = 'block';
   }
 

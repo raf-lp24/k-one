@@ -110,6 +110,14 @@ const handler = require(R + 'api/notify.js');
 let dias = 0;
 (async () => {
   const logs = []; const cl = console.log, cw = console.warn, ce = console.error;
+  // Invitado sin cuenta que pide su plan por email (día 0, antes del cron).
+  desfase = 9 * 3600000 - (RD.now() % dia) - 60000;
+  const resPI = { c: 200, status(c) { this.c = c; return this; }, json(o) { this.o = o; return this; } };
+  console.warn = (...a) => logs.push('W ' + a.join(' ')); console.error = (...a) => logs.push('E ' + a.join(' '));
+  await handler({ method: 'POST', headers: {}, body: { tipo: 'plan_invitado', email: 'invitado@ejemplo.com', acepta: true, cuestionario: { ...base, nombre: '<b>X</b>' } }, query: {}, socket: {} }, resPI);
+  const resPImal = { c: 200, status(c) { this.c = c; return this; }, json(o) { this.o = o; return this; } };
+  await handler({ method: 'POST', headers: {}, body: { tipo: 'plan_invitado', email: 'otro@ejemplo.com', cuestionario: base }, query: {}, socket: {} }, resPImal);
+  console.warn = cw; console.error = ce;
   for (dias = 0; dias < 8; dias++) {
     desfase = dias * dia + 9 * 3600000 - (RD.now() % dia);        // 09:00 UTC de cada día
     const res = { c: 200, status(c) { this.c = c; return this; }, json(o) { this.o = o; return this; } };
@@ -147,6 +155,15 @@ console.log('auditorias_clientes abiertas:', T.auditorias_clientes.length);
   if (conMotorViejo > 1) malos.push(conMotorViejo + ' planes siguen con el motor anterior (solo se admite el cliente sin datos)');
   if (/pollo/i.test(JSON.stringify(rev.plan.nutricionPorDia))) malos.push('el plan de no como pollo sigue llevando pollo');
   if (ult.profiles.some(p => 'plan' in p)) malos.push('la copia de seguridad lleva planes');
+  const aInv = enviados.filter(e => [].concat(e.a).includes('invitado@ejemplo.com'));
+  const planInv = aInv.find(e => /Tu plan de K-ONE .gratis/.test(e.asunto));
+  const recInv = aInv.filter(e => /sigue esperándote/.test(e.asunto));
+  if (process.env.GUARDAR_HTML && planInv) fs.writeFileSync(process.env.GUARDAR_HTML, planInv.html);
+  console.log('invitado: plan por email', resPI.c, planInv ? 'enviado' : 'NO', '· con sesión y comidas:', !!(planInv && /TU PRIMERA SESIÓN/.test(planInv.html) && /UN DÍA DE TUS COMIDAS/.test(planInv.html)), '· recordatorios:', recInv.map(e => 'día ' + e.dia).join(',') || 'ninguno', '· sin conformidad →', resPImal.c);
+  if (resPI.c !== 200 || !planInv) malos.push('el plan por email al invitado no se envía');
+  else if (!/TU PRIMERA SESIÓN/.test(planInv.html) || !/UN DÍA DE TUS COMIDAS/.test(planInv.html)) malos.push('el plan por email no lleva sesión y comidas');
+  if (recInv.length !== 1) malos.push('recordatorio al invitado: ' + recInv.length + ' (debía ser 1)');
+  if (resPImal.c !== 400) malos.push('sin conformidad se envía igual');
   const aSinTarjeta = T.email_log.filter(e => e.destinatario === sinTarjeta.email).map(e => e.tipo);
   console.log('cliente parado en la tarjeta recibe:', aSinTarjeta.join(', ') || 'nada');
   if (!aSinTarjeta.includes('retencion_tarjeta')) malos.push('quien hizo el cuestionario y no metió la tarjeta no recibe el email de la tarjeta');
