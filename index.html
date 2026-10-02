@@ -1696,7 +1696,7 @@
   }
   .pill-activo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brasa); box-shadow: 0 0 8px var(--brasa); }
   .hoy-semana { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; color: var(--metal); text-transform: uppercase; }
-  .hoy-frase { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgba(242,106,54,0.18); font-size: 15px; line-height: 1.55; font-style: italic; color: var(--blanco); max-width: 62ch; }
+  .hoy-frase { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgba(242,106,54,0.18); font-size: 15px; line-height: 1.55; font-style: italic; color: var(--blanco); }
   .hoy-frase:empty { display: none; }
 
   /* HOY EN EL MÓVIL (2 oct 2026): la cabecera ocupaba la primera pantalla entera
@@ -9275,7 +9275,6 @@
                 <span class="hoy-racha" id="hoyRacha" style="display:none" title="Días seguidos entrenando"></span>
                 <span class="hoy-semana" id="hoyHeaderSemana">SEMANA 1</span>
               </div>
-              <p class="dash-subtitle" id="dashSubtitle">Tu plan está listo. Empieza hoy.</p>
             </div>
           </div>
           <!-- Frase del día (2 oct 2026): antes iba en una tarjeta aparte más abajo;
@@ -20229,7 +20228,8 @@
 
     // Header
     document.getElementById('dashTitle').textContent = userData.objetivo || 'Tu plan';
-    document.getElementById('dashSubtitle').textContent = generatedPlan.bienvenida;
+    // La bienvenida ('Tienes base. Ahora le damos estructura...') ya no se pinta en
+    // Hoy desde el 2 oct 2026 (lo pidió el usuario): repetía lo que ya se sabe.
     // El "mensaje del día" se calcula al pintar: el del plan guardado se quedaba
     // congelado (el plan solo se regenera al renovar el menú) y era siempre el mismo.
     let _msgDia = generatedPlan.mensaje_dia;
