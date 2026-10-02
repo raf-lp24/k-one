@@ -1638,9 +1638,11 @@
     color: var(--blanco-puro);
     margin-bottom: 8px;
   }
+  /* Sobre la foto el gris no se leía (2 oct 2026): blanco con sombra. */
   .today-hero-sub {
     font-size: 13.5px;
-    color: var(--metal-claro);
+    color: var(--blanco);
+    text-shadow: 0 1px 10px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.6);
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.3px;
     margin-bottom: 16px;
@@ -1695,7 +1697,8 @@
     font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
   }
   .pill-activo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brasa); box-shadow: 0 0 8px var(--brasa); }
-  .hoy-semana { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; color: var(--metal); text-transform: uppercase; }
+  /* "SEMANA 16": pastilla como las etiquetas de la web, junto a "Programa activo". */
+  .hoy-semana { display: inline-flex; align-items: center; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blanco); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 6px 14px; }
   .hoy-frase { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgba(242,106,54,0.18); font-size: 15px; line-height: 1.55; font-style: italic; color: var(--blanco); }
   .hoy-frase:empty { display: none; }
 
@@ -4000,12 +4003,14 @@
     flex-direction: column;
   }
 
+  /* Día de la semana: misma etiqueta naranja que "VIERNES" en Hoy (2 oct 2026). */
   .week-day-name {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
-    color: var(--metal);
+    color: var(--brasa-txt);
     margin-bottom: 14px;
     display: flex;
     align-items: center;
@@ -4013,6 +4018,7 @@
   }
 
   .week-day-row.today .week-day-name { color: var(--brasa-txt); }
+  .week-day-row.rest .week-day-name { color: var(--metal); }
 
   .week-day-type {
     font-family: 'Bebas Neue', sans-serif;
