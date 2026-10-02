@@ -23,10 +23,13 @@ ok(/^[0-9a-f]{64}$/.test(huellaEmail('a@b.c')), 'la huella es SHA-256 en hex, nu
 
 // ---------- create-checkout-session con todo simulado
 function montar({ huellasUsadas = [] } = {}) {
-  const llamadas = { sesiones: [] };
+  const llamadas = { sesiones: [], subs: [] };
   const stripe = {
     customers: { search: async () => ({ data: [] }), create: async () => ({ id: 'cus_nuevo' }) },
-    subscriptions: { list: async () => ({ data: [] }) },
+    subscriptions: {
+      list: async () => ({ data: [] }),
+      create: async (p) => { llamadas.subs.push(p); const ahora = Math.floor(Date.now() / 1000); return { id: 'sub_1', customer: 'cus_nuevo', status: 'trialing', cancel_at_period_end: false, trial_end: ahora + 30 * 86400, items: { data: [{ price: { id: p.items[0].price }, current_period_start: ahora, current_period_end: ahora + 30 * 86400 }] } }; },
+    },
     checkout: { sessions: { create: async (p) => { llamadas.sesiones.push(p); return { url: 'https://checkout.stripe.test/s' }; } } },
   };
   const supa = {
@@ -55,6 +58,7 @@ async function pedir(m, body) {
     getStripe: () => m.stripe, getSupabaseAdmin: () => m.supa,
     getAuthUser: async () => ({ id: 'u1', email: 'C.Liente@gmail.com' }),
     getPriceId: () => 'price_completo_mensual',
+    upsertFromSubscription: async () => {}, tieneMetodoPago: async () => false,
   } };
   process.env.APP_URL = 'https://k-one.test';
   const handler = require(checkout);
@@ -68,10 +72,13 @@ async function pedir(m, body) {
   const silencio = console.warn; console.warn = () => {}; console.error = () => {};
   const body = { tipoPlan: 'Plan completo: entrenamiento + nutrición', periodicidad: 'mensual' };
 
-  console.log('Email nuevo');
+  console.log('Email nuevo: mes gratis SIN tarjeta (desde el 2 oct 2026)');
   { const m = montar(); const r = await pedir(m, body);
-    ok(r.estado === 200 && r.cuerpo.url, 'devuelve la URL de pago');
-    ok(m.llamadas.sesiones[0]?.subscription_data?.trial_period_days === 30, 'con 30 días gratis'); }
+    ok(r.estado === 200 && r.cuerpo.activado === true && !r.cuerpo.url, 'se activa al momento, sin mandar a pagar');
+    ok(m.llamadas.sesiones.length === 0, 'no se abre Stripe Checkout (no se pide tarjeta)');
+    const sub = m.llamadas.subs[0] || {};
+    ok(sub.trial_period_days === 30, 'suscripción con 30 días gratis');
+    ok(sub.trial_settings?.end_behavior?.missing_payment_method === 'cancel', 'si no añade tarjeta, al terminar se cancela sola (no se cobra)'); }
 
   console.log('Email que ya tuvo suscripción (borró la cuenta y vuelve)');
   { const m = montar({ huellasUsadas: [huellaEmail('cliente@gmail.com')] }); const r = await pedir(m, body);
@@ -83,7 +90,7 @@ async function pedir(m, body) {
 
   console.log('aceptoSinPrueba no regala nada a un email nuevo');
   { const m = montar(); const r = await pedir(m, { ...body, aceptoSinPrueba: true });
-    ok(m.llamadas.sesiones[0]?.subscription_data?.trial_period_days === 30, 'un email nuevo sigue teniendo sus 30 días'); }
+    ok(r.cuerpo.activado === true && m.llamadas.subs[0]?.trial_period_days === 30, 'un email nuevo sigue teniendo sus 30 días'); }
 
   console.warn = silencio;
   console.log('\n' + (fallos ? '✘ ' + fallos + ' fallos' : '✔ Todo bien')); process.exit(fallos ? 1 : 0);

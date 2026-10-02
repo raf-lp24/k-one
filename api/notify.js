@@ -7,7 +7,7 @@
 // GET:  cron de retención (día 3 sin cuestionario, día 8 sin pagar) — protegido por CRON_SECRET
 // Variables de entorno: RESEND_API_KEY, CRON_SECRET
 
-const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
+const { getSupabaseAdmin, getAuthUser, getStripe, tieneMetodoPago } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
 const { obtenerMotor, actualizarPlanCliente } = require('../lib/motor-servidor');
@@ -376,7 +376,7 @@ async function handleCronRetencion(req, res) {
         perfiles = r.data;
       }
     }
-    const { data: subs } = await supa.from('subscriptions').select('user_id, status, plan, current_period_end, cancel_at_period_end');
+    const { data: subs } = await supa.from('subscriptions').select('user_id, status, plan, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id');
     const subByUser = {};
     (subs || []).forEach(s => { subByUser[s.user_id] = s; });
 
@@ -581,21 +581,37 @@ async function handleCronRetencion(req, res) {
           const primerNombre = nombre.split(' ')[0] || 'Hola';
           const fecha = new Date(fin).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Madrid' });
           const plan = ETIQUETA_PLAN[sub.plan];
+          // Desde el 2 oct 2026 el mes gratis empieza sin tarjeta: a quien no la ha
+          // añadido no se le puede decir "se te cobrará", hay que decirle que la
+          // añada para seguir. Si no se puede saber (Stripe caído), texto que vale
+          // para los dos casos.
+          let conTarjeta = null;
+          try { conTarjeta = await tieneMetodoPago(getStripe(), sub.stripe_customer_id, sub.stripe_subscription_id); } catch (_) { conTarjeta = null; }
+          const bloqueOpciones = conTarjeta === false ? `
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Seguir:</span> añade tu tarjeta desde tu perfil antes de esa fecha${plan ? ` y continuarás con ${esc(plan)}` : ''}.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No seguir:</span> no hagas nada. Tu acceso termina ese día y no se te cobra nada.</p>` : conTarjeta === true ? `
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Seguir:</span> no tienes que hacer nada.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Cambiar de plan:</span> desde tu perfil, y se aplica en el siguiente período.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No continuar:</span> pulsa «Cancelar suscripción» en «Gestionar suscripción» antes de esa fecha y no se te cobrará nada.</p>` : `
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Si ya añadiste tu tarjeta:</span> no tienes que hacer nada.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Si no la has añadido y quieres seguir:</span> hazlo desde «Gestionar suscripción» antes de esa fecha.</p>
+                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No continuar:</span> cancela desde «Gestionar suscripción» y no se te cobrará nada.</p>`;
+          const fraseCobro = conTarjeta === false
+            ? `termina tu primer mes gratis en K-ONE. Todavía no has añadido tarjeta, así que no se te cobrará nada`
+            : `termina tu primer mes gratis en K-ONE${plan ? ` y, si sigues, se te cobrará ${esc(plan)}` : ' y empezará tu cuota'}`;
           const html = emailWrapper(`
             <div style="padding:28px 28px 0">
               <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu mes gratis termina el ${esc(fecha)}</h1>
               <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
-              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Solo un aviso, sin sorpresas: el <span style="color:#F0EDE8;font-weight:500">${esc(fecha)}</span> termina tu primer mes gratis en K-ONE${plan ? ` y, si sigues, se te cobrará ${esc(plan)}` : ' y empezará tu cuota'}.</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Solo un aviso, sin sorpresas: el <span style="color:#F0EDE8;font-weight:500">${esc(fecha)}</span> ${fraseCobro}.</p>
               <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
                 <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">LO QUE PUEDES HACER</div>
-                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Seguir:</span> no tienes que hacer nada.</p>
-                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 8px"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Cambiar de plan:</span> desde tu perfil, y se aplica en el siguiente período.</p>
-                <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No continuar:</span> pulsa «Cancelar suscripción» en el menú de tu perfil antes de esa fecha y no se te cobrará nada.</p>
+${bloqueOpciones}
               </div>
               <p style="color:#B5B2AD;font-size:13px;line-height:1.7;margin:0 0 18px">Si tienes cualquier duda, responde a este correo y te ayudamos.</p>
             </div>
             <div style="padding:0 28px 28px;text-align:center">
-              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">ABRIR MI PERFIL</a>
+              <a href="${APP_URL}${conTarjeta === false ? '/?tarjeta=anadir' : ''}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">${conTarjeta === false ? 'AÑADIR MI TARJETA' : 'ABRIR MI PERFIL'}</a>
             </div>`);
           const asunto = `${primerNombre}, tu mes gratis termina el ${fecha}`;
           await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });

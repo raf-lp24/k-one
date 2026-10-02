@@ -131,7 +131,7 @@
         {
           "@type": "Question",
           "name": "¿Qué pasa después del mes gratis?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Te avisamos por email unos días antes, y puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "El primer mes es gratis y no te pedimos tarjeta para empezar. Unos días antes de que termine te avisamos por email: si quieres seguir, añades tu tarjeta y continúas con el plan que elegiste (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes); si no, el mes termina y no se cobra nada. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes." }
         },
         {
           "@type": "Question",
@@ -6724,11 +6724,11 @@
     <!-- Solo en el primer mes gratis: lo que más frena es dejar la tarjeta, así que se dice
          claro qué pasa con ella (y se cumple: el cron avisa antes del primer cobro). -->
     <div id="paywallGarantia" style="display:none;margin-top:14px;padding:12px 14px;border:1px solid var(--humo);border-radius:10px;background:var(--carbon)">
-      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> <strong style="color:var(--blanco)">Hoy no se cobra nada.</strong> La tarjeta solo sirve para reservar tu plan.</p>
-      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Te avisamos por email antes del primer cobro.</p>
-      <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Cancelas en un clic desde tu perfil, sin llamadas ni explicaciones.</p>
+      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> <strong style="color:var(--blanco)">Sin tarjeta.</strong> Empiezas ahora mismo y no se cobra nada.</p>
+      <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Unos días antes de que termine te avisamos por email para que decidas si sigues.</p>
+      <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Si no añades tarjeta, el mes termina y ya está: sin cobros ni permanencia.</p>
     </div>
-    <div class="pago-seguro">
+    <div class="pago-seguro" id="paywallSello">
       <div class="pago-seguro-fila">
         <span class="pago-seguro-candado" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
         <span>Pago seguro con <b>Stripe</b></span>
@@ -7542,6 +7542,11 @@
         <span class="ms-txt"><span class="ms-tit">Cambiar de plan</span><span class="ms-sub" id="msFilaCambiarSub">Solo nutrición o completo, mensual o trimestral, otro objetivo</span></span>
         <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
+      <button type="button" class="ms-fila ms-destacada" id="msFilaTarjeta" onclick="anadirTarjeta(this)" style="display:none">
+        <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M16 15h2"/><path d="M12 15h1"/></svg></span>
+        <span class="ms-txt"><span class="ms-tit">Añadir tarjeta para seguir</span><span class="ms-sub" id="msFilaTarjetaSub">Sin ella, al terminar el mes gratis tu acceso se acaba (sin cobros)</span></span>
+        <svg class="ms-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
       <button type="button" class="ms-fila" id="msFilaPago" onclick="abrirPortalPago(this)">
         <span class="ms-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></svg></span>
         <span class="ms-txt"><span class="ms-tit">Tarjeta y facturas</span><span class="ms-sub" id="msFilaPagoSub">Cambia tu método de pago o descarga tus facturas</span></span>
@@ -7961,7 +7966,7 @@
   <section class="pricing" id="pricing">
     <div class="section-header">
       <h2 class="section-title">Sin letra pequeña</h2>
-      <p class="section-note">Tu primer mes es gratis. Al terminar, pasa al plan que elijas. Puedes cambiar de plan (se aplica en el siguiente período) o cancelar cuando quieras, antes de que se cobre nada.</p>
+      <p class="section-note">Tu primer mes es gratis y sin tarjeta. Si al terminar quieres seguir, eliges tu plan y añades la tarjeta; si no, no se cobra nada. Sin permanencia.</p>
     </div>
     <div class="pricing-cards">
       <div class="price-card">
@@ -7969,7 +7974,7 @@
         <div class="price-tag">Empieza aquí</div>
         <div class="price-amount" data-kp="primerMesGratis">Gratis</div>
         <div class="price-period" data-kp-period="oferta">30 días · Después 7,99€/mes</div>
-        <p class="price-desc">Acceso completo. Al terminar, pasa al plan que elijas. Cambio de plan en el siguiente período. Cancela cuando quieras, antes de que se cobre nada.</p>
+        <p class="price-desc">Acceso completo durante 30 días, sin tarjeta. Al terminar decides si sigues: añades la tarjeta y continúas con el plan que elijas.</p>
         <ul class="price-features">
           <li>Plan de entreno personalizado</li>
           <li>Plan de nutrición con 5 opciones/comida</li>
@@ -8073,7 +8078,7 @@
     <div class="faq-grid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes gratis?</summary>
-        <p class="faq-a">Al terminar tu primer mes gratis, tu suscripción pasa automáticamente al plan que elegiste al registrarte (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes) y ahí se hace el primer cobro. Te avisamos por email unos días antes, y puedes cambiar de plan o cancelar desde tu perfil antes de que eso pase. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
+        <p class="faq-a">El primer mes es gratis y no te pedimos tarjeta para empezar. Unos días antes de que termine te avisamos por email: si quieres seguir, añades tu tarjeta y continúas con el plan que elegiste (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes); si no, el mes termina y no se cobra nada. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
       </details>
       <details class="faq-item">
         <summary class="faq-q">¿Es una IA que improvisa o hay un criterio detrás?</summary>
@@ -8338,7 +8343,7 @@
       <h3>3.2. Registro y edad mínima</h3>
       <p>Para usar el servicio debes registrarte con datos veraces y mantener la confidencialidad de tus credenciales. Eres responsable de la información que facilitas; la calidad del plan depende de su exactitud. El servicio es solo para personas mayores de 18 años: al registrarte confirmas que lo eres. Al tratarse de un servicio que recoge datos de salud, no está disponible para menores de edad.</p>
       <h3>3.3. Precios, pago y prueba</h3>
-      <p>El primer mes es gratuito para todos los planes, una sola vez por persona y dirección de email: si una cuenta que ya tuvo suscripción se elimina y se vuelve a registrar con el mismo email, la nueva suscripción empieza a cobrarse desde el primer día (se avisa antes de pagar). Al finalizar, la suscripción se renueva automáticamente al plan elegido por el usuario y se realiza el primer cobro: plan completo (7,99€/mes o 14,99€ cada 3 meses) o solo nutrición (4,99€/mes). El usuario puede cambiar de plan o cancelar desde su perfil en cualquier momento, incluido durante el mes gratuito, antes de que se realice ningún cobro. El cambio de plan se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). Los precios incluyen los impuestos aplicables.</p>
+      <p>El primer mes es gratuito para todos los planes, una sola vez por persona y dirección de email: si una cuenta que ya tuvo suscripción se elimina y se vuelve a registrar con el mismo email, la nueva suscripción empieza a cobrarse desde el primer día (se avisa antes de pagar). El mes gratuito no requiere tarjeta. Antes de que termine se avisa al usuario por email: si añade un método de pago, la suscripción continúa con el plan elegido y se realiza el primer cobro al finalizar el mes gratuito (plan completo 7,99€/mes o 14,99€ cada 3 meses; solo nutrición 4,99€/mes); si no lo añade, el acceso termina al final del mes gratuito sin ningún cargo. Si el usuario ya había añadido su método de pago, la suscripción se renueva automáticamente al plan elegido. El usuario puede cambiar de plan o cancelar desde su perfil en cualquier momento, incluido durante el mes gratuito, antes de que se realice ningún cobro. El cambio de plan se aplica en el siguiente período de facturación (nunca a mitad de ciclo, sin prorrateos ni devoluciones). Los precios incluyen los impuestos aplicables.</p>
       <h3>3.4. Cancelación y política de reembolso</h3>
       <p>Puedes cancelar tu suscripción en cualquier momento desde tu perfil, sin permanencia, sin llamadas y sin formularios. La cancelación detiene futuras renovaciones y el acceso se mantiene activo hasta el final del período ya facturado.</p>
       <p>Las cuotas abonadas no son reembolsables. Al tratarse de un servicio digital de acceso inmediato (plan personalizado generado al instante), el usuario reconoce que el servicio se presta desde el momento de la activación. Conforme al artículo 103.m) del Real Decreto Legislativo 1/2007, el derecho de desistimiento no es aplicable a contenidos digitales cuya ejecución haya comenzado con el consentimiento expreso del consumidor. No obstante, si consideras que ha habido un error en el cobro, contacta con nosotros en <a href="mailto:k.one.fit26@gmail.com" style="color: var(--brasa-txt)">k.one.fit26@gmail.com</a> y lo revisaremos.</p>
@@ -8960,6 +8965,11 @@
 
       <!-- HOY -->
       <div class="dash-section active" id="section-hoy">
+        <!-- Mes gratis sin tarjeta: aviso en la última semana para que la añada y siga. -->
+        <div id="avisoTarjetaPrueba" role="status" style="display:none;margin:0 0 18px;padding:14px 16px;border:1px solid rgba(224,164,58,0.55);background:rgba(224,164,58,0.07);border-radius:12px;gap:12px;align-items:center;flex-wrap:wrap">
+          <p id="avisoTarjetaPruebaTexto" style="margin:0;flex:1 1 220px;font-size:13px;line-height:1.5;color:var(--metal-claro)"></p>
+          <button type="button" class="btn-primary" style="padding:9px 18px;font-size:12px" onclick="anadirTarjeta(this)">Añadir tarjeta</button>
+        </div>
         <div id="dashSkeleton" style="display:none">
           <div class="skeleton" style="height:80px;margin-bottom:20px"></div>
           <div class="skeleton" style="height:48px;width:60%;margin-bottom:24px"></div>
@@ -25741,6 +25751,7 @@
     }
     comprobarPaywall(email);
     comprobarRenovacionMensual();
+    try { _comprobarTarjetaPrueba(); } catch (e) {}
     comprobarRecordatorioCheckin();
     // Antes solo se ocultaba dentro del "if (generatedPlan) { if
     // (tieneAccesoActivo) {...} }" -- si saved no existía, o existía sin
@@ -26399,6 +26410,7 @@ Se coló: ${lista}`;
     if (btnCerrar) btnCerrar.style.display = _paywallVoluntario ? '' : 'none';
     document.getElementById('paywallOfertaBox').style.display = primerMes ? 'block' : 'none';
     const _gar = document.getElementById('paywallGarantia'); if (_gar) _gar.style.display = primerMes ? 'block' : 'none';
+    const _sello = document.getElementById('paywallSello'); if (_sello) _sello.style.display = primerMes ? 'none' : '';
     if (primerMes) { try { _pintarAdelantoPaywall(); } catch (e) { console.warn('[paywall] adelanto:', e.message); } }
     else { const _ad = document.getElementById('paywallAdelanto'); if (_ad) { _ad.style.display = 'none'; _ad.innerHTML = ''; } }
     document.getElementById('paywallPlanChooser').style.display = (primerMes || pagoFallido) ? 'none' : 'block';
@@ -26429,8 +26441,8 @@ Se coló: ${lista}`;
     }
     if (primerMes) {
       if (titulo) titulo.textContent = 'Tu plan está listo';
-      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes es gratis. Tú eliges cómo sigue después. Sin permanencia, cancela cuando quieras antes de que se cobre nada.';
-      if (btn) btn.textContent = 'Empezar gratis →';
+      if (desc) desc.textContent = 'Actívalo ahora: tu primer mes es gratis y no te pedimos tarjeta. Al final del mes decides si sigues.';
+      if (btn) btn.textContent = 'Empezar mi mes gratis →';
       // Se preselecciona lo que eligió en el cuestionario, pero puede cambiarlo aquí.
       const tpActual = getUserData(user?.email || '')?.userData?.tipoPlan || userData.tipoPlan || '';
       preseleccionarRadio('pw-ofertaTipo', (_ocultarCompleto || tpActual.includes('Solo nutrición')) ? 'Solo nutrición' : 'Entrenamiento + nutrición');
@@ -26478,13 +26490,13 @@ Se coló: ${lista}`;
     if (!aviso) return;
     if (_ofertaEsSoloNutricion()) {
       if (wrap) wrap.style.display = 'none';
-      aviso.textContent = `Al terminar los 30 días, tu plan "Solo nutrición" se renueva automáticamente a ${KONE_PRICES.nutricion}/mes. Puedes cambiar de plan o cancelar cuando quieras desde tu perfil.`;
+      aviso.textContent = `Si al terminar los 30 días quieres seguir, añades tu tarjeta y continúas con "Solo nutrición" a ${KONE_PRICES.nutricion}/mes. Si no, no se cobra nada.`;
       return;
     }
     if (wrap) wrap.style.display = '';
     const trimestral = periodicidadTrasOferta() === 'trimestral';
     const precio = trimestral ? `${KONE_PRICES.trimestral} cada 3 meses` : `${KONE_PRICES.completo} al mes`;
-    aviso.textContent = `Al terminar los 30 días, tu suscripción se renueva automáticamente a ${precio}. Puedes cambiar de plan (se aplica en el siguiente período) o cancelar cuando quieras desde tu perfil.`;
+    aviso.textContent = `Si al terminar los 30 días quieres seguir, añades tu tarjeta y continúas a ${precio}. Si no, no se cobra nada.`;
   }
 
   // Si en la pantalla de la oferta cambia lo que incluye su plan (por ejemplo pasa
@@ -26562,7 +26574,7 @@ Se coló: ${lista}`;
       showToast('Tu sesión ha caducado. Vuelve a iniciar sesión.', 5000);
       return;
     }
-    if (boton) { boton.disabled = true; boton.textContent = 'Redirigiendo a pago seguro...'; }
+    if (boton) { boton.disabled = true; boton.textContent = oferta ? 'Activando tu mes gratis...' : 'Redirigiendo a pago seguro...'; }
     try {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -26597,6 +26609,22 @@ Se coló: ${lista}`;
         showToast('Tienes acceso premium: no tienes que pagar nada.', 5000);
         if (typeof comprobarPaywall === 'function') comprobarPaywall(user.email);
         if (typeof actualizarBtnCancelar === 'function') actualizarBtnCancelar();
+        return;
+      }
+      // MES GRATIS SIN TARJETA (2 oct 2026): el servidor crea la prueba sin pasar por
+      // Stripe. Se recarga la cuenta y se abre el plan con el tour de bienvenida.
+      if (data.activado) {
+        if (session.user) await syncProfileFromSupabase(session.user);
+        document.getElementById('modalPaywall')?.classList.remove('visible');
+        if (boton) { boton.disabled = false; boton.textContent = textoBoton || 'Empezar mi mes gratis →'; }
+        kEvento('prueba_iniciada', { tipo: (tipoPlan || '').includes('Solo') ? 'solo_nutricion' : 'completo' });
+        if (typeof gtag === 'function') gtag('event', 'purchase', { currency: 'EUR', value: 0 });
+        _estadoTarjeta = false;
+        const u2 = getCurrentUser();
+        if (u2) { loadUserDashboard(u2.email); goTo('dashboard'); }
+        if (typeof actualizarBtnCancelar === 'function') actualizarBtnCancelar();
+        showToast(data.yaExistia ? 'Tu plan ya está activo.' : 'Tu mes gratis ha empezado. ¡A por ello!', 5000);
+        if (!userData.onboardingCompletado) startOnboarding();
         return;
       }
       if (!data.url) throw new Error('No se recibió URL de pago');
@@ -28921,6 +28949,62 @@ Se coló: ${lista}`;
     document.getElementById('modalPlanEjemplo')?.classList.remove('visible');
   }
 
+  // ===== MES GRATIS SIN TARJETA (2 oct 2026) =====
+  // null = no se sabe todavía; true/false = lo ha dicho el servidor. Solo se
+  // pregunta a quien está en el mes gratis.
+  let _estadoTarjeta = null;
+  async function _comprobarTarjetaPrueba() {
+    const u = getCurrentUser();
+    if (!u || u.isBeta || !u.tieneSub || u.estadoSub !== 'trialing') { _pintarAvisoTarjeta(); return; }
+    if (_estadoTarjeta === null) {
+      try {
+        const { data: { session } } = await supa.auth.getSession();
+        if (!session) return;
+        const r = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+          body: JSON.stringify({ accion: 'estado-tarjeta' })
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && typeof d.tieneTarjeta === 'boolean') _estadoTarjeta = d.tieneTarjeta;
+      } catch (e) { /* sin red: no se enseña nada */ }
+    }
+    _pintarAvisoTarjeta();
+  }
+  function _pintarAvisoTarjeta() {
+    const caja = document.getElementById('avisoTarjetaPrueba');
+    if (!caja) return;
+    const u = getCurrentUser();
+    const fin = u && u.fechaPago ? new Date(u.fechaPago) : null;
+    const dias = fin ? Math.ceil((fin.getTime() - Date.now()) / 86400000) : null;
+    const mostrar = !!(u && u.estadoSub === 'trialing' && !u.cancelaAlFinal && _estadoTarjeta === false && dias !== null && dias <= 7);
+    caja.style.display = mostrar ? 'flex' : 'none';
+    if (mostrar) {
+      const cuando = dias <= 0 ? 'hoy' : dias === 1 ? 'mañana' : 'en ' + dias + ' días';
+      document.getElementById('avisoTarjetaPruebaTexto').textContent = 'Tu mes gratis termina ' + cuando + ' (' + _fechaLarga(u.fechaPago) + '). Añade tu tarjeta para seguir con tu plan sin cortes. Si no, se acaba y no se cobra nada.';
+    }
+  }
+  async function anadirTarjeta(btn) {
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) { showToast('Tu sesión ha caducado. Vuelve a entrar.', 4000); return; }
+    const texto = btn ? btn.innerHTML : '';
+    if (btn) btn.disabled = true;
+    try {
+      const r = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ accion: 'anadir-tarjeta' })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.url) throw new Error(d.error || 'No se pudo abrir el formulario de la tarjeta');
+      kEvento('tarjeta_iniciada');
+      location.href = d.url;
+    } catch (e) {
+      showToast(e.message, 5000);
+      if (btn) { btn.disabled = false; btn.innerHTML = texto; }
+    }
+  }
+
   // ===== PANEL "GESTIONAR SUSCRIPCIÓN" =====
   function _fechaLarga(f) {
     if (!f) return '';
@@ -28942,6 +29026,7 @@ Se coló: ${lista}`;
     if (u.isBeta) { estado = fecha ? 'Sin coste · hasta el ' + fecha : 'Sin coste'; tono = 'ok'; }
     else if (u.pagoPendiente) { estado = 'Pago pendiente: el último cobro no se pudo hacer'; tono = 'mal'; }
     else if (u.suscripcionActiva && u.cancelaAlFinal) { estado = 'Cancelada · tu acceso sigue hasta el ' + (fecha || 'final del período'); tono = 'aviso'; }
+    else if (u.suscripcionActiva && u.estadoSub === 'trialing' && _estadoTarjeta === false) { estado = 'Mes gratis hasta el ' + (fecha || 'final de la prueba') + ' · sin tarjeta'; tono = 'aviso'; }
     else if (u.suscripcionActiva && u.estadoSub === 'trialing') { estado = 'Mes gratis · primer cobro el ' + (fecha || 'final de la prueba'); tono = 'ok'; }
     else if (u.suscripcionActiva && conStripe) { estado = 'Activa · se renueva el ' + (fecha || 'final del período'); tono = 'ok'; }
     else if (u.suscripcionActiva) { estado = 'Activa'; tono = 'ok'; }
@@ -28950,7 +29035,9 @@ Se coló: ${lista}`;
     pill.dataset.tono = tono;
 
     const ver = (id, si) => { const el = document.getElementById(id); if (el) el.style.display = si ? '' : 'none'; };
-    ver('msFilaPago', conStripe);
+    // En el mes gratis sin tarjeta, 'Añadir tarjeta' ya cubre esto: no se enseñan dos filas de tarjeta.
+    ver('msFilaPago', conStripe && !(u.estadoSub === 'trialing' && _estadoTarjeta === false));
+    ver('msFilaTarjeta', conStripe && u.suscripcionActiva && u.estadoSub === 'trialing' && !u.cancelaAlFinal && _estadoTarjeta === false);
     ver('msFilaCancelar', conStripe && u.suscripcionActiva && !u.cancelaAlFinal);
     ver('msFilaReactivar', conStripe && u.suscripcionActiva && u.cancelaAlFinal);
     const pago = document.getElementById('msFilaPago');
@@ -28964,6 +29051,7 @@ Se coló: ${lista}`;
   function abrirMiSuscripcion() {
     if (!getCurrentUser()) return;
     _pintarMiSuscripcion();
+    _comprobarTarjetaPrueba().then(() => _pintarMiSuscripcion()).catch(() => {});
     document.getElementById('modalMiSuscripcion')?.classList.add('visible');
   }
   function cerrarMiSuscripcion() {
@@ -30564,6 +30652,18 @@ Se coló: ${lista}`;
     // aviso nunca más, con el interruptor puesto.
     if (session && typeof _resincronizarPushSubscription === 'function') {
       _resincronizarPushSubscription();
+    }
+
+    // Tarjeta del mes gratis: vuelta de Stripe (ok/cancelada) o enlace del email (anadir).
+    const tarjetaParam = new URLSearchParams(window.location.search).get('tarjeta');
+    if (tarjetaParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+      if (tarjetaParam === 'ok') { _estadoTarjeta = true; kEvento('tarjeta_anadida'); setTimeout(() => showToast('Tarjeta añadida. Seguirás con tu plan sin cortes al terminar el mes gratis.', 6000), 800); }
+      else if (tarjetaParam === 'cancelada') setTimeout(() => showToast('No se ha añadido la tarjeta. Puedes hacerlo cuando quieras desde «Gestionar suscripción».', 6000), 800);
+      else if (tarjetaParam === 'anadir') {
+        if (session) setTimeout(() => anadirTarjeta(null), 1200);
+        else setTimeout(() => showToast('Entra en tu cuenta y pulsa «Añadir tarjeta» en «Gestionar suscripción».', 6000), 800);
+      }
     }
 
     // Vuelta desde Stripe Checkout (ver api/create-checkout-session.js).

@@ -1,7 +1,7 @@
-const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser } = require('./_stripeHelpers');
+const { getStripe, getSupabaseAdmin, getPriceId, getAuthUser, upsertFromSubscription, tieneMetodoPago } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { premiumVigente, concederPremium } = require('./_premium');
-const { pruebaYaUsada } = require('./_pruebaGratis');
+const { pruebaYaUsada, marcarPruebaUsada } = require('./_pruebaGratis');
 
 // Crea una sesión de Stripe Checkout (suscripción) para el plan/periodicidad
 // elegidos por el usuario logueado y devuelve la URL a la que redirigir.
@@ -24,6 +24,32 @@ module.exports = async (req, res) => {
     if (!user) return res.status(401).json({ error: 'No autenticado' });
 
     const { tipoPlan, periodicidad } = req.body;
+
+    // TARJETA DURANTE EL MES GRATIS (2 oct 2026): "estado-tarjeta" dice si ya la
+    // tiene (para el aviso del panel) y "anadir-tarjeta" abre Stripe Checkout en
+    // modo setup (solo guarda la tarjeta, no cobra). El webhook la deja como la
+    // de su suscripción.
+    if (req.body.accion === 'estado-tarjeta' || req.body.accion === 'anadir-tarjeta') {
+      const { data: subT } = await supabaseAdmin.from('subscriptions')
+        .select('stripe_customer_id, stripe_subscription_id, status').eq('user_id', user.id).maybeSingle();
+      if (!subT?.stripe_customer_id) return res.status(404).json({ error: 'No tienes una suscripción todavía.' });
+      if (req.body.accion === 'estado-tarjeta') {
+        const tieneTarjeta = await tieneMetodoPago(stripe, subT.stripe_customer_id, subT.stripe_subscription_id);
+        return res.status(200).json({ tieneTarjeta });
+      }
+      const originT = process.env.APP_URL;
+      if (!originT) return res.status(500).json({ error: 'APP_URL no configurada' });
+      const setup = await stripe.checkout.sessions.create({
+        mode: 'setup',
+        customer: subT.stripe_customer_id,
+        payment_method_types: ['card'],
+        client_reference_id: user.id,
+        metadata: { supabase_user_id: user.id, motivo: 'tarjeta_prueba' },
+        success_url: `${originT}/?tarjeta=ok`,
+        cancel_url: `${originT}/?tarjeta=cancelada`,
+      });
+      return res.status(200).json({ url: setup.url });
+    }
 
     // PREMIUM: un cliente con premium concedido (o invitado desde Jarvis) no
     // tiene que pasar por Stripe ni meter tarjeta. La app ya no le enseña el
@@ -111,6 +137,7 @@ module.exports = async (req, res) => {
     // Un customer recién creado no tiene historial, así que se salta la llamada.
     let tieneHistorial = false;
     let yaTieneActiva = false;
+    let subViva = null;
     if (!customerEraNuevo) {
       const prev = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 });
       // incomplete_expired: intento de pago que nunca llegó a activarse (falló la
@@ -121,7 +148,8 @@ module.exports = async (req, res) => {
       // automático por un fallo que no tuvo nada que ver con abusar de la oferta.
       const historialReal = prev.data.filter(s => s.status !== 'incomplete_expired');
       tieneHistorial = historialReal.length > 0;
-      yaTieneActiva = historialReal.some(s => ['active', 'trialing', 'past_due'].includes(s.status));
+      subViva = historialReal.find(s => ['active', 'trialing', 'past_due'].includes(s.status)) || null;
+      yaTieneActiva = !!subViva;
     }
 
     // SEGURIDAD: si el cliente ya tiene una suscripción activa/en prueba/con pago
@@ -132,6 +160,13 @@ module.exports = async (req, res) => {
     // problema pasaría desapercibido en el panel aunque Stripe siguiera cobrando
     // ambas. Para cambiar de plan ya existe update-subscription.js.
     if (yaTieneActiva) {
+      // Ya la tiene en Stripe pero quizá no en nuestra base de datos (p. ej. el mes
+      // gratis sin tarjeta se creó y el guardado falló): se sincroniza y se le deja
+      // entrar, sin crear otra.
+      if (subViva && ['active', 'trialing'].includes(subViva.status)) {
+        try { await upsertFromSubscription(supabaseAdmin, subViva, user.id); } catch (e) { console.warn('[create-checkout-session] resync:', e.message); }
+        return res.status(200).json({ activado: true, yaExistia: true });
+      }
       return res.status(400).json({ error: 'Ya tienes una suscripción activa. Gestiona tu plan desde el panel de tu cuenta.' });
     }
 
@@ -217,6 +252,29 @@ module.exports = async (req, res) => {
     // ningún código. Se suscribe DIRECTAMENTE a su plan real desde el día 1,
     // con un periodo de prueba que retrasa el primer cobro.
     const diasPrueba = (!tieneHistorial && !pruebaUsada) ? 30 : 0;
+
+    // MES GRATIS SIN TARJETA (2 oct 2026). Los clientes se registraban y se
+    // paraban al pedirles la tarjeta. Ahora la prueba se crea directamente, sin
+    // pasar por Checkout ni pedir nada: acceso al momento. Si al terminar los 30
+    // días no ha añadido tarjeta, Stripe la cancela sola (missing_payment_method:
+    // cancel) y no se cobra nada; si la añade ("anadir-tarjeta"), sigue con su plan.
+    if (diasPrueba) {
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: priceId, quantity: 1 }],
+        trial_period_days: diasPrueba,
+        trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        metadata: { supabase_user_id: user.id, tipoPlan: tipoPlan || '', periodicidad: periodicidad || '', prueba_sin_tarjeta: 'si' },
+      }, { idempotencyKey: `prueba-sin-tarjeta-${user.id}` });
+      await upsertFromSubscription(supabaseAdmin, subscription, user.id);
+      await marcarPruebaUsada(supabaseAdmin, user.email);
+      try {
+        const { enviarPushAAdmins } = require('./notify');
+        await enviarPushAAdmins({ title: 'K-ONE · Nuevo mes gratis', body: 'Un cliente ha empezado su mes gratis (sin tarjeta). Míralo en Jarvis.', url: '/' });
+      } catch (_) {}
+      return res.status(200).json({ activado: true, finPrueba: subscription.trial_end || null });
+    }
     const subscriptionData = { metadata: { supabase_user_id: user.id } };
     if (diasPrueba) subscriptionData.trial_period_days = diasPrueba;
 

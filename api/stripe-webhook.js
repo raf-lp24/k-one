@@ -1,4 +1,4 @@
-const { getStripe, getSupabaseAdmin, getSubscriptionPeriod } = require('./_stripeHelpers');
+const { getStripe, getSupabaseAdmin, getSubscriptionPeriod, upsertFromSubscription } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA } = require('./_premium');
 const { marcarPruebaUsada } = require('./_pruebaGratis');
@@ -17,50 +17,6 @@ function readRawBody(req) {
     req.on('end',  () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
-}
-
-// Actualiza (o crea) la fila de subscriptions a partir de un objeto suscripción de Stripe.
-async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
-  const item      = subscription.items.data[0];
-  const periodEnd = item?.current_period_end   ?? subscription.current_period_end;
-  const periodStart = item?.current_period_start ?? subscription.current_period_start;
-
-  // Sin este guard, si Stripe no manda el periodo (cambió de sitio entre versiones
-  // de la API), `new Date(undefined * 1000).toISOString()` lanza RangeError y tumba
-  // el webhook entero con un 500, en vez de guardar la fila sin la fecha.
-  if (!periodEnd) {
-    console.warn(`[stripe-webhook] suscripción ${subscription.id} sin current_period_end; se guarda sin fecha de renovación`);
-  }
-
-  const row = {
-    stripe_customer_id:     subscription.customer,
-    stripe_subscription_id: subscription.id,
-    plan:                   item?.price?.id || null,
-    status:                 subscription.status,
-    current_period_start:   periodStart ? new Date(periodStart * 1000).toISOString() : null,
-    current_period_end:     periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-    cancel_at_period_end:   !!subscription.cancel_at_period_end
-  };
-
-  async function escribir(r) {
-    if (userId) {
-      return supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...r }, { onConflict: 'user_id' });
-    }
-    return supabaseAdmin.from('subscriptions').update(r).eq('stripe_customer_id', subscription.customer);
-  }
-
-  let { error: err } = await escribir(row);
-
-  // M-3: loggear el error ANTES del fallback para que aparezca en los logs de Vercel
-  if (err && err.message && /current_period_start|cancel_at_period_end/.test(err.message)) {
-    console.warn('[stripe-webhook] columna faltante en subscriptions, reintentando sin ella:', err.message);
-    const rowMin = { ...row };
-    delete rowMin.current_period_start;
-    delete rowMin.cancel_at_period_end;
-    ({ error: err } = await escribir(rowMin));
-  }
-
-  if (err) throw new Error(`Supabase upsert error: ${err.message}`);
 }
 
 // Sincroniza el estado del cliente eligiendo SIEMPRE su mejor suscripción activa.
@@ -131,6 +87,27 @@ module.exports = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId  = session.client_reference_id || session.metadata?.supabase_user_id;
+
+        // AÑADIR TARJETA DURANTE EL MES GRATIS (2 oct 2026). El mes gratis empieza
+        // sin tarjeta; cuando el cliente la añade, Checkout la guarda en modo
+        // "setup" y aquí se pone como la de su cliente y la de su suscripción, para
+        // que al terminar la prueba se cobre y no se cancele.
+        if (session.mode === 'setup') {
+          const si = session.setup_intent ? await stripe.setupIntents.retrieve(session.setup_intent) : null;
+          const pm = si && si.payment_method;
+          if (pm && session.customer) {
+            await stripe.customers.update(session.customer, { invoice_settings: { default_payment_method: pm } });
+            const subsCliente = await stripe.subscriptions.list({ customer: session.customer, status: 'all', limit: 10 });
+            for (const s of subsCliente.data) {
+              if (['trialing', 'active', 'past_due'].includes(s.status)) {
+                await stripe.subscriptions.update(s.id, { default_payment_method: pm });
+              }
+            }
+            console.log(`[stripe-webhook] Tarjeta añadida durante la prueba: customer ${session.customer}`);
+          }
+          break;
+        }
+
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
         // Oferta 1,99€: al terminar el primer mes pasa al plan que eligió el cliente
@@ -236,6 +213,14 @@ module.exports = async (req, res) => {
           }
         }
 
+        break;
+      }
+      // El mes gratis sin tarjeta se crea sin Checkout (create-checkout-session.js):
+      // si este evento está activado en Stripe, deja la fila al día por si el
+      // guardado directo hubiera fallado.
+      case 'customer.subscription.created': {
+        const s = event.data.object;
+        if (s.metadata?.supabase_user_id) await upsertFromSubscription(supabaseAdmin, s, s.metadata.supabase_user_id);
         break;
       }
       case 'customer.subscription.updated': {
@@ -423,6 +408,39 @@ module.exports = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
+        // El mes gratis (sin tarjeta desde el 2 oct 2026) ha terminado sin que el
+        // cliente añadiera tarjeta: Stripe la cancela sola (trial_settings). No es
+        // una baja: se le escribe para que la añada y siga, y el admin lo sabe aparte.
+        const finPruebaSinTarjeta = !!subscription.trial_end && !!subscription.ended_at
+          && subscription.ended_at >= subscription.trial_end - 3600
+          && !subscription.default_payment_method && !subscription.cancel_at_period_end;
+        if (finPruebaSinTarjeta) {
+          try { await enviarPushAAdmins({ title: 'K-ONE · Fin de mes gratis sin tarjeta', body: 'Un cliente ha terminado su mes gratis sin añadir tarjeta. Míralo en Jarvis.', url: '/' }); } catch (e) {}
+          try {
+            const uid = subscription.metadata?.supabase_user_id;
+            const { data: prof } = uid
+              ? await supabaseAdmin.from('profiles').select('nombre, email').eq('id', uid).maybeSingle()
+              : { data: null };
+            const apiKey = process.env.RESEND_API_KEY;
+            if (prof?.email && apiKey) {
+              const { enviarEmail, ADMIN_EMAIL } = require('./notify');
+              const esc = (t) => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+              const primer = esc((prof.nombre || '').split(' ')[0] || 'Hola');
+              const app = process.env.APP_URL || 'https://k-one.fit';
+              await enviarEmail(apiKey, {
+                from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: prof.email,
+                subject: `${primer}, tu mes gratis ha terminado`,
+                html: `<div style="font-family:Arial,sans-serif;background:#0A0A0A;color:#B5B2AD;padding:28px;border-radius:10px;max-width:560px">
+                  <h1 style="color:#F0EDE8;font-size:20px;margin:0 0 16px">Tu mes gratis ha terminado</h1>
+                  <p style="font-size:14px;line-height:1.7">Hola <span style="color:#E8490F;font-weight:600">${primer}</span>, tu primer mes en K-ONE ha llegado a su fin. No se te ha cobrado nada.</p>
+                  <p style="font-size:14px;line-height:1.7">Tu plan, tus registros y tu progreso siguen guardados. Si quieres seguir, entra, elige tu plan y añade tu tarjeta: continúas justo donde lo dejaste.</p>
+                  <p style="text-align:center;margin:24px 0 8px"><a href="${app}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 28px;font-size:14px;font-weight:600;border-radius:8px">SEGUIR CON MI PLAN</a></p>
+                  <p style="font-size:12px;color:#8A8A8A;text-align:center">¿Dudas? Responde a este email.</p></div>`
+              });
+            }
+          } catch (e) { console.warn('[stripe-webhook] email fin de prueba:', e.message); }
+          break;
+        }
         // Si la cancelación la ha provocado el propio admin al darle premium
         // (api/_premium.js), no es una baja: no se avisa.
         if (![MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA].includes(subscription.cancellation_details?.comment)) {

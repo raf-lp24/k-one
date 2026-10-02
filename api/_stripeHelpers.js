@@ -110,7 +110,71 @@ function assertSubscriptionOwnership(subscription, stripeCustomerId) {
   }
 }
 
+// Actualiza (o crea) la fila de subscriptions a partir de un objeto suscripción de Stripe.
+async function upsertFromSubscription(supabaseAdmin, subscription, userId) {
+  const item      = subscription.items.data[0];
+  const periodEnd = item?.current_period_end   ?? subscription.current_period_end;
+  const periodStart = item?.current_period_start ?? subscription.current_period_start;
+
+  // Sin este guard, si Stripe no manda el periodo (cambió de sitio entre versiones
+  // de la API), `new Date(undefined * 1000).toISOString()` lanza RangeError y tumba
+  // el webhook entero con un 500, en vez de guardar la fila sin la fecha.
+  if (!periodEnd) {
+    console.warn(`[stripe] suscripción ${subscription.id} sin current_period_end; se guarda sin fecha de renovación`);
+  }
+
+  const row = {
+    stripe_customer_id:     subscription.customer,
+    stripe_subscription_id: subscription.id,
+    plan:                   item?.price?.id || null,
+    status:                 subscription.status,
+    current_period_start:   periodStart ? new Date(periodStart * 1000).toISOString() : null,
+    current_period_end:     periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+    cancel_at_period_end:   !!subscription.cancel_at_period_end
+  };
+
+  async function escribir(r) {
+    if (userId) {
+      return supabaseAdmin.from('subscriptions').upsert({ user_id: userId, ...r }, { onConflict: 'user_id' });
+    }
+    return supabaseAdmin.from('subscriptions').update(r).eq('stripe_customer_id', subscription.customer);
+  }
+
+  let { error: err } = await escribir(row);
+
+  // M-3: loggear el error ANTES del fallback para que aparezca en los logs de Vercel
+  if (err && err.message && /current_period_start|cancel_at_period_end/.test(err.message)) {
+    console.warn('[stripe] columna faltante en subscriptions, reintentando sin ella:', err.message);
+    const rowMin = { ...row };
+    delete rowMin.current_period_start;
+    delete rowMin.cancel_at_period_end;
+    ({ error: err } = await escribir(rowMin));
+  }
+
+  if (err) throw new Error(`Supabase upsert error: ${err.message}`);
+}
+
+
+// ¿El cliente tiene ya una forma de pago con la que cobrarle al terminar el mes
+// gratis? Desde el 2 oct 2026 el mes gratis empieza SIN tarjeta, así que hay que
+// saberlo para avisarle y para enseñarle "Añadir tarjeta". Mira la suscripción,
+// el método por defecto del cliente y, por último, si tiene alguna tarjeta guardada.
+async function tieneMetodoPago(stripe, customerId, subscriptionId) {
+  if (!customerId) return false;
+  if (subscriptionId) {
+    const s = await stripe.subscriptions.retrieve(subscriptionId);
+    if (s.default_payment_method || s.default_source) return true;
+  }
+  const c = await stripe.customers.retrieve(customerId);
+  if (!c || c.deleted) return false;
+  if ((c.invoice_settings && c.invoice_settings.default_payment_method) || c.default_source) return true;
+  const pms = await stripe.paymentMethods.list({ customer: customerId, type: 'card', limit: 1 });
+  return !!(pms.data && pms.data.length);
+}
+
 module.exports = {
+  upsertFromSubscription,
+  tieneMetodoPago,
   getStripe,
   getSupabaseAdmin,
   getPriceId,
