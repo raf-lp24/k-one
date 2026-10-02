@@ -9305,7 +9305,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
             <div class="rail-big" id="diasRestantesPlan">—</div>
-            <div class="rail-sub" id="diasRestantesPlanLabel">de tu plan actual</div>
+            <div class="rail-sub" id="diasRestantesPlanLabel">días de tu plan actual</div>
             <button class="btn-ghost" style="width:100%;margin-top:14px;padding:10px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
           </div>
 
@@ -9659,7 +9659,7 @@
 
         <div class="progress-section">
           <div class="progress-title">Fotos mensuales</div>
-          <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan solo en este dispositivo, nadie más las ve, y te ayudan a ver tu evolución mes a mes.</p>
+          <p class="field-hint" style="margin-bottom:16px">Toca uno de los huecos para subir una foto desde tu dispositivo. Se guardan en tu cuenta de forma privada (solo tú puedes verlas, desde cualquier móvil u ordenador) y te ayudan a ver tu evolución mes a mes.</p>
           <input type="file" id="fotoInput" aria-label="Subir foto de progreso" accept="image/*" style="display:none" onchange="onFotoSelected(event)">
           <div class="fotos-nav" id="fotosNav"></div>
           <div class="photos-grid" id="photosGrid"></div>
@@ -20550,7 +20550,15 @@
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
         notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${_esc(n)}`).join('<br>')}</div></details>`;
       }
-      notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">Tu dieta se actualiza cada mes con nuevos platos. Si quieres cambiar algo antes (alimentos, objetivo, preferencias), escríbenos desde <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline;padding:12px 2px" onclick="showSection('contacto')">Contacto</strong> y lo ajustamos.</div>`;
+      // Antes decía siempre "se actualiza cada mes" (aunque el cliente hubiera elegido
+      // semanal o fija en el selector de justo encima) y mandaba a escribir por Contacto
+      // para cambiar cosas que el propio cliente puede cambiar en «Reiniciar» y en
+      // «Cambiar plan».
+      const _rot = userData.rotacionMenu || 'mensual';
+      const _fraseRot = _rot === 'semanal' ? 'Tus platos se renuevan cada semana.'
+        : _rot === 'fija' ? 'Tus platos se mantienen fijos hasta que tú decidas cambiarlos.'
+        : 'Tus platos se renuevan cada mes.';
+      notasHTML += `<div style="background:rgba(255,255,255,0.04);border-left:3px solid var(--metal);padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:var(--metal)">${_fraseRot} Si una comida no te convence, pulsa <strong style="color:var(--blanco)">Reiniciar</strong> y te damos otras 5. Para quitar alimentos que no comes o cambiar de objetivo, entra en <strong style="color:var(--blanco);cursor:pointer;text-decoration:underline;padding:12px 2px" onclick="abrirModalCambiarPlan()">Cambiar plan</strong>.</div>`;
       nutricionNotas.innerHTML = notasHTML;
     }
 
@@ -22999,7 +23007,7 @@
     const user = getCurrentUser();
     if (!user || !user.creado) {
       el.textContent = '—';
-      if (label) label.textContent = 'de tu plan actual';
+      if (label) label.textContent = 'días de tu plan actual';
       return;
     }
     const DIA_MS = 1000 * 60 * 60 * 24;
@@ -23009,7 +23017,7 @@
     // (current_period_end, una fecha futura): se cuentan los días que faltan hasta ella.
     if (!enPrueba && !isNaN(finReal) && finReal > Date.now()) {
       el.textContent = Math.max(0, Math.ceil((finReal - Date.now()) / DIA_MS));
-      if (label) label.textContent = user.isBeta ? 'de tu acceso premium' : 'de tu plan actual';
+      if (label) label.textContent = user.isBeta ? 'días de tu acceso premium' : (user.estadoSub === 'trialing' ? 'días de tu mes gratis' : 'días hasta tu próxima renovación');
       return;
     }
     // Caso prueba (cuenta desde el registro) o datos heredados (fechaPago pasada):
@@ -23020,7 +23028,7 @@
     const diasTranscurridos = (Date.now() - new Date(refFecha).getTime()) / DIA_MS;
     const restantes = Math.max(0, Math.ceil(periodo - (diasTranscurridos % periodo)));
     el.textContent = restantes;
-    if (label) label.textContent = enPrueba ? 'de tu mes de prueba gratis' : 'de tu plan actual';
+    if (label) label.textContent = enPrueba ? 'días de tu mes de prueba gratis' : 'días de tu plan actual';
   }
 
   function actualizarPrecioCambioPlan() {
