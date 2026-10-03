@@ -315,6 +315,9 @@
         // dominios ("Script error." sin detalle) y avisos inofensivos.
         if (!mensaje || /^Script error\.?$/i.test(mensaje)) return;
         if (/ResizeObserver loop|Non-Error promise rejection|Load failed|Failed to fetch|NetworkError|cancelled|AbortError/i.test(mensaje)) return;
+        // Ruido del navegador, no fallos de K-ONE: vídeo pausado por ahorro de batería,
+        // reproducción sin gesto del usuario, portapapeles sin foco.
+        if (/play\(\) request was interrupted|play\(\) failed|NotAllowedError|Document is not focused/i.test(mensaje)) return;
         if (/^(chrome|moz|safari)-extension:|^webkit-masked-url:/.test(origen)) return;
         // Navegadores dentro de apps (Instagram, Facebook, TikTok...) inyectan su
         // propio código y sus fallos llegaban como si fueran nuestros (1 oct 2026:
@@ -8018,12 +8021,12 @@
       </svg>
     </div>
     <div class="hero-video-mobile">
-      <button onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';m.querySelector('video').play()">
+      <button onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){})">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <span>Ver demo</span>
       </button>
     </div>
-    <div class="hero-demo" role="button" tabindex="0" aria-label="Ver el recorrido completo por el área de cliente, con explicación de cada sección" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';m.querySelector('video').play()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="cursor:pointer;pointer-events:auto">
+    <div class="hero-demo" role="button" tabindex="0" aria-label="Ver el recorrido completo por el área de cliente, con explicación de cada sección" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="cursor:pointer;pointer-events:auto">
       <div class="hero-demo-inner">
         <!-- Antes había un <video autoplay loop> de 15MB cargándose para TODO
              visitante nada más entrar — un golpe directo al LCP/Core Web
@@ -8514,7 +8517,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X
     </a>
-    <button class="share-btn share-btn--copy" onclick="navigator.clipboard.writeText('https://k-one.fit').then(()=>showToast('Enlace copiado'))">
+    <button class="share-btn share-btn--copy" onclick="navigator.clipboard.writeText('https://k-one.fit').then(()=>showToast('Enlace copiado')).catch(()=>showToast('No se pudo copiar: k-one.fit'))">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       Copiar enlace
     </button>
@@ -23400,7 +23403,7 @@
   function copiarCodigoReferido() {
     const codigo = document.getElementById('codigoReferido')?.textContent;
     if (!codigo || codigo === '---') return;
-    navigator.clipboard.writeText(codigo).then(() => showToast('Código copiado'));
+    navigator.clipboard.writeText(codigo).then(() => showToast('Código copiado')).catch(() => showToast('No se pudo copiar el código'));
   }
 
   function compartirCodigoReferido() {
