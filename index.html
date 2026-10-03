@@ -10466,7 +10466,7 @@
     if (peso > 0 && altura > 0) {
       const altM = altura / 100;
       const imc = peso / (altM * altM);
-      document.getElementById('imcValue').textContent = imc.toFixed(1);
+      document.getElementById('imcValue').textContent = _d1(imc);
       const imcCat = document.getElementById('imcCategoria');
       if (imcCat) {
         if (imc < 18.5)      { imcCat.textContent = '— Bajo peso';  imcCat.style.color = '#f0a500'; }
@@ -12550,9 +12550,9 @@
               <span class="alimento-nombre">${_esc(a.n)}<span class="alimento-fuente-badge">${a.fuente}</span></span>
               <span class="alimento-macros">
                 <b>${Math.round(a.kcal * f)}</b> kcal
-                <span>P ${(a.p * f).toFixed(1)}</span>
-                <span>C ${(a.c * f).toFixed(1)}</span>
-                <span>G ${(a.g * f).toFixed(1)}</span>
+                <span>P ${_d1(a.p * f)}</span>
+                <span>C ${_d1(a.c * f)}</span>
+                <span>G ${_d1(a.g * f)}</span>
               </span>
             </div>`).join('')}
         `);
@@ -12573,9 +12573,9 @@
           <span class="alimento-nombre">${a.n}</span>
           <span class="alimento-macros">
             <b>${Math.round(a.kcal * f)}</b> kcal
-            <span>P ${(a.p * f).toFixed(1)}</span>
-            <span>C ${(a.c * f).toFixed(1)}</span>
-            <span>G ${(a.g * f).toFixed(1)}</span>
+            <span>P ${_d1(a.p * f)}</span>
+            <span>C ${_d1(a.c * f)}</span>
+            <span>G ${_d1(a.g * f)}</span>
           </span>
         </div>`).join('')}
     `).join('');
@@ -12614,9 +12614,9 @@
           <span class="alimento-nombre">${_esc(a.n)}</span>
           <span class="alimento-macros">
             <b>${Math.round(a.kcal * f)}</b> kcal
-            <span>P ${(a.p * f).toFixed(1)}</span>
-            <span>C ${(a.c * f).toFixed(1)}</span>
-            <span>G ${(a.g * f).toFixed(1)}</span>
+            <span>P ${_d1(a.p * f)}</span>
+            <span>C ${_d1(a.c * f)}</span>
+            <span>G ${_d1(a.g * f)}</span>
           </span>
         </div>`).join('')}
     `).join('');
@@ -12907,9 +12907,9 @@
         <span class="alimento-nombre">${t}</span>
         <span class="alimento-macros">
           <b>${Math.round(al.kcal * f)}</b> kcal
-          <span>P ${(al.p * f).toFixed(1)}</span>
-          <span>C ${(al.c * f).toFixed(1)}</span>
-          <span>G ${(al.g * f).toFixed(1)}</span>
+          <span>P ${_d1(al.p * f)}</span>
+          <span>C ${_d1(al.c * f)}</span>
+          <span>G ${_d1(al.g * f)}</span>
         </span></div>`;
     }).join('');
 
@@ -13630,6 +13630,8 @@
   // Sin esto, la sugerencia contradiría al plan justo la semana que el plan
   // pide recuperar.
   const _fmtKg = kg => (Math.round(kg * 10) / 10).toString().replace('.', ',');
+  // Un decimal con coma, siempre ("7,4", "0,0"): macros, IMC, ejes de gráficos.
+  const _d1 = v => (Math.round(Number(v) * 10) / 10).toFixed(1).replace('.', ',');
 
   // El salto razonable depende del ejercicio: 5 kg en una sentadilla con barra
   // es un escalón normal, en un curl de bíceps es subir casi un 20% de golpe.
@@ -21615,7 +21617,7 @@
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
 
     const diff = nuevoPeso - (pesoPrevio || nuevoPeso);
-    const difMsg = diff !== 0 ? ` (${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg desde tu registro)` : '';
+    const difMsg = diff !== 0 ? ` (${diff > 0 ? '+' : ''}${_fmtKg(diff)} kg desde tu registro)` : '';
     showToast(`Plan recalculado con tu peso actual: ${nuevoPeso} kg${difMsg}.`);
   }
 
@@ -22906,7 +22908,7 @@
       const v = yMin + (yMax - yMin) * t;
       const yy = y(v);
       ctx.beginPath(); ctx.moveTo(marginL, yy); ctx.lineTo(W - marginR, yy); ctx.stroke();
-      ctx.fillText(v.toFixed(1), 0, yy + 3);
+      ctx.fillText(_d1(v), 0, yy + 3);
     });
 
     ctx.beginPath();
@@ -22940,9 +22942,9 @@
     ctx.font = '600 12px Inter, sans-serif';
     ctx.fillStyle = '#F0EDE8';
     ctx.textAlign = 'left';
-    ctx.fillText(`${primero.peso}${sufijo}`, x(0), y(primero.peso) - 10);
+    ctx.fillText(`${_fmtKg(primero.peso)}${sufijo}`, x(0), y(primero.peso) - 10);
     ctx.textAlign = 'right';
-    ctx.fillText(`${ultimo.peso}${sufijo}`, x(ordenado.length - 1), y(ultimo.peso) - 10);
+    ctx.fillText(`${_fmtKg(ultimo.peso)}${sufijo}`, x(ordenado.length - 1), y(ultimo.peso) - 10);
 
     ctx.font = '10px "DM Mono", monospace';
     ctx.fillStyle = '#8A8A8A';
@@ -22972,7 +22974,7 @@
     const delta = ultimo.peso - primero.peso;
     const resumen = Math.abs(delta) < 0.1
       ? `Peso estable desde el ${fmtFechaCorta(primero.fecha)}`
-      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
+      : `${delta > 0 ? '+' : ''}${_fmtKg(Math.round(delta * 10) / 10)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
     wrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div>`;
     _dibujarGraficoLinea('graficoPeso', wrap, ordenado, 'kg');
   }
@@ -23008,7 +23010,7 @@
     const delta = ultimo.peso - primero.peso;
     const resumen = Math.abs(delta) < 0.1
       ? `Mismo peso desde el ${fmtFechaCorta(primero.fecha)}`
-      : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
+      : `${delta > 0 ? '+' : ''}${_fmtKg(Math.round(delta * 10) / 10)} kg desde el ${fmtFechaCorta(primero.fecha)}`;
     chartWrap.innerHTML = `<div class="informe-eyebrow">${_esc(resumen)}</div>`;
     _dibujarGraficoLinea('graficoFuerza', chartWrap, ordenado, 'kg');
   }
@@ -23168,7 +23170,7 @@
       let filaPeso = '';
       if (hp.length >= 2) {
         const ini = parseFloat(hp[0].peso), fin = parseFloat(hp[hp.length - 1].peso), d = fin - ini;
-        filaPeso = `<div class="informe-record"><span class="informe-record-nombre">Peso desde tu primer registro</span><span class="informe-record-cambio">${ini} → <strong>${fin} kg</strong> (${d > 0 ? '+' : ''}${d.toFixed(1)})</span></div>`;
+        filaPeso = `<div class="informe-record"><span class="informe-record-nombre">Peso desde tu primer registro</span><span class="informe-record-cambio">${ini} → <strong>${fin} kg</strong> (${d > 0 ? '+' : ''}${_d1(d)})</span></div>`;
       }
       cont.innerHTML = `
         <div class="informe-eyebrow">Tu comida · Semana ${semana}</div>
@@ -25412,8 +25414,8 @@
         let cant;
         if (ing.cantidad > 0) {
           cant = ing.esLiquido
-            ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}l` : `${Math.round(ing.cantidad)}ml`)
-            : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
+            ? (ing.cantidad >= 1000 ? `${_fmtKg(ing.cantidad / 1000)}l` : `${Math.round(ing.cantidad)}ml`)
+            : (ing.cantidad >= 1000 ? `${_fmtKg(ing.cantidad / 1000)}kg` : `${Math.round(ing.cantidad)}g`);
         } else if (ing.unidades > 0) {
           cant = `${Math.ceil(ing.unidades)}`;
         } else if (reCondimento.test(ing.nombre)) {
@@ -25544,8 +25546,8 @@
         let cant;
         if (ing.cantidad > 0) {
           cant = ing.esLiquido
-            ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}l` : `${Math.round(ing.cantidad)}ml`)
-            : (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`);
+            ? (ing.cantidad >= 1000 ? `${_fmtKg(ing.cantidad / 1000)}l` : `${Math.round(ing.cantidad)}ml`)
+            : (ing.cantidad >= 1000 ? `${_fmtKg(ing.cantidad / 1000)}kg` : `${Math.round(ing.cantidad)}g`);
         } else if (ing.unidades > 0) {
           cant = `${Math.ceil(ing.unidades)}`;
         } else if (reCondimentoCopia.test(ing.nombre)) {
@@ -25728,7 +25730,7 @@
       });
     }
     const items = Object.values(ingredientes).sort((a, b) => b.veces - a.veces).map(ing => {
-      const cant = ing.cantidad > 0 ? (ing.cantidad >= 1000 ? `${(ing.cantidad / 1000).toFixed(1)}kg` : `${Math.round(ing.cantidad)}g`) : `x${ing.veces}`;
+      const cant = ing.cantidad > 0 ? (ing.cantidad >= 1000 ? `${_fmtKg(ing.cantidad / 1000)}kg` : `${Math.round(ing.cantidad)}g`) : `x${ing.veces}`;
       const nombre = ing.nombre.replace(/^\d+([.,]\d+)?\s*(g|gr|ml|kg|l|ud|uds)\s*/i, '').trim();
       const cap = nombre.charAt(0).toUpperCase() + nombre.slice(1);
       let cat = 'OTROS';
