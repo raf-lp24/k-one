@@ -8009,9 +8009,9 @@
              el único CTA de toda la landing que se salta la pantalla
              "bienvenida" (con la opción de "ya tengo cuenta") que sí usan
              todos los demás. Ambas cosas corregidas. -->
-        <div class="hero-price" role="button" tabindex="0" aria-label="Oferta del mes: primer mes gratis. Crear cuenta nueva" onclick="goTo('bienvenida')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('bienvenida');}">
+        <div class="hero-price" role="button" tabindex="0" aria-label="Primer mes gratis y sin tarjeta. Crear cuenta nueva" onclick="goTo('bienvenida')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('bienvenida');}">
           <div class="hero-price-txt">
-            <span class="hero-price-label"><span class="hero-price-dot" aria-hidden="true"></span>Oferta del mes</span>
+            <span class="hero-price-label"><span class="hero-price-dot" aria-hidden="true"></span>Sin tarjeta</span>
             <span class="hero-price-main">Primer mes <b>gratis</b></span>
           </div>
           <span class="hero-price-arrow" aria-hidden="true">
@@ -9177,7 +9177,7 @@
       <div class="logo" onclick="verLandingComoVisitante()" style="cursor:pointer">K-<span>ONE</span></div>
       <button class="dash-menu-btn" onclick="toggleDashMenu()" aria-label="Abrir menú">☰</button>
     </div>
-    <div class="dash-overlay" id="dashOverlay" onclick="closeDashMenu()"></div>
+    <div class="dash-overlay" id="dashOverlay" onclick="closeDashMenu()" aria-label="Cerrar el menú"></div>
     <!-- Barra inferior (móvil y tablet). «Más» abre el menú lateral de siempre. -->
     <nav class="tabbar" aria-label="Secciones">
       <button type="button" class="tabbar-item active" data-sec="hoy" onclick="showSection('hoy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Hoy</button>
