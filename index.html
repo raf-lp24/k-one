@@ -17913,6 +17913,15 @@
         prep,
       };
     };
+    // RACIÓN FIJA (3 oct 2026). Recetas que el usuario quiere TAL CUAL, sin que
+    // el motor las agrande ni las encoja (los desayunos de solo proteína de la
+    // dieta AJ7: "2 huevos + 30 g de pavo"). Ningún ajuste de cantidades las toca
+    // (escalado, calibración de proteína/hidratos, ciclado, reparto por toma ni
+    // conciliación con "Ver macros"); las alergias y el "no como" sí se aplican.
+    // Ese día el desayuno queda por debajo de su parte: decisión del usuario.
+    const opFija = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => ({
+      nombre, ingredientes: ponerCantidades(ingredientes), kcal, prot, carbs, grasa, prep, racionFija: true,
+    });
 
     let nutricion = [];
 
@@ -17922,6 +17931,11 @@
           momento: "Desayuno", hora: "7:30",
           porque: "Proteína desde primera hora para preservar músculo y controlar el apetito",
           opciones: [
+            // 1ª comida de la dieta AJ7 del usuario (6 abril 2025): solo proteína y ración fija, solo en perder grasa.
+            opFija("Huevos a la plancha con pavo o jamón cocido", "2 huevos, 30g pavo en lonchas", "187 kcal", "20g prot", "2g carbs", "11g grasa", "Fácil · 5 min"),
+            opFija("Tortilla de claras con un huevo entero", "1 huevo, 200ml claras, sal, pimienta", "178 kcal", "29g prot", "2g carbs", "6g grasa", "Fácil · 5 min"),
+            opFija("Proteína isolada con agua", "40g proteína aislada, agua, hielo", "148 kcal", "36g prot", "1g carbs", "0g grasa", "Fácil · 1 min"),
+            opFija("Salmón ahumado con guacamole casero", "60g salmón ahumado, 30g guacamole casero", "119 kcal", "12g prot", "2g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Tostada de aguacate con huevo pochado", "2 rebanadas pan centeno, 1/2 aguacate, 2 huevos pochados, tomate cherry, pimienta", "495 kcal", "22g prot", "41g carbs", "27g grasa", "Fácil · 10 min"),
             op("Crepes de avena con yogur y fruta", "40g harina de avena, 1 huevo, leche, 100g yogur griego 0%, fresas laminadas, canela", "425 kcal", "30g prot", "47g carbs", "13g grasa", "Fácil · 10 min"),
             op("Porridge de avena con frutos rojos y miel", "60g avena, leche semidesnatada, 100g frutos rojos, 1 cda miel, canela", "405 kcal", "15g prot", "70g carbs", "8g grasa", "Fácil · 5 min"),
@@ -19249,7 +19263,7 @@
       nutricionPorDia.forEach(dia => {
         dia.forEach(m => {
           (m.opciones || []).forEach(o => {
-            if (_yaVerificadas.has(o)) return;
+            if (o.racionFija || _yaVerificadas.has(o)) return;
             _yaVerificadas.add(o);
             // BUG REAL encontrado ago 2026: esta red de seguridad corregía prot/carbs
             // hacia lo que dicen de verdad los ingredientes, pero nunca tocaba las
@@ -19340,7 +19354,7 @@
         nutricionPorDia.forEach(dia => {
           dia.forEach(m => {
             (m.opciones || []).forEach(o => {
-              if (_yaCorregidas.has(o)) return;
+              if (o.racionFija || _yaCorregidas.has(o)) return;
               _yaCorregidas.add(o);
               const p = parseInt(o.prot) || 0;
               const c = parseInt(o.carbs) || 0;
@@ -19435,7 +19449,7 @@
       kcalObjPorDia[i] = Math.round(kcalObj + 4 * (carbsObjPorDia[i] - carbsObj));
       dia.forEach(m => {
         m.opciones = (m.opciones || []).map(o => {
-          if (f === 1) return { ...o };
+          if (f === 1 || o.racionFija) return { ...o };
           const c = parseInt(o.carbs) || 0;
           const cNuevo = Math.max(0, Math.round(c * f));
           return {
@@ -19859,7 +19873,7 @@
         if (!m.opciones || !m.opciones.length) return;
         const objetivoToma = objetivoDia * ((PESO_TOMA[m.momento] || 0.2) / pesoDia);
         m.opciones.forEach(o => {
-          if (_yaNormalizadas.has(o)) return;
+          if (o.racionFija || _yaNormalizadas.has(o)) return;
           _yaNormalizadas.add(o);
           const k = parseInt(o.kcal) || 0;
           if (!k) return;
@@ -19997,7 +20011,7 @@
         tomasDia.forEach((m, iToma) => {
           const objP = medias[iToma] * corr;
           (m.opciones || []).forEach(o => {
-            if (_hechas.has(o)) return;
+            if (o.racionFija || _hechas.has(o)) return;
             _hechas.add(o);
             let p = parseInt(o.prot) || 0, c = parseInt(o.carbs) || 0, g = parseInt(o.grasa) || 0;
             const kcal = p * 4 + c * 4 + g * 9;
@@ -20138,7 +20152,7 @@
       }, 0);
       const _conciliadas = new Set();
       const _conciliar = o => {
-        if (!o || _conciliadas.has(o) || !_alimentos) return;
+        if (!o || o.racionFija || _conciliadas.has(o) || !_alimentos) return;
         _conciliadas.add(o);
         const etiqueta = parseInt(o.kcal) || 0;
         if (etiqueta < 60) return;
