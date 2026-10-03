@@ -12708,12 +12708,6 @@
       + '<button type="button" class="btn-primary plato-guardar" onclick="guardarPlatoExtra()">Añadir a esta comida</button>';
     box.style.display = '';
   }
-  // Compatibilidad: añadir un alimento suelto y guardarlo ya (lo usan las pruebas).
-  function agregarComidaExtra(key) {
-    _platoExtra = [];
-    anadirAlPlato(key);
-    guardarPlatoExtra();
-  }
 
   async function abrirAnadirComida(mealIdx) {
     _comidaExtraMealIdx = mealIdx;
@@ -13006,11 +13000,6 @@
     const nombreJs = _esc(nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     const diaJs = _esc((diaNombre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
     return `<div class="ej-lectura"><span class="n">${_esc(nombre)}</span><span class="sr">${_esc(m[2].trim())}</span><button type="button" class="ver" onclick="event.stopPropagation();abrirInfoEjercicio('${nombreJs}','${diaJs}')">Cómo se hace</button></div>`;
-  }
-
-  function irASesionHoy() {
-    showSection('hoy');
-    setTimeout(() => document.getElementById('todayPlan')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   function renderEjercicioConPeso(texto, capitalizar, diaNombre) {
@@ -21253,7 +21242,6 @@
         : '<button type="button" class="btn-primary" onclick="sesIr(1)"' + (listo ? '' : ' style="opacity:.85"') + '>' + (ultimo ? 'Terminar sesión' : (listo ? 'Siguiente ejercicio' : 'Saltar al siguiente')) + '</button>');
   }
 
-  function _sesInputKg() { return document.querySelector('#sesCuerpo .ses-serie.actual .ses-kg input') || document.querySelector('#sesCuerpo .ses-kg input'); }
   function sesKg(delta) {
     const p = _ses.pasos[_ses.idx];
     const v = Math.max(0, Math.round(((parseFloat(p.kg) || 0) + delta) * 10) / 10);
