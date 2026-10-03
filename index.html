@@ -1724,7 +1724,7 @@
   .tabbar { display: none; }
   @media (max-width: 1024px) {
     #dashboard.active .tabbar { display: grid; }
-    .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 150; grid-template-columns: repeat(5, 1fr);
+    .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 150; grid-auto-flow: column; grid-auto-columns: 1fr;
       padding: 7px 6px calc(8px + env(safe-area-inset-bottom, 0px)); background: rgba(12,12,12,0.96);
       border-top: 1px solid #1f1f1f; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
     .tabbar-item { background: none; border: none; color: var(--metal); font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 500;
@@ -11038,7 +11038,7 @@
   // Antes eran 18 pasos; ahora 10, uno por cosa que de verdad hay que saber.
   // soloEntreno: el paso no sale a quien tiene el plan de Solo nutrición.
   const ONBOARDING_STEPS = [
-    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', title: 'Tu día, en una pantalla', text: 'Aquí tienes todo lo de hoy: tu sesión, tus comidas y tu racha de días seguidos. Ábrela cada día y sabrás qué toca sin buscar. En el móvil, la barra de abajo te lleva a Hoy, Entreno, Comida y Progreso.' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', title: 'Tu día, en una pantalla', textSolo: 'Aquí tienes lo de hoy: tus comidas, con su hora y sus calorías, para marcarlas cuando las hagas. En el móvil, la barra de abajo te lleva a Hoy, Comida y Progreso.', text: 'Aquí tienes todo lo de hoy: tu sesión, tus comidas y tu racha de días seguidos. Ábrela cada día y sabrás qué toca sin buscar. En el móvil, la barra de abajo te lleva a Hoy, Entreno, Comida y Progreso.' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>', title: 'Pulsa «Empezar entrenamiento»', text: 'Te guiamos ejercicio a ejercicio, a pantalla completa: ves la foto, las series, las repeticiones y el peso que usaste la última vez. Si quieres, sube o baja series, cambia las repeticiones o añade un ejercicio sin salir. Y puedes salir cuando quieras y seguir luego: lo que llevas se guarda.' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>', title: 'Marca cada serie: el descanso va solo', text: 'Al terminar una serie, márcala con el ✓ y arranca el temporizador de descanso con el tiempo que toca para ese ejercicio. Cuando acaba, el móvil vibra y vas a por la siguiente. Con «Avisos de entreno» activados, te avisamos aunque tengas el móvil bloqueado.' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>', title: 'Nosotros te decimos cuánto peso poner', text: 'Apunta el peso que usas y, al acabar cada ejercicio, dinos «Me sobró», «Justo» o «No llegué». Con eso te proponemos el peso de la próxima vez. Al terminar la sesión verás los kilos movidos y tus récords.' },
@@ -11046,15 +11046,15 @@
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Tus comidas de hoy', text: 'En Hoy ves las comidas que te tocan, con su hora y sus calorías. Márcalas cuando las hagas. Para ver la receta o cambiar un plato, pulsa «Ver recetas y cambiar comidas».' },
     { section: 'semana', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title: 'Entreno: tu semana entera', text: 'Aquí ves todos los días de esta semana y las próximas, que se van ajustando con tu progreso. Si quieres meter un ejercicio que no está, pulsa «+ Añadir ejercicio» al final del día.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>', title: 'Comida: elige y cambia lo que quieras', text: 'Cada comida tiene 5 opciones con las cantidades ya ajustadas a ti. Si ninguna te convence, «Reiniciar» te da otras 5. ¿Comes otra cosa? «+ Añadir tu comida» y montas tu plato con sus gramos: calculamos sus calorías. Elige tus 7 días y te sale la lista de la compra.' },
-    { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in cada fin de semana', text: 'Cinco minutos: tu peso, cómo te has encontrado y cuántos días entrenaste. Con eso ajustamos tu plan de la semana siguiente. Cuando toque, te lo recordamos en Hoy.' },
-    { section: 'progreso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 15 L11 10 L14 13 L19 6"/></svg>', title: 'Tu progreso, y el resto en «Más»', text: 'En Progreso ves cómo suben tus pesos, tu evolución, tus fotos y tus hitos. Notas, Contacto y tu suscripción están en «Más» (en el ordenador, en el menú de la izquierda). Si tienes cualquier duda, escríbenos: te contesta una persona.' }
+    { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in cada fin de semana', textSolo: 'Cinco minutos: tu peso y cómo te has encontrado. Con eso ajustamos tus calorías si hace falta. Cuando toque, te lo recordamos en Hoy.', text: 'Cinco minutos: tu peso, cómo te has encontrado y cuántos días entrenaste. Con eso ajustamos tu plan de la semana siguiente. Cuando toque, te lo recordamos en Hoy.' },
+    { section: 'progreso', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 15 L11 10 L14 13 L19 6"/></svg>', title: 'Tu progreso, y el resto en «Más»', textSolo: 'En Progreso ves la evolución de tu peso, tus fotos y tus hitos. Notas, Contacto y tu suscripción están en «Más» (en el ordenador, en el menú de la izquierda). Si tienes cualquier duda, escríbenos: te contesta una persona.', text: 'En Progreso ves cómo suben tus pesos, tu evolución, tus fotos y tus hitos. Notas, Contacto y tu suscripción están en «Más» (en el ordenador, en el menú de la izquierda). Si tienes cualquier duda, escríbenos: te contesta una persona.' }
   ];
   // NOVEDADES (2 oct 2026): versión corta del tutorial para quien YA era cliente
   // antes del rediseño, que no vuelve a ver el tutorial completo. Sale una sola
   // vez (userData.novedadesVisto). Cuando haya otras novedades, se cambia el id.
   const NOVEDADES_ID = 'area-oct-2026';
   const NOVEDADES_STEPS = [
-    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L19 8.2l-3.8 3.4 1.1 5L12 14.3 7.7 16.6l1.1-5L5 8.2l5.1-.6z"/></svg>', title: 'Hemos renovado tu área', text: 'Ahora Hoy reúne tu sesión, tus comidas del día (que puedes marcar cuando las hagas) y tu racha de días seguidos. En el móvil tienes una barra abajo para ir a Hoy, Entreno, Comida y Progreso; Notas, Contacto y tu suscripción están en «Más».' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L19 8.2l-3.8 3.4 1.1 5L12 14.3 7.7 16.6l1.1-5L5 8.2l5.1-.6z"/></svg>', title: 'Hemos renovado tu área', textSolo: 'Ahora Hoy reúne tus comidas del día, que puedes marcar cuando las hagas. En el móvil tienes una barra abajo para ir a Hoy, Comida y Progreso; Notas, Contacto y tu suscripción están en «Más».', text: 'Ahora Hoy reúne tu sesión, tus comidas del día (que puedes marcar cuando las hagas) y tu racha de días seguidos. En el móvil tienes una barra abajo para ir a Hoy, Entreno, Comida y Progreso; Notas, Contacto y tu suscripción están en «Más».' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>', title: 'Nuevo: modo entrenamiento', text: 'Pulsa «Empezar entrenamiento» y te guiamos ejercicio a ejercicio a pantalla completa, con el peso que usaste la última vez. Marca cada serie con el ✓ y el descanso arranca solo; al terminar verás tus kilos movidos y tus récords.' },
     { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg>', title: 'Y el check-in te avisa', text: 'Cuando toque tu check-in semanal, te saldrá una tarjeta en Hoy. Todo lo demás sigue donde estaba: tu plan, tus pesos y tus comidas no cambian.' }
   ];
@@ -11064,7 +11064,8 @@
   function _pasosTour() {
     const solo = !!(generatedPlan && generatedPlan.soloDieta);
     const base = _modoTour === 'novedades' ? NOVEDADES_STEPS : ONBOARDING_STEPS;
-    return base.filter(p => !(solo && p.soloEntreno));
+    // textSolo: el mismo paso contado sin entreno para los planes de solo nutrición.
+    return base.filter(p => !(solo && p.soloEntreno)).map(p => (solo && p.textSolo) ? { ...p, text: p.textSolo } : p);
   }
 
   function startNovedades() {
@@ -21534,6 +21535,9 @@
     const esSoloDietaPlan = !!generatedPlan.soloDieta;
     const navSemana = document.getElementById('nav-semana');
     if (navSemana) navSemana.style.display = esSoloDietaPlan ? 'none' : '';
+    // La barra inferior del móvil también (3 oct 2026): quedaba "Entreno" a la vista.
+    const tabSemana = document.querySelector('.tabbar [data-sec="semana"]');
+    if (tabSemana) tabSemana.style.display = esSoloDietaPlan ? 'none' : '';
     const entrenoWrap = document.getElementById('checkinEntrenoWrap');
     if (entrenoWrap) entrenoWrap.style.display = esSoloDietaPlan ? 'none' : '';
     const navHoy = document.getElementById('nav-hoy');
@@ -21999,6 +22003,8 @@
     const label = document.getElementById('rachaDiasLabel');
     // Solo nutrición: la racha son las semanas con los 7 días de comida confirmados.
     if (generatedPlan && generatedPlan.soloDieta) {
+      const chipSolo = document.getElementById('hoyRacha');
+      if (chipSolo) chipSolo.style.display = 'none'; // cuenta días entrenando: no aplica
       const sem = userData.semanasNutricionCompletas || 0;
       if (el) el.textContent = String(sem);
       if (label) label.textContent = sem === 1 ? 'semana con los 7 días confirmados' : 'semanas con los 7 días confirmados';
