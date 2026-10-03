@@ -29001,7 +29001,7 @@ Se coló: ${lista}`;
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         ${row('Semana', c.semanaActual || 1)}
         ${row('Entrenos totales', c.entrenosTotal || 0, c.entrenosTotal > 0 ? 'var(--jv-ok)' : null)}
-        ${row('Peso actual', c.peso ? c.peso + ' kg' : '—')}
+        ${row('Peso actual', c.peso ? String(c.peso).replace('.', ',') + ' kg' : '—')}
       </div>
       <div class="jc-row" style="flex-direction:column;align-items:stretch;gap:0">
         <div class="jc-label" style="margin-bottom:10px">Esta semana</div>
