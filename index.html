@@ -21042,7 +21042,16 @@
   async function _sesProgramarAviso(seg, texto) {
     _sesCancelarAviso();
     if (!seg) return;
-    if (!('Notification' in window) || Notification.permission !== 'granted') {
+    // Con el permiso dado pero los avisos apagados en el menú (se borra la
+    // suscripción) tampoco llegaría nada: se mira la suscripción real.
+    let _suscrito = false;
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 1500))]);
+        _suscrito = !!(reg && await reg.pushManager.getSubscription());
+      }
+    } catch (e) {}
+    if (!('Notification' in window) || Notification.permission !== 'granted' || !_suscrito) {
       try {
         if (!localStorage.getItem('kone_hint_descanso')) {
           localStorage.setItem('kone_hint_descanso', '1');
