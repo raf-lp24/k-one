@@ -21010,6 +21010,7 @@
   // Botón "Empezar entrenamiento": lleva al detalle del entreno de hoy (o a nutrición si es solo dieta).
   function empezarEntrenamientoHoy() {
     if (generatedPlan && generatedPlan.soloDieta) { showSection('nutricion'); return; }
+    _ses = null; // desde el botón siempre es la sesión de HOY (no la de ayer en memoria)
     if (sesAbrir()) return;
     const el = document.getElementById('todayPlan');
     if (el && el.style.display !== 'none') {
@@ -21083,7 +21084,9 @@
       });
     } catch (e) {}
   }
-  const _SES_CLAVE = () => 'kone_sesion_' + getFechaHoyISO();
+  // La clave va con el día en que EMPEZÓ la sesión: si se entrena pasada la
+  // medianoche, lo hecho no se parte en dos días (3 oct 2026).
+  const _SES_CLAVE = () => 'kone_sesion_' + ((_ses && _ses.fecha) || getFechaHoyISO());
 
   function _sesLeerEjercicios() {
     const cont = document.getElementById('todayContent');
@@ -21134,7 +21137,7 @@
         p.hechas = mismo && Array.isArray(g.hechas) ? g.hechas.slice(0, 1) : [false];
       }
     });
-    _ses = { pasos, idx: guardado && guardado.idx < pasos.length ? guardado.idx : 0, inicio: (guardado && guardado.inicio) || Date.now(), fin: guardado && guardado.fin };
+    _ses = { pasos, fecha: (_ses && _ses.fecha) || getFechaHoyISO(), idx: guardado && guardado.idx < pasos.length ? guardado.idx : 0, inicio: (guardado && guardado.inicio) || Date.now(), fin: guardado && guardado.fin };
     if (_ses.fin) _ses.idx = pasos.length; // ya terminada: se enseña el resumen
     document.getElementById('sesionModo').classList.add('abierta');
     document.body.style.overflow = 'hidden';
