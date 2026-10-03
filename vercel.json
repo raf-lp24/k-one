@@ -22,7 +22,7 @@
       ]
     },
     {
-      "source": "/og-image.png",
+      "source": "/og-image-(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
       ]

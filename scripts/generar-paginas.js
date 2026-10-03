@@ -139,7 +139,7 @@ function pagina(p) {
 <meta property="og:title" content="${esc(p.title)}">
 <meta property="og:description" content="${esc(p.desc)}">
 <meta property="og:locale" content="es_ES">
-<meta property="og:image" content="${SITIO}/og-image.png">
+<meta property="og:image" content="${SITIO}/og-image-v2.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
