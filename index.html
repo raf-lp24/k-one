@@ -1802,6 +1802,12 @@
   .ses-kg input::-webkit-outer-spin-button, .ses-kg input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .ses-reps { text-align: center; font-size: 15px; font-weight: 600; color: var(--blanco); }
   .ses-reps small { display: block; font-size: 10px; color: var(--metal); font-weight: 500; }
+  /* Móviles estrechos (≤360 px): el campo de kilos se quedaba en ~30 px y el "kg" salía cortado. */
+  @media (max-width: 360px) {
+    .ses-serie { grid-template-columns: 28px 1fr 46px 46px; gap: 6px; padding-left: 10px; }
+    .ses-kg button { width: 28px; }
+    .ses-reps { font-size: 14px; }
+  }
   .ses-marcar { height: 44px; border-radius: 12px; border: 1.5px solid var(--humo); background: none; color: var(--metal); display: grid; place-items: center; cursor: pointer; }
   .ses-marcar svg { width: 18px; height: 18px; }
   .ses-serie.actual { border-color: rgba(242,106,54,.7); }
