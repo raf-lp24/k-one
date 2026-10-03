@@ -89,7 +89,7 @@ const PAGINAS = [
   {
     archivo: 'solo-nutricion.html', ruta: '/solo-nutricion', imagen: '/img/landing/nutricion-banner.webp', etiqueta: 'Solo nutrición',
     title: 'Plan de alimentación personalizado desde 4,99 €/mes — K-ONE',
-    desc: 'Dieta personalizada con 5 opciones por comida, macros, lista de la compra y adaptada a alergias. Para quien ya entrena por su cuenta. Primer mes gratis, sin tarjeta.',
+    desc: 'Dieta personalizada con 5 opciones por comida, macros, lista de la compra y adaptada a alergias. Para quien ya entrena. Primer mes gratis, sin tarjeta.',
     h1: 'Tu alimentación calculada, sin cambiar cómo entrenas',
     lead: 'Si ya entrenas con tu entrenador, tu box o tu club, K-ONE te da solo la nutrición: un plan de comidas 100 % personalizado, adaptado a tus alergias y a tu objetivo.',
     incluye: [
