@@ -33,7 +33,7 @@ function buscarAlimento(texto) {
 }
 
 const PESO_UNIDAD = [
-  [/pl[áa]tano/i, 120], [/huevos?\b/i, 55], [/claras?\b/i, 33], [/kiwis?\b/i, 75],
+  [/pl[áa]tano/i, 120], [/huevos?\b/i, 55], [/claras?\b/i, 33], [/yemas?\b/i, 17], [/kiwis?\b/i, 75],
   [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
   [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
   [/\bbarra\b/i, 100],
