@@ -9749,7 +9749,7 @@
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
           <!-- Por qué el día que estás mirando lleva más o menos hidratos -->
           <div id="cicloCarbsAviso" style="display:none"></div>
-          <div class="nutri-resumen-label">Total de hoy, según tus elecciones</div>
+          <div class="nutri-resumen-label" id="nutriResumenTitulo">Total de hoy, según tus elecciones</div>
           <div class="stats-row">
             <div class="stat-card">
               <div class="stat-card-label">Calorías</div>
@@ -9776,7 +9776,7 @@
         <div id="nutricionNotas"></div>
         <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px">KCAL HOY</span>
+            <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px" id="kcalDiarioTitulo">KCAL HOY</span>
             <span style="font-size:12px;color:var(--metal)" id="kcalDiarioTexto">0 / 0 kcal</span>
           </div>
           <div style="background:var(--grafito);height:8px;border-radius:4px;overflow:hidden">
@@ -20652,16 +20652,24 @@
       enfoqueEl.style.display = 'none';
     }
 
-    // Nutrición con múltiples opciones
-    diaNutriActual = 0;
+    // Nutrición con múltiples opciones.
+    // 3 oct 2026: antes se abría SIEMPRE en el lunes y con userData.comidasSeleccionadas,
+    // que son las del último día que tocó el cliente (p. ej. el jueves): el lunes
+    // enseñaba los platos del jueves y, al cambiar de día, se GUARDABAN en el lunes
+    // (se perdían sus elecciones). Ahora se abre en el día de hoy y con las de ese día.
+    diaNutriActual = (new Date().getDay() + 6) % 7;
     comidasSeleccionadas = generatedPlan.nutricion.map((meal, mealIdx) => {
       const guardada = (userData.comidasSeleccionadas || [])[mealIdx];
       return (typeof guardada === 'number' && guardada >= 0 && guardada < meal.opciones.length) ? guardada : 0;
     });
     inicializarComidasSemana();
+    if (Array.isArray(comidasSemana[diaNutriActual]) && comidasSemana[diaNutriActual].length === generatedPlan.nutricion.length) {
+      comidasSeleccionadas = comidasSemana[diaNutriActual].map(v => (typeof v === 'number' && v >= 0) ? v : 0);
+    }
     actualizarIndicadoresDias();
-    document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === 0));
-    renderNutritionGrid(0);
+    document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === diaNutriActual));
+    renderNutritionGrid(diaNutriActual);
+    try { _etiquetasDiaNutri(); } catch (e) {}
     _reflejarRotacionMenu();
 
     // Tarjeta resumen del día (entreno + comida de un vistazo)
@@ -25243,6 +25251,15 @@
     actualizarBotonConfirmarDia();
   }
 
+  function _etiquetasDiaNutri() {
+    const esHoy = diaNutriActual === (new Date().getDay() + 6) % 7;
+    const nombre = (DIAS_SEMANA[diaNutriActual] || '').toLowerCase();
+    const t = document.getElementById('nutriResumenTitulo');
+    if (t) t.textContent = esHoy ? 'Total de hoy, según tus elecciones' : `Total del ${nombre}, según tus elecciones`;
+    const k = document.getElementById('kcalDiarioTitulo');
+    if (k) k.textContent = esHoy ? 'KCAL HOY' : `KCAL ${nombre.toUpperCase()}`;
+  }
+
   function seleccionarDiaNutri(dia) {
     if (!generatedPlan?.nutricion) return;
     if (!comidasSemana.length) inicializarComidasSemana();
@@ -25252,6 +25269,7 @@
     document.querySelectorAll('.nutri-dia').forEach((b, i) => b.classList.toggle('selected', i === dia));
     renderNutritionGrid(dia);
     actualizarBotonConfirmarDia();
+    _etiquetasDiaNutri();
   }
 
   function actualizarIndicadoresDias() {
