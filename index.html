@@ -20708,13 +20708,23 @@
     try { _pintarCheckinPendiente(); } catch (e) {}
   }
 
+  // Fecha del último check-in. Los de antes del 3 oct 2026 no la guardaban: de
+  // respaldo, el último pesaje (el check-in es lo que lo registra).
+  function _fechaUltimoCheckin() {
+    const f = [userData._ultimoCheckin];
+    const h = Array.isArray(userData.historialPeso) ? userData.historialPeso : [];
+    if (h.length) f.push(h[h.length - 1].fecha);
+    const t = Math.max(...f.map(x => Date.parse(x || '') || 0));
+    return t ? new Date(t) : null;
+  }
+
   function _pintarCheckinPendiente() {
     const b = document.getElementById('hoyCheckin');
     if (!b) return;
     let toca = false;
     const d = new Date().getDay();
     if (d === 0 || d === 6 || d === 1) {
-      const ult = userData._ultimoCheckin ? new Date(userData._ultimoCheckin) : null;
+      const ult = _fechaUltimoCheckin();
       toca = !ult || (Date.now() - ult.getTime()) / 86400000 >= 5;
     }
     b.style.display = toca ? '' : 'none';
@@ -22210,7 +22220,7 @@
   function comprobarRecordatorioCheckin() {
     if (!userData || !userData.progreso) return;
     const semana = userData.progreso.semana || 1;
-    const ultimoCheckin = userData._ultimoCheckin || null;
+    const ultimoCheckin = _fechaUltimoCheckin();
     const hoy = new Date();
     const diaSemana = hoy.getDay();
     if (diaSemana !== 0 && diaSemana !== 6) return;
@@ -23734,6 +23744,11 @@
       if (nota && nota.trim()) {
         userData.progreso.ultimaNota = nota.trim();
       }
+      // 3 oct 2026: _ultimoCheckin se leía (tarjeta "Toca tu check-in" y el
+      // recordatorio) pero nunca se escribía, así que la tarjeta seguía saliendo
+      // todo el fin de semana aunque ya lo hubiera hecho.
+      userData._ultimoCheckin = new Date().toISOString();
+      try { _pintarCheckinPendiente(); } catch (e) {}
       const mensajeCalorias = evaluarYAjustarCalorias(pesoCheckin, document.getElementById('checkinCintura')?.value);
       if (mensajeCalorias) respuesta += ` ${mensajeCalorias}`;
 
