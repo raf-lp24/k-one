@@ -3834,6 +3834,8 @@
   .plato-macros { font-size: 11.5px; color: var(--metal-claro); }
   #comidaExtraNombre { background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); padding: 10px 12px; font-size: 13.5px; font-family: inherit; border-radius: 8px; }
   .plato-guardar { width: 100%; padding: 12px; }
+  /* Con el plato empezado, la explicación sobra y la lista de alimentos necesita el sitio. */
+  #modalAnadirComida .modal-box:has(#comidaExtraPlato:not([style*="none"])) > .modal-desc { display: none; }
   .comida-extra-badge {
     font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .5px;
     color: var(--brasa-txt); border: 1px solid var(--brasa); border-radius: 20px; padding: 2px 8px;
@@ -7724,7 +7726,7 @@
     <p class="modal-desc" style="margin-bottom:12px">Macros por 100 g según la base oficial de la USDA. Escribe para buscar y ajusta la cantidad.</p>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <input type="text" id="alimentoBuscar" aria-label="Buscar alimento" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderAlimentos()"
-        style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
+        style="flex:1;min-width:0;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="alimentoGramos" value="100" min="1" max="2000" step="10" oninput="renderAlimentos()"
           aria-label="Cantidad en gramos"
@@ -7747,7 +7749,7 @@
     <div class="plato-extra" id="comidaExtraPlato" style="display:none"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <input type="text" id="comidaExtraBuscar" aria-label="Buscar alimento" placeholder="Pollo, arroz, huevo…" autocomplete="off" oninput="renderComidaExtraLista()"
-        style="flex:1;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
+        style="flex:1;min-width:0;background:var(--grafito);border:1px solid var(--humo);color:var(--blanco);padding:11px 13px;font-size:14px;font-family:inherit;border-radius:8px;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:6px;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;padding:0 10px">
         <input type="number" id="comidaExtraGramos" value="100" min="1" max="2000" step="10" oninput="renderComidaExtraLista()"
           aria-label="Cantidad en gramos"
