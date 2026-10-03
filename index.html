@@ -25972,6 +25972,39 @@
   // revisión, no dos.
   let _huellaPedida = null;
 
+  // VARIOS DISPOSITIVOS (3 oct 2026). Los datos de la nube solo se traían al abrir
+  // la app: con K-ONE abierta en el ordenador, un check-in hecho después en el móvil
+  // se perdía en cuanto el ordenador guardaba cualquier cosa (sube su copia entera,
+  // más vieja). Ahora, al volver a la pestaña tras un rato fuera, si la nube tiene
+  // algo más nuevo se carga antes de que el cliente toque nada.
+  let _ocultoDesde = 0;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { _ocultoDesde = Date.now(); return; }
+    const fuera = _ocultoDesde ? Date.now() - _ocultoDesde : 0;
+    _ocultoDesde = 0;
+    if (fuera < 60 * 1000) return;
+    _traerCambiosDeOtroDispositivo().catch(() => {});
+  });
+  async function _traerCambiosDeOtroDispositivo() {
+    if (!_supaUserId || !document.getElementById('dashboard')?.classList.contains('active')) return;
+    // No se interrumpe nada a medias: sesión de entreno, una ventana abierta o el tour.
+    if (document.getElementById('sesionModo')?.classList.contains('abierta')) return;
+    if (document.querySelector('.modal-overlay.visible, .onboarding-modal.visible')) return;
+    const user = getCurrentUser();
+    if (!user) return;
+    const { data: p, error } = await supa.from('profiles').select('userdata, plan, saved_at').eq('id', _supaUserId).maybeSingle();
+    if (error || !p || !p.saved_at || !p.userdata) return;
+    const local = getUserData(user.email);
+    const tsNube = Date.parse(p.saved_at) || 0;
+    const tsLocal = Date.parse(local?.savedAt || '') || 0;
+    if (tsNube <= tsLocal + 1000) return;
+    try { localStorage.setItem(`k1_data_${user.email}`, JSON.stringify({ userData: p.userdata, plan: p.plan || null, savedAt: p.saved_at })); } catch (e) { return; }
+    const seccion = (document.querySelector('.dash-section.active')?.id || '').replace('section-', '');
+    loadUserDashboard(user.email);
+    if (seccion && seccion !== 'hoy') { try { showSection(seccion); } catch (e) {} }
+    showToast('Hemos traído los cambios que hiciste en otro dispositivo.', 4000);
+  }
+
   // Devuelve una promesa que resuelve a true si quedó guardado en la nube
   // (quien no la necesite puede ignorarla, como hasta ahora).
   function saveUserData(email, data) {
