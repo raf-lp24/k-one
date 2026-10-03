@@ -3878,14 +3878,19 @@
   }
   .btn-lista-compra:hover { background: #ff5a10; }
   @media (max-width: 768px) {
+    /* Los 7 días en UNA fila (3 oct 2026): el min-width de 62px de escritorio
+       seguía mandando y se partían en 4 + 3 con anchos distintos. */
     .nutri-dias {
-      gap: 6px;
-      justify-content: center;
+      gap: 5px;
+      flex-wrap: nowrap;
     }
     .nutri-dia {
-      width: 38px; height: 38px;
-      font-size: 12px;
-      border-radius: 6px;
+      flex: 1 1 0;
+      min-width: 0;
+      height: 44px;
+      padding: 0;
+      font-size: 17px;
+      border-radius: 10px;
     }
     .btn-lista-compra {
       width: 100%;
@@ -4461,6 +4466,16 @@
     flex-direction: column;
     gap: 6px;
     min-width: 0;
+  }
+  /* Móvil (3 oct 2026): título, plato elegido, "5 opciones · toca..." y Reiniciar
+     iban en columnas tan estrechas que "Media mañana" se partía en dos líneas. */
+  @media (max-width: 600px) {
+    .meal-block-header { padding: 16px 18px; gap: 12px; }
+    .meal-block-left { flex: 1; }
+    .meal-block-right { gap: 10px; flex-shrink: 0; }
+    .meal-block-count, .meal-block-why { display: none; }
+    .meal-block-title { font-size: 21px; line-height: 1.05; }
+    .meal-block-selected { font-size: 12.5px; line-height: 1.4; }
   }
   @media (max-width: 360px) { .meal-block-header { padding: 16px 14px; gap: 10px; } }
 
