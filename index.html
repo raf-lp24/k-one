@@ -25981,13 +25981,34 @@
   // más vieja). Ahora, al volver a la pestaña tras un rato fuera, si la nube tiene
   // algo más nuevo se carga antes de que el cliente toque nada.
   let _ocultoDesde = 0;
+  // Día con el que se pintó el panel: una app instalada que se queda abierta de un
+  // día para otro seguía enseñando el entreno y las comidas de ayer (y el modo
+  // entrenamiento leía la sesión de ayer y la guardaba con la fecha de hoy).
+  let _fechaPintada = null;
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') { _ocultoDesde = Date.now(); return; }
     const fuera = _ocultoDesde ? Date.now() - _ocultoDesde : 0;
     _ocultoDesde = 0;
+    if (_fechaPintada && _fechaPintada !== getFechaHoyISO() && _repintarSiCambioDia()) return;
     if (fuera < 60 * 1000) return;
     _traerCambiosDeOtroDispositivo().catch(() => {});
   });
+  function _repintarSiCambioDia() {
+    if (!document.getElementById('dashboard')?.classList.contains('active')) return false;
+    if (document.getElementById('sesionModo')?.classList.contains('abierta')) return false;
+    const user = getCurrentUser();
+    if (!user) return false;
+    const seccion = (document.querySelector('.dash-section.active')?.id || '').replace('section-', '');
+    const repintar = () => {
+      if (_fechaPintada === getFechaHoyISO()) return; // ya lo repintó la sincronización
+      loadUserDashboard(user.email);
+      if (seccion && seccion !== 'hoy') { try { showSection(seccion); } catch (e) {} }
+    };
+    // Primero se traen los cambios de otros dispositivos (si los hay, eso ya repinta).
+    if (_supaUserId) _traerCambiosDeOtroDispositivo().catch(() => {}).finally(repintar);
+    else repintar();
+    return true;
+  }
   async function _traerCambiosDeOtroDispositivo() {
     if (!_supaUserId || !document.getElementById('dashboard')?.classList.contains('active')) return;
     // No se interrumpe nada a medias: sesión de entreno, una ventana abierta o el tour.
@@ -26833,6 +26854,7 @@
 
   // ===== CARGAR DASHBOARD DE USUARIO EXISTENTE =====
   function loadUserDashboard(email) {
+    try { _fechaPintada = getFechaHoyISO(); } catch (e) {}
     const saved = getUserData(email);
     const skel = document.getElementById('dashSkeleton');
     if (skel) skel.style.display = '';
