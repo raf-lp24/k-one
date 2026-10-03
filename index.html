@@ -22155,19 +22155,24 @@
 
   // ===== COMPARTIR PROGRESO =====
   function exportarProgresoCSV() {
-    const user = getCurrentUser();
-    const ud = user ? getUserData(user.email) : null;
-    const pesos = ud?.pesosRegistrados || {};
-    if (!Object.keys(pesos).length) { showToast('No hay pesos registrados todavía'); return; }
-    const rows = [['Ejercicio','Semana','Peso (kg)']];
-    Object.entries(pesos).forEach(([ejercicio, semanas]) => {
-      Object.entries(semanas).forEach(([sem, peso]) => {
-        rows.push([ejercicio, sem, peso]);
+    // 3 oct 2026: leía ud.pesosRegistrados, un campo que no existe (y en el nivel
+    // equivocado): siempre decía "No hay pesos registrados". Los datos reales son
+    // userData.pesosEjercicios[clave].historial y userData.historialPeso.
+    const sens = { facil: 'Me sobró', justo: 'Justo', duro: 'No llegué' };
+    const rows = [['Tipo', 'Ejercicio', 'Fecha', 'Peso (kg)', 'Sensación']];
+    Object.entries(userData.pesosEjercicios || {}).forEach(([clave, e]) => {
+      const nombre = (e && e.nombre) || clave;
+      (Array.isArray(e && e.historial) ? e.historial : []).forEach(h => {
+        if (h && Number(h.peso) > 0) rows.push(['Carga', nombre, String(h.fecha || '').slice(0, 10), String(h.peso).replace('.', ','), sens[h.sensacion] || '']);
       });
     });
+    (Array.isArray(userData.historialPeso) ? userData.historialPeso : []).forEach(h => {
+      if (h && Number(h.peso) > 0) rows.push(['Peso corporal', '', String(h.fecha || '').slice(0, 10), String(h.peso).replace('.', ','), '']);
+    });
+    if (rows.length === 1) { showToast('Todavía no hay pesos registrados'); return; }
     // Mismo guard anti-inyección de fórmulas que exportarAdminCSV(): el nombre
     // del ejercicio puede venir de "Añadir ejercicio" (texto libre del cliente).
-    const csv = rows.map(r => r.map(_csvSafe).join(',')).join('\n');
+    const csv = rows.map(r => r.map(_csvSafe).join(';')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
