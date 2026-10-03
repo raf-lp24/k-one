@@ -5560,7 +5560,9 @@
     font-style: italic;
     padding: 24px;
     text-align: center;
-    background: var(--carbon);
+    background: transparent;
+    border: 1px dashed var(--humo);
+    border-radius: 14px;
   }
 
   /* LOADING */
@@ -27032,7 +27034,18 @@
       const clave = 'kone_feedback_banner_' + ((user && user.email) || '');
       if (localStorage.getItem(clave)) { box.style.display = 'none'; return; }
     } catch (e) {}
-    box.style.display = 'block';
+    // 3 oct 2026: salía desde el primer día y a la vez que el check-in, el
+    // recálculo mensual o el aviso de tarjeta (tres cajas seguidas en Hoy). Ahora
+    // solo tras una semana de uso y cuando no hay otro aviso más importante.
+    box.style.display = 'none';
+    const alta = Date.parse((user && user.creado) || '') || 0;
+    if (!alta || Date.now() - alta < 7 * 86400000) return;
+    clearTimeout(actualizarBannerFeedback._t);
+    actualizarBannerFeedback._t = setTimeout(() => {
+      const otro = ['hoyCheckin', 'bannerRecalculo', 'avisoRenovacion', 'avisoTarjetaPrueba']
+        .some(id => { const e = document.getElementById(id); return e && e.style.display !== 'none'; });
+      box.style.display = otro ? 'none' : 'block';
+    }, 1500);
   }
 
   function cerrarBannerFeedback() {
