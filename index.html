@@ -20694,7 +20694,7 @@
     const obj = (generatedPlan.kcalObjPorDia && generatedPlan.kcalObjPorDia[dia]) || generatedPlan.kcalObj;
     const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     caja.innerHTML = '<div class="hc-cab"><div><span class="hc-eyebrow">Nutrición · hoy</span><div class="hc-tit">Tus comidas de hoy</div></div>'
-      + (obj ? '<div class="hc-obj"><span class="k">Objetivo</span><span class="v">' + _esc(Number(obj).toLocaleString('es-ES')) + '<small>kcal</small></span></div>' : '') + '</div>'
+      + (obj ? '<div class="hc-obj"><span class="k">' + (generatedPlan.kcalObjPorDia ? 'Objetivo hoy' : 'Objetivo') + '</span><span class="v">' + _esc(Number(obj).toLocaleString('es-ES')) + '<small>kcal</small></span></div>' : '') + '</div>'
       + '<div class="hc-prog"><span>' + (n === comidas.length ? 'Todas hechas. Bien.' : n + ' de ' + comidas.length + ' hechas') + '</span>'
       + '<span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(n / comidas.length * 100) + '%"></i></span></div>'
       + '<div class="hc-lista">' + comidas.map((c, i) => {
@@ -21593,7 +21593,8 @@
 
     // Pre-rellenar con el peso que ya tiene el perfil
     const input = document.getElementById('inputPesoRecalculo');
-    if (input && userData.peso && !input.value) input.value = userData.peso;
+    // El último peso registrado (check-in), no el del alta: ver _pesoUltimo().
+    if (input && !input.value) { const _pu = _pesoUltimo(); if (_pu) input.value = _pu; }
   }
 
   function confirmarRecalculoPeso() {
@@ -22482,10 +22483,17 @@
   // ===== PROGRESO: HITOS CONSEGUIDOS =====
   // Kilos avanzados en la dirección del objetivo del usuario (perder → bajar,
   // ganar músculo → subir). Para "mantenerse" no aplica y devuelve 0.
+  // 3 oct 2026: salía de userData.peso y userData.pesoActual, que el check-in no
+  // toca y la renovación pone iguales, así que daba siempre 0 y los hitos de
+  // kilos no se marcaban nunca en la app. Ahora, igual que api/_hitos.js (que es
+  // el que cuenta para las recompensas): primer y último pesaje del historial.
   function _kilosHaciaObjetivo() {
-    const inicial = parseFloat(userData.peso);
-    const actual  = parseFloat(userData.pesoActual || userData.peso);
-    if (!inicial || !actual) return 0;
+    const h = (Array.isArray(userData.historialPeso) ? userData.historialPeso : [])
+      .filter(x => x && Number(x.peso) > 0 && !isNaN(Date.parse(x.fecha)))
+      .sort((a, b) => Date.parse(a.fecha) - Date.parse(b.fecha));
+    if (h.length < 2) return 0;
+    const inicial = Number(h[0].peso);
+    const actual  = Number(h[h.length - 1].peso);
     const obj = userData.objetivo || '';
     if (obj.includes('Perder') || obj.includes('grasa')) return inicial - actual;
     if (obj.includes('Ganar') || obj.includes('músculo')) return actual - inicial;
