@@ -3,23 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <title>Página no encontrada — K-ONE</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { margin:0; background:#0a0a0a; color:#F0EDE8; font-family:Arial,Helvetica,sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; text-align:center; }
-  .box { max-width:400px; padding:40px 24px; }
-  .logo { font-size:32px; font-weight:900; letter-spacing:2px; margin-bottom:24px; }
-  .logo span { color:#E8490F; }
-  .code { font-size:80px; font-weight:900; color:#E8490F; line-height:1; margin-bottom:8px; }
-  .msg { font-size:16px; color:#888; line-height:1.6; margin-bottom:32px; }
-  .btn { display:inline-block; background:#E8490F; color:#fff; text-decoration:none; padding:14px 32px; font-size:14px; font-weight:600; border-radius:8px; letter-spacing:0.5px; }
-  .btn:hover { background:#c03a08; }
+  /* Misma estética que la web (3 oct 2026): antes era Arial. */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0A0A0A; color: #F0EDE8; font-family: 'Inter', Arial, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 24px 16px; position: relative; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; width: 700px; height: 700px; right: -300px; top: -320px; border-radius: 50%; background: radial-gradient(circle, rgba(209,66,14,.28), transparent 62%); pointer-events: none; }
+  .box { position: relative; max-width: 420px; }
+  .logo { font-family: 'Bebas Neue', Arial, sans-serif; font-size: 34px; letter-spacing: 3px; margin-bottom: 28px; }
+  .logo span, .code span { color: #F26A36; }
+  .eye { display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #F26A36; background: rgba(209,66,14,.10); border: 1px solid rgba(209,66,14,.4); border-radius: 999px; padding: 6px 14px; }
+  .eye::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #D1420E; box-shadow: 0 0 8px #D1420E; }
+  .code { font-family: 'Bebas Neue', Arial, sans-serif; font-size: 120px; line-height: .9; letter-spacing: 2px; margin: 18px 0 6px; }
+  h1 { font-family: 'Bebas Neue', Arial, sans-serif; font-weight: 400; font-size: 34px; letter-spacing: .5px; line-height: 1; margin: 0 0 14px; }
+  .msg { font-size: 15px; color: #B5B2AD; line-height: 1.6; margin: 0 0 30px; }
+  .btn { display: inline-block; background: #D1420E; color: #fff; text-decoration: none; padding: 15px 34px; font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 10px; box-shadow: 0 12px 34px rgba(209,66,14,.35); }
+  .btn:hover, .btn:focus-visible { background: #B8380B; outline: none; }
+  .btn:focus-visible { box-shadow: 0 0 0 3px #F26A36; }
 </style>
 </head>
 <body>
 <div class="box">
   <div class="logo">K-<span>ONE</span></div>
-  <div class="code">404</div>
-  <p class="msg">Esta página no existe. Puede que hayas seguido un enlace antiguo o escrito mal la dirección.</p>
+  <div class="eye">Error 404</div>
+  <div class="code">4<span>0</span>4</div>
+  <h1>Esta página no existe</h1>
+  <p class="msg">Puede que hayas seguido un enlace antiguo o escrito mal la dirección.</p>
   <a href="/" class="btn">Volver a K-ONE</a>
 </div>
 </body>
