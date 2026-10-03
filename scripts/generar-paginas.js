@@ -14,7 +14,7 @@ const path = require('path');
 const raiz = path.join(__dirname, '..');
 const SITIO = 'https://k-one.fit';
 
-const PRECIOS = 'Primer mes gratis. Después, plan completo 7,99 €/mes (o 14,99 € cada 3 meses) y solo nutrición 4,99 €/mes. Sin permanencia: cancelas desde tu perfil cuando quieras.';
+const PRECIOS = 'Primer mes gratis y sin tarjeta: no te pedimos ningún dato de pago para empezar. Después, plan completo 7,99 €/mes (o 14,99 € cada 3 meses) y solo nutrición 4,99 €/mes. Sin permanencia: cancelas desde tu perfil cuando quieras.';
 
 const otras = [
   ['/gimnasio', 'Gimnasio', 'Hipertrofia, fuerza y definición con progresión de cargas.'],
@@ -27,7 +27,7 @@ const PAGINAS = [
   {
     archivo: 'running.html', ruta: '/running', imagen: '/img/landing/running.webp', etiqueta: 'Running',
     title: 'Plan de running personalizado, de 5 km a maratón — K-ONE',
-    desc: 'Plan de running con ritmos, distancias y fases, adaptado a tu nivel y lesiones, y con nutrición incluida. Primer mes gratis.',
+    desc: 'Plan de running con ritmos, distancias y fases, adaptado a tu nivel y lesiones, y con nutrición incluida. Primer mes gratis, sin tarjeta.',
     h1: 'Un plan de running que se adapta a ti, semana a semana',
     lead: 'De tu primer 5 km a un maratón: sesiones con ritmos, distancias y zonas de esfuerzo, y una alimentación que acompaña cada entreno.',
     incluye: [
@@ -48,7 +48,7 @@ const PAGINAS = [
   {
     archivo: 'gimnasio.html', ruta: '/gimnasio', imagen: '/img/landing/gimnasio.webp', etiqueta: 'Gimnasio',
     title: 'Plan de gimnasio personalizado: hipertrofia y fuerza — K-ONE',
-    desc: 'Rutina de gimnasio con progresión de cargas cada semana, fichas de cada ejercicio y nutrición incluida. En gimnasio o en casa. Primer mes gratis.',
+    desc: 'Rutina de gimnasio con progresión de cargas cada semana, fichas de cada ejercicio y nutrición incluida. En gimnasio o en casa. Primer mes gratis, sin tarjeta.',
     h1: 'Tu rutina de gimnasio, con la carga que te toca cada semana',
     lead: 'Hipertrofia, fuerza o definición: entrenamiento generado con tus datos reales, con progresión de cargas y una alimentación calculada para tu objetivo.',
     incluye: [
@@ -69,7 +69,7 @@ const PAGINAS = [
   {
     archivo: 'hibrido.html', ruta: '/hibrido', imagen: '/img/landing/hero.webp', etiqueta: 'Híbrido',
     title: 'Plan híbrido de fuerza y resistencia para correr — K-ONE',
-    desc: 'Plan semanal que reparte fuerza y carrera sin que se pisen. Para maratón, media maratón o Hyrox sin perder lo ganado. Primer mes gratis.',
+    desc: 'Plan semanal que reparte fuerza y carrera sin que se pisen. Para maratón, media maratón o Hyrox sin perder lo ganado. Primer mes gratis, sin tarjeta.',
     h1: 'Fuerza y resistencia en la misma semana, sin que se pisen',
     lead: 'Si preparas un maratón o un Hyrox y no quieres perder lo ganado en el gimnasio, el plan híbrido reparte la carga para que cada sesión llegue descansada.',
     incluye: [
@@ -89,7 +89,7 @@ const PAGINAS = [
   {
     archivo: 'solo-nutricion.html', ruta: '/solo-nutricion', imagen: '/img/landing/nutricion-banner.webp', etiqueta: 'Solo nutrición',
     title: 'Plan de alimentación personalizado desde 4,99 €/mes — K-ONE',
-    desc: 'Dieta personalizada con 5 opciones por comida, macros, lista de la compra y adaptada a alergias. Para quien ya entrena por su cuenta. Primer mes gratis.',
+    desc: 'Dieta personalizada con 5 opciones por comida, macros, lista de la compra y adaptada a alergias. Para quien ya entrena por su cuenta. Primer mes gratis, sin tarjeta.',
     h1: 'Tu alimentación calculada, sin cambiar cómo entrenas',
     lead: 'Si ya entrenas con tu entrenador, tu box o tu club, K-ONE te da solo la nutrición: un plan de comidas 100 % personalizado, adaptado a tus alergias y a tu objetivo.',
     incluye: [
@@ -162,7 +162,7 @@ function pagina(p) {
       <h1>${esc(p.h1)}</h1>
       <p class="lead">${esc(p.lead)}</p>
       <div class="acciones">
-        <a class="btn grande" href="/?go=registro">Empieza gratis — primer mes</a>
+        <a class="btn grande" href="/?go=registro">Empieza gratis, sin tarjeta</a>
         <a class="enlace" href="/#pricing">Ver precios</a>
       </div>
     </div>
@@ -200,7 +200,7 @@ ${p.faq.map(([q, a]) => `      <details><summary>${esc(q)}</summary><p>${esc(a)}
   </section>
 
   <section class="cierre">
-    <h2>Empieza hoy, primer mes gratis</h2>
+    <h2>Empieza hoy: primer mes gratis, sin tarjeta</h2>
     <p>${esc(PRECIOS)}</p>
     <a class="btn grande" href="/?go=registro">Crear mi plan</a>
   </section>
