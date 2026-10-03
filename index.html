@@ -17913,15 +17913,27 @@
         prep,
       };
     };
-    // RACIÓN FIJA (3 oct 2026). Recetas que el usuario quiere TAL CUAL, sin que
-    // el motor las agrande ni las encoja (los desayunos de solo proteína de la
-    // dieta AJ7: "2 huevos + 30 g de pavo"). Ningún ajuste de cantidades las toca
-    // (escalado, calibración de proteína/hidratos, ciclado, reparto por toma ni
-    // conciliación con "Ver macros"); las alergias y el "no como" sí se aplican.
-    // Ese día el desayuno queda por debajo de su parte: decisión del usuario.
-    const opFija = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => ({
-      nombre, ingredientes: ponerCantidades(ingredientes), kcal, prot, carbs, grasa, prep, racionFija: true,
-    });
+    // RACIÓN PROPORCIONAL A UNA DIETA DE REFERENCIA (3 oct 2026). Los desayunos de
+    // solo proteína de la dieta AJ7 del usuario ("2 huevos + 30 g de pavo") se
+    // respetan en su forma, pero esas cantidades eran para SU peso de entonces:
+    // aquí se escalan en proporción a las kcal de cada cliente frente a las de
+    // aquella dieta (~1.900 kcal/día, calculado con la tabla de alimentos), con
+    // límites para no salir de raciones razonables. Y NO se rellenan hasta el
+    // 25 % del día como las demás recetas: ningún ajuste posterior de
+    // cantidades las toca (racionFija). Las alergias y el "no como" sí se aplican.
+    const KCAL_REF_AJ7 = 1900;
+    const factorAJ7 = Math.min(1.6, Math.max(0.75, kcalObj / KCAL_REF_AJ7));
+    const opFija = (nombre, ingredientes, kcal, prot, carbs, grasa, prep) => {
+      const p = Math.round((parseFloat(prot) || 0) * factorAJ7);
+      const c = Math.round((parseFloat(carbs) || 0) * factorAJ7);
+      const g = Math.round((parseFloat(grasa) || 0) * factorAJ7);
+      return {
+        nombre,
+        ingredientes: scaleIngredientes(ponerCantidades(ingredientes), factorAJ7),
+        kcal: `${p * 4 + c * 4 + g * 9} kcal`, prot: `${p}g prot`, carbs: `${c}g carbs`, grasa: `${g}g grasa`,
+        prep, racionFija: true,
+      };
+    };
 
     let nutricion = [];
 
@@ -17931,7 +17943,7 @@
           momento: "Desayuno", hora: "7:30",
           porque: "Proteína desde primera hora para preservar músculo y controlar el apetito",
           opciones: [
-            // 1ª comida de la dieta AJ7 del usuario (6 abril 2025): solo proteína y ración fija, solo en perder grasa.
+            // 1ª comida de la dieta AJ7 del usuario (6 abril 2025): solo proteína, proporcional a las kcal del cliente (opFija), solo en perder grasa.
             opFija("Huevos a la plancha con pavo o jamón cocido", "2 huevos, 30g pavo en lonchas", "187 kcal", "20g prot", "2g carbs", "11g grasa", "Fácil · 5 min"),
             opFija("Tortilla de claras con un huevo entero", "1 huevo, 200ml claras, sal, pimienta", "178 kcal", "29g prot", "2g carbs", "6g grasa", "Fácil · 5 min"),
             opFija("Proteína isolada con agua", "40g proteína aislada, agua, hielo", "148 kcal", "36g prot", "1g carbs", "0g grasa", "Fácil · 1 min"),
