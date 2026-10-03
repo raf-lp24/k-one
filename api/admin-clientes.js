@@ -451,7 +451,17 @@ module.exports = async (req, res) => {
         alergia:      ud.alergia      || null,
         alergiaOtra:  ud.alergiaOtra  || null,
         medicacion:   ud.medicacion   || null,
-        peso:         ud.peso || ud.pesoActual || null,
+        // Peso ACTUAL = el más reciente entre el último check-in y el del perfil
+        // (el del perfil es el del alta salvo que se cambiara al renovar o en
+        // "Cambiar plan"); antes Jarvis enseñaba siempre el del alta.
+        peso: (() => {
+          const h = Array.isArray(ud.historialPeso) ? ud.historialPeso : [];
+          const u = h.length ? h[h.length - 1] : null;
+          const fPerfil = Date.parse(ud.pesoFecha || ud.ultimoRecalculo || '') || 0;
+          const fCheckin = u ? (Date.parse(u.fecha || '') || 0) : 0;
+          if (u && Number(u.peso) > 0 && fCheckin >= fPerfil) return Number(u.peso);
+          return ud.peso || ud.pesoActual || (u && u.peso) || null;
+        })(),
         edad:         ud.edad || null,
         // Ficha completa (a petición del usuario): resto de campos del
         // cuestionario que no estaban en la ficha del cliente en Jarvis.

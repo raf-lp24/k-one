@@ -20327,7 +20327,7 @@
     // ── KPIs adicionales ──────────────────────────────────────────────────────
     // Peso actual
     const statPesoEl = document.getElementById('statPesoActual');
-    if (statPesoEl) statPesoEl.textContent = userData.peso ? `${String(userData.peso).replace('.', ',')} kg` : '—';
+    if (statPesoEl) statPesoEl.textContent = _textoPesoActual();
 
     // Adherencia: días completados esta semana vs días planificados (rail derecho)
     const statAdherenciaEl = document.getElementById('statAdherencia');
@@ -21605,6 +21605,7 @@
     const pesoPrevio = userData.peso;
     userData.peso = nuevoPeso;
     userData.ultimoRecalculo = new Date().toISOString();
+    userData.pesoFecha = userData.ultimoRecalculo;
     delete userData.recalculoSnooze;
 
     generatedPlan = buildPlanFromData(userData);
@@ -23479,6 +23480,26 @@
   // en mantenimiento) y se ajusta userData.ajusteCalorico en consecuencia.
   // Ajuste moderado (150 kcal) y no en cada check-in: hace falta tendencia de
   // 3 semanas, no un solo pesaje (agua, digestión, ciclo... meten ruido).
+  // Peso que se ENSEÑA como "actual" (3 oct 2026): el último del check-in. Antes
+  // la tarjeta leía userData.peso, que es el del alta (solo cambia al renovar) y
+  // un cliente que llevaba semanas bajando seguía viendo su peso del primer día.
+  // userData.peso no se toca: es la base del cálculo de calorías.
+  function _pesoUltimo() {
+    const h = Array.isArray(userData.historialPeso) ? userData.historialPeso : [];
+    const u = h.length ? h[h.length - 1] : null;
+    const ult = u ? Number(u.peso) : NaN;
+    // Si el peso del perfil se cambió (renovación, "Cambiar plan") DESPUÉS del
+    // último check-in, ese es el más reciente.
+    const fPerfil = Date.parse(userData.pesoFecha || userData.ultimoRecalculo || '') || 0;
+    const fCheckin = u ? (Date.parse(u.fecha || '') || 0) : 0;
+    const p = ult > 0 && fCheckin >= fPerfil ? ult : (Number(userData.peso) > 0 ? Number(userData.peso) : ult);
+    return p > 0 ? Math.round(p * 10) / 10 : null;
+  }
+  function _textoPesoActual() {
+    const p = _pesoUltimo();
+    return p ? `${String(p).replace('.', ',')} kg` : '—';
+  }
+
   function evaluarYAjustarCalorias(pesoActual, cinturaActual) {
     // Mismo rango biológico que ya usa guardarCambioPlan() para el peso --
     // el input del check-in tiene min/max en el HTML, pero eso no bloquea
@@ -23495,6 +23516,7 @@
     const _registro = { fecha: new Date().toISOString(), peso: pesoActual, semana: getSemanaActual() };
     if (_cint >= 40 && _cint <= 200) _registro.cintura = _cint;
     userData.historialPeso.push(_registro);
+    { const el = document.getElementById('statPesoActual'); if (el) el.textContent = _textoPesoActual(); }
     if (userData.historialPeso.length > 26) userData.historialPeso = userData.historialPeso.slice(-26);
 
     const hist = userData.historialPeso;
@@ -24819,9 +24841,11 @@
     preseleccionarRadio('cp-objetivo', userData.objetivo);
     const inputPesoCp = document.getElementById('cp-peso');
     if (inputPesoCp) {
-      inputPesoCp.value = userData.peso || '';
+      // Último peso del check-in, no el del alta (ver _textoPesoActual).
+      const _pu = _pesoUltimo();
+      inputPesoCp.value = _pu || '';
       const sl = document.getElementById('cp-pesoSlider');
-      if (sl) sl.value = userData.peso ? parseFloat(userData.peso) : 70;
+      if (sl) sl.value = _pu || 70;
     }
     preseleccionarRadio('cp-enfoqueMacros', userData.enfoqueMacros || 'Equilibrado');
     // "Pico continuamente" (opción retirada del cuestionario) ya da 5 tomas: se
@@ -24957,6 +24981,7 @@
     if (!isNaN(_pesoNuevo) && _pesoNuevo >= 40 && _pesoNuevo <= 180) {
       userData.peso = _pesoNuevo;
       userData.ultimoRecalculo = new Date().toISOString();
+      userData.pesoFecha = userData.ultimoRecalculo;
     }
 
     const _entrenoHaCambiado = nuevoDeporte !== userData.deporte ||
@@ -26757,7 +26782,9 @@
     if (diasDesdeAlta < 25) return;
 
     const entrenosTotal = Array.isArray(userData.historialEntrenos) ? userData.historialEntrenos.length : 0;
-    const pesoActual = userData.peso || userData.pesoActual || '—';
+    // El último peso del check-in, no el del alta (ver _textoPesoActual): con él
+    // se recalcula el plan del mes si el cliente no lo cambia a mano.
+    const pesoActual = _pesoUltimo() || userData.pesoActual || '—';
     const semana = userData.progreso?.semana || 1;
     const racha = userData.progreso?.rachaActual || 0;
 
@@ -26783,6 +26810,7 @@
     if (nuevoPeso && nuevoPeso > 30) {
       userData.peso = String(nuevoPeso);
       userData.pesoActual = String(nuevoPeso);
+      userData.pesoFecha = new Date().toISOString();
     }
 
     const cambiarObj = document.getElementById('renovCambiarObj').checked;
