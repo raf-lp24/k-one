@@ -35,7 +35,7 @@
 // v23 (29 sept 2026): vídeo de técnica concreto por ejercicio y recuadro
 // 'Tu plan, adaptado' con 3 notas visibles (el resto plegadas).
 // v66 (2 oct 2026): 'Tu plan, adaptado' y 'Después de entrenar' plegados del todo.
-const CACHE_NAME = 'kone-v86';
+const CACHE_NAME = 'kone-v87';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

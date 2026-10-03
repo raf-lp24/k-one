@@ -7629,8 +7629,8 @@
       <div class="field">
         <label>¿Con qué periodicidad quieres pagar?</label>
         <div class="radio-group" id="cp-periodicidad">
-          <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
-          <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
+          <div class="radio-opt selected" data-valor="mensual" onclick="_cpPeriodicidadTocada = true; selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Mensual</div>
+          <div class="radio-opt" data-valor="trimestral" onclick="_cpPeriodicidadTocada = true; selectRadio(this,'cp-periodicidad'); actualizarPrecioCambioPlan();">Trimestral</div>
         </div>
         <span class="field-hint" id="cpPrecioInfo"></span>
       </div>
@@ -24891,6 +24891,7 @@
 
   function abrirModalCambiarPlan() {
     enfoqueMacrosManualCambio = false;
+    _cpPeriodicidadTocada = false;
     const tipoPlanActual = userData.tipoPlan || 'Plan completo: entrenamiento + nutrición';
     const esSoloNutri = tipoPlanActual.includes('Solo');
     preseleccionarRadio('cp-tipoPlan', tipoPlanActual);
@@ -24982,6 +24983,7 @@
     preseleccionarRadio('cp-enfoqueMacros', enfoquePorObjetivo[objetivo] || 'Equilibrado');
   }
 
+  let _cpPeriodicidadTocada = false;
   async function guardarCambioPlan() {
     const getRadio = (id) => document.querySelector(`#${id} .selected`)?.textContent?.trim() || '';
     const nuevoTipoPlan = getRadio('cp-tipoPlan');
@@ -25004,7 +25006,12 @@
     }
 
     const planCambia = nuevoTipoPlan !== userData.tipoPlan;
-    const periodCambia = nuevaPeriodicidad !== userData.periodicidad;
+    // Si no sabemos qué periodicidad tiene (clientes de antes del 3 oct 2026), la
+    // preseleccionada "Mensual" es una suposición: solo cuenta como cambio si el
+    // cliente la ha tocado. Si no, se le reprogramaba la suscripción sin pedirlo.
+    const periodCambia = userData.periodicidad
+      ? nuevaPeriodicidad !== userData.periodicidad
+      : _cpPeriodicidadTocada;
     const planAnterior = userData.tipoPlan;
     const user = getCurrentUser();
     let enOferta = false; // true si el cliente sigue en el primer mes a 1,99€
@@ -25066,7 +25073,7 @@
     userData.eventoFecha = document.getElementById('cp-eventoFecha')?.value || '';
 
     userData.tipoPlan = nuevoTipoPlan;
-    userData.periodicidad = nuevaPeriodicidad;
+    if (userData.periodicidad || _cpPeriodicidadTocada) userData.periodicidad = nuevaPeriodicidad; // no apuntar una suposición
     userData.objetivo = nuevoObjetivo;
     // Salud y alimentación: lo que cambia qué platos puede comer.
     {
@@ -27750,7 +27757,16 @@ Se coló: ${lista}`;
       }
       // MES GRATIS SIN TARJETA (2 oct 2026): el servidor crea la prueba sin pasar por
       // Stripe. Se recarga la cuenta y se abre el plan con el tour de bienvenida.
+      // Periodicidad elegida (3 oct 2026): antes no se guardaba en ningún sitio y
+      // "Cambiar plan" creía que había cambiado (vacío ≠ "mensual") y reprogramaba
+      // la suscripción; a un trimestral lo pasaba a mensual sin pedirlo.
+      const _guardarPeriodicidad = () => {
+        if (!periodicidad || userData.periodicidad === periodicidad) return;
+        userData.periodicidad = periodicidad;
+        try { saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() }); } catch (e) {}
+      };
       if (data.activado) {
+        _guardarPeriodicidad();
         if (session.user) await syncProfileFromSupabase(session.user);
         document.getElementById('modalPaywall')?.classList.remove('visible');
         if (boton) { boton.disabled = false; boton.textContent = textoBoton || 'Empezar mi mes gratis →'; }
@@ -27765,6 +27781,7 @@ Se coló: ${lista}`;
         return;
       }
       if (!data.url) throw new Error('No se recibió URL de pago');
+      _guardarPeriodicidad();
       // El primer mes es gratis (trial de Stripe): mandar 1,99 a Analytics
       // inflaba el valor de pagos iniciados con dinero que no existe.
       // Importe real del plan elegido (antes 7,99 fijo aunque fuera trimestral o solo nutrición).
