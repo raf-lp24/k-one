@@ -4865,6 +4865,9 @@
     border-radius: 6px;
   }
 
+  /* Las dos preguntas de entreno van en un envoltorio (se oculta en solo nutrición):
+     sin esto, el gap del contenedor no llegaba entre ellas y quedaban pegadas. */
+  #checkinEntrenoWrap { display: flex; flex-direction: column; gap: 32px; }
   .checkin-questions { display: flex; flex-direction: column; gap: 32px; }
 
   .checkin-q label {
@@ -5649,7 +5652,7 @@
 
     /* DASHBOARD: el sidebar fijo de 260px ocupa ~1/3 de una tablet,
        pasa a menú lateral oculto (hamburguesa) igual que en móvil */
-    .dash-layout { grid-template-columns: 1fr; }
+    .dash-layout { grid-template-columns: 1fr; align-content: start; } /* sin esto, con una sección corta la cabecera crecía y dejaba un hueco negro arriba */
     .dash-sidebar {
       position: fixed;
       top: 0; left: 0; bottom: 0;
@@ -6640,7 +6643,7 @@
        interno ('+ Añadir foto') forzaba el desbordamiento: la rejilla se salía
        7px por la derecha. Con 3 columnas cabe, y min-width:0 impide que el
        contenido vuelva a estirar la celda. */
-    .photos-grid { grid-template-columns: repeat(3, 1fr); }
+    .photos-grid { grid-template-columns: repeat(2, 1fr); } /* 3 oct 2026: con 3 columnas los 4 meses de cada página dejaban el 4.º solo en otra fila */
     .photo-slot { min-width: 0; }
     .photo-slot-hint { overflow-wrap: anywhere; }
 
