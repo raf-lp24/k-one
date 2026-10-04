@@ -448,7 +448,7 @@ async function handleCronRetencion(req, res) {
       (users || []).forEach(u => { if (u.last_sign_in_at) authLastSignIn[u.id] = u.last_sign_in_at; });
     } catch (_) {}
 
-    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'retencion_tarjeta', 'recordatorio_plan_invitado', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro']);
+    const { data: enviados } = await supa.from('email_log').select('destinatario, tipo').in('tipo', ['retencion_dia3', 'retencion_dia8', 'retencion_tarjeta', 'recordatorio_plan_invitado', 'reenganche_7d', 'reenganche_14d', 'reenganche_21d', 'aviso_primer_cobro', 'prueba_sin_entrenar', 'prueba_sin_tarjeta']);
     const yaEnviado = new Set();
     (enviados || []).forEach(e => yaEnviado.add(`${e.tipo}:${e.destinatario}`));
 
@@ -681,6 +681,102 @@ ${bloqueOpciones}
           yaEnviado.add(`aviso_primer_cobro:${p.email}`);
           enviadosPrimerCobro++;
         } catch (ePC) { console.warn('[notify-cron] aviso primer cobro:', ePC.message); }
+      }
+    }
+
+    // DURANTE EL MES GRATIS (4 oct 2026). Entre el alta y el aviso de "faltan 3
+    // días" no había nada pensado para quien está probando: si no arrancaba, solo
+    // le llegaba el reenganche genérico tras 7 días sin entrar. Quien no entrena
+    // la primera semana casi nunca paga. Dos correos, cada uno una sola vez:
+    //  - prueba_sin_entrenar: 3 días o más de prueba y ningún entreno marcado
+    //    (historialEntrenos vacío). No a Solo nutrición, que no tiene entrenos.
+    //  - prueba_sin_tarjeta: quedan entre 4 y 7 días y Stripe confirma que NO hay
+    //    tarjeta (si no se puede saber, no se manda). El de 3 días ya existe
+    //    (aviso_primer_cobro); este llega antes para que no se entere el último día.
+    // Los días se cuentan desde el fin de la prueba (current_period_end), no desde
+    // el alta: el cuestionario va antes de la cuenta y la prueba puede empezar más tarde.
+    let enviadosPrueba = 0;
+    {
+      const DIA = 86400000;
+      const PRECIO_PLAN = {};
+      [['STRIPE_PRICE_COMPLETO_MENSUAL', '7,99 € al mes'],
+       ['STRIPE_PRICE_COMPLETO_TRIMESTRAL', '14,99 € cada 3 meses'],
+       ['STRIPE_PRICE_NUTRICION_MENSUAL', '4,99 € al mes']
+      ].forEach(([env, texto]) => { if (process.env[env]) PRECIO_PLAN[process.env[env]] = texto; });
+      for (const p of (sinEmail ? [] : (perfiles || []))) {
+        try {
+          const sub = subByUser[p.id];
+          if (!p.email || !sub || sub.status !== 'trialing' || sub.cancel_at_period_end || !sub.current_period_end) continue;
+          if (p.is_beta) continue;
+          const fin = new Date(sub.current_period_end).getTime();
+          const quedan = (fin - ahora.getTime()) / DIA;
+          const llevaDias = 30 - quedan;
+          const ud = p.userdata || {};
+          const nombre = p.nombre || ud.nombre || '';
+          const primerNombre = nombre.split(' ')[0] || 'Hola';
+          const soloNutricion = String(ud.tipoPlan || '').includes('Solo');
+          const entrenos = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length : 0;
+
+          if (!soloNutricion && entrenos === 0 && llevaDias >= 3 && quedan > 7
+              && !yaEnviado.has(`prueba_sin_entrenar:${p.email}`)) {
+            const plan = [ud.deporte, ud.objetivo].filter(Boolean).map(esc).join(' · ');
+            const html = emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu primer entreno te está esperando</h1>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Llevas unos días con tu mes gratis y todavía no has hecho tu primer entreno. Es lo normal: lo difícil no es entrenar, es empezar.${plan ? ` Tu plan ya está listo: <span style="color:#F0EDE8">${plan}</span>.` : ''}</p>
+              <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">HOY, EN 3 PASOS</div>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">1.</span> Entra en K-ONE: se abre en «Hoy», con el entreno que te toca.</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">2.</span> Pulsa <span style="color:#F0EDE8">«Empezar entrenamiento»</span>: te guía serie a serie, con el peso y el descanso.</p>
+                <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">3.</span> Al terminar, márcalo como hecho y tu plan empieza a ajustarse a ti.</p>
+              </div>
+              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">¿Algo no te encaja del plan? Responde a este correo y lo vemos.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">EMPEZAR MI PRIMER ENTRENO</a>
+            </div>`);
+            const asunto = `${primerNombre}, tu primer entreno te está esperando`;
+            await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });
+            await supa.from('email_log').insert({ tipo: 'prueba_sin_entrenar', destinatario: p.email, asunto, html, datos: JSON.stringify({ nombre, resumen: `Mes gratis: ${Math.floor(llevaDias)} días sin ningún entreno` }) });
+            yaEnviado.add(`prueba_sin_entrenar:${p.email}`);
+            enviadosPrueba++;
+          }
+
+          if (quedan > 3 && quedan <= 7 && !yaEnviado.has(`prueba_sin_tarjeta:${p.email}`)) {
+            let conTarjeta = null;
+            try { conTarjeta = await tieneMetodoPago(getStripe(), sub.stripe_customer_id, sub.stripe_subscription_id); } catch (_) { conTarjeta = null; }
+            if (conTarjeta !== false) continue;
+            const fecha = new Date(fin).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Madrid' });
+            const precio = PRECIO_PLAN[sub.plan];
+            const progreso = entrenos > 0
+              ? `Llevas <span style="color:#F0EDE8">${entrenos} ${entrenos === 1 ? 'entreno' : 'entrenos'}</span> con tu plan: no lo dejes a medias.`
+              : 'Tu plan sigue ahí, listo para cuando quieras empezar.';
+            const html = emailWrapper(`
+            <div style="padding:28px 28px 0">
+              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Te queda una semana de mes gratis</h1>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Tu mes gratis en K-ONE termina el <span style="color:#F0EDE8;font-weight:500">${esc(fecha)}</span>. ${progreso}</p>
+              <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
+                <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">LO QUE PUEDES HACER</div>
+                <p style="margin:0 0 8px;font-size:13px;color:#B5B2AD;line-height:1.7"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">Seguir:</span> añade tu tarjeta ahora. No se cobra nada hasta el ${esc(fecha)}${precio ? `, y después ${esc(precio)}` : ''}. Puedes cancelar cuando quieras.</p>
+                <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.7"><span style="color:#E8490F">&#10003;</span> <span style="color:#F0EDE8">No seguir:</span> no hagas nada. Tu acceso termina ese día y no se cobra nada.</p>
+              </div>
+              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">¿Dudas? Responde a este correo y te contesta una persona.</p>
+            </div>
+            <div style="padding:0 28px 28px;text-align:center">
+              <a href="${APP_URL}/?tarjeta=anadir" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">AÑADIR MI TARJETA</a>
+            </div>`);
+            const asunto = `${primerNombre}, te queda una semana de mes gratis`;
+            await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });
+            await supa.from('email_log').insert({ tipo: 'prueba_sin_tarjeta', destinatario: p.email, asunto, html, datos: JSON.stringify({ nombre, resumen: `Mes gratis sin tarjeta: termina el ${fecha}` }) });
+            yaEnviado.add(`prueba_sin_tarjeta:${p.email}`);
+            enviadosPrueba++;
+            try {
+              await enviarPushAUsuario(p.id, { title: 'K-ONE · Te queda una semana de mes gratis', body: 'Añade tu tarjeta para seguir con tu plan. No se cobra nada hasta que termine.', url: '/?tarjeta=anadir' });
+            } catch (_) {}
+          }
+        } catch (ePr) { console.warn('[notify-cron] correos del mes gratis:', ePr.message); }
       }
     }
 
@@ -1447,7 +1543,7 @@ ${bloqueOpciones}
     }
 
     console.log(`[notify-cron] Retención: ${enviados3} día3, ${enviados8} día8, ${enviadosReenganche} reenganche, ${enviadosResumen} resumen, ${pushEnviados} push, backup: ${backupOk ? 'OK' : 'FAIL'}`);
-    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosTarjeta, enviadosPlanInvitado, enviadosReenganche, enviadosPrimerCobro, enviadosResumen, pushEnviados, backupOk });
+    return res.status(200).json({ ok: true, enviados3, enviados8, enviadosTarjeta, enviadosPlanInvitado, enviadosReenganche, enviadosPrimerCobro, enviadosPrueba, enviadosResumen, pushEnviados, backupOk });
   } catch (err) {
     console.error('[notify-cron] error:', err);
     capturarError(err, { fn: 'notify-cron' });

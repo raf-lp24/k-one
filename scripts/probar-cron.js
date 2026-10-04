@@ -31,7 +31,7 @@ function perfil(i, extra = {}) {
   let plan = null; if (extra.conPlan !== false) { try { plan = motor.generar(ud); plan.motorVersion = extra.motorViejo ? 'viejo000' : plan.motorVersion; } catch (e) {} }
   const p = { id: 'u' + i, nombre: ud.nombre, email: `c${i}@ejemplo.com`, userdata: ud, plan, created_at: iso(extra.alta ?? -30), last_seen: extra.visto === null ? null : iso(extra.visto ?? -1), is_beta: !!extra.premium, beta_expires: extra.premium ? iso(60) : null };
   T.profiles.push(p);
-  if (extra.sub) T.subscriptions.push({ user_id: p.id, status: extra.sub, plan: 'price_m', current_period_end: iso(extra.fin ?? 10), cancel_at_period_end: !!extra.cancela });
+  if (extra.sub) T.subscriptions.push({ user_id: p.id, status: extra.sub, plan: 'price_m', current_period_end: iso(extra.fin ?? 10), cancel_at_period_end: !!extra.cancela, stripe_customer_id: extra.cus || null });
   if (extra.push) T.push_subscriptions.push({ id: 'ps' + i, user_id: p.id, endpoint: 'https://push.ejemplo/' + i, p256dh: 'p', auth_key: 'a' });
   return p;
 }
@@ -53,6 +53,12 @@ perfil(n++, { alta: -20, visto: -1, sub: 'trialing', fin: 10 });                
 perfil(n++, { alta: -28, visto: -1, sub: 'trialing', fin: 2, cancela: true });        // ya canceló -> NO
 perfil(n++, { alta: -28, visto: -1, sub: 'trialing', fin: 2, premium: true });        // premium -> NO
 perfil(n++, { alta: -28, visto: -1, sub: 'active', fin: 2 });                         // ya paga -> NO
+// Correos del mes gratis (4 oct 2026). fin 11,5: entra en la ventana de 4-7 días el día 5 y no llega a 3 días en los 8 del test.
+const pSinEntrenar = perfil(n++, { alta: -6, visto: -1, sub: 'trialing', fin: 25 });                                  // 5 días de prueba sin entrenar -> sí
+const pEntrena = perfil(n++, { alta: -6, visto: -1, sub: 'trialing', fin: 25, ud: { historialEntrenos: ['2026-10-01'] } }); // ya entrenó -> no
+const pSoloNutri = perfil(n++, { alta: -6, visto: -1, sub: 'trialing', fin: 25, ud: { tipoPlan: 'Solo nutrición, sin entrenamiento' } }); // sin entrenos -> no
+const pSinTarj = perfil(n++, { alta: -19, visto: -1, sub: 'trialing', fin: 11.5, cus: 'cus_sin', ud: { historialEntrenos: ['a', 'b'] } }); // sin tarjeta -> sí, una vez
+const pConTarj = perfil(n++, { alta: -19, visto: -1, sub: 'trialing', fin: 11.5, cus: 'cus_con', ud: { historialEntrenos: ['a'] } });   // con tarjeta -> no
 // una con plan roto (null) y una con userdata nulo
 T.profiles.push({ id: 'ux', nombre: 'Roto', email: 'roto@e.com', userdata: null, plan: null, created_at: iso(-12), last_seen: iso(-12), is_beta: false, beta_expires: null });
 T.profiles.push({ id: 'uy', nombre: 'Roto2', email: 'roto2@e.com', userdata: {}, plan: { motorVersion: 'x' }, created_at: iso(-12), last_seen: iso(-12), is_beta: false, beta_expires: null });
@@ -91,7 +97,7 @@ function tabla(nombre) {
 const ALMACEN = new Map(); for (const d of ['2026-08-01','2026-08-20','2026-09-20','2026-09-30']) ALMACEN.set('backup-'+d+'.json','viejo');
 const fake = { storage: { from: () => ({ upload: async (n, c) => { ALMACEN.set(n, c); return { error: null }; }, list: async () => ({ data: [...ALMACEN.keys()].map(name => ({ name })), error: null }), remove: async (ns) => { ns.forEach(n => ALMACEN.delete(n)); return { error: null }; } }) }, from: tabla, rpc: async () => ({ data: true, error: null }), auth: { admin: { listUsers: async () => ({ data: { users: [] } }) }, getUser: async () => ({ data: { user: null }, error: { message: 'x' } }) } };
 const rutaH = require.resolve(R + 'api/_stripeHelpers.js');
-require.cache[rutaH] = { id: rutaH, filename: rutaH, loaded: true, exports: { getSupabaseAdmin: () => fake, getAuthUser: async () => null, getStripe: () => ({}), stripe: {} } };
+require.cache[rutaH] = { id: rutaH, filename: rutaH, loaded: true, exports: { getSupabaseAdmin: () => fake, getAuthUser: async () => null, getStripe: () => ({}), stripe: {}, tieneMetodoPago: async (st, cus) => cus !== 'cus_sin' } };
 
 // ---- Resend y push simulados
 const enviados = []; const pushes = []; const fallos = [];
@@ -167,6 +173,16 @@ console.log('auditorias_clientes abiertas:', T.auditorias_clientes.length);
   const aSinTarjeta = T.email_log.filter(e => e.destinatario === sinTarjeta.email).map(e => e.tipo);
   console.log('cliente parado en la tarjeta recibe:', aSinTarjeta.join(', ') || 'nada');
   if (!aSinTarjeta.includes('retencion_tarjeta')) malos.push('quien hizo el cuestionario y no metió la tarjeta no recibe el email de la tarjeta');
+  const tiposDe = p => T.email_log.filter(e => e.destinatario === p.email).map(e => e.tipo);
+  const cuenta = (p, t) => tiposDe(p).filter(x => x === t).length;
+  const mailTarj = enviados.find(e => [].concat(e.a).includes(pSinTarj.email) && /semana de mes gratis/.test(e.asunto));
+  console.log('mes gratis: sin entrenar', cuenta(pSinEntrenar, 'prueba_sin_entrenar'), '· ya entrena', cuenta(pEntrena, 'prueba_sin_entrenar'), '· solo nutrición', cuenta(pSoloNutri, 'prueba_sin_entrenar'),
+    '· sin tarjeta', cuenta(pSinTarj, 'prueba_sin_tarjeta'), mailTarj ? '(día ' + mailTarj.dia + ')' : '', '· con tarjeta', cuenta(pConTarj, 'prueba_sin_tarjeta'));
+  if (cuenta(pSinEntrenar, 'prueba_sin_entrenar') !== 1) malos.push('correo de "primer entreno" a quien no ha entrenado: ' + cuenta(pSinEntrenar, 'prueba_sin_entrenar') + ' (debía ser 1)');
+  if (cuenta(pEntrena, 'prueba_sin_entrenar') || cuenta(pSoloNutri, 'prueba_sin_entrenar')) malos.push('correo de "primer entreno" a quien ya entrena o es solo nutrición');
+  if (cuenta(pSinTarj, 'prueba_sin_tarjeta') !== 1) malos.push('correo de "añade tu tarjeta" a quien no la tiene: ' + cuenta(pSinTarj, 'prueba_sin_tarjeta') + ' (debía ser 1)');
+  else if (!/tarjeta=anadir/.test(mailTarj.html) || !/7,99/.test(mailTarj.html) || !/2 entrenos/.test(mailTarj.html)) malos.push('el correo de "añade tu tarjeta" no lleva enlace, precio o entrenos');
+  if (cuenta(pConTarj, 'prueba_sin_tarjeta')) malos.push('correo de "añade tu tarjeta" a quien ya la tiene');
   if (aSinTarjeta.includes('retencion_dia3')) malos.push('a quien ya hizo el cuestionario se le pide que lo complete');
   console.log('\n' + (malos.length ? '✘ ' + malos.join(' · ') : '✔ Cron correcto'));
   process.exit(malos.length ? 1 : 0);
