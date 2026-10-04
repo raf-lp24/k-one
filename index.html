@@ -473,8 +473,26 @@
   .logo:hover { opacity: 0.75; }
 
   .logo span { color: var(--brasa-txt); }
+  /* Logo de la portada (4 oct 2026, como la maqueta de ChatGPT que eligió el
+     usuario): mancuerna en brasa + K-ONE + el lema en pequeño debajo. */
+  .logo-marca { display: inline-flex; flex-direction: column; align-items: flex-start; letter-spacing: 0; font-size: 40px; }
+  .logo-fila { display: flex; align-items: center; gap: 0.12em; color: var(--blanco); }
+  .logo-pesa { height: 0.6em; width: auto; aspect-ratio: 200 / 170; flex-shrink: 0; overflow: visible; margin-top: -0.06em; }
+  .logo-pesa .lp-n { fill: #F0571C; stroke: #F0571C; }
+  .logo-pesa .lp-b { fill: var(--blanco); }
+  .logo-marca .logo-txt { font-size: 1em; letter-spacing: 0.04em; line-height: 0.82; color: var(--blanco); -webkit-text-stroke: 0.02em currentColor; }
+  .logo-marca .logo-txt span { color: #F0571C; }
+  /* El lema empieza bajo los discos (no bajo la punta de la barra) y acaba
+     con la E de ONE, como en la maqueta. */
+  .logo-lema { display: block; margin: 0.9em 0 0 1.27em; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.15em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--metal-claro); white-space: nowrap; line-height: 1; }
+  @media (max-width: 899px) {
+    .logo-marca { font-size: 34px; }
+  }
 
-  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links { display: flex; gap: 32px; align-items: center; flex: 1; margin-left: 40px; }
+  /* Enlaces centrados y "Entrar" + botón a la derecha: los dos auto se reparten el hueco. */
+  .nav-links > .nav-link:first-child, .nav-links > .nav-entrar { margin-left: auto; }
+  .nav-entrar { color: var(--blanco); }
   .nav-link {
     color: var(--metal);
     text-decoration: none;
@@ -1012,87 +1030,230 @@
   }
   .btn-link:hover { color: var(--blanco-puro); text-decoration-color: var(--metal); }
 
-  /* HERO */
+  /* HERO (rediseño 4 oct 2026, a partir de una maqueta que le gustó al
+     usuario). Antes: titular partido en tres líneas con un hueco enorme, dos
+     botones compitiendo y una foto de fondo de gimnasio genérica. Ahora:
+     titular en dos líneas + un solo botón a la izquierda, y a la derecha la
+     app de verdad (captura real de "Hoy" con el cliente de demostración)
+     rodeada de tarjetas que explican qué hay dentro. Debajo, "Elige tu
+     camino" con los deportes, visible sin bajar en escritorio. */
   .hero {
+    position: relative;
+    overflow: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 120px 40px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-photo {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 35%;
-    filter: brightness(0.55) saturate(0.9);
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
+    padding: 108px 40px 32px;
     background:
-      radial-gradient(ellipse 60% 50% at 70% 40%, rgba(209,66,14,0.12) 0%, transparent 70%),
-      linear-gradient(180deg, rgba(10,10,10,0.25) 0%, rgba(10,10,10,0.45) 40%, rgba(10,10,10,0.95) 100%);
+      radial-gradient(ellipse 42% 55% at 62% 46%, rgba(209,66,14,0.20) 0%, transparent 70%),
+      linear-gradient(180deg, #0D0B0A 0%, var(--negro) 100%);
   }
-
-  .hero-texture {
-    position: absolute;
-    inset: 0;
-    background-image: 
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(255,255,255,0.015) 2px,
-        rgba(255,255,255,0.015) 3px
-      );
+  .hv-fondo { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .hv-foto {
+    position: absolute; top: 0; right: 0; height: 100%; width: 42%;
+    object-fit: cover; object-position: center 30%;
+    filter: brightness(0.42) contrast(1.1) sepia(0.35) saturate(1.6) hue-rotate(-12deg);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+            mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
   }
+  .hv-rayo { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hv-rayo path { fill: none; stroke: var(--brasa); stroke-width: 1.2; opacity: 0.55; vector-effect: non-scaling-stroke; }
+  .hv-rayo path + path { opacity: 0.22; }
 
-  .hero-content { position: relative; z-index: 2; max-width: 720px; }
-
-  .hero-eyebrow {
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--brasa-txt);
-    margin-bottom: 12px;
-    padding-left: 14px;
-    border-left: 2px solid var(--brasa);
+  .hv-grid {
+    position: relative; z-index: 2; flex: 1;
+    display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.3fr);
+    gap: 24px; align-items: center;
+    max-width: 1320px; width: 100%; margin: 0 auto;
   }
-
+  .hero-content { position: relative; z-index: 2; min-width: 0; }
   .hero-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(72px, 10vw, 140px);
+    font-size: clamp(58px, 6.4vw, 108px);
     line-height: 0.9;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: var(--blanco);
-    margin-bottom: 32px;
+    margin-bottom: 22px;
+    text-wrap: balance;
   }
-
-  .hero-title em {
-    font-style: normal;
-    color: var(--brasa-txt);
-    display: block;
-  }
-
+  .hero-title em { font-style: normal; color: var(--brasa-txt); display: block; }
   .hero-sub {
-    font-size: 17px;
+    font-size: clamp(17px, 1.5vw, 21px);
     color: var(--metal-claro);
-    max-width: 520px;
-    line-height: 1.7;
-    margin-bottom: 48px;
+    max-width: 440px;
+    line-height: 1.45;
+    margin-bottom: 30px;
     font-weight: 500;
   }
+  .hero-sub b { color: var(--blanco); font-weight: 600; }
+  .hv-cta {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 18px 30px; font-size: 15px; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(209,66,14,0.28);
+  }
+  .hv-cta svg { width: 20px; height: 20px; transition: transform 0.2s; }
+  .hv-cta:hover svg { transform: translateX(3px); }
+  .hv-oferta {
+    margin-top: 14px;
+    font-family: 'DM Mono', monospace; font-size: 12.5px; letter-spacing: 0.5px;
+    color: var(--metal-claro);
+  }
+  .hv-oferta span { white-space: nowrap; }
+  .hv-oferta i { font-style: normal; color: var(--brasa-txt); padding: 0 2px; }
+  .hero-content .hero-trust { margin-top: 14px; }
 
-  .hero-cta { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  /* Escena: el móvil con la captura real y cuatro tarjetas alrededor */
+  .hv-escena { position: relative; height: min(620px, calc(100vh - 372px)); min-height: 440px; }
+  .hv-movil {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    height: 100%; aspect-ratio: 300 / 620;
+    padding: 9px; border-radius: 40px;
+    background: linear-gradient(160deg, #2b2b2b, #0c0c0c 40%, #1b1b1b);
+    border: 1px solid #3a3a3a;
+    box-shadow: 0 0 0 1px #000 inset, 0 30px 80px rgba(0,0,0,0.7), 0 0 90px rgba(209,66,14,0.22);
+    cursor: pointer; display: block;
+  }
+  .hv-movil:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 4px; }
+  .hv-pantalla { position: relative; display: block; width: 100%; height: 100%; border-radius: 32px; overflow: hidden; background: var(--negro); }
+  .hv-pantalla img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .hv-isla { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 30%; height: 20px; border-radius: 12px; background: #000; z-index: 2; }
+  .hv-play {
+    position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2;
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    padding: 9px 14px 9px 10px; border-radius: 999px;
+    background: rgba(10,10,10,0.78); border: 1px solid rgba(242,106,54,0.55);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--blanco);
+  }
+  .hv-play i { width: 22px; height: 22px; border-radius: 50%; background: var(--brasa); display: grid; place-items: center; }
+  .hv-play i svg { width: 9px; height: 9px; margin-left: 2px; }
+  .hv-movil:hover .hv-play { border-color: var(--brasa-txt); }
+
+  .hv-tarjeta {
+    position: absolute; z-index: 3; width: 228px;
+    padding: 14px 16px;
+    background: rgba(20,20,20,0.86);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+    font-size: 12px; color: var(--blanco);
+    animation: hvEntra 0.7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .hv-t-progreso { left: 0; top: 6%; animation-delay: .15s; }
+  .hv-t-semana   { left: 3%; top: 56%; animation-delay: .3s; }
+  .hv-t-entreno  { right: 0; top: 3%; animation-delay: .22s; }
+  .hv-t-nutri    { right: 2%; top: 57%; animation-delay: .38s; }
+  @keyframes hvEntra { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .hv-tit { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-weight: 700; font-size: 13px; }
+  .hv-tit small { font-family: 'DM Mono', monospace; font-weight: 400; font-size: 10px; letter-spacing: 1px; color: var(--metal); text-transform: uppercase; }
+  .hv-grafica { display: block; width: 100%; height: 58px; }
+  .hv-datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .hv-datos span { display: block; font-size: 9.5px; color: var(--metal); text-transform: uppercase; letter-spacing: .5px; }
+  .hv-datos b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 21px; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+  .hv-dias { display: flex; justify-content: space-between; gap: 4px; }
+  .hv-dia { display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--metal); }
+  .hv-dia i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--humo); display: grid; place-items: center; }
+  .hv-dia.hecho i { background: var(--brasa); border-color: var(--brasa); }
+  .hv-dia.hecho i::after { content: ''; width: 8px; height: 4px; border: solid #fff; border-width: 0 0 2px 2px; transform: rotate(-45deg) translate(1px, -1px); }
+  .hv-dia.toca i { border-color: var(--brasa-txt); box-shadow: 0 0 0 3px rgba(242,106,54,0.18); }
+  .hv-nota { margin-top: 10px; color: var(--metal-claro); font-size: 11.5px; }
+  .hv-nota b { color: var(--brasa-txt); font-weight: 600; }
+  .hv-lista { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .hv-lista li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.05); }
+  .hv-lista li.hoy { border-color: rgba(242,106,54,0.45); background: rgba(209,66,14,0.10); }
+  .hv-lista em { font-style: normal; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--brasa-txt); width: 26px; flex-shrink: 0; text-transform: uppercase; }
+  .hv-lista span { flex: 1; min-width: 0; font-size: 11.5px; line-height: 1.25; }
+  .hv-lista svg { width: 12px; height: 12px; color: var(--metal); flex-shrink: 0; }
+  .hv-comida { display: flex; gap: 12px; align-items: center; }
+  .hv-plato { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; background: rgba(209,66,14,0.14); color: var(--brasa-txt); display: grid; place-items: center; }
+  .hv-plato svg { width: 24px; height: 24px; }
+  .hv-comida small { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .5px; color: var(--metal); text-transform: uppercase; margin-bottom: 3px; }
+  .hv-comida b { display: block; font-size: 12px; line-height: 1.3; font-weight: 600; }
+  .hv-macros { display: flex; gap: 4px; margin-top: 12px; height: 5px; border-radius: 3px; overflow: hidden; }
+  .hv-macros i { display: block; height: 100%; }
+  .hv-leyenda { display: flex; justify-content: space-between; margin-top: 7px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--metal); }
+  .hv-leyenda b { color: var(--blanco); font-weight: 500; }
+
+  /* Elige tu camino */
+  .hv-caminos {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: minmax(200px, 0.75fr) minmax(0, 3fr); gap: 32px; align-items: center;
+    max-width: 1320px; width: 100%; margin: 28px auto 0;
+    padding-top: 26px; border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .hv-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .hv-caminos h2 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: clamp(30px, 2.8vw, 42px); line-height: 1; letter-spacing: 1px; margin: 6px 0 8px; color: var(--blanco); }
+  .hv-caminos p { font-size: 13.5px; color: var(--metal-claro); line-height: 1.5; }
+  .hv-caminos-lista { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .hv-camino {
+    position: relative; display: flex; flex-direction: column; text-align: left;
+    background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden;
+    padding: 0; cursor: pointer; color: var(--blanco); font: inherit;
+    transition: border-color .2s, transform .2s;
+  }
+  .hv-camino:hover, .hv-camino:focus-visible { border-color: rgba(242,106,54,0.6); transform: translateY(-3px); outline: none; }
+  .hv-camino img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; filter: brightness(0.75) sepia(0.25) saturate(1.3) hue-rotate(-10deg); }
+  .hv-camino-pie { display: flex; align-items: center; gap: 9px; padding: 11px 12px; font-size: 13px; font-weight: 600; }
+  .hv-camino-pie > svg:first-child { width: 18px; height: 18px; flex-shrink: 0; color: var(--blanco); }
+  .hv-camino-pie > span { flex: 1; min-width: 0; }
+  .hv-camino-pie small { display: block; font-family: 'DM Mono', monospace; font-weight: 400; font-size: 9.5px; letter-spacing: .5px; color: var(--metal); text-transform: uppercase; margin-top: 2px; }
+  .hv-camino-pie > svg:last-child { width: 15px; height: 15px; color: var(--brasa-txt); flex-shrink: 0; transition: transform .2s; }
+  .hv-camino:hover .hv-camino-pie > svg:last-child { transform: translateX(3px); }
+
+  @media (max-width: 1180px) {
+    .hv-tarjeta { width: 200px; padding: 12px 13px; }
+    .hv-t-semana, .hv-t-entreno { display: none; }
+    .hv-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  }
+  @media (max-width: 1024px) {
+    .hv-caminos { grid-template-columns: 1fr; gap: 16px; }
+  }
+  /* Móvil: todo en una columna. El móvil de la app debajo del botón, con dos
+     tarjetas montadas encima de sus esquinas, y los deportes en una tira que
+     se desliza de lado (sin desbordar la página). */
+  @media (max-width: 899px) {
+    .hero { padding: 92px 20px 28px; min-height: 0; }
+    .hv-foto, .hv-rayo { display: none; }
+    .hv-oferta { font-size: 11.5px; }
+    .hero-content .hero-trust { justify-content: center; }
+    .hv-datos { grid-template-columns: 1fr 1fr; }
+    .hv-datos > div:nth-child(2) { display: none; }
+    .hv-grid { grid-template-columns: 1fr; gap: 30px; }
+    .hero-title { font-size: clamp(54px, 15vw, 84px); margin-bottom: 16px; }
+    .hero-sub { margin-bottom: 24px; }
+    .hv-cta { width: 100%; justify-content: center; }
+    .hv-oferta { text-align: center; }
+    .hero-content .hero-ejemplo { display: flex; justify-content: center; margin-left: auto; margin-right: auto; }
+    .hv-escena { height: 470px; min-height: 0; }
+    .hv-tarjeta { width: 144px; padding: 10px 11px; font-size: 11px; border-radius: 12px; }
+    .hv-t-progreso { left: 0; top: 8%; }
+    .hv-t-nutri { display: none; }
+    .hv-tit { font-size: 12px; margin-bottom: 8px; }
+    .hv-grafica { height: 40px; }
+    .hv-datos b { font-size: 17px; }
+    .hv-datos span { font-size: 8.5px; }
+    .hv-comida { gap: 9px; }
+    .hv-plato { width: 34px; height: 34px; border-radius: 9px; }
+    .hv-plato svg { width: 18px; height: 18px; }
+    .hv-comida b { font-size: 11px; }
+    .hv-caminos { margin-top: 30px; }
+    .hv-caminos-lista {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px;
+      margin: 0 -20px; padding: 0 20px 6px; scrollbar-width: none;
+    }
+    .hv-caminos-lista::-webkit-scrollbar { display: none; }
+    .hv-camino { flex: 0 0 152px; scroll-snap-align: start; }
+  }
+  @media (max-width: 380px) {
+    .hv-escena { height: 420px; }
+    .hv-tarjeta { width: 142px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hv-tarjeta { animation: none; }
+    .hv-camino, .hv-cta svg, .hv-camino-pie > svg:last-child { transition: none; }
+    .hv-camino:hover { transform: none; }
+  }
 
   .hero-trust {
     display: flex;
@@ -1140,215 +1301,6 @@
     width: 18px;
     height: 18px;
     stroke-width: 2.4;
-  }
-
-  /* RECUADRO "OFERTA DEL MES" (rediseño 1 oct 2026). Antes: un rectángulo de 550 px
-     con "GRATIS" enorme y "Solo el primer mes" flotando en medio, sin nada que dijera
-     que se puede pulsar. Ahora es una tarjeta compacta con el lenguaje de la web:
-     etiqueta en DM Mono con punto, la oferta en Bebas, el precio de después en
-     pequeño y una flecha en círculo naranja como el resto de botones. */
-  .hero-price {
-    display: inline-flex;
-    align-items: center;
-    gap: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 16px 16px 16px 22px;
-    background: linear-gradient(135deg, rgba(209,66,14,0.16), rgba(209,66,14,0.04) 65%);
-    border: 1px solid rgba(209,66,14,0.45);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .hero-price:hover,
-  .hero-price:focus-visible {
-    border-color: var(--brasa-txt);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(209,66,14,0.22);
-    outline: none;
-  }
-  .hero-price:focus-visible { box-shadow: 0 0 0 3px rgba(242,106,54,0.45), 0 12px 30px rgba(209,66,14,0.22); }
-  .hero-price-txt { display: flex; flex-direction: column; min-width: 0; }
-  .hero-price-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--brasa-txt);
-    margin-bottom: 6px;
-  }
-  .hero-price-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--brasa-txt);
-    box-shadow: 0 0 0 4px rgba(242,106,54,0.18);
-    flex-shrink: 0;
-  }
-  .hero-price-main {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(34px, 4.2vw, 44px);
-    line-height: 0.95;
-    letter-spacing: 1px;
-    color: var(--blanco-puro);
-    white-space: nowrap;
-  }
-  .hero-price-main b { color: var(--brasa-txt); font-weight: 400; }
-  .hero-price-sub {
-    margin-top: 7px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.4px;
-    color: var(--metal-claro);
-  }
-  .hero-price-arrow {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: var(--brasa);
-    color: #fff;
-    display: grid; place-items: center;
-    flex-shrink: 0;
-    transition: transform 0.15s ease;
-  }
-  .hero-price-arrow svg { width: 20px; height: 20px; }
-  .hero-price:hover .hero-price-arrow { transform: translateX(3px); }
-  @media (max-width: 520px) {
-    .hero-price { width: 100%; justify-content: space-between; gap: 14px; padding: 14px 14px 14px 18px; }
-    .hero-price-main { font-size: 36px; }
-    .hero-price-sub { font-size: 11px; }
-    .hero-price-arrow { width: 42px; height: 42px; }
-  }
-  @media (max-width: 360px) {
-    .hero-price { gap: 10px; padding: 14px 12px 14px 16px; }
-    .hero-price-main { font-size: 30px; }
-    .hero-price-arrow { width: 38px; height: 38px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-price, .hero-price-arrow { transition: none; }
-    .hero-price:hover, .hero-price:hover .hero-price-arrow { transform: none; }
-  }
-
-  .hero-visual {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .hero-deco {
-    position: absolute;
-    opacity: 0.08;
-    stroke: var(--brasa);
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .hero-deco-1 { top: 8%; left: 55%; width: 180px; transform: rotate(-15deg); }
-  .hero-deco-2 { bottom: 15%; left: 48%; width: 140px; transform: rotate(20deg); }
-  .hero-deco-3 { top: 35%; left: 62%; width: 100px; transform: rotate(-5deg); }
-  @media (max-width: 768px) {
-    .hero-visual { display: none; }
-  }
-  .hero-demo {
-    position: absolute;
-    top: 12%;
-    right: 30%;
-    width: min(25vw, 280px);
-    z-index: 2;
-    pointer-events: none;
-  }
-  .hero-demo-inner {
-    position: relative;
-    background: #111;
-    border-radius: 16px;
-    padding: 5px;
-    border: 2px solid rgba(209,66,14,0.2);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
-    max-height: 65vh;
-    overflow: hidden;
-  }
-  /* El texto "toca para ver más" bajo el vídeo pasaba desapercibido en
-     escritorio (nadie prueba a hacer clic en un vídeo de fondo por
-     defecto). Un botón de play superpuesto, igual que el de móvil, dice
-     "esto es interactivo" sin depender de que alguien lea la etiqueta. */
-  .hero-demo-playbtn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: rgba(209,66,14,0.18);
-    border: 2px solid rgba(209,66,14,0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-  }
-  .hero-demo-playbtn svg { width: 20px; height: 20px; margin-left: 3px; }
-  .hero-demo video, .hero-demo-inner img {
-    width: 100%;
-    max-height: 62vh;
-    object-fit: cover;
-    object-position: top;
-    border-radius: 12px;
-    display: block;
-  }
-  .hero-demo-label {
-    text-align: center;
-    margin-top: 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--metal);
-    text-transform: uppercase;
-  }
-  @media (max-width: 1200px) {
-    .hero-demo { width: min(26vw, 240px); right: 3%; }
-  }
-  @media (max-width: 768px) {
-    .hero-demo { display: none; }
-    .hero-video-mobile {
-      display: flex !important;
-      position: absolute;
-      top: 28%;
-      right: 8%;
-      z-index: 3;
-    }
-  }
-  .hero-video-mobile {
-    display: none;
-  }
-  .hero-video-mobile button {
-    background: rgba(209,66,14,0.12);
-    border: 2px solid rgba(209,66,14,0.5);
-    color: var(--blanco);
-    border-radius: 50%;
-    width: 72px;
-    height: 72px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-  .hero-video-mobile button span {
-    font-size: 8px;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--brasa-txt);
   }
 
   /* Fondo decorativo gym en toda la landing */
@@ -5791,7 +5743,6 @@
     .stat-card-value { font-size: 30px; }
     #todayPlan, #feedbackPanel, .checkin-card { padding: 20px !important; }
     .landing-nav { padding: 20px 24px; }
-    .hero { padding: 100px 24px 60px; min-height: 100vh; }
     .app-preview, .how, .sports, .pricing, .philosophy, .testimonials { padding: 80px 24px; }
   }
 
@@ -8028,14 +7979,20 @@
 <div class="screen active" id="landing" tabindex="-1">
   <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
   <nav class="landing-nav">
-    <div class="logo" onclick="goTo('landing')" style="cursor:pointer">K-<span>ONE</span></div>
+    <div class="logo logo-marca" onclick="goTo('landing')" style="cursor:pointer" role="link" tabindex="0" aria-label="K-ONE, ir al inicio" onkeydown="if(event.key==='Enter')this.click()">
+      <span class="logo-fila">
+        <svg class="logo-pesa" viewBox="0 0 200 170" aria-hidden="true"><polygon class="lp-b" points="2,85 34,74 34,96"/><rect class="lp-n" x="36" y="26" width="22" height="118" rx="4"/><rect class="lp-n" x="62" y="2" width="28" height="166" rx="4"/><rect class="lp-b" x="90" y="79" width="78" height="12"/><polygon class="lp-n" points="160,56 198,85 160,114" stroke-linejoin="round"/></svg>
+        <span class="logo-txt">K-<span>ONE</span></span>
+      </span>
+      <small class="logo-lema">No hay atajos · Hay pasos</small>
+    </div>
     <div class="nav-links">
-      <span class="nav-link" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('sports')" onkeydown="if(event.key==='Enter')this.click()">Deportes</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('how')" onkeydown="if(event.key==='Enter')this.click()">Cómo funciona</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
+      <span class="nav-link nav-entrar" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis</button>
     </div>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
@@ -8054,118 +8011,132 @@
   </div>
 
   <section class="hero">
-    <picture>
-      <source srcset="/img/landing/hero.webp" type="image/webp">
-      <img class="hero-photo" src="/img/landing/hero.jpg" alt="" fetchpriority="high" aria-hidden="true" width="1200" height="800">
-    </picture>
-    <div class="hero-bg"></div>
-    <div class="hero-texture"></div>
-    <div class="hero-visual" aria-hidden="true">
-      <!-- Barra/mancuerna -->
-      <svg class="hero-deco hero-deco-1" viewBox="0 0 400 220">
-        <line x1="40" y1="110" x2="360" y2="110" stroke-width="4"/>
-        <rect x="4" y="70" width="22" height="80" rx="3"/>
-        <rect x="30" y="50" width="26" height="120" rx="3"/>
-        <rect x="374" y="70" width="22" height="80" rx="3"/>
-        <rect x="344" y="50" width="26" height="120" rx="3"/>
-        <circle cx="200" cy="110" r="3" fill="var(--brasa)" opacity="0.15"/>
-      </svg>
-      <!-- Mancuerna -->
-      <svg class="hero-deco hero-deco-2" viewBox="0 0 200 80">
-        <rect x="10" y="15" width="18" height="50" rx="4"/>
-        <rect x="172" y="15" width="18" height="50" rx="4"/>
-        <line x1="28" y1="40" x2="172" y2="40" stroke-width="5"/>
-        <rect x="28" y="22" width="14" height="36" rx="3"/>
-        <rect x="158" y="22" width="14" height="36" rx="3"/>
-      </svg>
-      <!-- Kettlebell -->
-      <svg class="hero-deco hero-deco-3" viewBox="0 0 100 130">
-        <path d="M35 45 Q35 20 50 15 Q65 20 65 45"/>
-        <circle cx="50" cy="75" r="35"/>
-        <circle cx="50" cy="75" r="8" opacity="0.5"/>
+    <div class="hv-fondo" aria-hidden="true">
+      <!-- En móvil la foto no se ve (display:none), y una <img> oculta se
+           descarga igual: el <source> vacío para móvil evita bajar 100 KB que
+           nadie va a ver. -->
+      <picture>
+        <source media="(max-width: 899px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+        <source srcset="/img/landing/gym-hero.webp" type="image/webp">
+        <img class="hv-foto" src="/img/landing/gym-hero.jpg" alt="" width="1000" height="1355">
+      </picture>
+      <svg class="hv-rayo" viewBox="0 0 1000 600" preserveAspectRatio="none">
+        <path d="M360 600 L560 470 L1000 470"/>
+        <path d="M1000 40 L880 210 L1000 330"/>
       </svg>
     </div>
-    <div class="hero-video-mobile">
-      <button onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){})">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <span>Ver demo</span>
-      </button>
-    </div>
-    <div class="hero-demo" role="button" tabindex="0" aria-label="Ver el recorrido completo por el área de cliente, con explicación de cada sección" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="cursor:pointer;pointer-events:auto">
-      <div class="hero-demo-inner">
-        <!-- Antes había un <video autoplay loop> de 15MB cargándose para TODO
-             visitante nada más entrar — un golpe directo al LCP/Core Web
-             Vitals, que es justo lo que Google mide para posicionar. Ahora es
-             una foto estática (38KB) del propio vídeo; el vídeo real
-             (demo-septiembre.mp4) solo se descarga si alguien hace clic. -->
-        <img src="/demo-poster-v2.jpg" alt="Vista previa del área de cliente de K-ONE: tu entrenamiento de hoy" width="390" height="844" fetchpriority="high">
-        <div class="hero-demo-playbtn" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="var(--brasa)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+
+    <div class="hv-grid">
+      <div class="hero-content">
+        <h1 class="hero-title">No hay atajos. <em>Hay pasos.</em></h1>
+        <p class="hero-sub">Tu entrenamiento y tu nutrición, <b>adaptados a ti</b>. El plan se ajusta cada semana según tu progreso.</p>
+        <button class="btn-primary hv-cta" onclick="goTo('bienvenida')">
+          Empieza gratis
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="hv-oferta"><span>30 días gratis</span> <i aria-hidden="true">·</i> <span>Sin tarjeta</span> <i aria-hidden="true">·</i> <span>Cancela cuando quieras</span></p>
+        <button type="button" class="hero-ejemplo" onclick="abrirPlanEjemplo('hero')">Ver un plan de ejemplo por dentro →</button>
+        <div class="hero-trust">
+          <span id="heroRating" style="display:none">
+            <span class="trust-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 L14.6 9 L21 9.6 L16.2 13.9 L17.6 20.3 L12 17 L6.4 20.3 L7.8 13.9 L3 9.6 L9.4 9 Z"/>
+              </svg>
+            </span>
+          </span>
         </div>
       </div>
-      <div class="hero-demo-label">Área de cliente real · toca para ver el recorrido completo</div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-eyebrow">Entrenamiento · Nutrición · Mentalidad</div>
-      <h1 class="hero-title">
-        No hay<br>
-        <em>atajos.</em><br>
-        Hay pasos.
-      </h1>
-      <p class="hero-sub">Tu plan de entrenamiento y nutrición generado con tus datos reales. Se adapta cada semana según tu progreso.</p>
-      <div class="hero-cta">
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empieza ahora</button>
-        <!-- Antes "primer mes" solo estaba en el aria-label (invisible para
-             quien ve la pantalla) y el clic saltaba directo a "registro",
-             el único CTA de toda la landing que se salta la pantalla
-             "bienvenida" (con la opción de "ya tengo cuenta") que sí usan
-             todos los demás. Ambas cosas corregidas. -->
-        <div class="hero-price" role="button" tabindex="0" aria-label="Primer mes gratis y sin tarjeta. Crear cuenta nueva" onclick="goTo('bienvenida')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goTo('bienvenida');}">
-          <div class="hero-price-txt">
-            <span class="hero-price-label"><span class="hero-price-dot" aria-hidden="true"></span>Sin tarjeta</span>
-            <span class="hero-price-main">Primer mes <b>gratis</b></span>
+
+      <!-- La pantalla del móvil es una captura REAL de la app (pantalla "Hoy")
+           con el cliente de demostración de marketing/estado-demo-hoy.js; las
+           tarjetas usan los mismos datos de ese plan (sesiones, desayuno,
+           kcal). Al pulsar el móvil se abre el vídeo del recorrido completo. -->
+      <div class="hv-escena">
+        <div class="hv-tarjeta hv-t-progreso" aria-hidden="true">
+          <div class="hv-tit">Progreso <small>Peso</small></div>
+          <svg class="hv-grafica" viewBox="0 0 200 58" preserveAspectRatio="none">
+            <defs><linearGradient id="hvArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D1420E" stop-opacity=".45"/><stop offset="1" stop-color="#D1420E" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0 48 L33 44 L66 46 L100 36 L133 30 L166 26 L200 14 L200 58 L0 58 Z" fill="url(#hvArea)"/>
+            <path d="M0 48 L33 44 L66 46 L100 36 L133 30 L166 26 L200 14" fill="none" stroke="#F26A36" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="hv-datos">
+            <div><span>Peso</span><b>79 kg</b></div>
+            <div><span>Semana</span><b>2</b></div>
+            <div><span>Entrenos</span><b>3/4</b></div>
           </div>
-          <span class="hero-price-arrow" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <div class="hv-tarjeta hv-t-semana" aria-hidden="true">
+          <div class="hv-tit">Tu semana <small>Racha</small></div>
+          <div class="hv-dias">
+            <div class="hv-dia hecho"><i></i>L</div>
+            <div class="hv-dia hecho"><i></i>M</div>
+            <div class="hv-dia"><i></i>X</div>
+            <div class="hv-dia hecho"><i></i>J</div>
+            <div class="hv-dia toca"><i></i>V</div>
+            <div class="hv-dia"><i></i>S</div>
+            <div class="hv-dia"><i></i>D</div>
+          </div>
+          <p class="hv-nota">El domingo, check-in: <b>el plan se ajusta solo</b>.</p>
+        </div>
+
+        <button type="button" class="hv-movil" aria-label="Ver el recorrido completo por la app de K-ONE, en vídeo" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){})">
+          <span class="hv-pantalla">
+            <span class="hv-isla" aria-hidden="true"></span>
+            <img src="/img/landing/app-hoy-portada.webp" alt="Pantalla Hoy de la app de K-ONE: la sesión del día, Torso A, empuje y tirón, con duración, intensidad y ejercicios" width="600" height="1298" fetchpriority="high">
+            <span class="hv-play" aria-hidden="true"><i><svg viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></i>Ver la app por dentro</span>
           </span>
+        </button>
+
+        <div class="hv-tarjeta hv-t-entreno" aria-hidden="true">
+          <div class="hv-tit">Entrenamiento <small>4 días</small></div>
+          <ul class="hv-lista">
+            <li class="hoy"><em>Lun</em><span>Torso A · Empuje y tirón</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></li>
+            <li><em>Mar</em><span>Pierna A · Cuádriceps y glúteos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></li>
+            <li><em>Jue</em><span>Torso B · Variante</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></li>
+            <li><em>Vie</em><span>Pierna B · Isquios y glúteos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></li>
+          </ul>
+        </div>
+
+        <div class="hv-tarjeta hv-t-nutri" aria-hidden="true">
+          <div class="hv-tit">Nutrición <small>Hoy</small></div>
+          <div class="hv-comida">
+            <span class="hv-plato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg></span>
+            <div><small>Desayuno · 7:30</small><b>Tostadas con aceite, huevos a la plancha y pavo</b></div>
+          </div>
+          <div class="hv-macros"><i style="flex:3;background:#F26A36"></i><i style="flex:5;background:#B5B2AD"></i><i style="flex:2;background:#3A3A3A"></i></div>
+          <div class="hv-leyenda"><span>Objetivo</span><b>2.605 kcal</b></div>
         </div>
       </div>
-      <button type="button" class="hero-ejemplo" onclick="abrirPlanEjemplo('hero')">Ver un plan de ejemplo por dentro →</button>
-      <div class="hero-trust">
-        <span>
-          <span class="trust-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/>
-              <path d="M8.5 12 L11 14.5 L15.5 9.5"/>
-            </svg>
-          </span>
-          Pago seguro
-        </span>
-        <span>
-          <span class="trust-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3 V11"/>
-              <path d="M7 5.5 A8 8 0 1 0 17 5.5"/>
-            </svg>
-          </span>
-          Cancela cuando quieras
-        </span>
-        <span>
-          <span class="trust-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="11" width="14" height="9" rx="2"/>
-              <path d="M8 11 V7 a4 4 0 0 1 7.46 -2"/>
-            </svg>
-          </span>
-          Sin permanencia
-        </span>
-        <span id="heroRating" style="display:none">
-          <span class="trust-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3 L14.6 9 L21 9.6 L16.2 13.9 L17.6 20.3 L12 17 L6.4 20.3 L7.8 13.9 L3 9.6 L9.4 9 Z"/>
-            </svg>
-          </span>
-        </span>
+    </div>
+
+    <div class="hv-caminos">
+      <div>
+        <div class="hv-eyebrow">Deportes</div>
+        <h2>Elige tu camino</h2>
+        <p>Diseñamos tu plan, sea cual sea tu deporte o tu objetivo.</p>
+      </div>
+      <div class="hv-caminos-lista">
+        <button type="button" class="hv-camino" onclick="scrollToSection('sports')">
+          <img src="/img/landing/caminos/gimnasio.webp" alt="" width="480" height="300" loading="lazy">
+          <span class="hv-camino-pie"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="14" y1="24" x2="34" y2="24"/><rect x="8" y="17" width="6" height="14" rx="1.5"/><rect x="34" y="17" width="6" height="14" rx="1.5"/><rect x="3" y="20" width="5" height="8" rx="1.5"/><rect x="40" y="20" width="5" height="8" rx="1.5"/></svg><span>Gimnasio</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="hv-camino" onclick="scrollToSection('sports')">
+          <img src="/img/landing/caminos/running.webp" alt="" width="480" height="300" loading="lazy">
+          <span class="hv-camino-pie"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/></svg><span>Running</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="hv-camino" onclick="scrollToSection('sports')">
+          <img src="/img/landing/caminos/hibrido.webp" alt="" width="480" height="300" loading="lazy">
+          <span class="hv-camino-pie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7 H7 L17 17 H21"/><path d="M3 17 H7 L17 7 H21"/><path d="M18 4 L21 7 L18 10"/><path d="M18 14 L21 17 L18 20"/></svg><span>Híbrido</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="hv-camino" onclick="scrollToSection('sports')">
+          <img src="/img/landing/caminos/hyrox.webp" alt="" width="480" height="300" loading="lazy">
+          <span class="hv-camino-pie"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 4 L10 27 H23 L20 44 L38 20 H25 Z"/></svg><span>Hyrox<small>Nutrición</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="hv-camino" onclick="scrollToSection('sports')">
+          <img src="/img/landing/caminos/crossfit.webp" alt="" width="480" height="300" loading="lazy">
+          <span class="hv-camino-pie"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 5 C26 14 34 16 34 26 a10 10 0 0 1 -20 0 C14 20 18 18 19 14 C22 18 24 18 24 5 Z"/></svg><span>CrossFit<small>Nutrición</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
       </div>
     </div>
   </section>
