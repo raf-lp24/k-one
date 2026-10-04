@@ -1641,28 +1641,32 @@
     color: var(--metal); margin-bottom: 5px;
   }
   .today-hero-stats .v { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1; color: var(--blanco-puro); }
+  /* 4 oct: fila con el texto y el botón redondo naranja con flecha, como el
+     resto de accesos de Hoy (antes, botón naranja entero en DM Mono). */
   .today-hero-btn {
     width: 100%;
-    background: var(--brasa);
+    background: rgba(10,10,10,0.6);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     color: var(--blanco-puro);
-    border: none;
-    border-radius: 12px;
-    padding: 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    border: 1px solid rgba(242,106,54,0.6);
+    border-radius: 16px;
+    padding: 9px 9px 9px 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: background 0.2s, transform 0.2s;
-    box-shadow: 0 12px 30px -12px rgba(209,66,14,0.6);
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.2s, background 0.2s;
+    box-shadow: 0 12px 30px -14px rgba(209,66,14,0.55);
   }
-  .today-hero-btn svg { width: 18px; height: 18px; }
-  .today-hero-btn:hover { background: #FF5A1A; transform: translateY(-2px); }
+  .today-hero-btn .flecha-redonda { width: 46px; height: 46px; }
+  .today-hero-btn .flecha-redonda svg { width: 20px; height: 20px; }
+  .today-hero-btn:hover { border-color: var(--brasa-txt); background: rgba(209,66,14,0.14); }
+  .today-hero-btn:hover .flecha-redonda { transform: translateX(2px); background: var(--brasa-oscura); }
 
   /* ===== HOY: layout dos columnas + header con peso + rail de métricas ===== */
   .hoy-header-grid { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
@@ -9392,7 +9396,7 @@
             </div>
             <button class="today-hero-btn" id="todayHeroBtn" onclick="empezarEntrenamientoHoy()">
               <span id="todayHeroBtnLabel">Empezar entrenamiento</span>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+              <span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
             </button>
           </div>
         </div>
