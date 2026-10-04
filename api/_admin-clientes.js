@@ -316,7 +316,11 @@ module.exports = async (req, res) => {
       const diasDesdeAlta = diasEntre(p.created_at, ahora);
       const altaDate  = new Date(p.created_at);
       const esNuevo   = altaDate >= hace1d;
-      const esSemanaPasada = !esNuevo && altaDate >= hace14d;
+      // Registros de los últimos 7 días y de los 7 anteriores. Hasta el 4 oct 2026
+      // "esta semana" contaba esNuevo, que es solo las últimas 24 h (el distintivo
+      // "Nuevo" de la lista), y la semana anterior se comía del día 2 al 14.
+      const esEstaSemana   = altaDate >= hace7d;
+      const esSemanaPasada = !esEstaSemana && altaDate >= hace14d;
 
       const entrenosTotal = Array.isArray(ud.historialEntrenos)
         ? ud.historialEntrenos.length
@@ -426,7 +430,7 @@ module.exports = async (req, res) => {
       if ((activo || premium) && entrenosTotal === 0) m.ceroEntrenosActivos++;
       // Ingresos al mes: solo quien paga y no ha pedido darse de baja.
       if (pagando && !cancela && !enOferta && MRR_MAP[s.plan]) mrr += MRR_MAP[s.plan];
-      if (esNuevo)       m.nuevosEstaSemana++;
+      if (esEstaSemana)  m.nuevosEstaSemana++;
       if (esSemanaPasada) m.nuevosSemanaPasada++;
 
       return {
