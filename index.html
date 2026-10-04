@@ -1052,7 +1052,7 @@
     flex-direction: column;
     padding: 104px 40px 48px;
     background:
-      radial-gradient(ellipse 42% 55% at 62% 46%, rgba(209,66,14,0.20) 0%, transparent 70%),
+      radial-gradient(ellipse 42% 55% at 62% 46%, rgba(209,66,14,0.30) 0%, transparent 70%),
       linear-gradient(180deg, #0D0B0A 0%, var(--negro) 100%);
   }
   .hv-fondo { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
@@ -1128,10 +1128,28 @@
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     height: 100%; aspect-ratio: 300 / 620;
     padding: 9px; border-radius: 40px;
-    background: linear-gradient(160deg, #2b2b2b, #0c0c0c 40%, #1b1b1b);
-    border: 1px solid #3a3a3a;
-    box-shadow: 0 0 0 1px #000 inset, 0 30px 80px rgba(0,0,0,0.7), 0 0 90px rgba(209,66,14,0.22);
     display: block;
+  }
+  /* Luz naranja en el móvil (4 oct, como la maqueta): el marco se ilumina en
+     naranja por los lados y por abajo, con un reflejo en el "suelo". La usan
+     el móvil de la portada y el del vídeo de la app. */
+  .hv-movil, .ap-video-pantalla {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(160deg, #262626, #0c0c0c 40%, #161616) padding-box,
+      linear-gradient(195deg, #3a3a3a 0%, #2a2a2a 30%, #C8461A 62%, #FF7A3D 88%, #FFB089 100%) border-box;
+    box-shadow:
+      0 0 0 1px #000 inset,
+      0 30px 80px rgba(0,0,0,0.7),
+      -10px 14px 34px -14px rgba(242,106,54,0.85),
+      10px 14px 34px -14px rgba(242,106,54,0.85),
+      0 26px 70px -18px rgba(232,73,15,0.65),
+      0 0 140px rgba(232,73,15,0.30);
+  }
+  .hv-movil::after, .ap-video-pantalla::after {
+    content: ''; position: absolute; left: -12%; right: -12%; bottom: -70px; height: 150px; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse 50% 50% at center, rgba(255,122,61,0.95) 0%, rgba(232,73,15,0.55) 35%, rgba(232,73,15,0.15) 60%, transparent 75%);
+    filter: blur(22px);
   }
   .hv-pantalla { position: relative; display: block; width: 100%; height: 100%; border-radius: 32px; overflow: hidden; background: var(--negro); }
   .hv-pantalla img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
@@ -1387,12 +1405,10 @@
   }
 
   /* Vídeo de la app: un móvil con el primer fotograma y un botón de play */
-  .ap-video { display: flex; flex-direction: column; align-items: center; gap: 18px; background: none; border: none; padding: 0; cursor: pointer; color: var(--blanco); font: inherit; }
+  .ap-video { display: flex; flex-direction: column; align-items: center; gap: 40px; background: none; border: none; padding: 0; cursor: pointer; color: var(--blanco); font: inherit; }
   .ap-video-pantalla {
     position: relative; display: block; width: min(300px, 72vw); aspect-ratio: 390 / 844;
     padding: 9px; border-radius: 42px;
-    background: linear-gradient(160deg, #2b2b2b, #0c0c0c 40%, #1b1b1b); border: 1px solid #3a3a3a;
-    box-shadow: 0 0 0 1px #000 inset, 0 40px 80px -30px rgba(0,0,0,0.8), 0 0 90px rgba(209,66,14,0.18);
   }
   .ap-video-pantalla img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 33px; display: block; filter: brightness(0.72); transition: filter .2s; }
   .ap-video-play {
