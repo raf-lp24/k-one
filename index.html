@@ -3726,38 +3726,67 @@
   }
 
   /* RESUMEN NUTRICIONAL DEL DÍA */
+  /* ===== NUTRICIÓN (rediseño 4 oct 2026) ===== */
+  .nt-dia { background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px; margin: 4px 0 18px; }
+  .nt-dia .nutri-resumen { margin: 0; }
+  .nt-dia #nutriResumen .stats-row, .nt-dia #nutriResumenTitulo { display: none; }
+  .nt-dia #cicloCarbsAviso .ciclo-aviso { margin: 14px 0 0; }
+  .nt-total { margin-top: 16px; }
+  .nt-total-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 9px; }
+  .nt-eyebrow { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .nt-total-num { font-size: 14px; color: var(--metal-claro); font-variant-numeric: tabular-nums; }
+  .nt-total-num b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 26px; letter-spacing: .5px; color: var(--blanco); }
+  .nt-barra { height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+  .nt-barra #kcalDiarioFill { height: 100%; width: 0; border-radius: 999px; background: var(--brasa-txt); transition: width .5s; }
+  .nt-macros { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; color: var(--metal); }
+  .nt-macros b { color: var(--blanco); font-weight: 600; }
+  .nt-herr { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 18px; }
+  @media (max-width: 600px) {
+    .nt-herr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .nt-herr .btn-recetario, .nt-herr .btn-lista-compra { justify-content: center; text-align: center; padding: 10px 12px; font-size: 13px; line-height: 1.25; }
+    .nt-herr .btn-lista-compra { grid-column: 1 / -1; }
+  }
+  .nt-ajustes { background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; margin-bottom: 24px; }
+  .nt-ajustes summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; cursor: pointer; }
+  .nt-ajustes summary::-webkit-details-marker { display: none; }
+  .nt-ajustes summary b { display: block; font-size: 15px; font-weight: 600; color: var(--blanco); }
+  .nt-ajustes summary small { display: block; font-size: 12.5px; color: var(--metal); margin-top: 3px; line-height: 1.4; }
+  .nt-ajustes-chev { width: 32px; height: 32px; border-radius: 50%; background: var(--grafito); color: var(--metal-claro); display: grid; place-items: center; flex-shrink: 0; transition: transform .2s; }
+  .nt-ajustes-chev svg { width: 16px; height: 16px; }
+  .nt-ajustes[open] .nt-ajustes-chev { transform: rotate(180deg); color: var(--brasa-txt); }
+  .nt-ajustes-cuerpo { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .nt-ajustes-cuerpo .plan-porque { margin: 0; }
+  .nt-ajustes-cuerpo #nutricionNotas > *:last-child { margin-bottom: 0 !important; }
+  .nt-ajuste { background: var(--grafito); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px 18px; }
   .nutri-dias {
     display: flex;
     align-items: stretch;
-    gap: 10px;
-    margin-top: 24px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
   .nutri-dia {
-    flex: 1;
-    min-width: 62px;
-    padding: 14px 6px;
-    background: var(--carbon);
-    border: 1px solid var(--humo);
-    border-radius: 12px;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 46px;
+    padding: 0;
+    background: var(--grafito);
+    border: 1.5px solid transparent;
+    border-radius: 999px;
     color: var(--metal-claro);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 1px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .nutri-dia:hover { border-color: var(--brasa); color: var(--blanco); transform: translateY(-2px); }
-  .nutri-dia.selected {
-    background: linear-gradient(180deg, rgba(209,66,14,0.16), var(--carbon));
-    border-color: var(--brasa);
-    color: var(--blanco-puro);
-  }
-  .nutri-dia.has-selection { box-shadow: inset 0 -3px 0 var(--brasa); }
+  .nutri-dia:hover { border-color: rgba(242,106,54,0.6); color: var(--blanco); }
+  /* Día confirmado: borde naranja; día que se está mirando: relleno naranja */
+  .nutri-dia.has-selection { color: var(--blanco); }
+  .nutri-dia.selected { background: var(--brasa); border-color: var(--brasa); color: #fff; box-shadow: 0 6px 18px -6px rgba(209,66,14,0.6); }
   .rotacion-opt, .ciclo-opt {
     background: var(--grafito); border: 1px solid var(--humo); color: var(--metal-claro);
     border-radius: 999px; padding: 7px 16px; font-size: 12px; font-weight: 600;
@@ -3857,32 +3886,20 @@
     padding: 12px 20px;
     background: var(--brasa);
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     color: var(--blanco-puro);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
     font-weight: 600;
-    letter-spacing: 0.5px;
     cursor: pointer;
     transition: background 0.2s;
-    margin-left: auto;
   }
   .btn-lista-compra:hover { background: #ff5a10; }
   @media (max-width: 768px) {
     /* Los 7 días en UNA fila (3 oct 2026): el min-width de 62px de escritorio
        seguía mandando y se partían en 4 + 3 con anchos distintos. */
-    .nutri-dias {
-      gap: 5px;
-      flex-wrap: nowrap;
-    }
-    .nutri-dia {
-      flex: 1 1 0;
-      min-width: 0;
-      height: 44px;
-      padding: 0;
-      font-size: 17px;
-      border-radius: 10px;
-    }
+    .nutri-dias { gap: 5px; }
+    .nutri-dia { height: 42px; font-size: 13px; }
     .btn-lista-compra {
       width: 100%;
       justify-content: center;
@@ -4432,10 +4449,10 @@
 
   /* NUTRICIÓN - nuevo diseño multi-opción */
   .meal-block {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     background: var(--carbon);
-    border-radius: 14px;
-    border: 1px solid var(--humo);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
     overflow: hidden;
   }
 
@@ -4444,8 +4461,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 20px 28px;
-    border-bottom: 1px solid var(--humo);
+    padding: 18px 20px 14px;
     cursor: pointer;
     transition: background 0.2s;
   }
@@ -4472,14 +4488,16 @@
 
   .meal-block-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
+    font-size: 24px;
+    line-height: 1;
     letter-spacing: 0.5px;
     color: var(--blanco);
   }
 
   .meal-block-selected {
-    font-size: 12px;
-    color: var(--brasa-txt);
+    font-size: 13px;
+    color: var(--metal-claro);
+    line-height: 1.4;
   }
 
   .meal-block-right {
@@ -4498,9 +4516,10 @@
   }
 
   .meal-block-toggle {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    color: var(--metal);
+    width: 32px; height: 32px; border-radius: 50%; background: var(--grafito);
+    display: grid; place-items: center;
+    font-size: 13px;
+    color: var(--metal-claro);
     transition: transform 0.2s, color 0.2s;
     flex-shrink: 0;
   }
@@ -4511,43 +4530,52 @@
   }
 
   .meal-block-count {
-    font-size: 10px;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.5px;
+    font-size: 12px;
     color: var(--metal);
-    text-transform: uppercase;
   }
 
   /* Versión compacta de .btn-primary (mismo naranja de marca, misma
      tipografía en mayúsculas que el resto de botones de la web) para que
      encaje dentro de la cabecera de una toma sin ser tan grande como el
      botón de pago o el de "Siguiente" del tour. */
-  .meal-reiniciar-btn {
-    padding: 6px 13px 6px 10px;
-    font-size: 10.5px;
-    letter-spacing: 1px;
-    border-radius: 7px;
+  /* Reiniciar: acción secundaria, así que botón discreto (antes, naranja macizo
+     en cada comida: 5 botones naranjas compitiendo con lo importante). */
+  .btn-primary.meal-reiniciar-btn {
+    padding: 7px 13px 7px 11px;
+    background: transparent;
+    border: 1px solid var(--humo);
+    color: var(--metal-claro);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    border-radius: 999px;
+    box-shadow: none;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
   }
+  .btn-primary.meal-reiniciar-btn:hover { background: rgba(209,66,14,0.10); border-color: rgba(242,106,54,0.6); color: var(--blanco); transform: none; box-shadow: none; }
+  .btn-primary.meal-reiniciar-btn svg { color: var(--brasa-txt); }
   @media (max-width: 480px) {
-    .meal-reiniciar-btn { padding: 5px 10px 5px 8px; font-size: 10px; }
+    .btn-primary.meal-reiniciar-btn { padding: 6px 11px 6px 9px; font-size: 12px; }
   }
 
   /* MINIATURAS DE LAS OPCIONES, SIEMPRE VISIBLES (sin expandir) */
   .meal-preview-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2px;
-    padding: 2px;
+    gap: 8px;
+    padding: 0 14px 14px;
   }
 
   .meal-preview-pill {
     padding: 12px 14px;
     background: var(--grafito);
+    border-radius: 12px;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 1.5px solid transparent;
     transition: background 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
@@ -4558,8 +4586,8 @@
   .meal-preview-pill:hover { background: var(--acero); }
 
   .meal-preview-pill.selected {
-    border-color: var(--brasa);
-    background: rgba(209,66,14,0.06);
+    border-color: var(--brasa-txt);
+    background: rgba(209,66,14,0.10);
   }
 
   .meal-preview-num {
@@ -4573,8 +4601,8 @@
   .meal-preview-pill.selected .meal-preview-num { color: var(--brasa-txt); }
 
   .meal-preview-name {
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 12.5px;
+    font-weight: 600;
     line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -4583,9 +4611,8 @@
   }
 
   .meal-preview-kcal {
-    font-size: 10px;
+    font-size: 11.5px;
     color: var(--metal);
-    font-family: 'DM Mono', monospace;
   }
 
   @media (max-width: 900px) {
@@ -4595,8 +4622,8 @@
   .meal-options {
     display: none;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2px;
-    padding: 2px;
+    gap: 8px;
+    padding: 0 14px 14px;
   }
 
   .meal-block.expanded .meal-options { display: grid; }
@@ -6404,22 +6431,20 @@
   .btn-recetario {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    margin-top: 16px;
-    padding: 11px 22px;
-    border-radius: 10px;
-    background: rgba(209,66,14,0.10);
-    border: 1px solid rgba(209,66,14,0.4);
-    color: var(--brasa-txt);
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--humo);
+    border-radius: 999px;
+    color: var(--blanco);
     font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
     font-weight: 600;
-    font-size: 12.5px;
-    letter-spacing: 0.2px;
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    transition: background .2s, border-color .2s;
   }
-  .btn-recetario:hover { background: rgba(209,66,14,0.2); border-color: var(--brasa); transform: translateY(-1px); }
-  .btn-recetario svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .btn-recetario:hover { background: rgba(209,66,14,0.10); border-color: rgba(242,106,54,0.6); }
+  .btn-recetario svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--brasa-txt); }
   /* Enlace inline naranja para llamar la atención sobre el recetario dentro del texto */
   .link-recetario { color: var(--brasa-txt); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
   .link-recetario:hover { opacity: 0.82; }
@@ -9726,36 +9751,10 @@
             <p class="dash-subtitle" id="nutricionSubtitle">Elige tus comidas día a día. Confirma cada día y pasa al siguiente. Cuando completes los 7 días, genera tu <strong>lista de la compra</strong>.</p>
           </div>
         </div>
-        <!-- Cabecera personalizada: su nombre y por qué come lo que come. -->
-        <div class="plan-porque" id="porqueNutricion" style="display:none">
-          <div class="plan-porque-eyebrow">Tu plan de alimentación</div>
-          <h3 class="plan-porque-titulo" id="porqueNutricionTitulo"></h3>
-          <p class="plan-porque-texto plegado" id="porqueNutricionTexto"></p>
-          <button class="plan-porque-mas" id="porqueNutricionMas" onclick="togglePorque('Nutricion')" aria-expanded="false">Ver más</button>
-        </div>
-        <div class="dash-header">
-          <!-- Renovación del menú: destacado para que todos sepan que pueden elegirlo -->
-          <div id="rotacionMenuBox" style="margin:14px 0;background:linear-gradient(135deg,rgba(209,66,14,.10),var(--carbon));border:1px solid var(--brasa);border-radius:12px;padding:16px 18px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">TÚ ELIGES CÓMO SE RENUEVA TU DIETA</span>
-            </div>
-            <div style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
-              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
-              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
-            </div>
-          </div>
-          <!-- Aquí había un selector de "ciclado de carbohidratos" (Ajustar por
-               día / Los 7 días iguales). Se quitó el 11 sept 2026: no es una
-               preferencia, es un cálculo. El motor ya decide si tiene sentido
-               ciclar y con cuánta amplitud según el objetivo y el reparto real
-               de días de entreno y descanso -- preguntárselo al cliente le pide
-               una decisión técnica que no tiene por qué saber tomar.
-               El porqué del día que está mirando sigue explicado en
-               #cicloCarbsAviso, que es donde de verdad sirve. -->
-          <!-- Selector de días de la semana -->
+        <!-- REDISEÑO 4 oct 2026: primero el día (semana + total) y las comidas;
+             luego las herramientas; lo que se lee una vez (por qué comes así,
+             cada cuánto cambian los platos, hidratación) plegado al final. -->
+        <div class="nt-dia">
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">Lun</button>
             <button class="nutri-dia" onclick="seleccionarDiaNutri(1)">Mar</button>
@@ -9764,31 +9763,8 @@
             <button class="nutri-dia" onclick="seleccionarDiaNutri(4)">Vie</button>
             <button class="nutri-dia" onclick="seleccionarDiaNutri(5)">Sáb</button>
             <button class="nutri-dia" onclick="seleccionarDiaNutri(6)">Dom</button>
-            <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-              Lista de la compra
-            </button>
           </div>
-          <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
-          <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
-            <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn-recetario" onclick="abrirRecetario()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
-              Ver recetario completo
-            </button>
-            <button class="btn-recetario" onclick="descargarPlanPDF()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Descargar plan semanal
-            </button>
-            <button class="btn-recetario" onclick="abrirBuscadorAlimentos()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Buscador de alimentos
-            </button>
-          </div>
-        </div>
-        <div class="nutri-resumen" id="nutriResumen">
+          <div class="nutri-resumen" id="nutriResumen">
           <div class="nutri-resumen-label" id="enfoqueNutricional" style="display:none"></div>
           <!-- Por qué el día que estás mirando lleva más o menos hidratos -->
           <div id="cicloCarbsAviso" style="display:none"></div>
@@ -9816,26 +9792,23 @@
             </div>
           </div>
         </div>
-        <div id="nutricionNotas"></div>
-        <div id="kcalDiarioBar" style="background:var(--carbon);padding:16px 20px;margin-bottom:16px;border-radius:8px;display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:12px;color:var(--metal);font-family:'DM Mono',monospace;letter-spacing:1px" id="kcalDiarioTitulo">KCAL HOY</span>
-            <span style="font-size:12px;color:var(--metal)" id="kcalDiarioTexto">0 / 0 kcal</span>
-          </div>
-          <div style="background:var(--grafito);height:8px;border-radius:4px;overflow:hidden">
-            <div id="kcalDiarioFill" style="height:100%;background:var(--brasa);border-radius:4px;transition:width 0.5s;width:0%"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;flex-wrap:wrap;gap:4px">
-            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioProt">Prot: 0g</span>
-            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioCarbs">Carbs: 0g</span>
-            <span style="font-size:11px;color:var(--metal)" id="kcalDiarioGrasa">Grasa: 0g</span>
+          <div id="kcalDiarioBar" class="nt-total" style="display:none">
+            <div class="nt-total-cab">
+              <span class="nt-eyebrow" id="kcalDiarioTitulo">Total de hoy</span>
+              <span class="nt-total-num" id="kcalDiarioTexto">0 / 0 kcal</span>
+            </div>
+            <div class="nt-barra"><div id="kcalDiarioFill"></div></div>
+            <div class="nt-macros">
+              <span id="kcalDiarioProt">Proteína 0 g</span>
+              <span id="kcalDiarioCarbs">Hidratos 0 g</span>
+              <span id="kcalDiarioGrasa">Grasa 0 g</span>
+            </div>
           </div>
         </div>
-        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <button class="btn-ghost" onclick="imprimirDieta()" style="font-size:11px;padding:8px 14px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
-          </button>
-        </div>
+        <p class="dash-subtitle" id="nutricionBienvenida" style="display:none"></p>
+        <div id="nutriCambiarPlan" style="display:none;margin-top:16px">
+            <button class="btn-ghost" style="padding:8px 16px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar plan / añadir entrenamiento</button>
+          </div>
         <div id="nutritionGrid">
           <!-- generado por JS -->
         </div>
@@ -9848,6 +9821,54 @@
             <span id="diasConfirmadosCount">0</span>/7 días completados
           </div>
         </div>
+        <div class="nt-herr">
+          <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Lista de la compra
+            </button>
+          <button class="btn-recetario" onclick="abrirRecetario()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
+              Ver recetario completo
+            </button>
+          <button class="btn-recetario" onclick="descargarPlanPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar plan semanal
+            </button>
+          <button class="btn-recetario" onclick="abrirBuscadorAlimentos()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Buscador de alimentos
+            </button>
+          <button class="btn-recetario" onclick="imprimirDieta()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
+          </button>
+        </div>
+        <details class="nt-ajustes">
+          <summary>
+            <span><b>Ajustes y consejos</b><small>Cada cuánto cambian tus platos, por qué comes así, hidratación y suplementos</small></span>
+            <span class="nt-ajustes-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </summary>
+          <div class="nt-ajustes-cuerpo">
+            <div id="rotacionMenuBox" class="nt-ajuste">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">TÚ ELIGES CÓMO SE RENUEVA TU DIETA</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
+              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
+              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
+            </div>
+          </div>
+            <div class="plan-porque" id="porqueNutricion" style="display:none">
+          <div class="plan-porque-eyebrow">Tu plan de alimentación</div>
+          <h3 class="plan-porque-titulo" id="porqueNutricionTitulo"></h3>
+          <p class="plan-porque-texto plegado" id="porqueNutricionTexto"></p>
+          <button class="plan-porque-mas" id="porqueNutricionMas" onclick="togglePorque('Nutricion')" aria-expanded="false">Ver más</button>
+        </div>
+            <div id="nutricionNotas"></div>
+          </div>
+        </details>
       </div>
 
       <!-- CHECK-IN -->
@@ -21887,8 +21908,8 @@
           <div class="meal-opt-ingredients" style="margin-bottom:10px;font-size:13px;color:var(--metal-claro);line-height:1.6">${ingredTexto}</div>
           <div class="meal-opt-macros-visual">
             <div class="macro-bar-row"><span class="macro-bar-label">Prot</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(protNum/maxMacro*100)}%;background:var(--brasa)"></div></div><span class="macro-bar-val">${protNum}g</span></div>
-            <div class="macro-bar-row"><span class="macro-bar-label">Carbs</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(carbsNum/maxMacro*100)}%;background:#f0a500"></div></div><span class="macro-bar-val">${carbsNum}g</span></div>
-            <div class="macro-bar-row"><span class="macro-bar-label">Grasa</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(grasaNum/maxMacro*100)}%;background:#27ae60"></div></div><span class="macro-bar-val">${grasaNum}g</span></div>
+            <div class="macro-bar-row"><span class="macro-bar-label">Carbs</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(carbsNum/maxMacro*100)}%;background:#B5B2AD"></div></div><span class="macro-bar-val">${carbsNum}g</span></div>
+            <div class="macro-bar-row"><span class="macro-bar-label">Grasa</span><div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.round(grasaNum/maxMacro*100)}%;background:#6B6863"></div></div><span class="macro-bar-val">${grasaNum}g</span></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;border-top:1px solid var(--humo);padding-top:8px;margin-top:8px">
             <span class="meal-opt-kcal" style="font-size:14px;color: var(--brasa-txt);font-weight:600">${opt.kcal}</span>
@@ -21942,7 +21963,7 @@
     // QUÉ HACER en esta pantalla, y la tarjeta dice QUÉ ES tu plan y POR QUÉ.
     const nutriSubEl = document.getElementById('nutricionSubtitle');
     if (nutriSubEl) {
-      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>. Si no sabes cómo preparar un plato, pulsa <span class="link-recetario" onclick="abrirRecetario()">Ver recetario completo</span>. La pasta, el arroz y los cereales van en peso cocido salvo que ponga «crudo»; al lado de cada uno tienes su equivalencia. Si ninguna de las 5 opciones de una toma te convence, pulsa <strong>Reiniciar</strong> junto a esa comida: te damos otras 5, con los mismos macros.`;
+      nutriSubEl.innerHTML = `Elige tus comidas día a día y confirma cada día. Cuando completes los 7, genera tu <strong>lista de la compra</strong>.`;
     }
 
     // Notas de adaptación nutricional (alergias, intolerancias) en planes "solo nutrición"
@@ -21953,7 +21974,7 @@
         notasHTML += renderNotasAdaptado(generatedPlan.notasNutricion, 16);
       }
       if (generatedPlan.notasDeporte && generatedPlan.notasDeporte.length) {
-        notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${_esc(n)}`).join('<br>')}</div></details>`;
+        notasHTML += `<details style="margin-bottom:16px"><summary style="background:rgba(209,66,14,0.07);border-left:3px solid var(--brasa);padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600"><span>Recomendaciones de hidratación y suplementación</span><span style="font-size:10px;color:var(--metal)">ver ▾</span></summary><div style="background:rgba(39,174,96,0.04);border-left:3px solid #27ae60;padding:14px 18px;font-size:13px;line-height:1.7;color:var(--metal-claro)">${generatedPlan.notasDeporte.map(n => `· ${_esc(n)}`).join('<br>')}</div></details>`;
       }
       // Antes decía siempre "se actualiza cada mes" (aunque el cliente hubiera elegido
       // semanal o fija en el selector de justo encima) y mandaba a escribir por Contacto
@@ -22608,12 +22629,13 @@
     // muerto: quien comía de más nunca veía el aviso rojo.
     const pct = objetivo > 0 ? Math.round((totalKcal / objetivo) * 100) : 0;
     const pctBarra = Math.min(100, pct);
-    document.getElementById('kcalDiarioTexto').textContent = `${totalKcal} / ${objetivo} kcal (${pct}%)`;
+    document.getElementById('kcalDiarioTexto').innerHTML = `<b>${totalKcal.toLocaleString('es-ES')}</b> / ${objetivo.toLocaleString('es-ES')} kcal`;
     document.getElementById('kcalDiarioFill').style.width = pctBarra + '%';
-    document.getElementById('kcalDiarioFill').style.background = pct > 110 ? '#e74c3c' : pct > 90 ? '#27ae60' : 'var(--brasa)';
-    document.getElementById('kcalDiarioProt').textContent = `Prot: ${totalProt}g`;
-    document.getElementById('kcalDiarioCarbs').textContent = `Carbs: ${totalCarbs}g`;
-    document.getElementById('kcalDiarioGrasa').textContent = `Grasa: ${totalGrasa}g`;
+    // Naranja de marca; solo si se pasa de verdad (>110 %) cambia a rojo de aviso.
+    document.getElementById('kcalDiarioFill').style.background = pct > 110 ? '#e74c3c' : 'var(--brasa-txt)';
+    document.getElementById('kcalDiarioProt').innerHTML = `Proteína <b>${totalProt} g</b>` + (generatedPlan.protObj ? ` / ${generatedPlan.protObj}` : '');
+    document.getElementById('kcalDiarioCarbs').innerHTML = `Hidratos <b>${totalCarbs} g</b>`;
+    document.getElementById('kcalDiarioGrasa').innerHTML = `Grasa <b>${totalGrasa} g</b>`;
   }
 
   // ===== COMPARTIR PROGRESO =====
@@ -25862,7 +25884,7 @@
     const t = document.getElementById('nutriResumenTitulo');
     if (t) t.textContent = esHoy ? 'Total de hoy, según tus elecciones' : `Total del ${nombre}, según tus elecciones`;
     const k = document.getElementById('kcalDiarioTitulo');
-    if (k) k.textContent = esHoy ? 'KCAL HOY' : `KCAL ${nombre.toUpperCase()}`;
+    if (k) k.textContent = esHoy ? 'Total de hoy' : `Total del ${nombre}`;
   }
 
   function seleccionarDiaNutri(dia) {
