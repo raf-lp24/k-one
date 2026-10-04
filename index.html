@@ -28465,7 +28465,7 @@ Se coló: ${lista}`;
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) return;
-      const res = await fetch('/api/is-admin', {
+      const res = await fetch('/api/admin?fn=is-admin', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
@@ -28485,7 +28485,7 @@ Se coló: ${lista}`;
   async function marcarGestionado(msgId) {
     try {
       const { data: { session } } = await supa.auth.getSession();
-      await fetch('/api/admin-mensaje', {
+      await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ id: msgId, accion: 'gestionado' })
@@ -28514,7 +28514,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ id: msgId, accion: 'responder_mensaje', texto })
@@ -28533,7 +28533,7 @@ Se coló: ${lista}`;
     if (!confirm('¿Eliminar este mensaje?')) return;
     try {
       const { data: { session } } = await supa.auth.getSession();
-      await fetch('/api/admin-mensaje', {
+      await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ id: msgId, accion: 'eliminar' })
@@ -28571,7 +28571,7 @@ Se coló: ${lista}`;
     btn.textContent = 'Invitando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-crear-cliente', {
+      const res = await fetch('/api/admin?fn=crear-cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ email })
@@ -28678,7 +28678,7 @@ Se coló: ${lista}`;
     try {
       const { data: { session } } = await supa.auth.getSession();
       if (!session) throw new Error('Sesión caducada. Vuelve a entrar.');
-      const res = await fetch('/api/admin-clientes', {
+      const res = await fetch('/api/admin?fn=clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
       });
@@ -29745,7 +29745,7 @@ Se coló: ${lista}`;
     btn.disabled = true; btn.textContent = 'Regenerando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const pedir = (body) => fetch('/api/admin-clientes', {
+      const pedir = (body) => fetch('/api/admin?fn=clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify(body)
@@ -29801,7 +29801,7 @@ Se coló: ${lista}`;
     btn.disabled = true; btn.lastChild.textContent = 'Cargando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const r = await fetch('/api/admin-clientes', {
+      const r = await fetch('/api/admin?fn=clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'userdata', userId })
@@ -29935,7 +29935,7 @@ Se coló: ${lista}`;
     btn.disabled = true; btn.textContent = 'Marcando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-clientes', {
+      const res = await fetch('/api/admin?fn=clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'marcar_revision_hecha', userId })
@@ -29964,7 +29964,7 @@ Se coló: ${lista}`;
     btn.textContent = 'Actualizando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-set-premium', {
+      const res = await fetch('/api/admin?fn=set-premium', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ userId, premium })
@@ -29992,7 +29992,7 @@ Se coló: ${lista}`;
     btn.textContent = 'Cancelando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-set-premium', {
+      const res = await fetch('/api/admin?fn=set-premium', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ userId, accion: 'detener_stripe' })
@@ -30237,7 +30237,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Marcando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const resultados = await Promise.allSettled(ids.map(id => fetch('/api/admin-mensaje', {
+      const resultados = await Promise.allSettled(ids.map(id => fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'email_gestionado', id })
@@ -30274,7 +30274,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'eliminar_emails_masivo', ids })
@@ -30337,7 +30337,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Marcando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'mensajes_masivo_gestionado', ids })
@@ -30367,7 +30367,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'eliminar_mensajes_masivo', ids })
@@ -30433,7 +30433,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'eliminar_leads_masivo', ids })
@@ -30460,7 +30460,7 @@ Se coló: ${lista}`;
     btn.disabled = true; btn.textContent = 'Guardando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'guardar_nota', userId, nota })
@@ -30483,7 +30483,7 @@ Se coló: ${lista}`;
     btn.textContent = 'Marcando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'email_gestionado', id: emailId })
@@ -30514,7 +30514,7 @@ Se coló: ${lista}`;
     if (btn) { btn.disabled = true; btn.textContent = 'Eliminando...'; }
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'eliminar_email', id: emailId })
@@ -30564,7 +30564,7 @@ Se coló: ${lista}`;
     if (!confirm(`¿Eliminar ${ids.length} email(s) que coinciden con los filtros actuales? Esta acción no se puede deshacer.`)) return;
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'eliminar_emails_masivo', ids })
@@ -30587,7 +30587,7 @@ Se coló: ${lista}`;
     btn.textContent = 'Eliminando...';
     try {
       const { data: { session } } = await supa.auth.getSession();
-      const res = await fetch('/api/admin-mensaje', {
+      const res = await fetch('/api/admin?fn=mensaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ accion: 'borrar_cliente', userId })

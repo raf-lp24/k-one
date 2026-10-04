@@ -1,79 +1,175 @@
 {
   "rewrites": [
-    { "source": "/running", "destination": "/running.html" },
-    { "source": "/gimnasio", "destination": "/gimnasio.html" },
-    { "source": "/hibrido", "destination": "/hibrido.html" },
-    { "source": "/solo-nutricion", "destination": "/solo-nutricion.html" }
+    {
+      "source": "/running",
+      "destination": "/running.html"
+    },
+    {
+      "source": "/gimnasio",
+      "destination": "/gimnasio.html"
+    },
+    {
+      "source": "/hibrido",
+      "destination": "/hibrido.html"
+    },
+    {
+      "source": "/solo-nutricion",
+      "destination": "/solo-nutricion.html"
+    },
+    {
+      "source": "/api/admin-clientes",
+      "destination": "/api/admin?fn=clientes"
+    },
+    {
+      "source": "/api/admin-mensaje",
+      "destination": "/api/admin?fn=mensaje"
+    },
+    {
+      "source": "/api/admin-set-premium",
+      "destination": "/api/admin?fn=set-premium"
+    },
+    {
+      "source": "/api/admin-crear-cliente",
+      "destination": "/api/admin?fn=crear-cliente"
+    },
+    {
+      "source": "/api/is-admin",
+      "destination": "/api/admin?fn=is-admin"
+    }
   ],
   "redirects": [
-    { "source": "/lib/:path*", "destination": "/", "permanent": false }
+    {
+      "source": "/lib/:path*",
+      "destination": "/",
+      "permanent": false
+    }
   ],
   "headers": [
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     },
     {
       "source": "/manifest.json",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
       ]
     },
     {
       "source": "/og-image-(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, immutable"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control",           "value": "public, max-age=0, must-revalidate" },
-        { "key": "X-Content-Type-Options",  "value": "nosniff" },
-        { "key": "X-Frame-Options",         "value": "DENY" },
-        { "key": "Referrer-Policy",         "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy",            "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Content-Security-Policy",        "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://api.nal.usda.gov https://world.openfoodfacts.org; frame-ancestors 'none'; object-src 'none'; base-uri 'self';" },
-        { "key": "Cross-Origin-Opener-Policy",     "value": "same-origin" },
-        { "key": "Cross-Origin-Resource-Policy",   "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy",   "value": "credentialless" },
-        { "key": "Strict-Transport-Security",      "value": "max-age=63072000; includeSubDomains; preload" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://api.nal.usda.gov https://world.openfoodfacts.org; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "credentialless"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        }
       ]
     },
     {
       "source": "/img/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, immutable"
+        }
       ]
     },
     {
       "source": "/data/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
       ]
     },
     {
       "source": "/demo-(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, immutable"
+        }
       ]
     }
   ],
   "functions": {
-    "api/stripe-webhook.js":          { "maxDuration": 30 },
-    "api/admin-clientes.js":          { "maxDuration": 30 },
-    "api/notify.js":                  { "maxDuration": 300 },
-    "api/create-checkout-session.js": { "maxDuration": 15 },
-    "api/update-subscription.js":     { "maxDuration": 15 },
-    "api/cancel-subscription.js":     { "maxDuration": 15 },
-    "api/reactivate-subscription.js": { "maxDuration": 15 },
-    "api/create-portal-session.js":   { "maxDuration": 15 },
-    "api/is-admin.js":                { "maxDuration": 10 },
-    "api/admin-mensaje.js":           { "maxDuration": 15 },
-    "api/admin-crear-cliente.js":     { "maxDuration": 10 },
-    "api/admin-set-premium.js":       { "maxDuration": 10 }
+    "api/stripe-webhook.js": {
+      "maxDuration": 30
+    },
+    "api/notify.js": {
+      "maxDuration": 300
+    },
+    "api/create-checkout-session.js": {
+      "maxDuration": 15
+    },
+    "api/update-subscription.js": {
+      "maxDuration": 15
+    },
+    "api/cancel-subscription.js": {
+      "maxDuration": 15
+    },
+    "api/reactivate-subscription.js": {
+      "maxDuration": 15
+    },
+    "api/create-portal-session.js": {
+      "maxDuration": 15
+    },
+    "api/admin.js": {
+      "maxDuration": 30
+    }
   },
   "crons": [
     {

@@ -77,7 +77,7 @@ async function concederPremium(supabaseAdmin, userId) {
 const ESTADOS_COBRABLES = ['trialing', 'active', 'past_due', 'unpaid', 'incomplete'];
 
 // Pone al día, de una vez, lo que quedó mal antes de este arreglo. Corre al
-// abrir Jarvis (api/admin-clientes.js), así que no hace falta tocar la base
+// abrir Jarvis (api/_admin-clientes.js), así que no hace falta tocar la base
 // de datos a mano:
 //  1. Emails invitados desde Jarvis que YA tienen cuenta (la invitación no se
 //     canjeaba nunca, ver syncProfileFromSupabase): premium concedido ya.
