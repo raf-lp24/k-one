@@ -1915,8 +1915,8 @@
   .plg-chev { width: 16px; height: 16px; flex-shrink: 0; color: var(--metal-claro); transition: transform .2s ease; }
   .plg[open] .plg-chev { transform: rotate(180deg); }
   .plg-cuerpo { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: var(--metal-claro); }
-  .plg-caja { background: rgba(76,175,122,0.06); border-left: 3px solid #4CAF7A; border-radius: 0 12px 12px 0; padding: 12px 16px; margin-bottom: 16px; }
-  .plg.verde .plg-eye { color: #4CAF7A; }
+  /* 4 oct: sin el verde (no es color de la marca); tarjeta redondeada como el resto */
+  .plg-caja { background: var(--grafito); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; }
   @media (prefers-reduced-motion: reduce) { .plg-chev { transition: none; } }
 
   /* Título del día dentro del entreno ("Viernes" + nombre de la sesión) */
@@ -3740,13 +3740,13 @@
   .nt-barra #kcalDiarioFill { height: 100%; width: 0; border-radius: 999px; background: var(--brasa-txt); transition: width .5s; }
   .nt-macros { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; color: var(--metal); }
   .nt-macros b { color: var(--blanco); font-weight: 600; }
-  .nt-herr { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 18px; }
+  .nt-herr { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 14px; }
   @media (max-width: 600px) {
     .nt-herr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .nt-herr .btn-recetario, .nt-herr .btn-lista-compra { justify-content: center; text-align: center; padding: 10px 12px; font-size: 13px; line-height: 1.25; }
     .nt-herr .btn-lista-compra { grid-column: 1 / -1; }
   }
-  .nt-ajustes { background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; margin-bottom: 24px; }
+  .nt-ajustes { background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; margin-bottom: 16px; }
   .nt-ajustes summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; cursor: pointer; }
   .nt-ajustes summary::-webkit-details-marker { display: none; }
   .nt-ajustes summary b { display: block; font-size: 15px; font-weight: 600; color: var(--blanco); }
@@ -3824,7 +3824,7 @@
   .ejercicio-consejos-list { margin: 0; padding-left: 18px; color: var(--metal-claro); font-size: 13px; line-height: 1.6; }
   .ejercicio-consejos-list li { margin-bottom: 6px; }
   .ejercicio-consejos-list li::marker { color: var(--brasa-txt); }
-  .ejercicio-info-btn { font-style: italic; font-family: Georgia, serif; font-weight: 700; cursor: pointer; }
+  .ejercicio-info-btn { cursor: pointer; }
   .ej-foto { margin: 0; }
   .ej-foto img {
     width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
@@ -4339,15 +4339,16 @@
   .peso-stepper {
     display: flex;
     align-items: center;
-    border: 1px solid var(--humo);
+    gap: 6px;
     flex-shrink: 0;
   }
 
   .peso-btn {
-    width: 30px;
-    height: 32px;
-    background: var(--acero);
-    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
     color: var(--metal-claro);
     font-size: 16px;
     line-height: 1;
@@ -4359,12 +4360,11 @@
   .peso-btn:active { background: var(--brasa-oscura); color: var(--blanco-puro); }
 
   .peso-input {
-    width: 56px;
-    height: 32px;
-    background: var(--carbon);
-    border: none;
-    border-left: 1px solid var(--humo);
-    border-right: 1px solid var(--humo);
+    width: 64px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grafito);
+    border: 1px solid var(--humo);
     color: var(--blanco);
     padding: 0 4px;
     font-family: 'Inter', sans-serif;
@@ -4377,6 +4377,9 @@
   .peso-input::-webkit-outer-spin-button,
   .peso-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .peso-input::placeholder { color: var(--metal); font-weight: 400; }
+  /* El de «Añadir ejercicio» (alto fijo por estilo en línea): botones redondeados, no círculos */
+  .peso-stepper[style] .peso-btn { width: 48px; border-radius: 12px; }
+  .peso-stepper[style] .peso-input { border-radius: 12px; }
 
   .peso-unit {
     font-family: 'DM Mono', monospace;
@@ -5381,6 +5384,41 @@
   #section-checkin .rating-btn.selected { transform: none; background: var(--brasa); border-color: var(--brasa); color: #fff; box-shadow: 0 6px 18px -6px rgba(209,66,14,0.6); }
   #section-checkin .checkin-textarea { border-radius: 14px; min-height: 96px; }
   .ck-enviar { margin-top: 28px; }
+
+  /* ===== ENTRENO, NOTAS y CONTACTO con el estilo de la web (4 oct 2026) ===== */
+  #section-semana .week-tab { border-radius: 999px; padding: 11px 20px; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; background: var(--grafito); border-color: transparent; color: var(--metal-claro); }
+  #section-semana .week-tab:hover { border-color: rgba(242,106,54,0.6); }
+  #section-semana .week-tab.active { background: var(--brasa); border-color: var(--brasa); color: #fff; box-shadow: 0 6px 18px -6px rgba(209,66,14,0.6); }
+  #section-semana .week-preview-note { font-style: normal; font-size: 13px; border-left: none; background: var(--carbon); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 16px; }
+  #section-semana .week-day-row { border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); }
+  #section-semana .week-day-row:hover { transform: none; }
+  #section-semana .week-day-row.today { border: 1px solid rgba(242,106,54,0.55); background: rgba(209,66,14,0.05); }
+  #section-semana .week-day-row.rest { opacity: 0.6; }
+  #section-semana .week-day-toggle { width: 32px; height: 32px; border-radius: 50%; background: var(--grafito); display: grid; place-items: center; top: 20px; right: 20px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--metal-claro); }
+  #section-semana .week-day-tag { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0; text-transform: none; border-radius: 999px; padding: 4px 12px; }
+  #section-semana .week-day-rest-msg { font-style: normal; }
+  #section-semana .week-today-badge { border-radius: 999px; font-family: 'Inter', sans-serif; letter-spacing: 0; }
+
+  #section-notas .notes-form { border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); }
+  #section-notas .notes-form textarea { border-radius: 14px; font-size: 15px; }
+  #section-notas .notes-form .btn-primary { border-radius: 14px; padding: 14px 24px; }
+  #section-notas .notes-empty { font-style: normal; border: 1px solid rgba(255,255,255,0.08); background: var(--carbon); border-radius: 18px; color: var(--metal-claro); }
+  #section-notas .nota-item { border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); }
+  #section-notas .nota-date { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0; }
+  #section-notas .nota-delete, #section-notas .nota-edit { border-radius: 999px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; padding: 6px 14px; }
+  #section-notas .nota-edit-input { border-radius: 12px; }
+
+  #section-contacto .informe-eyebrow { border-left: none; padding-left: 0; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 10.5px; letter-spacing: 2px; }
+  #section-contacto .contacto-motivo { border-radius: 16px; border-color: rgba(255,255,255,0.08); font-size: 13px; }
+  #section-contacto .contacto-motivo.selected { border-color: var(--brasa-txt); background: rgba(209,66,14,0.10); }
+  #section-contacto .contacto-card { border-radius: 18px; border-color: rgba(255,255,255,0.08); }
+  #section-contacto .contacto-hint { font-size: 14px; }
+  #section-contacto .contacto-footer-note { font-family: 'Inter', sans-serif; font-size: 12.5px; }
+  #section-contacto .contacto-card-footer { border-top-color: rgba(255,255,255,0.07); }
+  #section-contacto #btnEnviarContacto { border-radius: 999px; padding: 11px 24px !important; font-size: 13px !important; }
+  #section-contacto .contacto-trust { font-family: 'Inter', sans-serif; font-size: 13.5px; letter-spacing: 0; }
+  #section-contacto .conv-hilo { border-radius: 18px; }
+  #section-contacto .conv-hilo-fecha { font-family: 'Inter', sans-serif; }
   /* Resumen tras enviar: casillas redondeadas con hueco (antes, rejilla con
      línea de 1 px y un hueco gris vacío cuando salían 5 datos) */
   #section-checkin .checkin-summary-icon { border-radius: 50%; }
@@ -9805,7 +9843,7 @@
           <!-- generado por JS -->
         </div>
         <p class="week-preview-note" id="weekPreviewNote" style="display:none">
-          // Vista orientativa. Tu plan real de cada semana se ajusta automáticamente según tu check-in semanal.
+          Vista orientativa. Tu plan real de cada semana se ajusta automáticamente según tu check-in semanal.
         </p>
         <div class="week-list" id="weekGrid">
           <!-- generado por JS -->
@@ -9829,6 +9867,54 @@
         <!-- REDISEÑO 4 oct 2026: primero el día (semana + total) y las comidas;
              luego las herramientas; lo que se lee una vez (por qué comes así,
              cada cuánto cambian los platos, hidratación) plegado al final. -->
+        <div class="nt-herr">
+          <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Lista de la compra
+            </button>
+          <button class="btn-recetario" onclick="abrirRecetario()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
+              Ver recetario completo
+            </button>
+          <button class="btn-recetario" onclick="descargarPlanPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar plan semanal
+            </button>
+          <button class="btn-recetario" onclick="abrirBuscadorAlimentos()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Buscador de alimentos
+            </button>
+          <button class="btn-recetario" onclick="imprimirDieta()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
+          </button>
+        </div>
+        <details class="nt-ajustes">
+          <summary>
+            <span><b>Ajustes y consejos</b><small>Cada cuánto cambian tus platos, por qué comes así, hidratación y suplementos</small></span>
+            <span class="nt-ajustes-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </summary>
+          <div class="nt-ajustes-cuerpo">
+            <div id="rotacionMenuBox" class="nt-ajuste">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">TÚ ELIGES CÓMO SE RENUEVA TU DIETA</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
+              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
+              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
+            </div>
+          </div>
+            <div class="plan-porque" id="porqueNutricion" style="display:none">
+          <div class="plan-porque-eyebrow">Tu plan de alimentación</div>
+          <h3 class="plan-porque-titulo" id="porqueNutricionTitulo"></h3>
+          <p class="plan-porque-texto plegado" id="porqueNutricionTexto"></p>
+          <button class="plan-porque-mas" id="porqueNutricionMas" onclick="togglePorque('Nutricion')" aria-expanded="false">Ver más</button>
+        </div>
+            <div id="nutricionNotas"></div>
+          </div>
+        </details>
         <div class="nt-dia">
           <div class="nutri-dias" id="nutriDias">
             <button class="nutri-dia selected" onclick="seleccionarDiaNutri(0)">Lun</button>
@@ -9896,54 +9982,6 @@
             <span id="diasConfirmadosCount">0</span>/7 días completados
           </div>
         </div>
-        <div class="nt-herr">
-          <button class="btn-lista-compra" id="btnListaCompra" onclick="generarListaCompra()" style="display:none">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-              Lista de la compra
-            </button>
-          <button class="btn-recetario" onclick="abrirRecetario()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
-              Ver recetario completo
-            </button>
-          <button class="btn-recetario" onclick="descargarPlanPDF()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Descargar plan semanal
-            </button>
-          <button class="btn-recetario" onclick="abrirBuscadorAlimentos()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Buscador de alimentos
-            </button>
-          <button class="btn-recetario" onclick="imprimirDieta()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir dieta
-          </button>
-        </div>
-        <details class="nt-ajustes">
-          <summary>
-            <span><b>Ajustes y consejos</b><small>Cada cuánto cambian tus platos, por qué comes así, hidratación y suplementos</small></span>
-            <span class="nt-ajustes-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-          </summary>
-          <div class="nt-ajustes-cuerpo">
-            <div id="rotacionMenuBox" class="nt-ajuste">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              <span style="font-size:12px;color:var(--blanco);font-weight:700;letter-spacing:.5px">TÚ ELIGES CÓMO SE RENUEVA TU DIETA</span>
-            </div>
-            <div style="font-size:12.5px;color:var(--metal-claro);margin-bottom:12px;line-height:1.5">¿Cada cuánto quieres platos nuevos? Al renovar, vuelves a elegir tu semana desde cero. Puedes cambiarlo cuando quieras.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="rotacion-opt" data-rot="semanal" onclick="cambiarRotacionMenu('semanal')">Cada semana</button>
-              <button class="rotacion-opt" data-rot="mensual" onclick="cambiarRotacionMenu('mensual')">Cada mes</button>
-              <button class="rotacion-opt" data-rot="fija" onclick="cambiarRotacionMenu('fija')">Mantener fijo</button>
-            </div>
-          </div>
-            <div class="plan-porque" id="porqueNutricion" style="display:none">
-          <div class="plan-porque-eyebrow">Tu plan de alimentación</div>
-          <h3 class="plan-porque-titulo" id="porqueNutricionTitulo"></h3>
-          <p class="plan-porque-texto plegado" id="porqueNutricionTexto"></p>
-          <button class="plan-porque-mas" id="porqueNutricionMas" onclick="togglePorque('Nutricion')" aria-expanded="false">Ver más</button>
-        </div>
-            <div id="nutricionNotas"></div>
-          </div>
-        </details>
       </div>
 
       <!-- CHECK-IN -->
@@ -10238,7 +10276,7 @@
              sitio para ofrecerle seguirnos que interrumpir en la landing a
              alguien que iba a registrarse. -->
         <div style="text-align:center;margin:30px 0 0">
-          <p style="font-size:11px;color:var(--metal);letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:14px">Síguenos</p>
+          <p style="font-size:14px;font-weight:600;color:var(--metal-claro);margin-bottom:12px">Síguenos</p>
           <div class="redes">
             <a class="red-btn" href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en Instagram"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><b>Instagram</b></a>
             <a class="red-btn" href="https://www.tiktok.com/@k.one.fit" target="_blank" rel="noopener noreferrer" aria-label="K-ONE en TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97a9.4 9.4 0 0 1-1.62-.93c-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><b>TikTok</b></a>
@@ -10250,7 +10288,7 @@
              Se mueve aquí (Contacto es donde se buscan estas cosas) en vez de
              quitarlo: dentro de la app tiene que seguir siendo consultable sin
              cerrar sesión, porque se tratan datos de salud (art. 9 RGPD). -->
-        <p style="text-align:center;margin:22px 0 0;font-size:11px;color:var(--metal)">
+        <p style="text-align:center;margin:22px 0 0;font-size:12.5px;color:var(--metal)">
           <a onclick="goToLegal()" style="color:var(--metal);text-decoration:underline;cursor:pointer;padding:8px 4px;display:inline-block">Aviso legal y política de privacidad</a>
         </p>
       </div>
@@ -25945,9 +25983,10 @@
         if (diasConfirmados[i]) {
           btn.textContent = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i];
           btn.setAttribute('aria-label', DIAS_NOMBRES[i]);
-          btn.style.background = 'rgba(39,174,96,0.15)';
-          btn.style.borderColor = '#27ae60';
-          btn.style.color = '#27ae60';
+          // Confirmado: borde naranja (antes verde, fuera de la paleta de la marca)
+          btn.style.background = '';
+          btn.style.borderColor = 'rgba(242,106,54,0.6)';
+          btn.style.color = '';
         } else {
           btn.textContent = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i];
           btn.setAttribute('aria-label', DIAS_NOMBRES[i]);
