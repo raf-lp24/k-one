@@ -7816,8 +7816,8 @@
   <div class="modal-box" style="max-width:480px">
     <div class="modal-title" style="font-size:19px">¿Seguro que quieres cancelar?</div>
     <p class="modal-desc" id="cancelarSubTexto" style="margin-bottom:18px"></p>
-    <p class="modal-desc" style="font-size:13px;color:var(--metal);margin-bottom:10px">Si quieres, dinos por qué -- no es obligatorio, pero nos ayuda a mejorar:</p>
-    <div id="cancelarSubChips" role="radiogroup" aria-label="Si quieres, marca de qué fue" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <p class="modal-desc" style="font-size:14px;color:var(--blanco);font-weight:600;margin-bottom:10px">Antes de irte, ¿qué ha pasado?</p>
+    <div id="cancelarSubChips" role="radiogroup" aria-label="Qué ha pasado" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" onchange="_cancelarMotivoElegido()">
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Dieta">Algo de la nutrición</label>
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Entrenos">Algo del entrenamiento</label>
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Falta variedad">Se me hacía repetitivo</label>
@@ -7826,11 +7826,19 @@
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Precio">Es caro para mí</label>
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Objetivo cumplido">Ya conseguí mi objetivo</label>
       <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Otro">Otra cosa</label>
+      <label class="chip-baja"><input type="radio" name="cancelarMotivoBaja" value="Prefiere no decirlo">Prefiero no decirlo</label>
+    </div>
+    <!-- Alternativa según el motivo (4 oct 2026): de las bajas del mes gratis,
+         casi nadie llegó a entrenar; antes de confirmar se le enseña lo que
+         resuelve justo lo que ha marcado. _cancelarMotivoElegido() la pinta. -->
+    <div id="cancelarSubOferta" style="display:none;background:rgba(232,73,15,.07);border:1px solid rgba(232,73,15,.35);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <p id="cancelarSubOfertaTxt" style="margin:0;font-size:13px;line-height:1.6;color:var(--blanco)"></p>
+      <button type="button" id="cancelarSubOfertaBtn" class="btn-primary" style="display:none;margin-top:10px;padding:10px 16px;font-size:13px" onclick="_cancelarIrAlternativa()"></button>
     </div>
     <textarea id="cancelarSubTexto2" aria-label="Cuéntanos el motivo" rows="2" maxlength="1000" placeholder="Cuéntanoslo con tus palabras, si te apetece" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;resize:vertical;outline:none;margin-bottom:18px"></textarea>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button style="flex:1;background:none;border:1px solid var(--humo);border-radius:8px;color:var(--blanco);font-size:13px;font-weight:600;cursor:pointer;padding:12px 16px" onclick="cerrarModalCancelar()">Seguir con mi plan</button>
-      <button id="btnConfirmarCancelar" style="flex:1;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px" onclick="confirmarCancelarSuscripcion()">Sí, cancelar suscripción</button>
+      <button id="btnConfirmarCancelar" style="flex:1;background:none;border:1px solid #5A2A2A;border-radius:8px;color:#E8776A;font-size:13px;cursor:pointer;padding:12px 16px" onclick="confirmarCancelarSuscripcion()" disabled title="Marca primero qué ha pasado">Sí, cancelar suscripción</button>
     </div>
   </div>
 </div>
@@ -30459,7 +30467,45 @@ Se coló: ${lista}`;
     document.querySelectorAll('#cancelarSubChips input[name="cancelarMotivoBaja"]').forEach(el => { el.checked = false; });
     const txt2 = document.getElementById('cancelarSubTexto2');
     if (txt2) txt2.value = '';
+    _cancelarMotivoElegido();
     document.getElementById('modalCancelarSuscripcion')?.classList.add('visible');
+  }
+
+  // Alternativa según el motivo marcado al cancelar. 'accion': qué abre el botón.
+  const _ALTERNATIVA_BAJA = {
+    'Falta de uso': { txt: 'Es lo más normal al empezar. Puedes ajustar tu plan a menos días o a sesiones más cortas, y se rehace al momento.', btn: 'Ajustar mi plan', accion: 'plan' },
+    'Precio': { txt: 'Si lo que más usas es la alimentación, el plan «Solo nutrición» cuesta 4,99 € al mes.', btn: 'Ver Solo nutrición', accion: 'plan', soloCompleto: true },
+    'Entrenos': { txt: 'Puedes cambiar tu objetivo, tus días de entreno o dónde entrenas, y el plan se rehace al momento.', btn: 'Cambiar mi plan', accion: 'plan' },
+    'Dieta': { txt: 'Puedes cambiar lo que no comes, tus alergias o el número de comidas, y la dieta se rehace al momento. También puedes añadir tus propias comidas.', btn: 'Cambiar mi plan', accion: 'plan' },
+    'Falta variedad': { txt: 'Cambiando el objetivo o las preferencias, el plan se rehace con otros ejercicios y otras recetas.', btn: 'Cambiar mi plan', accion: 'plan' },
+    'Fallos': { txt: 'Cuéntanos aquí abajo qué ha fallado y te escribimos para arreglarlo.', accion: 'texto' },
+    'Objetivo cumplido': { txt: '¡Enhorabuena! Tu progreso se queda guardado por si quieres volver.' },
+  };
+
+  function _cancelarMotivoElegido() {
+    const sel = document.querySelector('#cancelarSubChips input[name="cancelarMotivoBaja"]:checked');
+    const btnOk = document.getElementById('btnConfirmarCancelar');
+    if (btnOk) { btnOk.disabled = !sel; btnOk.title = sel ? '' : 'Marca primero qué ha pasado'; btnOk.style.opacity = sel ? '' : '.5'; }
+    const caja = document.getElementById('cancelarSubOferta');
+    if (!caja) return;
+    let alt = sel ? _ALTERNATIVA_BAJA[sel.value] : null;
+    const esSolo = String((userData && userData.tipoPlan) || '').includes('Solo');
+    if (alt && alt.soloCompleto && esSolo) alt = null;
+    caja.style.display = alt ? 'block' : 'none';
+    if (!alt) return;
+    document.getElementById('cancelarSubOfertaTxt').textContent = alt.txt;
+    const b = document.getElementById('cancelarSubOfertaBtn');
+    b.style.display = alt.btn ? '' : 'none';
+    b.textContent = alt.btn || '';
+    b.dataset.accion = alt.accion || '';
+    if (alt.accion === 'texto') setTimeout(() => document.getElementById('cancelarSubTexto2')?.focus(), 50);
+  }
+
+  function _cancelarIrAlternativa() {
+    const b = document.getElementById('cancelarSubOfertaBtn');
+    const sel = document.querySelector('#cancelarSubChips input[name="cancelarMotivoBaja"]:checked');
+    kEvento('baja_alternativa', { motivo: sel ? sel.value : '' });
+    if (b && b.dataset.accion === 'plan') { cerrarModalCancelar(); abrirModalCambiarPlan(); }
   }
 
   // ===== PLAN DE EJEMPLO (portada) =====

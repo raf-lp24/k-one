@@ -2,6 +2,7 @@ const { getSupabaseAdmin, getAuthUser } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarYGuardar } = require('../lib/normalizador-alimentos');
 const { reconciliarPremium } = require('./_premium');
+const { motivoDeMensaje } = require('./_motivoBaja');
 
 // A-5: sin fallback hardcodeado — fail-closed si ADMIN_EMAILS no está configurada
 function getAdmins() {
@@ -519,6 +520,25 @@ module.exports = async (req, res) => {
     // Motivos de baja agregados (12 sept: cada uno ya se veía suelto en su
     // ficha; esto es la vista de conjunto para detectar patrones -- si la
     // mayoría se va por precio o por la dieta, por ejemplo).
+    // Quien cancela en el portal de Stripe no pasa por el modal de la web: su
+    // motivo lo deja el webhook en el Buzón (api/_motivoBaja.js). Se usa si la
+    // ficha no tiene uno mejor (4 oct 2026).
+    try {
+      const { data: bajas, error: eB } = await supabaseAdmin.from('mensajes_cliente')
+        .select('email, mensaje, created_at').like('mensaje', '[BAJA] Motivo:%')
+        .order('created_at', { ascending: false }).limit(200);
+      if (eB) console.warn('[admin-clientes] motivos de baja del Buzón:', eB.message);
+      const porEmail = {};
+      (bajas || []).forEach(b => {
+        const k = String(b.email || '').toLowerCase();
+        const mot = motivoDeMensaje(b.mensaje);
+        if (k && mot && mot !== 'sin marcar' && !porEmail[k]) porEmail[k] = { mot, fecha: b.created_at };
+      });
+      clientes.forEach(c => {
+        const x = porEmail[String(c.email || '').toLowerCase()];
+        if (x && (!c.motivoBaja || c.motivoBaja === 'sin_respuesta')) { c.motivoBaja = x.mot; c.motivoBajaFecha = x.fecha; }
+      });
+    } catch (e) { console.warn('[admin-clientes] motivos de baja del Buzón:', e.message); }
     const distMotivoBaja = distribucion(clientes.filter(c => c.motivoBaja), 'motivoBaja');
 
     let leads = [];

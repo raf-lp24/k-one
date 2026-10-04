@@ -2,6 +2,7 @@ const { getStripe, getSupabaseAdmin, getSubscriptionPeriod, upsertFromSubscripti
 const { capturarError } = require('./_sentry');
 const { MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA } = require('./_premium');
 const { marcarPruebaUsada } = require('./_pruebaGratis');
+const { registrarMotivoStripe } = require('./_motivoBaja');
 // Push al móvil del admin para lo que de verdad urge (pago fallido, baja).
 // Hasta ahora el webhook solo mandaba emails AL CLIENTE: de un pago fallido
 // o una baja, el dueño solo se enteraba al día siguiente por el digest.
@@ -227,6 +228,8 @@ module.exports = async (req, res) => {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
         const prev = event.data.previous_attributes;
+        // Baja desde el portal de Stripe: su encuesta de motivo, al Buzón (ver _motivoBaja.js).
+        await registrarMotivoStripe(supabaseAdmin, subscription, [MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA]);
 
         // REFERIDOS: aplicar el descuento acumulado en la siguiente cuota del referrer.
         // Se usa un crédito en el SALDO del cliente (customer balance): Stripe lo aplica
@@ -408,6 +411,7 @@ module.exports = async (req, res) => {
       case 'customer.subscription.deleted': {
         const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
         await syncCustomerFromStripe(stripe, supabaseAdmin, subscription.customer, subscription);
+        await registrarMotivoStripe(supabaseAdmin, subscription, [MOTIVO_CANCELACION_PREMIUM, MOTIVO_CUENTA_ELIMINADA]);
         // El mes gratis (sin tarjeta desde el 2 oct 2026) ha terminado sin que el
         // cliente añadiera tarjeta: Stripe la cancela sola (trial_settings). No es
         // una baja: se le escribe para que la añada y siga, y el admin lo sabe aparte.
