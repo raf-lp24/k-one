@@ -282,7 +282,10 @@ module.exports = async (req, res) => {
 
     const m = {
       registrados: 0, onboardingCompletado: 0,
-      activosPago: 0, enOferta: 0, cancelanAlFinal: 0,
+      // activosPago = PAGANDO de verdad (status active). Hasta el 4 oct 2026 sumaba
+      // también los del mes gratis (trialing) y Jarvis enseñaba "6 de pago, 43 %
+      // de conversión, 38,96 €/mes" sin que nadie hubiera pagado aún.
+      activosPago: 0, enPrueba: 0, pruebasTerminadas: 0, mrrPotencial: 0, enOferta: 0, cancelanAlFinal: 0,
       pagoFallido: 0, sinSuscripcion: 0, cancelados: 0, premium: 0,
       renovacionProximos7d: 0, sinOnboarding14d: 0, ceroEntrenosActivos: 0,
       tasaConversion: 0, tiempoMedioPago: null, mediaEntrenos: 0, mrrEstimado: 0,
@@ -305,7 +308,9 @@ module.exports = async (req, res) => {
       const sStripe = subByUser[p.id];
       const s       = premium ? null : sStripe;
       const status  = premium ? 'premium' : (s?.status || 'none');
-      const activo  = ['active', 'trialing'].includes(status);
+      const activo  = ['active', 'trialing'].includes(status);   // tiene acceso por Stripe
+      const pagando = status === 'active';                        // y además ya paga
+      const enPrueba = status === 'trialing';
       const enOferta  = activo && offerPriceId && s?.plan === offerPriceId;
       const cancela   = activo && !!s?.cancel_at_period_end;
       const diasDesdeAlta = diasEntre(p.created_at, ahora);
@@ -378,21 +383,25 @@ module.exports = async (req, res) => {
       }
       else if (status === 'past_due')              { alerta = 'red';    alertaRazon = 'Pago fallido'; }
       else if (sinOnboarding14d)              { alerta = 'red';    alertaRazon = '+14 días sin onboarding'; }
-      else if (activo && entrenosTotal === 0) { alerta = 'orange'; alertaRazon = 'Activo, 0 entrenos'; }
+      else if (activo && entrenosTotal === 0) { alerta = 'orange'; alertaRazon = enPrueba ? 'En prueba, 0 entrenos' : 'Pagando, 0 entrenos'; }
       else if (cancela)                       { alerta = 'orange'; alertaRazon = 'Cancela al vencer'; }
       else if (renovaProximo && !cancela)     { alerta = 'yellow'; alertaRazon = 'Renueva en 7 días'; }
-      else if (activo && entrenosTotal > 0)   { alerta = 'green';  alertaRazon = 'Activo y entrenando'; }
+      else if (activo && entrenosTotal > 0)   { alerta = 'green';  alertaRazon = enPrueba ? 'En prueba y entrenando' : 'Pagando y entrenando'; }
 
-      if (activo && s?.current_period_start && p.created_at) {
+      // Días desde el alta hasta el PRIMER cobro. Con current_period_start de una
+      // suscripción en prueba salía 0 (la prueba empieza el día del alta).
+      if (pagando && s?.current_period_start && p.created_at) {
         const dias = diasEntre(p.created_at, s.current_period_start);
         if (dias !== null && dias >= 0 && dias <= 365) { sumaDiasPago += dias; contadorDiasPago++; }
       }
 
-      if (activo && s?.current_period_start && new Date(s.current_period_start) >= hace7d) {
+      // Cobros de esta semana (primer pago o renovación). Antes contaba también
+      // las altas al mes gratis, que no cobran nada.
+      if (pagando && s?.current_period_start && new Date(s.current_period_start) >= hace7d) {
         m.nuevosPagosEstaSemana++;
       }
 
-      if (activo && !enOferta) {
+      if (pagando && !enOferta) {
         const sem = semanaActual >= 4 ? '4+' : String(semanaActual);
         retencion[sem]++;
       }
@@ -403,7 +412,11 @@ module.exports = async (req, res) => {
       if (ud.onboardingCompletado) m.onboardingCompletado++;
       if (premium) m.premium++;
       else if (!s || status === 'none') m.sinSuscripcion++;
-      if (activo)    m.activosPago++;
+      if (pagando)   m.activosPago++;
+      if (enPrueba)  m.enPrueba++;
+      // Pruebas ya decididas: pagó (active) o no (pago fallido, cancelada, impagada).
+      if (pagando || ['past_due', 'canceled', 'unpaid'].includes(status)) m.pruebasTerminadas++;
+      if (enPrueba && !cancela && MRR_MAP[s.plan]) m.mrrPotencial += MRR_MAP[s.plan];
       if (enOferta)  m.enOferta++;
       if (cancela)   m.cancelanAlFinal++;
       if (status === 'past_due') m.pagoFallido++;
@@ -411,7 +424,8 @@ module.exports = async (req, res) => {
       if (renovaProximo) m.renovacionProximos7d++;
       if (sinOnboarding14d) m.sinOnboarding14d++;
       if ((activo || premium) && entrenosTotal === 0) m.ceroEntrenosActivos++;
-      if (activo && !enOferta && MRR_MAP[s.plan]) mrr += MRR_MAP[s.plan];
+      // Ingresos al mes: solo quien paga y no ha pedido darse de baja.
+      if (pagando && !cancela && !enOferta && MRR_MAP[s.plan]) mrr += MRR_MAP[s.plan];
       if (esNuevo)       m.nuevosEstaSemana++;
       if (esSemanaPasada) m.nuevosSemanaPasada++;
 
@@ -510,7 +524,10 @@ module.exports = async (req, res) => {
     });
 
     m.mrrEstimado     = Math.round(mrr * 100) / 100;
-    m.tasaConversion  = m.registrados > 0 ? Math.round((m.activosPago / m.registrados) * 100) : 0;
+    // Conversión del mes gratis: de las pruebas que ya terminaron, cuántas pagan.
+    // (Antes: activos con prueba incluida / registrados.) null = aún no ha terminado ninguna.
+    m.tasaConversion  = m.pruebasTerminadas > 0 ? Math.round((m.activosPago / m.pruebasTerminadas) * 100) : null;
+    m.mrrPotencial    = Math.round(m.mrrPotencial * 100) / 100;
     m.tiempoMedioPago = contadorDiasPago > 0 ? Math.round(sumaDiasPago / contadorDiasPago) : null;
     m.mediaEntrenos   = contEntrenosActivos > 0 ? Math.round((sumEntrenosActivos / contEntrenosActivos) * 10) / 10 : 0;
 

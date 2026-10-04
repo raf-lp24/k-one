@@ -7184,7 +7184,8 @@
             <button class="jarvis-filtro jarvis-filtro-active" onclick="filtrarAdminTipo('todos')">Todos</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('alertas')">Alertas</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('revisar')">Revisar plan</button>
-            <button class="jarvis-filtro" onclick="filtrarAdminTipo('activos')">Activos</button>
+            <button class="jarvis-filtro" onclick="filtrarAdminTipo('activos')">Pagando</button>
+            <button class="jarvis-filtro" onclick="filtrarAdminTipo('prueba')">Mes gratis</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('premium')">Premium</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('sinpago')">Sin pago</button>
             <button class="jarvis-filtro" onclick="filtrarAdminTipo('nuevos')">Nuevos</button>
@@ -28662,7 +28663,8 @@ Se coló: ${lista}`;
     if (c.enOferta)    return _estadoPill('Oferta 1,99€', '255,197,61');
     if (c.estado === 'past_due') return _estadoPill('Pago fallido', '255,94,94');
     if (c.cancelaAlFinal) return _estadoPill('Cancela al final', '255,149,86');
-    if (['active','trialing'].includes(c.estado)) return _estadoPill('Activo', '61,220,151');
+    if (c.estado === 'trialing') return _estadoPill('Mes gratis', '82,169,255');
+    if (c.estado === 'active') return _estadoPill('Pagando', '61,220,151');
     if (['canceled','unpaid'].includes(c.estado)) return _estadoPill('Cancelado', '93,98,112');
     return _estadoPill('Sin pago', '93,98,112');
   };
@@ -28760,7 +28762,7 @@ Se coló: ${lista}`;
       { n: clientes.filter(_accCancela).length,        label: 'Cancela al vencer',   sub: 'Se van al renovar',       color: '#FF9556',        rgb: '255,149,86',  tipo: 'cancela' },
       { n: clientes.filter(_accPremiumCaduca).length,  label: 'Premium por caducar', sub: 'Próximos 7 días',         color: 'var(--jv-warn)', rgb: '255,197,61',  tipo: 'premiumcaduca' },
       { n: clientes.filter(_accInactivo).length,       label: 'Inactivos +14 días',  sub: 'Sin abrir la web',        color: '#FF9556',        rgb: '255,149,86',  tipo: 'inactivos' },
-      { n: clientes.filter(_accSinEntrenar).length,    label: 'Activos sin entrenar',sub: '0 entrenos, pagando',     color: 'var(--jv-warn)', rgb: '255,197,61',  tipo: 'sinentrenar' },
+      { n: clientes.filter(_accSinEntrenar).length,    label: 'Sin entrenar',        sub: '0 entrenos, en prueba o pagando', color: 'var(--jv-warn)', rgb: '255,197,61',  tipo: 'sinentrenar' },
       { n: clientes.filter(_accRenueva7).length,       label: 'Renuevan en 7 días',  sub: 'Cobro próximo',           color: 'var(--jv-info)', rgb: '82,169,255',  tipo: 'renueva7' },
       { n: sinResponder,                               label: 'Mensajes sin responder', sub: 'En el buzón',          color: 'var(--jv-alt)',  rgb: '167,139,250', tipo: '__buzon' },
     ].filter(it => it.n > 0);
@@ -28823,9 +28825,12 @@ Se coló: ${lista}`;
 
     // — Negocio —
     renderCards('adminMetricsBiz', [
-      { label: 'Ingresos est./mes (MRR)', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2) : '0') + '€', color: 'var(--jv-accent-2)' },
-      { label: 'Activos de pago', valor: mt.activosPago || 0, color: 'var(--jv-ok)', sub: `${mt.tasaConversion || 0}% conversión` },
-      { label: 'En oferta 1,99€', valor: mt.enOferta || 0, color: (mt.enOferta || 0) > 0 ? 'var(--jv-warn)' : OFF },
+      // Desde el 4 oct 2026 "pagando" es solo quien ya paga: el mes gratis va aparte.
+      { label: 'Ingresos al mes', valor: (mt.mrrEstimado != null ? mt.mrrEstimado.toFixed(2).replace('.', ',') : '0') + ' €', color: 'var(--jv-accent-2)',
+        sub: mt.mrrPotencial > 0 ? `+${mt.mrrPotencial.toFixed(2).replace('.', ',')} € si pagan los que están en prueba` : 'Solo quien ya paga' },
+      { label: 'Pagando', valor: mt.activosPago || 0, color: (mt.activosPago || 0) > 0 ? 'var(--jv-ok)' : OFF,
+        sub: mt.tasaConversion == null ? 'Aún no ha terminado ninguna prueba' : `${mt.tasaConversion}% de las pruebas terminadas (${mt.activosPago || 0} de ${mt.pruebasTerminadas || 0})` },
+      { label: 'En mes gratis', valor: mt.enPrueba || 0, color: (mt.enPrueba || 0) > 0 ? 'var(--jv-info)' : OFF, sub: 'Todavía no pagan' },
       { label: 'Premium (no pagan)', valor: mt.premium || 0, color: (mt.premium || 0) > 0 ? 'var(--jv-warn)' : OFF },
       { label: 'Total registrados', valor: mt.registrados || 0, color: 'var(--jv-text)' },
     ]);
@@ -28836,15 +28841,15 @@ Se coló: ${lista}`;
     const nReg = mt.nuevosEstaSemana || 0, pReg = mt.nuevosSemanaPasada || 0;
     renderCards('adminMetricsTrend', [
       { label: 'Nuevos registros', valor: nReg + trendArrow(nReg, pReg), color: trendColor(nReg, pReg), sub: `${pReg} semana anterior` },
-      { label: 'Nuevos pagos', valor: mt.nuevosPagosEstaSemana || 0, color: (mt.nuevosPagosEstaSemana || 0) > 0 ? 'var(--jv-ok)' : OFF },
+      { label: 'Cobros esta semana', valor: mt.nuevosPagosEstaSemana || 0, color: (mt.nuevosPagosEstaSemana || 0) > 0 ? 'var(--jv-ok)' : OFF },
     ]);
 
     // — Embudo & Engagement —
     renderCards('adminMetricsEng', [
       { label: 'Completaron onboarding', valor: mt.onboardingCompletado || 0, color: 'var(--jv-text)', sub: `de ${mt.registrados || 0} registrados` },
-      { label: 'Tiempo medio hasta pago', valor: mt.tiempoMedioPago != null ? mt.tiempoMedioPago + ' días' : '—', color: 'var(--jv-text)' },
-      { label: 'Media entrenos (activos)', valor: mt.mediaEntrenos || 0, color: 'var(--jv-ok)' },
-      { label: 'Activos sin entrenar', valor: mt.ceroEntrenosActivos || 0, color: mt.ceroEntrenosActivos > 0 ? '#FF9556' : OFF },
+      { label: 'Días hasta el primer pago', valor: mt.tiempoMedioPago != null ? mt.tiempoMedioPago + ' días' : '—', color: 'var(--jv-text)' },
+      { label: 'Media de entrenos', valor: String(mt.mediaEntrenos || 0).replace('.', ','), color: 'var(--jv-ok)', sub: 'En prueba, pagando o premium' },
+      { label: 'Sin entrenar', valor: mt.ceroEntrenosActivos || 0, color: mt.ceroEntrenosActivos > 0 ? '#FF9556' : OFF },
     ]);
 
     // — Alertas operativas —
@@ -29117,7 +29122,8 @@ Se coló: ${lista}`;
     let lista = clientes.filter(c => {
       switch (_adminFiltro.tipo) {
         case 'alertas': return c.alerta === 'red' || c.alerta === 'orange';
-        case 'activos': return ['active','trialing'].includes(c.estado);
+        case 'activos': return c.estado === 'active';
+        case 'prueba':  return c.estado === 'trialing';
         case 'premium': return c.isBeta;
         case 'sinpago': return !['active','trialing','past_due','canceled','unpaid','premium'].includes(c.estado);
         case 'nuevos':  return c.esNuevo;
@@ -29315,7 +29321,9 @@ Se coló: ${lista}`;
       b.classList.toggle('jarvis-filtro-active', b.textContent.trim().toLowerCase().includes(
         tipo === 'todos' ? 'todos' :
         tipo === 'alertas' ? 'alertas' :
-        tipo === 'activos' ? 'activos' :
+        tipo === 'activos' ? 'pagando' :
+        tipo === 'prueba' ? 'mes gratis' :
+        tipo === 'revisar' ? 'revisar plan' :
         tipo === 'premium' ? 'premium' :
         tipo === 'sinpago' ? 'sin pago' :
         tipo === 'nuevos' ? 'nuevos' :
@@ -29418,7 +29426,7 @@ Se coló: ${lista}`;
     const estadoTexto = c.estado === 'premium' ? 'Premium · no paga' :
       c.enOferta ? 'Oferta 1,99€' : c.cancelaAlFinal ? 'Cancela al final' :
       c.estado === 'past_due' ? 'Pago fallido' :
-      c.estado === 'active' ? 'Activo' : c.estado === 'trialing' ? 'Trialing' :
+      c.estado === 'active' ? 'Pagando' : c.estado === 'trialing' ? 'Mes gratis (aún no paga)' :
       c.estado === 'canceled' ? 'Cancelado' :
       (c.estado === 'none' || !c.estado) ? (c.isBeta ? 'Premium (sin Stripe)' : 'Sin pago') : c.estado;
 
@@ -30011,14 +30019,14 @@ Se coló: ${lista}`;
   }
 
   // ===== PANEL DE EMAILS: tipos, filtros y render =====
-  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario', auditoria_plan: 'Aviso del agente de revisión' };
+  const _emailTipoLabel = { lead: 'Email de plan al lead', bienvenida: 'Email de bienvenida', opinion: 'Notificación de opinión', mensaje: 'Mensaje de cliente', resumen_semanal: 'Resumen semanal', retencion_dia3: 'Retención día 3', retencion_dia8: 'Retención día 8', reenganche_7d: 'Re-engagement 7 días', reenganche_14d: 'Re-engagement 14 días', reenganche_21d: 'Re-engagement 21 días', renovacion: 'Email de renovación', digest_admin: 'Digest admin diario', auditoria_plan: 'Aviso del agente de revisión', retencion_tarjeta: 'Retención: plan hecho sin activar', aviso_primer_cobro: 'Aviso: termina el mes gratis', prueba_sin_entrenar: 'Mes gratis: primer entreno', prueba_sin_tarjeta: 'Mes gratis: añade tu tarjeta', pago_fallido: 'Pago fallido', plan_invitado: 'Plan por email (sin cuenta)', recordatorio_plan_invitado: 'Recordatorio al invitado', push_recordatorio_diario: 'Aviso diario al móvil', generico: 'Correo' };
   // Paleta por tipo de email: familias distinguibles entre sí (naranja de marca
   // para captación, verde para altas, azul/violeta para informes, y rojos cada
   // vez más intensos para los 3 niveles de re-enganche).
   // OJO: aquí van hex literales a propósito, NO var(--jv-*): estos valores se
   // concatenan con sufijos de opacidad más abajo (`${color}18`), y "var(...)18"
   // no es CSS válido -- el fondo se perdería en silencio.
-  const _emailTipoColor = { lead: '#FF5F2E', bienvenida: '#3DDC97', opinion: '#FFC53D', mensaje: '#52A9FF', resumen_semanal: '#A78BFA', retencion_dia3: '#FFA766', retencion_dia8: '#FF8A4C', reenganche_7d: '#FF7A7A', reenganche_14d: '#FF5E5E', reenganche_21d: '#E23F3F', renovacion: '#2DD4BF', digest_admin: '#8B909C' };
+  const _emailTipoColor = { lead: '#FF5F2E', bienvenida: '#3DDC97', opinion: '#FFC53D', mensaje: '#52A9FF', resumen_semanal: '#A78BFA', retencion_dia3: '#FFA766', retencion_dia8: '#FF8A4C', reenganche_7d: '#FF7A7A', reenganche_14d: '#FF5E5E', reenganche_21d: '#E23F3F', renovacion: '#2DD4BF', digest_admin: '#8B909C', retencion_tarjeta: '#FFA766', aviso_primer_cobro: '#2DD4BF', prueba_sin_entrenar: '#52A9FF', prueba_sin_tarjeta: '#2DD4BF', pago_fallido: '#E23F3F', plan_invitado: '#FF5F2E', recordatorio_plan_invitado: '#FF8A4C', push_recordatorio_diario: '#8B909C', auditoria_plan: '#A78BFA', generico: '#8B909C' };
   function _emailIcon(tipo) {
     const c = _emailTipoColor[tipo] || 'var(--jv-faint)';
     const iconos = {
