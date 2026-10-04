@@ -4480,6 +4480,17 @@
     font-family: 'DM Mono', monospace;
   }
 
+  /* Etiquetas pequeñas de las tarjetas de ejercicio en Inter (5 oct 2026).
+     Los rótulos naranjas de sección («LUNES», «NUTRICIÓN · HOY») siguen en DM Mono a propósito. */
+  .em-k, .ejercicio-rpe .k, .prog-sug-k, .prog-feedback-k, .peso-unit, .peso-ultimo,
+  .week-session-text strong, .entreno-bloque-num, .ej-lectura .sr, .ses-serie .n, .week-today-badge {
+    font-family: 'Inter', sans-serif; letter-spacing: 0; text-transform: none;
+  }
+  .em-k, .ejercicio-rpe .k, .prog-sug-k, .prog-feedback-k { font-size: 12px; font-weight: 600; }
+  .peso-unit { font-size: 13px; font-weight: 600; }
+  .week-session-text strong { font-size: 13.5px; font-weight: 700; }
+  .week-today-badge { font-size: 11px; font-weight: 700; border-radius: 999px; }
+
   /* NUTRICIÓN */
   .nutrition-day {
     display: grid;
