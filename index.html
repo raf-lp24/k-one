@@ -13509,7 +13509,7 @@
     if (generatedPlan) {
       regenerarEntrenamientoHoy(generatedPlan);
       const todayContent = document.getElementById('todayContent');
-      const diaHoyPlan = generatedPlan.semana?.[getIndiceDiaHoy()];
+      const diaHoyPlan = generatedPlan.semana?.[getIndiceSesionHoy()];
       if (todayContent && !generatedPlan.soloDieta && diaHoyPlan && diaHoyPlan.tipo !== 'Descanso') {
         todayContent.innerHTML = generatedPlan.entrenamiento_hoy;
       }
@@ -18055,7 +18055,7 @@
           opciones: [
             // Movidas aquí desde Desayuno por el usuario (3 oct 2026).
             op("Revuelto de champiñones y espinacas con pavo", "3 claras, 1 huevo, 100g champiñones, 100g espinacas, 60g pavo, 10g AOVE", "324 kcal", "38g prot", "7g carbs", "16g grasa", "Fácil · 10 min"),
-            op("Poké bowl de salmón con arroz y aguacate", "150g salmón fresco en dados, 80g arroz, 1/4 aguacate, pepino, edamame, salsa soja, sésamo", "615 kcal", "43g prot", "37g carbs", "33g grasa", "Sin cocción · 10 min"),
+            op("Poké bowl de salmón con arroz y aguacate", "150g salmón fresco en dados, 80g arroz cocido, 1/4 aguacate, pepino, edamame, salsa soja, sésamo", "615 kcal", "43g prot", "37g carbs", "33g grasa", "Sin cocción · 10 min"),
             op("Pollo al limón con patata asada y ensalada", "180g pollo al horno, 150g patata asada, 120g lechuga, 120g tomate, 60g zanahoria, 10g AOVE, limón", "516 kcal", "47g prot", "46g carbs", "16g grasa", "Fácil · 30 min"),
             op("Tacos de pollo con guacamole casero y pico de gallo", "2 tortillas de maíz, 180g pollo especiado, 40g guacamole casero, tomate, cebolla, cilantro, lima", "492 kcal", "47g prot", "48g carbs", "13g grasa", "Medio · 20 min"),
             op("Merluza al horno con patata y verduras", "200g merluza, 150g patata, judías verdes, zanahoria, AOVE, limón", "448 kcal", "41g prot", "44g carbs", "12g grasa", "Fácil · 25 min"),
@@ -18077,7 +18077,7 @@
             op("Sepia a la plancha con pisto de verduras", "200g sepia, 120g calabacín, 100g pimiento, 100g tomate, 60g cebolla, 10g AOVE", "345 kcal", "36g prot", "21g carbs", "13g grasa", "Fácil · 20 min"),
             op("Ensalada de garbanzos con caballa y pepino", "150g garbanzos cocidos, 100g caballa, 100g pepino, 100g tomate, 40g cebolla, 10g AOVE", "578 kcal", "34g prot", "52g carbs", "26g grasa", "Sin cocción · 10 min"),
             op("Dorada al horno con espárragos y limón", "220g dorada, 150g espárragos trigueros, 150g patata, 10g AOVE, limón, perejil", "520 kcal", "49g prot", "36g carbs", "20g grasa", "Fácil · 25 min"),
-            op("Salteado de pavo con brócoli y quinoa", "180g pavo, 150g brócoli, 120g quinoa, 10g AOVE, ajo, 10ml salsa de soja", "500 kcal", "53g prot", "36g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Salteado de pavo con brócoli y quinoa", "180g pavo, 150g brócoli, 120g quinoa cocida, 10g AOVE, ajo, 10ml salsa de soja", "500 kcal", "53g prot", "36g carbs", "16g grasa", "Fácil · 20 min"),
             // Añadidas el 3 oct 2026 (aprobadas por el usuario; macros con scripts/componer.js).
             op("Ternera guisada con patata, zanahoria y guisantes", "150g ternera, 200g patata, 100g zanahoria, 50g guisantes, 5g AOVE, cebolla, laurel", "604 kcal", "62g prot", "62g carbs", "12g grasa", "Media · 40 min"),
             op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
@@ -18319,19 +18319,19 @@
           opciones: [
             // Movidas aquí desde Desayuno por el usuario (3 oct 2026).
             op("Revuelto de patata, huevo y jamón", "200g patata cocida, 3 huevos, 60g jamón cocido, 10g AOVE", "556 kcal", "34g prot", "42g carbs", "28g grasa", "Fácil · 15 min"),
-            op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati, pimiento, brócoli, zanahoria, salsa soja, sésamo", "508 kcal", "48g prot", "52g carbs", "12g grasa", "Medio · 25 min"),
-            op("Pasta boloñesa casera con ternera", "180g ternera picada, 100g pasta integral, tomate frito casero, zanahoria, cebolla, orégano", "586 kcal", "42g prot", "64g carbs", "18g grasa", "Medio · 25 min"),
+            op("Arroz con pollo y verduras al wok", "220g pollo, 120g arroz basmati cocido, pimiento, brócoli, zanahoria, salsa soja, sésamo", "508 kcal", "48g prot", "52g carbs", "12g grasa", "Medio · 25 min"),
+            op("Pasta boloñesa casera con ternera", "180g ternera picada, 100g pasta integral cocida, tomate frito casero, zanahoria, cebolla, orégano", "586 kcal", "42g prot", "64g carbs", "18g grasa", "Medio · 25 min"),
             op("Salmón con patata asada y ensalada grande", "200g salmón al horno, 200g patata asada con romero, ensalada verde, limón", "596 kcal", "44g prot", "42g carbs", "28g grasa", "Medio · 30 min"),
             op("Fajitas de pollo con pimiento y cebolla", "2 tortillas de trigo, 200g pollo especiado, pimiento, cebolla, AOVE, lima", "621 kcal", "54g prot", "50g carbs", "22g grasa", "Medio · 20 min"),
-            op("Poké bowl de salmón con arroz y edamame", "180g salmón fresco, 100g arroz, edamame, aguacate, pepino, soja, sésamo", "612 kcal", "42g prot", "48g carbs", "28g grasa", "Sin cocción · 10 min"),
-            op("Pollo al curry con arroz basmati", "200g pollo, 120g arroz basmati, 100ml leche de coco light, curry, cebolla, tomate, cilantro", "560 kcal", "46g prot", "58g carbs", "16g grasa", "Medio · 25 min"),
+            op("Poké bowl de salmón con arroz y edamame", "180g salmón fresco, 100g arroz cocido, edamame, aguacate, pepino, soja, sésamo", "612 kcal", "42g prot", "48g carbs", "28g grasa", "Sin cocción · 10 min"),
+            op("Pollo al curry con arroz basmati", "200g pollo, 120g arroz basmati cocido, 100ml leche de coco light, curry, cebolla, tomate, cilantro", "560 kcal", "46g prot", "58g carbs", "16g grasa", "Medio · 25 min"),
             op("Entrecot a la plancha con patata asada y guisantes", "200g entrecot de ternera, 200g patata asada, 100g guisantes, AOVE", "900 kcal", "60g prot", "57g carbs", "48g grasa", "Medio · 25 min"),
-            op("Pasta con atún y tomate", "150g pasta integral, 2 latas atún, tomate frito casero, aceitunas", "436 kcal", "50g prot", "48g carbs", "6g grasa", "Fácil · 20 min"),
-            op("Arroz con pollo al horno y verduras", "150g arroz, 200g pollo al horno, pimiento, cebolla, AOVE", "582 kcal", "46g prot", "68g carbs", "14g grasa", "Fácil · 30 min"),
+            op("Pasta con atún y tomate", "150g pasta integral cocida, 2 latas atún, tomate frito casero, aceitunas", "436 kcal", "50g prot", "48g carbs", "6g grasa", "Fácil · 20 min"),
+            op("Arroz con pollo al horno y verduras", "150g arroz cocido, 200g pollo al horno, pimiento, cebolla, AOVE", "582 kcal", "46g prot", "68g carbs", "14g grasa", "Fácil · 30 min"),
             op("Lomo de cerdo con patatas panadera", "200g lomo de cerdo, 200g patata panadera, cebolla, AOVE", "503 kcal", "46g prot", "46g carbs", "15g grasa", "Medio · 30 min"),
             op("Espaguetis con almejas y gambas", "150g espaguetis crudos, 150g almejas, 100g gambas, ajo, perejil, AOVE", "811 kcal", "52g prot", "117g carbs", "15g grasa", "Medio · 20 min"),
             op("Pechuga rellena de jamón y queso con patatas", "200g pechuga de pollo, 40g jamón cocido, 40g queso tierno, 150g patatas al horno, AOVE", "582 kcal", "48g prot", "48g carbs", "22g grasa", "Medio · 30 min"),
-            op("Cuscús con pollo y verduras", "150g cuscús, 200g pollo especiado, calabacín, pimiento, pasas", "491 kcal", "53g prot", "55g carbs", "6g grasa", "Fácil · 20 min"),
+            op("Cuscús con pollo y verduras", "150g cuscús cocido, 200g pollo especiado, calabacín, pimiento, pasas", "491 kcal", "53g prot", "55g carbs", "6g grasa", "Fácil · 20 min"),
             op("Rissotto de champiñones con pollo", "80g arroz crudo (arborio), 180g pollo, champiñones, caldo, parmesano", "610 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
             // PLATOS DENSOS EN CARBOHIDRATOS (auditoría 5 sept 2026). El pool de
             // ganancia se movía en 38-70 g de carbohidratos por comida, y a un
@@ -18346,7 +18346,7 @@
             op("Paella de pollo y verduras", "220g arroz cocido, 200g pollo, 120g judías verdes, 100g pimiento, azafrán, 15g AOVE", "706 kcal", "54g prot", "82g carbs", "18g grasa", "Medio · 35 min"),
             op("Macarrones integrales con pollo y tomate", "200g macarrones integrales cocidos, 200g pollo, 100g tomate frito casero, orégano, 10g AOVE", "692 kcal", "54g prot", "83g carbs", "16g grasa", "Fácil · 20 min"),
             op("Fideuá de pollo y gambas", "200g fideos cocidos, 150g pollo, 100g gambas, 100g pimiento, ajo, azafrán, 10g AOVE", "662 kcal", "64g prot", "70g carbs", "14g grasa", "Medio · 30 min"),
-            op("Cuscús con ternera y verduras salteadas", "150g cuscús, 180g ternera, 100g pimiento, 80g zanahoria, 60g cebolla, 10g AOVE, comino", "670 kcal", "73g prot", "54g carbs", "18g grasa", "Fácil · 25 min"),
+            op("Cuscús con ternera y verduras salteadas", "150g cuscús cocido, 180g ternera, 100g pimiento, 80g zanahoria, 60g cebolla, 10g AOVE, comino", "670 kcal", "73g prot", "54g carbs", "18g grasa", "Fácil · 25 min"),
             // Añadidas el 3 oct 2026 (aprobadas por el usuario; macros con scripts/componer.js).
             op("Ternera guisada con patata, zanahoria y guisantes", "150g ternera, 200g patata, 100g zanahoria, 50g guisantes, 5g AOVE, cebolla, laurel", "604 kcal", "62g prot", "62g carbs", "12g grasa", "Media · 40 min"),
             op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
@@ -18423,19 +18423,19 @@
           momento: "Cena", hora: "21:00",
           porque: "Cena abundante en proteína para la recuperación y reparación muscular nocturna",
           opciones: [
-            op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral, 200g brócoli al vapor, limón, AOVE", "626 kcal", "46g prot", "34g carbs", "34g grasa", "Fácil · 20 min"),
+            op("Salmón a la plancha con arroz y brócoli", "200g salmón, 80g arroz integral cocido, 200g brócoli al vapor, limón, AOVE", "626 kcal", "46g prot", "34g carbs", "34g grasa", "Fácil · 20 min"),
             op("Solomillo de ternera con patata y ensalada", "180g solomillo a la plancha, 150g patata cocida, ensalada verde, AOVE", "422 kcal", "41g prot", "33g carbs", "14g grasa", "Medio · 25 min"),
             op("Tortilla de huevos con jamón, queso y pan", "4 huevos, 50g jamón cocido, 40g queso, 2 rebanadas pan centeno", "620 kcal", "44g prot", "30g carbs", "36g grasa", "Fácil · 10 min"),
             op("Bacalao al pil-pil con patata y pimiento", "200g bacalao, 150g patata, pimiento verde, ajo, guindilla, AOVE", "424 kcal", "38g prot", "32g carbs", "16g grasa", "Medio · 25 min"),
             op("Pollo al horno con boniato y espárragos", "220g pollo, 200g boniato asado, espárragos verdes, AOVE, romero", "530 kcal", "48g prot", "44g carbs", "18g grasa", "Fácil · 30 min"),
             op("Cinta de lomo a la plancha con verduras", "180g cinta de lomo, brócoli, zanahoria y judías verdes al vapor, AOVE", "372 kcal", "36g prot", "12g carbs", "20g grasa", "Fácil · 15 min"),
             op("Ensalada templada de salmón con patata y huevo", "180g salmón a la plancha, 100g patata, 1 huevo duro, rúcula, AOVE, mostaza", "632 kcal", "46g prot", "22g carbs", "40g grasa", "Fácil · 20 min"),
-            op("Alitas de pollo al horno con arroz y guisantes", "250g alitas de pollo al horno, 100g arroz basmati, 100g guisantes, AOVE", "802 kcal", "54g prot", "43g carbs", "46g grasa", "Medio · 30 min"),
-            op("Pasta con pollo y champiñones al ajillo", "120g pasta integral, 180g pollo, champiñones, ajo, AOVE", "568 kcal", "44g prot", "62g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Alitas de pollo al horno con arroz y guisantes", "250g alitas de pollo al horno, 100g arroz basmati cocido, 100g guisantes, AOVE", "802 kcal", "54g prot", "43g carbs", "46g grasa", "Medio · 30 min"),
+            op("Pasta con pollo y champiñones al ajillo", "120g pasta integral cocida, 180g pollo, champiñones, ajo, AOVE", "568 kcal", "44g prot", "62g carbs", "16g grasa", "Fácil · 20 min"),
             op("Hamburguesa de ternera con boniato al horno", "180g ternera picada, 200g boniato asado, ensalada", "584 kcal", "42g prot", "50g carbs", "24g grasa", "Medio · 25 min"),
-            op("Salmón con arroz y edamame", "180g salmón, 100g arroz, 100g edamame, salsa soja, sésamo", "626 kcal", "42g prot", "56g carbs", "26g grasa", "Fácil · 20 min"),
+            op("Salmón con arroz y edamame", "180g salmón, 100g arroz cocido, 100g edamame, salsa soja, sésamo", "626 kcal", "42g prot", "56g carbs", "26g grasa", "Fácil · 20 min"),
             op("Merluza con patatas panadera", "200g merluza, 200g patata panadera, cebolla, AOVE", "488 kcal", "38g prot", "48g carbs", "16g grasa", "Medio · 25 min"),
-            op("Pechuga rellena de espinacas y queso con arroz", "200g pechuga de pollo, 50g queso tierno, 100g espinacas, 100g arroz", "564 kcal", "46g prot", "50g carbs", "20g grasa", "Medio · 30 min"),
+            op("Pechuga rellena de espinacas y queso con arroz", "200g pechuga de pollo, 50g queso tierno, 100g espinacas, 100g arroz cocido", "564 kcal", "46g prot", "50g carbs", "20g grasa", "Medio · 30 min"),
             op("Costillas al horno con puré de patata", "220g costillas de cerdo, 200g puré de patata, especias", "781 kcal", "61g prot", "40g carbs", "42g grasa", "Medio · 35 min"),
             op("Wok de ternera con tallarines de arroz y verduras", "180g ternera en tiras, 100g tallarines de arroz, pimiento, brócoli, soja", "588 kcal", "40g prot", "62g carbs", "20g grasa", "Medio · 20 min"),
             // Cenas densas en carbohidratos, mismo motivo que las comidas.
@@ -18443,7 +18443,7 @@
             op("Salmón con boniato asado y quinoa", "180g salmón al horno, 250g boniato asado, 100g quinoa cocida, espárragos, 10g AOVE", "833 kcal", "48g prot", "77g carbs", "37g grasa", "Medio · 35 min"),
             op("Espaguetis integrales con pavo y tomate", "200g espaguetis integrales cocidos, 180g pavo picado, 100g tomate frito casero, albahaca, 10g AOVE", "664 kcal", "52g prot", "78g carbs", "16g grasa", "Fácil · 20 min"),
             op("Hamburguesa de ternera con huevo y boniato asado", "180g carne picada de ternera, 2 huevos, 200g boniato, 10g AOVE, 80g lechuga, 80g tomate", "686 kcal", "57g prot", "47g carbs", "30g grasa", "Medio · 30 min"),
-            op("Salmón al horno con quinoa y espárragos", "200g salmón, 150g quinoa, 150g espárragos trigueros, 10g AOVE, limón", "716 kcal", "51g prot", "38g carbs", "40g grasa", "Fácil · 25 min"),
+            op("Salmón al horno con quinoa y espárragos", "200g salmón, 150g quinoa cocida, 150g espárragos trigueros, 10g AOVE, limón", "716 kcal", "51g prot", "38g carbs", "40g grasa", "Fácil · 25 min"),
             op("Tortilla de patata con atún y ensalada", "3 huevos, 200g patata, 2 latas atún al natural, 15g AOVE, 80g lechuga, 80g tomate", "753 kcal", "67g prot", "47g carbs", "33g grasa", "Medio · 30 min"),
             op("Pechuga de pollo rellena de espinacas con puré de patata", "200g pollo, 100g espinacas, 200g patata, 100ml leche semidesnatada, 10g AOVE", "574 kcal", "55g prot", "48g carbs", "18g grasa", "Medio · 35 min"),
             op("Wok de cerdo con arroz, verduras y anacardos", "180g cinta de lomo, 150g arroz cocido, 100g pimiento, 80g zanahoria, 20g anacardos, 10g AOVE, 10ml salsa de soja", "686 kcal", "50g prot", "63g carbs", "26g grasa", "Fácil · 20 min"),
@@ -18573,15 +18573,15 @@
             op("Albóndigas de pavo en salsa con arroz", "180g pavo picado, 80g arroz crudo, salsa de tomate casera, cebolla, AOVE", "611 kcal", "51g prot", "68g carbs", "15g grasa", "Medio · 30 min"),
             op("Pollo al horno con patata asada y ensalada", "180g pollo, 150g patata asada con romero, ensalada verde, AOVE", "448 kcal", "40g prot", "36g carbs", "16g grasa", "Fácil · 25 min"),
             (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos') || enfermedad.includes('cardiacos'))
-              ? op("Lentejas estofadas con verduras", "180g lentejas, zanahoria, patata, pimiento, cebolla, pimentón ahumado, AOVE", "460 kcal", "28g prot", "62g carbs", "8g grasa", "Fácil · 35 min")
-              : op("Lentejas con chorizo y verduras", "180g lentejas, 40g chorizo, zanahoria, patata, pimiento, pimentón", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
+              ? op("Lentejas estofadas con verduras", "180g lentejas cocidas, zanahoria, patata, pimiento, cebolla, pimentón ahumado, AOVE", "460 kcal", "28g prot", "62g carbs", "8g grasa", "Fácil · 35 min")
+              : op("Lentejas con chorizo y verduras", "180g lentejas cocidas, 40g chorizo, zanahoria, patata, pimiento, pimentón", "500 kcal", "30g prot", "58g carbs", "14g grasa", "Fácil · 35 min"),
             op("Merluza al horno con patatas y pisto", "200g merluza, 120g patata, calabacín, tomate, pimiento, AOVE, limón", "384 kcal", "36g prot", "42g carbs", "8g grasa", "Fácil · 25 min"),
-            op("Arroz con pollo al curry y verduras", "180g pollo, 100g arroz basmati, 100ml leche de coco light, curry, pimiento, cebolla", "494 kcal", "40g prot", "52g carbs", "14g grasa", "Medio · 25 min"),
-            op("Garbanzos con atún, huevo y ensalada", "150g garbanzos, 1 lata atún, 1 huevo duro, ensalada variada, AOVE", "524 kcal", "42g prot", "44g carbs", "20g grasa", "Sin cocción · 8 min"),
+            op("Arroz con pollo al curry y verduras", "180g pollo, 100g arroz basmati cocido, 100ml leche de coco light, curry, pimiento, cebolla", "494 kcal", "40g prot", "52g carbs", "14g grasa", "Medio · 25 min"),
+            op("Garbanzos con atún, huevo y ensalada", "150g garbanzos cocidos, 1 lata atún, 1 huevo duro, ensalada variada, AOVE", "524 kcal", "42g prot", "44g carbs", "20g grasa", "Sin cocción · 8 min"),
             op("Pasta con pollo y pesto casero", "60g pasta integral cruda, 150g pollo a la plancha, pesto de albahaca casero, tomate cherry", "496 kcal", "40g prot", "48g carbs", "16g grasa", "Fácil · 20 min"),
             op("Salmón a la parrilla con quinoa y ensalada", "200g salmón, 150g quinoa cocida, ensalada con tomate, pepino y limón", "593 kcal", "48g prot", "35g carbs", "29g grasa", "Fácil · 20 min"),
             op("Pollo al ajillo con patatas panadera", "180g pollo, 150g patata, ajo, AOVE, perejil", "464 kcal", "38g prot", "42g carbs", "16g grasa", "Fácil · 25 min"),
-            op("Arroz con conejo y verduras", "100g arroz, 180g conejo, pimiento, tomate, romero", "470 kcal", "36g prot", "50g carbs", "14g grasa", "Medio · 35 min"),
+            op("Arroz con conejo y verduras", "100g arroz cocido, 180g conejo, pimiento, tomate, romero", "470 kcal", "36g prot", "50g carbs", "14g grasa", "Medio · 35 min"),
             op("Ensalada de pasta con atún y verduras", "130g pasta integral cocida, 1 lata atún, tomate, pepino, maíz", "365 kcal", "31g prot", "55g carbs", "4g grasa", "Sin cocción · 15 min"),
             op("Bacalao con tomate y pimientos", "200g bacalao, tomate frito casero, pimientos, ajo", "194 kcal", "37g prot", "7g carbs", "2g grasa", "Fácil · 25 min"),
             op("Pollo al horno con verduras variadas", "180g pollo, calabacín, zanahoria, cebolla, AOVE", "408 kcal", "40g prot", "26g carbs", "16g grasa", "Fácil · 30 min"),
@@ -18589,7 +18589,7 @@
             op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
             op("Cinta de lomo con boniato y judías verdes", "160g cinta de lomo, 150g boniato, 150g judías verdes, 10g AOVE, romero", "468 kcal", "40g prot", "41g carbs", "16g grasa", "Fácil · 30 min"),
             op("Dorada al horno con patata panadera y cebolla", "200g dorada, 150g patata, 80g cebolla, 10g AOVE, perejil, limón", "491 kcal", "43g prot", "37g carbs", "19g grasa", "Fácil · 30 min"),
-            op("Calamares a la plancha con quinoa y ensalada de tomate", "180g calamar, 150g quinoa, 120g tomate, 40g cebolla, 10g AOVE, perejil", "444 kcal", "33g prot", "42g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Calamares a la plancha con quinoa y ensalada de tomate", "180g calamar, 150g quinoa cocida, 120g tomate, 40g cebolla, 10g AOVE, perejil", "444 kcal", "33g prot", "42g carbs", "16g grasa", "Fácil · 20 min"),
             op("Guiso de ternera con patata y zanahoria", "150g ternera, 150g patata, 80g zanahoria, 60g cebolla, 10g AOVE, laurel, pimentón", "548 kcal", "58g prot", "43g carbs", "16g grasa", "Medio · 45 min"),
             op("Revuelto de bacalao con pimientos y patata", "150g bacalao, 120g pimiento, 150g patata, 2 huevos, 10g AOVE, ajo", "526 kcal", "44g prot", "38g carbs", "22g grasa", "Fácil · 20 min"),
             // Añadidas el 3 oct 2026 (aprobadas por el usuario; macros con scripts/componer.js).
@@ -18798,9 +18798,9 @@
     if (esRunner || esHyrox) {
       const extrasCarbs = [
         op("Pasta con verduras y atún", "70g pasta integral cruda, 1 lata atún, calabacín, tomate, AOVE", "468 kcal", "32g prot", "58g carbs", "12g grasa", "Fácil · 15 min"),
-        op("Arroz con pollo y boniato", "180g pollo, 80g arroz, 100g boniato, AOVE", "502 kcal", "42g prot", "52g carbs", "14g grasa", "Fácil · 25 min"),
+        op("Arroz con pollo y boniato", "180g pollo, 80g arroz cocido, 100g boniato, AOVE", "502 kcal", "42g prot", "52g carbs", "14g grasa", "Fácil · 25 min"),
         op("Wrap integral de pollo y hummus casero", "1 tortilla integral, 150g pollo, 40g hummus casero, lechuga, zanahoria", "422 kcal", "38g prot", "36g carbs", "14g grasa", "Sin cocción · 5 min"),
-        op("Cuscús con verduras y garbanzos", "100g cuscús, 100g garbanzos, calabacín, pimiento, AOVE, comino", "410 kcal", "18g prot", "62g carbs", "10g grasa", "Fácil · 15 min"),
+        op("Cuscús con verduras y garbanzos", "100g cuscús cocido, 100g garbanzos cocidos, calabacín, pimiento, AOVE, comino", "410 kcal", "18g prot", "62g carbs", "10g grasa", "Fácil · 15 min"),
         op("Bocadillo de pavo con aguacate", "1 barra pan integral, 100g pavo, 1/4 aguacate, tomate, lechuga", "440 kcal", "32g prot", "42g carbs", "16g grasa", "Sin cocción · 5 min"),
       ];
       nutricion.forEach(m => {
@@ -18817,10 +18817,10 @@
     }
     if (esGimnasio || esCrossfit) {
       const extrasProte = [
-        op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral, 200g brócoli, AOVE", "486 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
+        op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral cocido, 200g brócoli, AOVE", "486 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
         op("Steak de ternera con patata asada", "180g ternera magra, 200g patata asada, ensalada verde, AOVE", "626 kcal", "71g prot", "45g carbs", "18g grasa", "Medio · 25 min"),
         op("Revuelto de claras con avena y pavo", "200ml claras, 2 huevos, 30g avena, 50g pavo, espinacas", "446 kcal", "53g prot", "25g carbs", "14g grasa", "Fácil · 10 min"),
-        op("Bowl de atún con arroz y aguacate", "2 latas atún, 100g arroz, 1/4 aguacate, edamame, soja", "472 kcal", "40g prot", "42g carbs", "16g grasa", "Sin cocción · 8 min"),
+        op("Bowl de atún con arroz y aguacate", "2 latas atún, 100g arroz cocido, 1/4 aguacate, edamame, soja", "472 kcal", "40g prot", "42g carbs", "16g grasa", "Sin cocción · 8 min"),
         op("Pechuga de pavo al horno con boniato", "200g pavo, 200g boniato, espárragos, AOVE", "452 kcal", "46g prot", "40g carbs", "12g grasa", "Medio · 30 min"),
         op("Tortilla de 4 claras con jamón y queso", "4 claras + 1 huevo, 40g jamón cocido, 30g queso, espinacas", "294 kcal", "38g prot", "4g carbs", "14g grasa", "Fácil · 8 min"),
       ];
@@ -18839,11 +18839,11 @@
     if (esCombinacion) {
       nutricion.forEach(m => {
         if (m.momento === 'Comida') m.opciones.push(
-          op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa, garbanzos, tomate seco, rúcula, AOVE", "565 kcal", "53g prot", "45g carbs", "19g grasa", "Fácil · 20 min"),
-          op("Salmón con arroz y edamame", "180g salmón, 80g arroz, 80g edamame, soja, sésamo", "609 kcal", "50g prot", "31g carbs", "31g grasa", "Fácil · 20 min")
+          op("Bowl mediterráneo de pollo y quinoa", "180g pollo, 100g quinoa cocida, garbanzos, tomate seco, rúcula, AOVE", "565 kcal", "53g prot", "45g carbs", "19g grasa", "Fácil · 20 min"),
+          op("Salmón con arroz y edamame", "180g salmón, 80g arroz cocido, 80g edamame, soja, sésamo", "609 kcal", "50g prot", "31g carbs", "31g grasa", "Fácil · 20 min")
         );
         if (m.momento === 'Cena') m.opciones.push(
-          op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz, aguacate, zanahoria, soja, sésamo", "448 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
+          op("Poke bowl casero de atún", "150g atún fresco o lata, 80g arroz cocido, aguacate, zanahoria, soja, sésamo", "448 kcal", "34g prot", "42g carbs", "16g grasa", "Sin cocción · 10 min")
         );
         if (m.momento === 'Media mañana') m.opciones.push(
           op("Wrap pequeño de atún y aguacate (energía para el entreno híbrido)", "1 tortilla integral pequeña, 1 lata atún, 1/4 aguacate, tomate", "315 kcal", "26g prot", "28g carbs", "11g grasa", "Sin cocción · 5 min")
@@ -19085,7 +19085,7 @@
             op('Fruta variada con semillas de calabaza', '1 pieza de fruta, 1 mandarina, 15g semillas de calabaza', '180 kcal', '5g prot', '24g carbs', '8g grasa', 'Sin cocción · 1 min')
           ],
           'Comida': [
-            op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz, 200g brócoli al vapor, 15g AOVE', '565 kcal', '53g prot', '41g carbs', '21g grasa', 'Fácil · 20 min'),
+            op('Pollo a la plancha con arroz y verduras', '200g pechuga de pollo, 100g arroz cocido, 200g brócoli al vapor, 15g AOVE', '565 kcal', '53g prot', '41g carbs', '21g grasa', 'Fácil · 20 min'),
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '595 kcal', '26g prot', '53g carbs', '31g grasa', 'Medio · 25 min'),
             op('Muslo de pollo al horno con boniato y verduras', '200g muslo de pollo sin piel, 200g boniato, 150g calabacín, AOVE', '639 kcal', '54g prot', '45g carbs', '27g grasa', 'Fácil · 30 min'),
@@ -19100,10 +19100,10 @@
           ],
           'Cena': [
             op('Merluza al horno con patata y judías verdes', '220g merluza, 200g patata, 200g judías verdes, AOVE', '508 kcal', '46g prot', '54g carbs', '12g grasa', 'Fácil · 25 min'),
-            op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
-            op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),
+            op('Pechuga de pavo con calabacín y arroz', '200g pavo, 250g calabacín a la plancha, 60g arroz cocido, AOVE', '450 kcal', '46g prot', '34g carbs', '14g grasa', 'Fácil · 20 min'),
+            op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa cocida, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),
             op('Rape a la plancha con calabacín y patata', '200g rape, 150g calabacín, 150g patata, AOVE', '380 kcal', '36g prot', '32g carbs', '12g grasa', 'Fácil · 20 min'),
-            op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')
+            op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz cocido, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')
           ]
         };
         return pool[momento] || pool['Comida'];
@@ -20921,7 +20921,7 @@
     // el bloque entero para no dejar contenido de gimnasio que no corresponde.
     const todayPlanEl = document.getElementById('todayPlan');
     if (todayPlanEl) todayPlanEl.style.display = generatedPlan.soloDieta ? 'none' : '';
-    const diaHoyPlan = generatedPlan.semana?.[getIndiceDiaHoy()];
+    const diaHoyPlan = generatedPlan.semana?.[getIndiceSesionHoy()];
     const esDescansoHoy = !generatedPlan.soloDieta && diaHoyPlan && diaHoyPlan.tipo === 'Descanso';
     const btnCompletado = document.getElementById('btnCompletado');
     const btnFeedback = document.getElementById('btnFeedback');
@@ -21100,7 +21100,7 @@
     // Planes solo-nutrición no tienen entrenamiento: la tarjeta no aplica.
     if (generatedPlan.soloDieta) { hero.style.display = 'none'; return; }
     const semana = (userData.progreso && userData.progreso.semana) || 1;
-    const idx = getIndiceDiaHoy();
+    const idx = getIndiceSesionHoy();
     const dia = generatedPlan.semana && generatedPlan.semana[idx];
     document.getElementById('todayHeroEyebrow').textContent = `Sesión de hoy · Semana ${semana} · Día ${idx + 1}`;
 
@@ -21109,7 +21109,16 @@
     const btnLabel = document.getElementById('todayHeroBtnLabel');
     const tagsEl = document.getElementById('todayHeroTags');
     const statsEl = document.getElementById('todayHeroStats');
-    if (dia && dia.tipo === 'Descanso') {
+    const _ofertaPrimero = (dia && dia.tipo === 'Descanso') ? _ofrecerPrimerEntrenoHoy() : null;
+    const _heroBtn = document.getElementById('todayHeroBtn');
+    if (_heroBtn) _heroBtn.onclick = _ofertaPrimero ? hacerPrimerEntrenoHoy : empezarEntrenamientoHoy;
+    if (_ofertaPrimero) {
+      wTitle.textContent = '¿Empiezas hoy?';
+      wSub.textContent = 'Hoy te toca descanso, pero puedes adelantar tu primer entreno: ' + _nombreSesion(_ofertaPrimero.dia.resumen || _ofertaPrimero.dia.dia || '');
+      btnLabel.textContent = 'Hacer mi primer entreno hoy';
+      if (tagsEl) tagsEl.innerHTML = '';
+      if (statsEl) statsEl.style.display = 'none';
+    } else if (dia && dia.tipo === 'Descanso') {
       wTitle.textContent = 'Día de descanso';
       wSub.textContent = ['Recuperación', dia.dia].filter(Boolean).join(' · ');
       btnLabel.textContent = 'Ver el detalle';
@@ -21299,7 +21308,11 @@
       if (m) { const r = parseInt(m[1], 10); sumRpe += (r <= 6 ? 8 : r <= 10 ? 8.5 : r <= 14 ? 9 : 9.5); cnt++; }
     });
     const avg = cnt ? sumRpe / cnt : 0;
-    const intensidad = avg >= 8.7 ? 'Alta' : avg >= 8.2 ? 'Media-alta' : 'Media';
+    // A quien empieza desde cero, su primera sesión le salía «Intensidad ALTA» (3x10
+    // cuenta como RPE alto en esta regla): asusta justo el primer día y no es lo que
+    // se le pide, que es aprender el movimiento. Para principiantes, como mucho Media.
+    const _principiante = /principiante/i.test((userData && userData.nivel) || '');
+    const intensidad = _principiante ? 'Media' : avg >= 8.7 ? 'Alta' : avg >= 8.2 ? 'Media-alta' : 'Media';
 
     // Duración estimada: ~11 min por ejercicio (series + descansos), redondeada a 5, entre 30 y 80
     const n = conReps.length;
@@ -21451,6 +21464,9 @@
     _ses = { pasos, fecha: (_ses && _ses.fecha) || getFechaHoyISO(), idx: guardado && guardado.idx < pasos.length ? guardado.idx : 0, inicio: (guardado && guardado.inicio) || Date.now(), fin: guardado && guardado.fin };
     if (_ses.fin) _ses.idx = pasos.length; // ya terminada: se enseña el resumen
     document.getElementById('sesionModo').classList.add('abierta');
+    // Los avisos de instalar la app y de activar avisos van abajo, justo donde
+    // están los botones de la sesión: se ocultan (sin darlos por descartados).
+    ['pwaInstallBanner', 'pushInstallBanner'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = 'none'; });
     document.body.style.overflow = 'hidden';
     clearInterval(_sesTimer);
     _sesTimer = setInterval(_sesPintarCrono, 1000);
@@ -21599,7 +21615,7 @@
   // guardarlo se vuelve a leer la sesión, que conserva lo ya hecho.
   let _sesAnadiendo = false;
   function sesAnadirEjercicio() {
-    const dia = generatedPlan && generatedPlan.semana && generatedPlan.semana[getIndiceDiaHoy()];
+    const dia = generatedPlan && generatedPlan.semana && generatedPlan.semana[getIndiceSesionHoy()];
     if (!dia || !dia.dia) return;
     _sesAnadiendo = true;
     abrirAnadirEjercicio(dia.dia);
@@ -22103,10 +22119,10 @@
     hoy: {
       titulo: 'Tu entrenamiento de hoy',
       items: [
-        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M21 3H3v18h18V3z"/></svg>', label: 'Marca completado', desc: 'Cuando termines, pulsa el botón verde para registrarlo y subir tu racha' },
+        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M21 3H3v18h18V3z"/></svg>', label: 'Empieza por aquí', desc: 'Pulsa «Empezar entrenamiento»: te guía serie a serie, con el peso y el descanso, y al terminar queda registrado' },
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>', label: 'Vídeos de apoyo', desc: 'Si no conoces un ejercicio, pulsa el botón de vídeo para ver cómo se ejecuta' },
         { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>', label: 'Cambiar ejercicios', desc: 'Toca "Cómo se hace" en un ejercicio: si tiene alternativas, aparecen ahí mismo para cambiarlo al instante. Para cualquier otro caso, escríbenos por "¿Cómo va el entreno?"' },
-        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg>', label: 'Racha de entrenos', desc: 'Cada día que entrenas sube tu racha. ¡Intenta no romperla!' }
+        { icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-7-8-12 0-3 2-6 5-7 1 3 3 5 3 5s2-4 1-7c4 2 7 6 7 9 0 5-4 9-8 12z"/></svg>', label: 'Tu progreso', desc: 'Cada entreno que registras cuenta para tu semana y ajusta los pesos del siguiente' }
       ]
     },
     semana: {
@@ -22211,6 +22227,7 @@
         </div>
       </div>`).join('');
     const el = document.createElement('div');
+    el.id = 'guiaSeccion';
     el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;max-width:380px;background:#111;border:1px solid #D1420E40;border-radius:14px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.5);animation:fadeInUp 0.3s ease';
     el.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -22257,6 +22274,60 @@
   // new Date().getDay() devuelve 0=Domingo...6=Sábado, por eso se desplaza +6 mod 7.
   function getIndiceDiaHoy() {
     return (new Date().getDay() + 6) % 7;
+  }
+
+  // PRIMER ENTRENO EN DÍA DE DESCANSO (4 oct 2026). Los días de entreno van por
+  // día de la semana, así que quien se registra un sábado o un domingo (o
+  // cualquier día de descanso) no tenía nada que hacer hasta el lunes. Y de las
+  // bajas del mes gratis, casi nadie llegó a hacer un solo entreno: el primer
+  // día es el que más cuenta. Si aún no ha entrenado nunca, puede adelantar HOY
+  // su próximo entreno. Solo cambia la SESIÓN de hoy (tarjeta, detalle y modo
+  // entrenamiento); el calendario y el nombre del día siguen siendo los reales,
+  // y mañana todo vuelve a su sitio solo (el adelanto vale para una fecha).
+  const _CLAVE_ADELANTO = 'kone_entreno_adelantado';
+  function _diaAdelantado() {
+    try {
+      const a = JSON.parse(localStorage.getItem(_CLAVE_ADELANTO) || 'null');
+      if (a && a.fecha === getFechaHoyISO() && Number.isInteger(a.idx)) return a.idx;
+    } catch (e) {}
+    return null;
+  }
+  function getIndiceSesionHoy() {
+    const a = _diaAdelantado();
+    return a == null ? getIndiceDiaHoy() : a;
+  }
+  // Próximo día de entreno del plan a partir de mañana (o null si no hay ninguno).
+  function _proximoDiaEntreno() {
+    const sem = generatedPlan && generatedPlan.semana;
+    if (!Array.isArray(sem) || !sem.length || generatedPlan.soloDieta) return null;
+    const hoy = getIndiceDiaHoy();
+    for (let k = 1; k <= 7; k++) {
+      const i = (hoy + k) % 7;
+      if (sem[i] && sem[i].tipo === 'Entrenamiento') return i;
+    }
+    return null;
+  }
+  // ¿Se le ofrece adelantar? Hoy toca descanso, no ha entrenado nunca y hay un entreno al que adelantarse.
+  function _ofrecerPrimerEntrenoHoy() {
+    if (!generatedPlan || generatedPlan.soloDieta || _diaAdelantado() != null) return null;
+    const dia = generatedPlan.semana && generatedPlan.semana[getIndiceDiaHoy()];
+    if (!dia || dia.tipo !== 'Descanso') return null;
+    const hechos = (Array.isArray(userData.historialEntrenos) ? userData.historialEntrenos.length : 0)
+      + (Array.isArray(userData.entrenosCompletados) ? userData.entrenosCompletados.length : 0);
+    if (hechos > 0) return null;
+    const idx = _proximoDiaEntreno();
+    return idx == null ? null : { idx, dia: generatedPlan.semana[idx] };
+  }
+  function hacerPrimerEntrenoHoy() {
+    const of = _ofrecerPrimerEntrenoHoy();
+    if (!of) return;
+    try { localStorage.setItem(_CLAVE_ADELANTO, JSON.stringify({ fecha: getFechaHoyISO(), idx: of.idx })); } catch (e) {}
+    kEvento('primer_entreno_adelantado');
+    try { regenerarEntrenamientoHoy(generatedPlan); } catch (e) {}
+    try { buildDashboard(); } catch (e) {}
+    try { showSection('hoy'); } catch (e) {}
+    window.scrollTo(0, 0);
+    showToast('Listo: hoy haces tu primer entreno. Pulsa «Empezar entrenamiento» cuando quieras.', 5000);
   }
 
   // Número de semana del plan, contado desde la fecha de registro del usuario (creado).
@@ -27252,7 +27323,7 @@
   // sin tener que regenerar todo el plan.
   function regenerarEntrenamientoHoy(plan) {
     if (!plan || !plan.semana || !plan.semana.length) return;
-    const diaHoy = plan.semana[getIndiceDiaHoy()];
+    const diaHoy = plan.semana[getIndiceSesionHoy()];
     let notaHTML = '';
     const match = (plan.entrenamiento_hoy || '').match(/^<div style="background:rgba\(209,66,14,0\.08\)[^>]*>[\s\S]*?<\/div>/);
     if (match) notaHTML = _migrarNotaAdaptado(match[0]);
@@ -32437,8 +32508,16 @@ Se coló: ${lista}`;
       // visitante de móvil, encima de la portada, del registro o del
       // cuestionario, justo cuando aún no tiene nada que instalar.
       // ...y sin taparle el tour de bienvenida si lo está viendo.
+      // ...ni encima de la guía de primera vez de cada sección (4 oct 2026: le
+      // tapaba el botón «Entendido» a un cliente nuevo en el móvil) ni de un modal.
       const enPanel = () => document.getElementById('dashboard')?.classList.contains('active')
-        && !(document.getElementById('onboardingModal') && getComputedStyle(document.getElementById('onboardingModal')).display !== 'none');
+        && !(document.getElementById('onboardingModal') && getComputedStyle(document.getElementById('onboardingModal')).display !== 'none')
+        && !document.getElementById('guiaSeccion')
+        && !document.querySelector('.modal-overlay.visible')
+        && !document.getElementById('sesionModo')?.classList.contains('abierta')
+        // El primer día sobra: se ofrece cuando ya ha entrenado o lleva 2 días.
+        && (((userData && userData.historialEntrenos) || []).length > 0
+            || Date.now() - Date.parse((getCurrentUser() || {}).creado || 0) > 2 * 86400000);
       let esperas = 0;
       const cuandoEnPanel = fn => { if (enPanel()) setTimeout(fn, 3000); else if (++esperas < 120) setTimeout(() => cuandoEnPanel(fn), 5000); };
       cuandoEnPanel(function() {
@@ -32500,6 +32579,8 @@ Se coló: ${lista}`;
         // No amontonar con el banner de instalar PWA, que ocupa el mismo hueco.
         const pwaBanner = document.getElementById('pwaInstallBanner');
         if (pwaBanner && pwaBanner.style.display !== 'none') { setTimeout(intentar, 6000); return; }
+        // Ni en mitad de un entreno: taparía los botones de la sesión.
+        if (document.getElementById('sesionModo')?.classList.contains('abierta')) { setTimeout(intentar, 15000); return; }
         const banner = document.getElementById('pushInstallBanner');
         // Solo nutrición: el aviso llega CADA día y habla de comidas (30 sept 2026).
         if (typeof generatedPlan !== 'undefined' && generatedPlan && generatedPlan.soloDieta) {
