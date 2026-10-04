@@ -1930,6 +1930,7 @@
   @media (max-width: 980px) {
     .hoy-grid { grid-template-columns: minmax(0, 1fr); }
     .hoy-rail { flex-direction: row; flex-wrap: wrap; }
+    .hoy-rail { align-items: flex-start; }
     .hoy-rail .rail-card { flex: 1; min-width: 46%; }
   }
 
@@ -1957,6 +1958,34 @@
   .rail-macros > div { flex: 1; text-align: center; padding: 10px 4px; background: var(--grafito); border-radius: 9px; }
   .rail-macros span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
   .rail-macros b { font-family: 'Bebas Neue', sans-serif; font-size: 22px; font-weight: 400; color: var(--blanco); margin-top: 3px; display: block; }
+  /* Panel lateral de Hoy con el estilo de la web (4 oct 2026): etiquetas en
+     Inter, iconos de trazo fino en casilla, «172 g» en una línea. */
+  .rail-card { border-radius: 18px; border-color: rgba(255,255,255,0.08); }
+  .rail-card-head { font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--metal-claro); }
+  .rail-ico { width: 32px; height: 32px; border-radius: 10px; background: var(--grafito); color: var(--metal-claro); display: grid; place-items: center; flex-shrink: 0; }
+  .rail-card-head .rail-ico svg { width: 17px; height: 17px; stroke: currentColor; }
+  #railKcalCard .rail-ico { color: var(--brasa-txt); }
+  .rail-sub { font-family: 'Inter', sans-serif; font-size: 12.5px; letter-spacing: 0; text-transform: none; }
+  .rail-peso span { font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; }
+  .rail-macros > div { border-radius: 12px; }
+  .rail-macros span { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .rail-macros b small { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--metal); }
+  .rail-macros b { white-space: nowrap; }
+  /* Móvil: la tarjeta va a media pantalla y no caben tres casillas; en filas */
+  @media (max-width: 600px) {
+    .rail-macros { flex-direction: column; gap: 6px; }
+    .rail-macros > div { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 12px; text-align: left; }
+    .rail-macros b { margin-top: 0; font-size: 20px; }
+  }
+  .rail-btn { width: 100%; margin-top: 16px; padding: 12px; border-radius: 999px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: border-color .2s, background .2s; }
+  .rail-btn:hover { border-color: rgba(242,106,54,0.6); background: rgba(209,66,14,0.10); }
+  /* Hoy (4 oct 2026): píldoras y etiquetas pequeñas en Inter, sin mayúsculas de máquina */
+  .pill-activo, .hoy-semana { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .today-hero-sub { font-family: 'Inter', sans-serif; letter-spacing: 0; font-weight: 500; }
+  .today-hero-tags span { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .today-hero-stats .k { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .hc-prog { font-family: 'Inter', sans-serif; font-size: 12.5px; letter-spacing: 0; text-transform: none; }
+  .hc-obj .k, .hc-kcal .k { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0; text-transform: none; }
 
   /* Banner de sección con foto (Plan semanal, Nutrición) — mismo lenguaje que el hero de Hoy */
   .section-banner {
@@ -5479,7 +5508,8 @@
     align-items: center;
     gap: 8px;
     background: rgba(209,66,14,0.12);
-    border-left: 3px solid var(--brasa);
+    border: 1px solid rgba(242,106,54,0.3);
+    border-radius: 14px;
     color: var(--blanco);
     font-size: 13px;
     padding: 12px 18px;
@@ -9756,7 +9786,7 @@
         <aside class="hoy-rail">
           <div class="rail-card">
             <div class="rail-card-head"><span>Adherencia</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <span class="rail-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span>
             </div>
             <div class="rail-big brasa" id="statAdherencia">—</div>
             <div class="rail-bar"><i id="railAdherenciaBar" style="width:0%"></i></div>
@@ -9769,7 +9799,7 @@
           <div class="rail-card" id="railKcalCard">
             <div class="rk-kcal">
             <div class="rail-card-head"><span>Kcal objetivo</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3 3 5 3 8a3 3 0 0 1-6 0c0-1 .5-2 1-3"/><path d="M12 22a6 6 0 0 0 6-6c0-2-1-4-2-5"/><path d="M12 22a6 6 0 0 1-6-6c0-2 1-4 2-5"/></svg>
+              <span class="rail-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
             </div>
             <div class="rail-big" id="statKcal">—</div>
             <div class="rail-macros" id="railMacros" style="display:none">
@@ -9784,17 +9814,17 @@
 
           <div class="rail-card">
             <div class="rail-card-head"><span>Tu plan</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="rail-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></span>
             </div>
             <div class="rail-big" id="diasRestantesPlan">—</div>
             <div class="rail-sub" id="diasRestantesPlanLabel">días de tu plan actual</div>
-            <button class="btn-ghost" style="width:100%;margin-top:14px;padding:10px;font-size:11px" onclick="abrirModalCambiarPlan()">Cambiar objetivo / deporte</button>
+            <button class="rail-btn" onclick="abrirModalCambiarPlan()">Cambiar objetivo o deporte</button>
           </div>
 
           <!-- Código de referido: siempre visible para compartir -->
           <div class="rail-card" id="railReferidos" style="display:none;background:linear-gradient(160deg,rgba(209,66,14,0.10),var(--carbon));border-color:rgba(209,66,14,0.4)">
             <div class="rail-card-head"><span>Invita y gana</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span class="rail-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
             </div>
             <div style="font-size:12.5px;color:var(--metal-claro);line-height:1.5;margin-bottom:14px"><b style="color:var(--blanco)">5€</b> por cada amigo que se una con tu código (máx. 15€ en tu cuota).</div>
             <div style="display:flex;align-items:center;gap:8px;background:var(--negro);border:1px solid var(--humo);border-radius:9px;padding:11px 13px;margin-bottom:10px">
@@ -9805,18 +9835,6 @@
             <div class="rail-sub" style="text-align:center"><span id="railRefPagados" style="color: var(--brasa-txt);font-weight:700">0</span>/3 amigos · <span id="railRefDescuento">0€</span> ganados</div>
           </div>
 
-          <!-- Los clientes que pagan entran aqui todos los dias y son los mas
-               propensos a seguir y a compartir. Va al final del rail, debajo
-               de las metricas: presente, sin robarle sitio a lo importante. -->
-          <div class="rail-card">
-            <div class="rail-card-head"><span>Síguenos</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-9.6a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 5-7.5 9.6-7.5 9.6z"/></svg>
-            </div>
-            <div class="redes" style="justify-content:flex-start">
-              <a class="red-btn" href="https://www.instagram.com/k.one.fit" target="_blank" rel="noopener noreferrer" style="padding:8px 14px;font-size:11.5px" aria-label="K-ONE en Instagram"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><b>Instagram</b></a>
-              <a class="red-btn" href="https://www.tiktok.com/@k.one.fit" target="_blank" rel="noopener noreferrer" style="padding:8px 14px;font-size:11.5px" aria-label="K-ONE en TikTok"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97a9.4 9.4 0 0 1-1.62-.93c-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><b>TikTok</b></a>
-            </div>
-          </div>
         </aside>
         </div><!-- /hoy-grid -->
       </div>
@@ -14966,7 +14984,7 @@
     const orden = notas.map((n, i) => [n, i]).sort((a, b) => (_prioridadNota(a[0]) - _prioridadNota(b[0])) || (a[1] - b[1])).map(x => x[0]);
     const abierto = _prioridadNota(orden[0]) === 0 ? ' open' : '';
     const n = orden.length;
-    return `<div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><details class="plg"${abierto}><summary><span class="plg-txt"><span class="plg-eye">Tu plan, adaptado</span><span class="plg-res">${n} ${n === 1 ? 'consejo' : 'consejos'} para ti</span></span>${_CHEV_PLG}</summary><p class="plg-cuerpo">${orden.map(x => `· ${x}`).join('<br>')}</p></details></div>`;
+    return `<div style="background:rgba(209,66,14,0.08);border:1px solid rgba(242,106,54,0.25);border-radius:14px;padding:12px 16px;margin-bottom:${margen || 20}px;font-size:13px;line-height:1.7;color:var(--blanco)"><details class="plg"${abierto}><summary><span class="plg-txt"><span class="plg-eye">Tu plan, adaptado</span><span class="plg-res">${n} ${n === 1 ? 'consejo' : 'consejos'} para ti</span></span>${_CHEV_PLG}</summary><p class="plg-cuerpo">${orden.map(x => `· ${x}`).join('<br>')}</p></details></div>`;
   }
   // Los planes guardados antes del 2 oct traen el recuadro viejo dentro de
   // entrenamiento_hoy: se sacan sus notas y se vuelve a pintar con el nuevo.
@@ -20873,9 +20891,9 @@
       if (k && p && c) {
         const g = Math.round((k - p*4 - c*4) / 9);
         if (g > 0) {
-          document.getElementById('railProt').innerHTML = p + '<span style="font-size:13px">g</span>';
-          document.getElementById('railCarbs').innerHTML = c + '<span style="font-size:13px">g</span>';
-          document.getElementById('railGrasa').innerHTML = g + '<span style="font-size:13px">g</span>';
+          document.getElementById('railProt').innerHTML = p + '<small> g</small>';
+          document.getElementById('railCarbs').innerHTML = c + '<small> g</small>';
+          document.getElementById('railGrasa').innerHTML = g + '<small> g</small>';
           box.style.display = '';
         }
       }
