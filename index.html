@@ -1865,6 +1865,22 @@
   @media (prefers-reduced-motion: reduce) { .ses-overlay * { transition: none !important; } }
 
   /* COMIDAS DE HOY en la pestaña Hoy */
+  /* Primeros pasos (4 oct 2026): lista de arranque de las 2 primeras semanas. */
+  .pp-card { background: var(--carbon); border: 1px solid rgba(232,73,15,.35); border-radius: 16px; padding: 18px 18px 8px; margin: 0 0 20px; position: relative; }
+  .pp-cerrar { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border: none; background: none; color: var(--metal); font-size: 18px; cursor: pointer; border-radius: 8px; }
+  .pp-cerrar:hover, .pp-cerrar:focus-visible { color: var(--blanco); background: rgba(255,255,255,.06); outline: none; }
+  .pp-fila { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  .pp-num { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--humo); display: grid; place-items: center; flex-shrink: 0; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--metal-claro); }
+  .pp-num svg { width: 15px; height: 15px; }
+  .pp-fila.hecho .pp-num { background: var(--brasa); border-color: var(--brasa); color: #fff; }
+  .pp-txt { flex: 1; min-width: 0; }
+  .pp-tit { font-size: 14px; font-weight: 600; color: var(--blanco); }
+  .pp-sub { font-size: 12px; color: var(--metal-claro); margin-top: 2px; line-height: 1.45; }
+  .pp-fila.hecho .pp-tit { color: var(--metal); text-decoration: line-through; text-decoration-color: rgba(242,106,54,.6); }
+  .pp-fila.hecho .pp-sub { display: none; }
+  .pp-ir { flex-shrink: 0; background: none; border: 1px solid var(--humo); border-radius: 999px; color: var(--blanco); font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 12px; min-height: 36px; cursor: pointer; }
+  .pp-ir:hover, .pp-ir:focus-visible { border-color: var(--brasa-txt); outline: none; }
+  .pp-fila.siguiente .pp-ir { background: var(--brasa); border-color: var(--brasa); }
   .hoy-comidas { background: var(--carbon); border: 1px solid var(--humo); border-radius: 16px; padding: 18px 18px 14px; margin: 0 0 20px; }
   .hc-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 4px; }
   .hc-eyebrow { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
@@ -9359,6 +9375,9 @@
 
         <div class="hoy-grid">
         <div class="hoy-main">
+
+        <!-- Primeros pasos: las 2 primeras semanas, hasta completarlos o cerrarlos. La pinta _pintarPrimerosPasos(). -->
+        <div class="pp-card" id="primerosPasos" style="display:none" aria-labelledby="ppTitulo"></div>
 
         <!-- RESUMEN DEL DÍA: hero de la sesión con foto de gimnasio -->
         <div class="today-hero" id="todayHero" style="display:none">
@@ -20997,6 +21016,7 @@
     // correctamente el check-in semanal según el tipo de plan.
     buildDashboardNutricionExtra();
     try { _pintarComidasHoy(); } catch (e) { console.warn('[hoy] comidas de hoy:', e.message); }
+    try { _pintarPrimerosPasos(); } catch (e) { console.warn('[hoy] primeros pasos:', e.message); }
     try { _pintarCheckinPendiente(); } catch (e) {}
   }
 
@@ -21042,6 +21062,72 @@
       return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '' } : null;
     }).filter(Boolean);
   }
+  // PRIMEROS PASOS (4 oct 2026). De los clientes del mes gratis, casi nadie hizo
+  // un solo entreno y la mayoría dejó de entrar a los pocos días: se encontraban
+  // la app entera sin saber por dónde empezar. Durante las 2 primeras semanas,
+  // Hoy enseña 4 pasos que se marcan solos al hacerlos (no hay que tachar nada):
+  // primer entreno, una comida hecha, ver la semana y activar los avisos. Se va
+  // cuando están todos o si el cliente la cierra (en este dispositivo).
+  const _CLAVE_PP_CERRADO = 'kone_primeros_pasos_cerrado';
+  function _pasosIniciales() {
+    const soloDieta = !!(generatedPlan && generatedPlan.soloDieta);
+    const entrenos = (Array.isArray(userData.historialEntrenos) ? userData.historialEntrenos.length : 0)
+      + (Array.isArray(userData.entrenosCompletados) ? userData.entrenosCompletados.length : 0);
+    const comidaHecha = Object.values((userData.comidasHechas && typeof userData.comidasHechas === 'object') ? userData.comidasHechas : {})
+      .some(d => Array.isArray(d) && d.some(Boolean));
+    const visto = k => { try { return !!localStorage.getItem('kone_guia_' + k); } catch (e) { return false; } };
+    const pasos = [];
+    if (!soloDieta) pasos.push({ id: 'entreno', tit: 'Haz tu primer entreno', sub: 'Pulsa «Empezar entrenamiento»: te guía serie a serie.', btn: 'Empezar', hecho: entrenos > 0 });
+    pasos.push({ id: 'comida', tit: 'Marca una comida como hecha', sub: 'En «Tus comidas de hoy», toca el círculo cuando te la comas.', btn: 'Ver comidas', hecho: comidaHecha });
+    pasos.push(soloDieta
+      ? { id: 'menu', tit: 'Mira tu menú de la semana', sub: 'Elige entre las opciones de cada comida y cambia lo que no te guste.', btn: 'Ver menú', hecho: visto('nutricion') }
+      : { id: 'semana', tit: 'Mira tu semana de entreno', sub: 'Qué toca cada día, para organizarte.', btn: 'Ver semana', hecho: visto('semana') });
+    // En el iPhone los avisos solo existen con la app instalada: si no hay forma, no se pide.
+    if ('Notification' in window) pasos.push({ id: 'avisos', tit: soloDieta ? 'Activa el aviso diario' : 'Activa los avisos de entreno', sub: soloDieta ? 'Cada día, tu menú listo.' : 'Solo los días que no hayas entrenado.', btn: 'Activar', hecho: Notification.permission === 'granted' });
+    return pasos;
+  }
+  function _pintarPrimerosPasos() {
+    const caja = document.getElementById('primerosPasos');
+    if (!caja || !generatedPlan) return;
+    let cerrado = false;
+    try { cerrado = !!localStorage.getItem(_CLAVE_PP_CERRADO); } catch (e) {}
+    const user = getCurrentUser();
+    const creado = Date.parse((user && user.creado) || '') || 0;
+    const reciente = creado && (Date.now() - creado) < 14 * 86400000;
+    const pasos = _pasosIniciales();
+    const hechos = pasos.filter(p => p.hecho).length;
+    if (cerrado || !reciente || hechos === pasos.length) { caja.style.display = 'none'; return; }
+    const sig = pasos.findIndex(p => !p.hecho);
+    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    caja.innerHTML = '<button type="button" class="pp-cerrar" onclick="cerrarPrimerosPasos()" aria-label="Cerrar primeros pasos">&times;</button>'
+      + '<div class="hc-cab"><div><span class="hc-eyebrow">Para empezar</span><div class="hc-tit" id="ppTitulo">Tus primeros pasos</div></div></div>'
+      + '<div class="hc-prog"><span>' + hechos + ' de ' + pasos.length + ' hechos</span><span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(hechos / pasos.length * 100) + '%"></i></span></div>'
+      + pasos.map((p, i) => '<div class="pp-fila' + (p.hecho ? ' hecho' : '') + (i === sig ? ' siguiente' : '') + '">'
+        + '<span class="pp-num">' + (p.hecho ? check : (i + 1)) + '</span>'
+        + '<div class="pp-txt"><div class="pp-tit">' + _esc(p.tit) + '</div><div class="pp-sub">' + _esc(p.sub) + '</div></div>'
+        + (p.hecho ? '' : '<button type="button" class="pp-ir" onclick="irPrimerPaso(\'' + p.id + '\')">' + _esc(p.btn) + '</button>')
+        + '</div>').join('');
+    caja.style.display = '';
+  }
+  function irPrimerPaso(id) {
+    kEvento('primeros_pasos', { paso: id });
+    if (id === 'entreno') {
+      if (typeof _ofrecerPrimerEntrenoHoy === 'function' && _ofrecerPrimerEntrenoHoy()) hacerPrimerEntrenoHoy();
+      else empezarEntrenamientoHoy();
+    } else if (id === 'comida') {
+      const c = document.getElementById('hoyComidas');
+      if (c) { const y = c.getBoundingClientRect().top + window.scrollY - 80; window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
+    } else if (id === 'semana') showSection('semana');
+    else if (id === 'menu') showSection('nutricion');
+    else if (id === 'avisos') Promise.resolve(window.activarNotificaciones && window.activarNotificaciones()).finally(() => { try { _pintarPrimerosPasos(); } catch (e) {} });
+  }
+  function cerrarPrimerosPasos() {
+    try { localStorage.setItem(_CLAVE_PP_CERRADO, '1'); } catch (e) {}
+    kEvento('primeros_pasos_cerrado');
+    const caja = document.getElementById('primerosPasos');
+    if (caja) caja.style.display = 'none';
+  }
+
   function _pintarComidasHoy() {
     const caja = document.getElementById('hoyComidas');
     if (!caja) return;
@@ -21085,6 +21171,7 @@
     userData.comidasHechas = todas;
     if (dia[i]) kEvento('comida_hecha', { toma: i });
     _pintarComidasHoy();
+    try { _pintarPrimerosPasos(); } catch (e) {}
     const user = getCurrentUser();
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
@@ -22181,6 +22268,7 @@
     // Con guarda: si el id no existe, la linea de arriba ya ha apagado todas
     // las secciones y sin esto la app se queda en blanco. Se vuelve a "hoy",
     // que siempre existe, y se deja constancia en la consola.
+    if (id === 'hoy') { try { _pintarPrimerosPasos(); } catch (e) {} }
     const _seccion = document.getElementById(`section-${id}`);
     if (!_seccion) {
       console.error('showSection: no existe la sección "' + id + '"');
@@ -22656,6 +22744,7 @@
       if (userData.horaCompletado) delete userData.horaCompletado[hoy];
     }
     actualizarEstadoCompletado();
+    try { _pintarPrimerosPasos(); } catch (e) {}
 
     const user = getCurrentUser();
     if (user) {
