@@ -1894,6 +1894,11 @@
     box-shadow: 0 6px 18px rgba(209,66,14,0.35); transition: transform .2s, background .2s; }
   .flecha-redonda svg { width: 18px; height: 18px; }
   .hc-ver:hover .flecha-redonda, .hoy-checkin:hover .flecha-redonda, .hoy-feedback:hover .flecha-redonda { transform: translateX(2px); background: var(--brasa-oscura); }
+  .hc-ir { background: none; border: none; padding: 0; margin-left: 2px; cursor: pointer; flex-shrink: 0; }
+  .hc-ir .flecha-redonda { width: 32px; height: 32px; box-shadow: 0 4px 12px rgba(209,66,14,0.3); }
+  .hc-ir .flecha-redonda svg { width: 15px; height: 15px; }
+  .hc-ir:hover .flecha-redonda, .hc-ir:focus-visible .flecha-redonda { transform: translateX(2px); background: var(--brasa-oscura); }
+  .hc-fila.hecha .hc-ir .flecha-redonda { background: var(--grafito); box-shadow: none; color: var(--metal-claro); }
   .hc-ver { margin-top: 14px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 14px; padding: 10px 10px 10px 16px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
   .hc-ver:hover { border-color: rgba(242,106,54,0.6); }
   .hoy-feedback { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 999px; padding: 6px 6px 6px 18px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -21146,7 +21151,8 @@
           + '<button type="button" class="hc-check" onclick="marcarComidaHoy(' + i + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + c.momento) + '">' + check + '</button>'
           + '<div class="hc-txt"><div class="hc-mom">' + _esc(c.momento) + (c.hora ? ' · <b>' + _esc(c.hora) + '</b>' : '') + '</div><div class="hc-nom">' + _esc(nom.nombre) + '</div>'
           + (nom.nota ? '<span class="hc-nota">' + _esc(nom.nota) + '</span>' : '') + '</div>'
-          + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '') + '</div>';
+          + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '')
+          + '<button type="button" class="hc-ir" onclick="irAComidaHoy(' + i + ')" aria-label="' + _esc('Ver las recetas de ' + c.momento) + '"><span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button></div>';
       }).join('') + '</div>'
       + '<button type="button" class="hc-ver" onclick="irANutricionHoy()"><span>Ver recetas y cambiar comidas</span><span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>';
     caja.style.display = '';
@@ -21170,6 +21176,16 @@
   function irANutricionHoy() {
     showSection('nutricion');
     try { seleccionarDiaNutri((new Date().getDay() + 6) % 7); } catch (e) {}
+  }
+  // Flecha de cada comida en Hoy: abre esa toma ya desplegada en Nutrición.
+  function irAComidaHoy(i) {
+    irANutricionHoy();
+    setTimeout(() => {
+      const b = document.getElementById('mealBlock' + i);
+      if (!b) return;
+      b.classList.add('expanded');
+      window.scrollTo({ top: Math.max(0, b.getBoundingClientRect().top + window.scrollY - 16), behavior: 'smooth' });
+    }, 250);
   }
 
   // Rellena la tarjeta "Tu entrenamiento de hoy" con los datos reales del plan.
