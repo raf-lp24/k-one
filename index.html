@@ -298,6 +298,46 @@
     try { if (typeof gtag === 'function') gtag('event', nombre, params || {}); } catch (e) {}
   }
 
+  // DE DÓNDE VIENE CADA CLIENTE (4 oct 2026). Con anuncios en Instagram no había
+  // forma de saber cuántos registros, entrenos y pagos traía cada campaña. Se
+  // guarda el PRIMER contacto (utm_* del enlace; si no hay, se deduce del
+  // navegador de Instagram/Facebook/TikTok o de la web de la que viene) en este
+  // navegador, y al crear la cuenta pasa al perfil (userData._origen). Una
+  // visita directa no pisa un origen anterior. Solo la fuente, nunca la URL
+  // completa de la que viene.
+  const _CLAVE_ORIGEN = 'kone_origen';
+  (function _capturarOrigen() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const ua = navigator.userAgent || '';
+      let ref = '';
+      try {
+        const r = document.referrer ? new URL(document.referrer) : null;
+        if (r && r.hostname && r.hostname !== location.hostname) ref = r.hostname.replace(/^www\./, '').toLowerCase();
+      } catch (e) {}
+      const limpia = (v, n) => String(v || '').toLowerCase().replace(/[^a-z0-9_\-.]/g, '').slice(0, n);
+      let fuente = limpia(q.get('utm_source'), 40);
+      if (!fuente) {
+        if (/Instagram/i.test(ua) || /(^|\.)instagram\.com$/.test(ref)) fuente = 'instagram';
+        else if (/FBAN|FBAV/.test(ua) || /(^|\.)facebook\.com$/.test(ref)) fuente = 'facebook';
+        else if (/tiktok/i.test(ua) || /tiktok\.com$/.test(ref)) fuente = 'tiktok';
+        else if (/(^|\.)google\./.test(ref)) fuente = 'google';
+        else if (ref) fuente = limpia(ref, 40);
+      }
+      if (!fuente) return;
+      if (localStorage.getItem(_CLAVE_ORIGEN)) return;
+      const medio = limpia(q.get('utm_medium'), 30) || (q.get('fbclid') ? 'clic' : '');
+      localStorage.setItem(_CLAVE_ORIGEN, JSON.stringify({
+        fuente, medio, campana: limpia(q.get('utm_campaign'), 60), fecha: new Date().toISOString().slice(0, 10)
+      }));
+    } catch (e) {}
+  })();
+  // Origen para una cuenta recién creada ("directo" si llegó sin rastro).
+  function _origenParaCuenta() {
+    try { const o = JSON.parse(localStorage.getItem(_CLAVE_ORIGEN) || 'null'); if (o && o.fuente) return o; } catch (e) {}
+    return { fuente: 'directo', medio: '', campana: '', fecha: new Date().toISOString().slice(0, 10) };
+  }
+
   // Avisa al servidor de los errores de JavaScript que le saltan a un cliente,
   // para enterarnos antes de que escriba. Sin datos personales: solo el mensaje,
   // el archivo/línea, en qué pantalla estaba y el navegador. Va aquí (antes de
@@ -8662,6 +8702,7 @@
         <li><strong>Datos de perfil físico y de actividad:</strong> edad, sexo, peso, altura, objetivo, deporte, nivel, disponibilidad y hábitos (trabajo, sueño, estrés, alimentación).</li>
         <li><strong>Categorías especiales de datos (datos de salud — art. 9 RGPD):</strong> enfermedades, lesiones, operaciones, alergias, medicación y antecedentes de trastornos de la conducta alimentaria que declares para adaptar tu plan. Estos datos solo se tratan con tu <strong>consentimiento explícito</strong>.</li>
         <li><strong>Datos de uso:</strong> entrenamientos marcados, check-ins, pesos registrados y progreso.</li>
+        <li><strong>Cómo nos conociste:</strong> si llegaste desde un anuncio, una red social o un buscador (por ejemplo, «Instagram»), y la campaña, para saber qué funciona. No guardamos la página exacta de la que vienes.</li>
       </ul>
 
       <h3>2.3. Finalidad</h3>
@@ -26604,6 +26645,12 @@
   // Devuelve una promesa que resuelve a true si quedó guardado en la nube
   // (quien no la necesite puede ignorarla, como hasta ahora).
   function saveUserData(email, data) {
+    try {
+      const u = getCurrentUser();
+      const creado = Date.parse((u && u.creado) || '') || 0;
+      if (data && data.userData && typeof data.userData === 'object' && !data.userData._origen
+          && creado && Date.now() - creado < 2 * 86400000) data.userData._origen = _origenParaCuenta();
+    } catch (e) {}
     try { localStorage.setItem(`k1_data_${email}`, JSON.stringify(data)); } catch(e) {}
     if (!_supaUserId) return Promise.resolve(false);
     const payload = { userdata: data.userData, plan: data.plan, saved_at: data.savedAt };
@@ -28918,6 +28965,23 @@ Se coló: ${lista}`;
       // % es sobre quienes contestaron, no sobre el total de clientes --
       // mezclar los dos denominadores haría parecer el problema más pequeño
       // de lo que es.
+      // Origen de los registros (4 oct 2026): de dónde vienen y cuántos de cada
+      // origen han entrenado y pagan. Así se ve si una campaña trae clientes o solo clics.
+      const conOrigen = (data.clientes || []).filter(c => c.origen && c.origen.fuente);
+      const porOrigen = {};
+      conOrigen.forEach(c => {
+        const k = c.origenTexto || c.origen.fuente;
+        const o = porOrigen[k] || (porOrigen[k] = { n: 0, entrenan: 0, pagan: 0 });
+        o.n++; if ((c.entrenosTotal || 0) > 0) o.entrenan++; if (c.estado === 'active') o.pagan++;
+      });
+      const origenCard = conOrigen.length
+        ? `<div class="jv-card" style="padding:17px 19px">
+            <div class="jv-metric-label" style="margin-bottom:4px">De dónde vienen</div>
+            <div style="font-size:12px;color:var(--jv-faint);margin-bottom:14px;font-weight:500">${conOrigen.length} registro${conOrigen.length === 1 ? '' : 's'} con origen (desde el 4 oct 2026)</div>
+            ${Object.entries(porOrigen).sort((a, b) => b[1].n - a[1].n).map(([k, o]) =>
+              barra(_esc(k) + ' · ' + o.entrenan + ' entrenan · ' + o.pagan + ' pagan', o.n, Math.round(o.n / conOrigen.length * 100), GRAD_ACC)).join('')}
+          </div>`
+        : '';
       const distMotivoBaja = data.distMotivoBaja || [];
       const totalBajas = distMotivoBaja.reduce((s, it) => s + it.count, 0);
       const bajaCard = totalBajas > 0
@@ -28935,7 +28999,7 @@ Se coló: ${lista}`;
         renderDist('Deporte', data.distDeporte, totalClientes) +
         renderDist('Objetivo', data.distObjetivo, totalClientes) +
         renderDist('Tipo de plan', data.distPlan, totalClientes) +
-        retCard + bajaCard;
+        retCard + bajaCard + origenCard;
     }
 
     // — Totales en cabecera de tabla —
@@ -29576,6 +29640,7 @@ Se coló: ${lista}`;
         ${row('Estado', estadoTexto, estadoColor)}
         ${row('Plan', c.tipoPlan + (c.planPrecio && c.planPrecio !== '—' ? ' · ' + c.planPrecio : ''))}
       </div>
+      ${c.origen && c.origen.fuente ? `<div style="display:grid;grid-template-columns:1fr;gap:10px">${row('Cómo llegó', c.origenTexto + (c.origen.fecha ? ' · ' + c.origen.fecha.split('-').reverse().join('/') : ''), 'var(--jv-info)')}</div>` : ''}
       ${(() => {
         // Solo aparece si ha cancelado o si ya contestó al banner "¿Nos dices
         // por qué lo dejas?" (index.html, sección Hoy). Las tres situaciones

@@ -455,6 +455,18 @@ module.exports = async (req, res) => {
         // dejas?" en index.html, una sola vez, guardado en userData._cuenta).
         // 'sin_respuesta' = lo descartó sin contestar; null = nunca se le llegó
         // a mostrar (no ha cancelado, o es cuenta beta).
+        // De dónde vino (userData._origen, se guarda al crear la cuenta desde el 4 oct 2026).
+        origen: (ud._origen && typeof ud._origen === 'object') ? {
+          fuente: String(ud._origen.fuente || '').slice(0, 40), medio: String(ud._origen.medio || '').slice(0, 30),
+          campana: String(ud._origen.campana || '').slice(0, 60), fecha: String(ud._origen.fecha || '').slice(0, 10)
+        } : null,
+        origenTexto: (() => {
+          const o = ud._origen; if (!o || !o.fuente) return null;
+          const NOMBRE = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', google: 'Google', directo: 'Directo' };
+          const f = NOMBRE[o.fuente] || String(o.fuente);
+          const m = /^(anuncio|paid|cpc|ads?|clic)$/i.test(o.medio || '') ? 'anuncio' : (o.medio || '');
+          return [f, m, o.campana].filter(Boolean).join(' · ').slice(0, 90);
+        })(),
         motivoBaja:      ud._cuenta?.motivoBaja      || null,
         motivoBajaFecha: ud._cuenta?.motivoBajaFecha || null,
         // Alimentos prohibidos detectados por el agente de auditoría diario
