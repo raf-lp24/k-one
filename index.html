@@ -1731,7 +1731,8 @@
     border: 1px solid rgba(224,164,58,0.5); border-radius: 16px; padding: 14px 16px; margin: 0 0 20px; color: var(--blanco); cursor: pointer; font-family: inherit; }
   .hoy-checkin .ic { width: 38px; height: 38px; border-radius: 12px; background: rgba(224,164,58,0.15); color: #E0A43A; display: grid; place-items: center; flex-shrink: 0; }
   .hoy-checkin .ic svg { width: 19px; height: 19px; }
-  .hoy-checkin b { display: block; font-size: 14px; }
+  .hoy-checkin b { display: block; font-size: 14px; color: var(--blanco); }
+  .hoy-checkin .flecha-redonda { color: #fff; }
   .hoy-checkin span { font-size: 12.5px; color: var(--metal-claro); }
   /* Entreno: los ejercicios de la semana se consultan, no se registran aquí */
   .ej-lectura { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -1883,8 +1884,19 @@
   .hc-kcal .v { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; color: var(--blanco); }
   .hc-kcal .k { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); margin-top: 3px; }
   .hc-fila.hecha .hc-kcal .v { color: var(--metal); }
-  .hc-ver { margin-top: 12px; width: 100%; background: none; border: 1px solid var(--humo); border-radius: 10px; padding: 12px; color: var(--blanco); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; }
-  .hc-ver:hover { border-color: var(--brasa-txt); }
+  /* Botón redondo naranja con flecha (4 oct, como la maqueta): marca los
+     accesos de Hoy que llevan a otra pantalla. */
+  .flecha-redonda { width: 38px; height: 38px; border-radius: 50%; background: var(--brasa); color: #fff; display: grid; place-items: center; flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(209,66,14,0.35); transition: transform .2s, background .2s; }
+  .flecha-redonda svg { width: 18px; height: 18px; }
+  .hc-ver:hover .flecha-redonda, .hoy-checkin:hover .flecha-redonda, .hoy-feedback:hover .flecha-redonda { transform: translateX(2px); background: var(--brasa-oscura); }
+  .hc-ver { margin-top: 14px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 14px; padding: 10px 10px 10px 16px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+  .hc-ver:hover { border-color: rgba(242,106,54,0.6); }
+  .hoy-feedback { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 999px; padding: 6px 6px 6px 18px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .hoy-feedback:hover { border-color: rgba(242,106,54,0.6); }
+  .hoy-feedback .flecha-redonda { width: 32px; height: 32px; }
+  .hoy-feedback .flecha-redonda svg { width: 16px; height: 16px; }
+  @media (prefers-reduced-motion: reduce) { .flecha-redonda { transition: none; } }
   @media (prefers-reduced-motion: reduce) { .hc-barra i, .hc-check { transition: none; } }
 
   /* RECUADROS PLEGABLES del entreno ("Tu plan, adaptado", "Después de entrenar"):
@@ -9391,7 +9403,8 @@
         <div class="hoy-comidas" id="hoyComidas" style="display:none"></div>
         <button type="button" class="hoy-checkin" id="hoyCheckin" style="display:none" onclick="showSection('checkin')">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg></span>
-          <span><b>Toca tu check-in semanal</b><span>Cinco minutos y ajustamos tu plan de la semana que viene.</span></span>
+          <span style="flex:1;min-width:0"><b>Toca tu check-in semanal</b><span>Cinco minutos y ajustamos tu plan de la semana que viene.</span></span>
+          <span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </button>
 
         <!-- OFERTA REFERIDOS (solo primer mes, arriba de todo) -->
@@ -9528,7 +9541,7 @@
             <div class="motivation-label">Entrenamiento de hoy</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
-              <button class="btn-ghost" id="btnFeedback" onclick="toggleFeedback()" style="font-size:11px;padding:8px 16px;letter-spacing:1px">¿Cómo va el entreno? →</button>
+              <button type="button" class="hoy-feedback" id="btnFeedback" onclick="toggleFeedback()">¿Cómo va el entreno?<span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
             </div>
           </div>
           <div id="todayContent" style="color:var(--metal);font-size:14px;line-height:1.8;margin-top:16px">
@@ -21131,7 +21144,7 @@
           + (nom.nota ? '<span class="hc-nota">' + _esc(nom.nota) + '</span>' : '') + '</div>'
           + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '') + '</div>';
       }).join('') + '</div>'
-      + '<button type="button" class="hc-ver" onclick="irANutricionHoy()">Ver recetas y cambiar comidas →</button>';
+      + '<button type="button" class="hc-ver" onclick="irANutricionHoy()"><span>Ver recetas y cambiar comidas</span><span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>';
     caja.style.display = '';
   }
   function marcarComidaHoy(i) {
