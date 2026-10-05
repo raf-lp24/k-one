@@ -6364,31 +6364,47 @@
   .ejemplo-cta p { margin: 0; color: var(--metal-claro); font-size: 14px; line-height: 1.55; }
 
   #modalPlanEjemplo .modal-box { max-width: 580px; padding: 34px 24px 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .pe-perfil { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--brasa-txt); margin: 2px 0 12px; line-height: 1.7; }
-  .pe-intro { font-size: 13px; color: var(--metal-claro); line-height: 1.55; margin: 0 0 16px; }
-  .pe-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-  .pe-chip { flex: 1 1 90px; background: var(--grafito); border: 1px solid var(--humo); border-radius: 10px; padding: 10px 6px; text-align: center; }
-  .pe-chip b { display: block; font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 26px; line-height: 1; color: var(--blanco-puro); }
-  .pe-chip span { display: block; font-size: 9.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--metal); margin-top: 4px; }
-  .pe-tit { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--metal); margin: 22px 0 10px; }
-  .pe-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
-  .pe-dia { border: 1px solid var(--humo); border-radius: 9px; padding: 8px 4px; text-align: center; font-size: 10.5px; color: var(--metal); line-height: 1.3; }
-  .pe-dia b { display: block; font-size: 11px; color: var(--blanco); margin-bottom: 3px; }
-  .pe-dia.entreno { border-color: rgba(209,66,14,0.55); background: rgba(209,66,14,0.08); color: var(--metal-claro); }
-  .pe-ejercicios { margin: 0; padding: 0 0 0 22px; color: var(--metal-claro); font-size: 13px; line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
-  .pe-ejercicios li::marker { color: var(--brasa-txt); font-family: 'DM Mono', monospace; font-size: 11px; }
-  .pe-comida { border: 1px solid var(--humo); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
-  .pe-comida-cab { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--brasa-txt); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
-  .pe-comida-cab span:last-child { color: var(--metal); }
-  .pe-comida-nombre { font-size: 14px; font-weight: 600; color: var(--blanco); line-height: 1.35; }
-  .pe-comida-ing { font-size: 12px; color: var(--metal); line-height: 1.45; margin: 4px 0 8px; }
+  /* Plan de ejemplo con el estilo de la web (5 oct 2026): perfil en píldoras,
+     tarjetas redondeadas, ejercicios numerados en círculo, todo en Inter. */
+  #modalPlanEjemplo .modal-box { border-radius: 22px; }
+  .pe-perfil { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
+  .pe-perfil span { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--blanco); background: var(--grafito); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 5px 11px; }
+  .pe-perfil .pe-perfil-k { color: var(--brasa-txt); background: rgba(209,66,14,0.12); border-color: rgba(242,106,54,0.35); }
+  .pe-intro { font-size: 14px; color: var(--metal-claro); line-height: 1.6; margin: 0 0 18px; }
+  .pe-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .pe-chip { background: var(--grafito); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px 8px; text-align: center; }
+  .pe-chip:first-child b { color: var(--brasa-txt); }
+  .pe-chip b { display: block; font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 30px; line-height: 1; color: var(--blanco-puro); }
+  .pe-chip span { display: block; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--metal); margin-top: 5px; }
+  .pe-tit { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); margin: 26px 0 12px; }
+  .pe-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .pe-dia { background: var(--grafito); border: 1px solid transparent; border-radius: 14px; padding: 10px 2px; text-align: center; font-size: 11px; color: var(--metal); line-height: 1.3; }
+  .pe-dia b { display: block; font-size: 13px; font-weight: 600; color: var(--metal-claro); margin-bottom: 3px; }
+  .pe-dia.entreno { border-color: rgba(242,106,54,0.5); background: rgba(209,66,14,0.10); color: var(--blanco); }
+  .pe-dia.entreno b { color: var(--brasa-txt); }
+  .pe-ejercicios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .pe-ejercicios li { display: flex; align-items: flex-start; gap: 12px; background: var(--grafito); border-radius: 14px; padding: 11px 14px; font-size: 14px; line-height: 1.45; color: var(--blanco); }
+  .pe-n { width: 26px; height: 26px; border-radius: 50%; background: rgba(209,66,14,0.15); color: var(--brasa-txt); display: grid; place-items: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0; margin-top: -1px; }
+  .pe-comida { background: var(--grafito); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+  .pe-comida-cab { display: flex; justify-content: space-between; gap: 10px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--brasa-txt); margin-bottom: 5px; }
+  .pe-comida-cab span:last-child { color: var(--metal); font-weight: 500; }
+  .pe-comida-nombre { font-size: 15px; font-weight: 600; color: var(--blanco); line-height: 1.35; }
+  .pe-comida-ing { font-size: 12.5px; color: var(--metal); line-height: 1.5; margin: 5px 0 10px; }
   .pe-macros { display: flex; gap: 6px; flex-wrap: wrap; }
-  .pe-macros span { font-size: 11px; color: var(--metal-claro); background: rgba(255,255,255,0.04); border: 1px solid var(--humo); border-radius: 999px; padding: 3px 9px; font-variant-numeric: tabular-nums; }
-  .pe-nota { font-size: 12px; color: var(--metal); line-height: 1.5; margin: 4px 0 0; }
-  .pe-final { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--humo); display: flex; flex-direction: column; gap: 10px; }
+  .pe-macros span { font-size: 12px; font-weight: 600; color: var(--metal-claro); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 4px 10px; font-variant-numeric: tabular-nums; }
+  .pe-macros span:first-child { color: var(--brasa-txt); border-color: rgba(242,106,54,0.35); }
+  .pe-nota { font-size: 13px; color: var(--metal); line-height: 1.55; margin: 6px 0 0; }
+  .pe-final { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; gap: 10px; }
+  .pe-cta { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; border-radius: 14px; }
+  .pe-cta svg { width: 18px; height: 18px; }
   @media (max-width: 480px) {
     #modalPlanEjemplo .modal-box { padding: 30px 14px 18px; }
-    .pe-semana { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .pe-semana { gap: 4px; }
+    .pe-dia { font-size: 10px; padding: 9px 1px; }
+    /* «Descanso» no cabe en 7 casillas: en móvil, una raya */
+    .pe-dia:not(.entreno) span { font-size: 0; }
+    .pe-dia:not(.entreno) span::after { content: '—'; font-size: 12px; }
+    .pe-dia b { font-size: 12px; }
   }
 
   .faq-contacto { display: flex; gap: 14px; align-items: flex-start; max-width: 760px; margin: 28px auto 0; padding: 18px 20px; border: 1px solid var(--humo); border-radius: 14px; background: rgba(255,255,255,0.02); font-size: 14px; line-height: 1.55; color: var(--metal-claro); }
@@ -31038,18 +31054,18 @@ Se coló: ${lista}`;
     const tomas = (plan.nutricionPorDia && plan.nutricionPorDia[idxPrimera]) || (plan.nutricionPorDia && plan.nutricionPorDia[0]) || plan.nutricion || [];
     const kcalDia = (plan.kcalObjPorDia && plan.kcalObjPorDia[idxPrimera]) || plan.kcalObj;
     const chip = (v, t) => '<div class="pe-chip"><b>' + _esc(v) + '</b><span>' + _esc(t) + '</span></div>';
-    let h = '<div class="pe-perfil">Perfil de ejemplo · mujer · 29 años · 64 kg · perder grasa · gimnasio 3 días</div>'
+    let h = '<div class="pe-perfil"><span class="pe-perfil-k">Perfil de ejemplo</span>' + ['Mujer', '29 años', '64 kg', 'Perder grasa', 'Gimnasio 3 días'].map(t => '<span>' + t + '</span>').join('') + '</div>'
       + '<p class="pe-intro">Esto es exactamente lo que genera K-ONE para este perfil. El tuyo se calcula con tus respuestas: tu peso, tu objetivo, tus días, tus lesiones y lo que no comes.</p>'
       + '<div class="pe-chips">' + chip(plan.kcalObj, 'kcal / día de media') + (plan.protObj ? chip(plan.protObj + ' g', 'proteína al día') : '') + chip(sesiones.length, 'sesiones / semana') + '</div>';
     h += '<div class="pe-tit">La semana</div><div class="pe-semana">' + semana.map(d => {
       const ent = /entren/i.test(d.tipo || '');
       const corto = ent ? _nombreSesion(String(d.resumen || '').split(' · ')[0]) : 'Descanso';
-      return '<div class="pe-dia' + (ent ? ' entreno' : '') + '"><b>' + _esc(String(d.dia || '').slice(0, 3)) + '</b>' + _esc(corto) + '</div>';
+      return '<div class="pe-dia' + (ent ? ' entreno' : '') + '"><b>' + _esc(String(d.dia || '').slice(0, 3)) + '</b><span>' + _esc(corto) + '</span></div>';
     }).join('') + '</div>';
     if (primera) {
       const ejercicios = _ejerciciosDeDetalle(primera.detalle);
       h += '<div class="pe-tit">Sesión del ' + _esc(String(primera.dia || '').toLowerCase()) + ' · ' + _esc(_nombreSesion(primera.resumen || '')) + '</div>'
-        + '<ol class="pe-ejercicios">' + ejercicios.map(e => '<li>' + _esc(e) + '</li>').join('') + '</ol>'
+        + '<ol class="pe-ejercicios">' + ejercicios.map((e, i) => '<li><span class="pe-n">' + (i + 1) + '</span><span>' + _esc(e) + '</span></li>').join('') + '</ol>'
         + '<p class="pe-nota" style="margin-top:10px">Dentro, cada ejercicio viene explicado paso a paso con su vídeo de técnica, y la carga sube cuando tu propio registro dice que puedes.</p>';
     }
     const conOpcion = tomas.filter(t => t && t.opciones && t.opciones[0]);
@@ -31065,7 +31081,7 @@ Se coló: ${lista}`;
         }).join('')
         + '<p class="pe-nota">Cada comida trae 5 opciones para elegir, con calorías y macros parecidos, y la lista de la compra de la semana sale sola.</p>';
     }
-    h += '<div class="pe-final"><button class="btn-primary" style="width:100%" onclick="cerrarPlanEjemplo(); goTo(\'bienvenida\')">Quiero el mío · primer mes gratis</button>'
+    h += '<div class="pe-final"><button class="btn-primary pe-cta" onclick="cerrarPlanEjemplo(); goTo(\'bienvenida\')">Quiero el mío · primer mes gratis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>'
       + '<p class="pe-nota" style="text-align:center;margin:0">Responder el cuestionario lleva unos 3 minutos.</p></div>';
     caja.innerHTML = h;
   }
