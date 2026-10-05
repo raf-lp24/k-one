@@ -7007,6 +7007,28 @@
     #landing .step-num { grid-row: span 2; font-size: 52px; margin: 0; }
     #landing .step-title { font-size: 24px; margin-bottom: 6px; }
   }
+
+  /* PORTADA MÁS CORTA (5 oct 2026): en móvil pasaba de 18 pantallas.
+     Deportes y precios en tiras que se deslizan, «Cómo se genera tu plan»
+     compacto, y 5 preguntas a la vista (el resto tras un botón). */
+  #landing .faq-corta .faq-item:nth-child(n+6) { display: none; }
+  #landing .faq-mas { display: block; margin: 14px auto 0; padding: 12px 22px; border-radius: 999px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #landing .faq-mas:hover { border-color: rgba(242,106,54,0.6); }
+  .desliza { display: none; }
+  @media (max-width: 600px) {
+    #landing .sports-grid, #landing .pricing-cards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin-left: -24px; margin-right: -24px; padding: 4px 24px 10px; scrollbar-width: none; }
+    #landing .sports-grid::-webkit-scrollbar, #landing .pricing-cards::-webkit-scrollbar { display: none; }
+    #landing .sport-card { flex: 0 0 78%; min-height: 300px; padding: 28px 22px; scroll-snap-align: center; }
+    #landing .price-card { flex: 0 0 84%; scroll-snap-align: center; padding: 30px 22px; }
+    #landing .pricing-cards { margin-top: 32px; padding-top: 18px; }
+    #landing .hybrid-callout { padding: 20px; }
+    #landing .pillars-grid { gap: 10px; }
+    #landing .pillar-card { padding: 20px; text-align: left; display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: start; }
+    #landing .pillar-card > *:first-child { grid-row: span 2; margin: 0; }
+    #landing .pillar-card h3, #landing .pillar-card .pillar-title { margin: 0 0 6px; font-size: 22px; }
+    #landing .pillar-card p { margin: 0; font-size: 13.5px; }
+    #landing .desliza { display: flex; justify-content: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--metal); }
+  }
 </style>
 </head>
 <body>
@@ -8438,6 +8460,7 @@
         <p class="sport-desc">¿Ya entrenas por tu cuenta? Plan de alimentación 100% personalizado, adaptado a tus alergias y tu objetivo, desde 4,99€/mes.</p>
       </div>
     </div>
+    <p class="desliza" aria-hidden="true">Desliza para ver los 5 deportes <span>→</span></p>
   </section>
 
   <section class="how" id="how">
@@ -8561,10 +8584,6 @@
         <p class="pillar-desc">K-One no sustituye a un médico ni a un dietista-nutricionista. Adapta el plan a tus condiciones, lesiones y alergias, pero ante cualquier duda, consulta a un profesional.</p>
       </div>
     </div>
-    <div class="ejemplo-cta">
-      <p>¿Quieres ver qué te llevas antes de dar ningún dato? Este es un plan real generado por K-ONE para un perfil de ejemplo: su semana, una sesión completa y un día de comidas.</p>
-      <button type="button" class="btn-ghost" onclick="abrirPlanEjemplo('transparencia')">Ver un plan de ejemplo</button>
-    </div>
   </section>
 
   <section class="pricing" id="pricing">
@@ -8631,6 +8650,7 @@
         <button class="btn-primary" onclick="goTo('bienvenida')">Empezar gratis</button>
       </div>
     </div>
+    <p class="desliza" aria-hidden="true">Desliza para ver los 4 planes <span>→</span></p>
     <div class="pago-seguro">
       <div class="pago-seguro-fila">
         <span class="pago-seguro-candado" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
@@ -8679,7 +8699,7 @@
       <h2 class="section-title">Preguntas frecuentes</h2>
       <p class="section-note">Las dudas más comunes antes de empezar.</p>
     </div>
-    <div class="faq-grid">
+    <div class="faq-grid faq-corta" id="faqGrid">
       <details class="faq-item">
         <summary class="faq-q">¿Qué pasa después del mes gratis?</summary>
         <p class="faq-a">El primer mes es gratis y no te pedimos tarjeta para empezar. Unos días antes de que termine te avisamos por email: si quieres seguir, añades tu tarjeta y continúas con el plan que elegiste (completo 7,99€/mes o 14,99€ cada 3 meses, o solo nutrición 4,99€/mes); si no, el mes termina y no se cobra nada. El cambio de plan se aplica en el siguiente período de facturación, nunca a mitad de mes.</p>
@@ -8729,6 +8749,7 @@
         <p class="faq-a">Depende de tu punto de partida y de tu constancia — no prometemos números. Lo que sí controlamos: el plan sube tu peso en los ejercicios cuando tu propio feedback dice que puedes, y ajusta tus calorías cada semana según tu progreso real, no según una tabla fija. Con eso documentado (fotos, peso, cargas) en tres meses tienes una historia real de tu cambio, no una promesa.</p>
       </details>
     </div>
+    <button type="button" class="faq-mas" id="faqMas" onclick="document.getElementById('faqGrid').classList.remove('faq-corta');this.remove()">Ver las 12 preguntas</button>
     <div class="faq-contacto">
       <span class="faq-contacto-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
       <div><b>¿Te queda alguna duda?</b> Escríbenos a <a href="mailto:k.one.fit26@gmail.com">k.one.fit26@gmail.com</a> y te respondemos en menos de 24 horas. Te contesta una persona, no un bot.</div>
@@ -8769,11 +8790,6 @@
     </h2>
     <p class="philosophy-sub">Dentro de un año vas a desear haber empezado hoy. El único momento es ahora.</p>
     <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis</button>
-    <form class="lead-magnet-form" onsubmit="return submitLeadEmail(event)">
-      <input type="email" id="leadEmail" placeholder="tu@email.com" required aria-label="Tu email">
-      <button type="submit" class="btn-ghost">Avísame de ofertas</button>
-    </form>
-    <p class="lead-magnet-note" id="leadMagnetNote"></p>
   </section>
 
   <div class="share-bar">
