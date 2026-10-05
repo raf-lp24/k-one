@@ -6515,9 +6515,10 @@
   .encuesta-skip {
     background: none;
     border: none;
-    color: var(--metal);
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
+    color: var(--metal-claro);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
     cursor: pointer;
     text-decoration: underline;
     margin-top: 12px;
@@ -7128,6 +7129,28 @@
     .cookie-banner-acciones { width: 100%; }
     .cookie-banner-btn { flex: 1; }
   }
+
+  /* VENTANAS DE LA APP con el estilo de la web (5 oct 2026): esquinas
+     redondeadas, botones redondeados en Inter, casillas oscuras y números en
+     Inter en vez de letra de máquina. */
+  .modal-box, .lc-box { border-radius: 22px !important; border-color: rgba(255,255,255,0.1); }
+  .modal-overlay .btn-primary, .modal-overlay .btn-ghost { border-radius: 14px; }
+  .modal-overlay .btn-ghost { font-family: 'Inter', sans-serif; font-size: 14px !important; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  input[type="checkbox"] { color-scheme: dark; accent-color: var(--brasa); }
+  .modal-overlay textarea, .modal-overlay input[type="text"], .modal-overlay input[type="search"], .modal-overlay input[type="email"], .modal-overlay input[type="number"] { border-radius: 14px; }
+  .alimento-macros { font-family: 'Inter', sans-serif; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .recetario-section { margin-bottom: 8px; }
+  .recetario-section-header { border-radius: 14px; background: var(--grafito); border-color: rgba(255,255,255,0.06); padding: 14px 16px; }
+  .recetario-section.open .recetario-section-header { border-color: rgba(242,106,54,0.45); }
+  .recetario-section-title { font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+  .recetario-section-hora { font-family: 'Inter', sans-serif; font-size: 12.5px; }
+  .receta-card { border-radius: 16px; border-color: rgba(255,255,255,0.08); background: var(--grafito); }
+  .receta-num, .receta-prep { font-family: 'Inter', sans-serif; font-size: 11.5px; letter-spacing: 0; text-transform: none; }
+  .receta-nombre { font-size: 14px; }
+  .receta-ingredientes { font-size: 12.5px; }
+  .receta-macro-pill { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 3px 9px; }
+  .receta-pasos { border-left: none; border-radius: 12px; font-size: 12.5px; }
+  .receta-pasos-label { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: 0; text-transform: none; }
 </style>
 </head>
 <body>
@@ -7360,7 +7383,7 @@
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color: var(--brasa-txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
       <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
       <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
-      <div id="recetarioNotaCiclo" style="display:none;font-size:12px;color:var(--metal-claro);background:rgba(209,66,14,.07);border-left:3px solid var(--brasa);border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:14px;line-height:1.5"></div>
+      <div id="recetarioNotaCiclo" style="display:none;font-size:13px;color:var(--metal-claro);background:rgba(209,66,14,.07);border:1px solid rgba(242,106,54,0.3);border-radius:14px;padding:11px 14px;margin-bottom:14px;line-height:1.5"></div>
       <input type="text" id="recetarioBuscador" aria-label="Buscar receta" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
     <div id="recetarioContenido"></div>
@@ -8112,7 +8135,7 @@
     <div class="modal-title" style="font-size:19px" id="infoComidaTitulo">Comida</div>
     <p class="modal-desc" style="margin-bottom:14px">De dónde salen los macros de este plato, ingrediente a ingrediente.</p>
     <div id="infoComidaLista"></div>
-    <div id="infoComidaNota" style="font-size:11px;color:var(--metal);background:var(--carbon);border-left:2px solid var(--humo);border-radius:0 6px 6px 0;padding:9px 12px;margin-top:12px;line-height:1.5"></div>
+    <div id="infoComidaNota" style="font-size:12.5px;color:var(--metal-claro);background:var(--grafito);border-radius:12px;padding:10px 14px;margin-top:12px;line-height:1.5"></div>
     <p style="font-size:9.5px;color:#555;text-align:center;margin:12px 0 0">Macros por alimento: USDA FoodData Central · dominio público</p>
     <button class="encuesta-skip" onclick="document.getElementById('modalInfoComida').classList.remove('visible')">Cerrar</button>
   </div>
@@ -26536,7 +26559,7 @@
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--humo)">
             <span style="display:inline-flex;color: var(--brasa-txt)">${catIcons[cat] || catIconOtros}</span>
             <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--blanco)">${cat.toUpperCase()}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--metal);margin-left:auto">${items.length}</span>
+            <span style="font-size:12px;font-weight:600;color:var(--metal);margin-left:auto">${items.length}</span>
           </div>
           ${items.map(i => `
             <label style="display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;transition:background 0.15s;border-radius:4px" onmouseover="this.style.background='rgba(209,66,14,0.06)'" onmouseout="this.style.background='transparent'" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.opacity=this.querySelector('input').checked?'0.4':'1'">
@@ -26545,7 +26568,7 @@
                 <div style="color:var(--blanco);font-size:14px;font-weight:500">${i.nombre}</div>
               </div>
               <div style="text-align:right;flex-shrink:0">
-                <div style="font-family:'DM Mono',monospace;font-size:13px;color: var(--brasa-txt);font-weight:700">${i.cant}</div>
+                <div style="font-size:14px;color: var(--brasa-txt);font-weight:700;font-variant-numeric:tabular-nums">${i.cant}</div>
               </div>
             </label>`).join('')}
         </div>`;
@@ -26555,7 +26578,7 @@
     modal.className = 'modal-overlay visible';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     modal.innerHTML = `
-      <div style="background:var(--carbon);border:1px solid var(--humo);width:100%;max-width:520px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;margin:10px">
+      <div class="lc-box" style="background:var(--carbon);border:1px solid rgba(255,255,255,0.1);width:100%;max-width:520px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;margin:10px">
         <div style="padding:20px 20px 0;flex-shrink:0">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
             <div style="display:flex;align-items:center;gap:8px">
