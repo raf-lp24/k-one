@@ -7045,6 +7045,16 @@
     #landing .pillar-card p { margin: 0; font-size: 13.5px; }
     #landing .desliza { display: flex; justify-content: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--metal); }
   }
+
+  /* Menú de la portada (5 oct 2026): sin mayúsculas ni letras separadas, como
+     el resto de la web; al pasar el ratón, blanco con una raya naranja debajo. */
+  #landing .nav-link { position: relative; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--metal-claro); padding: 6px 0; }
+  #landing .nav-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--brasa-txt); transform: scaleX(0); transition: transform .2s; }
+  #landing .nav-link:hover, #landing .nav-link:focus-visible { color: var(--blanco); outline: none; }
+  #landing .nav-link:hover::after, #landing .nav-link:focus-visible::after { transform: scaleX(1); }
+  #landing .nav-links .nav-entrar { color: var(--blanco); font-weight: 600; }
+  #landing .mobile-menu .nav-link { font-size: 22px; font-weight: 600; color: var(--blanco); }
+  @media (prefers-reduced-motion: reduce) { #landing .nav-link::after { transition: none; } }
 </style>
 </head>
 <body>
