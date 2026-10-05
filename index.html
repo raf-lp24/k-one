@@ -2615,23 +2615,27 @@
   .landing-cta-float .btn-primary { width: 100%; padding: 14px; font-size: 14px; }
   @media (min-width: 769px) { .landing-cta-float { display: none !important; } }
 
+  /* «Volver a mi plan» (5 oct 2026): píldora oscura como el resto de la app,
+     casa + texto + botón redondo naranja. En móvil, abajo y centrada. */
   .btn-volver-dashboard {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 200;
-    background: var(--brasa);
-    color: var(--blanco-puro);
-    border: none;
-    padding: 12px 22px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(209,66,14,0.4);
-    transition: background 0.2s, transform 0.2s;
+    position: fixed; bottom: 24px; right: 24px; z-index: 200;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 7px 7px 7px 10px; border-radius: 999px;
+    background: rgba(20,20,20,0.88); border: 1px solid rgba(242,106,54,0.45);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 30px rgba(209,66,14,0.18);
+    transition: border-color .2s, transform .2s;
   }
-  .btn-volver-dashboard:hover { background: #ff5a10; transform: translateY(-2px); }
+  .btn-volver-dashboard:hover { border-color: var(--brasa-txt); transform: translateY(-2px); }
+  .btn-volver-dashboard:hover .flecha-redonda { background: var(--brasa-oscura); transform: translateX(2px); }
+  .bvd-ico { width: 34px; height: 34px; border-radius: 50%; background: var(--grafito); color: var(--brasa-txt); display: grid; place-items: center; flex-shrink: 0; }
+  .bvd-ico svg { width: 18px; height: 18px; }
+  @media (max-width: 600px) {
+    .btn-volver-dashboard { left: 50%; right: auto; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); white-space: nowrap; }
+    .btn-volver-dashboard:hover { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn-volver-dashboard { transition: none; } }
 
   .testimonials-empty {
     text-align: center;
@@ -8211,7 +8215,7 @@
 </div>
 
 <div class="screen active" id="landing" tabindex="-1">
-  <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')">← Volver a mi plan</button>
+  <button class="btn-volver-dashboard" id="btnVolverDashboard" style="display:none" onclick="loadUserDashboard(getCurrentUser().email); goTo('dashboard')"><span class="bvd-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span>Volver a mi plan</span><span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
   <nav class="landing-nav">
     <div class="logo logo-marca" onclick="goTo('landing')" style="cursor:pointer" role="link" tabindex="0" aria-label="K-ONE, ir al inicio" onkeydown="if(event.key==='Enter')this.click()">
       <span class="logo-fila">
@@ -10561,6 +10565,8 @@
     window.addEventListener('scroll', () => {
       if (!document.getElementById('landing')?.classList.contains('active')) { cta.style.display='none'; return; }
       if (window.innerWidth > 768) { cta.style.display='none'; return; }
+      const volver = document.getElementById('btnVolverDashboard');
+      if (volver && volver.style.display !== 'none') { cta.style.display='none'; return; }
       cta.style.display = '';
       const y = window.scrollY;
       if (y > 400) { cta.classList.add('visible'); } else { cta.classList.remove('visible'); }
