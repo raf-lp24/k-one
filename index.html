@@ -194,6 +194,9 @@
 }
 </script>
 <link rel="canonical" href="https://k-one.fit/">
+<!-- La captura del móvil de la portada es lo más grande que se pinta (LCP):
+     se pide desde la cabecera en vez de esperar a llegar a ella en el HTML. -->
+<link rel="preload" as="image" href="/img/landing/app-hoy-portada-420.webp" imagesrcset="/img/landing/app-hoy-portada-420.webp 420w, /img/landing/app-hoy-portada.webp 600w" imagesizes="(max-width: 899px) 230px, 300px" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://rfdrqbnzceudwclagjvp.supabase.co">
@@ -8442,7 +8445,7 @@
         <button type="button" class="hv-movil hv-movil-video" aria-label="Ver la app por dentro: vídeo de 1 minuto" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){});try{kEvento('video_demo',{origen:'portada'})}catch(e){}">
           <span class="hv-pantalla">
             <span class="hv-isla" aria-hidden="true"></span>
-            <img src="/img/landing/app-hoy-portada.webp" alt="Pantalla Hoy de la app de K-ONE: la sesión del día, Torso A, empuje y tirón, con duración, intensidad y ejercicios" width="600" height="1298" fetchpriority="high">
+            <img src="/img/landing/app-hoy-portada-420.webp" srcset="/img/landing/app-hoy-portada-420.webp 420w, /img/landing/app-hoy-portada.webp 600w" sizes="(max-width: 899px) 230px, 300px" alt="Pantalla Hoy de la app de K-ONE: la sesión del día, Torso A, empuje y tirón, con duración, intensidad y ejercicios" width="600" height="1298" fetchpriority="high">
             <span class="hv-play-grande" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><polygon points="6 3 20 12 6 21 6 3"/></svg></span>
             <span class="hv-play-txt" aria-hidden="true">Ver la app en 1 minuto</span>
           </span>
