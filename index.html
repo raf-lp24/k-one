@@ -7063,6 +7063,39 @@
   #landing .nav-links .nav-entrar { color: var(--blanco); font-weight: 600; }
   #landing .mobile-menu .nav-link { font-size: 22px; font-weight: 600; color: var(--blanco); }
   @media (prefers-reduced-motion: reduce) { #landing .nav-link::after { transition: none; } }
+
+  /* ALTA Y CUESTIONARIO con el estilo de la web (5 oct 2026): campos y
+     opciones redondeados, etiquetas en Inter sin mayúsculas, pistas sin
+     cursiva y botones de navegación redondeados. */
+  .field label, .auth-field label { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--blanco); }
+  .field .optional, .auth-field .optional { letter-spacing: 0; text-transform: none; }
+  .field input, .field select, .field textarea, .auth-field input { border-radius: 14px; background: var(--carbon); border-color: rgba(255,255,255,0.12); font-size: 15px; }
+  .field input:focus, .field select:focus, .field textarea:focus, .auth-field input:focus { border-color: var(--brasa-txt); box-shadow: 0 0 0 3px rgba(209,66,14,0.15); }
+  .stepper-wrap { border-radius: 14px; overflow: hidden; }
+  .stepper-unit { font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 0; }
+  .field .field-hint, #formulario .field-hint, .auth-card .field-hint { font-style: normal; font-size: 12.5px; color: var(--metal); }
+  .radio-opt, .check-opt { border-radius: 999px; padding: 11px 18px; font-size: 14px; font-weight: 500; border-color: rgba(255,255,255,0.12); color: var(--metal-claro); }
+  .radio-opt:hover, .check-opt:hover { border-color: rgba(242,106,54,0.6); color: var(--blanco); }
+  .radio-opt.selected, .check-opt.selected { background: var(--brasa); border-color: var(--brasa); color: #fff; font-weight: 600; }
+  /* Opciones con explicación (nivel): tarjeta con el título arriba y la
+     explicación debajo, en vez de dos columnas mal alineadas. */
+  .radio-opt[data-hint] { flex-direction: column; align-items: flex-start; gap: 2px; border-radius: 16px; width: 100%; padding: 14px 18px; }
+  .radio-opt[data-hint]::after { margin-top: 2px; font-size: 12.5px; color: var(--metal); }
+  .radio-opt.selected[data-hint]::after { color: rgba(255,255,255,0.85); }
+  .progress-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--metal-claro); }
+  .progress-bar, .form-progress-bar { height: 6px; border-radius: 999px; }
+  .progress-fill, .form-progress-bar-fill { border-radius: 999px; }
+  .form-block-tag { font-family: 'DM Mono', monospace; }
+  .form-nav .btn-primary, .form-nav .btn-ghost { border-radius: 14px; }
+  .form-nav-note { font-family: 'Inter', sans-serif; }
+  /* En móvil salían dos barras de progreso seguidas (la de paso y la de bloque): una sola */
+  .form-progress-mobile .form-progress-bar { display: none; }
+  .auth-card .btn-primary, .auth-card .btn-ghost, .auth-submit { border-radius: 14px; }
+  .auth-card .btn-ghost { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .auth-check-label { font-size: 13px; font-weight: 400; color: var(--metal-claro); }
+  .auth-check input[type="checkbox"] { width: 20px; height: 20px; border-radius: 6px; }
+  .auth-back { font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--metal-claro); }
+  .auth-forgot span { font-size: 13px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -7166,8 +7199,8 @@
     <div class="auth-error" id="err-pass2">Las contraseñas no coinciden</div>
 
     <div class="auth-field" style="margin-bottom:12px">
-      <div style="font-size:11px;color:var(--metal);font-family:'DM Mono',monospace;margin-bottom:6px">¿TE INVITÓ UN AMIGO? <span style="color:var(--metal-claro)">(opcional)</span></div>
-      <input type="text" id="reg-codigoInvitacion" aria-label="Código de invitación" placeholder="Código de invitación" style="text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace" autocomplete="off"
+      <label for="reg-codigoInvitacion">¿Te invitó un amigo? <span class="optional">Opcional</span></label>
+      <input type="text" id="reg-codigoInvitacion" aria-label="Código de invitación" placeholder="Código de invitación" style="text-transform:uppercase;letter-spacing:1px" autocomplete="off"
         oninput="comprobarCodigoRegistro()">
       <div id="reg-codigoInfo" style="display:none;font-size:12px;margin-top:7px;line-height:1.5"></div>
       <div style="font-size:11px;color:var(--metal);margin-top:6px;line-height:1.5">Código de un amigo que te invitó a K-ONE.</div>
