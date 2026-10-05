@@ -6986,6 +6986,23 @@
     #landing .sport-card, #landing .hybrid-callout { border-radius: 18px; overflow: hidden; }
     #landing .hybrid-callout { margin-bottom: 20px; }
   }
+
+  /* «Cómo funciona», distintivos de pago y formulario de ofertas con el estilo
+     del resto (5 oct 2026): tarjetas redondeadas y separadas, Inter. */
+  #landing .steps { gap: 12px; }
+  #landing .step { border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); padding: 32px 26px 30px; }
+  #landing .step::before { display: none; }
+  #landing .step-num { font-size: 64px; color: var(--brasa-txt); opacity: .9; margin-bottom: 12px; }
+  #landing .step-body { font-weight: 400; }
+  #landing .trust-bar { font-family: 'Inter', sans-serif; font-size: 13.5px; letter-spacing: 0; }
+  #landing .lead-magnet-form input { border-radius: 14px; background: var(--carbon); }
+  #landing .lead-magnet-form .btn-ghost { border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  #landing .philosophy .btn-primary { border-radius: 14px; padding: 15px 28px; }
+  @media (max-width: 600px) {
+    #landing .step { padding: 24px 22px; display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-items: start; }
+    #landing .step-num { grid-row: span 2; font-size: 52px; margin: 0; }
+    #landing .step-title { font-size: 24px; margin-bottom: 6px; }
+  }
 </style>
 </head>
 <body>
