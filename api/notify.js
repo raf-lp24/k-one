@@ -374,7 +374,7 @@ function emailWrapper(contenido, subtitulo) {
         </td></tr>
         <tr><td style="height:4px;line-height:4px;font-size:0;background:#E8490F">&nbsp;</td></tr>
         <tr><td style="padding:24px 28px 18px;text-align:center">
-          <span style="font-size:24px;font-weight:900;letter-spacing:3px;color:#F0EDE8">K-</span><span style="font-size:24px;font-weight:900;letter-spacing:3px;color:#E8490F">ONE</span>
+          <img src="${APP_URL}/img/marca/logo-email.png" width="180" height="76" alt="K-ONE · No hay atajos, hay pasos" style="display:inline-block;width:180px;height:auto;border:0">
           ${subtitulo ? `<div style="font-size:11px;color:#8A8A8A;letter-spacing:1.5px;margin-top:6px;text-transform:uppercase">${subtitulo}</div>` : ''}
         </td></tr>
       </table>

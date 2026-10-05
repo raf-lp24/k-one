@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8">
+<!-- Logo para los emails (PNG; los clientes de correo no muestran SVG). Fondo #141414 = el de la tarjeta del email. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@700&display=block">
+<style>
+  html,body{margin:0;background:#141414}
+  .l{display:inline-flex;flex-direction:column;align-items:flex-start;padding:30px 42px;font:400 180px/.82 'Bebas Neue',sans-serif}
+  .f{display:flex;align-items:center;gap:.12em;color:#F0EDE8;letter-spacing:.04em;-webkit-text-stroke:.02em currentColor}
+  .f svg{height:.6em;width:auto;margin-top:-.06em}
+  .f b{font-weight:400;color:#F0571C}
+  .s{margin:.9em 0 0 1.27em;font:700 27px/1 Inter,sans-serif;letter-spacing:.14em;color:#B5B2AD}
+</style>
+<div class="l" id="logo"><div class="f"><svg viewBox="0 0 200 170"><polygon fill="#F0EDE8" points="2,85 34,74 34,96"/><rect fill="#F0571C" x="36" y="26" width="22" height="118" rx="4"/><rect fill="#F0571C" x="62" y="2" width="28" height="166" rx="4"/><rect fill="#F0EDE8" x="90" y="79" width="78" height="12"/><polygon fill="#F0571C" stroke="#F0571C" stroke-linejoin="round" points="160,56 198,85 160,114"/></svg><span>K-<b>ONE</b></span></div><div class="s">NO HAY ATAJOS · HAY PASOS</div></div>
+<script>document.fonts.ready.then(()=>{const r=document.getElementById('logo').getBoundingClientRect();document.title=Math.ceil(r.width)+'x'+Math.ceil(r.height);})</script>

@@ -152,7 +152,7 @@ function pagina(p) {
 <body>
 <a class="salto" href="#contenido">Saltar al contenido</a>
 <header class="cab">
-  <a class="logo" href="/" aria-label="K-ONE, ir a la portada">K-<b>ONE</b></a>
+  <a class="logo" href="/" aria-label="K-ONE, ir a la portada"><svg class="logo-pesa" viewBox="0 0 200 170" aria-hidden="true"><polygon fill="#F0EDE8" points="2,85 34,74 34,96"/><rect fill="#F0571C" x="36" y="26" width="22" height="118" rx="4"/><rect fill="#F0571C" x="62" y="2" width="28" height="166" rx="4"/><rect fill="#F0EDE8" x="90" y="79" width="78" height="12"/><polygon fill="#F0571C" stroke="#F0571C" stroke-linejoin="round" points="160,56 198,85 160,114"/></svg><span>K-<b>ONE</b></span></a>
   <a class="btn" href="/?go=registro">Empieza gratis</a>
 </header>
 <main id="contenido">
@@ -206,7 +206,7 @@ ${p.faq.map(([q, a]) => `      <details><summary>${esc(q)}</summary><p>${esc(a)}
   </section>
 </main>
 <footer class="pie">
-  <a class="logo" href="/">K-<b>ONE</b></a>
+  <a class="logo" href="/"><svg class="logo-pesa" viewBox="0 0 200 170" aria-hidden="true"><polygon fill="#F0EDE8" points="2,85 34,74 34,96"/><rect fill="#F0571C" x="36" y="26" width="22" height="118" rx="4"/><rect fill="#F0571C" x="62" y="2" width="28" height="166" rx="4"/><rect fill="#F0EDE8" x="90" y="79" width="78" height="12"/><polygon fill="#F0571C" stroke="#F0571C" stroke-linejoin="round" points="160,56 198,85 160,114"/></svg><span>K-<b>ONE</b></span></a>
   <nav aria-label="Legal">
     <a href="/#aviso-legal">Aviso legal</a>
     <a href="/#privacidad">Privacidad</a>
@@ -234,38 +234,39 @@ a { color: inherit; }
 .salto { position: absolute; left: -9999px; top: 8px; background: var(--blanco); color: var(--negro); padding: 8px 14px; z-index: 10; }
 .salto:focus { left: 8px; }
 .cab { display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(16px, 4vw, 48px); border-bottom: 1px solid var(--grafito); position: sticky; top: 0; background: rgba(10,10,10,.92); backdrop-filter: blur(8px); z-index: 5; }
-.logo { font: 400 30px/1 'Bebas Neue', Impact, sans-serif; letter-spacing: 3px; text-decoration: none; }
+.logo { display: inline-flex; align-items: center; gap: 7px; font: 400 30px/1 'Bebas Neue', Impact, sans-serif; letter-spacing: 2px; text-decoration: none; }
+.logo-pesa { height: .62em; width: auto; }
 .logo b { color: var(--brasa-vivo); font-weight: 400; }
-.btn { display: inline-block; background: var(--brasa); color: #fff; text-decoration: none; font: 600 13px/1 Inter, sans-serif; letter-spacing: 1px; text-transform: uppercase; padding: 13px 20px; border-radius: 8px; }
+.btn { display: inline-block; background: var(--brasa); color: #fff; text-decoration: none; font: 600 13px/1 Inter, sans-serif; letter-spacing: 1px; text-transform: uppercase; padding: 13px 20px; border-radius: 12px; }
 .btn:hover { background: var(--brasa-vivo); }
 .btn.grande { padding: 16px 26px; font-size: 14px; }
 .hero { position: relative; min-height: min(78vh, 640px); display: flex; align-items: flex-end; background: linear-gradient(180deg, rgba(10,10,10,.35), var(--negro) 96%), var(--img) center / cover no-repeat, var(--carbon); }
 .hero-in { width: 100%; max-width: 900px; padding: clamp(96px, 16vh, 160px) clamp(16px, 4vw, 48px) clamp(40px, 7vh, 72px); }
-.eyebrow { margin: 0 0 12px; font: 500 12px/1 'DM Mono', monospace; letter-spacing: 2.5px; text-transform: uppercase; color: var(--brasa-vivo); }
+.eyebrow { display: inline-block; margin: 0 0 14px; padding: 6px 13px; border-radius: 999px; background: rgba(10,10,10,.72); border: 1px solid rgba(242,106,54,.4); backdrop-filter: blur(6px); font: 700 12px/1 Inter, sans-serif; letter-spacing: .6px; text-transform: uppercase; color: var(--brasa-vivo); }
 h1, h2 { font-family: 'Bebas Neue', Impact, sans-serif; font-weight: 400; letter-spacing: 1px; line-height: 1; margin: 0; text-wrap: balance; }
 h1 { font-size: clamp(44px, 8vw, 84px); }
 h2 { font-size: clamp(30px, 4.5vw, 46px); margin-bottom: 26px; }
 h3 { font: 600 16px/1.3 Inter, sans-serif; margin: 0 0 8px; }
 .lead { max-width: 60ch; margin: 22px 0 0; font-size: clamp(17px, 2.2vw, 20px); color: #d8d3cc; }
 .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 30px; }
-.enlace { color: var(--metal); font: 500 13px/1 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+.enlace { color: var(--blanco); font: 600 14.5px/1 Inter, sans-serif; text-underline-offset: 4px; }
 .enlace:hover { color: var(--blanco); }
 .bloque { max-width: 1040px; margin: 0 auto; padding: clamp(40px, 8vw, 84px) clamp(16px, 4vw, 48px) 0; }
 .rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
-.rejilla li { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 12px; padding: 22px; }
+.rejilla li { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 18px; padding: 22px; }
 .rejilla p { margin: 0; color: #c9c4bd; font-size: 15px; }
 .pasos { margin: 0; padding-left: 22px; display: grid; gap: 14px; max-width: 70ch; }
 .pasos li::marker { color: var(--brasa-vivo); font-weight: 600; }
-.nota { margin: 26px 0 0; padding: 16px 18px; border-left: 3px solid var(--brasa); background: var(--carbon); color: #c9c4bd; font-size: 14px; max-width: 70ch; }
+.nota { margin: 26px 0 0; padding: 16px 18px; border: 1px solid rgba(242,106,54,.3); border-radius: 16px; background: var(--carbon); color: #c9c4bd; font-size: 14px; max-width: 70ch; }
 .faq { display: grid; gap: 10px; max-width: 780px; }
-.faq details { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 10px; padding: 0 18px; }
+.faq details { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 14px; padding: 0 18px; }
 .faq summary { cursor: pointer; padding: 16px 0; font-weight: 600; list-style: none; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after { content: '+'; float: right; color: var(--brasa-vivo); font-size: 22px; line-height: 1; }
 .faq details[open] summary::after { content: '−'; }
 .faq details p { margin: 0 0 18px; color: #c9c4bd; }
 .otras { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
-.otra { display: block; text-decoration: none; background: var(--carbon); border: 1px solid var(--grafito); border-radius: 12px; padding: 18px 20px; }
+.otra { display: block; text-decoration: none; background: var(--carbon); border: 1px solid var(--grafito); border-radius: 16px; padding: 18px 20px; }
 .otra:hover { border-color: var(--brasa); }
 .otra strong { display: block; font: 400 26px/1 'Bebas Neue', Impact, sans-serif; letter-spacing: 1px; margin-bottom: 6px; }
 .otra span { color: var(--metal); font-size: 14px; }
