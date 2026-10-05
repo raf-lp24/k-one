@@ -7110,6 +7110,24 @@
   .reg-paso-n { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
   .reg-paso b { font-size: 18px; font-weight: 700; color: var(--blanco); }
   .reg-paso span:last-child { font-size: 13.5px; color: var(--metal-claro); line-height: 1.5; }
+
+  /* Aviso de cookies (5 oct 2026): tarjeta flotante redondeada, en Inter */
+  .cookie-banner { display: none; position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9998; max-width: 760px; margin: 0 auto;
+    background: rgba(20,20,20,0.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px 18px;
+    gap: 14px; align-items: center; flex-wrap: wrap; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .cookie-banner.visible { display: flex; }
+  .cookie-banner-texto { flex: 1 1 260px; margin: 0; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.55; color: var(--metal-claro); }
+  .cookie-banner-texto a { color: var(--brasa-txt); text-decoration: none; font-weight: 600; margin-left: 4px; }
+  .cookie-banner-acciones { display: flex; gap: 8px; flex-shrink: 0; }
+  .cookie-banner-btn { min-height: 44px; padding: 0 18px; border-radius: 999px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .cookie-no { background: transparent; color: var(--blanco); border: 1px solid var(--humo); }
+  .cookie-si { background: var(--brasa); color: #fff; border: none; }
+  @media (max-width: 600px) {
+    .cookie-banner { left: 10px; right: 10px; bottom: 10px; padding: 14px; }
+    .cookie-banner-acciones { width: 100%; }
+    .cookie-banner-btn { flex: 1; }
+  }
 </style>
 </head>
 <body>
@@ -8943,13 +8961,25 @@
 </div>
 
 <!-- BANNER DE COOKIES (RGPD) -->
-<div id="cookieBanner" class="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#141414;border-top:1px solid #2A2A2A;padding:14px 24px;gap:16px;align-items:center;flex-wrap:wrap">
-  <p class="cookie-banner-texto" style="flex:1;margin:0;font-size:11px;color:#B5B2AD;font-family:'DM Mono',monospace;line-height:1.7;min-width:200px">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link" style="color: var(--brasa-txt);text-decoration:none">Más información</a></p>
-  <div style="display:flex;gap:10px;flex-shrink:0">
-    <button onclick="rechazarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:transparent;color:#fff;border:1px solid #6b6b6b;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px;font-weight:600">Solo necesarias</button>
-    <button onclick="aceptarCookies()" class="cookie-banner-btn" style="padding:14px 20px;min-height:44px;background:var(--brasa);color:#fff;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:2px">Aceptar</button>
+<div id="cookieBanner" class="cookie-banner" role="region" aria-label="Aviso de cookies">
+  <p class="cookie-banner-texto">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link">Más información</a></p>
+  <div class="cookie-banner-acciones">
+    <button onclick="rechazarCookies()" class="cookie-banner-btn cookie-no">Solo necesarias</button>
+    <button onclick="aceptarCookies()" class="cookie-banner-btn cookie-si">Aceptar</button>
   </div>
 </div>
+<script>
+  /* 5 oct 2026: el aviso lo mostraba el código de la app al terminar de cargar
+     (7 s con 4G lenta) y era lo último y más grande que se pintaba (LCP). Ahora
+     sale nada más llegar aquí. Estas dos funciones valen hasta que carga la
+     app, que las vuelve a declarar igual. */
+  (function () {
+    var ya = null; try { ya = localStorage.getItem('kone_cookies_ok'); } catch (e) {}
+    if (ya === null) document.getElementById('cookieBanner').classList.add('visible');
+    window.aceptarCookies = function () { try { localStorage.setItem('kone_cookies_ok', '1'); } catch (e) {} try { cargarGA(); } catch (e) {} document.getElementById('cookieBanner').classList.remove('visible'); document.getElementById('cookieBanner').style.display = 'none'; };
+    window.rechazarCookies = function () { try { localStorage.setItem('kone_cookies_ok', '0'); } catch (e) {} document.getElementById('cookieBanner').classList.remove('visible'); document.getElementById('cookieBanner').style.display = 'none'; };
+  })();
+</script>
 
 <!-- BANNER INSTALAR APP (PWA) -->
 <div id="pwaInstallBanner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9997;background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:14px 40px 14px 16px;max-width:360px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:pwaBannerFadeIn 0.4s ease">
@@ -32498,7 +32528,7 @@ Se coló: ${lista}`;
   function mostrarCookieBanner() {
     try { if (localStorage.getItem('kone_cookies_ok') !== null) return; } catch(e) {}
     const b = document.getElementById('cookieBanner');
-    if (b) b.style.display = 'flex';
+    if (b) { b.style.display = ''; b.classList.add('visible'); }
   }
 
   // ===== TEMA: forzado oscuro (decisión de diseño, ver dirección visual) =====
