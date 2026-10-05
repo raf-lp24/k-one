@@ -1151,6 +1151,26 @@
     background: radial-gradient(ellipse 50% 50% at center, rgba(255,122,61,0.95) 0%, rgba(232,73,15,0.55) 35%, rgba(232,73,15,0.15) 60%, transparent 75%);
     filter: blur(22px);
   }
+  .hv-movil-video { cursor: pointer; font: inherit; color: inherit; }
+  .hv-movil-video:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 6px; }
+  .hv-movil-video .hv-pantalla img { transition: filter .2s; filter: brightness(0.82); }
+  .hv-movil-video:hover .hv-pantalla img { filter: brightness(0.95); }
+  .hv-play-grande {
+    position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 3;
+    width: 76px; height: 76px; border-radius: 50%; background: var(--brasa); display: grid; place-items: center;
+    box-shadow: 0 0 0 10px rgba(209,66,14,0.25), 0 14px 40px rgba(0,0,0,0.55);
+    animation: hvLatido 2.4s ease-in-out infinite;
+  }
+  .hv-play-grande svg { width: 28px; height: 28px; margin-left: 4px; }
+  @keyframes hvLatido { 0%, 100% { box-shadow: 0 0 0 10px rgba(209,66,14,0.25), 0 14px 40px rgba(0,0,0,0.55); } 50% { box-shadow: 0 0 0 18px rgba(209,66,14,0.10), 0 14px 40px rgba(0,0,0,0.55); } }
+  .hv-play-txt {
+    position: absolute; left: 50%; top: calc(46% + 58px); transform: translateX(-50%); z-index: 3; white-space: nowrap;
+    padding: 8px 14px; border-radius: 999px; background: rgba(10,10,10,0.82); border: 1px solid rgba(242,106,54,0.5);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--blanco);
+  }
+  .hv-movil-video:hover .hv-play-grande { background: var(--brasa-oscura); }
+  @media (prefers-reduced-motion: reduce) { .hv-play-grande { animation: none; } }
   .hv-pantalla { position: relative; display: block; width: 100%; height: 100%; border-radius: 32px; overflow: hidden; background: var(--negro); }
   .hv-pantalla img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   .hv-isla { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 30%; height: 20px; border-radius: 12px; background: #000; z-index: 2; }
@@ -6959,6 +6979,9 @@
     #landing .hero-content .hero-trust { margin-top: 14px; }
     #landing .hero-content .hero-trust > span { width: 100%; justify-content: center; border-radius: 14px; padding: 10px; }
     #landing .hv-t-progreso { display: none; }
+    #landing .hv-play-grande { width: 62px; height: 62px; }
+    #landing .hv-play-grande svg { width: 24px; height: 24px; }
+    #landing .hv-play-txt { top: calc(46% + 48px); font-size: 12px; padding: 7px 12px; }
     #landing .sports-grid { gap: 12px; }
     #landing .sport-card, #landing .hybrid-callout { border-radius: 18px; overflow: hidden; }
     #landing .hybrid-callout { margin-bottom: 20px; }
@@ -8284,12 +8307,16 @@
 
         <!-- Sin botón al vídeo por ahora (4 oct): el móvil es solo la captura. El modal
              #heroVideoModal sigue en la página por si se vuelve a enlazar. -->
-        <div class="hv-movil">
+        <!-- 5 oct 2026: el vídeo vuelve aquí (lo primero que se ve), con un play
+             grande; el de «El control total en tu mano» se queda para quien baje. -->
+        <button type="button" class="hv-movil hv-movil-video" aria-label="Ver la app por dentro: vídeo de 1 minuto" onclick="var m=document.getElementById('heroVideoModal');m.style.display='flex';var p=m.querySelector('video').play();if(p&&p.catch)p.catch(function(){});try{kEvento('video_demo',{origen:'portada'})}catch(e){}">
           <span class="hv-pantalla">
             <span class="hv-isla" aria-hidden="true"></span>
             <img src="/img/landing/app-hoy-portada.webp" alt="Pantalla Hoy de la app de K-ONE: la sesión del día, Torso A, empuje y tirón, con duración, intensidad y ejercicios" width="600" height="1298" fetchpriority="high">
+            <span class="hv-play-grande" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><polygon points="6 3 20 12 6 21 6 3"/></svg></span>
+            <span class="hv-play-txt" aria-hidden="true">Ver la app en 1 minuto</span>
           </span>
-        </div>
+        </button>
 
         <div class="hv-tarjeta hv-t-entreno" aria-hidden="true">
           <div class="hv-tit">Entrenamiento <small>4 días</small></div>
