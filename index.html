@@ -7096,6 +7096,12 @@
   .auth-check input[type="checkbox"] { width: 20px; height: 20px; border-radius: 6px; }
   .auth-back { font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--metal-claro); }
   .auth-forgot span { font-size: 13px; font-weight: 500; }
+
+  /* «Tu plan está listo» (5 oct 2026): etiquetas en Inter y caja redondeada */
+  .pw-lab { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--blanco); margin: 0 0 10px; }
+  #modalPaywall .modal-box { border-radius: 22px; }
+  #modalPaywall #paywallBtn { border-radius: 14px; }
+  #modalPaywall .field-hint { font-style: normal; }
 </style>
 </head>
 <body>
@@ -7340,31 +7346,31 @@
     <div id="paywallOfertaBox" style="display:none">
       <div class="price-amount" style="margin-bottom:4px"><span>Gratis</span><span style="font-size:14px;color:var(--metal)"> · primer mes</span></div>
       <div style="margin:14px 0 0">
-        <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
+        <p class="pw-lab">¿Qué quieres incluir?</p>
         <div class="radio-group" id="pw-ofertaTipo" style="margin-bottom:8px">
           <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-ofertaTipo'); actualizarAvisoOferta();">Entrenamiento + nutrición</div>
           <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-ofertaTipo'); actualizarAvisoOferta();">Solo nutrición</div>
         </div>
       </div>
       <div id="pwOfertaDespuesWrap" style="margin:14px 0">
-        <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿Y DESPUÉS DEL PRIMER MES?</p>
+        <p class="pw-lab">¿Y después del primer mes?</p>
         <div class="radio-group" id="pw-ofertaDespues" style="margin-bottom:8px">
           <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-ofertaDespues'); actualizarAvisoOferta();">7,99€ al mes</div>
           <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-ofertaDespues'); actualizarAvisoOferta();">14,99€ cada 3 meses</div>
         </div>
       </div>
-      <div style="background:#1a1206;border:1px solid #d4a500;border-radius:8px;padding:12px 14px;margin-bottom:12px">
-        <p style="margin:0;font-size:12px;color:#ffd700;line-height:1.5;font-weight:500" id="pwOfertaAviso"></p>
+      <div style="background:rgba(209,66,14,0.08);border:1px solid rgba(242,106,54,0.35);border-radius:14px;padding:12px 14px;margin-bottom:12px">
+        <p style="margin:0;font-size:13px;color:var(--blanco);line-height:1.5;font-weight:500" id="pwOfertaAviso"></p>
       </div>
     </div>
     <!-- Modo "elige tu plan": selector de periodicidad y precio normal -->
     <div id="paywallPlanChooser">
-      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px">¿QUÉ QUIERES INCLUIR?</p>
+      <p class="pw-lab">¿Qué quieres incluir?</p>
       <div class="radio-group" id="pw-tipoPlan" style="margin-bottom:16px">
         <div class="radio-opt selected" data-valor="completo" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Entrenamiento + nutrición</div>
         <div class="radio-opt" data-valor="nutricion" onclick="selectRadio(this,'pw-tipoPlan'); actualizarPrecioPaywall();">Solo nutrición</div>
       </div>
-      <p style="font-size:11px;color:var(--metal);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px" id="pw-periodicidadLabel">FACTURACIÓN</p>
+      <p class="pw-lab" id="pw-periodicidadLabel">Facturación</p>
       <div class="radio-group" id="pw-periodicidad" style="margin-bottom:16px">
         <div class="radio-opt selected" data-valor="mensual" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Mensual</div>
         <div class="radio-opt" data-valor="trimestral" onclick="selectRadio(this,'pw-periodicidad'); actualizarPrecioPaywall();">Trimestral</div>
@@ -7374,11 +7380,11 @@
     </div>
     <!-- Solo si el servidor dice que este email ya tuvo el mes gratis (borró la cuenta y
          volvió a registrarse): se avisa de que el cobro empieza hoy ANTES de mandarle a Stripe. -->
-    <div id="paywallAvisoPrueba" role="alert" style="display:none;margin-top:16px;background:#1a1206;border:1px solid #d4a500;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#ffd700;line-height:1.5"></div>
+    <div id="paywallAvisoPrueba" role="alert" style="display:none;margin-top:16px;background:rgba(209,66,14,0.08);border:1px solid rgba(242,106,54,0.45);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--blanco);line-height:1.5"></div>
     <button class="btn-primary" id="paywallBtn" style="width:100%;padding:14px;margin-top:16px" onclick="pagarDesdePaywall()">Continuar con K-One →</button>
     <!-- Solo en el primer mes gratis: lo que más frena es dejar la tarjeta, así que se dice
          claro qué pasa con ella (y se cumple: el cron avisa antes del primer cobro). -->
-    <div id="paywallGarantia" style="display:none;margin-top:14px;padding:12px 14px;border:1px solid var(--humo);border-radius:10px;background:var(--carbon)">
+    <div id="paywallGarantia" style="display:none;margin-top:14px;padding:14px 16px;border:1px solid rgba(255,255,255,0.08);border-radius:16px;background:var(--carbon)">
       <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> <strong style="color:var(--blanco)">Sin tarjeta.</strong> Empiezas ahora mismo y no se cobra nada.</p>
       <p style="margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Unos días antes de que termine te avisamos por email para que decidas si sigues.</p>
       <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--metal-claro)"><span style="color:var(--brasa-txt)">✓</span> Si no añades tarjeta, el mes termina y ya está: sin cobros ni permanencia.</p>
@@ -7396,7 +7402,7 @@
       <p class="pago-seguro-nota">No guardamos tu tarjeta: el pago lo procesa Stripe, con certificación PCI DSS de nivel 1.</p>
     </div>
     <p class="field-hint" style="text-align:center;margin-top:10px">Cancela cuando quieras · Sin permanencia</p>
-    <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--blanco);font-family:'DM Mono',monospace;cursor:pointer" onclick="logout()">Cerrar sesión</p>
+    <p style="text-align:center;margin-top:16px;font-size:13px;font-weight:600;color:var(--metal-claro);cursor:pointer" onclick="logout()">Cerrar sesión</p>
   </div>
 </div>
 
@@ -9679,9 +9685,9 @@
       <!-- HOY -->
       <div class="dash-section active" id="section-hoy">
         <!-- Mes gratis sin tarjeta: aviso en la última semana para que la añada y siga. -->
-        <div id="avisoTarjetaPrueba" role="status" style="display:none;margin:0 0 18px;padding:14px 16px;border:1px solid rgba(224,164,58,0.55);background:rgba(224,164,58,0.07);border-radius:12px;gap:12px;align-items:center;flex-wrap:wrap">
+        <div id="avisoTarjetaPrueba" role="status" style="display:none;margin:0 0 18px;padding:14px 16px;border:1px solid rgba(242,106,54,0.45);background:rgba(209,66,14,0.08);border-radius:16px;gap:12px;align-items:center;flex-wrap:wrap">
           <p id="avisoTarjetaPruebaTexto" style="margin:0;flex:1 1 220px;font-size:13px;line-height:1.5;color:var(--metal-claro)"></p>
-          <button type="button" class="btn-primary" style="padding:9px 18px;font-size:12px" onclick="anadirTarjeta(this)">Añadir tarjeta</button>
+          <button type="button" class="btn-primary" style="padding:11px 20px;font-size:12.5px;border-radius:999px" onclick="anadirTarjeta(this)">Añadir tarjeta</button>
         </div>
         <div id="dashSkeleton" style="display:none">
           <div class="skeleton" style="height:80px;margin-bottom:20px"></div>
@@ -28377,14 +28383,14 @@ Se coló: ${lista}`;
     let plan = (typeof generatedPlan !== 'undefined' && generatedPlan) || null;
     if (!plan) { const u = getCurrentUser(); plan = (u && getUserData(u.email)?.plan) || null; }
     if (!plan || !(plan.kcalObj > 0)) { box.style.display = 'none'; box.innerHTML = ''; return; }
-    box.innerHTML = '<div style="background:var(--carbon);border:1px solid var(--humo);border-radius:12px;padding:14px 14px 12px;margin:14px 0 4px">' + _htmlAdelantoPlan(plan, 'UN ADELANTO DE TU PLAN') + '</div>';
+    box.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px 16px 14px;margin:14px 0 4px">' + _htmlAdelantoPlan(plan, 'UN ADELANTO DE TU PLAN') + '</div>';
     box.style.display = 'block';
   }
 
   // Lo que se enseña del plan antes de tener acceso: cifras, primera sesión y tres
   // comidas. Lo usan el paywall y la pantalla de registro tras el cuestionario.
   function _htmlAdelantoPlan(plan, etiqueta) {
-    const chip = (valor, texto) => `<div style="flex:1 1 76px;background:var(--grafito);border:1px solid var(--humo);border-radius:10px;padding:8px 6px;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:var(--blanco-puro)">${_esc(valor)}</div><div style="font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--metal);margin-top:3px">${_esc(texto)}</div></div>`;
+    const chip = (valor, texto) => `<div style="flex:1 1 76px;background:var(--grafito);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 6px;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--blanco-puro)">${_esc(valor)}</div><div style="font-size:12px;color:var(--metal);margin-top:5px">${_esc(texto)}</div></div>`;
     const sesiones = Array.isArray(plan.semana) && !plan.soloDieta ? plan.semana.filter(d => /entren/i.test(d.tipo || '')) : [];
     let html = `<div style="font-size:11px;color:var(--brasa-txt);font-family:'DM Mono',monospace;letter-spacing:1.5px;margin:2px 0 8px">${_esc(etiqueta)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">${chip(plan.kcalObj, 'kcal al día')}${plan.protObj ? chip(plan.protObj + ' g', 'proteína') : ''}${sesiones.length ? chip(sesiones.length, sesiones.length === 1 ? 'sesión / semana' : 'sesiones / semana') : ''}</div>`;
@@ -28486,11 +28492,11 @@ Se coló: ${lista}`;
     }
     if (titulo) titulo.textContent = 'Tu plan está listo';
     if (sub) sub.innerHTML = 'Crea tu cuenta para guardarlo y empezar tu primer mes gratis. ¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra →</a>';
-    caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(209,66,14,0.4);border-radius:12px;padding:14px 14px 12px;margin:0 0 14px;text-align:left">'
+    caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(242,106,54,0.4);border-radius:18px;padding:16px 16px 14px;margin:0 0 14px;text-align:left">'
       + _htmlAdelantoPlan(p.plan, 'TU PLAN, CON TUS RESPUESTAS')
       + '<button type="button" onclick="rehacerCuestionario()" style="margin-top:10px;background:none;border:none;padding:4px 0;color:var(--metal);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Rehacer el cuestionario</button></div>'
       // ENVÍAME MI PLAN (2 oct 2026): para quien no quiere crear la cuenta todavía.
-      + '<form id="planEmailForm" onsubmit="return enviarPlanPorEmail(event)" style="margin:0 0 22px;padding:12px 14px;border:1px dashed var(--humo);border-radius:12px;text-align:left">'
+      + '<form id="planEmailForm" onsubmit="return enviarPlanPorEmail(event)" style="margin:0 0 22px;padding:14px 16px;border:1px solid rgba(255,255,255,0.08);background:var(--carbon);border-radius:18px;text-align:left">'
       + '<div style="font-size:13px;color:var(--blanco);margin-bottom:8px">¿Prefieres pensarlo? Te mandamos tu plan por email.</div>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="planEmailInput" required autocomplete="email" placeholder="tu@email.com" aria-label="Tu email para recibir el plan" style="flex:1 1 180px;min-width:0;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-size:14px">'
       + '<button type="submit" id="planEmailBtn" class="btn-ghost" style="padding:10px 16px;font-size:12px">Enviármelo</button></div>'
