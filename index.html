@@ -7102,6 +7102,11 @@
   #modalPaywall .modal-box { border-radius: 22px; }
   #modalPaywall #paywallBtn { border-radius: 14px; }
   #modalPaywall .field-hint { font-style: normal; }
+
+  .reg-paso { display: flex; flex-direction: column; gap: 4px; margin: 26px 0 20px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .reg-paso-n { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .reg-paso b { font-size: 18px; font-weight: 700; color: var(--blanco); }
+  .reg-paso span:last-child { font-size: 13.5px; color: var(--metal-claro); line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -7161,6 +7166,14 @@
     <p class="auth-subtitle" id="registroSubtitulo">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
     <!-- Con el cuestionario hecho como invitado: su adelanto y para qué es la cuenta. -->
     <div id="registroPlanListo" style="display:none"></div>
+    <!-- 5 oct 2026: el usuario no entendía por qué tras «Tu plan está listo» salían
+         otra vez nombre, email... El cuestionario se hace SIN cuenta: esto es la
+         cuenta, y ahora se dice. «¿Prefieres pensarlo?» pasa debajo del botón. -->
+    <div id="registroPasoCuenta" class="reg-paso" style="display:none">
+      <span class="reg-paso-n">Último paso</span>
+      <b>Crea tu cuenta para guardar tu plan</b>
+      <span>Solo nombre, email y contraseña. Así tu plan queda guardado y empiezas tu mes gratis.</span>
+    </div>
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
@@ -7242,6 +7255,7 @@
 
     <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
     </form>
+    <div id="registroPensarlo" style="display:none"></div>
     <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
   </div>
 </div>
@@ -28486,6 +28500,7 @@ Se coló: ${lista}`;
     if (!caja) return;
     if (!p || !p.plan || !(p.plan.kcalObj > 0)) {
       caja.style.display = 'none'; caja.innerHTML = '';
+      ['registroPensarlo', 'registroPasoCuenta'].forEach(id => { const e = document.getElementById(id); if (e) { e.style.display = 'none'; if (id === 'registroPensarlo') e.innerHTML = ''; } });
       if (titulo) titulo.textContent = 'Crear cuenta';
       if (sub) sub.innerHTML = '¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra aquí →</a>';
       return;
@@ -28495,14 +28510,18 @@ Se coló: ${lista}`;
     caja.innerHTML = '<div style="background:var(--carbon);border:1px solid rgba(242,106,54,0.4);border-radius:18px;padding:16px 16px 14px;margin:0 0 14px;text-align:left">'
       + _htmlAdelantoPlan(p.plan, 'TU PLAN, CON TUS RESPUESTAS')
       + '<button type="button" onclick="rehacerCuestionario()" style="margin-top:10px;background:none;border:none;padding:4px 0;color:var(--metal);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Rehacer el cuestionario</button></div>'
-      // ENVÍAME MI PLAN (2 oct 2026): para quien no quiere crear la cuenta todavía.
-      + '<form id="planEmailForm" onsubmit="return enviarPlanPorEmail(event)" style="margin:0 0 22px;padding:14px 16px;border:1px solid rgba(255,255,255,0.08);background:var(--carbon);border-radius:18px;text-align:left">'
+      + '';
+    caja.style.display = 'block';
+    // Debajo del botón de crear la cuenta, como alternativa
+    const pensar = document.getElementById('registroPensarlo');
+    if (pensar) { pensar.innerHTML = '<form id="planEmailForm" onsubmit="return enviarPlanPorEmail(event)" style="margin:22px 0 0;padding:14px 16px;border:1px solid rgba(255,255,255,0.08);background:var(--carbon);border-radius:18px;text-align:left">'
       + '<div style="font-size:13px;color:var(--blanco);margin-bottom:8px">¿Prefieres pensarlo? Te mandamos tu plan por email.</div>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="email" id="planEmailInput" required autocomplete="email" placeholder="tu@email.com" aria-label="Tu email para recibir el plan" style="flex:1 1 180px;min-width:0;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--blanco);font-size:14px">'
       + '<button type="submit" id="planEmailBtn" class="btn-ghost" style="padding:10px 16px;font-size:12px">Enviármelo</button></div>'
       + '<p id="planEmailNota" style="margin:8px 0 0;font-size:11px;color:var(--metal);line-height:1.5">Al pulsar te enviamos tu plan y un único recordatorio dentro de 2 días. Nada más.</p>'
-      + '</form>';
-    caja.style.display = 'block';
+      + '</form>'; pensar.style.display = 'block'; }
+    const paso = document.getElementById('registroPasoCuenta');
+    if (paso) paso.style.display = '';
   }
 
   // Tras crear la cuenta o entrar: si la cuenta ya tiene plan, ese manda (no se
