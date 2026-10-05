@@ -6933,6 +6933,31 @@
   .skip-link{position:absolute;top:8px;left:-9999px;z-index:9999;background:var(--brasa);color:#fff;
     padding:10px 18px;border-radius:8px;font-weight:700;text-decoration:none}
   .skip-link:focus{left:8px}
+
+  /* PORTADA EN MÓVIL (5 oct 2026): el usuario la veía «muy justa». Cada
+     sección tenía su propio margen lateral (20, 24, 40 px) y los bloques del
+     hero iban pegados. Un solo margen de 24 px, titular algo menor y más aire
+     vertical entre bloques. Va al final para mandar sobre lo anterior. */
+  @media (max-width: 600px) {
+    #landing .landing-nav { padding: 16px 24px; }
+    #landing .hero { padding: 104px 24px 48px; }
+    #landing .hv-grid { gap: 48px; }
+    #landing .hero-title { font-size: clamp(46px, 12.6vw, 64px); line-height: .94; margin-bottom: 20px; }
+    #landing .hero-sub { font-size: 16.5px; line-height: 1.6; margin-bottom: 30px; }
+    #landing .hv-ventajas { margin-top: 20px; gap: 10px 16px; }
+    #landing .hv-ejemplo { margin-top: 28px; }
+    #landing .hero-content .hero-trust { margin-top: 22px; }
+    #landing .hv-escena { height: 450px; }
+    #landing .hv-t-progreso { left: -6px; top: 6%; width: 136px; }
+    #landing .sports, #landing .how, #landing .app-preview, #landing .pricing,
+    #landing .testimonials, #landing .philosophy, #landing .pillars, #landing .faq-section { padding: 72px 24px; }
+    #landing .share-bar { padding: 36px 24px; }
+    #landing .pie { padding: 48px 24px 28px; }
+    #landing .section-header { margin-bottom: 32px; }
+    #landing .sports-grid { gap: 12px; }
+    #landing .sport-card, #landing .hybrid-callout { border-radius: 18px; overflow: hidden; }
+    #landing .hybrid-callout { margin-bottom: 20px; }
+  }
 </style>
 </head>
 <body>
