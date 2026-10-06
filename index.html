@@ -11668,7 +11668,7 @@
     // Además rebajaba el básico de cuádriceps del día a un ejercicio sin
     // carga para alguien que tiene mancuernas delante. Se cambia por step-ups,
     // que sí admite repeticiones, tiene ficha y se puede hacer en casa.
-    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Step-ups con mancuernas']],
+    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Step-ups con mancuernas', 'Sentadilla con talones elevados']],
     // Las tres últimas alternativas van sin material a propósito: las dos
     // primeras llevan mancuerna, así que _ALT_PESO_LIBRE las descarta para quien
     // entrena sin peso y el ejercicio se quedaba FIJO 12 semanas seguidas. Es lo
@@ -11855,7 +11855,7 @@
     // bíceps en banco scott" en "curl bíceps concentrado con mancuerna", y la
     // regla solo cambiaba "curl bíceps" -- salía "Curl martillo concentrado con
     // mancuerna" o "Curl inclinado con mancuernas concentrado con mancuerna".
-    [/curl b[ií]ceps(?! con barra z| en banco scott)( concentrado)?( con banda el[aá]stica| con mancuernas?)?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas']],
+    [/curl b[ií]ceps(?! con barra z| en banco scott)( concentrado)?( con banda el[aá]stica| con mancuernas?)?|curl de biceps/i, ['Curl martillo', 'Curl en polea baja', 'Curl inclinado con mancuernas', 'Curl bayesiano en polea', 'Curl en polea alta a una mano']],
     // El grupo de material del final consume lo que deja detrás la plantilla o
     // la rotación de accesorios: el pool escribe "extensión de tríceps en polea"
     // y esta regla solo se comía el nombre, así que el material quedaba colgando
@@ -11866,14 +11866,22 @@
     // "con banda elástica" en el material (16 sept 2026): la traducción a casa
     // pasa "extensión de tríceps con cuerda" a "con banda elástica", y sin
     // consumirlo salía "Patada de tríceps con mancuerna con banda elástica".
-    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra| con banda el[aá]stica)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna']],
+    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra| con banda el[aá]stica)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna', 'Extensión katana en polea']],
     // "Elevaciones frontales" y "Press Arnold" quitadas (14 sept 2026): las dos
     // trabajan el deltoides ANTERIOR, que en cualquiera de estas plantillas ya
     // va saturado por los presses de pecho y de hombro. La elevación lateral es
     // el único trabajo directo del deltoides MEDIO de la semana, así que
     // cambiarla por una frontal deja ese haz a cero. Las alternativas son ahora
     // el mismo movimiento con otro material.
-    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Elevaciones laterales en máquina']],
+    [/elevaciones laterales(?! con mancuernas)/i, ['Elevaciones en polea', 'Elevaciones laterales en máquina', 'Six way con mancuernas']],
+    // Ejercicios sacados de vídeos de técnica (7 oct 2026). El curl martillo no
+    // rotaba nunca: ahora tiene alternativas del mismo músculo y movimiento.
+    [/curl martillo(?! concentrado| con cuerda| en polea)( con mancuernas?)?/i, ['Curl invertido con barra Z', 'Curl martillo con cuerda en polea']],
+    [/curl martillo con cuerda en polea/i, ['Curl invertido con barra Z', 'Curl martillo con mancuernas']],
+    // Las plantillas escriben el tríceps por encima de la cabeza y el combo de
+    // hombro con estos nombres, que ninguna regla cubría: no rotaban nunca.
+    [/extensi[oó]n de tr[ií]ceps sobre cabeza/i, ['Extensión katana en polea']],
+    [/combo lateral-frontal/i, ['Six way con mancuernas']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
     [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
@@ -12019,7 +12027,7 @@
   // paréntesis del ejercicio original detrás ("saltando a la comba").
   // Al corredor de cinta no le afecta: el lugar "Cinta / Interior" se resuelve
   // como entorno de gimnasio, así que sigue pudiendo recibirlas.
-  const _ALT_SOLO_GIMNASIO = /polea|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
+  const _ALT_SOLO_GIMNASIO = /polea|barra z|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
   // La BANDA ELÁSTICA cuenta como material: quien elige "en casa sin material"
   // no tiene una. Medido el 6 sept 2026: "pallof press con banda" y "clamshells
   // con banda" llegaban a planes sin material (128 casos), desde las plantillas
@@ -12045,7 +12053,7 @@
   // que el `[/overhead carry/ → farmer carry]` que ya existía allí no protegía
   // de un overhead carry METIDO por la propia rotación. Se vio al darle
   // alternativas al slot de carries para quien entrena en casa.
-  const _ALT_RIESGO_HOMBRO = /press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
+  const _ALT_RIESGO_HOMBRO = /six way|press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
   // "superman" (15 sept 2026): es extensión lumbar tumbado boca abajo, lo mismo
   // que la hiperextensión, y la rotación del dead bug lo metía con la espalda tocada.
   const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n|superman/i;
@@ -12787,7 +12795,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json');
+      const r = await fetch('/data/ejercicios-info.json?v=20261007');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -17190,7 +17198,7 @@
       semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
       notasSalud.push(sentirseMejor
         ? 'Tu objetivo es encontrarte mejor, así que los básicos van a 8 repeticiones con una carga que controles, no a 5 con carga máxima: para la salud rinde lo mismo, te recuperas antes y la sesión cabe en tu tiempo porque el descanso es más corto (unos 90 segundos). Acaba cada serie con 2-3 repeticiones de reserva.'
-        : 'Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa 2 minutos entre series de básicos y 60-90 segundos en los accesorios.');
+        : 'Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa de 2 a 3 minutos entre series de básicos (con menos, la serie siguiente sale con menos peso) y 60-90 segundos en los accesorios.');
     }
 
     // 60 años o más (29 sept 2026, auditoría de entrenador): el plan era el
@@ -22071,7 +22079,9 @@
   function _sesDescansoDe(p) {
     if (p.tipo !== 'peso') return 0;
     const r = parseInt(p.reps, 10) || 10;
-    return r <= 6 ? 150 : r <= 10 ? 120 : r <= 14 ? 90 : 60;
+    // Series pesadas, más descanso (7 oct 2026): por debajo de 2 minutos se
+    // levanta menos peso en la serie siguiente y se gana menos músculo.
+    return r <= 6 ? 180 : r <= 10 ? 150 : r <= 14 ? 90 : 60;
   }
   function _sesGuardar() {
     try { localStorage.setItem(_SES_CLAVE(), JSON.stringify({ idx: _ses.idx, inicio: _ses.inicio, fin: _ses.fin || null, pasos: _ses.pasos.map(p => ({ key: p.key || p.nombre, hechas: p.hechas, kg: p.kg, series: p.series, reps: p.reps })) })); } catch (e) {}
