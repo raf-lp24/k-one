@@ -33,7 +33,7 @@ Además `tests.html` (20 pruebas en el navegador; abrir con el servidor local). 
 - Los macros de una receta **nunca a mano**: `scripts/componer.js`.
 - Cambiar un precio = Price nuevo en Stripe + variable de entorno + redeploy; y actualizar `index.html`, `llms.txt`, términos y las páginas generadas.
 - El vídeo de la portada se llama `demo-septiembre.mp4`: `vercel.json` cachea `/demo-*` 30 días como inmutable, así que **al cambiarlo hay que cambiar el nombre**.
-- Iconos: `node marketing/generar-iconos.mjs`. Vídeo demo: `node marketing/grabar-demo.mjs`.
+- Iconos: `node marketing/generar-iconos.mjs`. Vídeo demo: `node marketing/grabar-demo-oct.mjs` (lo deja en marketing/Videos/demo-octubre.mp4; la portada usa la copia de la raíz).
 - Archivos con saltos de línea mezclados (CRLF/LF): editar con herramientas que los respeten; en scripts de shell se pierden las barras invertidas (`\d`, `\n`) — escribir los scripts a archivo.
 
 ## Variables de entorno (Vercel)
