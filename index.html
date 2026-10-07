@@ -11668,7 +11668,7 @@
     // Además rebajaba el básico de cuádriceps del día a un ejercicio sin
     // carga para alguien que tiene mancuernas delante. Se cambia por step-ups,
     // que sí admite repeticiones, tiene ficha y se puede hacer en casa.
-    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Step-ups con mancuernas', 'Sentadilla con talones elevados']],
+    [/sentadilla goblet( con mancuernas?)?/i, ['Prensa de piernas', 'Zancadas con mancuernas', 'Step-ups con mancuernas', 'Sentadilla con talones elevados', 'Sentadilla frontal con mancuernas']],
     // Las tres últimas alternativas van sin material a propósito: las dos
     // primeras llevan mancuerna, así que _ALT_PESO_LIBRE las descarta para quien
     // entrena sin peso y el ejercicio se quedaba FIJO 12 semanas seguidas. Es lo
@@ -11793,7 +11793,7 @@
     // en repeticiones y el farmer carry es un transporte medido en metros. Salía
     // "Farmer carry con mancuernas 4×10 por lado" -- un paseo cargado de "10
     // repeticiones por lado".
-    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho']],
+    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Remo en banco inclinado con mancuernas']],
     // "( cargadas? con mancuernas?)?" entra en el patrón por lo mismo que el
     // material del hip thrust de abajo: la plantilla de Híbrido en casa escribe
     // "zancadas cargadas con mancuernas" y, si la regla solo se comía
@@ -12670,6 +12670,8 @@
     ['six way', 'eNUh4_x3Mi4', 'Training Norte - Six way'],
     ['sentadilla con talones elevados', 'WKBaF3-E40I', 'Coach Luis Solís - Sentadilla goblet con talones elevados'],
     ['encogimiento inclinado', '7hzPJzg3Oyo', 'Culturadegym - Encogimientos en banco inclinado'],
+    ['sentadilla frontal con mancuern', 'gUITTCpa4Z4', 'EresFitness - Sentadilla frontal con mancuernas'],
+    ['remo en banco inclinado', 'D6lpHgyDItk', 'Zonapablo - Remo con 2 mancuernas en banco inclinado'],
     ['peso muerto rumano con mancuern|peso muerto rumano mancuern', 'yxLk9X5C7RU', 'DrVíctorLópez - PMR con mancuernas'],
     ['peso muerto sumo', 'VjcxPlAYReA', 'Élite - Peso muerto sumo con mancuerna'],
     ['peso muerto rumano|\\brdl\\b', 'rjvlSfZ-PQw', 'Fit Generation - Peso muerto rumano'],
@@ -12805,7 +12807,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261007');
+      const r = await fetch('/data/ejercicios-info.json?v=20261007b');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -14479,7 +14481,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (60 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (90 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -14540,7 +14542,38 @@
     "Cada vez que dices 'mañana' pagas con los resultados del mañana.",
     "El camino es el mismo para todos. La diferencia es quién no para.",
     "Este no es un plan de 30 días. Es un cambio de quién eres.",
-    "K-One no te da un plan. Te da una herramienta. El trabajo es tuyo."
+    "K-One no te da un plan. Te da una herramienta. El trabajo es tuyo.",
+    // 30 más (7 oct 2026): hábitos, identidad, músculo y relación con la comida
+    "No hace falta hacerlo perfecto. Hace falta hacerlo el tiempo suficiente.",
+    "Un mal día no arruina tu proceso. Abandonarlo cada vez que fallas, sí.",
+    "Deja de ser la primera persona a la que cancelas.",
+    "No esperes a sentirte preparado para empezar. Esa sensación llega haciendo.",
+    "Primero cambian tus decisiones, después tus hábitos y al final tu cuerpo.",
+    "Cada vez que cumples lo que te prometiste, confías un poco más en ti.",
+    "Cuidarte no es castigarte. Es darle a tu cuerpo lo que necesita para cambiar.",
+    "Tu cuerpo no premia las intenciones. Responde a lo que repites.",
+    "Descansar también es parte del plan. Desaparecer, no.",
+    "Si hay plan, hay avance. Aunque esta semana todavía no se note.",
+    "No necesitas otro lunes. Necesitas el siguiente paso de hoy.",
+    "La motivación dura unos días. Los hábitos se quedan.",
+    "Hacerlo imperfecto hoy vale más que el plan perfecto que nunca empieza.",
+    "Tu cabeza siempre va a pedirte lo fácil. La última palabra es tuya.",
+    "Lo que eliges cuando nadie te ve es lo que acaba viéndose.",
+    "No te falta fuerza de voluntad. Te sobra negociar contigo.",
+    "Los hábitos que te traen el cambio son los mismos que lo mantienen.",
+    "Moverte cambia cómo te sientes. El ánimo también se entrena.",
+    "No es falta de tiempo. Es dónde pones tus prioridades.",
+    "Háblate bien también los días flojos. Esa voz decide si sigues.",
+    "El tiempo va a pasar igual. Que pase trabajando para ti.",
+    "Nadie ve las veces que fuiste sin ganas. Pero acaban notándose.",
+    "El músculo no es solo estética: es lo que te va a sostener dentro de 30 años.",
+    "Dos personas con el mismo peso pueden verse muy distintas. La diferencia es el músculo.",
+    "Comer cada vez menos no siempre es avanzar. A veces lo que falta es construir.",
+    "La báscula cuenta una parte. Tu fuerza, tu cintura y tu energía cuentan el resto.",
+    "Disfrutar también entra en el plan. La mayor parte de la semana, manda tu objetivo.",
+    "Deja preparado hoy lo que mañana te va a costar decidir.",
+    "La tranquilidad con la comida llega después del orden, no antes.",
+    "Sigue apareciendo cuando ya se haya ido la emoción del principio."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -18582,6 +18615,8 @@
             op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
             op("Gofre de boniato con hamburguesa, cottage y guacamole", "200g boniato, 1 huevo, 150g carne picada de ternera, 80g queso cottage, 30g guacamole casero, 100g tomate, 30g canónigos", "591 kcal", "53g prot", "52g carbs", "19g grasa", "Gofrera · 20 min"),
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
           ]
         },
         {
@@ -18633,6 +18668,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
           ]
         },
         {
@@ -18895,6 +18932,8 @@
             op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
             op("Gofre de boniato con hamburguesa, cottage y guacamole", "200g boniato, 1 huevo, 150g carne picada de ternera, 80g queso cottage, 30g guacamole casero, 100g tomate, 30g canónigos", "591 kcal", "53g prot", "52g carbs", "19g grasa", "Gofrera · 20 min"),
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
           ]
         },
         {
@@ -18947,6 +18986,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
           ]
         },
         {
@@ -19182,6 +19223,8 @@
             op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
             op("Gofre de boniato con hamburguesa, cottage y guacamole", "200g boniato, 1 huevo, 150g carne picada de ternera, 80g queso cottage, 30g guacamole casero, 100g tomate, 30g canónigos", "591 kcal", "53g prot", "52g carbs", "19g grasa", "Gofrera · 20 min"),
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
           ]
         },
         {
@@ -19233,6 +19276,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
+            // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
+            op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
           ]
         },
         {
@@ -22528,6 +22573,9 @@
       // semanal o fija en el selector de justo encima) y mandaba a escribir por Contacto
       // para cambiar cosas que el propio cliente puede cambiar en «Reiniciar» y en
       // «Cambiar plan».
+      // Claves de alimentación (7 oct 2026): lo que más frena a quien "come sano"
+      // y no cambia, y el susto de la báscula de una semana a otra.
+      notasHTML += "<details style=\"margin-bottom:16px\"><summary style=\"background:rgba(209,66,14,0.07);border-left:3px solid var(--brasa);padding:12px 18px;font-size:13px;color:var(--blanco);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600\"><span>Claves para que tu alimentación funcione</span><span style=\"font-size:10px;color:var(--metal)\">ver ▾</span></summary><div style=\"background:rgba(255,255,255,0.03);border-left:3px solid var(--brasa);padding:14px 18px;font-size:13px;line-height:1.65;color:var(--metal-claro)\"><p style=\"margin:0 0 10px\"><strong style=\"color:var(--blanco)\">Monta bien el plato.</strong> Proteína en cada comida, mucha verdura o fruta para el volumen, hidratos para rendir y un poco de grasa buena. Así comes mucho sin pasarte.</p><p style=\"margin:0 0 10px\"><strong style=\"color:var(--blanco)\">Pesa la comida al principio.</strong> Poner el plato en la báscula lleva menos de 30 segundos y es la única forma de saber cuánto comes de verdad. Con unas semanas, el ojo aprende y ya no hace falta.</p><p style=\"margin:0 0 10px\"><strong style=\"color:var(--blanco)\">Gramos de comida no son gramos de proteína.</strong> 100 g de pechuga de pollo en crudo tienen unos 23 g de proteína, no 100. Por eso conviene repartirla en todas las comidas.</p><p style=\"margin:0 0 10px\"><strong style=\"color:var(--blanco)\">Disfrutar también cuenta.</strong> Si la mayor parte de la semana comes según tu plan, una comida libre no estropea nada. Lo que frena es abandonar el plan cada vez que fallas.</p><p style=\"margin:0 0 10px\"><strong style=\"color:var(--blanco)\">La báscula sube a veces.</strong> De una semana a otra puede subir por agua, sal, más hidratos o el ciclo menstrual aunque lo estés haciendo bien. Fíjate en la tendencia de varias semanas y en la cintura.</p><p style=\"margin:0\"><strong style=\"color:var(--blanco)\">Comer menos no siempre es la solución.</strong> Si llevas tiempo recortando y no cambias, lo que suele faltar es músculo y energía para entrenar, no más hambre.</p></div></details>";
       const _rot = userData.rotacionMenu || 'mensual';
       const _fraseRot = _rot === 'semanal' ? 'Tus platos se renuevan cada semana.'
         : _rot === 'fija' ? 'Tus platos se mantienen fijos hasta que tú decidas cambiarlos.'
@@ -24804,8 +24852,15 @@
       // todo el fin de semana aunque ya lo hubiera hecho.
       userData._ultimoCheckin = new Date().toISOString();
       try { _pintarCheckinPendiente(); } catch (e) {}
+      const _pesoAnterior = (userData.historialPeso || []).length ? userData.historialPeso[userData.historialPeso.length - 1].peso : null;
       const mensajeCalorias = evaluarYAjustarCalorias(pesoCheckin, document.getElementById('checkinCintura')?.value);
       if (mensajeCalorias) respuesta += ` ${mensajeCalorias}`;
+      // Una subida de una semana a otra casi nunca es grasa (7 oct 2026): sin este
+      // aviso, quien lo está haciendo bien se asusta y recorta comida o lo deja.
+      else if (_pesoAnterior && !isNaN(pesoCheckin) && pesoCheckin - _pesoAnterior >= 0.3
+        && /perder|grasa/i.test(userData.objetivo || '')) {
+        respuesta += ` La báscula marca ${Math.round((pesoCheckin - _pesoAnterior) * 10) / 10} kg más que la semana pasada. De una semana a otra eso casi siempre es agua (sal, más hidratos, estrés o el ciclo menstrual), no grasa. Sigue con tu plan: lo que cuenta es la tendencia de varias semanas y la cintura.`;
+      }
 
       if (!userData.historialEntrenos) userData.historialEntrenos = [];
       if (Array.isArray(userData.entrenosCompletados) && userData.entrenosCompletados.length) {
@@ -25752,6 +25807,9 @@
     "Tortas de arroz con lomo embuchado": "Coloca el lomo embuchado en lonchas sobre las tortas de arroz. Listo en 2 min. Mejor no más de 2 días por semana entre lomo, cecina y jamón serrano.",
     "Tortas de arroz con cecina": "Coloca la cecina en lonchas sobre las tortas de arroz. Listo en 2 min. Mejor no más de 2 días por semana entre lomo, cecina y jamón serrano.",
     "Tortas de arroz con jamón serrano": "Coloca el jamón serrano en lonchas sobre las tortas de arroz. Listo en 2 min. Mejor no más de 2 días por semana entre lomo, cecina y jamón serrano.",
+    // Recetas del 7 oct 2026
+    "Crumble de frutos rojos con yogur griego": "Pon los frutos rojos (pueden ser congelados) en un recipiente pequeño apto para horno. Mezcla con los dedos los copos de avena, la proteína, el aceite de coco derretido y la canela hasta que quede una textura arenosa, y repártela por encima. Hornea a 180º unos 18-20 min, en horno o freidora de aire, hasta que la cobertura se dore. Deja templar y sírvelo con el yogur griego.",
+    "Filetes de soja texturizada con calabaza y ensalada": "Hidrata la soja texturizada en agua caliente 15 min y escúrrela bien. Dora en una sartén con el aceite la calabaza y el pimiento en dados hasta que se caramelicen. Tritura todo con el huevo, el pimentón y el ajo, forma filetes y rebózalos en los copos de avena triturados. Hazlos en la freidora de aire a 190º unos 12-15 min (o al horno a 200º unos 20 min), dándoles la vuelta a mitad. Sírvelos con la ensalada.",
     // Recetas de vídeos de cocina fit (6 oct 2026)
     "Tostadas de boniato con cottage, aguacate y huevo": "Corta el boniato a lo largo en láminas de 1 cm, sazónalas con pimentón y ásalas en la freidora de aire a 190º unos 15-20 min (o al horno a 200º unos 25 min) hasta que estén tiernas. Mientras, cuece los huevos 10 min y pélalos. Pon sobre las láminas el queso cottage, el aguacate en rodajas y el huevo en láminas, y termina con un hilo de miel.",
     "Boniato asado con yogur proteico, nueces y miel": "Asa el boniato en láminas o mitades en la freidora de aire a 190º unos 15-20 min. Mezcla el yogur con la proteína hasta que quede una crema lisa. Pon la crema encima del boniato templado y termina con las nueces troceadas, canela y la miel.",
