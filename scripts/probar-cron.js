@@ -19,6 +19,11 @@ const RD = Date; let desfase = 0;
 global.Date = class extends RD { constructor(...a) { if (a.length === 0) super(RD.now() + desfase); else super(...a); } static now() { return RD.now() + desfase; } };
 const dia = 86400000;
 const iso = (d) => new RD(RD.now() + d * dia).toISOString();
+// El fin de la prueba se ancla a las 12:00 UTC de hoy (7 oct 2026). Con la hora real,
+// la prueba fallaba si se pasaba antes de las 09:00 UTC: el cron simulado corre a
+// las 09:00 y a los clientes con fin a 10 días les quedaban justo 3 el día 7, así
+// que recibían el aviso de primer cobro y salían 11 en vez de 1.
+const ancla = (d) => new RD(RD.now() - (RD.now() % dia) + 12 * 3600000 + d * dia).toISOString();
 
 // ---- base de datos
 let semilla = 5; const az = () => { semilla |= 0; semilla = (semilla + 0x6D2B79F5) | 0; let t = Math.imul(semilla ^ (semilla >>> 15), 1 | semilla); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -31,7 +36,7 @@ function perfil(i, extra = {}) {
   let plan = null; if (extra.conPlan !== false) { try { plan = motor.generar(ud); plan.motorVersion = extra.motorViejo ? 'viejo000' : plan.motorVersion; } catch (e) {} }
   const p = { id: 'u' + i, nombre: ud.nombre, email: `c${i}@ejemplo.com`, userdata: ud, plan, created_at: iso(extra.alta ?? -30), last_seen: extra.visto === null ? null : iso(extra.visto ?? -1), is_beta: !!extra.premium, beta_expires: extra.premium ? iso(60) : null };
   T.profiles.push(p);
-  if (extra.sub) T.subscriptions.push({ user_id: p.id, status: extra.sub, plan: 'price_m', current_period_end: iso(extra.fin ?? 10), cancel_at_period_end: !!extra.cancela, stripe_customer_id: extra.cus || null });
+  if (extra.sub) T.subscriptions.push({ user_id: p.id, status: extra.sub, plan: 'price_m', current_period_end: ancla(extra.fin ?? 10), cancel_at_period_end: !!extra.cancela, stripe_customer_id: extra.cus || null });
   if (extra.push) T.push_subscriptions.push({ id: 'ps' + i, user_id: p.id, endpoint: 'https://push.ejemplo/' + i, p256dh: 'p', auth_key: 'a' });
   return p;
 }
