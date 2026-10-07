@@ -161,7 +161,7 @@ console.log('  · ' + pctPasos + '% de las recetas tienen pasos escritos a mano 
 
 // ═══════════════════════ 3 · REPARTO Y CALIDAD POR OBJETIVO ═══════════════════════
 sec('3 · REPARTO DEL DÍA Y CALIDAD POR OBJETIVO');
-const VERDURA = /lechuga|tomate|pepino|pimiento|calabac[íi]n|berenjena|espinaca|br[óo]coli|jud[íi]as verdes|zanahoria|cebolla|champi[ñn]on|esp[áa]rrago|r[úu]cula|can[óo]nigos|ensalada|verduras?|puerro|coliflor|coles de bruselas|alcachofa|calabaza|apio|guisantes|setas|acelga|escarola|menestra|pisto|grelos/i;
+const VERDURA = /lechuga|tomate|pepino|pimiento|calabac[íi]n|berenjena|espinaca|br[óo]coli|jud[íi]as verdes|zanahoria|cebolla|champi[ñn]on|esp[áa]rrago|r[úu]cula|can[óo]nigos|ensalada|verduras?|puerro|coliflor|coles de bruselas|alcachofa|calabaza|apio|guisantes|setas|acelga|escarola|menestra|pisto|grelos|salmorejo|gazpacho|edamame/i;
 const med = a => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 for (const [rama] of ramas) {
   const dela = platos.filter(p => p.rama === rama);
