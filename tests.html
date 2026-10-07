@@ -357,7 +357,11 @@ async function correr() {
         win._testSetGeneratedPlan(plan);
         try { win.abrirRecetario(); } catch (e) { return; }
         const modal = win.document.getElementById('modalRecetario');
-        const cards = [...modal.querySelectorAll('.receta-card')];
+        // "Mi semana" (lo que abre por defecto) y "Todas las opciones": las
+        // tarjetas de las dos vistas tienen que traer su preparación.
+        const cardsSemana = [...modal.querySelectorAll('.receta-card')];
+        win.cambiarModoRecetario('todas');
+        const cards = cardsSemana.concat([...modal.querySelectorAll('.receta-card')]);
         const sinPasos = cards.filter(c => !c.querySelector('.receta-pasos'));
         // Red de seguridad contra el mismo fallo silencioso: si no se pintó
         // ninguna tarjeta, NO cuenta como "ok" aunque sinPasos también sea 0.
@@ -369,6 +373,52 @@ async function correr() {
     }));
     test('Recetario', `Todas las recetas de ${combosTotal} planes generados traen instrucciones`, combosOk === combosTotal,
       faltantesTotal.size ? `Sin instrucciones: ${[...faltantesTotal].slice(0, 10).join(', ')}` : `${combosOk}/${combosTotal} planes con recetario 100% completo.`);
+  }
+
+  // ─────────── D2. RECETARIO: enseña lo que el cliente ha elegido en su semana ───────────
+  // Antes enseñaba solo las 5 opciones del lunes, así que salían recetas que no
+  // estaban en su menú y no las que sí había elegido (aviso del usuario, 7 oct 2026).
+  {
+    const fallos = [];
+    let planes = 0;
+    ['Gimnasio / Fuerza', 'Running', 'CrossFit'].forEach((deporte, k) => {
+      const u = perfilBase({ deporte, email: `test-recetario-eleccion-${k}@x.com` });
+      let plan;
+      try { plan = win.buildPlanFromData(u); } catch (e) { return; }
+      planes++;
+      win._testSetGeneratedPlan(plan);
+      // Cada día, una opción distinta por toma (martes: la 4ª, miércoles: la 3ª...).
+      const sel = Array.from({ length: 7 }, (_, d) => plan.nutricion.map((_m, i) => (d + i) % 5));
+      win._testSetEstadoNutricion({ userData: u, comidasSemana: sel, comidasSeleccionadas: [...sel[0]], diaNutriActual: 0 });
+      win.abrirRecetario();
+      const modal = win.document.getElementById('modalRecetario');
+      plan.nutricion.forEach((m, mealIdx) => {
+        const esperadas = new Set();
+        for (let d = 0; d < 7; d++) {
+          const op = plan.nutricionPorDia[d][mealIdx].opciones[sel[d][mealIdx]];
+          if (op) esperadas.add(op.nombre);
+        }
+        const sec = [...modal.querySelectorAll('.recetario-section')].find(s => s.querySelector('.recetario-section-title')?.textContent === m.momento);
+        const vistas = new Set(sec ? [...sec.querySelectorAll('.receta-nombre')].map(e => e.textContent) : []);
+        const faltan = [...esperadas].filter(n => !vistas.has(n));
+        const sobran = [...vistas].filter(n => !esperadas.has(n));
+        if (faltan.length || sobran.length) fallos.push(`${deporte} · ${m.momento}: faltan [${faltan.join(', ')}] sobran [${sobran.join(', ')}]`);
+      });
+      // Cambia una elección y vuelve a abrir: tiene que reflejarlo.
+      const m0 = plan.nutricion.findIndex(m => m.momento === 'Comida');
+      if (m0 >= 0) {
+        sel[2][m0] = 4;
+        win.abrirRecetario();
+        const i4 = Math.min(4, plan.nutricionPorDia[2][m0].opciones.length - 1); sel[2][m0] = i4; win.abrirRecetario();
+        const nuevo = plan.nutricionPorDia[2][m0].opciones[i4].nombre;
+        const sec = [...modal.querySelectorAll('.recetario-section')].find(s => s.querySelector('.recetario-section-title')?.textContent === 'Comida');
+        const tarjeta = sec && [...sec.querySelectorAll('.receta-card')].find(c => c.querySelector('.receta-nombre').textContent === nuevo);
+        if (!tarjeta || ![...tarjeta.querySelectorAll('.receta-dia-chip.elegida')].some(c => c.textContent === 'Mié')) fallos.push(`${deporte}: al elegir otra comida el miércoles, el recetario no la enseña con su día`);
+      }
+      win.document.getElementById('modalRecetario').classList.remove('visible');
+    });
+    test('Recetario', 'Enseña las recetas que el cliente tiene elegidas en la semana (ni más ni menos) y se actualiza al cambiarlas',
+      planes > 0 && fallos.length === 0, fallos.length ? fallos.slice(0, 5).join('\n') : `${planes} planes comprobados, 7 días × todas las tomas.`);
   }
 
   // ───────────────────────── E. LISTA DE LA COMPRA: categorización ─────────────────────────

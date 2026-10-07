@@ -6590,6 +6590,12 @@
     margin-bottom: 8px;
     line-height: 1.4;
   }
+  /* Qué días de la semana lleva esta receta en el menú del cliente */
+  .receta-dias { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 6px; }
+  .receta-dias-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--metal); letter-spacing: 0.8px; text-transform: uppercase; margin-right: 2px; }
+  .receta-dia-chip { font-family: 'DM Mono', monospace; font-size: 10px; padding: 1px 7px; border-radius: 999px; border: 1px solid rgba(181,178,173,0.25); color: var(--metal-claro); }
+  .receta-dia-chip.elegida { background: rgba(209,66,14,.15); border-color: var(--brasa); color: var(--blanco); }
+  .receta-card.no-elegida { opacity: .78; }
   .receta-ingredientes {
     font-size: 11px;
     color: var(--metal-claro);
@@ -7387,8 +7393,12 @@
     <button class="modal-close" onclick="cerrarRecetario()" aria-label="Cerrar">✕</button>
     <div style="margin-bottom:20px">
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color: var(--brasa-txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Recetario</div>
-      <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tu plan completo</div>
-      <div style="font-size:12px;color:var(--metal);margin-bottom:14px">Todas las opciones de tu plan nutricional con ingredientes y macros.</div>
+      <div style="font-size:22px;font-weight:700;color:var(--blanco);margin-bottom:6px">Tus recetas</div>
+      <div id="recetarioResumen" style="font-size:12px;color:var(--metal);margin-bottom:12px;line-height:1.5"></div>
+      <div role="group" aria-label="Qué recetas ver" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <button type="button" class="rotacion-opt" data-modo-rec="semana" onclick="cambiarModoRecetario('semana')">Mi semana</button>
+        <button type="button" class="rotacion-opt" data-modo-rec="todas" onclick="cambiarModoRecetario('todas')">Todas las opciones</button>
+      </div>
       <div id="recetarioNotaCiclo" style="display:none;font-size:13px;color:var(--metal-claro);background:rgba(209,66,14,.07);border:1px solid rgba(242,106,54,0.3);border-radius:14px;padding:11px 14px;margin-bottom:14px;line-height:1.5"></div>
       <input type="text" id="recetarioBuscador" aria-label="Buscar receta" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
@@ -26024,33 +26034,69 @@
     return 'Cocina la proteína (a la plancha, al horno o salteada, según el tipo) hasta que esté hecha. Prepara el resto de ingredientes por separado y sirve todo junto.';
   }
 
-  function abrirRecetario() {
-    if (!generatedPlan || !generatedPlan.nutricion) return;
-    // El recetario enseña UN día de referencia (el lunes) con todas sus
-    // opciones. Con el ciclado activo las cantidades cambian según el día, así
-    // que hay que decir de qué día son estas -- si no, el cliente compara este
-    // gramaje con el del miércoles y parece que algo falla.
-    const notaCiclo = document.getElementById('recetarioNotaCiclo');
-    if (notaCiclo) {
-      const c = generatedPlan.cicloCarbs;
-      if (c) {
-        notaCiclo.textContent = `Las cantidades que ves aquí son las de un ${c.dias[0] ? 'día de entreno' : 'día de descanso'}. Tus días de entreno llevan un ${c.pctEntreno}% más de carbohidratos y los de descanso un ${c.pctDescanso}% menos: en la pestaña de cada día tienes el gramaje exacto que te toca.`;
-        notaCiclo.style.display = '';
-      } else {
-        notaCiclo.style.display = 'none';
-      }
+  // El recetario enseña lo que hay en el menú REAL del cliente. Antes pintaba
+  // generatedPlan.nutricion, que es solo el lunes con sus 5 opciones: cada día
+  // tiene sus propias opciones (nutricionPorDia) y el cliente elige una por
+  // toma (comidasSemana), así que el recetario mostraba platos que no estaban
+  // en su semana y no los que sí había elegido (7 oct 2026, aviso del usuario).
+  // Recorre los 7 días y agrupa por toma, sin repetir la receta que sale varios
+  // días: cada una lleva la lista de días en que la tiene.
+  let _recetarioModo = 'semana';
+  const _DIAS_CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  function _recetarioRecopilar() {
+    if (!comidasSemana.length) inicializarComidasSemana();
+    comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
+    const tomas = [], porMomento = {};
+    for (let d = 0; d < 7; d++) {
+      const meals = generatedPlan.nutricionPorDia?.[d] || generatedPlan.nutricion;
+      _inyectarComidasExtraDia(d, meals);
+      meals.forEach((meal, mealIdx) => {
+        let t = porMomento[meal.momento];
+        if (!t) { t = porMomento[meal.momento] = { momento: meal.momento, platos: new Map() }; tomas.push(t); }
+        const elegida = comidasSemana[d]?.[mealIdx] || 0;
+        meal.opciones.forEach((opt, i) => {
+          let p = t.platos.get(opt.nombre);
+          if (!p) { p = { opt, dias: [], elegidos: [] }; t.platos.set(opt.nombre, p); }
+          p.dias.push(_DIAS_CORTOS[d]);
+          if (i === elegida) {
+            // Las cantidades que se enseñan son las del primer día en que la come.
+            if (!p.elegidos.length) p.opt = opt;
+            p.elegidos.push(_DIAS_CORTOS[d]);
+          }
+        });
+      });
     }
-    const contenido = document.getElementById('recetarioContenido');
-    contenido.innerHTML = generatedPlan.nutricion.map((meal, mealIdx) => {
-      const cards = meal.opciones.map((opt, i) => {
+    return tomas;
+  }
+
+  function _pintarRecetario() {
+    const abiertas = [...document.querySelectorAll('#recetarioContenido .recetario-section.open')].map(s => s.id);
+    const modo = _recetarioModo;
+    const tomas = _recetarioRecopilar();
+    document.querySelectorAll('[data-modo-rec]').forEach(b => b.classList.toggle('active', b.dataset.modoRec === modo));
+    let totalRecetas = 0;
+    const html = tomas.map((t, mealIdx) => {
+      let platos = [...t.platos.values()];
+      if (modo === 'semana') platos = platos.filter(p => p.elegidos.length);
+      else platos.sort((a, b) => (b.elegidos.length > 0) - (a.elegidos.length > 0));
+      if (!platos.length) return '';
+      totalRecetas += platos.length;
+      const cards = platos.map(p => {
+        const opt = p.opt;
         const items = opt.ingredientes.split(',').map(s => `<li>${_ingredienteConPesoCereal(s)}</li>`).join('');
         // opt.pasos solo existe cuando el plato se adaptó por alergia o
         // intolerancia (ver `adaptar` en buildPlanFromData): tiene prioridad
-        // porque RECETA_PASOS guarda el texto SIN adaptar.
-        const pasos = opt.pasos || RECETA_PASOS[opt.nombre] || _pasoGenerico(opt.nombre, opt.ingredientes, opt.prep);
+        // porque RECETA_PASOS guarda el texto SIN adaptar. Un plato que añadió
+        // el cliente a mano no tiene preparación: no se le inventa una.
+        const pasos = opt.custom ? '' : (opt.pasos || RECETA_PASOS[opt.nombre] || _pasoGenerico(opt.nombre, opt.ingredientes, opt.prep));
+        const chips = modo === 'semana'
+          ? `<span class="receta-dias-label">${opt.custom ? 'Añadida por ti · ' : ''}Tu menú</span>${p.elegidos.map(d => `<span class="receta-dia-chip elegida">${d}</span>`).join('')}`
+          : (p.elegidos.length
+            ? `<span class="receta-dias-label">En tu menú</span>${p.elegidos.map(d => `<span class="receta-dia-chip elegida">${d}</span>`).join('')}`
+            : `<span class="receta-dias-label">Sale el</span>${p.dias.map(d => `<span class="receta-dia-chip">${d}</span>`).join('')}`);
         return `
-          <div class="receta-card">
-            <div class="receta-num">Opción ${i + 1}</div>
+          <div class="receta-card${modo === 'todas' && !p.elegidos.length ? ' no-elegida' : ''}">
+            <div class="receta-dias">${chips}</div>
             <div class="receta-nombre">${opt.nombre}</div>
             <div class="receta-ingredientes"><ul>${items}</ul></div>
             ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : ''}
@@ -26066,17 +26112,50 @@
           </div>`;
       }).join('');
       return `
-        <div class="recetario-section" id="recSec${mealIdx}">
+        <div class="recetario-section${abiertas.includes('recSec' + mealIdx) ? ' open' : ''}" id="recSec${mealIdx}">
           <div class="recetario-section-header" onclick="toggleRecetarioSec(${mealIdx})">
             <div class="recetario-section-left">
-              <div class="recetario-section-title">${meal.momento}</div>
-              <div class="recetario-section-hora">${meal.opciones.length} opciones</div>
+              <div class="recetario-section-title">${t.momento}</div>
+              <div class="recetario-section-hora">${platos.length} ${modo === 'semana' ? (platos.length === 1 ? 'receta' : 'recetas') : 'opciones esta semana'}</div>
             </div>
             <div class="recetario-section-arrow">▾</div>
           </div>
           <div class="recetario-grid">${cards}</div>
         </div>`;
     }).join('');
+    document.getElementById('recetarioContenido').innerHTML = html;
+    const resumen = document.getElementById('recetarioResumen');
+    if (resumen) resumen.textContent = modo === 'semana'
+      ? 'Las recetas de las comidas que tienes elegidas esta semana, con ingredientes, preparación y macros. Si cambias una comida en Nutrición, aquí se actualiza.'
+      : 'Todas las opciones que te salen esta semana. Las que tienes elegidas van primero y marcadas con el día.';
+    const buscador = document.getElementById('recetarioBuscador');
+    if (buscador && buscador.value) filtrarRecetario(buscador.value);
+    return totalRecetas;
+  }
+
+  function cambiarModoRecetario(modo) {
+    if (modo !== 'semana' && modo !== 'todas') return;
+    _recetarioModo = modo;
+    if (generatedPlan && generatedPlan.nutricion) _pintarRecetario();
+  }
+
+  function abrirRecetario() {
+    if (!generatedPlan || !generatedPlan.nutricion) return;
+    // Con el ciclado activo las cantidades cambian según el día: las que se
+    // enseñan aquí son las del primer día en que el cliente come cada receta, y
+    // en la pestaña de cada día tiene el gramaje exacto que le toca.
+    const notaCiclo = document.getElementById('recetarioNotaCiclo');
+    if (notaCiclo) {
+      const c = generatedPlan.cicloCarbs;
+      if (c) {
+        notaCiclo.textContent = `Las cantidades de cada receta son las del primer día de la semana en que la tienes. Tus días de entreno llevan un ${c.pctEntreno}% más de carbohidratos y los de descanso un ${c.pctDescanso}% menos: en la pestaña de cada día tienes el gramaje exacto que te toca.`;
+        notaCiclo.style.display = '';
+      } else {
+        notaCiclo.style.display = 'none';
+      }
+    }
+    _recetarioModo = 'semana';
+    _pintarRecetario();
     document.getElementById('modalRecetario').classList.add('visible');
     document.body.style.overflow = 'hidden';
   }
@@ -26090,7 +26169,8 @@
     document.querySelectorAll('#recetarioContenido .recetario-section').forEach(sec => {
       let visibles = 0;
       sec.querySelectorAll('.receta-card').forEach(card => {
-        const texto = (card.textContent || '').toLowerCase();
+        // Sin los chips de día: buscar "mar" no debe traer el martes.
+        const texto = [...card.querySelectorAll('.receta-nombre, .receta-ingredientes, .receta-pasos')].map(e => e.textContent).join(' ').toLowerCase();
         const match = !query || texto.includes(query);
         card.style.display = match ? '' : 'none';
         if (match) visibles++;
