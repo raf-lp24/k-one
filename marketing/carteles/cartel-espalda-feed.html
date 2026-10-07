@@ -1,0 +1,127 @@
+<!doctype html>
+<!--
+  Cartel de Instagram, versión publicación del feed (1080x1350, 4:5). Generado desde cartel-espalda.html (1080x1920, historias): 6 ejercicios de espalda con su nombre, el
+  músculo principal que trabaja y los secundarios. El color indica la zona
+  (dorsal / espalda media / lumbar), con leyenda abajo. Hermano de cartel-espalda.html.
+  Fotos: espalda/*.jpg (generadas con IA, sin marcas).
+  Captura: node ../cdp-shot.mjs "file:///.../cartel-espalda-feed.html" cartel-espalda-feed.png 1080 1350 1
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<style>
+  :root{
+    --fondo:#0c0a09; --bone:#EDE8E1; --gris:#9d948b; --tinta:#141110;
+    --media:#F5B942; --dorsal:#E8621C; --lumbar:#C0392B; --medio:#E8621C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--fondo);color:var(--bone);
+    font-family:Bahnschrift,"Segoe UI",Arial,sans-serif}
+  body{position:relative;
+    background:
+      radial-gradient(70% 30% at 50% 0%, rgba(209,66,14,.28) 0%, rgba(209,66,14,0) 70%),
+      radial-gradient(60% 25% at 50% 100%, rgba(209,66,14,.18) 0%, rgba(209,66,14,0) 70%),
+      var(--fondo)}
+  .cond{font-family:"Bahnschrift SemiBold Condensed",Bahnschrift,sans-serif}
+
+  header{display:flex;flex-direction:column;align-items:center;padding-top:48px}
+  .marca{font-family:Impact,sans-serif;font-size:92px;letter-spacing:3px;line-height:1}
+  .marca b{color:var(--medio);font-weight:400}
+  .raya{width:150px;height:5px;background:#D1420E;margin-top:12px}
+
+  .pregunta{margin:30px 70px 0;background:var(--bone);color:var(--tinta);border-radius:26px;
+    padding:20px 34px;text-align:center;font-size:42px;line-height:1.12;text-wrap:balance}
+
+  .titulo{display:flex;flex-direction:column;align-items:center;margin-top:30px}
+  .t1,.t2{font-family:Impact,sans-serif;text-transform:uppercase;line-height:1;border-radius:18px;padding:10px 30px 12px}
+  .t1{background:#D1420E;color:#fff;font-size:64px;transform:rotate(-2deg)}
+  .t2{background:var(--bone);color:var(--tinta);font-size:84px;margin-top:-6px;display:flex;align-items:center;gap:14px;transform:rotate(1deg)}
+  .t2 svg{width:62px;height:62px}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px 22px;padding:40px 40px 0}
+  .ej{display:flex;flex-direction:column;align-items:center}
+  .nombre{width:100%;border-radius:999px;padding:8px 14px 10px;text-align:center;line-height:1.02;
+    color:var(--tinta);height:78px;display:flex;align-items:center;justify-content:center;
+    font-family:"Bahnschrift SemiBold Condensed",Bahnschrift,sans-serif;font-size:29px;position:relative;z-index:2}
+  .foto{width:100%;height:436px;margin-top:-20px;border-radius:24px;overflow:hidden;background:#000;position:relative}
+  .foto img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+  .foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(0,0,0,.6) 100%)}
+  .dato{width:90%;margin-top:-56px;position:relative;z-index:2;background:var(--tinta);border:4px solid;border-radius:20px;
+    text-align:center;padding:9px 8px 11px}
+  .dato small{display:block;font-size:19px;color:var(--gris);letter-spacing:1.5px;text-transform:uppercase}
+  .dato strong{display:block;font-family:Impact,sans-serif;font-weight:400;font-size:36px;line-height:1.05;text-transform:uppercase;white-space:nowrap}
+  .dato span{display:block;font-size:23px;white-space:nowrap;color:var(--bone);margin-top:4px;line-height:1.1}
+
+  footer{position:absolute;left:40px;right:40px;bottom:50px;display:flex;flex-direction:column;align-items:center;gap:20px}
+  .leyenda{display:flex;gap:30px;font-size:24px;color:var(--gris);letter-spacing:1px;text-transform:uppercase}
+  .leyenda i{display:inline-block;width:18px;height:18px;border-radius:50%;margin-right:8px;vertical-align:-2px}
+  .cta{font-size:34px;text-align:center}
+  .cta b{color:var(--medio)}
+
+  /* ── Versión feed 4:5 (1080x1350): Instagram recorta el 9:16 en publicaciones ── */
+  html,body{height:1350px}
+  header{padding-top:34px}
+  .marca{font-size:66px}
+  .raya{width:120px;height:4px;margin-top:8px}
+  .pregunta{margin:20px 96px 0;padding:12px 28px 13px;font-size:30px;border-radius:20px}
+  .titulo{margin-top:20px}
+  .t1{font-size:46px;padding:8px 24px 10px;border-radius:14px}
+  .t2{font-size:62px;padding:8px 24px 10px;border-radius:14px;gap:10px}
+  .t2 svg{width:46px;height:46px}
+  .grid{gap:22px 22px;padding:26px 52px 0}
+  .nombre{height:62px;font-size:25px;padding:6px 12px 8px}
+  .foto{height:306px;margin-top:-18px;border-radius:20px}
+  .foto img{object-position:center 10%}
+  .dato{margin-top:-48px;padding:6px 6px 8px;border-width:3px;border-radius:16px}
+  .dato small{font-size:16px}
+  .dato strong{font-size:29px}
+  .dato span{font-size:20px;margin-top:2px}
+  footer{left:52px;right:52px;bottom:30px;gap:10px}
+  .leyenda{font-size:20px;gap:26px}
+  .leyenda i{width:15px;height:15px}
+  .cta{font-size:28px}
+</style>
+<body>
+<header>
+  <div class="marca">K-<b>ONE</b></div>
+  <div class="raya"></div>
+</header>
+<p class="pregunta cond">¿Qué músculo trabaja cada ejercicio? Guárdalo para tu próximo día de espalda.</p>
+<div class="titulo">
+  <div class="t1">Ejercicios para</div>
+  <div class="t2">la espalda
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#D1420E" d="M12.8 2.2c.4 3-1.2 4.6-2.7 6.2C8.6 10 7 11.7 7 14.6 7 18 9.3 21 12.5 21s5.5-2.6 5.5-6.1c0-2.6-1.2-4.2-2.3-5.6-.2 1.4-.9 2.4-1.9 2.9.4-3.6-.2-7.4-1-9z"/><path fill="#F5B942" d="M12.4 12.5c.1 1.6-.8 2.4-1.5 3.2-.5.6-.9 1.2-.9 2.1 0 1.4 1.1 2.4 2.4 2.4s2.4-1 2.4-2.5c0-1.6-1.1-2.6-2.4-5.2z"/></svg>
+  </div>
+</div>
+<main class="grid" id="grid"></main>
+<footer>
+  <div class="leyenda cond">
+    <span><i style="background:var(--dorsal)"></i>Dorsal</span>
+    <span><i style="background:var(--media)"></i>Espalda media</span>
+    <span><i style="background:var(--lumbar)"></i>Lumbar</span>
+  </div>
+  <div class="cta cond">Tu rutina de espalda, con series y cargas, en <b>k-one.fit</b></div>
+</footer>
+<script>
+// [nombre, foto, zona (dorsal|media|lumbar), músculo principal, también trabaja]
+const EJ = [
+  ['Dominadas',                 1, 'dorsal', 'Dorsal ancho',  '+ bíceps y redondo'],
+  ['Jalón al pecho',            2, 'dorsal', 'Dorsal ancho',  '+ bíceps'],
+  ['Remo con barra',            3, 'media',  'Espalda media', '+ dorsal y bíceps'],
+  ['Remo con mancuerna',        4, 'dorsal', 'Dorsal ancho',  '+ romboides y bíceps'],
+  ['Remo en polea baja',        5, 'media',  'Espalda media', '+ dorsal y bíceps'],
+  ['Peso muerto',               6, 'lumbar', 'Zona lumbar',   '+ glúteos e isquios'],
+];
+const grid = document.getElementById('grid');
+EJ.forEach(([n, foto, z, musculo, extra]) => {
+  const c = `var(--${z})`;
+  grid.insertAdjacentHTML('beforeend', `
+    <div class="ej">
+      <div class="nombre" style="background:${c}">${n}</div>
+      <div class="foto"><img src="espalda/${foto}.jpg" alt=""></div>
+      <div class="dato" style="border-color:${c}">
+        <small>Trabaja</small><strong style="color:${c}">${musculo}</strong><span class="cond">${extra}</span>
+      </div>
+    </div>`);
+});
+</script>
+</body>
