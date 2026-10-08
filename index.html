@@ -16069,7 +16069,7 @@
         ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
         : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
-      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_sinIntensidad ? 'zancada caminando con mancuernas 3×10 por pierna' : `${_plioHibAv}, A-skips 3×20m`}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
+      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_sinIntensidad ? 'zancada caminando con mancuernas 3×10 por pierna' : `${_plioHibAv}${_lesionZonaRodilla ? '' : ', A-skips 3×20m'}`}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
 
       // ── Metcon / circuito ──
       // Cardio entre rondas: más metros si el objetivo es resistencia; en casa,
@@ -16141,14 +16141,104 @@
         detalle: `Zona 2 · ${_rango(_Z2[0], _Z2[1])} ${_casaHib ? 'de caminata rápida' : 'de bici, remo o caminata rápida en cinta'} a ritmo conversacional (RPE 3)${_TOPE_HIB >= 45 ? '. Movilidad 5 min al acabar: cadera, hombros, tobillos' : ''}`
       });
 
+      // ── HÍBRIDO CON FUERZA Y CARRERA SEPARADAS (8 oct 2026, decisión de Rafa) ──
+      // Quien entra en Híbrido para perder grasa, ganar músculo o fuerza, o sentirse
+      // mejor (todo lo que NO es "Mejorar resistencia" ni "Preparar una
+      // competición") recibía la misma semana estilo Hyrox que el competidor:
+      // fuerza + cardio + metcon en circuito. Con un objetivo estético, la ciencia
+      // del entrenamiento concurrente pide lo contrario: fuerza y carrera en
+      // sesiones distintas y bien ordenadas, para que la una no frene a la otra. Y
+      // es lo que quiere quien viene del gimnasio: sus días de pesas de siempre,
+      // con la carrera sumada, no un circuito que se parece a CrossFit.
+      // Reglas de la semana:
+      //  · Los intervalos van AL ACABAR el día de torso (o de cuerpo completo):
+      //    8-12 min que cuentan como parte de esa sesión. Se suma carrera sin
+      //    quitar pesas, y se corre fuerte con las piernas frescas.
+      //  · La carrera suave (zona 2) va al día siguiente de una pierna ligera o a
+      //    48 h de la pesada. Nunca carrera fuerte al día siguiente de pierna.
+      //  · A 5 días, dos piernas distintas: una de fuerza e hipertrofia y otra
+      //    "atlética" (potencia, poco volumen) que deja las piernas listas para
+      //    correr al día siguiente.
+      // Resistencia y competición siguen con fuerza + cardio + metcon (abajo).
+      const _hibSeparado = !_resistenciaHib;
+      const _MIN_COLA = { expres: 0, corta: 8, media: 10, larga: 12, muyLarga: 12 }[_tramoDur];
+      // El remate va como PIEZA APARTE (tras una coma) y sin formato N×M: así el
+      // recorte por duración lo reconoce como remate y nunca se lo lleva junto
+      // al último ejercicio. Sin comas dentro por el mismo motivo.
+      const _colaCarrera = (tipo) => {
+        if (!_MIN_COLA) return '';
+        const donde = _lesionZonaRodilla ? (_casaHib ? 'caminando a paso vivo' : 'en bici') : (_casaHib ? 'corriendo al aire libre' : 'en cinta');
+        if (tipo === 'suave' || _sinIntensidad || sentirseMejor) {
+          return `Al acabar: ${_MIN_COLA} min de cardio suave ${donde} a ritmo conversacional (RPE 3-4)`;
+        }
+        return `Al acabar: ${_MIN_COLA} min de intervalos ${donde}: ${_MIN_COLA / 2} rondas de 1 min rápido (RPE ${esAvanzado ? '8' : '7'}) y 1 min suave`;
+      };
+      const _fuerzaSep = (resumen, detalle, tipoCola) => {
+        const cola = tipoCola ? _colaCarrera(tipoCola) : '';
+        return {
+          resumen: cola ? `${resumen} + ${tipoCola === 'suave' || _sinIntensidad || sentirseMejor ? 'cardio suave' : 'intervalos'}` : resumen,
+          detalle: cola ? `${detalle}, ${cola}` : detalle,
+          etiqueta: 'Fuerza'
+        };
+      };
+      // Segundo día de cuerpo completo y segundo torso: la regla de la casa es que
+      // no haya dos días con el mismo detalle en la semana.
+      const _FULL_INTER_B = `Fuerza · Peso muerto rumano ${v}×8, press militar ${v}×8, ${_casaHib ? 'dominadas en barra de puerta 3×6' : `jalón en polea ${v}×10`}, zancada 3×10 por pierna, press inclinado con mancuernas 3×10, gemelos en escalón 3×15`;
+      const _FULL_AV_B = `Fuerza · Peso muerto rumano ${vv}×6, press militar ${vv}×6, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} 3×6, sentadilla búlgara 3×8 por pierna, press inclinado con mancuernas 3×8, plancha 3×45s`;
+      const _SUP_B = esAvanzado
+        ? `Torso B · Press inclinado con mancuernas ${vv}×8, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} ${vv}×6, press de hombro con mancuernas 3×8, remo con mancuerna a una mano 3×10 por lado, elevaciones laterales 3×15, face pull 3×15`
+        : `Torso B · Press inclinado con mancuernas ${v}×10, ${_casaHib ? 'dominadas en barra de puerta 3×6' : `jalón en polea ${v}×10`}, press de hombro con mancuernas 3×10, remo con mancuerna a una mano 3×10 por lado, elevaciones laterales 3×15, face pull 3×15`;
+      // Pierna de fuerza e hipertrofia (sin saltos: los saltos van en la atlética).
+      const _PIERNA_HIP = esAvanzado
+        ? `Piernas · Sentadilla ${vv}×6, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×10 por pierna, gemelos con carga 4×12`
+        : _INF_INTER;
+      // Pierna atlética: potencia y poco volumen, para correr al día siguiente.
+      // Con la rodilla tocada o la tensión alta, sin saltos ni explosividad.
+      const _plioAtl = _plioVariantesHibAv[(bloqueMeso + 1) % _plioVariantesHibAv.length];
+      const _PIERNA_ATL = _lesionZonaRodilla
+        ? `Piernas · Hip thrust ${v}×8 (subiendo rápido), peso muerto rumano 3×6 (peso moderado), puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
+        : _sinIntensidad
+          ? `Piernas · Sentadilla 3×6 (peso moderado), peso muerto rumano 3×8, zancada 3×8 por pierna, puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
+          : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`;
+      // Carrera suave del día de cardio (en vez del "cambia de máquina" del
+      // gimnasio: este cliente quiere correr). Perder grasa: +5 min.
+      const _rodajeHib = () => {
+        const extra = perdidaGrasa ? 5 : 0;
+        const rango = _rango(_Z2[0] + extra, _Z2[1] + extra);
+        if (_lesionZonaRodilla) {
+          return { resumen: 'Cardio sin impacto · Zona 2', etiqueta: 'Cardio',
+            detalle: `Zona 2 · ${rango} ${_casaHib ? 'de caminata rápida en cuesta' : 'de bici o elíptica'} a ritmo conversacional (RPE 3-4)` };
+        }
+        return { resumen: 'Carrera suave · Zona 2', etiqueta: 'Cardio',
+          detalle: `Zona 2 · ${rango} de carrera continua ${_casaHib ? 'al aire libre' : 'en cinta o al aire libre'} a un ritmo en el que puedas hablar (RPE 3-4)${_conStridesHib ? '. Al acabar: 4 strides de 60m' : ''}` };
+      };
+
       const _planHib = {};
       if (esPrincipiante) {
         const fA = _fuerza('Full Body · Fuerza base', _FULL_PRINC_A);
         const fB = _fuerza('Full Body · Variantes', _FULL_PRINC_B);
         if (numDias <= 2) { _planHib[0] = fA; _planHib[3] = _cardioPrinc(); }
-        else if (numDias === 3) { _planHib[0] = fA; _planHib[2] = _cardioPrinc(); _planHib[4] = _circuitoSuave(); }
-        else if (numDias === 4) { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[5] = _circuitoSuave(); }
+        // Separado: el segundo día de pesas en vez del circuito (a 5 días se
+        // queda: ya hay dos de fuerza y el circuito suave suma sin castigar).
+        else if (numDias === 3) { _planHib[0] = fA; _planHib[2] = _cardioPrinc(); _planHib[4] = _hibSeparado ? fB : _circuitoSuave(); }
+        else if (numDias === 4) { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[5] = _hibSeparado ? _cardioSuavePrinc() : _circuitoSuave(); }
         else { _planHib[0] = fA; _planHib[1] = _cardioPrinc(); _planHib[3] = fB; _planHib[4] = _cardioSuavePrinc(); _planHib[5] = _circuitoSuave(); }
+      } else if (_hibSeparado) {
+        const fullA = _fuerzaSep('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER, 'intervalos');
+        const fullB = (tipoCola) => _fuerzaSep('Fuerza · Full body B', esAvanzado ? _FULL_AV_B : _FULL_INTER_B, tipoCola);
+        const supInt = _fuerzaSep('Fuerza · Torso', esAvanzado ? _SUP_AV : _SUP_INTER, 'intervalos');
+        const piernaHip = _fuerzaSep('Fuerza · Pierna (fuerza e hipertrofia)', _PIERNA_HIP);
+        if (numDias <= 2) { _planHib[0] = fullA; _planHib[3] = fullB('suave'); }
+        else if (numDias === 3) { _planHib[0] = fullA; _planHib[2] = _rodajeHib(); _planHib[4] = fullB(); }
+        else if (numDias === 4) { _planHib[0] = supInt; _planHib[1] = piernaHip; _planHib[3] = _rodajeHib(); _planHib[5] = fullB(); }
+        else {
+          _planHib[0] = supInt; _planHib[1] = piernaHip;
+          _planHib[3] = _fuerzaSep(_lesionZonaRodilla || _sinIntensidad ? 'Fuerza · Pierna ligera' : 'Fuerza · Pierna atlética (potencia)', _PIERNA_ATL);
+          _planHib[4] = _rodajeHib(); _planHib[5] = _fuerzaSep('Fuerza · Torso B', _SUP_B);
+        }
+        notasSalud.push(_MIN_COLA
+          ? `Tu híbrido separa la fuerza y la carrera: tus días de pesas de siempre y la carrera sumada, no circuitos. Los ${_MIN_COLA} min ${_sinIntensidad || sentirseMejor ? 'de cardio suave' : 'de intervalos'} del final del primer día de fuerza son parte de esa sesión. La carrera suave va cuando las piernas están frescas, nunca al día siguiente de la pierna pesada.`
+          : 'Tu híbrido separa la fuerza y la carrera: tus días de pesas de siempre y la carrera en su propio día, no circuitos. Con 15-20 min por sesión no caben intervalos al final de la fuerza: la carrera va entera en su día.');
       } else {
         const cardioDia = esAvanzado && !sentirseMejor && !_sinIntensidad ? _calidadHib() : _zona2();
         const full = _fuerza('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER);
@@ -17192,7 +17282,9 @@
         return t;
       };
       if (!_plantillaFuerza) {
-        semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aFuerza(d.detalle) } : d);
+        // La pierna atlética del Híbrido se queda como está (8 oct 2026): es el
+        // día de potencia ligera antes de correr, no un día de 5×5 pesado.
+        semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle && !/atl[eé]tica/i.test(d.resumen || '') ? { ...d, detalle: aFuerza(d.detalle) } : d);
       }
       notasSalud.push(_plantillaFuerza
         ? 'Tu objetivo es fuerza, así que tu semana gira alrededor de los tres levantamientos que la miden: sentadilla y press banca dos veces por semana (un día pesado y otro con unos kilos menos para practicar) y peso muerto una, que es el que más fatiga. Los básicos van a 3-5 repeticiones con carga alta y 2-3 minutos de descanso; sube el peso en cuanto completes todas las series limpias. Los accesorios son pocos a propósito: sirven para sostener los básicos, no para cansarte.'
@@ -17248,7 +17340,11 @@
         t = t.replace(/\u0000(\d+)\u0000/g, (m, i) => notas[+i]);
         return t;
       };
-      semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
+      // La pierna atlética del Híbrido (8 oct 2026) es potencia a pocas
+      // repeticiones a propósito: subirla a ×8 la convertiría en otra pierna de
+      // hipertrofia y llegaría con las piernas cargadas a la carrera del día
+      // siguiente.
+      semana = semana.map(d => d.tipo === 'Entrenamiento' && d.detalle && !/atl[eé]tica/i.test(d.resumen || '') ? { ...d, detalle: aHipertrofia(d.detalle) } : d);
       notasSalud.push(sentirseMejor
         ? 'Tu objetivo es encontrarte mejor, así que los básicos van a 8 repeticiones con una carga que controles, no a 5 con carga máxima: para la salud rinde lo mismo, te recuperas antes y la sesión cabe en tu tiempo porque el descanso es más corto (unos 90 segundos). Acaba cada serie con 2-3 repeticiones de reserva.'
         : 'Tu objetivo es ganar músculo, así que los básicos van a 8 repeticiones y no a 5: para crecer importa más el total de repeticiones duras que el peso de una serie suelta. Elige una carga con la que la octava te cueste de verdad pero salga limpia, y descansa de 2 a 3 minutos entre series de básicos (con menos, la serie siguiente sale con menos peso) y 60-90 segundos en los accesorios.');
@@ -17812,9 +17908,14 @@
         // de fuerza con series, descanso y montaje. El core y el remate de
         // cardio se quedan siempre.
         const cuenta = f => esEjercicio(f) && !_esCore.test(f);
+        // Híbrido con fuerza y carrera separadas (8 oct 2026): los 8-10 min de
+        // carrera al acabar el día de torso también ocupan la sesión, así que en
+        // 30-60 min ese día lleva un ejercicio de fuerza menos.
+        const _conCola = /Al acabar: \d+ min de (intervalos|cardio suave)/.test(d.detalle);
+        const _maxEj = _DUR.maxEj - (_conCola && (_tramoDur === 'corta' || _tramoDur === 'media') ? 1 : 0);
         let iEj = -1;
         const idxEjercicios = frs.map(f => cuenta(f) ? ++iEj : -1);
-        let piezas = frs.filter((f, i) => idxEjercicios[i] < 0 || idxEjercicios[i] < _DUR.maxEj);
+        let piezas = frs.filter((f, i) => idxEjercicios[i] < 0 || idxEjercicios[i] < _maxEj);
         // En las sesiones exprés y de 30-45 el core SÍ se come el tiempo: el día
         // de "Core y complementos" se quedaba con 3 ejercicios de fuerza y 3 de
         // core (~30 min en una sesión de 15-20), y el de "Hombros y core" con
@@ -17875,7 +17976,15 @@
         // Híbrido recibía las notas de GIMNASIO ("te hemos dejado los tres
         // ejercicios que más rinden"), que no describen sus días de cardio ni
         // sus circuitos.
-        const _notaHib = {
+        // Con fuerza y carrera separadas no hay circuitos: la nota no puede hablar
+        // de rondas (8 oct 2026).
+        const _hibSinCircuitos = !(mejorarResistencia || objetivo.includes('competici')) && (!esPrincipiante || numDias <= 4);
+        const _notaHib = _hibSinCircuitos ? {
+          expres: 'Sesiones de 15-20 min: la fuerza se queda en los ejercicios que más rinden y la carrera en 15-20 min seguidos. Descansa lo justo entre series (45-60 s) y todo cabe.',
+          corta: 'Sesiones de 30-45 min: fuerza recortada a lo esencial (un ejercicio menos el día que acaba con carrera) y carrera de 25-35 min. Cabe con su calentamiento si no alargas los descansos.',
+          larga: 'Tienes tiempo de sobra: se usa en más minutos de carrera suave y en descansos completos en la fuerza, no en meter más intensidad.',
+          muyLarga: 'Tienes tiempo de sobra: se usa en más minutos de carrera suave y en descansos completos en la fuerza, no en meter más intensidad.'
+        }[_tramoDur] : {
           expres: 'Sesiones de 15-20 min: la fuerza se queda en los ejercicios que más rinden, los circuitos en 2-3 rondas y el cardio en 15-20 min seguidos. Descansa lo justo entre series (45-60 s) y todo cabe.',
           corta: 'Sesiones de 30-45 min: fuerza recortada a lo esencial, circuitos de 3-4 rondas y cardio de 25-35 min. Cabe con su calentamiento si no alargas los descansos.',
           larga: 'Tienes tiempo de sobra: se usa en más rondas en los circuitos, más minutos de cardio suave y descansos completos en la fuerza, no en meter más intensidad.',
