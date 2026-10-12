@@ -11945,6 +11945,9 @@
         <div class="hoy-grid">
         <div class="hoy-main">
 
+        <!-- Nota del mes gratis (12 oct 2026): un mensaje corto los días 3, 10, 20 y 27 de la prueba. La pinta _pintarNotaMesGratis(). -->
+        <div class="pp-card" id="notaMesGratis" style="display:none;padding-bottom:18px" role="status"></div>
+
         <!-- Primeros pasos: las 2 primeras semanas, hasta completarlos o cerrarlos. La pinta _pintarPrimerosPasos(). -->
         <div class="pp-card" id="primerosPasos" style="display:none" aria-labelledby="ppTitulo"></div>
 
@@ -23874,6 +23877,7 @@
     buildDashboardNutricionExtra();
     try { _pintarComidasHoy(); } catch (e) { console.warn('[hoy] comidas de hoy:', e.message); }
     try { _pintarPrimerosPasos(); } catch (e) { console.warn('[hoy] primeros pasos:', e.message); }
+    try { _pintarNotaMesGratis(); } catch (e) { console.warn('[hoy] nota del mes gratis:', e.message); }
     try { _pintarCheckinPendiente(); } catch (e) {}
   }
 
@@ -23982,6 +23986,71 @@
     try { localStorage.setItem(_CLAVE_PP_CERRADO, '1'); } catch (e) {}
     kEvento('primeros_pasos_cerrado');
     const caja = document.getElementById('primerosPasos');
+    if (caja) caja.style.display = 'none';
+  }
+
+  // NOTA DEL MES GRATIS (12 oct 2026): durante la prueba, un mensaje corto por
+  // hito (días 3, 10, 20 y 27) con UNA acción. El motivo: de las pruebas
+  // terminadas hasta ahora casi nadie había llegado a entrenar, así que no se
+  // trata de vender sino de empujar a que usen lo que ya tienen. Cada mensaje
+  // se enseña dentro de su ventana de días y se puede cerrar (una vez por
+  // dispositivo). El día se saca del final de la prueba (fechaPago), no del
+  // alta: quien se registró y activó el mes días después cuenta desde la activación.
+  const _HITOS_MES_GRATIS = [{ id: 'd3', de: 3, hasta: 6 }, { id: 'd10', de: 10, hasta: 13 }, { id: 'd20', de: 20, hasta: 23 }, { id: 'd27', de: 27, hasta: 30 }];
+  function _diaMesGratis() {
+    const u = getCurrentUser();
+    if (!u || u.isBeta || u.estadoSub !== 'trialing' || u.cancelaAlFinal) return 0;
+    const fin = u.fechaPago ? Date.parse(u.fechaPago) : 0;
+    if (fin) return Math.max(1, 30 - Math.ceil((fin - Date.now()) / 86400000) + 1);
+    const alta = Date.parse(u.creado || '') || 0;
+    return alta ? Math.floor((Date.now() - alta) / 86400000) + 1 : 0;
+  }
+  function _textoNotaMesGratis(id) {
+    const soloDieta = !!(generatedPlan && generatedPlan.soloDieta);
+    const n = Array.isArray(userData.historialEntrenos) ? userData.historialEntrenos.length
+      : (Array.isArray(userData.entrenosCompletados) ? userData.entrenosCompletados.length : 0);
+    const plural = (k, uno, varios) => k + ' ' + (k === 1 ? uno : varios);
+    if (id === 'd3') {
+      if (soloDieta) return { tit: 'Tu menú ya está listo', sub: 'Elige entre las opciones de cada comida y cambia lo que no te guste. Cuanto más lo ajustes, más fácil es seguirlo.', btn: 'Ver menú', accion: 'nutricion' };
+      if (n === 0) return { tit: 'Todavía no has entrenado', sub: 'El primero es el que más cuesta. Tu sesión de hoy ya está lista: empieza y la app te guía serie a serie.', btn: 'Empezar', accion: 'entreno' };
+      return { tit: 'Buen arranque', sub: 'Llevas ' + plural(n, 'entreno', 'entrenos') + '. Repetir pronto es lo que crea el hábito: mira qué te toca esta semana.', btn: 'Ver mi semana', accion: 'semana' };
+    }
+    if (id === 'd10') return { tit: 'Llevas 10 días', sub: 'Haz el check-in semanal con tu peso y cómo te ha ido: el plan se ajusta a ti desde la semana siguiente.', btn: 'Hacer el check-in', accion: 'checkin' };
+    if (id === 'd20') {
+      if (!soloDieta && n === 0) return { tit: 'Te quedan unos 10 días de mes gratis', sub: 'Aún estás a tiempo de probar el plan de verdad. Una sesión hoy y ya sabes cómo se siente.', btn: 'Empezar', accion: 'entreno' };
+      return { tit: 'Te quedan unos 10 días de mes gratis', sub: 'Mira tu progreso y decide con datos si sigues.', btn: 'Ver mi progreso', accion: 'progreso' };
+    }
+    if (id === 'd27' && !soloDieta && n > 0) return { tit: 'Tu mes, en números', sub: plural(n, 'entreno hecho', 'entrenos hechos') + ' en tu primer mes. Eso lo has hecho tú.', btn: 'Ver mi progreso', accion: 'progreso' };
+    return null;
+  }
+  function _pintarNotaMesGratis() {
+    const caja = document.getElementById('notaMesGratis');
+    if (!caja) return;
+    caja.style.display = 'none';
+    const dia = _diaMesGratis();
+    const hito = dia ? _HITOS_MES_GRATIS.find(h => dia >= h.de && dia <= h.hasta) : null;
+    if (!hito || !generatedPlan) return;
+    try { if (localStorage.getItem('kone_nota_mes_' + hito.id)) return; } catch (e) {}
+    // El día 3 los primeros pasos ya dicen qué hacer: no se enseñan dos tarjetas con el mismo mensaje.
+    const pp = document.getElementById('primerosPasos');
+    if (hito.id === 'd3' && pp && pp.style.display !== 'none') return;
+    const t = _textoNotaMesGratis(hito.id);
+    if (!t) return;
+    caja.innerHTML = '<button type="button" class="pp-cerrar" onclick="cerrarNotaMesGratis(\'' + hito.id + '\')" aria-label="Cerrar este mensaje">&times;</button>'
+      + '<div class="hc-cab"><div><span class="hc-eyebrow">Tu mes gratis · día ' + dia + '</span><div class="hc-tit">' + _esc(t.tit) + '</div></div></div>'
+      + '<p style="margin:8px 0 14px;font-size:13px;line-height:1.5;color:var(--metal-claro)">' + _esc(t.sub) + '</p>'
+      + '<button type="button" class="btn-primary" style="padding:11px 20px;font-size:12.5px;border-radius:999px" onclick="irNotaMesGratis(\'' + hito.id + '\', \'' + t.accion + '\')">' + _esc(t.btn) + '</button>';
+    caja.style.display = '';
+  }
+  function irNotaMesGratis(hito, accion) {
+    kEvento('nota_mes_gratis', { hito: hito, accion: accion });
+    if (accion === 'entreno') { try { empezarEntrenamientoHoy(); } catch (e) { showSection('semana'); } }
+    else showSection(accion);
+  }
+  function cerrarNotaMesGratis(hito) {
+    try { localStorage.setItem('kone_nota_mes_' + hito, '1'); } catch (e) {}
+    kEvento('nota_mes_gratis_cerrada', { hito: hito });
+    const caja = document.getElementById('notaMesGratis');
     if (caja) caja.style.display = 'none';
   }
 
@@ -25141,7 +25210,7 @@
     // Con guarda: si el id no existe, la linea de arriba ya ha apagado todas
     // las secciones y sin esto la app se queda en blanco. Se vuelve a "hoy",
     // que siempre existe, y se deja constancia en la consola.
-    if (id === 'hoy') { try { _pintarPrimerosPasos(); } catch (e) {} }
+    if (id === 'hoy') { try { _pintarPrimerosPasos(); } catch (e) {} try { _pintarNotaMesGratis(); } catch (e) {} }
     const _seccion = document.getElementById(`section-${id}`);
     if (!_seccion) {
       console.error('showSection: no existe la sección "' + id + '"');
