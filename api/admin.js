@@ -15,6 +15,8 @@ const RUTAS = {
   'set-premium':    () => require('./_admin-set-premium'),
   'crear-cliente':  () => require('./_admin-crear-cliente'),
   'is-admin':       () => require('./_is-admin'),
+  // Solo contadores, con clave propia de Thor (THOR_API_KEY), sin sesión de admin.
+  'resumen':        () => require('./_admin-resumen'),
 };
 
 module.exports = async (req, res) => {
