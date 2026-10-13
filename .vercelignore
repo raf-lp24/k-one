@@ -36,3 +36,6 @@ IMAGEN K-one.png
 
 # Informes de Thor: están también en .gitignore; esto es por si alguien los sube
 informes/
+
+# Carpeta de Thor: notas internas, cuentas de referencia y estadísticas. No se publica.
+Thor/
