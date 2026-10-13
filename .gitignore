@@ -29,3 +29,7 @@ informes/
 
 # Carpeta de Thor (agente de K-ONE): conocimiento y revisión de Instagram. Solo en local.
 Thor/
+
+# Documentos de referencia (planes reales de entreno y dieta) y archivo de versiones viejas: solo en local.
+documentos/
+archivo/

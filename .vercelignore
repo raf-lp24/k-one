@@ -39,3 +39,7 @@ informes/
 
 # Carpeta de Thor: notas internas, cuentas de referencia y estadísticas. No se publica.
 Thor/
+
+# Documentos personales y versiones viejas: no se publican.
+documentos/
+archivo/
