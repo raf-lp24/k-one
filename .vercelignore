@@ -33,3 +33,6 @@ IMAGEN K-one.png
 
 # Configuración de GitHub (comprobaciones automáticas): no es parte de la web
 .github/
+
+# Informes de Thor: están también en .gitignore; esto es por si alguien los sube
+informes/

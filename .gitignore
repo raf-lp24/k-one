@@ -23,3 +23,6 @@ marketing/Videos/*.mp4
 
 # Copias de seguridad bajadas con scripts/copia-seguridad.js (datos de clientes: nunca a git)
 copias/
+
+# Informes de Thor (revisión de Instagram: estadísticas y gasto en anuncios). Solo en local.
+informes/
