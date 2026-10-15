@@ -14962,7 +14962,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261015a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261015b');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -19952,7 +19952,11 @@
         r(/prensa de piernas/gi, 'sentadilla a una pierna asistida en silla'),
         r(/\bprensa\b/gi, 'sentadilla profunda controlada'),
         r(/gemelos en (prensa o )?máquina/gi, 'gemelos en escalón'),
-        r(/femoral tumbado en máquina/gi, 'curl nórdico asistido'),
+        // El curl nórdico es de los ejercicios de femoral más duros que hay: quien
+        // empieza no hace ni una bajada controlada. Solo al avanzado; al resto, el
+        // puente de isquios con los talones en una silla (15 oct 2026, de las
+        // rutinas de femoral en casa de @valicentif), que sí puede hacer cualquiera.
+        r(/femoral tumbado en máquina/gi, /Avanzado/.test(u.nivel || '') ? 'curl nórdico asistido' : 'puente de isquios con talones en silla'),
         r(/press inclinado en (multipower|máquina)/gi, 'flexiones con pies elevados'),
         r(/press en máquina inclinado/gi, 'flexiones con pies elevados'),
         r(/press en máquina con agarre cerrado/gi, 'flexiones diamante'),
