@@ -14107,7 +14107,9 @@
     //     con segundos, repeticiones con repeticiones), además de músculo y
     //     patrón. Las tres de abajo son isométricas, como la plancha.
     [/plancha lateral/i, ['Copenhagen plank']],
-    [/plancha(?! lateral| invertida)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados'], true],
+    // «Plancha con elevación de pierna» (15 oct 2026, @valicentif): la progresión
+    // natural de la plancha sin material, apta para todos los niveles.
+    [/plancha(?! lateral| invertida| con elevaci)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados', 'Plancha con elevación de pierna'], true],
     // "Equilibrio en una pierna" fuera de estos dos huecos: es una postura que se
     // aguanta (segundos) y tanto el dead bug de las plantillas de running como los
     // clamshells se escriben por repeticiones por lado, así que salía un
@@ -14197,6 +14199,9 @@
   // comba empezó a aparecer en planes de rodilla lesionada pese a existir ya
   // una regla en el mapa de lesiones, que para entonces ya había pasado.
   const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto|comba/i;
+  // Perfil «sin impacto» (15 oct 2026): solo se vetan los saltos, no el patrón
+  // de rodilla. Mismo motivo de orden: la rotación corre después del mapa.
+  const _ALT_IMPACTO = /jump|burpee|salto|comba|hop|jacks|bounding|patinador|double[- ]?under|explosiv/i;
   // "overhead" añadido el 7 sept 2026 por el mismo motivo de orden que "comba"
   // en la lista de rodilla: la rotación corre DESPUÉS del mapa de lesiones, así
   // que el `[/overhead carry/ → farmer carry]` que ya existía allí no protegía
@@ -14236,6 +14241,7 @@
           if (lesiones.rodilla && _ALT_RIESGO_RODILLA.test(a)) return false;
           if (lesiones.hombro && _ALT_RIESGO_HOMBRO.test(a)) return false;
           if (lesiones.espalda && _ALT_RIESGO_ESPALDA.test(a)) return false;
+          if (lesiones.impacto && _ALT_IMPACTO.test(a)) return false;
         }
         return true;
       });
@@ -14956,7 +14962,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261014a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261015a');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -17650,6 +17656,20 @@
     const _lesionZonaEspalda = lesion.includes('Espalda') || _mencionaLesion('espalda', 'lumbar', 'lumbago', 'lumbalgia', 'hernia discal', 'hernia de disco', 'ciática', 'ciatica', 'columna', 'vértebra', 'vertebra', 'disco', 'escoliosis');
     const _lesionZonaHombro = lesion.includes('Hombro') || _mencionaLesion('hombro', 'manguito rotador', 'manguito rotator', 'luxación', 'luxacion', 'clavícula', 'clavicula', 'supraespinoso', 'acromion', 'pinzamiento', 'subacromial', 'labrum', 'por encima de la cabeza');
 
+    // SIN IMPACTO (15 oct 2026, idea de las rutinas «sin impacto» de
+    // @valicentif): hasta ahora los saltos solo se quitaban con la rodilla
+    // lesionada. Se quitan también, sin preguntar nada nuevo, a quien más
+    // castiga el aterrizaje: obesidad grave (IMC ≥ 35), obesidad empezando
+    // desde cero (IMC ≥ 30 y principiante), 65 años o más, o quien menciona en
+    // su lesión tobillo, cadera, artrosis, fascitis o que no puede saltar. Solo
+    // se cambian los SALTOS por su versión sin vuelo; el resto del plan (y la
+    // carrera, en Running e Híbrido) se queda igual. Con la rodilla ya se
+    // encarga su propio bloque, más completo.
+    const _imcEnt = (parseFloat(u.peso) || 70) / Math.pow((parseFloat(u.altura) || 170) / 100, 2);
+    const _edadEnt = parseInt(u.edad, 10) || 30;
+    const _sinImpacto = !_lesionZonaRodilla && (_imcEnt >= 35 || (_imcEnt >= 30 && esPrincipiante) || _edadEnt >= 65
+      || _mencionaLesion('tobillo', 'cadera', 'artrosis', 'fascitis', 'impacto', 'saltar', 'saltos', 'esguince', 'aquiles'));
+
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
     // Sin series, intervalos ni metcons (30 sept 2026): con tensión alta o
@@ -17956,7 +17976,7 @@
         : 'El volumen sube cada semana dentro de este bloque de 4 — la 4ª siempre descarga.';
 
       const _diaFuerza = () => ({
-        resumen: (esAvanzado && !_sinIntensidad && !_lesionZonaRodilla) ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
+        resumen: (esAvanzado && !_sinIntensidad && !_lesionZonaRodilla && !_sinImpacto) ? 'Fuerza + pliometría corredor' : 'Fuerza específica corredor',
         detalle: fuerzaCorredorObjetivo,
         etiqueta: 'Fortalecimiento'
       });
@@ -18384,7 +18404,14 @@
         ? `Piernas · Hip thrust ${v}×8 (subiendo rápido), peso muerto rumano 3×6 (peso moderado), puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
         : _sinIntensidad
           ? `Piernas · Sentadilla 3×6 (peso moderado), peso muerto rumano 3×8, zancada 3×8 por pierna, puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
-          : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`;
+          // Avanzado, un mesociclo sí y otro no (15 oct 2026, idea de @valicentif):
+          // CONTRASTE. Una serie pesada de sentadilla y, nada más acabarla, el
+          // mismo gesto con salto y sin peso: la serie pesada «despierta» la
+          // pierna y el salto sale más potente. Va en dos piezas seguidas para
+          // que cada una tenga su ficha; el paréntesis dice cómo se encadenan.
+          : (esAvanzado && !_sinImpacto && bloqueMeso % 2 === 1)
+            ? `Piernas · ${_casaHib ? 'Sentadilla goblet 4×5 (pesada)' : 'Sentadilla 4×4 (75-80 % del peso)'}, squat jumps 4×5 (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`
+            : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`;
       // Carrera suave del día de cardio (en vez del "cambia de máquina" del
       // gimnasio: este cliente quiere correr). Perder grasa: +5 min.
       const _rodajeHib = () => {
@@ -18428,7 +18455,7 @@
         const cardioDia = esAvanzado && !sentirseMejor && !_sinIntensidad ? _calidadHib() : _zona2();
         const full = _fuerza('Fuerza · Full body', esAvanzado ? _FULL_AV : _FULL_INTER);
         const sup = _fuerza(esAvanzado ? 'Fuerza · Tren superior + carries' : 'Fuerza · Tren superior', esAvanzado ? _SUP_AV : _SUP_INTER);
-        const inf = _fuerza(esAvanzado && !_sinIntensidad && !_lesionZonaRodilla ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
+        const inf = _fuerza(esAvanzado && !_sinIntensidad && !_lesionZonaRodilla && !_sinImpacto ? 'Fuerza · Tren inferior + pliometría' : 'Fuerza · Tren inferior', esAvanzado ? _INF_AV : _INF_INTER);
         if (numDias <= 2) { _planHib[0] = full; _planHib[3] = _metcon(); }
         else if (numDias === 3) { _planHib[0] = full; _planHib[2] = cardioDia; _planHib[4] = _metcon(); }
         else if (numDias === 4) { _planHib[0] = sup; _planHib[1] = cardioDia; _planHib[3] = inf; _planHib[5] = _metcon(); }
@@ -18546,7 +18573,7 @@
       // 15 minutos seguidos con el cliente ya fatigado. El resto de modalidades
       // (correr, comba, bici, remo, cuesta) no cargan el hombro así.
       const modalidadesSeguras = modalidadesDisponibles.filter(m => {
-        if (_lesionZonaRodilla && m.impacto) return false;
+        if ((_lesionZonaRodilla || _sinImpacto) && m.impacto) return false;
         if (_lesionZonaHombro && m.cargaHombro) return false;
         return true;
       });
@@ -19066,6 +19093,40 @@
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención a la rodilla en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios que más la cargan (sentadilla profunda, zancadas, saltos e impacto). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
         : 'Hemos adaptado los ejercicios que más cargan la rodilla (sentadilla profunda, zancadas, saltos e impacto) por la lesión que nos indicaste. Si notas dolor en cualquier ejercicio, párate y consulta con un profesional.');
+    }
+    // Perfil «sin impacto» (ver _sinImpacto arriba): solo los saltos, cada uno
+    // por su versión sin fase de vuelo, y los paréntesis que explican el salto.
+    // Mismo orden que en la rodilla: «Burpees box jump over» antes que «box jump».
+    if (_sinImpacto) {
+      const _marcha = eq('remo o bici (bajo impacto)', 'marcha rápida en el sitio', 'marcha rápida en el sitio');
+      mapaLesion = mapaLesion.concat([
+        [/[Bb]urpees?( box jump over| broad jumps| over bar)?/g, 'flexión + paso al frente (sin salto)'],
+        [/[Bb]ox jumps? o step[- ]ups?/g, 'step ups controlados (sin salto)'],
+        [/[Bb]ox jump over|[Bb]ox jumps?|[Ss]altos? al cajón/g, 'step ups controlados (sin salto)'],
+        [/[Ss]tep-ups explosivos/g, 'step ups controlados (sin salto)'],
+        [/[Ss]entadillas? con salto/g, 'sentadillas rápidas (sin salto)'],
+        [/[Ss]quat jumps?( con mancuernas( ligeras)?)?/g, 'sentadillas rápidas (sin salto)'],
+        [/\(salto vertical con carga corporal\)/gi, '(sin salto, subiendo rápido)'],
+        [/[Bb]road jumps?/g, 'step ups controlados (sin salto)'],
+        [/\(salto horizontal máximo, recuperación completa entre saltos\)/gi, '(sin salto, recuperación completa)'],
+        [/[Ss]kater hops?|[Ss]alto del patinador/g, 'step lateral controlado (sin salto)'],
+        [/\(salto lateral tipo patinador, aterriza estable\)/gi, '(sin salto, controlado)'],
+        [/[Ss]ingle-leg hop lateral/g, 'step lateral a una pierna (sin salto)'],
+        [/[Pp]ogo jumps?/g, 'elevación de gemelos de pie (sin salto)'],
+        [/\(rebote corto de tobillo, contacto mínimo con el suelo\)/gi, '(controlado, sin salto)'],
+        [/\b[Bb]ounding\b/g, 'zancadas largas caminando (sin salto)'],
+        [/\(zancada exagerada, prioriza altura y longitud sobre velocidad\)/gi, '(paso largo y controlado, sin fase de vuelo)'],
+        [/[Jj]umping jacks?/g, 'pasos laterales con brazos (sin salto)'],
+        [/[Dd]ouble[- ]unders?/g, _marcha],
+        [/\b[Cc]omba( \(saltos simples\))?|[Ss]altos? a la comba/g, _marcha],
+        [/[Ss]ubida explosiva (al|a un) (banco|escalón)/g, 'step ups controlados (sin salto)'],
+        [/[Ss]alto desde sentado en (un banco|una silla firme)/g, 'levantarse rápido del banco (sin salto)'],
+        // Quien empieza desde cero con este perfil se sienta y se levanta de una
+        // silla: la silla marca la profundidad y da seguridad (idea de las rutinas
+        // de principiantes de @valicentif).
+        ...(esPrincipiante ? [[/[Ss]entadillas? aéreas?/g, 'sentadilla a la silla']] : []),
+      ]);
+      notasSalud.push('Por tu perfil, tu plan no lleva saltos ni impacto: cada ejercicio con salto va en su versión sin despegar los pies del suelo, que trabaja lo mismo con mucha menos carga en tobillos, rodillas y cadera.');
     }
     if (_lesionZonaEspalda) {
       mapaLesion = mapaLesion.concat([
@@ -19764,7 +19825,8 @@
         const seguraParaLesion = alt =>
           !(_lesionZonaRodilla && _ALT_RIESGO_RODILLA.test(alt)) &&
           !(_lesionZonaHombro  && _ALT_RIESGO_HOMBRO.test(alt)) &&
-          !(_lesionZonaEspalda && _ALT_RIESGO_ESPALDA.test(alt));
+          !(_lesionZonaEspalda && _ALT_RIESGO_ESPALDA.test(alt)) &&
+          !(_sinImpacto && _ALT_IMPACTO.test(alt));
         const libre = entrada[1].find(alt => seguraParaLesion(alt) &&
           ![...vistos].some(v => _mismoEjercicio(v, _nombreDeTramo(alt))));
         if (!libre) return fr;
@@ -19960,7 +20022,7 @@
       : /casa/i.test(_lugarTxt) ? 'casa'
       : 'gimnasio';
     const mapaRotacion = _tablaRotacionAutomatica(semilla, semanaActual, bloqueMeso, _entornoRot,
-      { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda },
+      { rodilla: _lesionZonaRodilla, hombro: _lesionZonaHombro, espalda: _lesionZonaEspalda, impacto: _sinImpacto },
       esPrincipiante);
     if (mapaRotacion.length) {
       // Nombres que la PLANTILLA ya pone esta semana, día a día. Se calcula antes
