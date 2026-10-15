@@ -19949,6 +19949,14 @@
       // "Sin material" es peso corporal: no valen ni mancuernas ni bandas, así que
       // se traduce a la versión con el propio cuerpo o con muebles de casa.
       const mapaSinMaterial = [
+        // Antes que «prensa» (15 oct 2026): la regla suelta de prensa se comía la
+        // de «gemelos en prensa o máquina» y salía «gemelos en sentadilla
+        // profunda controlada o máquina».
+        r(/(elevación de )?gemelos( de pie| sentados?)? en prensa o máquina/gi, 'gemelos en escalón'),
+        r(/press de banca o mancuernas/gi, 'flexiones'),
+        r(/remo (en polea baja|bajo mesa) o remo con banda elástica/gi, 'remo bajo mesa'),
+        r(/fondos en banco/gi, 'fondos en silla'),
+        r(/hip thrust en banco/gi, 'hip thrust con la espalda en el sofá'),
         r(/prensa de piernas/gi, 'sentadilla a una pierna asistida en silla'),
         r(/\bprensa\b/gi, 'sentadilla profunda controlada'),
         r(/gemelos en (prensa o )?máquina/gi, 'gemelos en escalón'),
@@ -19978,10 +19986,33 @@
         r(/elevación de piernas en barra o banco/gi, 'elevación de piernas tumbado en suelo'),
         r(/face pull con banda( elástica)?/gi, 'retracción escapular tumbado boca abajo'),
         r(/face pull/gi, 'retracción escapular tumbado boca abajo'),
+        // MANCUERNAS SIN MATERIAL (15 oct 2026). Antes todo «con mancuernas»
+        // pasaba a «con el propio peso», y salían 97 textos sin sentido: «press
+        // de hombro con el propio peso», «elevaciones laterales con el propio
+        // peso», «remo con el propio peso apoyado en banco»... Ahora cada
+        // ejercicio va a su versión real sin material, y lo que necesita carga
+        // usa lo que hay en cualquier casa (idea de @valicentif: «si no tienes
+        // mancuernas, garrafas de agua o una mochila con kilos de arroz»).
+        // 1) Lo que ya es de peso corporal solo pierde la coletilla.
+        [/((?:flexiones|step-ups?|puente de glúteo|sin peso|plancha)[^,·]*?) con mancuernas?/gi, (m, n) => n],
+        // 2) Empujes: a flexiones.
+        r(/press arnold( con mancuernas?)?/gi, 'flexiones en pica'),
+        r(/press (de hombros?|militar) con mancuernas?/gi, 'flexiones en pica'),
+        r(/press inclinado con mancuernas?/gi, 'flexiones con pies elevados'),
+        r(/press cerrado con mancuernas?/gi, 'flexiones diamante'),
+        r(/press( de)?( banca)?( plano)? con mancuernas?( en banco)?/gi, 'flexiones'),
+        r(/aperturas con mancuernas?( en banco)?/gi, 'aperturas en suelo (deslizando toallas)'),
+        r(/(copa de tríceps|extensión de tríceps sobre cabeza|press francés) con mancuernas?/gi, 'fondos en silla'),
+        // 3) Remos: a una mano con una mochila, o bajo una mesa.
+        r(/remo con mancuernas? (a una mano|apoyado en banco)/gi, 'remo a una mano con una mochila cargada'),
+        r(/remo con mancuernas?/gi, 'remo bajo mesa'),
+        // 4) Pierna y cadera: el mismo ejercicio con una mochila cargada.
+        [/((?:peso muerto|hip thrust|sentadilla|zancadas?|gemelos|swing|puente)[^,·]*?) con mancuernas?/gi, (m, n) => n + ' con una mochila cargada'],
+        // 5) Brazos y hombros (curl, elevaciones): dos botellas de agua llenas.
+        r(/con mancuernas?/gi, 'con dos botellas de agua llenas'),
         r(/\ben polea\b/gi, 'con el propio peso'),
         r(/\ben multipower\b/gi, 'con el propio peso'),
         r(/\ben (la )?máquina\b/gi, 'con el propio peso'),
-        r(/con mancuernas?/gi, 'con el propio peso'),
       ];
 
       const mapaMaterial = (u.lugar || '').includes('sin material') ? mapaSinMaterial : mapaConMaterial;
@@ -20004,6 +20035,14 @@
     if (mapaLesion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
       semana = semana.map(d => d.detalle ? { ...d, detalle: _dedupSesion(d.detalle) } : d);
+      // Sin material: la lesión cambia el NOMBRE pero deja la carga que puso el
+      // traductor de material («Elevaciones frontales sin peso (solo rango) con
+      // dos botellas de agua llenas», «Step-ups controlados (sin salto) con una
+      // mochila cargada»). Si el sustituto es sin peso o controlado, sin carga.
+      if (!soloDieta && (u.lugar || '').includes('sin material')) {
+        const _sinCarga = /((?:sin peso|controlad[oa]s?|sin dolor|rango corto|rango cómodo|sin salto|flexiones)[^,·]*?) con (dos botellas de agua llenas|una mochila cargada)/gi;
+        semana = semana.map(d => d.detalle ? { ...d, detalle: d.detalle.replace(_sinCarga, '$1').replace(/a banco bajo/gi, 'a un escalón bajo') } : d);
+      }
     }
 
     // ROTACIÓN AUTOMÁTICA DE EJERCICIOS — antes el plan repetía exactamente los
