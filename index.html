@@ -13770,7 +13770,7 @@
     'WOD': { calentamiento: '3 rondas suaves: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks, más movilidad de cadera y hombro (círculos, balanceos) según el WOD de hoy', vueltaCalma: '5 min de respiración + estiramientos de los grupos más exigidos' },
     'Empuje': { calentamiento: '8 min de activación de hombro y pecho (band pull-aparts, rotaciones de hombro con banda, flexiones con rodillas apoyadas) + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
     'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda (band pull-aparts, remo con banda elástica, rotaciones de hombro) + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
-    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo (90/90, círculos de tobillo, sentadilla profunda sostenida) + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
+    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo (balanceos de pierna adelante-atrás, 90/90, círculos de tobillo, sentadilla profunda sostenida) + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
     'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador (rotaciones externas con banda, band pull-aparts, círculos de brazo) + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
     'Complemento': { calentamiento: '5-8 min de movilidad general y activación (círculos de cadera y hombro, sentadilla profunda sostenida, gato-camello)', vueltaCalma: '5 min de estiramientos generales + respiración' },
     // Estas cuatro etiquetas se usan de verdad en los planes (Híbrido 312 veces,
@@ -14956,7 +14956,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261008a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261014a');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -16602,7 +16602,7 @@
     return postEntrenoHTML +
       `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
-      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}`;
+      `<strong>Vuelta a la calma</strong> · ${extras.vueltaCalma}${/estiramiento/i.test(extras.vueltaCalma) ? '. Cada estiramiento, 30-60 s con tensión suave y sin dolor' : ''}`;
   }
 
   // El resumen del día ("Easy run · Zona 2", "Fartlek o series · Calidad"...)
@@ -16730,7 +16730,14 @@
     "Primero lo básico, todos los días. Lo demás suma, pero no salva una base floja.",
     "Tres días bien hechos valen más que siete a medias.",
     "Prohibírtelo todo no es disciplina. Es una cuenta atrás.",
-    "Lo que dura suele ir despacio. Y está bien."
+    "Lo que dura suele ir despacio. Y está bien.",
+    // 14 oct 2026 · línea «mentalidad», ideas de @valicentif con nuestras palabras
+    "¿Sin ganas? Diez minutos. Si a los diez quieres parar, paras. Casi nunca pasa.",
+    "No hay truco: moverte, comer bien y repetir.",
+    "De vacaciones también cuentan tus hábitos. Al 80 % ya es mucho.",
+    "El batido ayuda. La base es la comida.",
+    "El momento perfecto no existe. Existe hoy.",
+    "Cambia «no puedo» por «todavía no»."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -17812,20 +17819,40 @@
       // velocidad de carrera; pogo jumps son de bajo impacto y van bien para
       // tolerancia de tendón). Fuera quedan depth jumps y tuck jumps: mayor
       // riesgo de aterrizaje mal hecho sin nadie delante corrigiendo la técnica.
+      // 14 oct 2026: añadidas la subida explosiva y el salto desde sentado
+      // (idea de @valicentif, que los usa en casi todas sus sesiones para
+      // corredores). La subida trabaja la pierna de apoyo con la rodilla
+      // arriba, como la zancada de carrera; el salto desde sentado arranca sin
+      // contramovimiento y su aterrizaje es de los más fáciles de controlar.
       const plioVariantesAv = rSinMat
         ? ['broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
            'squat jumps 3×8 (salto vertical con carga corporal)',
            'single-leg hop lateral 3×8/lado',
            'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)',
+           'subida explosiva a un escalón 3×8/pierna',
+           'salto desde sentado en un banco 3×6']
         : ['box jumps 3×6',
            'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
            'squat jumps 3×8 con mancuernas ligeras',
            'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)',
+           'subida explosiva al banco 3×8/pierna',
+           'salto desde sentado en un banco 3×6'];
       const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
+      // El salto va el PRIMERO de la sesión, con las piernas frescas (14 oct
+      // 2026): antes iba el cuarto, detrás de búlgara, peso muerto e hip
+      // thrust. Además, en la sesión exprés el recorte por duración se queda
+      // con los tres primeros ejercicios y el salto se caía, aunque la sesión
+      // se llamara «Fuerza + pliometría».
+      const _plioAvIni = plioAv.charAt(0).toUpperCase() + plioAv.slice(1);
+      // Pies rápidos de bajo impacto para el intermedio, que no tenía nada
+      // reactivo. Solo con sesiones de 45 min o más (en las cortas no cabe) y
+      // nunca con la rodilla tocada ni con tensión alta o problemas cardíacos.
+      const _piesRapidosRun = (!_lesionZonaRodilla && !_sinIntensidad && _tramoDur !== 'expres' && _tramoDur !== 'corta')
+        ? `Toques rápidos en ${rSinMat ? 'un escalón' : 'step'} 3×20s, ` : '';
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
@@ -17837,11 +17864,11 @@
             // cinta también. El trabajo de gemelo/sóleo es de lo más
             // documentado para aguantar volumen de carrera sin lesionarse, así
             // que era un hueco raro justo en el perfil que más kilómetros hace.
-            ? `Fuerza + pliometría · Sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, ${plioAv}, copenhagen plank 3×15s/lado, A-skips 3×20m, gemelos en escalón a una pierna 4×12/lado`
-            : `Fuerza + pliometría · Peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, ${plioAv}, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
+            ? `Fuerza + pliometría · ${_plioAvIni}, sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, copenhagen plank 3×15s/lado, A-skips 3×20m, gemelos en escalón a una pierna 4×12/lado`
+            : `Fuerza + pliometría · ${_plioAvIni}, peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
-            ? 'Fuerza corredor · Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15'
-            : 'Fuerza corredor · Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15';
+            ? `Fuerza corredor · ${_piesRapidosRun}Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
+            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15`;
 
       // EL OBJETIVO NO CAMBIABA NADA DEL PLAN DE RUNNING (comprobado 7 sept
       // 2026: los cuatro objetivos daban un plan idéntico, carácter a carácter,
@@ -18200,7 +18227,11 @@
       const _FULL_AV = `Fuerza · Sentadilla ${vv}×5, press banca ${vv}×5, peso muerto rumano ${vv}×6, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas'} 3×6, farmer carry 3×40m, plancha 3×45s`;
       const _SUP_INTER = `Push/Pull · Press banca ${v}×8, remo con barra ${v}×10, press militar 3×10, dominadas o jalón 3×8, face pull 3×15, farmer carry 3×30m`;
       const _SUP_AV = `Push/Pull · Press banca ${vv}×6, remo con barra ${vv}×8, press militar 3×8, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} 3×6, face pull 3×15, overhead carry con mancuerna 3×30m por lado, farmer carry 3×40m`;
-      const _INF_INTER = `Piernas · Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, gemelos en escalón 3×15, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
+      // Pies rápidos de bajo impacto (14 oct 2026): el intermedio no tenía nada
+      // reactivo en su día de pierna. Mismas condiciones que en Running.
+      const _piesRapidosHib = (!_lesionZonaRodilla && !_sinIntensidad && _tramoDur !== 'expres' && _tramoDur !== 'corta')
+        ? `Toques rápidos en ${_casaHib ? 'un escalón' : 'step'} 3×20s, ` : '';
+      const _INF_INTER = `Piernas · ${_piesRapidosHib}Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, gemelos en escalón 3×15, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
       // BUG REAL (reportado por un cliente real, Alejandro, que compagina
       // Híbrido con carrera): el día "Tren inferior + pliometría" solo tenía UN
       // ejercicio realmente pliométrico (box/squat jumps, siempre el mismo) --
@@ -18213,10 +18244,17 @@
       // variedad de la que pedía el cliente, y con mejor transferencia real a
       // carrera que un salto vertical suelto.
       const _plioVariantesHibAv = _casaHib
-        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
-        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
+        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'subida explosiva a un escalón 3×8/pierna', 'salto desde sentado en una silla firme 3×6']
+        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'subida explosiva al banco 3×8/pierna', 'salto desde sentado en un banco 3×6'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
-      const _INF_AV = `Piernas · Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_sinIntensidad ? 'zancada caminando con mancuernas 3×10 por pierna' : `${_plioHibAv}${_lesionZonaRodilla ? '' : ', A-skips 3×20m'}`}, gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
+      // El salto va PRIMERO, con las piernas frescas (14 oct 2026): antes iba
+      // el quinto, y en la sesión de 30-45 min el recorte por duración (que se
+      // queda con los cuatro primeros) se lo llevaba aunque el día se llamara
+      // «Tren inferior + pliometría». Los A-skips se quedan tras la búlgara para
+      // no echar fuera más fuerza en las sesiones cortas.
+      const _plioHibIni = _sinIntensidad ? '' : `${_plioHibAv.charAt(0).toUpperCase() + _plioHibAv.slice(1)}, `;
+      const _trasBulgaraHib = _sinIntensidad ? 'zancada caminando con mancuernas 3×10 por pierna, ' : (_lesionZonaRodilla ? '' : 'A-skips 3×20m, ');
+      const _INF_AV = `Piernas · ${_plioHibIni}Sentadilla ${vv}×5, peso muerto rumano ${vv}×8, hip thrust ${v}×10, sentadilla búlgara 3×8 por pierna, ${_trasBulgaraHib}gemelos con carga 4×12, ${_casaHib ? 'zancadas cargadas con mancuernas 4×12 por pierna' : 'sled push 4×20m'}`;
 
       // ── Metcon / circuito ──
       // Cardio entre rondas: más metros si el objetivo es resistencia; en casa,
@@ -19018,6 +19056,12 @@
         [/\(rebote corto de tobillo, contacto mínimo con el suelo\)/gi, '(controlado, sin salto)'],
         [/\b[Bb]ounding\b/g, 'zancadas largas caminando (sin salto)'],
         [/\(zancada exagerada, prioriza altura y longitud sobre velocidad\)/gi, '(paso largo y controlado, sin fase de vuelo)'],
+        // Variantes añadidas el 14 oct 2026 a las mismas rotaciones (subida
+        // explosiva y salto desde sentado). Los toques rápidos ya no salen con la
+        // rodilla tocada, pero si llegaran por otra vía no pueden pasar sin adaptar.
+        [/[Ss]ubida explosiva (al|a un) (banco|escalón)/g, 'step ups controlados (sin salto)'],
+        [/[Ss]alto desde sentado en (un banco|una silla firme)/g, 'step-up controlado a banco bajo'],
+        [/[Tt]oques rápidos en (step|un escalón)/g, 'marcha en el sitio'],
       ]);
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención a la rodilla en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios que más la cargan (sentadilla profunda, zancadas, saltos e impacto). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
@@ -20054,7 +20098,11 @@
         // Solo cuenta para el tope lo que de verdad consume tiempo: ejercicios
         // de fuerza con series, descanso y montaje. El core y el remate de
         // cardio se quedan siempre.
-        const cuenta = f => esEjercicio(f) && !_esCore.test(f);
+        // Los toques rápidos en step (14 oct 2026) tampoco cuentan: son 3×20 s
+        // de pies rápidos sin montaje ni carga, como una plancha. Si contaran,
+        // en la sesión de 45-60 min echaban fuera los gemelos del corredor.
+        const _sinTope = /toques rápidos/i;
+        const cuenta = f => esEjercicio(f) && !_esCore.test(f) && !_sinTope.test(f);
         // Híbrido con fuerza y carrera separadas (8 oct 2026): los 8-10 min de
         // carrera al acabar el día de torso también ocupan la sesión, así que en
         // 30-60 min ese día lleva un ejercicio de fuerza menos.
@@ -20086,7 +20134,7 @@
             // Tope duro de 5 series por ejercicio: por encima, el volumen extra
             // dentro de la MISMA sesión deja de aportar (meta-regresiones 2025) y
             // lo que toca es repartirlo en otro día, no seguir sumando aquí.
-            if (sumadas < _DUR.sumarSerieA && n < 5 && !_esCore.test(f)) { n += 1; sumadas++; }
+            if (sumadas < _DUR.sumarSerieA && n < 5 && !_esCore.test(f) && !_sinTope.test(f)) { n += 1; sumadas++; }
             // Un aislamiento no se programa a 5-6 repeticiones pesadas. Pasaba cuando
             // la adaptación por lesión cambiaba un básico YA reescrito a fuerza
             // ("peso muerto rumano 5×5") por uno de aislamiento: salía "Femoral
@@ -20762,6 +20810,7 @@
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Bol de yogur proteico con plátano caramelizado", "200g yogur griego 0%, 25g proteína whey, 1 plátano, 20g copos de avena, 5g miel, canela", "428 kcal", "44g prot", "54g carbs", "4g grasa", "Sartén · 5 min"),
+            op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
           ]
         },
         {
@@ -20995,6 +21044,7 @@
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
             op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
+            op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
           ]
         }
       ];
@@ -21311,6 +21361,8 @@
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
             op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
+            op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
+            op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
           ]
         }
       ];
@@ -21376,6 +21428,7 @@
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
+            op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
           ]
         },
         {
@@ -21494,6 +21547,7 @@
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
+            op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
           ]
         },
         {
@@ -21604,6 +21658,7 @@
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
             op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
+            op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
           ]
         }
       ];
@@ -27535,6 +27590,10 @@
   }
 
   const RECETA_PASOS = {
+    // 14 oct 2026 · ideas de @valicentif, con nuestras cantidades y pasos
+    "Pizza con base de brócoli y pollo": "Tritura el brócoli crudo hasta que quede como arroz. Mézclalo con los huevos, la harina de avena, el ajo y el orégano, extiende la masa fina sobre papel de horno y hornéala 12 min a 200 °C. Mientras, haz el pollo a la plancha en tiras y corta la cebolla en juliana. Saca la base, cubre con el tomate, la mozzarella, el pollo y la cebolla, y vuelve al horno 8-10 min, hasta que se funda el queso.",
+    "Hamburguesas de lentejas con pan integral y huevo": "Escurre las lentejas y aplástalas con un tenedor hasta hacer un puré grueso. Bate los huevos y echa la mitad en el puré con los copos de avena, la cebolla muy picada y el comino; mezcla y forma dos hamburguesas. Hazlas a la plancha con el aceite, 3-4 min por cada lado, y cuaja el resto del huevo batido en la misma plancha. Tuesta el pan y monta las hamburguesas con la lechuga, el tomate y el huevo.",
+    "Huevos cocidos con plátano y crema de cacahuete": "Cuece los huevos 10 min en agua hirviendo, pásalos a agua fría y pélalos; puedes dejarlos hechos la noche antes y llevártelos. Sírvelos con una pizca de sal y acompáñalos del plátano con la crema de cacahuete untada por encima.",
     // Mantenimiento — renombradas al subir la fibra del día tipo a 25,5 g
     "Yogur natural con frutos rojos, miel y canela": "Vierte el yogur en un bol. Añade los frutos rojos enteros por encima, un hilo de miel y espolvorea canela. Sin cocción.",
     "Lomo embuchado con tortas de arroz y zanahoria": "Monta el lomo embuchado sobre las tortas de arroz. Corta la zanahoria en bastones y sírvela al lado para ir mojando.",
