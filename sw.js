@@ -60,6 +60,8 @@ function _cacheable(pathname) {
   if (pathname === '/' || pathname === '/index.html') return true;
   if (pathname.startsWith('/img/')) return true;
   if (pathname.startsWith('/data/')) return true;
+  // Fuentes propias desde el 16 oct 2026 (antes venían de Google y no se guardaban).
+  if (pathname.startsWith('/fonts/')) return true;
   if (pathname === '/manifest.json') return true;
   return /\.(png|jpe?g|svg|ico|webp|gif)$/i.test(pathname);
 }

@@ -197,8 +197,6 @@
 <!-- La captura del móvil de la portada es lo más grande que se pinta (LCP):
      se pide desde la cabecera en vez de esperar a llegar a ella en el HTML. -->
 <link rel="preload" as="image" href="/img/landing/app-hoy-portada-420.webp" imagesrcset="/img/landing/app-hoy-portada-420.webp 420w, /img/landing/app-hoy-portada.webp 600w" imagesizes="(max-width: 899px) 230px, 300px" fetchpriority="high">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://rfdrqbnzceudwclagjvp.supabase.co">
 <!-- El <script src=".../supabase-js@2"> de más abajo bloquea el render mientras
      se descarga: no lleva defer a propósito, porque el <script> inline que va
@@ -218,11 +216,13 @@
      en cuanto el backend confirma que el usuario es admin (ver
      _cargarFuentesAdmin, llamada desde actualizarBtnAdmin) — con margen de
      sobra antes de que le dé tiempo a pulsar el botón y abrir el panel. -->
-<!-- VELOCIDAD (2 oct 2026): la hoja de fuentes de Google ya no bloquea el primer
+<!-- 16 oct 2026: las fuentes se sirven desde k-one.fit (/fonts/), ya no desde Google:
+     abrir la web no manda la IP del visitante a Google antes de aceptar cookies.
+     VELOCIDAD (2 oct 2026): la hoja de fuentes ya no bloquea el primer
      pintado: se pide como "preload" y se aplica al llegar. Mientras, el texto sale
      con la fuente del sistema y cambia solo (display=swap). -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"></noscript>
+<link rel="preload" as="style" href="/fonts/fuentes.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/fonts/fuentes.css"></noscript>
 <!-- VELOCIDAD (2 oct 2026): la portada ya viene visible en el HTML (antes todas las
      pantallas estaban ocultas hasta que la app entera -- 1,5 MB de JS -- arrancaba
      en window.onload, y en un móvil con 4G lento no se veía NADA durante ~7 s).
@@ -2045,6 +2045,8 @@
   .pie-col span { color: var(--metal); font-size: 13px; }
   .pie-col a { transition: color .2s; }
   .pie-col a:hover, .pie-col a:focus-visible { color: var(--blanco); }
+  /* 16 oct 2026: en el móvil los enlaces del pie medían 29 px de alto (fácil fallar con el dedo). */
+  @media (pointer: coarse) { .pie-col { gap: 0; } .pie-col a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; } }
   .pie-base { max-width: 1320px; margin: 48px auto 0; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; font-size: 12.5px; color: var(--metal); }
   @media (max-width: 900px) {
     .pie { padding: 48px 20px 24px; }
@@ -7031,6 +7033,8 @@
   .pie-col a, .pie-col span { font-size: 14px; color: var(--metal-claro); text-decoration: none; padding: 4px 0; line-height: 1.5; }
   .pie-col span { color: var(--metal); font-size: 13px; }
   .pie-col a:hover, .pie-col a:focus-visible { color: var(--blanco); }
+  /* 16 oct 2026: en el móvil los enlaces del pie medían 29 px de alto (fácil fallar con el dedo). */
+  @media (pointer: coarse) { .pie-col { gap: 0; } .pie-col a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; } }
   .pie-base { max-width: 1320px; margin: 48px auto 0; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; font-size: 12.5px; color: var(--metal); }
   @media (max-width: 900px) {
     .pie { padding: 48px 20px 24px; }
@@ -17540,6 +17544,100 @@
     if (_u) saveUserData(_u.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
   }
 
+  // ESCALADO DE INGREDIENTES (fuera del motor desde el 16 oct 2026). Son funciones puras:
+  // las usa el motor y también la pantalla de Nutrición para subir las demás comidas
+  // del día cuando el cliente elige el desayuno de solo proteína (ver _tomasDia).
+  // Unidades que se cuentan por piezas. Se escalan igual que los gramos: si
+  // no, al escalar un plato la etiqueta se movia y "2 huevos" seguia siendo
+  // 2, dejando la ficha de "Ver macros" sin cuadrar con el propio plato.
+  // Medido: 87% de coherencia en el recetario sin escalar, 29% despues de
+  // que el motor ajustara las raciones.
+  const _UNIDAD_ENTERA = /^(huevos?|claras?|latas?|tostas?|tostadas?|rebanadas?|reba[ñn]adas?|panecillos?|barras?|tortitas?|tortas de arroz|scoops?|lonchas?|filetes?|panes wassa|kiwis?|mandarinas?|higos?|ciruelas?|d[áa]tiles?|puñados?|pu[ñn]ados?|cdas?|cdtas?|cucharadas?|cucharaditas?)\b/i;
+  const _UNIDAD_MEDIOS = /^(pl[áa]tanos?|aguacates?|manzanas?|peras?|naranjas?|tomates?|melocotones?|melocot[óo]n|mangos?|boniatos?|patatas?|berenjenas?|calabacines?|calabac[íi]n|pimientos?|zanahorias?|granadas?|piezas?|unidades?)\b/i;
+  // Concordancia: "2 huevo" no lo escribe nadie. Se pluraliza (o se vuelve
+  // al singular) la palabra del alimento cuando la cantidad cambia de lado.
+  // Los casos con tilde se listan aparte porque la pierden al pluralizar
+  // (melocotón -> melocotones) y la regla general no lo cubre.
+  const _PLURAL_IRREGULAR = { 'melocotón': 'melocotones', 'calabacín': 'calabacines', 'dátil': 'dátiles', 'unidad': 'unidades', 'filete': 'filetes' };
+  const _aPlural = (p) => {
+    if (_PLURAL_IRREGULAR[p.toLowerCase()]) return _PLURAL_IRREGULAR[p.toLowerCase()];
+    if (/[aeiouáéíóú]$/i.test(p)) return p + 's';
+    if (/z$/i.test(p)) return p.slice(0, -1) + 'ces';
+    return p + 'es';
+  };
+  const _aSingular = (p) => {
+    for (const [sing, plur] of Object.entries(_PLURAL_IRREGULAR)) if (plur === p.toLowerCase()) return sing;
+    if (/ces$/i.test(p)) return p.slice(0, -3) + 'z';
+    if (/es$/i.test(p) && !/[aeiou]es$/i.test(p)) return p.slice(0, -2);
+    if (/s$/i.test(p)) return p.slice(0, -1);
+    return p;
+  };
+  // Ajusta el numero de las 1-2 primeras palabras ("manzana o pera" lleva dos).
+  const _concordar = (resto, cantidad) => {
+    const plural = cantidad > 1;
+    // El adjetivo que va pegado también concuerda (29 sept 2026): al bajar
+    // "2 huevos duros" a una pieza salía "1 huevo duros". Solo los adjetivos
+    // de cocina que de verdad aparecen detrás de una pieza contable.
+    const _ADJ = /^(dur|cocid|pequeñ|median|madur|sec|fresc|enter|congelad|asad|rallad|triguer)[oa]s?$|^grandes?$/i;
+    const conAdj = (palabra, sig) => {
+      const n = plural ? _aPlural(palabra) : _aSingular(palabra);
+      if (!sig || !_ADJ.test(sig)) return n + (sig ? ' ' + sig : '');
+      return n + ' ' + (plural ? _aPlural(sig) : _aSingular(sig));
+    };
+    // "plátano o manzana": las dos piezas concuerdan, como siempre.
+    if (/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+ o [A-Za-zÁÉÍÓÚáéíóúÑñ]+/.test(resto)) {
+      return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+) o ([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/, (todo, p1, p2) =>
+        (plural ? _aPlural(p1) : _aSingular(p1)) + ' o ' + (plural ? _aPlural(p2) : _aSingular(p2)));
+    }
+    return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)(?: ([A-Za-zÁÉÍÓÚáéíóúÑñ]+))?/, (todo, p1, adj) => conAdj(p1, adj));
+  };
+
+  // "3/4" se lee mejor que "0,75" en una lista de la compra.
+  const _FRACCIONES = [[0.25, '1/4'], [1 / 3, '1/3'], [0.5, '1/2'], [2 / 3, '2/3'], [0.75, '3/4']];
+  const _formatearCantidad = (n) => {
+    // Sin decimales: la lista se separa por comas y "1,5 plátano" se
+    // partiria en "1" y "5 plátano". Entero a partir de 1, fraccion debajo.
+    if (n >= 1) return String(Math.round(n));
+    let mejor = _FRACCIONES[0];
+    for (const f of _FRACCIONES) if (Math.abs(f[0] - n) < Math.abs(mejor[0] - n)) mejor = f;
+    return mejor[1];
+  };
+  const scaleIngredientes = (texto, factor) => {
+    if (Math.abs(factor - 1) < 0.05) return texto;
+    return texto.split(',').map(trozo => {
+      // 1) gramos y mililitros
+      let t = trozo.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
+        const raw = parseFloat(num.replace(',', '.')) * factor;
+        const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
+        return `${Math.max(5, rounded)}${unit}`;
+      });
+      // 2) unidades contables al principio del ingrediente ("2 huevos",
+      //    "1/2 plátano"). Solo al principio: dentro del texto un numero
+      //    suele ser parte de una nota, no una cantidad.
+      t = t.replace(/^(\s*)(\d+(?:[.,]\d+)?|\d+\/\d+)\s+(?![0-9])(.+)$/, (todo, sp, cant, resto) => {
+        if (/^(g|ml|gr)\b/i.test(resto)) return todo;      // ya lo ha hecho el paso 1
+        const entera = _UNIDAD_ENTERA.test(resto);
+        const medios = _UNIDAD_MEDIOS.test(resto);
+        if (!entera && !medios) return todo;
+        let n = cant.includes('/')
+          ? (parseFloat(cant.split('/')[0]) / parseFloat(cant.split('/')[1]))
+          : parseFloat(cant.replace(',', '.'));
+        if (!(n > 0)) return todo;
+        let nuevo = n * factor;
+        if (entera) nuevo = Math.max(1, Math.round(nuevo));
+        // Por debajo de una pieza se usan fracciones (1/4, 1/2, 3/4); a
+        // partir de una, numeros enteros.
+        else nuevo = nuevo < 1 ? Math.max(0.25, Math.round(nuevo * 4) / 4) : Math.round(nuevo);
+        if (nuevo === n) return todo;
+        // Solo se toca el numero de la palabra si de verdad cruza el 1:
+        // de 2 a 3 no hay nada que cambiar.
+        const restoOk = ((n > 1) === (nuevo > 1)) ? resto : _concordar(resto, nuevo);
+        return sp + _formatearCantidad(nuevo) + ' ' + restoOk;
+      });
+      return t;
+    }).join(',');
+  };
+
   function buildPlanFromData(u) {
     // Hyrox y CrossFit se venden SOLO como nutrición: el entrenamiento lo hace
     // el cliente en su box. El formulario ya oculta esos dos deportes cuando el
@@ -20654,96 +20752,6 @@
       return def ? `${def} ${tx}` : t;
     }).join(', ');
 
-    // Unidades que se cuentan por piezas. Se escalan igual que los gramos: si
-    // no, al escalar un plato la etiqueta se movia y "2 huevos" seguia siendo
-    // 2, dejando la ficha de "Ver macros" sin cuadrar con el propio plato.
-    // Medido: 87% de coherencia en el recetario sin escalar, 29% despues de
-    // que el motor ajustara las raciones.
-    const _UNIDAD_ENTERA = /^(huevos?|claras?|latas?|tostas?|tostadas?|rebanadas?|reba[ñn]adas?|panecillos?|barras?|tortitas?|tortas de arroz|scoops?|lonchas?|filetes?|panes wassa|kiwis?|mandarinas?|higos?|ciruelas?|d[áa]tiles?|puñados?|pu[ñn]ados?|cdas?|cdtas?|cucharadas?|cucharaditas?)\b/i;
-    const _UNIDAD_MEDIOS = /^(pl[áa]tanos?|aguacates?|manzanas?|peras?|naranjas?|tomates?|melocotones?|melocot[óo]n|mangos?|boniatos?|patatas?|berenjenas?|calabacines?|calabac[íi]n|pimientos?|zanahorias?|granadas?|piezas?|unidades?)\b/i;
-    // Concordancia: "2 huevo" no lo escribe nadie. Se pluraliza (o se vuelve
-    // al singular) la palabra del alimento cuando la cantidad cambia de lado.
-    // Los casos con tilde se listan aparte porque la pierden al pluralizar
-    // (melocotón -> melocotones) y la regla general no lo cubre.
-    const _PLURAL_IRREGULAR = { 'melocotón': 'melocotones', 'calabacín': 'calabacines', 'dátil': 'dátiles', 'unidad': 'unidades', 'filete': 'filetes' };
-    const _aPlural = (p) => {
-      if (_PLURAL_IRREGULAR[p.toLowerCase()]) return _PLURAL_IRREGULAR[p.toLowerCase()];
-      if (/[aeiouáéíóú]$/i.test(p)) return p + 's';
-      if (/z$/i.test(p)) return p.slice(0, -1) + 'ces';
-      return p + 'es';
-    };
-    const _aSingular = (p) => {
-      for (const [sing, plur] of Object.entries(_PLURAL_IRREGULAR)) if (plur === p.toLowerCase()) return sing;
-      if (/ces$/i.test(p)) return p.slice(0, -3) + 'z';
-      if (/es$/i.test(p) && !/[aeiou]es$/i.test(p)) return p.slice(0, -2);
-      if (/s$/i.test(p)) return p.slice(0, -1);
-      return p;
-    };
-    // Ajusta el numero de las 1-2 primeras palabras ("manzana o pera" lleva dos).
-    const _concordar = (resto, cantidad) => {
-      const plural = cantidad > 1;
-      // El adjetivo que va pegado también concuerda (29 sept 2026): al bajar
-      // "2 huevos duros" a una pieza salía "1 huevo duros". Solo los adjetivos
-      // de cocina que de verdad aparecen detrás de una pieza contable.
-      const _ADJ = /^(dur|cocid|pequeñ|median|madur|sec|fresc|enter|congelad|asad|rallad|triguer)[oa]s?$|^grandes?$/i;
-      const conAdj = (palabra, sig) => {
-        const n = plural ? _aPlural(palabra) : _aSingular(palabra);
-        if (!sig || !_ADJ.test(sig)) return n + (sig ? ' ' + sig : '');
-        return n + ' ' + (plural ? _aPlural(sig) : _aSingular(sig));
-      };
-      // "plátano o manzana": las dos piezas concuerdan, como siempre.
-      if (/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+ o [A-Za-zÁÉÍÓÚáéíóúÑñ]+/.test(resto)) {
-        return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+) o ([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/, (todo, p1, p2) =>
-          (plural ? _aPlural(p1) : _aSingular(p1)) + ' o ' + (plural ? _aPlural(p2) : _aSingular(p2)));
-      }
-      return resto.replace(/^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)(?: ([A-Za-zÁÉÍÓÚáéíóúÑñ]+))?/, (todo, p1, adj) => conAdj(p1, adj));
-    };
-
-    // "3/4" se lee mejor que "0,75" en una lista de la compra.
-    const _FRACCIONES = [[0.25, '1/4'], [1 / 3, '1/3'], [0.5, '1/2'], [2 / 3, '2/3'], [0.75, '3/4']];
-    const _formatearCantidad = (n) => {
-      // Sin decimales: la lista se separa por comas y "1,5 plátano" se
-      // partiria en "1" y "5 plátano". Entero a partir de 1, fraccion debajo.
-      if (n >= 1) return String(Math.round(n));
-      let mejor = _FRACCIONES[0];
-      for (const f of _FRACCIONES) if (Math.abs(f[0] - n) < Math.abs(mejor[0] - n)) mejor = f;
-      return mejor[1];
-    };
-    const scaleIngredientes = (texto, factor) => {
-      if (Math.abs(factor - 1) < 0.05) return texto;
-      return texto.split(',').map(trozo => {
-        // 1) gramos y mililitros
-        let t = trozo.replace(/(\d+(?:[.,]\d+)?)\s*(g|ml)\b/gi, (_, num, unit) => {
-          const raw = parseFloat(num.replace(',', '.')) * factor;
-          const rounded = raw < 50 ? Math.round(raw / 5) * 5 : Math.round(raw / 10) * 10;
-          return `${Math.max(5, rounded)}${unit}`;
-        });
-        // 2) unidades contables al principio del ingrediente ("2 huevos",
-        //    "1/2 plátano"). Solo al principio: dentro del texto un numero
-        //    suele ser parte de una nota, no una cantidad.
-        t = t.replace(/^(\s*)(\d+(?:[.,]\d+)?|\d+\/\d+)\s+(?![0-9])(.+)$/, (todo, sp, cant, resto) => {
-          if (/^(g|ml|gr)\b/i.test(resto)) return todo;      // ya lo ha hecho el paso 1
-          const entera = _UNIDAD_ENTERA.test(resto);
-          const medios = _UNIDAD_MEDIOS.test(resto);
-          if (!entera && !medios) return todo;
-          let n = cant.includes('/')
-            ? (parseFloat(cant.split('/')[0]) / parseFloat(cant.split('/')[1]))
-            : parseFloat(cant.replace(',', '.'));
-          if (!(n > 0)) return todo;
-          let nuevo = n * factor;
-          if (entera) nuevo = Math.max(1, Math.round(nuevo));
-          // Por debajo de una pieza se usan fracciones (1/4, 1/2, 3/4); a
-          // partir de una, numeros enteros.
-          else nuevo = nuevo < 1 ? Math.max(0.25, Math.round(nuevo * 4) / 4) : Math.round(nuevo);
-          if (nuevo === n) return todo;
-          // Solo se toca el numero de la palabra si de verdad cruza el 1:
-          // de 2 a 3 no hay nada que cambiar.
-          const restoOk = ((n > 1) === (nuevo > 1)) ? resto : _concordar(resto, nuevo);
-          return sp + _formatearCantidad(nuevo) + ' ' + restoOk;
-        });
-        return t;
-      }).join(',');
-    };
 
     // Clasificación aproximada por palabras clave de qué ingrediente de la
     // receta es "la fuente de proteína" o "la fuente de carbohidrato", para
@@ -23570,7 +23578,13 @@
     const el = document.getElementById('cicloCarbsAviso');
     if (!el) return;
     const ciclo = generatedPlan?.cicloCarbs;
-    if (!ciclo || !ciclo.dias || dia < 0 || dia > 6) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    // Desayuno de solo proteína elegido (ver _tomasDia): el resto del día sube.
+    const _sube = ((generatedPlan?._nutricionActiva || []).flatMap(m => m.opciones || []).find(o => o._subeDia > 0) || {})._subeDia;
+    const _notaSube = _sube ? '<div class="ciclo-aviso"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><div class="ciclo-aviso-txt"><strong>Hoy tu desayuno es solo proteína.</strong> Para que llegues a tus calorías, el resto de comidas del día sube un ' + _sube + '%: las cantidades ya están ajustadas.</div></div>' : '';
+    if (!ciclo || !ciclo.dias || dia < 0 || dia > 6) {
+      if (_notaSube) { el.innerHTML = _notaSube; el.style.display = ''; } else { el.style.display = 'none'; el.innerHTML = ''; }
+      return;
+    }
     const entreno = !!ciclo.dias[dia];
     const carbsDia = generatedPlan.carbsObjPorDia?.[dia];
     const nombreDia = DIAS_SEMANA_LARGO[dia];
@@ -23580,7 +23594,7 @@
     const texto = entreno
       ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${ciclo.pctEntreno}% más de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''} para reponer el glucógeno que vas a gastar.`
       : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''}. La proteína no baja: sigue igual que cualquier otro día.`;
-    el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>`;
+    el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>` + _notaSube;
     el.style.display = '';
   }
 
@@ -24093,8 +24107,8 @@
   function _comidasDeHoy() {
     if (!generatedPlan || !generatedPlan.nutricion) return [];
     const dia = (new Date().getDay() + 6) % 7;
-    const tomas = (generatedPlan.nutricionPorDia && generatedPlan.nutricionPorDia[dia]) || generatedPlan.nutricion;
     const elegidas = (Array.isArray(userData.comidasSemana) && userData.comidasSemana[dia]) || [];
+    const tomas = _tomasDia(dia, generatedPlan, elegidas);
     return tomas.map((t, i) => {
       const base = (t.opciones || []).filter(o => !o.custom);
       const extras = (userData.comidasExtra && userData.comidasExtra[dia] && userData.comidasExtra[dia][i]) || [];
@@ -24961,6 +24975,49 @@
   // no se reconstruye en cada llamada), así nunca se duplican ni se pierden.
   // La usan tanto la pantalla de Nutrición (un día) como la lista de la
   // compra (los 7 días), para que una comida añadida cuente en ambas.
+  // DESAYUNO DE SOLO PROTEÍNA (16 oct 2026, Rafa: «que las otras comidas suban ese día»).
+  // En «perder grasa» hay desayunos de ración fija (los de su dieta AJ7: solo proteína,
+  // racionFija) que se quedan muy por debajo de los otros desayunos del día. Si el
+  // cliente elige uno, el día entero se quedaba ~13 % bajo su objetivo. Ahora lo que
+  // falta (frente a la mediana de los otros desayunos de ese día) se reparte subiendo
+  // en proporción las demás comidas del día. Se calcula al vuelo con lo que ya hay en
+  // el plan, así que vale también para los planes ya guardados. No cambia el plan
+  // guardado: devuelve una copia para pintar, la lista de la compra, el recetario…
+  function _kcalOp(o) { return parseFloat(o && o.kcal) || 0; }
+  function _medianaKcalNormal(meal) {
+    const v = (meal.opciones || []).filter(o => !o.racionFija && !o.custom).map(_kcalOp).filter(k => k > 0).sort((a, b) => a - b);
+    return v.length ? v[Math.floor((v.length - 1) / 2)] : 0;
+  }
+  function _opcionEscalada(o, f) {
+    const g = (txt, suf) => { const n = parseFloat(txt); return n > 0 ? Math.round(n * f) + suf : txt; };
+    return { ...o, kcal: g(o.kcal, ' kcal'), prot: g(o.prot, 'g prot'), carbs: g(o.carbs, 'g carbs'), grasa: g(o.grasa, 'g grasa'),
+      ingredientes: scaleIngredientes(o.ingredientes || '', f), _subeDia: Math.round((f - 1) * 100) };
+  }
+  function _tomasDia(dia, plan, sel) {
+    plan = plan || generatedPlan;
+    const base = (plan && plan.nutricionPorDia && plan.nutricionPorDia[dia]) || (plan && plan.nutricion) || [];
+    const elegidas = sel || (plan === generatedPlan ? (dia === diaNutriActual ? comidasSeleccionadas : comidasSemana[dia]) : null) || [];
+    let faltan = 0;
+    const fijas = new Set();
+    base.forEach((m, i) => {
+      const o = m.opciones && m.opciones[elegidas[i] || 0];
+      if (!o || !o.racionFija) return;
+      fijas.add(i);
+      faltan += Math.max(0, _medianaKcalNormal(m) - _kcalOp(o));
+    });
+    if (faltan < 40) return base;
+    const kcalOtras = base.reduce((a, m, i) => a + (fijas.has(i) ? 0 : _medianaKcalNormal(m)), 0);
+    if (!(kcalOtras > 0)) return base;
+    const f = Math.min(1.35, 1 + faltan / kcalOtras);
+    return base.map((m, i) => fijas.has(i) ? m
+      : { ...m, opciones: (m.opciones || []).map(o => (o.racionFija || o.custom) ? o : _opcionEscalada(o, f)) });
+  }
+  // ¿El desayuno elegido de este día es de ración fija? Cambiarlo obliga a repintar el día.
+  function _eleccionFija(mealIdx, optIdx) {
+    const base = generatedPlan?.nutricionPorDia?.[diaNutriActual] || generatedPlan?.nutricion || [];
+    return !!base[mealIdx]?.opciones?.[optIdx]?.racionFija;
+  }
+
   function _inyectarComidasExtraDia(dia, meals) {
     meals.forEach((meal, mealIdx) => {
       const extras = userData.comidasExtra?.[dia]?.[mealIdx] || [];
@@ -24974,7 +25031,7 @@
     if (!nutritionGrid) return;
     initOcultarKcal();
     nutritionGrid.innerHTML = '';
-    const meals = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+    const meals = _tomasDia(dia);
     generatedPlan._nutricionActiva = meals;
     _inyectarComidasExtraDia(dia, meals);
     _actualizarAvisoCiclo(dia);
@@ -28544,7 +28601,7 @@
     comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
     const tomas = [], porMomento = {};
     for (let d = 0; d < 7; d++) {
-      const meals = generatedPlan.nutricionPorDia?.[d] || generatedPlan.nutricion;
+      const meals = _tomasDia(d);
       _inyectarComidasExtraDia(d, meals);
       meals.forEach((meal, mealIdx) => {
         let t = porMomento[meal.momento];
@@ -29010,7 +29067,11 @@
     const label = document.getElementById('mealSelected' + mealIdx);
     if (label && nombre) label.textContent = `Elegida: ${nombre}`;
 
+    // Pasar de un desayuno normal a uno de solo proteína (o al revés) cambia las
+    // cantidades del resto del día (_tomasDia): hay que repintarlo.
+    const _cambiaFija = _eleccionFija(mealIdx, comidasSeleccionadas[mealIdx] || 0) !== _eleccionFija(mealIdx, optIdx);
     comidasSeleccionadas[mealIdx] = optIdx;
+    if (_cambiaFija) { try { renderNutritionGrid(diaNutriActual); } catch (e) {} }
     if (!comidasSemana.length) inicializarComidasSemana();
     comidasSemana[diaNutriActual] = [...comidasSeleccionadas];
     userData.comidasSeleccionadas = comidasSeleccionadas;
@@ -29281,7 +29342,7 @@
     const diasNombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
     for (let dia = 0; dia < 7; dia++) {
-      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      const _nutriDia = _tomasDia(dia);
       _inyectarComidasExtraDia(dia, _nutriDia);
       _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
@@ -29446,7 +29507,7 @@
     if (!comidasSemana.length) inicializarComidasSemana();
     const ingredientes = {};
     for (let dia = 0; dia < 7; dia++) {
-      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      const _nutriDia = _tomasDia(dia);
       _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
         const opt = meal.opciones[optIdx];
@@ -29553,7 +29614,7 @@
       // del que había elegido. Con el ciclado de carbohidratos además se
       // imprimían las cantidades del lunes en los siete días. Se usa el día
       // real, igual que ya hace generarListaCompra().
-      const tomasDia = generatedPlan.nutricionPorDia?.[diaIdx] || generatedPlan.nutricion;
+      const tomasDia = _tomasDia(diaIdx);
       // Las comidas que el cliente se ha añadido por su cuenta también son
       // parte de su semana: sin esto, el PDF se las dejaba fuera.
       try { _inyectarComidasExtraDia(diaIdx, tomasDia); } catch (e) {}
@@ -29629,7 +29690,7 @@
     };
     const ingredientes = {};
     for (let dia = 0; dia < 7; dia++) {
-      const _nutriDia = generatedPlan.nutricionPorDia?.[dia] || generatedPlan.nutricion;
+      const _nutriDia = _tomasDia(dia);
       _inyectarComidasExtraDia(dia, _nutriDia);
       _nutriDia.forEach((meal, mealIdx) => {
         const optIdx = comidasSemana[dia]?.[mealIdx] || 0;
@@ -31730,7 +31791,7 @@ Se coló: ${lista}`;
     _fuentesAdminCargadas = true;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap';
+    link.href = '/fonts/fuentes-admin.css';
     document.head.appendChild(link);
   }
 
@@ -33199,7 +33260,7 @@ Se coló: ${lista}`;
     html += `<div class="jc-label" style="margin-bottom:8px">Alimentación que está siguiendo${frecuencia}</div>
       <div style="display:flex;flex-direction:column;gap:8px">`;
     DIAS.forEach((nombreDia, diaIdx) => {
-      const tomasDia = (plan.nutricionPorDia && plan.nutricionPorDia[diaIdx]) || plan.nutricion || [];
+      const tomasDia = _tomasDia(diaIdx, plan, comidasCliente[diaIdx] || []);
       if (!tomasDia.length) return;
       const filas = tomasDia.map((meal, mealIdx) => {
         const optIdx = (comidasCliente[diaIdx] && comidasCliente[diaIdx][mealIdx]) || 0;

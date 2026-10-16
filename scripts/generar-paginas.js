@@ -143,9 +143,7 @@ function pagina(p) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/fonts/fuentes.css">
 <link rel="stylesheet" href="/paginas.css">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
