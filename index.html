@@ -18605,7 +18605,9 @@
       const _expres = _tramoDur === 'expres';
       const _interval = esPrincipiante
         ? (_expres ? '4 min interválico al finalizar' : _corta ? '8 min interválico al finalizar' : '12 min interválico al finalizar')
-        : (_expres ? '5 min interválico al finalizar' : _corta ? '10 min interválico al finalizar' : '15 min interválico al finalizar');
+        : (_expres ? '5 min interválico al finalizar' : _corta ? '10 min interválico al finalizar' : '14 min interválico al finalizar');
+      // 16 oct 2026: ponía «15 min» con 7 rondas de 1+1 min (= 14). Cada duración
+      // tiene que salir exacta de sus rondas.
       const _rondas = esPrincipiante
         ? (_expres ? '30 s fuerte / 30 s suave × 4 rondas' : _corta ? '30 s fuerte / 90 s suave × 4 rondas' : '30 s fuerte / 90 s suave × 6 rondas')
         : (_expres ? '30 s fuerte / 30 s suave × 5 rondas' : _corta ? '1 min fuerte / 1 min suave × 5 rondas' : '1 min fuerte / 1 min suave × 7 rondas');
@@ -20646,7 +20648,10 @@
       // Ya tiene cantidad (gramos, unidades o fracciones): no se toca
       if (/^\d|^(un|una|medio|media)\b/i.test(t)) return t;
       const def = CANT_DEFECTO[t.toLowerCase()];
-      return def ? `${def} ${t}` : t;
+      // Con la cantidad delante, la mayúscula del alimento sobra («90g Hojas de
+      // lechuga» → «90g hojas de lechuga»). Las siglas (AOVE) se quedan como están.
+      const tx = /^[A-ZÁÉÍÓÚÑ][a-záéíóúñü]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t;
+      return def ? `${def} ${tx}` : t;
     }).join(', ');
 
     // Unidades que se cuentan por piezas. Se escalan igual que los gramos: si
@@ -21883,8 +21888,10 @@
           op("Cottage con frutos rojos y nueces", "200g queso cottage, 80g frutos rojos, 15g nueces", "286 kcal", "24g prot", "18g carbs", "15g grasa", "Sin cocción · 2 min")
         );
         if (m.momento === 'Media mañana') m.opciones.push(
-          op("Huevos duros con jamón serrano (snack proteico pre-entreno)", "2 huevos duros, 20g jamón serrano, pimienta", "214 kcal", "20g prot", "2g carbs", "14g grasa", "Fácil · 8 min"),
-          op("Rollitos de pavo y queso fresco (snack proteico pre-entreno)", "80g pavo en lonchas, 60g queso fresco, orégano", "238 kcal", "32g prot", "5g carbs", "10g grasa", "Sin cocción · 3 min")
+          // 16 oct 2026: se llamaban «(snack proteico pre-entreno)», pero entran en la media
+          // mañana de TODOS los días, también los de descanso y en quien entrena por la tarde.
+          op("Huevos duros con jamón serrano (snack proteico)", "2 huevos duros, 20g jamón serrano, pimienta", "214 kcal", "20g prot", "2g carbs", "14g grasa", "Fácil · 8 min"),
+          op("Rollitos de pavo y queso fresco (snack proteico)", "80g pavo en lonchas, 60g queso fresco, orégano", "238 kcal", "32g prot", "5g carbs", "10g grasa", "Sin cocción · 3 min")
         );
       });
     }
@@ -34019,8 +34026,12 @@ Se coló: ${lista}`;
         + '<p class="pe-nota" style="margin-top:10px">Dentro, cada ejercicio viene explicado paso a paso con su vídeo de técnica, y la carga sube cuando tu propio registro dice que puedes.</p>';
     }
     const conOpcion = tomas.filter(t => t && t.opciones && t.opciones[0]);
+    // 16 oct 2026: el título enseñaba el objetivo del día (1730) y las cinco comidas
+    // de debajo sumaban otra cosa (1673). Quien lo sume tiene que ver lo mismo.
+    const sumaKcal = conOpcion.reduce((a, t) => a + (parseFloat(t.opciones[0].kcal) || 0), 0);
+    const kcalTitulo = sumaKcal > 0 ? Math.round(sumaKcal) : kcalDia;
     if (conOpcion.length) {
-      h += '<div class="pe-tit">Las comidas de ese día' + (kcalDia ? ' · ' + _esc(kcalDia) + ' kcal' : '') + '</div>'
+      h += '<div class="pe-tit">Las comidas de ese día' + (kcalTitulo ? ' · ' + _esc(kcalTitulo) + ' kcal' : '') + '</div>'
         + conOpcion.map(t => {
           const o = t.opciones[0];
           const macros = [o.kcal, o.prot, o.carbs, o.grasa].filter(Boolean).map(m => '<span>' + _esc(m) + '</span>').join('');
