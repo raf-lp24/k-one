@@ -7,8 +7,8 @@
     "test": "node scripts/comprobar-proyecto.js && node scripts/probar-eliminar-cuenta.js && node scripts/probar-prueba-gratis.js && node scripts/probar-descanso.js && node scripts/probar-cron.js && node scripts/comprobar-motor.js && node scripts/auditoria-completa.js"
   },
   "dependencies": {
-    "@sentry/node": "^10.75.3",
-    "@supabase/supabase-js": "^2.117.2",
+    "@sentry/node": "^10.76.2",
+    "@supabase/supabase-js": "^2.118.0",
     "stripe": "^16.12.0",
     "web-push": "^3.6.7"
   }
