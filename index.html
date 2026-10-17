@@ -8,13 +8,13 @@
      contenía ninguna palabra que alguien vaya a buscar, así que la marca y el
      lema se mantienen pero acompañados de lo que la web hace. -->
 <title>K-ONE — Plan de entrenamiento y nutrición personalizado</title>
-<meta name="description" content="K-ONE genera tu plan de entrenamiento y nutrición personalizado, adaptado cada semana a tu progreso. Gimnasio, running e híbrido. Primer mes gratis.">
+<meta name="description" content="Como tener un entrenador personal y un plan de nutrición a medida: entreno y menú que se ajustan cada semana. Gimnasio, running e híbrido. Primer mes gratis.">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://k-one.fit">
 <meta property="og:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
-<meta property="og:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Se ajusta cada semana según tu progreso. Primer mes gratis.">
+<meta property="og:description" content="Como tener un entrenador personal y un plan de nutrición a medida: entreno y menú que se ajustan cada semana. Gimnasio, running e híbrido. Primer mes gratis.">
 <meta property="og:locale" content="es_ES">
 <meta property="og:image" content="https://k-one.fit/og-image-v2.jpg">
 <meta property="og:image:width" content="1200">
@@ -22,7 +22,7 @@
 <meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-ONE — Tu plan de entrenamiento y nutrición personalizado">
-<meta name="twitter:description" content="Plan adaptado a tu deporte, nivel y objetivo. 5 comidas al día con 5 opciones cada una. Primer mes gratis.">
+<meta name="twitter:description" content="Como tener un entrenador personal y un plan de nutrición a medida: entreno y menú que se ajustan cada semana. Gimnasio, running e híbrido. Primer mes gratis.">
 <meta name="twitter:image" content="https://k-one.fit/og-image-v2.jpg">
 <meta name="theme-color" content="#0a0a0a">
 <!-- Sin esto, "Añadir a pantalla de inicio" en iOS abría Safari con la barra
@@ -1645,6 +1645,10 @@
     border-top: 1px solid var(--humo);
   }
 
+  /* 17 oct 2026: el argumento del precio frente a entrenador + dietista por separado. */
+  .precio-comparativa { max-width: 680px; margin: 40px 0 0; font-size: 17px; line-height: 1.55; color: var(--metal-claro); text-wrap: pretty; }
+  .precio-comparativa b { color: var(--blanco); font-weight: 600; }
+  .precio-comparativa b[data-kp] { color: var(--brasa-txt); }
   .pricing-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -4246,7 +4250,7 @@
     <div class="hv-grid">
       <div class="hero-content">
         <h1 class="hero-title">No hay atajos. <em>Hay pasos.</em></h1>
-        <p class="hero-sub">Tu entrenamiento y tu nutrición, <b>adaptados a ti</b>. El plan se ajusta cada semana según tu progreso.</p>
+        <p class="hero-sub">Como tener un <b>entrenador personal y un plan de nutrición a medida</b>, en tu móvil. Se ajusta cada semana a cómo te va.</p>
         <button class="btn-primary hv-cta" onclick="goTo('bienvenida')">
           Empieza gratis
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
@@ -4516,8 +4520,8 @@
             <circle cx="20" cy="14" r="1.5" fill="currentColor"/>
           </svg>
         </div>
-        <div class="pillar-title">No es una caja negra</div>
-        <p class="pillar-desc">Tu plan no lo escribe una IA conversacional improvisando: lo genera un motor de reglas (progresión de cargas, volumen, macros) con un criterio fijo y trazable, no al azar.</p>
+        <div class="pillar-title">Una IA que no improvisa</div>
+        <p class="pillar-desc">Trabaja como un entrenador con método: progresión de cargas, volumen y macros con criterios fijos y comprobables, sin frases inventadas. Cada semana revisa tu progreso y ajusta cargas y calorías.</p>
       </div>
       <div class="pillar-card">
         <div class="pillar-icon" aria-hidden="true">
@@ -4548,6 +4552,7 @@
       <h2 class="section-title">Sin letra pequeña</h2>
       <p class="section-note">Tu primer mes es gratis y sin tarjeta. Si al terminar quieres seguir, eliges tu plan y añades la tarjeta; si no, no se cobra nada. Sin permanencia.</p>
     </div>
+    <p class="precio-comparativa">Un entrenador personal y un dietista por separado suelen costar <b>más de 100 € al mes</b>. K-ONE te da entreno y menú a medida, ajustados cada semana, por <b data-kp="completo">7,99€</b> al mes.</p>
     <div class="pricing-cards">
       <div class="price-card">
         <div class="price-badge">Oferta del mes</div>
@@ -4811,7 +4816,7 @@
 
 <!-- BANNER DE COOKIES (RGPD) -->
 <div id="cookieBanner" class="cookie-banner" role="region" aria-label="Aviso de cookies">
-  <p class="cookie-banner-texto">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y, si las aceptas, cookies de analítica (Google Analytics) para mejorar el servicio y de medición de anuncios (píxel de Meta) para saber qué anuncios de Instagram funcionan. Las técnicas son necesarias; las demás son opcionales y no usan tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link">Más información</a></p>
+  <p class="cookie-banner-texto">Usamos cookies técnicas para tu cuenta y, si aceptas, de analítica (Google) y de medición de anuncios (Meta). Nunca con tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link">Más información</a></p>
   <div class="cookie-banner-acciones">
     <button onclick="rechazarCookies()" class="cookie-banner-btn cookie-no">Solo necesarias</button>
     <button onclick="aceptarCookies()" class="cookie-banner-btn cookie-si">Aceptar</button>
@@ -6315,6 +6320,10 @@
     border-top: 1px solid var(--humo);
   }
 
+  /* 17 oct 2026: el argumento del precio frente a entrenador + dietista por separado. */
+  .precio-comparativa { max-width: 680px; margin: 40px 0 0; font-size: 17px; line-height: 1.55; color: var(--metal-claro); text-wrap: pretty; }
+  .precio-comparativa b { color: var(--blanco); font-weight: 600; }
+  .precio-comparativa b[data-kp] { color: var(--brasa-txt); }
   .pricing-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
