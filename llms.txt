@@ -1,6 +1,6 @@
 # K-ONE
 
-> K-ONE genera planes de entrenamiento y nutrición personalizados mediante un motor de reglas (periodización real, déficit/superávit calórico, progresión de cargas) — no es una IA generativa que inventa contenido, es un sistema con criterio fijo y trazable. El plan se adapta cada semana según un check-in de progreso del usuario.
+> K-ONE funciona como un entrenador personal y un plan de nutrición a medida en el móvil: genera planes de entrenamiento y nutrición personalizados mediante un motor de reglas (periodización real, déficit/superávit calórico, progresión de cargas) — no es una IA generativa que inventa contenido, es un sistema con criterio fijo y trazable. El plan se adapta cada semana según un check-in de progreso del usuario.
 
 ## Qué ofrece
 

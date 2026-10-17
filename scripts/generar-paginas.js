@@ -199,6 +199,9 @@ ${p.faq.map(([q, a]) => `      <details><summary>${esc(q)}</summary><p>${esc(a)}
 
   <section class="cierre">
     <h2>Empieza hoy: primer mes gratis, sin tarjeta</h2>
+    <p class="idea">${p.archivo === 'solo-nutricion.html'
+      ? 'Como tener un plan de nutrición a medida que se ajusta cada semana, sin cambiar cómo entrenas.'
+      : 'Como tener un entrenador personal y un plan de nutrición a medida, en tu móvil, que se ajusta cada semana a cómo te va.'}</p>
     <p>${esc(PRECIOS)}</p>
     <a class="btn grande" href="/?go=registro">Crear mi plan</a>
   </section>
@@ -270,10 +273,13 @@ h3 { font: 600 16px/1.3 Inter, sans-serif; margin: 0 0 8px; }
 .otra span { color: var(--metal); font-size: 14px; }
 .cierre { text-align: center; max-width: 720px; margin: 0 auto; padding: clamp(56px, 10vw, 110px) clamp(16px, 4vw, 48px); }
 .cierre p { color: #c9c4bd; margin: 0 0 26px; }
+.cierre p.idea { color: var(--blanco); font-size: 1.12rem; margin-bottom: 14px; text-wrap: balance; }
 .pie { border-top: 1px solid var(--grafito); padding: 32px clamp(16px, 4vw, 48px) 40px; display: grid; gap: 14px; justify-items: start; color: var(--metal); font-size: 13px; }
 .pie nav { display: flex; flex-wrap: wrap; gap: 6px 22px; }
 .pie nav a { text-decoration: none; padding: 5px 0; }
 .pie nav a:hover { color: var(--blanco); }
+/* 16 oct 2026: zona táctil de 44 px en el móvil. */
+@media (pointer: coarse) { .pie nav { gap: 0 22px; } .pie nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; } }
 .pie p { margin: 0; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 `;
