@@ -717,27 +717,29 @@ ${bloqueOpciones}
           const soloNutricion = String(ud.tipoPlan || '').includes('Solo');
           const entrenos = Array.isArray(ud.historialEntrenos) ? ud.historialEntrenos.length : 0;
 
-          if (!soloNutricion && entrenos === 0 && llevaDias >= 3 && quedan > 7
+          // 17 oct 2026: a los 2 días (antes 3) y escrito por Rafa en primera persona,
+          // que conteste él: un correo de persona se lee y se responde; uno de marca, no.
+          if (!soloNutricion && entrenos === 0 && llevaDias >= 2 && quedan > 7
               && !yaEnviado.has(`prueba_sin_entrenar:${p.email}`)) {
             const plan = [ud.deporte, ud.objetivo].filter(Boolean).map(esc).join(' · ');
             const html = emailWrapper(`
             <div style="padding:28px 28px 0">
-              <h1 style="color:#F0EDE8;font-size:20px;font-weight:600;margin:0 0 18px">Tu primer entreno te está esperando</h1>
-              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola <span style="color:#E8490F;font-weight:600">${esc(primerNombre)}</span>,</p>
-              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Llevas unos días con tu mes gratis y todavía no has hecho tu primer entreno. Es lo normal: lo difícil no es entrenar, es empezar.${plan ? ` Tu plan ya está listo: <span style="color:#F0EDE8">${plan}</span>.` : ''}</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Hola${primerNombre && primerNombre !== 'Hola' ? ` <span style="color:#F0EDE8;font-weight:600">${esc(primerNombre)}</span>` : ''},</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Soy Rafa, el que está detrás de K-ONE. He visto que ya tienes tu plan, pero todavía no has hecho tu primer entreno. Es normal: lo difícil no es entrenar, es empezar.${plan ? ` Tu plan ya está listo: <span style="color:#F0EDE8">${plan}</span>.` : ''}</p>
               <div style="background:#0A0A0A;border:1px solid #232323;border-radius:10px;padding:16px 20px;margin:0 0 18px;border-left:3px solid #E8490F">
                 <div style="font-size:11px;color:#E8490F;letter-spacing:1px;font-weight:600;margin-bottom:10px">HOY, EN 3 PASOS</div>
                 <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">1.</span> Entra en K-ONE: se abre en «Hoy», con el entreno que te toca.</p>
                 <p style="margin:0 0 6px;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">2.</span> Pulsa <span style="color:#F0EDE8">«Empezar entrenamiento»</span>: te guía serie a serie, con el peso y el descanso.</p>
                 <p style="margin:0;font-size:13px;color:#B5B2AD;line-height:1.6"><span style="color:#E8490F">3.</span> Al terminar, márcalo como hecho y tu plan empieza a ajustarse a ti.</p>
               </div>
-              <p style="margin:0 0 20px;font-size:13px;color:#8A8A8A;text-align:center">¿Algo no te encaja del plan? Responde a este correo y lo vemos.</p>
+              <p style="color:#B5B2AD;font-size:14px;line-height:1.7;margin:0 0 14px">Y si algo te frena (un ejercicio que no sabes hacer, el horario o la comida), <span style="color:#F0EDE8">respóndeme a este correo</span>. Lo leo yo y lo ajustamos.</p>
+              <p style="color:#F0EDE8;font-size:14px;line-height:1.7;margin:0 0 20px">Rafa</p>
             </div>
             <div style="padding:0 28px 28px;text-align:center">
               <a href="${APP_URL}" style="display:inline-block;background:#E8490F;color:#fff;text-decoration:none;padding:12px 32px;font-size:14px;font-weight:600;letter-spacing:0.5px;border-radius:8px">EMPEZAR MI PRIMER ENTRENO</a>
             </div>`);
-            const asunto = `${primerNombre}, tu primer entreno te está esperando`;
-            await enviarEmail(apiKey, { from: 'K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });
+            const asunto = primerNombre && primerNombre !== 'Hola' ? `${primerNombre}, ¿te ayudo con el primer entreno?` : '¿Te ayudo con el primer entreno?';
+            await enviarEmail(apiKey, { from: 'Rafa de K-ONE <equipo@k-one.fit>', reply_to: ADMIN_EMAIL, to: p.email, subject: asunto, html });
             await supa.from('email_log').insert({ tipo: 'prueba_sin_entrenar', destinatario: p.email, asunto, html, datos: JSON.stringify({ nombre, resumen: `Mes gratis: ${Math.floor(llevaDias)} días sin ningún entreno` }) });
             yaEnviado.add(`prueba_sin_entrenar:${p.email}`);
             enviadosPrueba++;

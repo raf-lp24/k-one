@@ -293,12 +293,46 @@
     gtag('js', new Date());
     gtag('config', GA_MEASUREMENT_ID);
   }
-  try { if (localStorage.getItem('kone_cookies_ok') === '1') cargarGA(); } catch(e) {}
+  // PÍXEL DE META (17 oct 2026). Los anuncios de Instagram optimizaban CLICS porque Meta no
+  // sabía quién acababa registrándose. Con el píxel, Meta ve los pasos del embudo (los mismos
+  // de kEvento) y puede buscar gente que se registra. Igual que GA: solo con las cookies
+  // aceptadas. Mientras META_PIXEL_ID esté vacío no se carga nada.
+  var META_PIXEL_ID = '';
+  function cargarMeta() {
+    if (!/^[0-9]{10,20}$/.test(META_PIXEL_ID) || window._metaCargado) return;
+    window._metaCargado = true;
+    var n = window.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+    if (!window._fbq) window._fbq = n;
+    n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+    var t = document.createElement('script');
+    t.async = true;
+    t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(t);
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+  try { if (localStorage.getItem('kone_cookies_ok') === '1') { cargarGA(); cargarMeta(); } } catch(e) {}
 
   // Eventos del embudo para Analytics. Sin consentimiento GA no se carga, así que
   // esto no envía nada (solo se acumula en dataLayer, que nadie lee).
+  // Los pasos del embudo que también se mandan a Meta (con su nombre estándar cuando lo hay,
+  // que es el que sabe usar para optimizar un anuncio). Sin datos personales en los parámetros.
+  var _EVENTOS_META = {
+    cta_empezar: ['trackCustom', 'PulsaEmpezar'],
+    plan_ejemplo: ['trackCustom', 'VePlanEjemplo'],
+    quiz_inicio: ['trackCustom', 'EmpiezaCuestionario'],
+    plan_generado: ['track', 'Lead'],
+    plan_guardado_cuenta: ['track', 'CompleteRegistration'],
+    prueba_iniciada: ['track', 'StartTrial', { value: 0, currency: 'EUR' }],
+    tarjeta_anadida: ['track', 'AddPaymentInfo'],
+    sesion_terminada: ['trackCustom', 'EntrenoHecho']
+  };
   function kEvento(nombre, params) {
     try { if (typeof gtag === 'function') gtag('event', nombre, params || {}); } catch (e) {}
+    try {
+      var m = _EVENTOS_META[nombre];
+      if (m && window._metaCargado && typeof window.fbq === 'function') window.fbq(m[0], m[1], m[2] || {});
+    } catch (e) {}
   }
 
   // DE DÓNDE VIENE CADA CLIENTE (4 oct 2026). Con anuncios en Instagram no había
@@ -4777,7 +4811,7 @@
 
 <!-- BANNER DE COOKIES (RGPD) -->
 <div id="cookieBanner" class="cookie-banner" role="region" aria-label="Aviso de cookies">
-  <p class="cookie-banner-texto">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y cookies de analítica (Google Analytics) para mejorar el servicio. Las técnicas son necesarias; las de analítica son opcionales y no te identifican por tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link">Más información</a></p>
+  <p class="cookie-banner-texto">K-One usa cookies técnicas (Supabase Auth) para gestionar tu cuenta y, si las aceptas, cookies de analítica (Google Analytics) para mejorar el servicio y de medición de anuncios (píxel de Meta) para saber qué anuncios de Instagram funcionan. Las técnicas son necesarias; las demás son opcionales y no usan tu nombre ni tu email. <a href="#" onclick="goToLegal('cookies');document.getElementById('cookieBanner').style.display='none';return false;" class="cookie-banner-link">Más información</a></p>
   <div class="cookie-banner-acciones">
     <button onclick="rechazarCookies()" class="cookie-banner-btn cookie-no">Solo necesarias</button>
     <button onclick="aceptarCookies()" class="cookie-banner-btn cookie-si">Aceptar</button>
@@ -4791,7 +4825,7 @@
   (function () {
     var ya = null; try { ya = localStorage.getItem('kone_cookies_ok'); } catch (e) {}
     if (ya === null) document.getElementById('cookieBanner').classList.add('visible');
-    window.aceptarCookies = function () { try { localStorage.setItem('kone_cookies_ok', '1'); } catch (e) {} try { cargarGA(); } catch (e) {} document.getElementById('cookieBanner').classList.remove('visible'); document.getElementById('cookieBanner').style.display = 'none'; };
+    window.aceptarCookies = function () { try { localStorage.setItem('kone_cookies_ok', '1'); } catch (e) {} try { cargarGA(); cargarMeta(); } catch (e) {} document.getElementById('cookieBanner').classList.remove('visible'); document.getElementById('cookieBanner').style.display = 'none'; };
     window.rechazarCookies = function () { try { localStorage.setItem('kone_cookies_ok', '0'); } catch (e) {} document.getElementById('cookieBanner').classList.remove('visible'); document.getElementById('cookieBanner').style.display = 'none'; };
   })();
 </script>
@@ -10941,11 +10975,12 @@
         <li><strong>Vercel Inc.</strong> — alojamiento de la web y de las funciones del servidor (pagos, avisos y la puesta al día automática de tu plan cuando mejoramos el sistema, que usa los datos de tu cuestionario).</li>
         <li><strong>Resend Inc.</strong> — envío de emails transaccionales (bienvenida, retención, notificaciones).</li>
         <li><strong>Google LLC</strong> (Google Analytics) — analítica de uso del servicio, agregada y sin tu nombre ni tu email; solo si la aceptas en el aviso de cookies.</li>
+        <li><strong>Meta Platforms Ireland Ltd.</strong> (píxel de Meta) — medición de nuestros anuncios de Instagram y Facebook: qué visitas que llegan desde un anuncio empiezan el cuestionario, crean cuenta o activan el mes gratis. Solo si lo aceptas en el aviso de cookies; sin tu nombre, tu email ni tus respuestas. Meta es corresponsable de este tratamiento y puede usar estos datos para mejorar sus propios anuncios, según su política de privacidad.</li>
         <li><strong>Functional Software Inc.</strong> (Sentry) — registro de errores técnicos del servidor para detectarlos y corregirlos. Puede incluir el identificador interno de tu cuenta, nunca tu contraseña ni datos de pago.</li>
       </ul>
       <p>Si activas los avisos en tu móvil u ordenador, las notificaciones se entregan a través del servicio de notificaciones de tu propio navegador o sistema (Google, Apple o Mozilla, según el dispositivo), que solo recibe el aviso cifrado para mostrártelo.</p>
       <p>Cuando buscas un alimento que no está en nuestra tabla, el texto de la búsqueda se consulta directamente desde tu navegador en las bases de datos públicas de alimentos del USDA (Departamento de Agricultura de EE. UU.) y de Open Food Facts. Solo se envía lo que escribes en el buscador, junto con los datos técnicos de cualquier conexión a internet (como tu dirección IP); nunca tu nombre, tu email ni tu plan.</p>
-      <p>Estos proveedores solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend, Google y Sentry pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
+      <p>Estos proveedores (salvo Meta, que es corresponsable de la medición de anuncios) solo tratan los datos según nuestras instrucciones y no los usan para fines propios. Vercel, Stripe, Resend, Google, Meta y Sentry pueden implicar transferencias de datos fuera del Espacio Económico Europeo; en esos casos se apoyan en las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de garantía reconocido por el RGPD como base para dicha transferencia.</p>
 
       <h3>2.7. Tus derechos</h3>
       <p>Desde tu cuenta, en <strong>«Gestionar suscripción»</strong>, puedes <strong>descargar una copia de tus datos</strong> y <strong>eliminar tu cuenta y tus datos</strong>: se borra al instante tu cuenta, plan, progreso, fotos y mensajes, y se cancela tu suscripción; solo se conservan los datos de facturación que la ley obliga a guardar y, si tuviste suscripción, una huella cifrada de tu email (no el email en sí) para que el mes gratis no se pueda repetir.</p>
@@ -10974,10 +11009,11 @@
 
     <section class="legal-section" id="cookies">
       <h2>4. Política de cookies</h2>
-      <p>Esta web usa dos tipos de cookies:</p>
+      <p>Esta web usa tres tipos de cookies:</p>
       <p><strong>Cookies técnicas (Supabase Auth)</strong> — necesarias para gestionar tu autenticación y mantener la sesión activa. Son estrictamente necesarias para el funcionamiento del servicio y no requieren consentimiento previo según el art. 22.2 LSSI.</p>
       <p><strong>Cookies de analítica (Google Analytics)</strong> — miden el uso del servicio de forma agregada (sin tu nombre ni tu email) para mejorar la experiencia, y solo se activan si las aceptas. No se usan con fines publicitarios ni de seguimiento individualizado.</p>
-      <p>No se usan cookies publicitarias ni de terceros con fines comerciales. Tus datos de perfil, plan y preferencias se almacenan en servidores de Supabase en la UE (infraestructura cloud con acuerdos DPA conformes con el RGPD).</p>
+      <p><strong>Cookies de medición de anuncios (píxel de Meta)</strong> — si llegas desde un anuncio nuestro de Instagram o Facebook, nos dicen si después empezaste el cuestionario, creaste tu cuenta o activaste el mes gratis, para saber qué anuncios funcionan y mostrarlos a gente con más interés. Solo se activan si las aceptas, nunca se envía tu nombre, tu email ni tus respuestas del cuestionario, y Meta Platforms Ireland Ltd. trata esta información como corresponsable. Puedes retirar el consentimiento cuando quieras borrando las cookies de esta web en tu navegador.</p>
+      <p>No vendemos tus datos. Tus datos de perfil, plan y preferencias se almacenan en servidores de Supabase en la UE (infraestructura cloud con acuerdos DPA conformes con el RGPD).</p>
     </section>
 
     <button class="legal-back" onclick="goTo('landing')" style="margin-top:8px">← Volver al inicio</button>
@@ -32999,6 +33035,7 @@ Se coló: ${lista}`;
   function aceptarCookies() {
     try { localStorage.setItem('kone_cookies_ok', '1'); } catch(e) {}
     cargarGA();
+    try { cargarMeta(); } catch(e) {}
     const b = document.getElementById('cookieBanner');
     if (b) b.style.display = 'none';
   }
