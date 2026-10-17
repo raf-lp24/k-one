@@ -61,7 +61,9 @@ function _cacheable(pathname) {
   if (pathname.startsWith('/img/')) return true;
   if (pathname.startsWith('/data/')) return true;
   // Fuentes propias desde el 16 oct 2026 (antes venían de Google y no se guardaban).
-  if (pathname.startsWith('/fonts/')) return true;
+  // Solo los .woff2: la hoja fuentes.css va con preload y, si la sirve el service worker, el
+  // navegador no reutiliza la precarga y la descarga dos veces.
+  if (pathname.startsWith('/fonts/') && pathname.endsWith('.woff2')) return true;
   if (pathname === '/manifest.json') return true;
   return /\.(png|jpe?g|svg|ico|webp|gif)$/i.test(pathname);
 }
