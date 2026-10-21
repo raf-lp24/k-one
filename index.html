@@ -13755,7 +13755,7 @@
     // "con banda elástica" en el material (16 sept 2026): la traducción a casa
     // pasa "extensión de tríceps con cuerda" a "con banda elástica", y sin
     // consumirlo salía "Patada de tríceps con mancuerna con banda elástica".
-    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra| con banda el[aá]stica)?/i, ['Fondos en banco', 'Press cerrado', 'Patada de tríceps con mancuerna', 'Extensión katana en polea']],
+    [/(press franc[eé]s|extensi[oó]n de tr[ií]ceps(?! con cuerda| sobre cabeza))( en polea| en m[aá]quina| con mancuernas?| con barra| con banda el[aá]stica)?/i, ['Extensión de tríceps con mancuerna sobre cabeza', 'Extensión katana en polea', 'Press cerrado', 'Fondos en banco', 'Patada de tríceps con mancuerna']],
     // "Elevaciones frontales" y "Press Arnold" quitadas (14 sept 2026): las dos
     // trabajan el deltoides ANTERIOR, que en cualquiera de estas plantillas ya
     // va saturado por los presses de pecho y de hombro. La elevación lateral es
@@ -13947,7 +13947,7 @@
   // que el `[/overhead carry/ → farmer carry]` que ya existía allí no protegía
   // de un overhead carry METIDO por la propia rotación. Se vio al darle
   // alternativas al slot de carries para quien entrena en casa.
-  const _ALT_RIESGO_HOMBRO = /six way|press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead/i;
+  const _ALT_RIESGO_HOMBRO = /six way|press (militar|de hombro|inclinado|declinado)|pullover|apertura|contractor|arnold|elevaciones (laterales|frontales)|fondos|dominadas|muscle[- ]?up|thruster|wall ball|snatch|push press|overhead|sobre (la )?cabeza|katana/i;
   // "superman" (15 sept 2026): es extensión lumbar tumbado boca abajo, lo mismo
   // que la hiperextensión, y la rotación del dead bug lo metía con la espalda tocada.
   const _ALT_RIESGO_ESPALDA = /peso muerto|buenos d[íi]as|remo con barra|sentadilla trasera|sentadilla con barra|clean|snatch|extensi[oó]n lumbar|hiperextensi[oó]n|superman/i;
@@ -14702,7 +14702,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261015b');
+      const r = await fetch('/data/ejercicios-info.json?v=20261021e');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -16483,7 +16483,16 @@
     "De vacaciones también cuentan tus hábitos. Al 80 % ya es mucho.",
     "El batido ayuda. La base es la comida.",
     "El momento perfecto no existe. Existe hoy.",
-    "Cambia «no puedo» por «todavía no»."
+    "Cambia «no puedo» por «todavía no».",
+    // 21 oct 2026 · revisión semanal de Instagram, con nuestras palabras
+    "Si la báscula no se mueve, mira la cinta y la barra. A veces el progreso está ahí.",
+    "Cuanto más te gusta lo que comes, menos te cuesta cumplir.",
+    "Puedes cuidarte y seguir yendo a cenar con tu gente.",
+    "No necesitas otra dieta. Necesitas saber cómo volver.",
+    "Cada entreno que haces es una promesa que cumples contigo.",
+    "No te preguntes qué te apetece. Pregúntate qué haría la persona que quieres ser.",
+    "Hoy es la suma de lo que hiciste ayer. Mañana, de lo que hagas hoy.",
+    "Un mal día no estropea una buena semana."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -17679,22 +17688,24 @@
       // arriba, como la zancada de carrera; el salto desde sentado arranca sin
       // contramovimiento y su aterrizaje es de los más fáciles de controlar.
       const plioVariantesAv = rSinMat
-        ? ['broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
-           'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
+        ? ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
+           'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)',
+           'salto desde sentado en un banco 3×6',
            'squat jumps 3×8 (salto vertical con carga corporal)',
-           'single-leg hop lateral 3×8/lado',
-           'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)',
            'subida explosiva a un escalón 3×8/pierna',
-           'salto desde sentado en un banco 3×6']
-        : ['box jumps 3×6',
            'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
+           'single-leg hop lateral 3×8/lado',
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
+        : ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
+           'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)',
+           'salto desde sentado en un banco 3×6',
+           'box jumps 3×6',
            'squat jumps 3×8 con mancuernas ligeras',
-           'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)',
            'subida explosiva al banco 3×8/pierna',
-           'salto desde sentado en un banco 3×6'];
+           'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
+           'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
       // El salto va el PRIMERO de la sesión, con las piernas frescas (14 oct
       // 2026): antes iba el cuarto, detrás de búlgara, peso muerto e hip
@@ -18098,8 +18109,8 @@
       // variedad de la que pedía el cliente, y con mejor transferencia real a
       // carrera que un salto vertical suelto.
       const _plioVariantesHibAv = _casaHib
-        ? ['squat jumps 3×8', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'subida explosiva a un escalón 3×8/pierna', 'salto desde sentado en una silla firme 3×6']
-        : ['box jumps 3×6', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'squat jumps 3×8 con mancuernas ligeras', 'pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'subida explosiva al banco 3×8/pierna', 'salto desde sentado en un banco 3×6'];
+        ? ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en una silla firme 3×6', 'squat jumps 3×8', 'subida explosiva a un escalón 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
+        : ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en un banco 3×6', 'box jumps 3×6', 'squat jumps 3×8 con mancuernas ligeras', 'subida explosiva al banco 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
       // El salto va PRIMERO, con las piernas frescas (14 oct 2026): antes iba
       // el quinto, y en la sesión de 30-45 min el recorte por duración (que se
@@ -18925,6 +18936,9 @@
         [/[Ss]ubida explosiva (al|a un) (banco|escalón)/g, 'step ups controlados (sin salto)'],
         [/[Ss]alto desde sentado en (un banco|una silla firme)/g, 'step-up controlado a banco bajo'],
         [/[Tt]oques rápidos en (step|un escalón)/g, 'marcha en el sitio'],
+        // «Caída clavada» (21 oct 2026): también es un salto con aterrizaje.
+        [/[Cc]aída clavada/g, 'sentadilla parcial con pausa'],
+        [/\(salta y aterriza quieto 2 s, rodillas en línea con los pies\)/gi, '(baja despacio y aguanta 2 s, rodillas en línea con los pies)'],
       ]);
       notasSalud.push(_lesionOtra
         ? 'Detectamos mención a la rodilla en lo que nos contaste y hemos adaptado de forma preventiva los ejercicios que más la cargan (sentadilla profunda, zancadas, saltos e impacto). Esto es automático, no un diagnóstico -- si notas dolor, párate y consulta con un profesional.'
@@ -18956,6 +18970,9 @@
         [/[Dd]ouble[- ]unders?/g, _marcha],
         [/\b[Cc]omba( \(saltos simples\))?|[Ss]altos? a la comba/g, _marcha],
         [/[Ss]ubida explosiva (al|a un) (banco|escalón)/g, 'step ups controlados (sin salto)'],
+        // «Caída clavada» (21 oct 2026): también es un salto con aterrizaje.
+        [/[Cc]aída clavada/g, 'sentadilla parcial con pausa'],
+        [/\(salta y aterriza quieto 2 s, rodillas en línea con los pies\)/gi, '(baja despacio y aguanta 2 s, rodillas en línea con los pies)'],
         [/[Ss]alto desde sentado en (un banco|una silla firme)/g, 'levantarse rápido del banco (sin salto)'],
         // Quien empieza desde cero con este perfil se sienta y se levanta de una
         // silla: la silla marca la profundidad y da seguridad (idea de las rutinas
@@ -20665,6 +20682,8 @@
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Bol de yogur proteico con plátano caramelizado", "200g yogur griego 0%, 25g proteína whey, 1 plátano, 20g copos de avena, 5g miel, canela", "428 kcal", "44g prot", "54g carbs", "4g grasa", "Sartén · 5 min"),
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
+            op("Bol de yogur proteico con kiwi y pepitas de chocolate", "200g yogur griego 0%, 20g proteína whey, 1 kiwi, 20g copos de avena, 5g chocolate negro, 5g miel", "369 kcal", "40g prot", "41g carbs", "5g grasa", "Sin cocción · 3 min"),
+            op("Tortitas de maíz con cottage, salmón ahumado y tomate", "4 tortitas de maíz, 100g queso cottage, 60g salmón ahumado, 80g tomate, 1 manzana, especias", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -20787,6 +20806,7 @@
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
+            op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
           ]
         },
         {
@@ -20970,6 +20990,7 @@
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
+            op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
           ]
         },
         {
@@ -21106,6 +21127,7 @@
             op("Bowl de boniato con salmón, guacamole y cottage", "150g boniato asado, 120g salmón, 30g guacamole casero, 100g tomate, 80g queso cottage, 20g rúcula, 5g miel", "543 kcal", "38g prot", "46g carbs", "23g grasa", "Horno · 20 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
+            op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
           ]
         },
         {
@@ -21283,6 +21305,8 @@
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
+            op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
+            op("Tortitas de maíz con cottage, salmón ahumado y tomate", "4 tortitas de maíz, 100g queso cottage, 60g salmón ahumado, 80g tomate, 1 manzana, especias", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -21402,6 +21426,8 @@
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
+            op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
+            op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
           ]
         },
         {
@@ -27495,6 +27521,11 @@
   }
 
   const RECETA_PASOS = {
+    "Huevos en cesta crujiente con tomate y queso": "Pon la tortilla de trigo en un molde pequeño apto para la freidora de aire, de forma que haga de cesta. Casca los huevos dentro, reparte el tomate en rodajas por encima y espolvorea el queso rallado, el orégano y la pimienta. Hazla en la freidora de aire a 170º unos 15-17 min, hasta que la clara esté hecha (en el horno, a 180º unos 20 min).",
+    "Bol de yogur proteico con kiwi y pepitas de chocolate": "Mezcla el yogur griego con la proteína hasta que quede cremoso. Pela el kiwi y córtalo en dados. Pon por encima los copos de avena, el kiwi y el chocolate negro picado en trocitos, y termina con un hilo de miel.",
+    "Boniato con contramuslo, aguacate y cottage": "Asa el boniato partido por la mitad en la freidora de aire a 190º unos 20 min (en el horno, a 200º unos 30 min). Mientras, haz el contramuslo a la plancha con las especias, 5-6 min por cada lado, y córtalo en tiras. Corta el tomate y el aguacate en dados. Sirve el boniato abierto con el contramuslo, el tomate, el aguacate y el queso cottage por encima, y un hilo de miel.",
+    "Ternera con salsa burger de skyr y patatas": "Corta la patata en gajos, sazónala y hazla en la freidora de aire a 190º unos 20 min. Para la salsa, mezcla el skyr con la mostaza, un chorrito de vinagre, los pepinillos muy picados y especias al gusto. Haz el filete de ternera a la plancha 2-3 min por cada lado. Sirve la ternera con las patatas y la lechuga, y la salsa por encima.",
+    "Tortitas de maíz con cottage, salmón ahumado y tomate": "Unta las tortitas de maíz con el queso cottage. Pon encima el salmón ahumado y el tomate en rodajas, y termina con especias al gusto. Acompaña con la manzana.",
     // 14 oct 2026 · ideas de @valicentif, con nuestras cantidades y pasos
     "Pizza con base de brócoli y pollo": "Tritura el brócoli crudo hasta que quede como arroz. Mézclalo con los huevos, la harina de avena, el ajo y el orégano, extiende la masa fina sobre papel de horno y hornéala 12 min a 200 °C. Mientras, haz el pollo a la plancha en tiras y corta la cebolla en juliana. Saca la base, cubre con el tomate, la mozzarella, el pollo y la cebolla, y vuelve al horno 8-10 min, hasta que se funda el queso.",
     "Hamburguesas de lentejas con pan integral y huevo": "Escurre las lentejas y aplástalas con un tenedor hasta hacer un puré grueso. Bate los huevos y echa la mitad en el puré con los copos de avena, la cebolla muy picada y el comino; mezcla y forma dos hamburguesas. Hazlas a la plancha con el aceite, 3-4 min por cada lado, y cuaja el resto del huevo batido en la misma plancha. Tuesta el pan y monta las hamburguesas con la lechuga, el tomate y el huevo.",
