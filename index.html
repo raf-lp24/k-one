@@ -16927,6 +16927,147 @@
     return new RegExp('(?<![a-záéíóúüñ])' + (exc.antes || '') + cuerpo + (exc.despues || ''), 'gi');
   }
 
+  // «No como huevo» (21 oct 2026). El cambio palabra a palabra de abajo
+  // (huevo → «ración de tofu firme») dejaba ~80 platos con pasos sin sentido:
+  // «cuece la ración de tofu firme 10 min y pélalos», «casca la ración de tofu»,
+  // «como una .», y la yema se quedaba en el plato. Aquí se adapta el plato
+  // ENTERO antes del filtro general, según el papel del huevo:
+  //  · liga una masa (bizcochos, tortitas, gofres, rebozados…) → tofu sedoso,
+  //    60 g por huevo (lo que pesa un huevo);
+  //  · es el plato o su proteína (cocido, revuelto, tortilla, plancha) → tofu
+  //    firme, 60 g por huevo, desmenuzado y salteado, en dados o en filetes.
+  // Masa: se mira en las frases que nombran el huevo (si no, «masa madre», «de
+  // forma que» o el «tritura» de una crema hacían pasar un huevo duro por masa)
+  // o, para bizcochos y compañía, en el plato entero.
+  const _RE_MASA_FRASE = /harina|reb[oó]z|pur[eé]|crema lisa|con la leche|con el yogur|(?:tritura|machaca|m[eé]zcla)\w*[^.]*?\bcon\b[^.]*?\b(?:el huevo|los huevos)\b(?! batidos| troceados?| en rodajas| partidos?| duros?| cocidos?)/i;
+  const _RE_MASA_PLATO = /bizcocho|muffin|magdalena|gofre|crepe|torrija|\bmasa\b(?! madre)|forma (?:bolitas|filetes|dos hamburguesas|\d+ c[ií]rculos)/i;
+  const _RE_FRASE_HUEVO = /\bhuevos?\b|\bclaras?\b|\byemas?\b/i;
+  function _adaptarSinHuevo(opt) {
+    let pasos0 = opt.pasos || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : '') || '';
+    const ing0 = opt.ingredientes || '';
+    // «Tortilla» es de la familia del huevo, así que el filtro general la borra
+    // también cuando es la de trigo de un wrap («Calienta la 30 segundos»). Se
+    // deja dicho de qué es la tortilla para que sobreviva.
+    const tortillaWrap = (ing0.match(/tortillas? (?:de trigo|de ma[ií]z|integral(?:es)?)/i) || [])[0];
+    if (tortillaWrap) {
+      const deQue = tortillaWrap.replace(/^tortillas? /i, '');
+      pasos0 = pasos0.replace(/(?<!como (?:una )?)\b(media |la |las )?tortilla(s?)\b(?! de (?:trigo|ma[ií]z)| integral| de huevo)/gi, (m, art, s) => `${art || ''}tortilla${s} ${deQue}`);
+    }
+    // Solo platos que llevan huevo de verdad en los ingredientes (una «tortilla
+    // de trigo» no es huevo).
+    let gramos = 0, pos = -1;
+    const resto = [];
+    ing0.split(/,\s*/).forEach(p => {
+      let m;
+      if ((m = p.match(/^(\d+)\s+claras?\s*\+\s*(\d+)\s+huevos?$/i))) gramos += +m[1] * 33 + +m[2] * 60;
+      else if ((m = p.match(/^(\d+)\/(\d+)\s+huevos?\b/i))) gramos += 60 * m[1] / m[2];
+      else if ((m = p.match(/^(\d+)\s+huevos?\b/i))) gramos += +m[1] * 60;
+      else if ((m = p.match(/^(\d+)\s*ml\s+claras?\b/i))) gramos += +m[1];
+      else if ((m = p.match(/^(\d+)\s+claras?\b/i))) gramos += +m[1] * 33;
+      else if ((m = p.match(/^(\d+)\s+yemas?\b/i))) gramos += +m[1] * 17;
+      else { resto.push(p); return; }
+      if (pos < 0) pos = resto.length;
+    });
+    if (pos < 0) return pasos0 && tortillaWrap ? { ...opt, pasos: pasos0 } : opt;
+    const frasesHuevo = pasos0.split(/(?<=\.)\s+/).filter(f => _RE_FRASE_HUEVO.test(f)).join(' ');
+    const masa = _RE_MASA_FRASE.test(frasesHuevo) || _RE_MASA_PLATO.test(pasos0);
+    resto.splice(pos, 0, `${Math.max(30, Math.round(gramos / 10) * 10)}g ${masa ? 'tofu sedoso' : 'tofu firme'}`);
+    // Sustituye respetando si lo cambiado empezaba en mayúscula o en minúscula.
+    const rep = (s, re, por) => s.replace(re, (...a) => {
+      const m = a[0];
+      let r = typeof por === 'function' ? por(m) : m.replace(new RegExp(re.source, re.flags.replace('g', '')), por);
+      if (r && /^[A-ZÁÉÍÓÚ]/.test(m)) r = r.charAt(0).toUpperCase() + r.slice(1);
+      else if (r && /^[a-záéíóú]/.test(m)) r = r.charAt(0).toLowerCase() + r.slice(1);
+      return r;
+    });
+    // ── Nombre ──
+    let n = opt.nombre
+      .replace(/ con un huevo entero/gi, '')
+      .replace(/\b(?:huevos? y claras|claras y huevos?|claras, huevos?)\b/gi, 'huevos')
+      .replace(/ y una yema/gi, '');
+    if (masa) {
+      n = n.replace(/,? y huevo$/i, '').replace(/\bhuevos?\b|\bclaras\b/gi, 'tofu sedoso');
+    } else {
+      n = n.replace(/^(Tortilla|Revuelto)(?: francesa)?(?: de (?:\d+ )?(?:huevos|claras))?(?: francesa)?(?= |$)/i, '$1')
+        .replace(/^Tortilla de patata ligera/i, 'Tortilla de patata');
+      const m = n.match(/^(?:Tortilla|Revuelto) de (.+?)((?: con | en ).*)?$/i);
+      if (m) n = 'Salteado de tofu' + (/,| y /.test(m[1]) ? ', ' : ' y ') + m[1] + (m[2] || '');
+      else n = n.replace(/^(?:Tortilla|Revuelto)(?= con |$)/i, 'Tofu salteado');
+      // «…con crema de cacahuete, huevos y claras» → «…, tofu»: le falta la «y».
+      n = n.replace(/, (huevos?|claras)$/i, ' y $1');
+      n = n.replace(/^Huevos revueltos/i, 'Tofu salteado')
+        .replace(/\bhuevos? revueltos?|\btortilla(?: francesa| de claras| de huevos?)?\b(?! de (?:trigo|ma[ií]z))/gi, 'tofu salteado')
+        .replace(/\bhuevos? a la plancha\b/gi, 'tofu a la plancha')
+        .replace(/\bhuevos? (?:duros?|cocidos?|pochados?|poché)(?=\s|,|$)/gi, 'tofu')
+        .replace(/\bhuevos?\b|\bclaras\b/gi, 'tofu');
+    }
+    n = n.replace(/\s{2,}/g, ' ').trim();
+    n = n.charAt(0).toUpperCase() + n.slice(1);
+    // ── Pasos ──
+    let p = pasos0;
+    const esWrap = /tortillas? (?:de trigo|de ma[ií]z|integral)/i.test(ing0);
+    const reglas = masa ? [
+      [/Bate los huevos y echa la mitad en el puré/gi, 'Bate el tofu sedoso y échalo en el puré'],
+      [/,? y cuaja el resto del huevo batido en la misma plancha/gi, ''],
+      [/con la lechuga, el tomate y el huevo/gi, 'con la lechuga y el tomate'],
+      [/las claras y (?:los huevos|el huevo)/gi, 'el tofu sedoso'],
+      [/(?:los huevos|el huevo)(?: batidos?)?/gi, 'el tofu sedoso'],
+      [/las claras/gi, 'el tofu sedoso'],
+      [/\bhuevos?\b/gi, 'tofu sedoso'],
+    ] : [
+      [/pon a hervir agua con un chorro de vinagre\. casca cada huevo[^.]*\./gi, 'dora los filetes de tofu firme a la plancha 2-3 min por lado.'],
+      [/cocina los huevos al gusto \((?:plancha|poché) o (?:revueltos|a la plancha)\)/gi, 'haz los filetes de tofu firme a la plancha'],
+      [/cuaja las claras/gi, 'desmenuza el tofu firme y saltéalo'],
+      [/cuájalo en una sartén antiadherente a fuego medio 2-3 min, dale la vuelta y 1 min más/gi, 'saltéalo en una sartén antiadherente a fuego medio 3-4 min'],
+      [/y vierte en sartén\. Cuando cuaje, añade el queso, dobla y sirve/gi, 'y saltéalo todo 3-4 min en la sartén. Añade el queso al final y sirve'],
+      [/cuece la patata y el huevo ([^.]*?)\./gi, 'cuece la patata $1 y dora el tofu firme en dados en una sartén antiadherente 3-4 min.'],
+      [/cuece (?:el huevo|los huevos)\b[^.]*\./gi, m => 'dora el tofu firme en dados en una sartén antiadherente 3-4 min' + (/s[ií]rvelo/.test(m) ? ' y sírvelo por encima.' : '.')],
+      [/escalfa el huevo[^.]*\./gi, 'dora el filete de tofu firme a la plancha 2-3 min por lado.'],
+      [/los huevos a la plancha o revueltos/gi, 'los filetes de tofu firme a la plancha'],
+      [/cuaja el huevo por encima o sírvelo a la plancha aparte/gi, 'añade el tofu firme en dados y dóralo 3-4 min'],
+      [/casca los huevos encima; tapa 3-4 min hasta que cuajen/gi, 'añade el tofu firme desmenuzado y saltéalo 3-4 min'],
+      [/casca los huevos dentro/gi, 'desmenuza el tofu firme dentro'],
+      [/hasta que la clara esté hecha/gi, 'hasta que se dore'],
+      [/casca los huevos en una sartén antiadherente y revuélvelos/gi, 'desmenuza el tofu firme en una sartén antiadherente y saltéalo'],
+      [/los huevos a la plancha/gi, 'los filetes de tofu firme a la plancha'],
+      [/el huevo a la plancha/gi, 'el filete de tofu firme a la plancha'],
+      [/fríe los huevos con poco aceite/gi, 'dora los filetes de tofu firme con poco aceite'],
+      [/bate (?:los huevos|el huevo|las claras)(?: con (?:las claras|el huevo|la yema))? y (?:cuájalos|cuájalas|revuélvelos)/gi, 'desmenuza el tofu firme y saltéalo'],
+      [/bate (?:los huevos|el huevo|las claras)(?: con (?:las claras|el huevo(?: entero)?|la yema))?/gi, 'desmenuza el tofu firme'],
+      [/desmenuza el tofu firme y (sal\b|una pizca)/gi, 'desmenuza el tofu firme con $1'],
+      [/revuelve los huevos/gi, 'saltea el tofu firme desmenuzado'],
+      [/(incorpora|añade) (?:las claras y el huevo batidos|el huevo batido|los huevos batidos)/gi, '$1 el tofu firme desmenuzado'],
+      [/los huevos batidos: revuelve a fuego suave hasta que cuajen sin secarse/gi, 'el tofu firme desmenuzado: saltéalo 3-4 min a fuego suave'],
+      [/mézclala con los huevos batidos/gi, 'mézclala con el tofu firme desmenuzado'],
+      [/echa el huevo por encima/gi, 'echa el tofu firme desmenuzado por encima'],
+      [/hasta que cuaje\b/gi, 'hasta que se dore'],
+      [/cuaja en sartén antiadherente a fuego medio, (?:doblando por la mitad como una tortilla francesa|dándole la vuelta a mitad como una tortilla)/gi, 'saltéalo en una sartén antiadherente a fuego medio 3-4 min'],
+      [/cuaja en sartén como tortilla, dándole la vuelta a mitad/gi, 'saltéalo todo 3-4 min en la sartén'],
+      [/cuaja en sartén a fuego medio/gi, 'saltéalo en la sartén a fuego medio'],
+      [/cuaja a fuego medio removiendo/gi, 'saltéalo a fuego medio 3-4 min, removiendo'],
+      [/cuaja removiendo/gi, 'saltéalo 3-4 min removiendo'],
+      [/cu[aá]ja(?:la)? la tortilla/gi, 'saltéalo todo'],
+      [/haz la tortilla francesa/gi, 'saltéalo'],
+      [/ en revuelto o en tortilla/gi, ''],
+      [/,? doblando por la mitad/gi, ''],
+      [/,? como (?:una )?tortilla(?: fina| francesa)?/gi, ''],
+      [/(salt[eé]alo[^.]*?\d+(?:-\d+)? min) por lado/gi, '$1'],
+      [/la tortilla de huevo/gi, 'el tofu salteado'],
+      [/el revuelto/gi, 'el tofu salteado'],
+      ...(esWrap ? [] : [[/\bla tortilla\b/gi, 'el tofu salteado']]),
+      [/(?:los huevos|el huevo)(?: duros?| cocidos?)?(?: (?:en rodajas|en láminas|partidos?(?: por la mitad)?|troceados?|picados?))?/gi, 'el tofu firme'],
+      [/\bclaras\b|\byemas?\b/gi, 'tofu'],
+      [/\bhuevos?\b/gi, 'tofu'],
+      // La tortilla ya no existe: los «la» que la nombraban pasan a «lo».
+      ...(/^(?:tortilla|revuelto)/i.test(opt.nombre) && !esWrap
+        ? [[/\bSírvela\b/g, 'Sírvelo'], [/\bAcompáñala\b/g, 'Acompáñalo'], [/\bHazla\b/g, 'Hazlo'], [/\bmétela\b/g, 'mételo'], [/\bllevarla\b/g, 'llevarlo']]
+        : []),
+    ];
+    reglas.forEach(([re, por]) => { p = rep(p, re, por); });
+    p = p.replace(/\s{2,}/g, ' ').replace(/\s+([.,;])/g, '$1').replace(/\b([Aa]) el\b/g, '$1l').replace(/\b([Dd])e el\b/g, '$1el');
+    return { ...opt, nombre: n, ingredientes: resto.join(', '), pasos: p };
+  }
+
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
@@ -16967,13 +17108,15 @@
       'cacahuete': ['crema de cacahuete'],
       'garbanzo': ['hummus'],
       'ternera': ['solomillo'],
-      'aguacate': ['guacamole']
+      'aguacate': ['guacamole'],
+      'huevo': ['yema', 'clara']
     };
     [...todosTokens].forEach(t => {
       const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)];
       if (extra) extra.forEach(e => todosTokens.add(e));
     });
     const tokenArr = [...todosTokens];
+    const _sinHuevo = tokenArr.some(t => /^(huevo|clara|yema)$/.test(_normAlimento(t)));
     // Estas dos búsquedas comparaban cadena contra cadena, así que arrastraban
     // el mismo problema de tildes que la regex: con "esparragos" no encontraban
     // ni la receta de sustitución ni el alimento de recambio, que están
@@ -17094,6 +17237,7 @@
     }, txt);
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
+        if (_sinHuevo) opt = _adaptarSinHuevo(opt);
         // Los PASOS entran en la comprobación, no solo el nombre y los
         // ingredientes: hay recetas que nombran un alimento SOLO en la
         // preparación. Caso real: "Palitos de zanahoria con guacamole casero"
