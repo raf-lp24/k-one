@@ -3775,7 +3775,7 @@
           </div>
         </div>
         <!-- Marca reciente: recalcula los ritmos de las sesiones de carrera -->
-        <div class="field">
+        <div class="field" id="cp-campoMarca">
           <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
             <select id="cp-marcaDistancia" onchange="previsualizarRitmosCambioPlan()" style="flex:1;min-width:130px" aria-label="Distancia de la carrera">
@@ -11473,7 +11473,7 @@
           </div>
           <!-- Marca reciente de carrera: con ella se calculan los ritmos reales de
                entrenamiento (VDOT) en vez de decir solo "ritmo umbral" o "zona 2". -->
-          <div class="field" id="campoMarca">
+          <div class="field" id="campoMarca" style="display:none">
             <label>¿Tienes un tiempo reciente en alguna carrera? <span class="optional">Opcional</span></label>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
               <select id="marcaDistancia" onchange="previsualizarRitmos()" style="flex:1;min-width:130px" aria-label="Distancia de la carrera">
@@ -12647,6 +12647,16 @@
   }
 
   // ===== FORMULARIO =====
+  // 25 oct 2026: la pregunta del tiempo en carrera salía siempre, también a quien
+  // elegía gimnasio. Solo tiene sentido con Running o Híbrido (calcula los ritmos).
+  function _mostrarCampoMarca(grupoId) {
+    const esModal = grupoId.startsWith('cp-');
+    const campo = document.getElementById(esModal ? 'cp-campoMarca' : 'campoMarca');
+    if (!campo) return;
+    const dep = document.querySelector('#' + (esModal ? 'cp-deporte' : 'deporte') + ' .selected')?.textContent.trim() || '';
+    campo.style.display = /Running|Híbrido/.test(dep) ? '' : 'none';
+  }
+
   function selectRadio(el, group) {
     document.querySelectorAll(`#${group} .radio-opt, #${group} .check-opt`).forEach(o => { o.classList.remove('selected'); o.setAttribute('aria-checked', 'false'); });
     el.classList.add('selected');
@@ -12654,6 +12664,7 @@
     document.getElementById(group)?.classList.remove('error');
     if (group === 'deporte') updateLugarOptions(el.textContent.trim(), 'lugar');
     if (group === 'cp-deporte') updateLugarOptions(el.textContent.trim(), 'cp-lugar');
+    if (group === 'deporte' || group === 'cp-deporte') _mostrarCampoMarca(group);
     if (group === 'tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'deporte');
     if (group === 'cp-tipoPlan') updateDeporteOptionsPorPlan(el.textContent.trim(), 'cp-deporte');
     // El objetivo también decide qué deportes se ofrecen (Running no, con
@@ -12781,6 +12792,7 @@
       updateLugarOptions('', esModal ? 'cp-lugar' : 'lugar');
       if (!esModal) actualizarRutinaPreview();
     }
+    _mostrarCampoMarca(grupoId);
   }
 
   function updateLugarOptions(deporte, grupoId) {
@@ -28728,6 +28740,7 @@
     preseleccionarRadio('cp-comidas', _comidasActual);
     updateDeporteOptionsPorPlan(tipoPlanActual, 'cp-deporte');
     preseleccionarRadio('cp-deporte', userData.deporte);
+    _mostrarCampoMarca('cp-deporte');
     // Marca de carrera guardada (si la dio), para poder actualizarla al mejorar
     const cpMd = document.getElementById('cp-marcaDistancia');
     const cpMt = document.getElementById('cp-marcaTiempo');
