@@ -11,7 +11,8 @@ process.env.CRON_SECRET = 's3cret'; process.env.RESEND_API_KEY = 're_test'; proc
 process.env.ADMIN_EMAILS = 'admin@k-one.fit'; process.env.APP_URL = 'https://k-one.fit'; process.env.SUPABASE_URL = 'http://x'; process.env.SUPABASE_SERVICE_ROLE_KEY = 'x';
 process.env.STRIPE_PRICE_COMPLETO_MENSUAL = 'price_m';
 const { crearMotor } = require(R + 'lib/motor-servidor');
-const htmlApp = fs.readFileSync(R + 'index.html', 'utf8');
+// index.html y app.js juntos (lib/fuente-app.js): el motor del servidor sabe leer los dos formatos.
+const htmlApp = require(R + 'lib/fuente-app').leerFuente(R);
 const motor = crearMotor(htmlApp);
 
 // ---- reloj falso

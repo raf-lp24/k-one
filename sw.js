@@ -58,6 +58,8 @@ self.addEventListener('activate', e => {
 // de verdad se benefician de un fallback offline.
 function _cacheable(pathname) {
   if (pathname === '/' || pathname === '/index.html') return true;
+  // El código de la app está en /app.js desde el 25 oct 2026: sin él, la app guardada no arranca sin conexión.
+  if (pathname === '/app.js') return true;
   if (pathname.startsWith('/img/')) return true;
   if (pathname.startsWith('/data/')) return true;
   // Fuentes propias desde el 16 oct 2026 (antes venían de Google y no se guardaban).

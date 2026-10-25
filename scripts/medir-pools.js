@@ -2,7 +2,7 @@
 // tres lineas "nutricion = [" en vez de numeros de linea fijos, que se quedan
 // obsoletos en cuanto se inserta una receta.
 const fs = require('fs');
-const L = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8').split('\n');
+const L = require('../lib/fuente-app').leerFuente().split('\n');
 const arranques = [];
 L.forEach((l, i) => { if (/^\s*nutricion = \[\s*$/.test(l)) arranques.push(i); });
 let fin = arranques[2]; while (!/^\s{4}\}\s*$/.test(L[fin])) fin++;

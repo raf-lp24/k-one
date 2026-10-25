@@ -46,7 +46,7 @@ const INDEX = path.join(__dirname, '..', 'index.html');
 // 1 · EXTRAER LA TABLA DEL index.html
 // ──────────────────────────────────────────────────────────────────────────
 function extraerTabla() {
-  const lineas = fs.readFileSync(INDEX, 'utf8').split(/\r?\n/);
+  const lineas = require('../lib/fuente-app').leerFuente().split(/\r?\n/);
   const desde = lineas.findIndex(l => l.includes('const ALTERNATIVAS_EJERCICIO = ['));
   if (desde < 0) throw new Error('No encuentro ALTERNATIVAS_EJERCICIO en index.html');
   // La tabla se cierra con una linea que es solo "];" a su nivel de indentado.
@@ -74,7 +74,7 @@ function extraerTabla() {
 // correctas. Lo que no puede pasar es que la alternativa no admita NINGUNA de
 // las unidades con que se escribe el ejercicio al que sustituye.
 function unidadesEnPlantillas() {
-  const todo = fs.readFileSync(INDEX, 'utf8');
+  const todo = require('../lib/fuente-app').leerFuente();
   // Solo el bloque donde se construyen las semanas: los comentarios del motor
   // citan ejemplos de fallos ("Comba 3x20m") y el escáner se los creía.
   const src = todo.slice(todo.indexOf('let semana = [];'), todo.indexOf('// fin if (!soloDieta)'));
@@ -345,7 +345,7 @@ function main() {
   };
 
   // Texto de las plantillas de entrenamiento, para saber qué reglas siguen vivas.
-  const htm = fs.readFileSync(INDEX, 'utf8');
+  const htm = require('../lib/fuente-app').leerFuente();
   const plantillas = htm.slice(htm.indexOf('let semana = [];'), htm.indexOf('// fin if (!soloDieta)')).toLowerCase();
 
   for (const [regex, alternativas] of tabla) {

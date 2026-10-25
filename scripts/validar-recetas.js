@@ -82,7 +82,7 @@ module.exports = { analizar, buscarAlimento, ponerCantidades, ALIM };
 
 if (require.main === module) {
   // Linea base sobre TODAS las op() del archivo.
-  const L = fs.readFileSync(RAIZ + '/index.html', 'utf8').split('\n');
+  const L = require('../lib/fuente-app').leerFuente(RAIZ).split('\n');
   // Comillas dobles Y simples: las recetas de repostaje (fueling*) y el menú
   // de reserva para alérgicos (platosSeguros) van con comillas simples y
   // hasta el 27 sept 2026 este validador no las veía -- 11 de 51 tenían la

@@ -55,3 +55,5 @@ El cliente puede **eliminar su cuenta** desde el menú del panel (la copia de su
 - La proteína de la etiqueta de cada plato queda ~15 % por debajo de la que suman sus ingredientes.
 - Stripe (v16) y Sentry (v10) van una versión mayor por detrás; sin vulnerabilidades conocidas.
 - Opiniones externas (Google Business / Trustpilot): cuenta por crear.
+
+- **25 oct 2026:** el código de la app (motor incluido) está en `app.js`; `index.html` solo lleva `<script src="/app.js"></script>` al final. Las herramientas leen los dos juntos con `lib/fuente-app.js` (`leerFuente()`), y `crearMotor` completa solo con `app.js` si le pasas el index ligero.

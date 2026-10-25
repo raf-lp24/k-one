@@ -17,7 +17,7 @@ proyecto y no modifican nada: solo miden y avisan.
 
 `componer.js` y `cant-defecto.js` son auxiliares: el primero genera la línea
 `op(...)` de una receta con los macros **calculados de sus ingredientes** en
-vez de escritos a mano, y el segundo extrae `CANT_DEFECTO` de `index.html`
+vez de escritos a mano, y el segundo extrae `CANT_DEFECTO` del código de la app (`index.html` + `app.js`, juntos con `lib/fuente-app.js`)
 para que los auditores midan el mismo texto que ve el cliente.
 
 ## Por qué están aquí

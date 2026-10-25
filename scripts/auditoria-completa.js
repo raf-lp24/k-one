@@ -15,7 +15,7 @@ const A = require('../data/alimentos.json');
 const { analizar, buscarAlimento, ponerCantidades } = require('./validar-recetas');
 
 const RUTA = path.join(__dirname, '..', 'index.html');
-const TXT = fs.readFileSync(RUTA, 'utf8');
+const TXT = require('../lib/fuente-app').leerFuente();
 const L = TXT.split(/\r?\n/);
 
 let fallos = 0, avisos = 0;

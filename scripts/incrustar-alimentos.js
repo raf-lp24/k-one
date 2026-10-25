@@ -12,7 +12,9 @@ const path = require('path');
 const raiz = path.join(__dirname, '..');
 const fHtml = path.join(raiz, 'index.html');
 const tabla = JSON.stringify(JSON.parse(fs.readFileSync(path.join(raiz, 'data', 'alimentos.json'), 'utf8')));
-const html = fs.readFileSync(fHtml, 'utf8');
+// El motor vive en app.js desde el 25 oct 2026: se lee y se escribe a través de lib/fuente-app.js.
+const fuenteApp = require('../lib/fuente-app');
+const html = fuenteApp.leerFuente(raiz);
 const re = /\/\*ALIMENTOS\*\/[\s\S]*?\/\*FIN_ALIMENTOS\*\//;
 if (!re.test(html)) { console.error('index.html no tiene las marcas /*ALIMENTOS*/ ... /*FIN_ALIMENTOS*/'); process.exit(1); }
 const nuevo = '/*ALIMENTOS*/' + tabla + '/*FIN_ALIMENTOS*/';
@@ -22,5 +24,5 @@ if (process.argv.includes('--check')) {
   console.log('tabla de alimentos incrustada al día');
   process.exit(0);
 }
-fs.writeFileSync(fHtml, html.replace(re, () => nuevo));
+fuenteApp.escribirFuente(html.replace(re, () => nuevo), raiz);
 console.log('index.html: tabla de alimentos actualizada (' + tabla.length + ' caracteres)');

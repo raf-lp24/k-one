@@ -35,7 +35,8 @@ ok('api/ y lib/ compilan (comprobado)');
 for (const f of ['vercel.json', 'manifest.json', 'package.json']) {
   try { JSON.parse(leer(f)); ok(f + ' es JSON válido'); } catch (e) { mal(`${f} no es JSON válido: ${e.message}`); }
 }
-const html = leer('index.html');
+// index.html + app.js juntos, como estaba antes de separar el código (25 oct 2026).
+const html = require('../lib/fuente-app').leerFuente(raiz).split('\r\n').join('\n');
 const bloquesLD = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]);
 const ld = [];
 bloquesLD.forEach((b, i) => { try { ld.push(JSON.parse(b)); } catch (e) { mal(`JSON-LD nº ${i + 1} de index.html no es JSON válido: ${e.message}`); } });

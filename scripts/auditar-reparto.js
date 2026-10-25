@@ -3,7 +3,7 @@
 //    presente (sacia y aporta fibra con pocas calorias).
 //  · En SUPERAVIT: mas proteina y mas cantidad, repartida.
 const fs = require('fs');
-const L = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8').split('\n');
+const L = require('../lib/fuente-app').leerFuente().split('\n');
 const arr = []; L.forEach((l, i) => { if (/^\s*nutricion = \[\s*$/.test(l)) arr.push(i); });
 let fin = arr[2]; while (!/^\s{4}\}\s*$/.test(L[fin])) fin++;
 const ramas = [['perder grasa', arr[0], arr[1]], ['ganar musculo', arr[1], arr[2]], ['mantenimiento', arr[2], fin]];

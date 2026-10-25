@@ -4,7 +4,7 @@
 // densa y sacia poco por caloria. La fibra es lo contrario: sacia y casi no
 // suma. Se mira por rama.
 const fs = require('fs');
-const L = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8').split('\n');
+const L = require('../lib/fuente-app').leerFuente().split('\n');
 const { analizar } = require('./validar-recetas');
 const arr = []; L.forEach((l, i) => { if (/^\s*nutricion = \[\s*$/.test(l)) arr.push(i); });
 let fin = arr[2]; while (!/^\s{4}\}\s*$/.test(L[fin])) fin++;

@@ -2,7 +2,7 @@
 // misma tabla que la web (si no, mide un texto de ingredientes que el cliente
 // nunca ve: "AOVE" a secas suma 0 aqui y 10g alli).
 const fs = require('fs');
-const L = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8').split('\n');
+const L = require('../lib/fuente-app').leerFuente().split('\n');
 let i = L.findIndex(l => /const CANT_DEFECTO = \{/.test(l));
 const obj = {};
 for (i++; i < L.length && !/^\s*\};\s*$/.test(L[i]); i++) {

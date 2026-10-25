@@ -17,7 +17,7 @@ const { analizar } = require('./validar-recetas');
 const verMacros = { total: 0, fuera: 0 };
 
 const N = parseInt(process.argv[2], 10) || 600;
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = require('../lib/fuente-app').leerFuente();
 const motor = crearMotor(html);
 
 // Generador con semilla (mulberry32): mismos casos en cada ejecución.
