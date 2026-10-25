@@ -33,6 +33,11 @@ h3 { font: 600 16px/1.3 Inter, sans-serif; margin: 0 0 8px; }
 .rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
 .rejilla li { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 18px; padding: 22px; }
 .rejilla p { margin: 0; color: #c9c4bd; font-size: 15px; }
+/* 25 oct 2026: capturas reales de la app y el vídeo demo. En el móvil se deslizan de lado. */
+.por-dentro { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 280px); gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+.por-dentro figure { margin: 0; scroll-snap-align: start; }
+.por-dentro img, .por-dentro video { display: block; width: 100%; height: auto; border-radius: 22px; border: 1px solid var(--grafito); background: var(--carbon); }
+.por-dentro figcaption { margin-top: 10px; color: #c9c4bd; font-size: 14px; line-height: 1.45; }
 .pasos { margin: 0; padding-left: 22px; display: grid; gap: 14px; max-width: 70ch; }
 .pasos li::marker { color: var(--brasa-vivo); font-weight: 600; }
 .nota { margin: 26px 0 0; padding: 16px 18px; border: 1px solid rgba(242,106,54,.3); border-radius: 16px; background: var(--carbon); color: #c9c4bd; font-size: 14px; max-width: 70ch; }

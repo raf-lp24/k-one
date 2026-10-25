@@ -16,6 +16,41 @@ const SITIO = 'https://k-one.fit';
 
 const PRECIOS = 'Primer mes gratis y sin tarjeta: no te pedimos ningún dato de pago para empezar. Después, plan completo 7,99 €/mes (o 14,99 € cada 3 meses) y solo nutrición 4,99 €/mes. Sin permanencia: cancelas desde tu perfil cuando quieras.';
 
+// Capturas reales de la app (25 oct 2026), hechas con marketing/cdp-shot.mjs y los
+// estados de ejemplo de marketing/estado-demo-*.js (clientes inventados). Van en
+// img/paginas/. [archivo, texto alternativo, pie de foto].
+const CAPTURAS = {
+  'gimnasio.html': [
+    ['gimnasio-1', 'Tu semana de gimnasio en K-ONE: lunes Torso A con press banca y remo, martes Pierna A con sentadilla', 'Tu semana, con cada sesión y su objetivo'],
+    ['gimnasio-2', 'Ficha «Cómo se hace» del press declinado en máquina: posición inicial y final, músculos trabajados y pasos', 'Cada ejercicio, explicado paso a paso'],
+  ],
+  'running.html': [
+    ['running-1', 'Sesión de hoy: easy run en zona 2, 45 minutos a ritmo suave, y debajo las comidas del día', 'La sesión de hoy, con su ritmo y su duración'],
+    ['running-2', 'Semana de running: lunes easy run en zona 2, miércoles fartlek o series, jueves fuerza específica del corredor', 'Calidad, rodajes y fuerza repartidos en la semana'],
+  ],
+  'hibrido.html': [
+    ['hibrido-1', 'Semana híbrida: fuerza de tren superior, cardio en zona 2, descanso y fuerza de tren inferior', 'Fuerza y carrera repartidas sin que se pisen'],
+    ['hibrido-2', 'Ejercicios de la sesión con series, repeticiones, peso y la pregunta «¿Cómo fueron las series?»', 'Apuntas cómo te fue cada serie y la carga se ajusta'],
+  ],
+  'solo-nutricion.html': [
+    ['nutricion-1', 'Pantalla de nutrición: día de descanso con 20 % menos de hidratos, total del día y macros', 'Tus calorías y macros del día, según entrenes o descanses'],
+    ['nutricion-2', 'Recetario de la semana con las recetas elegidas para desayuno, media mañana, comida, merienda y cena', 'Tus recetas de la semana, con cantidades y pasos'],
+  ],
+};
+const porDentro = p => {
+  const c = CAPTURAS[p.archivo];
+  if (!c) return '';
+  return `
+  <section class="bloque">
+    <h2>Así se ve por dentro</h2>
+    <div class="por-dentro">
+${c.map(([a, alt, pie]) => `      <figure><img src="/img/paginas/${a}.webp" width="600" height="1298" loading="lazy" decoding="async" alt="${esc(alt)}"><figcaption>${esc(pie)}</figcaption></figure>`).join('\n')}
+      <figure><video controls preload="none" playsinline poster="/demo-poster-oct.jpg" width="600" height="1298" aria-label="Vídeo de un minuto con el recorrido por dentro de la app"><source src="/demo-octubre.mp4" type="video/mp4"></video><figcaption>Un minuto por dentro de la app</figcaption></figure>
+    </div>
+  </section>
+`;
+};
+
 const otras = [
   ['/gimnasio', 'Gimnasio', 'Hipertrofia, fuerza y definición con progresión de cargas.'],
   ['/running', 'Running', 'De 5 km a maratón, con ritmos y fases.'],
@@ -173,11 +208,12 @@ ${p.incluye.map(([t, d]) => `      <li><h3>${esc(t)}</h3><p>${esc(d)}</p></li>`)
     </ul>
   </section>
 
+${porDentro(p)}
   <section class="bloque">
     <h2>Cómo funciona</h2>
     <ol class="pasos">
       <li><strong>Cuestionario.</strong> Cuentas quién eres: cuerpo, salud, alimentación, objetivo y horarios. Cuantos más detalles, mejor el plan.</li>
-      <li><strong>Tu plan, al momento.</strong> Lo genera un motor de reglas con criterio fijo y trazable, no una IA que improvisa.</li>
+      <li><strong>Tu plan, al momento.</strong> Lo genera K-ONE como lo haría un entrenador con método: criterios fijos y comprobables, sin improvisar.</li>
       <li><strong>Check-in semanal.</strong> Cada semana cuentas cómo te fue y el plan siguiente se ajusta.</li>
     </ol>
     <p class="nota">K-ONE no sustituye a un médico ni a un dietista-nutricionista. Si tienes una enfermedad, una lesión o tomas medicación, consúltalo con un profesional antes de empezar.</p>
@@ -256,6 +292,11 @@ h3 { font: 600 16px/1.3 Inter, sans-serif; margin: 0 0 8px; }
 .rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
 .rejilla li { background: var(--carbon); border: 1px solid var(--grafito); border-radius: 18px; padding: 22px; }
 .rejilla p { margin: 0; color: #c9c4bd; font-size: 15px; }
+/* 25 oct 2026: capturas reales de la app y el vídeo demo. En el móvil se deslizan de lado. */
+.por-dentro { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 280px); gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+.por-dentro figure { margin: 0; scroll-snap-align: start; }
+.por-dentro img, .por-dentro video { display: block; width: 100%; height: auto; border-radius: 22px; border: 1px solid var(--grafito); background: var(--carbon); }
+.por-dentro figcaption { margin-top: 10px; color: #c9c4bd; font-size: 14px; line-height: 1.45; }
 .pasos { margin: 0; padding-left: 22px; display: grid; gap: 14px; max-width: 70ch; }
 .pasos li::marker { color: var(--brasa-vivo); font-weight: 600; }
 .nota { margin: 26px 0 0; padding: 16px 18px; border: 1px solid rgba(242,106,54,.3); border-radius: 16px; background: var(--carbon); color: #c9c4bd; font-size: 14px; max-width: 70ch; }
