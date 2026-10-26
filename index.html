@@ -243,7 +243,24 @@
 <script>
 (function () {
   var cola = window.__colaPortada = [];
-  function encolar(n) { return function () { cola.push([n, [].slice.call(arguments)]); document.documentElement.classList.add('portada-esperando'); }; }
+  // En el móvil no hay cursor: el "progress" de antes no se veía y el botón
+  // se quedaba quieto 4-5 s con 4G lenta (medido el 26 oct 2026). Ahora el
+  // botón tocado lleva un giro de carga hasta que la app hace lo pedido; al
+  // quitar la app la clase portada-esperando (goTo), el giro se va solo.
+  function marcar() {
+    var e = window.event, el = e && e.target && e.target.closest ? e.target.closest('button,a,[onclick]') : null;
+    if (!el) return;
+    var antes = document.querySelector('.k1-pulsado');
+    if (antes && antes !== el) { antes.classList.remove('k1-pulsado'); antes.removeAttribute('aria-busy'); }
+    el.classList.add('k1-pulsado'); el.setAttribute('aria-busy', 'true');
+    if (!el.querySelector('.k1-cargando')) { var s = document.createElement('span'); s.className = 'k1-cargando'; s.setAttribute('aria-hidden', 'true'); el.appendChild(s); }
+  }
+  function encolar(n) { return function () { cola.push([n, [].slice.call(arguments)]); document.documentElement.classList.add('portada-esperando'); try { marcar(); } catch (e) {} }; }
+  new MutationObserver(function () {
+    if (document.documentElement.classList.contains('portada-esperando')) return;
+    var el = document.querySelector('.k1-pulsado');
+    if (el) { el.classList.remove('k1-pulsado'); el.removeAttribute('aria-busy'); }
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   ['goTo', 'goToLegal', 'abrirPlanEjemplo', 'entrarODashboard', 'abrirOpinionPublica'].forEach(function (n) { if (!window[n]) window[n] = encolar(n); });
   function $(id) { return document.getElementById(id); }
   window.scrollToSection = function (id) { var e = $(id); if (e) e.scrollIntoView({ behavior: 'smooth' }); };
@@ -433,6 +450,18 @@
 /* CSS DIVIDIDO (8 oct 2026, velocidad de la portada): este bloque lleva lo que usa lo que se ve al abrir la web.
    Los estilos de registro, login, formulario, panel y legal están en el bloque «css-pantallas», justo después de la portada.
    Al añadir CSS: si es de la portada o del menú, aquí; si es de una pantalla de cliente, en css-pantallas. */
+/* Giro de carga del botón tocado mientras llega la app (ver la cola de la portada). Aquí y no en
+   css-pantallas: con 4G lenta el botón se puede tocar antes de que el navegador llegue a ese bloque. */
+.k1-cargando { display: none; }
+html.portada-esperando .k1-pulsado .k1-cargando {
+  display: inline-block; flex: none; width: 1em; height: 1em; margin-left: .6em; vertical-align: -.15em;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: k1-gira .7s linear infinite;
+}
+/* En los dos botones de la cabecera el giro ocupa el sitio de la flecha. */
+html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejemplo.k1-pulsado > .hv-ejemplo-flecha { display: none; }
+@keyframes k1-gira { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { html.portada-esperando .k1-pulsado .k1-cargando { animation-duration: 2.4s; } }
 
   :root {
     --negro: #0A0A0A;
@@ -1032,7 +1061,7 @@
   .hv-ejemplo-ico { width: 36px; height: 36px; border-radius: 9px; background: var(--grafito); color: var(--brasa-txt); display: grid; place-items: center; flex-shrink: 0; }
   .hv-ejemplo-ico svg { width: 19px; height: 19px; }
   .hv-ejemplo b { display: block; font-size: 14px; font-weight: 600; }
-  .hv-ejemplo small { display: block; font-size: 12px; color: var(--metal); margin-top: 2px; }
+  .hv-ejemplo small { display: block; font-size: 13px; color: var(--metal); margin-top: 2px; }
   .hv-ejemplo-flecha { width: 16px; height: 16px; color: var(--brasa-txt); margin-left: 6px; transition: transform .2s; }
   .hv-ejemplo:hover .hv-ejemplo-flecha { transform: translateX(3px); }
   .hero-content .hero-trust { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0; }
@@ -1599,7 +1628,7 @@
 
   .sport-badge {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11.5px;
     letter-spacing: 0.5px;
     font-weight: 500;
     text-transform: uppercase;
@@ -1726,7 +1755,7 @@
     background: var(--brasa);
     color: var(--blanco-puro);
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -1737,7 +1766,7 @@
   .price-tag {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12.5px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--brasa-txt);
@@ -1897,7 +1926,7 @@
   }
 
   .testimonial-role {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--metal-claro);
     font-family: 'DM Mono', monospace;
     margin-top: 3px;
@@ -2833,7 +2862,7 @@
   .pago-seguro-candado svg { width: 14px; height: 14px; }
   .pago-marcas { display: inline-flex; gap: 5px; }
   .pago-marcas svg { width: 34px; height: 22px; border-radius: 4px; display: block; }
-  .pago-seguro-nota { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--metal); }
+  .pago-seguro-nota { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--metal); }
   .pricing .pago-seguro { margin-top: 36px; }
 
   #modalPlanEjemplo .modal-box { max-width: 580px; padding: 34px 24px 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -3194,14 +3223,14 @@
        ancho, ventajas centradas en 2+1, valoración suelta y la tarjeta
        «Progreso» tapando medio móvil). */
     #landing .hv-ventajas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-    #landing .hv-ventajas li { flex-direction: column; justify-content: center; gap: 7px; text-align: center; font-size: 12.5px; line-height: 1.3; padding: 12px 6px; background: rgba(20,20,20,0.7); border: 1px solid var(--humo); border-radius: 14px; }
+    #landing .hv-ventajas li { flex-direction: column; justify-content: center; gap: 7px; text-align: center; font-size: 13px; line-height: 1.3; padding: 12px 6px; background: rgba(20,20,20,0.7); border: 1px solid var(--humo); border-radius: 14px; }
     #landing .hv-ejemplo { margin-top: 14px; }
     #landing .hero-content .hero-trust { margin-top: 14px; }
     #landing .hero-content .hero-trust > span { width: 100%; justify-content: center; border-radius: 14px; padding: 10px; }
     #landing .hv-t-progreso { display: none; }
     #landing .hv-play-grande { width: 62px; height: 62px; }
     #landing .hv-play-grande svg { width: 24px; height: 24px; }
-    #landing .hv-play-txt { top: calc(46% + 48px); font-size: 12px; padding: 7px 12px; }
+    #landing .hv-play-txt { top: calc(46% + 48px); font-size: 13px; padding: 7px 12px; }
     #landing .sports-grid { gap: 12px; }
     #landing .sport-card, #landing .hybrid-callout { border-radius: 18px; overflow: hidden; }
     #landing .hybrid-callout { margin-bottom: 20px; }}
@@ -4215,9 +4244,9 @@
     <div class="nav-links">
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('sports')" onkeydown="if(event.key==='Enter')this.click()">Deportes</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('how')" onkeydown="if(event.key==='Enter')this.click()">Cómo funciona</span>
+      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
-      <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('testimonials')" onkeydown="if(event.key==='Enter')this.click()">Opiniones</span>
       <span class="nav-link nav-entrar" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
       <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis</button>
     </div>
@@ -4230,9 +4259,9 @@
     <span class="nav-link" id="navEntrarMobile" onclick="closeMobileMenu(); entrarODashboard()">Entrar</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('sports')">Deportes</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('how')">Cómo funciona</span>
+    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
-    <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza gratis</button>
   </div>
 
@@ -4455,6 +4484,34 @@
         <div class="step-title">Documenta tu cambio</div>
         <p class="step-body">Fotos mensuales, registros y evolución de cargas: en tres meses tienes la historia completa de tu cambio.</p>
       </div>
+    </div>
+  </section>
+
+  <section class="testimonials" id="testimonials">
+    <div class="section-header">
+      <h2 class="section-title">Únete a los que ya entrenan con <span style="white-space:nowrap">K-ONE</span></h2>
+      <p class="section-note">Gente real que entrena con nosotros. Sin filtros, sin inventar.</p>
+    </div>
+    <div class="testimonials-carousel" id="testimonialsCarousel">
+    <button class="testimonials-nav testimonials-nav--prev" onclick="scrollTestimonials(-1)" aria-label="Ver opiniones anteriores">‹</button>
+    <button class="testimonials-nav testimonials-nav--next" onclick="scrollTestimonials(1)" aria-label="Ver más opiniones">›</button>
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="testimonial-card" style="display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:13px;font-family:'DM Mono',monospace;letter-spacing:1px">
+        Cargando opiniones...
+      </div>
+    </div>
+    </div>
+    <!-- Estado vacío: visible hasta que haya opiniones reales -->
+    <div class="testimonials-empty" id="testimonialsEmpty" style="display:none">
+      <div class="testimonials-empty-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--brasa)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="9" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="15" y1="10" x2="15" y2="10"/></svg>
+      </div>
+      <p class="testimonials-empty-title">Las primeras opiniones llegarán pronto</p>
+      <p class="testimonials-empty-desc">Cuando nuestros clientes compartan su experiencia, aparecerán aquí. Opiniones reales, sin inventar.</p>
+      <button class="btn-primary" onclick="abrirOpinionPublica()" style="margin-top:20px;padding:12px 28px;font-size:13px">Dejar mi opinión →</button>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn-ghost" onclick="abrirOpinionPublica()" style="padding:10px 24px;font-size:13px">Dejar mi opinión →</button>
     </div>
   </section>
 
@@ -4727,33 +4784,6 @@
     </div>
   </section>
 
-  <section class="testimonials" id="testimonials">
-    <div class="section-header">
-      <h2 class="section-title">Únete a los que ya entrenan con K-ONE</h2>
-      <p class="section-note">Gente real que entrena con nosotros. Sin filtros, sin inventar.</p>
-    </div>
-    <div class="testimonials-carousel" id="testimonialsCarousel">
-    <button class="testimonials-nav testimonials-nav--prev" onclick="scrollTestimonials(-1)" aria-label="Ver opiniones anteriores">‹</button>
-    <button class="testimonials-nav testimonials-nav--next" onclick="scrollTestimonials(1)" aria-label="Ver más opiniones">›</button>
-    <div class="testimonials-track" id="testimonialsTrack">
-      <div class="testimonial-card" style="display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:13px;font-family:'DM Mono',monospace;letter-spacing:1px">
-        Cargando opiniones...
-      </div>
-    </div>
-    </div>
-    <!-- Estado vacío: visible hasta que haya opiniones reales -->
-    <div class="testimonials-empty" id="testimonialsEmpty" style="display:none">
-      <div class="testimonials-empty-icon">
-        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--brasa)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="9" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="15" y1="10" x2="15" y2="10"/></svg>
-      </div>
-      <p class="testimonials-empty-title">Las primeras opiniones llegarán pronto</p>
-      <p class="testimonials-empty-desc">Cuando nuestros clientes compartan su experiencia, aparecerán aquí. Opiniones reales, sin inventar.</p>
-      <button class="btn-primary" onclick="abrirOpinionPublica()" style="margin-top:20px;padding:12px 28px;font-size:13px">Dejar mi opinión →</button>
-    </div>
-    <div style="text-align:center;margin-top:32px">
-      <button class="btn-ghost" onclick="abrirOpinionPublica()" style="padding:10px 24px;font-size:13px">Dejar mi opinión →</button>
-    </div>
-  </section>
 
   <section class="philosophy">
     <h2 class="philosophy-quote">
@@ -5165,7 +5195,7 @@
   .hv-ejemplo-ico { width: 36px; height: 36px; border-radius: 9px; background: var(--grafito); color: var(--brasa-txt); display: grid; place-items: center; flex-shrink: 0; }
   .hv-ejemplo-ico svg { width: 19px; height: 19px; }
   .hv-ejemplo b { display: block; font-size: 14px; font-weight: 600; }
-  .hv-ejemplo small { display: block; font-size: 12px; color: var(--metal); margin-top: 2px; }
+  .hv-ejemplo small { display: block; font-size: 13px; color: var(--metal); margin-top: 2px; }
   .hv-ejemplo-flecha { width: 16px; height: 16px; color: var(--brasa-txt); margin-left: 6px; transition: transform .2s; }
 
   /* Escena: el móvil con la captura real y cuatro tarjetas alrededor */
@@ -6278,7 +6308,7 @@
 
   .sport-badge {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11.5px;
     letter-spacing: 0.5px;
     font-weight: 500;
     text-transform: uppercase;
@@ -6400,7 +6430,7 @@
     background: var(--brasa);
     color: var(--blanco-puro);
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -6411,7 +6441,7 @@
   .price-tag {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12.5px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--brasa-txt);
@@ -6567,7 +6597,7 @@
   }
 
   .testimonial-role {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--metal-claro);
     font-family: 'DM Mono', monospace;
     margin-top: 3px;
@@ -10180,7 +10210,7 @@
   .pago-seguro-candado svg { width: 14px; height: 14px; }
   .pago-marcas { display: inline-flex; gap: 5px; }
   .pago-marcas svg { width: 34px; height: 22px; border-radius: 4px; display: block; }
-  .pago-seguro-nota { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--metal); }
+  .pago-seguro-nota { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--metal); }
 
   .ejemplo-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 40px auto 0; padding: 24px 20px; max-width: 640px; border: 1px dashed rgba(209,66,14,0.45); border-radius: 14px; text-align: center; }
   .ejemplo-cta p { margin: 0; color: var(--metal-claro); font-size: 14px; line-height: 1.55; }
@@ -10790,12 +10820,12 @@
        ancho, ventajas centradas en 2+1, valoración suelta y la tarjeta
        «Progreso» tapando medio móvil). */
     #landing .hv-ventajas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-    #landing .hv-ventajas li { flex-direction: column; justify-content: center; gap: 7px; text-align: center; font-size: 12.5px; line-height: 1.3; padding: 12px 6px; background: rgba(20,20,20,0.7); border: 1px solid var(--humo); border-radius: 14px; }
+    #landing .hv-ventajas li { flex-direction: column; justify-content: center; gap: 7px; text-align: center; font-size: 13px; line-height: 1.3; padding: 12px 6px; background: rgba(20,20,20,0.7); border: 1px solid var(--humo); border-radius: 14px; }
     #landing .hero-content .hero-trust { margin-top: 14px; }
     #landing .hero-content .hero-trust > span { width: 100%; justify-content: center; border-radius: 14px; padding: 10px; }
     #landing .hv-t-progreso { display: none; }
     #landing .hv-play-grande { width: 62px; height: 62px; }
-    #landing .hv-play-txt { top: calc(46% + 48px); font-size: 12px; padding: 7px 12px; }
+    #landing .hv-play-txt { top: calc(46% + 48px); font-size: 13px; padding: 7px 12px; }
     #landing .sport-card, #landing .hybrid-callout { border-radius: 18px; overflow: hidden; }}
   #landing .step { border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); padding: 32px 26px 30px; }
   #landing .step-num { font-size: 64px; color: var(--brasa-txt); opacity: .9; margin-bottom: 12px; }
