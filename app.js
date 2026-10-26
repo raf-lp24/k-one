@@ -8498,6 +8498,7 @@
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
+            op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
           ]
         },
         {
@@ -8820,6 +8821,7 @@
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
+            op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
           ]
         },
         {
@@ -8933,6 +8935,7 @@
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
+            op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
           ]
         }
       ];
@@ -9122,6 +9125,7 @@
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
+            op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
           ]
         },
         {
@@ -15874,6 +15878,7 @@
     "Muffins de arándanos proteicos": "Bate el huevo con el yogur y la vainilla. Añade la harina de avena y la proteína y mezcla hasta que no queden grumos. Incorpora los arándanos, reparte la masa en 2 moldes de magdalena y hornea a 180º unos 10-12 min. Puedes hacer varias tandas de una vez: aguantan 3 días en la nevera.",
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
     "Muffins de plátano, arándanos y pistacho": "Aplasta el plátano con un tenedor y bátelo con el huevo y el yogur. Añade la harina de avena, la proteína, la miel y la levadura, y mezcla sin grumos. Incorpora casi todos los arándanos. Reparte en 3-4 moldes de magdalena y pon encima el resto de arándanos y los pistachos picados. Freidora a 160º unos 20 min (horno: 180º, 15-18 min).",
+    "Pimientos rellenos de ternera y arroz integral": "Cuece el arroz integral. Corta la parte de arriba de los pimientos, vacíalos y ásalos en el horno a 200º unos 15 min. Mientras, rehoga la zanahoria rallada con el aceite, añade la carne picada con el comino y el orégano y, cuando cambie de color, el tomate triturado; deja 5 min y mézclalo con el arroz. Rellena los pimientos, pon la mozzarella por encima y hornea 20-25 min más a 200º, hasta que se gratine (en la freidora de aire, a 180º unos 15 min).",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
     "Patata o boniato con pollo y verdura": "Cuece o asa la patata o el boniato. Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Sírvelo todo junto con el aceite de oliva.",
