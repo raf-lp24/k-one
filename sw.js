@@ -36,7 +36,7 @@
 // 'Tu plan, adaptado' con 3 notas visibles (el resto plegadas).
 // v66 (2 oct 2026): 'Tu plan, adaptado' y 'Después de entrenar' plegados del todo.
 // v103 (4 oct 2026): portada nueva e iconos con la mancuerna del logo.
-const CACHE_NAME = 'kone-v104';
+const CACHE_NAME = 'kone-v105';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

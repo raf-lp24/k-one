@@ -213,6 +213,10 @@
      <script> real ya lo tiene en caché, así que la pausa que queda es solo la
      de ejecutarlo (rápida), no la de ida y vuelta de red (lenta en 4G). -->
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous">
+<!-- 27 oct 2026: lo mismo para /app.js (el código de la app, al final del body desde
+     el 25 oct). Sin esto no se pedía hasta que el parser llegaba al final del HTML
+     (~2,8 s con 4G lenta), y hasta que llega no funciona ningún botón. -->
+<link rel="preload" as="script" href="/app.js">
 <!-- Sora y Plus Jakarta Sans (9 variantes de grosor entre las dos) NO van aquí
      a propósito: solo las usa el panel de administración (Jarvis, variables
      --jv-display/--jv-ui), que ningún cliente ve nunca. Cargarlas para todo
