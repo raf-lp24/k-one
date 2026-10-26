@@ -2249,7 +2249,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261023a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261027a');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -5960,8 +5960,12 @@
           // mismo gesto con salto y sin peso: la serie pesada «despierta» la
           // pierna y el salto sale más potente. Va en dos piezas seguidas para
           // que cada una tenga su ficha; el paréntesis dice cómo se encadenan.
+          // 27 oct 2026 (aprobado por Rafa): un contraste sí y otro no, la pareja
+          // es búlgara pesada + búlgara con salto en vez de sentadilla + squat jumps.
           : (esAvanzado && !_sinImpacto && bloqueMeso % 2 === 1)
-            ? `Piernas · ${_casaHib ? 'Sentadilla goblet 4×5 (pesada)' : 'Sentadilla 4×4 (75-80 % del peso)'}, squat jumps 4×5 (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`
+            ? (Math.floor(bloqueMeso / 2) % 2 === 1
+              ? `Piernas · Sentadilla búlgara 3×5 por pierna (pesada), sentadilla búlgara con salto 3×4 por pierna (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`
+              : `Piernas · ${_casaHib ? 'Sentadilla goblet 4×5 (pesada)' : 'Sentadilla 4×4 (75-80 % del peso)'}, squat jumps 4×5 (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`)
             : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`;
       // Carrera suave del día de cardio (en vez del "cambia de máquina" del
       // gimnasio: este cliente quiere correr). Perder grasa: +5 min.
