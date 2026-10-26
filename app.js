@@ -8545,6 +8545,7 @@
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
             op("Muffins de arándanos proteicos", "1 huevo, 40g yogur griego 0%, 10g proteína whey, 15g harina de avena, 30g arándanos, vainilla", "215 kcal", "21g prot", "17g carbs", "7g grasa", "Horno 180º · 12 min"),
+            op("Tiramisú proteico en vaso", "200g yogur griego 0%, 25g proteína whey, 25g galletas maría, café, 5g cacao puro, 5g chocolate negro", "375 kcal", "44g prot", "34g carbs", "7g grasa", "Sin cocción · 5 min"),
             op("Tarta de queso ligera", "125g yogur griego 0%, 30g queso batido 0%, 1/2 huevo, vainilla", "131 kcal", "19g prot", "7g carbs", "3g grasa", "Freidora 170º · 25 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
@@ -8867,6 +8868,8 @@
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
             op("Muffins de arándanos proteicos", "1 huevo, 40g yogur griego 0%, 10g proteína whey, 15g harina de avena, 30g arándanos, vainilla", "215 kcal", "21g prot", "17g carbs", "7g grasa", "Horno 180º · 12 min"),
+            op("Tiramisú proteico en vaso", "200g yogur griego 0%, 25g proteína whey, 25g galletas maría, café, 5g cacao puro, 5g chocolate negro", "375 kcal", "44g prot", "34g carbs", "7g grasa", "Sin cocción · 5 min"),
+            op("Muffins de plátano, arándanos y pistacho", "1 plátano, 1 huevo, 100g yogur griego 0%, 15g proteína whey, 20g harina de avena, 40g arándanos, 5g pistachos, 5g miel, levadura química", "463 kcal", "34g prot", "57g carbs", "11g grasa", "Freidora 160º · 20 min"),
             op("Tarta de queso ligera", "125g yogur griego 0%, 30g queso batido 0%, 1/2 huevo, vainilla", "131 kcal", "19g prot", "7g carbs", "3g grasa", "Freidora 170º · 25 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
@@ -9166,6 +9169,8 @@
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
             op("Muffins de arándanos proteicos", "1 huevo, 40g yogur griego 0%, 10g proteína whey, 15g harina de avena, 30g arándanos, vainilla", "215 kcal", "21g prot", "17g carbs", "7g grasa", "Horno 180º · 12 min"),
+            op("Tiramisú proteico en vaso", "200g yogur griego 0%, 25g proteína whey, 25g galletas maría, café, 5g cacao puro, 5g chocolate negro", "375 kcal", "44g prot", "34g carbs", "7g grasa", "Sin cocción · 5 min"),
+            op("Muffins de plátano, arándanos y pistacho", "1 plátano, 1 huevo, 100g yogur griego 0%, 15g proteína whey, 20g harina de avena, 40g arándanos, 5g pistachos, 5g miel, levadura química", "463 kcal", "34g prot", "57g carbs", "11g grasa", "Freidora 160º · 20 min"),
             op("Tarta de queso ligera", "125g yogur griego 0%, 30g queso batido 0%, 1/2 huevo, vainilla", "131 kcal", "19g prot", "7g carbs", "3g grasa", "Freidora 170º · 25 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Helado proteico de frutos rojos", "150g frutos rojos congelados, 150ml leche desnatada, 1 scoop proteína whey, 1/2 plátano, 1 kiwi, 10g nueces", "405 kcal", "33g prot", "48g carbs", "9g grasa", "Batidora · 5 min"),
@@ -15867,6 +15872,8 @@
     "Patatas crujientes con ternera, queso fresco y ensalada": "Corta la patata en dados, sazónala con pimentón y hazla en la freidora de aire a 190º unos 16-18 min, sin aceite y removiendo a mitad. Mientras, saltea la carne picada con el ajo y una pizca de sal. Sirve las patatas con la carne, el queso batido por encima y la ensalada al lado.",
     "Ensalada crujiente de pollo y espirales de lentejas": "Cuece las espirales de lentejas como indica el paquete, escúrrelas y hazlas en la freidora de aire a 180º unos 15 min, con sal y especias, hasta que crujan. Haz el pollo a la plancha y córtalo en tiras. Para la salsa, mezcla el yogur con perejil, ajo, sal, pimienta y un chorro de limón. Monta la lechuga y el tomate, añade el pollo y las espirales crujientes y aliña con la salsa.",
     "Muffins de arándanos proteicos": "Bate el huevo con el yogur y la vainilla. Añade la harina de avena y la proteína y mezcla hasta que no queden grumos. Incorpora los arándanos, reparte la masa en 2 moldes de magdalena y hornea a 180º unos 10-12 min. Puedes hacer varias tandas de una vez: aguantan 3 días en la nevera.",
+    "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
+    "Muffins de plátano, arándanos y pistacho": "Aplasta el plátano con un tenedor y bátelo con el huevo y el yogur. Añade la harina de avena, la proteína, la miel y la levadura, y mezcla sin grumos. Incorpora casi todos los arándanos. Reparte en 3-4 moldes de magdalena y pon encima el resto de arándanos y los pistachos picados. Freidora a 160º unos 20 min (horno: 180º, 15-18 min).",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
     "Patata o boniato con pollo y verdura": "Cuece o asa la patata o el boniato. Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Sírvelo todo junto con el aceite de oliva.",
