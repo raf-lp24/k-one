@@ -4083,7 +4083,7 @@
     'marisco': ['gambas','langostinos','mejillon','mejillón','mejillones','almejas','calamar','calamares','pulpo','sepia','vieira','vieiras','cangrejo','langosta','cigalas','bogavante','berberechos','surimi'],
     'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas','chuletón'],
     'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon','cerdo','morcilla','butifarra'],
-    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr'],
+    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone'],
     'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones','macadamia'],
     'legumbres': ['garbanzos','lentejas','judías','judias','alubias','habas','guisantes','edamame','soja'],
     'verduras': ['brócoli','brocoli','espinacas','espinaca','lechuga','rúcula','rucula','calabacín','calabacin','berenjena','pimiento','pepino','tomate','cebolla','zanahoria','espárrago','esparrago','alcachofa','champiñón','champiñon','setas','apio','puerro','col','repollo','coliflor','calabaza'],
@@ -4649,7 +4649,7 @@
     // el mismo alimento: cualquier duda se queda fuera, porque tapar de más
     // vacía el recetario del cliente sin que él lo haya pedido.
     const SINONIMOS_MISMO_ALIMENTO = {
-      'queso': ['requesón'],
+      'queso': ['requesón','cottage','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone'],
       'gamba': ['langostino'],
       'langostino': ['gamba'],
       'cacahuete': ['crema de cacahuete'],
@@ -4691,7 +4691,7 @@
     const _APELLIDOS = '(?:romana|iceberg|trigueros|ib[eé]ric[oa]s?|serrano|dur[oa]s?|pochad[oa]s?|pelad[oa]s?|limpi[oa]s?|variad[oa]s?|basmati|arborio|bomba|manchego|curad[oa]s?|semicurad[oa]s?|tiern[oa]s?|parmesano|crema(?!\\s+de)|cherry|roj[oa]s?|verdes?|amarill[oa]s?|pintas?|blanc[oa]s?|semidesnatad[oa]|desnatad[oa]|enter[oa]|wassa|madur[oa]s?|sec[oa]s?|gratinad[oa]s?|proteic[oa]s?|poché|grandes?|pequeñ[oa]s?|integral(?:es)?|centeno|multicereal(?:es)?|fin[oa]s?|panadera|al natural|en conserva|en aceite|griego|light|\\d+\\s*%|certificad[ao]s?|sin (?:gluten|lactosa))';
     // Sin sustituto el alimento se BORRA, y con él la preparación que lo
     // describía: "con verduras salteadas" quedaba "con salteadas".
-    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
+    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|picad[oa]s?|laminad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
     const susMap = {};
     // Un sustituto sirve si no está vetado él mismo (ni por token ni por regex:
     // "pechuga de pollo" no vale si el cliente no come pollo).
@@ -4719,7 +4719,12 @@
         }
       }
     });
-    const regexesSust = regexes.map((re, i) => new RegExp('(?:' + re.source + ')(?:\\s+' + (susMap[i] ? _APELLIDOS : _DESCRIPCION_BORRADA) + ')*', re.flags));
+    // Sin sustituto, el artículo del alimento se va con él: si no, en los pasos
+    // quedaba "pon la por encima" o "cubre con el tomate, la , el pollo"
+    // (quitada la mozzarella, 26 oct 2026). Con sustituto se queda, y ya lo
+    // pone en su género concordarArticulos.
+    const _ARTICULO_PREVIO = '(?:(?<![a-záéíóúüñ])(?:el|la|los|las|un|una|unos|unas)\\s+)?';
+    const regexesSust = regexes.map((re, i) => new RegExp((susMap[i] ? '' : _ARTICULO_PREVIO) + '(?:' + re.source + ')(?:\\s+' + (susMap[i] ? _APELLIDOS : _DESCRIPCION_BORRADA) + ')*', re.flags));
     // Tras borrar un alimento sin sustituto pueden quedar preposiciones sueltas
     // delante de la puntuación ("sin grumos de .", "con , plátano").
     // Y si no hubo sustituto, se quitaba el alimento pero se quedaba su
@@ -4733,8 +4738,18 @@
       .replace(/\s+(?:con|y|e|de)\s+(?=(?:al|a la|a las)\s|\()/g, ' ')
       // "Pasta con y atún" · "tostada, y jamón" · "pisto de" al final
       .replace(/\s+(con|de)\s+(?:y|e)\s+/g, ' $1 ').replace(/,\s+(y|e)\s+/g, ' $1 ')
-      .replace(/\s+(?:con|y|e|de)\s*(?=$|\.)/g, '').replace(/\s+(de|del|con|y|e)\s*(?=[,.;])/g, '')
+      .replace(/\s+(?:con|y|e|de)\s*(?=$|\.)/g, '').replace(/\s+(de|del|con|y|e|para)\s*(?=[,.;])/g, '')
       .replace(/\s+de\s+(?=(con|y|e)\b)/g, ' ')
+      // En los pasos, quitado lo que iba detrás del verbo: "partidos y y echa",
+      // "Añade , el calabacín", "pon por encima y hornea" (era la mozzarella).
+      .replace(/\s+(y|e)\s+(?:y|e)\s+/g, ' $1 ')
+      .replace(/\b(pon|añade|echa|unta|reparte)\s*,\s*/gi, '$1 ')
+      // Quitado el ajo: "Añade y la guindilla", "Saltéalas con en la mitad del AOVE".
+      .replace(/\b(dora|saltea|sofríe|añade)\s+y\s+/gi, '$1 ')
+      .replace(/\s+con\s+(?=en\s)/g, ' ')
+      // "Sofríe en el AOVE" cuando lo que se sofreía era el ajo.
+      .replace(/\b(saltea|sofríe|dora)\s+en\s+(el|la)\s+/gi, (m, v, art) => (v[0] === v[0].toUpperCase() ? 'Calienta ' : 'calienta ') + art + ' ')
+      .replace(/\b(?:pon|echa|reparte|espolvorea)\s+(?:por\s+)?encima\s+y\s+/gi, '')
       .replace(/,\s*$/, '').replace(/^\s*,\s*/, '').replace(/\s{2,}/g, ' ').trim();
     // El artículo que llevaba el alimento quitado no tiene por qué valer para
     // el sustituto: "Tuesta el pan" → "Tuesta el tortas de arroz".
@@ -15878,7 +15893,7 @@
     "Muffins de arándanos proteicos": "Bate el huevo con el yogur y la vainilla. Añade la harina de avena y la proteína y mezcla hasta que no queden grumos. Incorpora los arándanos, reparte la masa en 2 moldes de magdalena y hornea a 180º unos 10-12 min. Puedes hacer varias tandas de una vez: aguantan 3 días en la nevera.",
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
     "Muffins de plátano, arándanos y pistacho": "Aplasta el plátano con un tenedor y bátelo con el huevo y el yogur. Añade la harina de avena, la proteína, la miel y la levadura, y mezcla sin grumos. Incorpora casi todos los arándanos. Reparte en 3-4 moldes de magdalena y pon encima el resto de arándanos y los pistachos picados. Freidora a 160º unos 20 min (horno: 180º, 15-18 min).",
-    "Pimientos rellenos de ternera y arroz integral": "Cuece el arroz integral. Corta la parte de arriba de los pimientos, vacíalos y ásalos en el horno a 200º unos 15 min. Mientras, rehoga la zanahoria rallada con el aceite, añade la carne picada con el comino y el orégano y, cuando cambie de color, el tomate triturado; deja 5 min y mézclalo con el arroz. Rellena los pimientos, pon la mozzarella por encima y hornea 20-25 min más a 200º, hasta que se gratine (en la freidora de aire, a 180º unos 15 min).",
+    "Pimientos rellenos de ternera y arroz integral": "Cuece el arroz integral. Corta la parte de arriba de los pimientos, vacíalos y ásalos en el horno a 200º unos 15 min. Mientras, rehoga la zanahoria rallada con el aceite, añade la carne picada con el comino y el orégano y, cuando cambie de color, el tomate triturado; deja 5 min y mézclalo con el arroz. Rellena los pimientos, pon la mozzarella por encima y hornea 20-25 min más a 200º, hasta que se dore (en la freidora de aire, a 180º unos 15 min).",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
     "Patata o boniato con pollo y verdura": "Cuece o asa la patata o el boniato. Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Sírvelo todo junto con el aceite de oliva.",
