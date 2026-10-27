@@ -3924,7 +3924,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (114 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (117 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4044,7 +4044,11 @@
     // 27 oct 2026 · revisión diaria de Instagram, aprobadas por Rafa
     "¿Entrenas a primera hora? Tu preentreno es la cena de la noche anterior: que lleve su ración de hidratos.",
     "Es más fácil culpar al plan que mirarse con honestidad. Mira qué haces bien, qué puedes mejorar, y cuéntanoslo.",
-    "Los saltos y los circuitos sin material suman, pero la base es la fuerza con peso. Si un día solo puedes entrenar en casa, perfecto; que no sea siempre."
+    "Los saltos y los circuitos sin material suman, pero la base es la fuerza con peso. Si un día solo puedes entrenar en casa, perfecto; que no sea siempre.",
+    // 27 oct 2026 · revisión de Instagram del 26 oct, aprobadas por Rafa
+    "La mejor dieta es la que podrías seguir dentro de dos años.",
+    "Si esperas el momento perfecto, te quedas parado. Empieza poco a poco y el camino se abre.",
+    "Lo que entrenas hoy lo vas a notar dentro de veinte años."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
