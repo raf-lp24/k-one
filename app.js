@@ -2136,6 +2136,7 @@
     ['hip thrust|empuje de cadera', 'efe-QObKAZU', 'Dra. Isabel Junio - Hip thrust con barra'],
     ['puente (de )?gluteo', 'oDXM-a-gBt8', 'Móveo Fisioterapia - Puente de glúteo'],
     ['patada de gluteo', 'EIst_zqP2dg', 'Galvistrainer - Patada de glúteo'],
+    ['zancadas? con salto|jump lunges?|split jumps?', 'LBBbKa--AEs', 'Oriol Roda - Zancada con salto'],
     ['zancada cruzada|curtsy', 'pJE4dq-cyYo', 'Carlos Online Coach - Zancada cruzada'],
     ['zancadas? lateral', '6mDKhdmTjao', 'Javier Giménez - Zancada lateral'],
     ['zancadas? inversa|zancadas? (hacia )?atras', 'wF96HPOuf7E', 'Proet - Zancada inversa'],
@@ -2249,7 +2250,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261027a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261027b');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3923,7 +3924,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (97 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (114 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4039,7 +4040,11 @@
     "Cada entreno que haces es una promesa que cumples contigo.",
     "No te preguntes qué te apetece. Pregúntate qué haría la persona que quieres ser.",
     "Hoy es la suma de lo que hiciste ayer. Mañana, de lo que hagas hoy.",
-    "Un mal día no estropea una buena semana."
+    "Un mal día no estropea una buena semana.",
+    // 27 oct 2026 · revisión diaria de Instagram, aprobadas por Rafa
+    "¿Entrenas a primera hora? Tu preentreno es la cena de la noche anterior: que lleve su ración de hidratos.",
+    "Es más fácil culpar al plan que mirarse con honestidad. Mira qué haces bien, qué puedes mejorar, y cuéntanoslo.",
+    "Los saltos y los circuitos sin material suman, pero la base es la fuerza con peso. Si un día solo puedes entrenar en casa, perfecto; que no sea siempre."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -5393,6 +5398,8 @@
       // corredores). La subida trabaja la pierna de apoyo con la rodilla
       // arriba, como la zancada de carrera; el salto desde sentado arranca sin
       // contramovimiento y su aterrizaje es de los más fáciles de controlar.
+      // 27 oct 2026 (aprobado por Rafa): zancadas con salto alternas, idea de
+      // @valicentif; la pierna adelantada trabaja como en la zancada de carrera.
       const plioVariantesAv = rSinMat
         ? ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
            'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)',
@@ -5402,7 +5409,7 @@
            'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
            'single-leg hop lateral 3×8/lado',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'zancadas con salto 3×10 alternas (cambia de pierna en el aire y cae suave)']
         : ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)',
            'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)',
            'salto desde sentado en un banco 3×6',
@@ -5411,7 +5418,7 @@
            'subida explosiva al banco 3×8/pierna',
            'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)',
            'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)',
-           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
+           'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'zancadas con salto 3×10 alternas (cambia de pierna en el aire y cae suave)'];
       const plioAv = plioVariantesAv[bloqueMeso % plioVariantesAv.length];
       // El salto va el PRIMERO de la sesión, con las piernas frescas (14 oct
       // 2026): antes iba el cuarto, detrás de búlgara, peso muerto e hip
@@ -5814,9 +5821,10 @@
       // Mismas dos variantes nuevas que Running (pogo jumps, bounding): más
       // variedad de la que pedía el cliente, y con mejor transferencia real a
       // carrera que un salto vertical suelto.
+      // 27 oct 2026: + zancadas con salto (igual que en Running).
       const _plioVariantesHibAv = _casaHib
-        ? ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en una silla firme 3×6', 'squat jumps 3×8', 'subida explosiva a un escalón 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)']
-        : ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en un banco 3×6', 'box jumps 3×6', 'squat jumps 3×8 con mancuernas ligeras', 'subida explosiva al banco 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)'];
+        ? ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en una silla firme 3×6', 'squat jumps 3×8', 'subida explosiva a un escalón 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'single-leg hop lateral 3×8/lado', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'zancadas con salto 3×10 alternas (cambia de pierna en el aire y cae suave)']
+        : ['pogo jumps 3×15-20 (rebote corto de tobillo, contacto mínimo con el suelo)', 'caída clavada 3×5 (salta y aterriza quieto 2 s, rodillas en línea con los pies)', 'salto desde sentado en un banco 3×6', 'box jumps 3×6', 'squat jumps 3×8 con mancuernas ligeras', 'subida explosiva al banco 3×8/pierna', 'broad jumps 3×5 (salto horizontal máximo, recuperación completa entre saltos)', 'skater hops 3×8/lado (salto lateral tipo patinador, aterriza estable)', 'bounding 3×20m (zancada exagerada, prioriza altura y longitud sobre velocidad)', 'zancadas con salto 3×10 alternas (cambia de pierna en el aire y cae suave)'];
       const _plioHibAv = _plioVariantesHibAv[bloqueMeso % _plioVariantesHibAv.length];
       // El salto va PRIMERO, con las piernas frescas (14 oct 2026): antes iba
       // el quinto, y en la sesión de 30-45 min el recorte por duración (que se
@@ -8390,6 +8398,7 @@
             op("Tostada de pollo asado con aguacate y cottage", "70g pan de masa madre, 40g aguacate, 100g queso cottage, 40g pechuga de pollo asada", "388 kcal", "27g prot", "43g carbs", "12g grasa", "Sin cocción · 5 min"),
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
+            op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Bol de yogur proteico con plátano caramelizado", "200g yogur griego 0%, 25g proteína whey, 1 plátano, 20g copos de avena, 5g miel, canela", "428 kcal", "44g prot", "54g carbs", "4g grasa", "Sartén · 5 min"),
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Bol de yogur proteico con kiwi y pepitas de chocolate", "200g yogur griego 0%, 20g proteína whey, 1 kiwi, 20g copos de avena, 5g chocolate negro, 5g miel", "369 kcal", "40g prot", "41g carbs", "5g grasa", "Sin cocción · 3 min"),
@@ -8701,6 +8710,7 @@
             op("Tostada de pollo asado con aguacate y cottage", "70g pan de masa madre, 40g aguacate, 100g queso cottage, 40g pechuga de pollo asada", "388 kcal", "27g prot", "43g carbs", "12g grasa", "Sin cocción · 5 min"),
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
+            op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
             op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
           ]
@@ -9019,6 +9029,7 @@
             op("Tostada de pollo asado con aguacate y cottage", "70g pan de masa madre, 40g aguacate, 100g queso cottage, 40g pechuga de pollo asada", "388 kcal", "27g prot", "43g carbs", "12g grasa", "Sin cocción · 5 min"),
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
+            op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
@@ -9898,7 +9909,7 @@
         const _tomasActivas = TOMAS_POR_FRECUENCIA[_forzando5Tomas ? '4-5 veces' : u.comidas] || TOMAS_POR_FRECUENCIA['4-5 veces'];
         const _hueco = _huecosHora({ pre: 'Comida', post: 'Merienda' });
         const _notaHora = {
-          manana: 'Entrenas por la mañana: en tus días de entreno el desayuno es fácil de digerir (hidrato y proteína, poca grasa y fibra) para tomarlo 45-60 min antes de empezar, y la media mañana es tu comida de recuperación, con proteína y algo de hidrato.',
+          manana: 'Entrenas por la mañana: en tus días de entreno el desayuno es fácil de digerir (hidrato y proteína, poca grasa y fibra) para tomarlo 45-60 min antes de empezar, y la media mañana es tu comida de recuperación, con proteína y algo de hidrato. Si entrenas muy temprano, tu preentreno es la cena de la noche anterior: que lleve su ración de hidratos (arroz, patata, pasta o pan).',
           mediodia: 'Entrenas a mediodía: en tus días de entreno la media mañana es un tentempié ligero para tomar 45-60 min antes, y la comida de después hace de recuperación.',
           noche: 'Entrenas por la noche: en tus días de entreno la merienda es un tentempié ligero para tomar 45-60 min antes, y la cena hace de recuperación. Si te cuesta dormir después de entrenar, mejor una cena sencilla y sin exceso de grasa.',
         }[_horaEnt];
@@ -15867,6 +15878,7 @@
     "Tostada de pollo asado con aguacate y cottage": "Tuesta el pan. Unta el queso cottage, pon el aguacate en láminas y el pollo asado desmenuzado por encima. Sal y pimienta al gusto.",
     "Wrap de huevo, pavo, cottage y aguacate": "Bate los huevos y cuájalos en una sartén antiadherente a fuego medio como una tortilla fina. Calienta la tortilla de trigo 30 segundos por cada lado. Unta el queso cottage, pon encima la tortilla de huevo, el pavo, los tomates cherry partidos, el aguacate y la rúcula. Enrolla y corta por la mitad.",
     "Tiras de crepe proteico con frambuesas": "Bate los huevos con el queso batido y la harina de avena hasta que no queden grumos. Pasa la masa a un biberón de cocina o a una bolsa con la punta cortada y dibuja tiras finas en una sartén antiadherente caliente. Dales la vuelta a los 30-40 segundos. Sírvelas en un bol, como si fueran cereales, con las frambuesas.",
+    "Crepes proteicas con chocolate negro y frambuesas": "Bate la harina de avena, la proteína, el huevo y la leche hasta tener una masa fina y sin grumos. Cuece 2-3 crepes en una sartén antiadherente caliente, 1-2 min por lado. Sírvelas con las frambuesas y el chocolate negro rallado o en trocitos por encima.",
     "Avena nocturna de chocolate con kiwi y arándanos": "Mezcla en un tarro los copos de avena, la proteína y la chía con la leche. Remueve bien, tápalo y déjalo en la nevera toda la noche. Por la mañana añade el kiwi en trozos, los arándanos y el chocolate rallado o en trocitos.",
     "Café helado proteico": "Prepara un café solo. Bate la leche con la proteína en una coctelera o con la batidora. Llena un vaso de hielo, echa el café y después la leche con proteína. Remueve y sirve.",
     "Helado proteico de frutos rojos": "Tritura los frutos rojos congelados con la leche y la proteína en una batidora potente hasta que quede una textura de helado (añade un chorrito más de leche si cuesta). Sírvelo en un bol con el plátano y el kiwi en rodajas y las nueces por encima. Cómelo al momento.",
