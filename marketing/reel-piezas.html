@@ -57,9 +57,25 @@
     ['Al terminar', 'Tus kilos y<br>tus récords'],
     ['Constancia', 'Y tu racha<br>sigue creciendo']
   ];
+  // ?reel=plan · «Le pido un plan a K-ONE» (27 oct 2026, montar-reel-plan.sh)
+  const TEXTOS_PLAN = [
+    ['Pruébalo tú', 'Le pido un plan<br>a K-ONE'],
+    ['Paso 1 de 6', 'Lo básico<br>de ti'],
+    ['Tu salud', 'Lesiones, alergias<br>y salud'],
+    ['Tu comida', 'Cómo y cuánto<br>comes'],
+    ['Tu objetivo', 'Qué quieres<br>conseguir'],
+    ['Tu entreno', 'Días, tiempo<br>y dónde entrenas'],
+    ['Un momento', 'Se monta<br>tu plan'],
+    ['Sin crear cuenta', 'Tus calorías, tu<br>primera sesión y tu menú']
+  ];
   const q = new URLSearchParams(location.search);
   const pieza = q.get('pieza') || 'fondo';
-  if (pieza === 'texto') { const t = TEXTOS[+q.get('i') || 0]; document.getElementById('eye').textContent = t[0]; document.getElementById('tit').innerHTML = t[1]; }
+  const esPlan = q.get('reel') === 'plan';
+  if (pieza === 'texto') { const t = (esPlan ? TEXTOS_PLAN : TEXTOS)[+q.get('i') || 0]; document.getElementById('eye').textContent = t[0]; document.getElementById('tit').innerHTML = t[1]; }
+  if (pieza === 'final' && esPlan) {
+    document.querySelector('#final .oferta').innerHTML = 'Hazlo tú:<br>primer mes <span class="naranja">gratis</span><br>y sin tarjeta';
+    document.querySelector('#final .cta').textContent = 'Comenta PLAN';
+  }
   document.getElementById(pieza).style.display = 'block';
   window.render = () => {};
   window.listo = document.fonts.ready.then(() => document.fonts.load("96px 'Bebas Neue'")).then(() => new Promise(r => setTimeout(r, 300)));
