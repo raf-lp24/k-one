@@ -3924,7 +3924,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (117 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (124 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4048,7 +4048,15 @@
     // 27 oct 2026 · revisión de Instagram del 26 oct, aprobadas por Rafa
     "La mejor dieta es la que podrías seguir dentro de dos años.",
     "Si esperas el momento perfecto, te quedas parado. Empieza poco a poco y el camino se abre.",
-    "Lo que entrenas hoy lo vas a notar dentro de veinte años."
+    "Lo que entrenas hoy lo vas a notar dentro de veinte años.",
+    // 28 oct 2026 · revisión de @elenadomenech_27, aprobadas por Rafa
+    "Los mejores entrenos suelen empezar con cero ganas. A los diez minutos ya ha cambiado todo.",
+    "Si hoy no puedes dar el 100 %, da el 40 %. Siempre es más que cero.",
+    "Nunca te arrepientes de haber entrenado. De no hacerlo, sí.",
+    "Compárate con quien eras hace un mes, no con nadie más.",
+    "Un entreno espectacular no cambia nada. Meses haciendo bien lo básico, sí.",
+    "Perder el hábito cuesta más que hacer el entreno de hoy.",
+    "Casi todos los días toca ir suave. Lo rápido llega después, y llega por eso."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -5692,6 +5700,73 @@
       semana = _DIAS_RUN.map((dia, i) => _plan[i]
         ? { dia, tipo: 'Entrenamiento', resumen: _plan[i].resumen, detalle: _plan[i].detalle, etiqueta: _plan[i].etiqueta }
         : { dia, tipo: 'Descanso', resumen: _DESCANSOS_RUN[i].resumen, detalle: _DESCANSOS_RUN[i].detalle, etiqueta: 'Descanso' });
+
+      // ── SEMANA DE LA CARRERA (28 oct 2026, aprobado por Rafa; idea de
+      // @elenadomenech_27) ── Con fecha de carrera puesta, el plan seguía igual
+      // hasta el último día: podía tocar una tirada larga o series fuertes dos
+      // días antes. Ahora, por días que faltan para la carrera (contando cada
+      // día de esta semana, no solo hoy):
+      //   8-14 días: la tirada larga, un 30 % más corta; lo demás igual.
+      //   2-7 días:  sin fuerza ni saltos (movilidad), rodajes a ~la mitad, y la
+      //              calidad pasa a toques cortos a ritmo de carrera.
+      //   1 día:     víspera: descanso o 15 min muy suaves.
+      //   0:         «Día de carrera».
+      //   1-3 días después: recuperación.
+      if (diasParaEvento !== null && diasParaEvento <= 17) {
+        const _hoyIdx = (new Date().getDay() + 6) % 7;
+        const _durTaper = _escalarDur(_RUN_DUR.suave[0], _RUN_DUR.suave[1], 0.6);
+        const _durLargaRec = _escalarDur(_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv, _multVolumenRun * 0.7);
+        const _nombreCarrera = tieneEvento ? u.evento.trim() : 'tu carrera';
+        const _rodajeTaper = (extra) => ({
+          tipo: 'Entrenamiento', resumen: 'Rodaje suave · Semana de carrera', etiqueta: 'Cardio',
+          detalle: `Rodaje suave · ${_durTaper} a zona 2 (RPE 3-4)${extra || ''}. Esta semana corres menos a propósito: el trabajo ya está hecho y ahora toca llegar descansado a ${_nombreCarrera}`
+        });
+        semana = semana.map((d, i) => {
+          const falta = diasParaEvento - (i - _hoyIdx);
+          if (falta === 0) {
+            return { dia: d.dia, tipo: 'Entrenamiento', resumen: `Día de carrera · ${_nombreCarrera}`, etiqueta: 'Intensidad',
+              detalle: `Hoy es ${_nombreCarrera}. Desayuno que ya hayas probado, 2-3 h antes. Calentamiento: 10 min trote suave${_conStrides ? ' + 3-4 progresivos de 60-80 m' : ''} (en maratón, 5 min basta). Sal más despacio de lo que te pide el cuerpo: los primeros kilómetros parecen fáciles y se pagan al final. Nada nuevo hoy: ni geles, ni zapatillas, ni ropa. Y disfrútala: es el premio a todas estas semanas` };
+          }
+          if (falta === 1) {
+            return { dia: d.dia, tipo: 'Descanso', resumen: 'Víspera de carrera', etiqueta: 'Descanso',
+              detalle: `Descanso${_conStrides ? ' o, si te ayuda a soltar las piernas, 15 min trote muy suave + 4 progresivos de 60 m' : ' o un paseo suave de 15-20 min'}. Deja preparado esta noche todo lo de mañana: ropa, zapatillas, dorsal, geles y el reloj cargado. Cena tu plato de hidratos de siempre, nada nuevo` };
+          }
+          if (falta < 0 && falta >= -3) {
+            return falta === -1 || d.tipo !== 'Entrenamiento'
+              ? { dia: d.dia, tipo: 'Descanso', resumen: 'Recuperación tras la carrera', etiqueta: 'Descanso',
+                  detalle: 'Descanso o paseo suave de 20-30 min. Come bien, sobre todo proteína e hidratos, y duerme: las piernas necesitan unos días' }
+              : { dia: d.dia, tipo: 'Entrenamiento', resumen: 'Recovery run · Tras la carrera', etiqueta: 'Cardio',
+                  detalle: `Recovery run · ${durRecup} muy suave (RPE 2-3), solo si las piernas están bien. Si notas molestias, camina en vez de correr` };
+          }
+          if (d.tipo !== 'Entrenamiento') return d;
+          if (falta >= 2 && falta <= 7) {
+            if (d.etiqueta === 'Fortalecimiento') {
+              return { dia: d.dia, tipo: 'Descanso', resumen: 'Movilidad · Semana de carrera', etiqueta: 'Descanso',
+                detalle: 'Esta semana no hay fuerza pesada ni saltos: llegarías con las piernas cargadas. Movilidad 10 min: cadera (90/90), tobillo (rodilla a pared), balanceos de pierna y gemelos' };
+            }
+            if (esPrincipiante) {
+              const rw = _runWalk(0, 'tecnica');
+              return { dia: d.dia, tipo: 'Entrenamiento', resumen: 'Run/walk suave · Semana de carrera', etiqueta: 'Cardio',
+                detalle: `${rw.detalle}. Esta semana, nada de alargar: llega descansado a ${_nombreCarrera}` };
+            }
+            if ((d.etiqueta === 'Intensidad' || d.etiqueta === 'Umbral') && !_sinIntensidad) {
+              const n = falta <= 3 ? 3 : 5;
+              return { dia: d.dia, tipo: 'Entrenamiento', resumen: 'Toques a ritmo de carrera · Semana de carrera', etiqueta: 'Intensidad',
+                detalle: `Calentamiento: ${_cal} min trote suave. Luego ${n} × 1 min a tu ritmo de carrera (no más rápido) con 2 min suaves entre medias. Enfriamiento: ${_vuelta} min trote. Es para recordar el ritmo a las piernas, no para cansarlas` };
+            }
+            return { dia: d.dia, ..._rodajeTaper() };
+          }
+          if (falta >= 8 && falta <= 14 && (d.etiqueta === 'Volumen' || d.etiqueta === 'Fondo')) {
+            if (esPrincipiante) {
+              const rw = _runWalk(1, 'largo');
+              return { ...d, detalle: `${rw.detalle}. Faltan ${falta} días para ${_nombreCarrera}: esta semana la sesión larga es algo más corta a propósito` };
+            }
+            return { ...d, resumen: 'Tirada larga · Más corta (se acerca la carrera)',
+              detalle: `Tirada larga · ${_durLargaRec} a ritmo suave zona 1-2 (RPE 3-4). Faltan ${falta} días para ${_nombreCarrera}: a partir de ahora el volumen baja para que llegues fresco. Post: foam rolling + estiramientos` };
+          }
+          return d;
+        });
+      }
 
       if (enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos')) {
         notasSalud.push('Por tu salud cardiovascular, tu plan de carrera no lleva series, cuestas ni intervalos intensos: todo el cardio va a ritmo conversacional. Antes de subir la intensidad, coméntalo con tu médico.');
@@ -9301,7 +9376,9 @@
       // fuelea sus días de fuerza estos pools se usan bastantes días más.
       op('Pan con mermelada y café (antes de tirada larga o series)', '3 rebanadas pan blanco, 30g mermelada, café', '310 kcal', '8g prot', '62g carbs', '3g grasa', 'Sin cocción · 3 min'),
       op('Copos de maíz con leche desnatada (antes de tirada larga o series)', '60g copos de maíz, 250ml leche desnatada', '300 kcal', '13g prot', '63g carbs', '1g grasa', 'Sin cocción · 2 min'),
-      op('Tortitas de arroz con miel y plátano (antes de tirada larga o series)', '4 tortitas de arroz, 15g miel, 1 plátano', '295 kcal', '4g prot', '69g carbs', '2g grasa', 'Sin cocción · 3 min')
+      op('Tortitas de arroz con miel y plátano (antes de tirada larga o series)', '4 tortitas de arroz, 15g miel, 1 plátano', '295 kcal', '4g prot', '69g carbs', '2g grasa', 'Sin cocción · 3 min'),
+      // 28 oct 2026 (aprobado por Rafa): lo que toma @elenadomenech_27 antes de correr. Macros con componer.js.
+      op('Tostada con crema de cacahuete y dátiles (antes de tirada larga o series)', '2 rebanadas pan blanco, 10g crema de cacahuete, 3 dátiles', '295 kcal', '8g prot', '50g carbs', '7g grasa', 'Sin cocción · 3 min')
     ];
     let fuelingPostCarrera = [
       op('Batido de plátano, miel y sal (recarga tras tirada larga)', '1 plátano, 250ml leche semidesnatada, 15g miel, pizca de sal', '260 kcal', '9g prot', '47g carbs', '5g grasa', 'Fácil · 3 min'),
@@ -10352,6 +10429,14 @@
       // evento esta lejos y el aviso no sirve para nada todavia.
       if (tieneEvento && diasParaEvento !== null && diasParaEvento <= 3) {
         notasDeporte.push(`Carga de hidratos para "${u.evento}": los 2-3 días antes de tu carrera, sube los carbohidratos a 8-10g/kg de tu peso al día (con tu plan actual de calorías, no hace falta comer más en total — cambia grasa por más arroz, pasta o pan) y baja algo la fibra para no ir pesado a la salida.`);
+      }
+      // Semana de la carrera (28 oct 2026, aprobado por Rafa; idea de @elenadomenech_27).
+      if (diasParaEvento !== null && diasParaEvento <= 7) {
+        notasDeporte.push(`Semana de ${tieneEvento ? `"${u.evento.trim()}"` : 'tu carrera'}: nada nuevo el día de la carrera (ni geles, ni desayuno, ni zapatillas, ni ropa: todo probado antes en una tirada larga). Deja todo preparado la noche anterior: ropa, dorsal, geles y el reloj cargado. Duerme bien las 2-3 noches previas, que cuentan más que la víspera (es normal dormir mal por los nervios). Y los 2 días antes, bebe algo más de lo normal, con electrolitos.`);
+      }
+      // Quien empieza a correr (28 oct 2026, aprobado por Rafa; idea de @elenadomenech_27).
+      if (esPrincipiante) {
+        notasDeporte.push('Empieza más despacio de lo que crees: si puedes hablar mientras corres, vas bien. Las lesiones al empezar casi siempre vienen de subir demasiado rápido, no de las zapatillas. Y caminar también cuenta: los minutos andando son parte del plan, no un fallo.');
       }
     } else if (esCrossfit) {
       notasDeporte.push('Hidratación: 500-700 ml en las 2h previas al WOD. Durante el WOD no sueles poder beber — hidrata bien antes y después.');
@@ -16057,6 +16142,7 @@
     "Pan con mermelada y café (antes de tirada larga o series)": "Tuesta el pan y unta la mermelada. Acompaña con el café. Cómelo 60-90 min antes de la tirada o las series.",
     "Copos de maíz con leche desnatada (antes de tirada larga o series)": "Sirve los copos de maíz en un bol y añade la leche desnatada fría. Tómalo 60-90 min antes de la tirada o las series.",
     "Tortitas de arroz con miel y plátano (antes de tirada larga o series)": "Unta la miel sobre las tortitas de arroz y coloca el plátano en rodajas por encima. Sin cocción. Tómalo 60-90 min antes de la tirada o las series.",
+    "Tostada con crema de cacahuete y dátiles (antes de tirada larga o series)": "Tuesta el pan y unta la crema de cacahuete. Quita el hueso a los dátiles, trocéalos y ponlos por encima. Tómala 60-90 min antes de la tirada o las series.",
     "Sándwich de pavo y miel (recarga tras tirada larga)": "Coloca el pavo en lonchas entre las dos rebanadas de pan y añade un hilo de miel. Tómalo en la primera hora tras la tirada.",
     "Batido de leche con cacao y miel (recarga tras tirada larga)": "Bate la leche con el cacao puro y la miel 20-30 segundos (o mézclalo bien con una cuchara). Tómalo en la primera hora tras la tirada.",
     "Arroz con atún y tomate (recarga tras tirada larga)": "Calienta el arroz, escurre el atún y mézclalo con el tomate troceado. Tómalo en la primera hora tras la tirada.",
