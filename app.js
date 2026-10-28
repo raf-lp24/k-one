@@ -8701,6 +8701,7 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -9033,6 +9034,7 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -9343,6 +9345,7 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -16060,6 +16063,7 @@
     // 28 oct 2026: recetas de @tonigimenex (TikTok), aprobadas por Rafa.
     "Ñoquis al air fryer con pavo, aguacate y salsa de yogur": "Pon los ñoquis en un bol con el aceite (mejor en spray) y el pimentón, mézclalos y hazlos en la freidora de aire 10 min a 200º, removiendo a mitad. Mientras, haz la pechuga de pavo a la plancha y córtala en tiras, y corta el aguacate en dados. Para la salsa, mezcla el yogur con la miel y el ajo. Sirve los ñoquis con el pavo, el aguacate y la salsa por encima.",
     "Boniato relleno de carne picada con salsa de yogur y miel": "Pincha el boniato con un tenedor, envuélvelo en papel de cocina húmedo y hazlo en el microondas unos 10 min, hasta que esté blando. Mientras, sofríe la cebolla picada en una sartén antiadherente y añade la carne picada con el pimentón hasta que cambie de color. Mezcla el yogur con la miel. Abre el boniato por la mitad, rellénalo con la carne y pon la salsa por encima.",
+    "Crema de cacao proteica con avena": "Mezcla la harina de avena, la proteína y el cacao en un bol. Añade la leche poco a poco, removiendo, hasta que quede una crema espesa y lisa, como una crema de cacao. Si la quieres más fina, un chorrito más de leche. Cómela con cuchara o úntala en una tortita de arroz.",
     "Bol helado de frutos rojos, plátano y yogur griego": "Tritura los arándanos y los frutos rojos congelados con el plátano y el yogur hasta tener una crema espesa, como un helado. Si cuesta triturar, espera 5 min a que la fruta se ablande un poco. Sírvelo en un bol y cómelo enseguida.",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
