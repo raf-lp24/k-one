@@ -2089,6 +2089,9 @@
   // remo australiano" abre el jalón y no el remo. VIDEOS_EJERCICIOS se queda
   // para las sugerencias de "Añadir ejercicio" y la búsqueda de reserva.
   const VIDEO_TECNICA = [
+    // 28 oct 2026 (aprobado por Rafa, ideas de @elenadomenech_27): ejercicios nuevos del corredor.
+    ['saltos (de )?lado a lado', 'sd0yBEhTQAo', 'Mariana Cicutta - Saltos laterales a la línea'],
+    ['(^|[^a-z])halo( con disco)?', 'BXfSBF90T64', 'Jose Trainer Valladolid - Halo con disco'],
     // 25 oct 2026: los 11 ejercicios que más salían sin vídeo propio (medido en 1.080
     // planes por la auditoría del 23 oct). Todos en español y comprobados en YouTube.
     ['remo supino bajo (la )?mesa', 'lFoFPEeYdJA', 'Musculando en casa con Rubencito - Remo invertido con agarre estrecho'],
@@ -2250,7 +2253,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261027b');
+      const r = await fetch('/data/ejercicios-info.json?v=20261028a');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -5441,8 +5444,14 @@
       // Pies rápidos de bajo impacto para el intermedio, que no tenía nada
       // reactivo. Solo con sesiones de 45 min o más (en las cortas no cabe) y
       // nunca con la rodilla tocada ni con tensión alta o problemas cardíacos.
+      // 28 oct 2026 (aprobado por Rafa, idea de @elenadomenech_27): un bloque sí y
+      // otro no, saltos lado a lado sobre una línea (rebote corto de tobillo, sin
+      // material). Son saltos: fuera también con el perfil sin impacto.
       const _piesRapidosRun = (!_lesionZonaRodilla && !_sinIntensidad && _tramoDur !== 'expres' && _tramoDur !== 'corta')
-        ? `Toques rápidos en ${rSinMat ? 'un escalón' : 'step'} 3×20s, ` : '';
+        ? (bloqueMeso % 2 === 1 && !_sinImpacto
+            ? 'Saltos lado a lado sobre una línea 3×30s, '
+            : `Toques rápidos en ${rSinMat ? 'un escalón' : 'step'} 3×20s, `)
+        : '';
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
@@ -5458,7 +5467,9 @@
             : `Fuerza + pliometría · ${_plioAvIni}, peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
             ? `Fuerza corredor · ${_piesRapidosRun}Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
-            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, pallof press 3×10/lado, gemelos en escalón 3×15`;
+            // 28 oct 2026 (aprobado por Rafa, idea de @elenadomenech_27): un bloque
+            // sí y otro no, halo con disco en lugar del pallof press (core + hombro).
+            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, gemelos en escalón 3×15`;
 
       // EL OBJETIVO NO CAMBIABA NADA DEL PLAN DE RUNNING (comprobado 7 sept
       // 2026: los cuatro objetivos daban un plan idéntico, carácter a carácter,
@@ -5594,8 +5605,21 @@
           detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? ' + drills (A-skips, balanceos de piernas)' : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
         };
       };
+      // Sesión mixta (28 oct 2026, aprobado por Rafa; la «semana 8» de
+      // @elenadomenech_27): un bloque largo a umbral y después series cortas
+      // rápidas. Solo para el avanzado que prepara una carrera, una semana de
+      // cada tres, y nunca en la sesión exprés (no cabe).
+      const _calidadMixta = () => ({
+        resumen: 'Umbral + series · Sesión mixta', etiqueta: 'Intensidad',
+        detalle: `Calentamiento: ${_cal} min progresivo + drills (A-skips, high knees). Luego ${{
+          corta: '8 min a ritmo umbral, 3 min trote suave y 4×2 min rápidos (ritmo 5K) con 90s suaves',
+          media: '10 min a ritmo umbral, 4 min trote suave y 5×3 min rápidos (ritmo 5K) con 90s suaves',
+          larga: '12 min a ritmo umbral, 5 min trote suave y 6×3 min rápidos (ritmo 5K) con 90s suaves',
+          muyLarga: '15 min a ritmo umbral, 5 min trote suave y 6×3 min rápidos (ritmo 5K) con 2 min suaves' }[_tramoDur]}. El umbral es fuerte pero sostenido (RPE 7-8); las series, más rápidas (RPE 8-9). Enfriamiento: ${_vuelta} min trote suave`
+      });
+      const _mixtaToca = objetivo.includes('competici') && _tramoDur !== 'expres' && semanaCiclo !== 4 && Math.max(1, semanaActual) % 3 === 0;
       // Calidad del avanzado: VO2máx una semana, umbral la siguiente.
-      const _calidadAvanzado = () => Math.max(1, semanaActual) % 2 === 1
+      const _calidadAvanzado = () => _mixtaToca ? _calidadMixta() : Math.max(1, semanaActual) % 2 === 1
         ? { resumen: 'VO2máx · Intervalos cortos', etiqueta: 'Intensidad',
             detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? ' + drills (A-skips, high knees, butt kicks)' : ''}. Series: ${{
               expres: '3×400m con 60s rec trote',
@@ -7830,7 +7854,7 @@
     // y los isquios de la semana se quedaban en 1,3 series, cuando el mínimo
     // para no perder masa es 6. Se cambia un minuto y medio de plancha por la
     // única bisagra de cadera del día: mal negocio.
-    const _esCore = /plancha|dead bug|bird dog|hollow|rueda abdominal|pallof|russian twist|abdominal|superman|tijeras|copenhagen|elevaci[oó]n de piernas/i;
+    const _esCore = /plancha|dead bug|bird dog|hollow|rueda abdominal|pallof|halo con disco|russian twist|abdominal|superman|tijeras|copenhagen|elevaci[oó]n de piernas/i;
     if (!soloDieta && _DUR && semana.length) {
       semana = semana.map(d => {
         if (!d.detalle || d.tipo !== 'Entrenamiento') return d;
@@ -7856,7 +7880,8 @@
         // Los toques rápidos en step (14 oct 2026) tampoco cuentan: son 3×20 s
         // de pies rápidos sin montaje ni carga, como una plancha. Si contaran,
         // en la sesión de 45-60 min echaban fuera los gemelos del corredor.
-        const _sinTope = /toques rápidos/i;
+        // Lo mismo los saltos lado a lado (28 oct 2026), que van en su lugar un bloque sí y otro no.
+        const _sinTope = /toques rápidos|saltos lado a lado/i;
         const cuenta = f => esEjercicio(f) && !_esCore.test(f) && !_sinTope.test(f);
         // Híbrido con fuerza y carrera separadas (8 oct 2026): los 8-10 min de
         // carrera al acabar el día de torso también ocupan la sesión, así que en
