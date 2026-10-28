@@ -1205,6 +1205,10 @@
     // más allá, así que la rotación dejaba el día con dos tirones horizontales y
     // ninguno vertical. Las otras tres alternativas sí son verticales.
     [/dominadas(?! australianas| asistidas| o jalón| lastradas)|pull[- ]?ups?/i, ['Jalón al pecho en polea', 'Pullover en polea alta', 'Jalón en polea con agarre cerrado'], false, true],
+    // 28 oct 2026 (aprobado por Rafa, idea de @tonigimenex): el jalón no tenía
+    // alternativas. Solo el jalón en polea a secas o «al pecho en polea»: los que ya
+    // traen variante (agarre cerrado, a una mano, «o remo australiano») no se tocan.
+    [/jal[oó]n (al pecho )?en polea(?! con agarre cerrado| a una mano| o remo)/i, ['Jalón a una mano arrodillado en polea', 'Jalón en polea con agarre cerrado'], false, true],
     [/remo (con )?barra/i, ['Remo en máquina con apoyo de pecho', 'Remo con mancuerna', 'Remo en T en máquina'], false, true],
     // "( a una mano)?" consume el sufijo que ahora lleva el nombre base
     // ("remo con mancuerna a una mano"): sin esto quedaba colgando ("Remo en
@@ -2091,6 +2095,8 @@
   const VIDEO_TECNICA = [
     // 28 oct 2026 (aprobado por Rafa, ideas de @elenadomenech_27): ejercicios nuevos del corredor.
     ['saltos (de )?lado a lado', 'sd0yBEhTQAo', 'Mariana Cicutta - Saltos laterales a la línea'],
+    // 28 oct 2026 (aprobado por Rafa, idea de @tonigimenex).
+    ['jalon a una mano|jalon unilateral', 'CwXhNVqpCxo', 'Zonapablo - Corrige el Jalón Para Espalda en Polea a 1 mano'],
     ['(^|[^a-z])halo( con disco)?', 'BXfSBF90T64', 'Jose Trainer Valladolid - Halo con disco'],
     // 25 oct 2026: los 11 ejercicios que más salían sin vídeo propio (medido en 1.080
     // planes por la auditoría del 23 oct). Todos en español y comprobados en YouTube.
@@ -2253,7 +2259,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261028a');
+      const r = await fetch('/data/ejercicios-info.json?v=20261028b');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3927,7 +3933,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (124 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (129 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4059,7 +4065,13 @@
     "Compárate con quien eras hace un mes, no con nadie más.",
     "Un entreno espectacular no cambia nada. Meses haciendo bien lo básico, sí.",
     "Perder el hábito cuesta más que hacer el entreno de hoy.",
-    "Casi todos los días toca ir suave. Lo rápido llega después, y llega por eso."
+    "Casi todos los días toca ir suave. Lo rápido llega después, y llega por eso.",
+    // 28 oct 2026 · revisión de @tonigimenex (TikTok), aprobadas por Rafa
+    "El aceite de oliva es sano; el problema es la cantidad. Una cucharada bien cargada son unas 120 kcal: usa spray o mídelo con una cucharilla.",
+    "Comer bien no es comer triste: ajo, pimentón, cúrcuma, curry, pimienta o un chorrito de vinagre dan sabor sin apenas calorías.",
+    "La regla del 3: a los 3 días tienes ganas, a las 3 semanas un hábito, a los 3 meses resultados.",
+    "Eres tú contra ti: mejor que ayer, peor que mañana.",
+    "Preocúpate por comer mejor, no por comer menos."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -8631,6 +8643,8 @@
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
           ]
         },
         {
@@ -8685,6 +8699,8 @@
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
           ]
         },
         {
@@ -8744,6 +8760,8 @@
             op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
           ]
         }
       ];
@@ -8955,6 +8973,8 @@
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
           ]
         },
         {
@@ -9011,6 +9031,8 @@
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
           ]
         },
         {
@@ -9069,6 +9091,8 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
           ]
         }
       ];
@@ -9260,6 +9284,8 @@
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
           ]
         },
         {
@@ -9315,6 +9341,8 @@
             op("Galletas proteicas de yogur con pepitas de chocolate", "30g harina de avena, 15g proteína whey, 60g yogur griego 0%, 10g chocolate negro, levadura química", "266 kcal", "23g prot", "30g carbs", "6g grasa", "Freidora 180º · 12 min"),
             // Recetas de una cuenta de nutrición y hábitos (7 oct 2026), macros con scripts/componer.js
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
           ]
         },
         {
@@ -9373,6 +9401,8 @@
             op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "3 huevos, 60g espinacas, 80g tomate cherry, 30g mozzarella", "346 kcal", "30g prot", "7g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
+            // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
+            op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
           ]
         }
       ];
@@ -9597,6 +9627,9 @@
           // casi siempre extracto de malta de CEBADA — trampa clásica para
           // celíacos. Se marca para que se compre la versión certificada.
           [/\bcopos de ma[íi]z\b(?![^,.;:]*sin gluten)/gi, 'copos de maíz sin gluten'],
+          // Los ñoquis de patata llevan harina de trigo (28 oct 2026, receta de @tonigimenex).
+          // Sin \b: en JS la «ñ» no es letra para \b y no casaría nunca.
+          [/(?<![a-záéíóúüñ])ñoquis( de patata)?(?![^,.;:]*sin gluten)/gi, 'ñoquis sin gluten'],
           // OJO -- NO añadir una regla para "pan tumaca" (probado y deshecho el
           // 11 sept 2026): el título se lee "(pan sin gluten tumaca)", pero si
           // se convierte en "(pan tumaca sin gluten)", el lookahead de la red
@@ -16024,6 +16057,10 @@
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
     "Muffins de plátano, arándanos y pistacho": "Aplasta el plátano con un tenedor y bátelo con el huevo y el yogur. Añade la harina de avena, la proteína, la miel y la levadura, y mezcla sin grumos. Incorpora casi todos los arándanos. Reparte en 3-4 moldes de magdalena y pon encima el resto de arándanos y los pistachos picados. Freidora a 160º unos 20 min (horno: 180º, 15-18 min).",
     "Pimientos rellenos de ternera y arroz integral": "Cuece el arroz integral. Corta la parte de arriba de los pimientos, vacíalos y ásalos en el horno a 200º unos 15 min. Mientras, rehoga la zanahoria rallada con el aceite, añade la carne picada con el comino y el orégano y, cuando cambie de color, el tomate triturado; deja 5 min y mézclalo con el arroz. Rellena los pimientos, pon la mozzarella por encima y hornea 20-25 min más a 200º, hasta que se dore (en la freidora de aire, a 180º unos 15 min).",
+    // 28 oct 2026: recetas de @tonigimenex (TikTok), aprobadas por Rafa.
+    "Ñoquis al air fryer con pavo, aguacate y salsa de yogur": "Pon los ñoquis en un bol con el aceite (mejor en spray) y el pimentón, mézclalos y hazlos en la freidora de aire 10 min a 200º, removiendo a mitad. Mientras, haz la pechuga de pavo a la plancha y córtala en tiras, y corta el aguacate en dados. Para la salsa, mezcla el yogur con la miel y el ajo. Sirve los ñoquis con el pavo, el aguacate y la salsa por encima.",
+    "Boniato relleno de carne picada con salsa de yogur y miel": "Pincha el boniato con un tenedor, envuélvelo en papel de cocina húmedo y hazlo en el microondas unos 10 min, hasta que esté blando. Mientras, sofríe la cebolla picada en una sartén antiadherente y añade la carne picada con el pimentón hasta que cambie de color. Mezcla el yogur con la miel. Abre el boniato por la mitad, rellénalo con la carne y pon la salsa por encima.",
+    "Bol helado de frutos rojos, plátano y yogur griego": "Tritura los arándanos y los frutos rojos congelados con el plátano y el yogur hasta tener una crema espesa, como un helado. Si cuesta triturar, espera 5 min a que la fruta se ablande un poco. Sírvelo en un bol y cómelo enseguida.",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
     "Patata o boniato con pollo y verdura": "Cuece o asa la patata o el boniato. Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Sírvelo todo junto con el aceite de oliva.",
