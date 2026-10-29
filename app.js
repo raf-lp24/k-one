@@ -2094,6 +2094,7 @@
   // para las sugerencias de "Añadir ejercicio" y la búsqueda de reserva.
   const VIDEO_TECNICA = [
     // 28 oct 2026 (aprobado por Rafa, ideas de @elenadomenech_27): ejercicios nuevos del corredor.
+    ['paseo de puntillas', 'D5k9qrRyjDk', 'PERFORMANCE MOVE - Paseo granjero de puntillas'],
     ['saltos (de )?lado a lado', 'sd0yBEhTQAo', 'Mariana Cicutta - Saltos laterales a la línea'],
     // 28 oct 2026 (aprobado por Rafa, idea de @tonigimenex).
     ['jalon a una mano|jalon unilateral', 'CwXhNVqpCxo', 'Zonapablo - Corrige el Jalón Para Espalda en Polea a 1 mano'],
@@ -2259,7 +2260,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261028b');
+      const r = await fetch('/data/ejercicios-info.json?v=20261029');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3933,7 +3934,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (129 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (131 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4071,7 +4072,10 @@
     "Comer bien no es comer triste: ajo, pimentón, cúrcuma, curry, pimienta o un chorrito de vinagre dan sabor sin apenas calorías.",
     "La regla del 3: a los 3 días tienes ganas, a las 3 semanas un hábito, a los 3 meses resultados.",
     "Eres tú contra ti: mejor que ayer, peor que mañana.",
-    "Preocúpate por comer mejor, no por comer menos."
+    "Preocúpate por comer mejor, no por comer menos.",
+    // 29 oct 2026 · revisión de @mariamffit y @cienciaychandal, aprobadas por Rafa
+    "¿No sabes usar las máquinas? Se aprende. ¿No sabes comer bien? Se aprende. La disciplina no se tiene: se construye, un día detrás de otro.",
+    "En redes ves lo mejor de los demás y lo peor de ti. A cada persona le tocan unas cartas; tu trabajo es jugar bien las tuyas."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -5464,6 +5468,12 @@
             ? 'Saltos lado a lado sobre una línea 3×30s, '
             : `Toques rápidos en ${rSinMat ? 'un escalón' : 'step'} 3×20s, `)
         : '';
+      // 29 oct 2026 (aprobado por Rafa, idea de @valicentif): un bloque sí y otro no,
+      // paseo de puntillas con mancuerna en lugar de los gemelos en escalón (gemelo,
+      // tobillo, agarre y core a la vez). Necesita una mancuerna, y fuera con el
+      // perfil sin impacto (que incluye tobillo, esguince y Aquiles) y en principiantes.
+      const _gemelosRun = (bloqueMeso % 2 === 0 && !rSinMat && !_sinImpacto && !esPrincipiante)
+        ? 'paseo de puntillas con mancuerna 3×20m por mano' : 'gemelos en escalón 3×15';
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
@@ -5481,7 +5491,7 @@
             ? `Fuerza corredor · ${_piesRapidosRun}Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
             // 28 oct 2026 (aprobado por Rafa, idea de @elenadomenech_27): un bloque
             // sí y otro no, halo con disco en lugar del pallof press (core + hombro).
-            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, gemelos en escalón 3×15`;
+            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, ${_gemelosRun}`;
 
       // EL OBJETIVO NO CAMBIABA NADA DEL PLAN DE RUNNING (comprobado 7 sept
       // 2026: los cuatro objetivos daban un plan idéntico, carácter a carácter,
@@ -5924,7 +5934,10 @@
       // reactivo en su día de pierna. Mismas condiciones que en Running.
       const _piesRapidosHib = (!_lesionZonaRodilla && !_sinIntensidad && _tramoDur !== 'expres' && _tramoDur !== 'corta')
         ? `Toques rápidos en ${_casaHib ? 'un escalón' : 'step'} 3×20s, ` : '';
-      const _INF_INTER = `Piernas · ${_piesRapidosHib}Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, gemelos en escalón 3×15, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
+      // Paseo de puntillas con mancuerna un bloque sí y otro no (29 oct 2026), como en Running.
+      const _gemelosHib = (bloqueMeso % 2 === 0 && !/sin material|aire libre/i.test(lugarComb) && !_sinImpacto && !esPrincipiante)
+        ? 'paseo de puntillas con mancuerna 3×20m por mano' : 'gemelos en escalón 3×15';
+      const _INF_INTER = `Piernas · ${_piesRapidosHib}Sentadilla ${v}×8, hip thrust ${v}×10, peso muerto rumano 3×10, sentadilla búlgara 3×10 por pierna, ${_gemelosHib}, ${_casaHib ? 'farmer carry 3×30m' : 'sled push 3×20m'}`;
       // BUG REAL (reportado por un cliente real, Alejandro, que compagina
       // Híbrido con carrera): el día "Tren inferior + pliometría" solo tenía UN
       // ejercicio realmente pliométrico (box/squat jumps, siempre el mismo) --
@@ -6062,7 +6075,7 @@
       };
       // Segundo día de cuerpo completo y segundo torso: la regla de la casa es que
       // no haya dos días con el mismo detalle en la semana.
-      const _FULL_INTER_B = `Fuerza · Peso muerto rumano ${v}×8, press militar ${v}×8, ${_casaHib ? 'dominadas en barra de puerta 3×6' : `jalón en polea ${v}×10`}, zancada 3×10 por pierna, press inclinado con mancuernas 3×10, gemelos en escalón 3×15`;
+      const _FULL_INTER_B = `Fuerza · Peso muerto rumano ${v}×8, press militar ${v}×8, ${_casaHib ? 'dominadas en barra de puerta 3×6' : `jalón en polea ${v}×10`}, zancada 3×10 por pierna, press inclinado con mancuernas 3×10, ${_gemelosHib}`;
       const _FULL_AV_B = `Fuerza · Peso muerto rumano ${vv}×6, press militar ${vv}×6, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} 3×6, sentadilla búlgara 3×8 por pierna, press inclinado con mancuernas 3×8, plancha 3×45s`;
       const _SUP_B = esAvanzado
         ? `Torso B · Press inclinado con mancuernas ${vv}×8, ${_casaHib ? 'dominadas en barra de puerta' : 'dominadas lastradas'} ${vv}×6, press de hombro con mancuernas 3×8, remo con mancuerna a una mano 3×10 por lado, elevaciones laterales 3×15, face pull 3×15`
@@ -6075,9 +6088,9 @@
       // Con la rodilla tocada o la tensión alta, sin saltos ni explosividad.
       const _plioAtl = _plioVariantesHibAv[(bloqueMeso + 1) % _plioVariantesHibAv.length];
       const _PIERNA_ATL = _lesionZonaRodilla
-        ? `Piernas · Hip thrust ${v}×8 (subiendo rápido), peso muerto rumano 3×6 (peso moderado), puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
+        ? `Piernas · Hip thrust ${v}×8 (subiendo rápido), peso muerto rumano 3×6 (peso moderado), puente de glúteo con mancuerna 3×12, ${_gemelosHib}`
         : _sinIntensidad
-          ? `Piernas · Sentadilla 3×6 (peso moderado), peso muerto rumano 3×8, zancada 3×8 por pierna, puente de glúteo con mancuerna 3×12, gemelos en escalón 3×15`
+          ? `Piernas · Sentadilla 3×6 (peso moderado), peso muerto rumano 3×8, zancada 3×8 por pierna, puente de glúteo con mancuerna 3×12, ${_gemelosHib}`
           // Avanzado, un mesociclo sí y otro no (15 oct 2026, idea de @valicentif):
           // CONTRASTE. Una serie pesada de sentadilla y, nada más acabarla, el
           // mismo gesto con salto y sin peso: la serie pesada «despierta» la
@@ -6087,9 +6100,9 @@
           // es búlgara pesada + búlgara con salto en vez de sentadilla + squat jumps.
           : (esAvanzado && !_sinImpacto && bloqueMeso % 2 === 1)
             ? (Math.floor(bloqueMeso / 2) % 2 === 1
-              ? `Piernas · Sentadilla búlgara 3×5 por pierna (pesada), sentadilla búlgara con salto 3×4 por pierna (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`
-              : `Piernas · ${_casaHib ? 'Sentadilla goblet 4×5 (pesada)' : 'Sentadilla 4×4 (75-80 % del peso)'}, squat jumps 4×5 (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`)
-            : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, gemelos en escalón 3×15`;
+              ? `Piernas · Sentadilla búlgara 3×5 por pierna (pesada), sentadilla búlgara con salto 3×4 por pierna (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, ${_gemelosHib}`
+              : `Piernas · ${_casaHib ? 'Sentadilla goblet 4×5 (pesada)' : 'Sentadilla 4×4 (75-80 % del peso)'}, squat jumps 4×5 (nada más acabar cada serie del ejercicio anterior, sin descanso: superserie de contraste), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, ${_gemelosHib}`)
+            : `Piernas · ${_plioAtl}, sentadilla 4×3 (60-70 % del peso: baja controlado y sube explosivo), peso muerto rumano 3×6 (peso moderado), zancada 3×6 por pierna, A-skips 3×20m, ${_gemelosHib}`;
       // Carrera suave del día de cardio (en vez del "cambia de máquina" del
       // gimnasio: este cliente quiere correr). Perder grasa: +5 min.
       const _rodajeHib = () => {
@@ -8573,6 +8586,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Café helado proteico", "250ml leche desnatada, 1 scoop proteína whey, café, hielo", "210 kcal", "33g prot", "15g carbs", "2g grasa", "Fácil · 3 min"),
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
+            // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
+            op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -8899,6 +8914,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Café helado proteico", "250ml leche desnatada, 1 scoop proteína whey, café, hielo", "210 kcal", "33g prot", "15g carbs", "2g grasa", "Fácil · 3 min"),
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
+            // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
+            op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -9218,6 +9235,8 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Café helado proteico", "250ml leche desnatada, 1 scoop proteína whey, café, hielo", "210 kcal", "33g prot", "15g carbs", "2g grasa", "Fácil · 3 min"),
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
+            // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
+            op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
           ]
         },
         {
@@ -16133,6 +16152,7 @@
     "Batido de leche entera con cacao y avena": "Mete la leche, la avena, el cacao puro y la miel en la batidora. Bate 30 segundos hasta que quede homogéneo, sin grumos de avena.",
     "Yogur griego con miel, nueces y plátano": "Vierte el yogur griego en un bol. Corta el plátano en rodajas y añade las nueces troceadas. Termina con un hilo de miel.",
     "Tostadas de queso cottage con miel y nueces": "Tuesta el pan. Extiende el queso cottage por encima, añade las nueces troceadas y riega con la miel.",
+    "Tortitas de arroz con queso cottage, miel y sésamo": "Unta el queso cottage sobre las tortitas de arroz, espolvorea el sésamo y un poco de pimienta y termina con un hilo de miel. Cómelas al momento para que la tortita siga crujiente.",
     "Barrita proteica con plátano y leche": "Sin cocción: toma la barrita proteica junto al plátano y un vaso de leche. Listo en 1 min.",
     "Batido de caseína con plátano y avena": "Mete la caseína, el plátano, la avena y la leche en la batidora. Bate 30-40 segundos hasta que quede homogéneo. La caseína espesa más que la whey: ajusta con más leche si lo quieres más ligero.",
     "Tortitas de arroz con crema de cacahuete y plátano": "Unta la crema de cacahuete sobre las tortitas de arroz. Corta el plátano en rodajas y repártelo encima. Sin cocción.",
