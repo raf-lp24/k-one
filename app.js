@@ -8532,6 +8532,20 @@
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Bol de yogur proteico con kiwi y pepitas de chocolate", "200g yogur griego 0%, 20g proteína whey, 1 kiwi, 20g copos de avena, 5g chocolate negro, 5g miel", "369 kcal", "40g prot", "41g carbs", "5g grasa", "Sin cocción · 3 min"),
             op("Tortitas de maíz con cottage, salmón ahumado y tomate", "4 tortitas de maíz, 100g queso cottage, 60g salmón ahumado, 80g tomate, 1 manzana, especias", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Avena nocturna de tarta de queso y arándanos", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 100g arándanos, 100g yogur griego 0%, 20g queso crema light, 5g miel, zumo de limón al gusto", "459 kcal", "26g prot", "64g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
+            op("Avena nocturna de manzana y canela", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 150g manzana, 100g yogur griego 0%, 5g miel, canela, zumo de limón al gusto", "439 kcal", "24g prot", "70g carbs", "7g grasa", "Sartén · 5 min + 1 noche"),
+            op("Avena horneada de plátano y arándanos", "40g copos de avena, 1 huevo, 50g plátano, 30g yogur griego 0%, 40g arándanos, 5g nueces, levadura química, canela", "360 kcal", "17g prot", "46g carbs", "12g grasa", "Horno · 30 min"),
+            op("Avena horneada de chocolate tipo brownie", "45g copos de avena, 10g cacao puro, 1 huevo, 120ml leche desnatada, 10g chocolate negro, levadura química", "389 kcal", "19g prot", "49g carbs", "13g grasa", "Horno · 15 min"),
+            op("Tortitas de yogur griego y arándanos", "1 huevo, 30g claras de huevo, 40g copos de avena, 125g yogur griego 0%, 75g arándanos, levadura química, canela", "369 kcal", "29g prot", "43g carbs", "9g grasa", "Sartén · 15 min"),
+            op("Tortitas de calabaza con especias", "30g copos de avena, 100g calabaza, 1 huevo, 30g claras de huevo, 50ml zumo de naranja, levadura química, canela, nuez moscada, 100g yogur griego 0%", "320 kcal", "26g prot", "36g carbs", "8g grasa", "Sartén · 15 min"),
+            op("Bocaditos de plátano en masa de avena", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
+            op("Torrijas de tarta de queso y fresas", "2 rebanadas pan de molde integral, 1 huevo, 50ml leche desnatada, 30g queso crema light, 80g fresas, 3g aceite de oliva virgen extra, canela", "370 kcal", "17g prot", "35g carbs", "18g grasa", "Sartén · 10 min"),
+            op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
+            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
+            op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
+            op("Muffins salados de huevo y verduras", "3 huevos, 30g queso crema light, 50g espinacas, 40g pimiento rojo, 30g maíz dulce, sal y pimienta", "364 kcal", "25g prot", "12g carbs", "24g grasa", "Horno · 25 min"),
+            op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
           ]
         },
         {
@@ -8588,6 +8602,9 @@
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
+            op("Huevos rellenos de aguacate y yogur", "3 huevos cocidos, 40g aguacate, 30g yogur griego 0%, sal y pimienta, pimentón", "322 kcal", "25g prot", "6g carbs", "22g grasa", "Cazo · 12 min"),
           ]
         },
         {
@@ -8660,6 +8677,9 @@
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Canelones de requesón, yogur y verduras", "60g pasta cruda, 100g requesón, 80g yogur griego 0%, 50g champiñones, 150g tomate, 20g queso rallado, orégano", "500 kcal", "37g prot", "61g carbs", "12g grasa", "Horno · 40 min"),
+            op("Huevos rancheros con alubias", "1 tortilla de trigo integral, 2 huevos, 100g tomate, 50g cebolla, 100g alubias cocidas, 3g aceite de oliva virgen extra, orégano, salsa picante al gusto", "485 kcal", "29g prot", "54g carbs", "17g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -8717,6 +8737,20 @@
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y frambuesas", "200g yogur griego 0%, 70g frambuesas, 3g gelatina neutra en polvo, 5g miel", "169 kcal", "24g prot", "16g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y mango", "200g yogur griego 0%, 100g mango, 3g gelatina neutra en polvo", "189 kcal", "24g prot", "21g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de kéfir y limón", "250ml kéfir, 4g gelatina neutra en polvo, 10g miel, zumo de limón al gusto", "155 kcal", "12g prot", "20g carbs", "3g grasa", "Nevera · 5 min + 2 h"),
+            op("Tarta de queso en vaso con mermelada de frutos rojos", "20g copos de avena, 10g crema de cacahuete, 150g yogur griego 0%, 20g queso crema light, 15g proteína whey, 15g mermelada", "381 kcal", "33g prot", "33g carbs", "13g grasa", "Nevera · 10 min"),
+            op("Tarta de yogur griego y chocolate con base de avena", "25g copos de avena, 15g crema de cacahuete, 100g yogur griego 0%, 7g cacao puro, 2g gelatina neutra en polvo", "291 kcal", "20g prot", "28g carbs", "11g grasa", "Nevera · 15 min + 3 h"),
+            op("Bizcocho de yogur griego y plátano con arándanos", "1 huevo, 150g yogur griego 0%, 60g plátano, 30g arándanos", "242 kcal", "23g prot", "24g carbs", "6g grasa", "Horno · 50 min"),
+            op("Bizcocho de arándanos y yogur en taza", "1 huevo, 30g harina de avena, 80g yogur griego 0%, 40g arándanos, levadura química", "264 kcal", "19g prot", "29g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Bizcocho de manzana y canela en taza", "30g copos de avena, 1 huevo, 75g manzana, levadura química, canela, 80g yogur griego 0%", "284 kcal", "19g prot", "34g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Pudin de chía con kéfir y fresas", "200ml kéfir, 20g semillas de chía, 100g fresas, 20g granola", "326 kcal", "13g prot", "37g carbs", "14g grasa", "Nevera · 5 min + 4 h"),
+            op("Smoothie de kéfir, papaya y chía", "250ml kéfir, 150g papaya, 10g semillas de chía, 15g copos de avena", "267 kcal", "13g prot", "38g carbs", "7g grasa", "Batidora · 3 min"),
+            op("Macedonia de frutas con kéfir", "200ml kéfir, 60g fresas, 60g melón, 50g uvas, 50g kiwi, 30g arándanos, 40g plátano", "259 kcal", "9g prot", "49g carbs", "3g grasa", "Sin cocción · 10 min"),
+            op("Galleta proteica gigante de una porción", "30g harina de avena, 15g proteína whey, 60ml leche desnatada, 10g pasas, levadura química", "227 kcal", "18g prot", "32g carbs", "3g grasa", "Microondas · 3 min"),
           ]
         },
         {
@@ -8778,6 +8812,11 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
+            op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
+            op("Pizza de avena en sartén con pavo", "40g harina de avena, 20g yogur griego 0%, 40g tomate, 30g queso rallado, 50g pechuga de pavo, 50g tomates cherry, orégano", "368 kcal", "29g prot", "36g carbs", "12g grasa", "Sartén · 12 min"),
+            op("Pan de atún y queso con ensalada", "80g atún al natural, 1 huevo, 20g queso rallado, levadura química, cebollino, 100g lechuga, 100g tomate", "288 kcal", "35g prot", "10g carbs", "12g grasa", "Microondas · 6 min"),
           ]
         }
       ];
@@ -8851,6 +8890,20 @@
             op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate con kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
             op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Avena nocturna de tarta de queso y arándanos", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 100g arándanos, 100g yogur griego 0%, 20g queso crema light, 5g miel, zumo de limón al gusto", "459 kcal", "26g prot", "64g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
+            op("Avena nocturna de manzana y canela", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 150g manzana, 100g yogur griego 0%, 5g miel, canela, zumo de limón al gusto", "439 kcal", "24g prot", "70g carbs", "7g grasa", "Sartén · 5 min + 1 noche"),
+            op("Avena horneada de plátano y arándanos", "40g copos de avena, 1 huevo, 50g plátano, 30g yogur griego 0%, 40g arándanos, 5g nueces, levadura química, canela", "360 kcal", "17g prot", "46g carbs", "12g grasa", "Horno · 30 min"),
+            op("Avena horneada de chocolate tipo brownie", "45g copos de avena, 10g cacao puro, 1 huevo, 120ml leche desnatada, 10g chocolate negro, levadura química", "389 kcal", "19g prot", "49g carbs", "13g grasa", "Horno · 15 min"),
+            op("Tortitas de yogur griego y arándanos", "1 huevo, 30g claras de huevo, 40g copos de avena, 125g yogur griego 0%, 75g arándanos, levadura química, canela", "369 kcal", "29g prot", "43g carbs", "9g grasa", "Sartén · 15 min"),
+            op("Tortitas de calabaza con especias", "30g copos de avena, 100g calabaza, 1 huevo, 30g claras de huevo, 50ml zumo de naranja, levadura química, canela, nuez moscada, 100g yogur griego 0%", "320 kcal", "26g prot", "36g carbs", "8g grasa", "Sartén · 15 min"),
+            op("Bocaditos de plátano en masa de avena", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
+            op("Torrijas de tarta de queso y fresas", "2 rebanadas pan de molde integral, 1 huevo, 50ml leche desnatada, 30g queso crema light, 80g fresas, 3g aceite de oliva virgen extra, canela", "370 kcal", "17g prot", "35g carbs", "18g grasa", "Sartén · 10 min"),
+            op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
+            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
+            op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
+            op("Muffins salados de huevo y verduras", "3 huevos, 30g queso crema light, 50g espinacas, 40g pimiento rojo, 30g maíz dulce, sal y pimienta", "364 kcal", "25g prot", "12g carbs", "24g grasa", "Horno · 25 min"),
+            op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
           ]
         },
         {
@@ -8916,6 +8969,9 @@
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
+            op("Huevos rellenos de aguacate y yogur", "3 huevos cocidos, 40g aguacate, 30g yogur griego 0%, sal y pimienta, pimentón", "322 kcal", "25g prot", "6g carbs", "22g grasa", "Cazo · 12 min"),
           ]
         },
         {
@@ -8993,6 +9049,9 @@
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Canelones de requesón, yogur y verduras", "60g pasta cruda, 100g requesón, 80g yogur griego 0%, 50g champiñones, 150g tomate, 20g queso rallado, orégano", "500 kcal", "37g prot", "61g carbs", "12g grasa", "Horno · 40 min"),
+            op("Huevos rancheros con alubias", "1 tortilla de trigo integral, 2 huevos, 100g tomate, 50g cebolla, 100g alubias cocidas, 3g aceite de oliva virgen extra, orégano, salsa picante al gusto", "485 kcal", "29g prot", "54g carbs", "17g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -9052,6 +9111,20 @@
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y frambuesas", "200g yogur griego 0%, 70g frambuesas, 3g gelatina neutra en polvo, 5g miel", "169 kcal", "24g prot", "16g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y mango", "200g yogur griego 0%, 100g mango, 3g gelatina neutra en polvo", "189 kcal", "24g prot", "21g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de kéfir y limón", "250ml kéfir, 4g gelatina neutra en polvo, 10g miel, zumo de limón al gusto", "155 kcal", "12g prot", "20g carbs", "3g grasa", "Nevera · 5 min + 2 h"),
+            op("Tarta de queso en vaso con mermelada de frutos rojos", "20g copos de avena, 10g crema de cacahuete, 150g yogur griego 0%, 20g queso crema light, 15g proteína whey, 15g mermelada", "381 kcal", "33g prot", "33g carbs", "13g grasa", "Nevera · 10 min"),
+            op("Tarta de yogur griego y chocolate con base de avena", "25g copos de avena, 15g crema de cacahuete, 100g yogur griego 0%, 7g cacao puro, 2g gelatina neutra en polvo", "291 kcal", "20g prot", "28g carbs", "11g grasa", "Nevera · 15 min + 3 h"),
+            op("Bizcocho de yogur griego y plátano con arándanos", "1 huevo, 150g yogur griego 0%, 60g plátano, 30g arándanos", "242 kcal", "23g prot", "24g carbs", "6g grasa", "Horno · 50 min"),
+            op("Bizcocho de arándanos y yogur en taza", "1 huevo, 30g harina de avena, 80g yogur griego 0%, 40g arándanos, levadura química", "264 kcal", "19g prot", "29g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Bizcocho de manzana y canela en taza", "30g copos de avena, 1 huevo, 75g manzana, levadura química, canela, 80g yogur griego 0%", "284 kcal", "19g prot", "34g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Pudin de chía con kéfir y fresas", "200ml kéfir, 20g semillas de chía, 100g fresas, 20g granola", "326 kcal", "13g prot", "37g carbs", "14g grasa", "Nevera · 5 min + 4 h"),
+            op("Smoothie de kéfir, papaya y chía", "250ml kéfir, 150g papaya, 10g semillas de chía, 15g copos de avena", "267 kcal", "13g prot", "38g carbs", "7g grasa", "Batidora · 3 min"),
+            op("Macedonia de frutas con kéfir", "200ml kéfir, 60g fresas, 60g melón, 50g uvas, 50g kiwi, 30g arándanos, 40g plátano", "259 kcal", "9g prot", "49g carbs", "3g grasa", "Sin cocción · 10 min"),
+            op("Galleta proteica gigante de una porción", "30g harina de avena, 15g proteína whey, 60ml leche desnatada, 10g pasas, levadura química", "227 kcal", "18g prot", "32g carbs", "3g grasa", "Microondas · 3 min"),
           ]
         },
         {
@@ -9112,6 +9185,11 @@
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
+            op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
+            op("Pizza de avena en sartén con pavo", "40g harina de avena, 20g yogur griego 0%, 40g tomate, 30g queso rallado, 50g pechuga de pavo, 50g tomates cherry, orégano", "368 kcal", "29g prot", "36g carbs", "12g grasa", "Sartén · 12 min"),
+            op("Pan de atún y queso con ensalada", "80g atún al natural, 1 huevo, 20g queso rallado, levadura química, cebollino, 100g lechuga, 100g tomate", "288 kcal", "35g prot", "10g carbs", "12g grasa", "Microondas · 6 min"),
           ]
         }
       ];
@@ -9181,6 +9259,20 @@
             op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
             op("Tortitas de maíz con cottage, salmón ahumado y tomate", "4 tortitas de maíz, 100g queso cottage, 60g salmón ahumado, 80g tomate, 1 manzana, especias", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Avena nocturna de tarta de queso y arándanos", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 100g arándanos, 100g yogur griego 0%, 20g queso crema light, 5g miel, zumo de limón al gusto", "459 kcal", "26g prot", "64g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
+            op("Avena nocturna de manzana y canela", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 150g manzana, 100g yogur griego 0%, 5g miel, canela, zumo de limón al gusto", "439 kcal", "24g prot", "70g carbs", "7g grasa", "Sartén · 5 min + 1 noche"),
+            op("Avena horneada de plátano y arándanos", "40g copos de avena, 1 huevo, 50g plátano, 30g yogur griego 0%, 40g arándanos, 5g nueces, levadura química, canela", "360 kcal", "17g prot", "46g carbs", "12g grasa", "Horno · 30 min"),
+            op("Avena horneada de chocolate tipo brownie", "45g copos de avena, 10g cacao puro, 1 huevo, 120ml leche desnatada, 10g chocolate negro, levadura química", "389 kcal", "19g prot", "49g carbs", "13g grasa", "Horno · 15 min"),
+            op("Tortitas de yogur griego y arándanos", "1 huevo, 30g claras de huevo, 40g copos de avena, 125g yogur griego 0%, 75g arándanos, levadura química, canela", "369 kcal", "29g prot", "43g carbs", "9g grasa", "Sartén · 15 min"),
+            op("Tortitas de calabaza con especias", "30g copos de avena, 100g calabaza, 1 huevo, 30g claras de huevo, 50ml zumo de naranja, levadura química, canela, nuez moscada, 100g yogur griego 0%", "320 kcal", "26g prot", "36g carbs", "8g grasa", "Sartén · 15 min"),
+            op("Bocaditos de plátano en masa de avena", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
+            op("Torrijas de tarta de queso y fresas", "2 rebanadas pan de molde integral, 1 huevo, 50ml leche desnatada, 30g queso crema light, 80g fresas, 3g aceite de oliva virgen extra, canela", "370 kcal", "17g prot", "35g carbs", "18g grasa", "Sartén · 10 min"),
+            op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
+            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
+            op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
+            op("Muffins salados de huevo y verduras", "3 huevos, 30g queso crema light, 50g espinacas, 40g pimiento rojo, 30g maíz dulce, sal y pimienta", "364 kcal", "25g prot", "12g carbs", "24g grasa", "Horno · 25 min"),
+            op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
           ]
         },
         {
@@ -9237,6 +9329,9 @@
             op("Bocaditos helados de yogur con fresas y mango", "200g yogur griego 0%, 80g fresas, 50g mango, 10g chocolate negro", "232 kcal", "22g prot", "27g carbs", "4g grasa", "Congelador · 1 h"),
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
+            op("Huevos rellenos de aguacate y yogur", "3 huevos cocidos, 40g aguacate, 30g yogur griego 0%, sal y pimienta, pimentón", "322 kcal", "25g prot", "6g carbs", "22g grasa", "Cazo · 12 min"),
           ]
         },
         {
@@ -9307,6 +9402,9 @@
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Canelones de requesón, yogur y verduras", "60g pasta cruda, 100g requesón, 80g yogur griego 0%, 50g champiñones, 150g tomate, 20g queso rallado, orégano", "500 kcal", "37g prot", "61g carbs", "12g grasa", "Horno · 40 min"),
+            op("Huevos rancheros con alubias", "1 tortilla de trigo integral, 2 huevos, 100g tomate, 50g cebolla, 100g alubias cocidas, 3g aceite de oliva virgen extra, orégano, salsa picante al gusto", "485 kcal", "29g prot", "54g carbs", "17g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -9365,6 +9463,20 @@
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y frambuesas", "200g yogur griego 0%, 70g frambuesas, 3g gelatina neutra en polvo, 5g miel", "169 kcal", "24g prot", "16g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de yogur griego y mango", "200g yogur griego 0%, 100g mango, 3g gelatina neutra en polvo", "189 kcal", "24g prot", "21g carbs", "1g grasa", "Nevera · 5 min + 2 h"),
+            op("Mousse de kéfir y limón", "250ml kéfir, 4g gelatina neutra en polvo, 10g miel, zumo de limón al gusto", "155 kcal", "12g prot", "20g carbs", "3g grasa", "Nevera · 5 min + 2 h"),
+            op("Tarta de queso en vaso con mermelada de frutos rojos", "20g copos de avena, 10g crema de cacahuete, 150g yogur griego 0%, 20g queso crema light, 15g proteína whey, 15g mermelada", "381 kcal", "33g prot", "33g carbs", "13g grasa", "Nevera · 10 min"),
+            op("Tarta de yogur griego y chocolate con base de avena", "25g copos de avena, 15g crema de cacahuete, 100g yogur griego 0%, 7g cacao puro, 2g gelatina neutra en polvo", "291 kcal", "20g prot", "28g carbs", "11g grasa", "Nevera · 15 min + 3 h"),
+            op("Bizcocho de yogur griego y plátano con arándanos", "1 huevo, 150g yogur griego 0%, 60g plátano, 30g arándanos", "242 kcal", "23g prot", "24g carbs", "6g grasa", "Horno · 50 min"),
+            op("Bizcocho de arándanos y yogur en taza", "1 huevo, 30g harina de avena, 80g yogur griego 0%, 40g arándanos, levadura química", "264 kcal", "19g prot", "29g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Bizcocho de manzana y canela en taza", "30g copos de avena, 1 huevo, 75g manzana, levadura química, canela, 80g yogur griego 0%", "284 kcal", "19g prot", "34g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Pudin de chía con kéfir y fresas", "200ml kéfir, 20g semillas de chía, 100g fresas, 20g granola", "326 kcal", "13g prot", "37g carbs", "14g grasa", "Nevera · 5 min + 4 h"),
+            op("Smoothie de kéfir, papaya y chía", "250ml kéfir, 150g papaya, 10g semillas de chía, 15g copos de avena", "267 kcal", "13g prot", "38g carbs", "7g grasa", "Batidora · 3 min"),
+            op("Macedonia de frutas con kéfir", "200ml kéfir, 60g fresas, 60g melón, 50g uvas, 50g kiwi, 30g arándanos, 40g plátano", "259 kcal", "9g prot", "49g carbs", "3g grasa", "Sin cocción · 10 min"),
+            op("Galleta proteica gigante de una porción", "30g harina de avena, 15g proteína whey, 60ml leche desnatada, 10g pasas, levadura química", "227 kcal", "18g prot", "32g carbs", "3g grasa", "Microondas · 3 min"),
           ]
         },
         {
@@ -9425,6 +9537,11 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
+            op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
+            op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
+            op("Pizza de avena en sartén con pavo", "40g harina de avena, 20g yogur griego 0%, 40g tomate, 30g queso rallado, 50g pechuga de pavo, 50g tomates cherry, orégano", "368 kcal", "29g prot", "36g carbs", "12g grasa", "Sartén · 12 min"),
+            op("Pan de atún y queso con ensalada", "80g atún al natural, 1 huevo, 20g queso rallado, levadura química, cebollino, 100g lechuga, 100g tomate", "288 kcal", "35g prot", "10g carbs", "12g grasa", "Microondas · 6 min"),
           ]
         }
       ];
@@ -10446,16 +10563,19 @@
       ? textoFiltro.split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2)
       : [];
     const _reFiltroIntegral = _tokensFiltroIntegral.map(_reAlimento);
+    // 29 oct 2026: lo que ya es «sin gluten» (lo pone la alergia, que corre antes)
+    // no se sube a integral: salía «pasta integral sin gluten cruda» y tests.html
+    // lo cazaba como gluten. Igual con macarrones, espaguetis y pan de molde.
     const _aIntegral = (o) => {
       if (_NO_INTEGRAL.test(`${o.nombre} ${o.ingredientes} ${o.prep || ''}`)) return o;
       const ing = o.ingredientes
         .replace(/\barroz\b(?! integral)/gi, 'arroz integral')
-        .replace(/\bpasta\b(?! integral)/gi, 'pasta integral')
-        .replace(/\bmacarrones\b(?! integrales)/gi, 'macarrones integrales')
-        .replace(/\bespaguetis\b(?! integrales)/gi, 'espaguetis integrales')
+        .replace(/\bpasta\b(?! integral| sin gluten)/gi, 'pasta integral')
+        .replace(/\bmacarrones\b(?! integrales| sin gluten)/gi, 'macarrones integrales')
+        .replace(/\bespaguetis\b(?! integrales| sin gluten)/gi, 'espaguetis integrales')
         .replace(/\bcusc[úu]s\b(?! integral)/gi, 'cuscús integral')
         .replace(/\bpan blanco\b/gi, 'pan integral')
-        .replace(/\bpan de molde\b(?! integral)/gi, 'pan de molde integral');
+        .replace(/\bpan de molde\b(?! integral| sin gluten)/gi, 'pan de molde integral');
       if (ing === o.ingredientes) return o;
       if (_reFiltroIntegral.some(re => { re.lastIndex = 0; return re.test(ing); })) return o;
       return { ...o, ingredientes: ing };
@@ -16153,6 +16273,40 @@
     "Yogur griego con miel, nueces y plátano": "Vierte el yogur griego en un bol. Corta el plátano en rodajas y añade las nueces troceadas. Termina con un hilo de miel.",
     "Tostadas de queso cottage con miel y nueces": "Tuesta el pan. Extiende el queso cottage por encima, añade las nueces troceadas y riega con la miel.",
     "Tortitas de arroz con queso cottage, miel y sésamo": "Unta el queso cottage sobre las tortitas de arroz, espolvorea el sésamo y un poco de pimienta y termina con un hilo de miel. Cómelas al momento para que la tortita siga crujiente.",
+    "Avena nocturna de tarta de queso y arándanos": "La noche antes, mezcla en un tarro la avena, la chía y la leche y déjalo en la nevera. Por la mañana, calienta la mitad de los arándanos 3-4 minutos en un cazo con un chorrito de agua y unas gotas de limón hasta que hagan una mermelada. Bate el yogur con el queso crema y la miel, ponlo encima de la avena y termina con la mermelada y el resto de arándanos.",
+    "Avena nocturna de manzana y canela": "La noche antes, mezcla en un tarro la avena, la chía, la leche y una pizca de canela y déjalo en la nevera. Por la mañana, corta la manzana en dados y cocínala 5 minutos en una sartén con un chorrito de agua, unas gotas de limón y canela. Pon encima de la avena el yogur mezclado con la miel y la manzana templada.",
+    "Avena horneada de plátano y arándanos": "Para 4 raciones, multiplica por 4. Chafa el plátano y mézclalo con el huevo, el yogur, la canela y una pizca de levadura. Añade la avena y casi todos los arándanos. Ponlo en una fuente, reparte encima el resto de arándanos y las nueces picadas y hornea 25-30 minutos a 180 °C. Aguanta 3-4 días en la nevera.",
+    "Avena horneada de chocolate tipo brownie": "Mezcla la avena, el cacao, una pizca de levadura, el huevo y la leche. Ponlo en un molde pequeño apto para horno, reparte encima el chocolate picado y hornea 12-15 minutos a 180 °C. Por dentro queda jugoso, como un brownie.",
+    "Tortitas de yogur griego y arándanos": "Tritura la avena con el huevo, las claras, 75 g del yogur, la canela y una pizca de levadura. Añade la mitad de los arándanos. Haz tortitas pequeñas en una sartén antiadherente a fuego medio, 2 minutos por lado. Sírvelas con el resto del yogur y de los arándanos.",
+    "Tortitas de calabaza con especias": "Cuece o asa la calabaza (o usa la que te sobró de otro día). Tritúrala con la avena, el huevo, las claras, el zumo de naranja, la canela, una pizca de nuez moscada y otra de levadura. Haz tortitas en una sartén antiadherente a fuego medio, 2 minutos por lado, y sírvelas con el yogur.",
+    "Bocaditos de plátano en masa de avena": "Tritura la avena con el huevo, la leche y una pizca de levadura. Corta el plátano en rodajas gruesas, báñalas en la masa y cocínalas en una sartén antiadherente a fuego medio, 1-2 minutos por lado. Sírvelas con las fresas.",
+    "Torrijas de tarta de queso y fresas": "Unta una rebanada con el queso crema, pon encima la mitad de las fresas en láminas y tapa con la otra rebanada. Bate el huevo con la leche y la canela y empapa el sándwich por los dos lados. Dóralo en una sartén con el aceite a fuego medio, 2-3 minutos por lado, y sírvelo con el resto de fresas.",
+    "Carrot cake de una porción con yogur": "Mezcla el huevo, la harina de avena, los primeros 60 g de yogur, la zanahoria rallada, la canela y una pizca de levadura. Ponlo en un recipiente apto para microondas y cuécelo 3-4 minutos a potencia media, hasta que al pinchar salga limpio. Deja que se temple, cúbrelo con el resto del yogur y las nueces picadas.",
+    "Pan de avena y espinacas relleno de pavo y queso fresco": "Tritura la avena, las espinacas, el huevo, las claras, la leche, una pizca de levadura y sal. Ponlo en un recipiente apto para microondas y cuécelo 3-4 minutos, vigilando que no se salga. Desmóldalo, ábrelo por la mitad y rellénalo con el queso fresco batido y el pavo.",
+    "Sándwich de huevo cremoso": "Cuece los huevos 10 minutos y pélalos. Chafa las yemas con el queso crema y la mostaza, pica las claras y mézclalo todo con sal y pimienta. Tuesta el pan, reparte el relleno y pon encima los pepinillos en rodajas.",
+    "Muffins salados de huevo y verduras": "Bate los huevos con el queso crema, sal y pimienta hasta que no queden grumos. Añade las espinacas picadas, el pimiento en dados y el maíz. Reparte en 4-6 moldes de magdalena engrasados y hornea 20 minutos a 180 °C. Se pueden comer fríos o recalentados.",
+    "Tortilla esponjosa de queso crema con pavo, champiñones y tomate": "Bate muy bien los huevos con el queso crema, sin grumos. Viértelo en una sartén antiadherente a fuego medio-bajo. Cuando empiecen a salir burbujas, reparte encima el pavo, los champiñones laminados, el tomate y el queso rallado. Tapa la sartén y espera a que se funda el queso.",
+    "Huevos rancheros con alubias": "Sofríe la cebolla picada con el aceite, añade el tomate troceado y el orégano y deja que se haga 10 minutos. Mientras, haz los huevos a la plancha y calienta la tortilla y las alubias. Pon sobre la tortilla las alubias, los huevos y la salsa de tomate, y un poco de picante si te gusta.",
+    "Tortitas de arroz con atún cremoso": "Escurre el atún y mézclalo con el queso crema, el yogur, unas gotas de limón, el apio picado, sal y pimienta. Repártelo sobre las tortitas de arroz y pon encima el tomate en dados.",
+    "Huevos rellenos de aguacate y yogur": "Cuece los huevos 10 minutos, pélalos y pártelos por la mitad. Chafa las yemas con el aguacate, el yogur, sal y pimienta hasta tener una crema. Rellena las claras y espolvorea un poco de pimentón.",
+    "Mousse de yogur griego y coco": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Mezcla el yogur con el coco y la miel, añade la gelatina y remueve bien. Repártelo en vasitos y déjalo 2 horas en la nevera.",
+    "Mousse de yogur griego y frambuesas": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Tritura el yogur con las frambuesas y la miel, añade la gelatina y bate otra vez. Repártelo en vasitos y déjalo 2 horas en la nevera.",
+    "Mousse de yogur griego y mango": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Tritura el yogur con el mango, añade la gelatina y bate otra vez. Repártelo en vasitos y déjalo 2 horas en la nevera.",
+    "Mousse de kéfir y limón": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Bate el kéfir con la miel y el zumo de medio limón (o uno entero si te gusta ácido), añade la gelatina y remueve bien. Repártelo en vasitos y déjalo 2 horas en la nevera.",
+    "Tarta de queso en vaso con mermelada de frutos rojos": "Mezcla la avena con la crema de cacahuete hasta que se apelmace y ponla en el fondo de un vaso. Bate el yogur con el queso crema y la proteína hasta que quede liso, ponlo encima y termina con la mermelada. Mejor si reposa un rato en la nevera.",
+    "Tarta de yogur griego y chocolate con base de avena": "Para 4 raciones, multiplica por 4. Mezcla la avena con la crema de cacahuete, aplástala en el fondo de un molde y, si quieres que quede crujiente, hornéala 10 minutos a 180 °C. Hidrata y disuelve la gelatina, bátela con el yogur y el cacao y viértelo sobre la base. Déjala 3 horas en la nevera.",
+    "Bizcocho de yogur griego y plátano con arándanos": "Para 4 raciones, multiplica por 4. Chafa el plátano y bátelo con el huevo y el yogur. Añade los arándanos, ponlo en un molde forrado con papel y hornea 45-50 minutos a 180 °C. Déjalo enfriar antes de desmoldar: queda como una tarta de yogur.",
+    "Bizcocho de arándanos y yogur en taza": "Mezcla en una taza grande el huevo, el yogur, la harina de avena y una pizca de levadura. Añade los arándanos y cuécelo 2-3 minutos en el microondas, hasta que al pinchar salga limpio.",
+    "Bizcocho de manzana y canela en taza": "Mezcla en una taza grande la avena, el huevo, la canela, una pizca de levadura y la manzana en dados pequeños. Cuécelo 2 minutos en el microondas y sírvelo con el yogur por encima.",
+    "Pudin de chía con kéfir y fresas": "Mezcla el kéfir con la chía, remueve otra vez a los 5 minutos para que no se apelmace y déjalo al menos 4 horas en la nevera (mejor de un día para otro). Sírvelo con las fresas troceadas y la granola por encima.",
+    "Smoothie de kéfir, papaya y chía": "Tritura el kéfir con la papaya troceada, la chía y la avena hasta que quede cremoso. Bébelo recién hecho.",
+    "Macedonia de frutas con kéfir": "Corta toda la fruta en trozos pequeños, ponla en un bol y riégala con el kéfir. Si la preparas antes, guárdala tapada en la nevera y añade el plátano al final para que no se oscurezca.",
+    "Galleta proteica gigante de una porción": "Mezcla la harina de avena, la proteína, una pizca de levadura y la leche hasta tener una masa espesa. Añade las pasas, aplánala en un plato apto para microondas formando una galleta grande y cuécela 1 minuto y medio. Se endurece un poco al enfriarse.",
+    "Canelones de requesón, yogur y verduras": "Cuece las placas de canelones según el paquete. Mezcla el requesón con el yogur, sal, pimienta y orégano. Rellena las placas y enróllalas. Ponlas en una fuente, cúbrelas con el tomate rallado o triturado, los champiñones laminados y el queso rallado, y hornea 20 minutos a 180 °C.",
+    "Croquetas de atún con salsa de yogur y cilantro": "Escurre bien el atún y mézclalo con el huevo, la harina de avena, el cebollino picado, sal y pimienta. Forma 5-6 tortitas con dos cucharas y dóralas en una sartén con el aceite, 2 minutos por lado. Para la salsa, mezcla el yogur con la mostaza, el cilantro picado y unas gotas de limón. Sírvelas con la lechuga y el tomate.",
+    "Pastel de pollo y calabaza": "Cuece el pollo, la calabaza y el brócoli (o aprovecha los que tengas hechos). Tritura la calabaza con la leche y el huevo, salpimienta y mézclalo con el pollo desmenuzado y el brócoli picado. Ponlo en una fuente pequeña, reparte encima el queso fresco y hornea 20 minutos a 180 °C.",
+    "Pizza de avena en sartén con pavo": "Mezcla la harina de avena con el yogur, sal, ajo en polvo, orégano y un chorrito de agua hasta tener una masa. Extiéndela fina en una sartén antiadherente y cocínala 3 minutos por un lado. Dale la vuelta, cúbrela con el tomate rallado, el queso, el pavo y los cherry partidos, tapa y déjala 5 minutos a fuego bajo hasta que se funda el queso.",
+    "Pan de atún y queso con ensalada": "Escurre el atún y mézclalo con el huevo, el queso rallado, el cebollino picado y una pizca de levadura. Ponlo en un recipiente apto para microondas y cuécelo 2-3 minutos, hasta que cuaje. Desmóldalo y sírvelo con la lechuga y el tomate.",
     "Barrita proteica con plátano y leche": "Sin cocción: toma la barrita proteica junto al plátano y un vaso de leche. Listo en 1 min.",
     "Batido de caseína con plátano y avena": "Mete la caseína, el plátano, la avena y la leche en la batidora. Bate 30-40 segundos hasta que quede homogéneo. La caseína espesa más que la whey: ajusta con más leche si lo quieres más ligero.",
     "Tortitas de arroz con crema de cacahuete y plátano": "Unta la crema de cacahuete sobre las tortitas de arroz. Corta el plátano en rodajas y repártelo encima. Sin cocción.",
