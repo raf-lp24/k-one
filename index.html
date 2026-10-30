@@ -4223,6 +4223,13 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   <div class="ses-pie"><div class="ses-pie-in" id="sesPie"></div></div>
 </div>
 
+<!-- MODO CARRERA (30 oct 2026): lo pinta _crPintar(). Mismo marco que el modo entrenamiento. -->
+<div class="ses-overlay cr-overlay" id="carreraModo" role="dialog" aria-modal="true" aria-label="Modo carrera">
+  <div class="ses-top" id="crTop"></div>
+  <div class="ses-cuerpo" id="crCuerpo"></div>
+  <div class="ses-pie"><div class="ses-pie-in" id="crPie"></div></div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -5895,6 +5902,87 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .ses-descanso .tx b { display: block; font-size: 14px; }
   .ses-descanso .tx span { font-size: 12px; color: var(--metal-claro); }
   .ses-mini { background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); border-radius: 10px; padding: 9px 10px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  /* Detalle del entreno en Hoy (30 oct 2026, Rafa): mismo lenguaje que el calendario,
+     sin letra de máquina espaciada en mayúsculas ni botones cuadrados. Solo en Hoy. */
+  #todayPlan { border: 1px solid var(--humo); border-radius: 18px; }
+  #todayPlan .motivation-label { font-size: 15px; letter-spacing: 0; text-transform: none; margin-bottom: 0; }
+  #todayPlan .btn-completado { border-radius: 12px; letter-spacing: 0; text-transform: none; font-size: 14px; padding: 12px 18px; }
+  #todayPlan .plg-eye { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+  #todayPlan .dia-tit-eye { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+  #todayPlan .entreno-bloque-num { font-family: 'Inter', sans-serif; font-weight: 700; }
+  .cr-overlay .ses-stat .k { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  /* MODO CARRERA (30 oct 2026) */
+  .cr-prog { flex: 1; height: 6px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .cr-prog i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #C03A08, #F26A36); transition: width .3s ease; }
+  .cr-overlay .ses-crono { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; }
+  .cr-cab { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; margin-top: 6px; }
+  .cr-fase { font-size: 12.5px; font-weight: 600; color: var(--metal-claro); }
+  .cr-ses { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .5px; color: var(--metal-claro); }
+  .cr-et { align-self: center; display: inline-flex; align-items: center; gap: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 1px; line-height: 1; padding: 10px 22px 6px; border-radius: 999px; color: #fff; }
+  .cr-et small { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0; opacity: .8; }
+  .cr-et.corre, .cr-et.fuerte { background: linear-gradient(155deg, #F26A36, #C03A08); box-shadow: 0 10px 30px rgba(209,66,14,.45); }
+  .cr-et.suave { background: #23402E; color: #8FE0AA; }
+  .cr-et.calienta { background: #3B2A12; color: #F2B45A; }
+  .cr-et.calma { background: #1E2A3A; color: #9CC3F2; }
+  .cr-et.core { background: var(--grafito); color: var(--blanco); border: 1px solid var(--humo); }
+  .cr-anillo { position: relative; width: min(72vw, 270px); aspect-ratio: 1; align-self: center; }
+  .cr-anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .cr-anillo circle { fill: none; stroke-width: 12; }
+  .cr-anillo .fondo { stroke: rgba(255,255,255,.07); }
+  .cr-anillo .val { stroke: #F26A36; stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+  .cr-anillo.suave .val { stroke: #4CC27A; }
+  .cr-anillo.calienta .val { stroke: #F2B45A; }
+  .cr-anillo.calma .val { stroke: #7FB2F0; }
+  .cr-anillo.sin-arco { border-radius: 50%; border: 12px solid rgba(242,106,54,.35); }
+  .cr-reloj-caja { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cr-reloj { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 20vw, 92px); line-height: .9; color: var(--blanco); font-variant-numeric: tabular-nums; }
+  .cr-reloj-k { font-size: 13px; font-weight: 600; color: var(--metal-claro); margin-top: 4px; }
+  .cr-obj { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--metal-claro); }
+  .cr-obj b { color: var(--blanco); }
+  .cr-obj-barra { position: relative; height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .cr-obj-barra i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: linear-gradient(90deg, #C03A08, #F26A36); }
+  .cr-obj-barra em { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--blanco); opacity: .5; }
+  .cr-contador { align-self: center; width: min(64vw, 230px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    background: radial-gradient(circle at 50% 35%, #F26A36, #B8380A); color: #fff; box-shadow: 0 16px 40px rgba(209,66,14,.45); font-family: inherit; }
+  .cr-contador b { font-family: 'Bebas Neue', sans-serif; font-size: 84px; line-height: .9; font-weight: 400; }
+  .cr-contador b small { font-size: 36px; opacity: .8; }
+  .cr-contador span { font-size: 13px; font-weight: 600; opacity: .9; }
+  .cr-contador:active { transform: scale(.97); }
+  .cr-lista { display: flex; flex-direction: column; gap: 8px; }
+  .cr-item { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 14px; color: var(--blanco); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .cr-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--humo); display: grid; place-items: center; color: transparent; flex-shrink: 0; }
+  .cr-check svg { width: 14px; height: 14px; }
+  .cr-item.ok { border-color: rgba(47,163,90,.45); background: rgba(47,163,90,.07); color: var(--metal-claro); }
+  .cr-item.ok .cr-check { background: #2FA35A; border-color: #2FA35A; color: #fff; }
+  .cr-tx { font-size: 14.5px; line-height: 1.55; color: var(--metal-claro); text-align: center; margin: 0; }
+  .cr-luego { display: flex; align-items: center; gap: 10px; background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; }
+  .cr-luego span { color: var(--metal); font-weight: 600; }
+  .cr-luego b { flex: 1; color: var(--blanco); }
+  .cr-luego em { font-style: normal; font-weight: 700; color: var(--brasa-txt); font-variant-numeric: tabular-nums; }
+  .cr-splits { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .cr-splits-t { font-size: 12px; font-weight: 700; color: var(--brasa-txt); margin-bottom: 2px; }
+  .cr-splits div:not(.cr-splits-t) { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--metal-claro); }
+  .cr-splits b { color: var(--blanco); font-variant-numeric: tabular-nums; }
+  .cr-pausa-aviso { align-self: center; font-size: 13px; font-weight: 700; color: #F2B45A; background: rgba(242,180,90,.12); border: 1px solid rgba(242,180,90,.35); border-radius: 999px; padding: 6px 14px; }
+  .cr-overlay .ses-atras { padding: 0 14px; display: grid; place-items: center; }
+  .cr-overlay .ses-atras svg { width: 18px; height: 18px; }
+  .cr-overlay .ses-atras:disabled { opacity: .35; cursor: default; }
+  .cr-pausa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); border-radius: 12px; padding: 0 16px; min-height: 50px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .cr-pausa svg, .cr-sig svg { width: 16px; height: 16px; }
+  .cr-sig { display: inline-flex !important; align-items: center; justify-content: center; gap: 8px; }
+  @media (prefers-reduced-motion: reduce) { .cr-prog i, .cr-anillo .val { transition: none; } }
+  /* Detalle del día de carrera, por fases (Hoy y Entreno) */
+  .cr-det { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 22px; }
+  .cr-det-b { position: relative; background: var(--grafito); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 12px 14px 12px 18px; overflow: hidden; }
+  .cr-det-b::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #F26A36; }
+  .cr-det-b.suave::before { background: #4CC27A; }
+  .cr-det-b.calienta::before { background: #F2B45A; }
+  .cr-det-b.calma::before { background: #7FB2F0; }
+  .cr-det-b.core::before { background: var(--metal-claro); }
+  .cr-det-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .cr-det-tit { font-family: 'Bebas Neue', sans-serif; font-size: 21px; letter-spacing: .4px; color: var(--blanco); }
+  .cr-det-res { font-size: 12.5px; font-weight: 700; color: var(--brasa-txt); }
+  .cr-det-tx { margin: 6px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--metal-claro); }
   .ses-fin { text-align: center; padding-top: 10px; }
   .ses-medalla { width: 86px; height: 86px; margin: 0 auto 12px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, rgba(242,106,54,.35), rgba(209,66,14,.08) 70%); border: 1.5px solid rgba(242,106,54,.6); display: grid; place-items: center; color: var(--brasa-txt); }
   .ses-medalla svg { width: 42px; height: 42px; }

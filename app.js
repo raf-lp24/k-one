@@ -3905,6 +3905,8 @@
     // Plegado (2 oct 2026): el título y el resumen bastan para recordarlo.
     const postEntrenoHTML = `<div class="plg-caja"><details class="plg verde"><summary><span class="plg-txt"><span class="plg-eye">Después de entrenar</span><span class="plg-res">${postEntrenoRes}</span></span>${_CHEV_PLG}</summary><p class="plg-cuerpo">${postEntrenoTxt}</p></details></div>`;
 
+    // Días de carrera: las fases en tarjetas (las mismas del modo carrera).
+    if (!_soloLectura && _hdEsCarrera(day)) return postEntrenoHTML + _crDetalleHTML(day) + renderExtraEjercicios(day);
     return postEntrenoHTML +
       `<strong>Calentamiento</strong> · ${extras.calentamiento}<br><br>` +
       `${bloquePrincipalHTML}<br><br>` +
@@ -12596,7 +12598,7 @@
     const boton = esHoy
       ? '<button type="button" class="today-hero-btn" onclick="empezarEntrenamientoHoy()"><span>' + (hecho ? 'Abrir el entreno' : 'Empezar entrenamiento') + '</span>' + _HD_PLAY + '</button>'
       : '<button type="button" class="today-hero-btn sec" onclick="hdVerEnEntreno(' + i + ')"><span>' + (i < hoyIdx ? 'Ver el día en Entreno' : 'Ver con fotos y técnica') + '</span>' + _HD_FLECHA + '</button>';
-    const carrera = _hdEsCarrera(d);
+    const carrera = _hdEsCarrera(d) && !/circuito/i.test(d.detalle || '');
     const hero = _hdHero({ foto: carrera ? 'running' : 'gym-hero', eyebrow, hecho, cuenta,
       titulo: _nombreSesion(d.resumen || '') || 'Tu sesión',
       sub: [userData.deporte, userData.objetivo ? 'Enfoque ' + userData.objetivo : ''].filter(Boolean).join(' · '),
@@ -12966,6 +12968,9 @@
   function empezarEntrenamientoHoy() {
     if (generatedPlan && generatedPlan.soloDieta) { showSection('nutricion'); return; }
     _ses = null; // desde el botón siempre es la sesión de HOY (no la de ayer en memoria)
+    // Días de carrera (running e híbrido): modo carrera guiado por fases (30 oct 2026).
+    const _diaHoy = generatedPlan && generatedPlan.semana && generatedPlan.semana[getIndiceSesionHoy()];
+    if (_diaHoy && _hdEsCarrera(_diaHoy) && crAbrir(_diaHoy)) return;
     if (sesAbrir()) return;
     // Sin modo serie a serie, el detalle de Hoy (plegado bajo el calendario) se abre.
     if (!_hdDetalle) { _hdSel = getIndiceDiaHoy(); _hdPestana = 'ent'; _hdDetalle = true; try { _pintarHoyDia(); } catch (e) {} }
@@ -13002,7 +13007,7 @@
       try {
         if (!localStorage.getItem('kone_hint_descanso')) {
           localStorage.setItem('kone_hint_descanso', '1');
-          showToast('Activa «Avisos de entreno» en el menú y te avisaremos al acabar el descanso aunque bloquees el móvil.', 7000);
+          showToast('Activa «Avisos de entreno» en el menú y te avisaremos al acabar el descanso o al cambiar de fase aunque bloquees el móvil.', 7000);
         }
       } catch (e) {}
       return;
@@ -13334,6 +13339,368 @@
       + '<p class="ses-sug" style="text-align:center">Con lo que has apuntado ajustamos los pesos de tu próxima sesión.</p>';
     pie.innerHTML = '<button type="button" class="ses-atras" onclick="sesIr(-1)">Revisar</button><button type="button" class="btn-primary" onclick="sesCerrar()">Volver a hoy</button>';
   }
+
+  // ===== MODO CARRERA (30 oct 2026, aprobado por Rafa) =====
+  // El modo serie a serie solo vale para ejercicios con series y repeticiones: en
+  // los días de carrera (running e híbrido) «Empezar entrenamiento» no guiaba nada.
+  // Aquí la sesión de carrera se parte en fases (calentamiento, parte principal,
+  // strides, core, vuelta a la calma) leyendo el texto del plan, que tiene pocos
+  // formatos fijos: run/walk, fartlek por tiempo, intervalos de umbral, series por
+  // distancia, cuestas, escalera, circuito por rondas y carrera continua.
+  // Las fases por tiempo van solas (pitido, vibración y aviso con el móvil
+  // bloqueado); las de distancia se marcan a mano y guardan el tiempo (split).
+  // _crBloques() también pinta el detalle del día (formatearSesion) con las mismas fases.
+  function _crBloques(day) {
+    const det = _aplicarSustitucionesDia(day.detalle || '', day.dia).replace(/\s+/g, ' ').trim();
+    const ex = SESION_EXTRAS[day.etiqueta] || SESION_EXTRAS_DEFAULT;
+    const limpio = s => String(s || '').replace(/\s*\([^()]*\)/g, '').replace(/\s+/g, ' ').trim().replace(/[.;,:]+$/, '');
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const minDe = s => [...String(s || '').matchAll(/(\d+)(?:\s*-\s*\d+)?\s*min/g)].reduce((a, m) => a + Number(m[1]), 0);
+    const rango = s => { const m = String(s || '').match(/(\d+)(?:\s*-\s*(\d+))?\s*min/); return m ? [Number(m[1]), Number(m[2] || m[1])] : null; };
+    let resto = det;
+    const sacar = re => { const m = resto.match(re); if (!m) return ''; resto = resto.replace(m[0], ' '); return (m[1] || '').trim(); };
+    const core = sacar(/Después del cardio:\s*(.+)$/);
+    const opcional = sacar(/Opcional(?:, al terminar)?:\s*([^.]*)\.?/);
+    const post = sacar(/Post:\s*([^.]*)\.?/);
+    let calma = sacar(/(?:Enfriamiento|Cierre):\s*([^.]*)\.?/);
+    const calienta = sacar(/Calentamiento:\s*([^.]*)\.?/) || sacar(/(\d+ min [^.]*?) de calentamiento\.?/);
+    const alAcabar = sacar(/Al (?:acabar|terminar):\s*([^.]*)\.?/);
+    resto = resto.replace(/^[^·:]{0,40}·\s*/, '').replace(/^Luego:\s*/, '').replace(/\s+/g, ' ').trim();
+    const pasos = [], bloques = [];
+    const bloque = (id, titulo, resumen, texto, clase) => bloques.push({ id, titulo, resumen, texto: cap(limpio(texto)), clase });
+
+    // Calentamiento
+    const segCal = (minDe(calienta) || minDe(ex.calentamiento) || 8) * 60;
+    bloque('cal', 'Calentamiento', Math.round(segCal / 60) + ' min', calienta || ex.calentamiento, 'calienta');
+    pasos.push({ k: 'cuenta', b: 'cal', seg: segCal, et: 'Calienta', clase: 'calienta', texto: cap(limpio(calienta || ex.calentamiento)) });
+
+    // Parte principal
+    const texto = limpio(resto);
+    const nombre = _nombreSesion(day.resumen || '') || 'Sesión principal';
+    let m;
+    if ((m = resto.match(/Circuito\s*(\d+)\s*rondas\s*\(descanso\s*(\d+)\s*s[^)]*\):\s*([^.]*)/i))) {
+      const R = +m[1], desc = +m[2];
+      const items = splitRespetandoParentesis(m[3]).map(s => cap(limpio(s))).filter(Boolean);
+      bloque('pri', nombre, R + ' rondas · ' + desc + ' s de descanso entre rondas', texto, 'fuerte');
+      for (let r = 1; r <= R; r++) {
+        pasos.push({ k: 'lista', b: 'pri', et: 'Ronda ' + r + ' de ' + R, clase: 'fuerte', items, texto: 'Haz los ' + items.length + ' ejercicios seguidos y marca la ronda al acabar.' });
+        if (r < R) pasos.push({ k: 'cuenta', b: 'pri', seg: desc, et: 'Descansa', clase: 'suave', texto: 'Respira. Siguiente ronda: ' + (r + 1) + ' de ' + R + '.' });
+      }
+      const extra = rango(alAcabar);
+      if (extra) {
+        bloque('ext', 'Al terminar', extra[0] + ' min', alAcabar, 'suave');
+        pasos.push({ k: 'cuenta', b: 'ext', seg: extra[0] * 60, et: 'Zona 2', clase: 'suave', texto: cap(limpio(alAcabar)) });
+      }
+    } else if ((m = resto.match(/(\d+)\s*min corriendo[^/]*\/\s*(\d+)\s*min caminando\s*×\s*(\d+)\s*rondas/i))) {
+      const A = +m[1], B = +m[2], N = +m[3];
+      bloque('pri', nombre, N + ' rondas: ' + A + ' min corriendo + ' + B + ' min caminando (~' + N * (A + B) + ' min)', texto, 'corre');
+      for (let r = 1; r <= N; r++) {
+        pasos.push({ k: 'cuenta', b: 'pri', seg: A * 60, et: 'Corre', clase: 'corre', grupo: 'Ronda ' + r + ' de ' + N, texto: 'A un ritmo en el que puedas hablar. Pasos cortos.' });
+        pasos.push({ k: 'cuenta', b: 'pri', seg: B * 60, et: 'Camina', clase: 'suave', grupo: 'Ronda ' + r + ' de ' + N, texto: 'Camina a paso vivo y recupera el aire.' });
+      }
+    } else if ((m = resto.match(/(\d+)\s*×\s*\(\s*(\d+)\s*min a ([^+]+?)\s*\+\s*(\d+)\s*min ([^)]+)\)/))) {
+      const N = +m[1], A = +m[2], B = +m[4];
+      bloque('pri', nombre, N + ' × (' + A + ' min a ' + m[3].trim() + ' + ' + B + ' min suave)', texto, 'fuerte');
+      for (let r = 1; r <= N; r++) {
+        pasos.push({ k: 'cuenta', b: 'pri', seg: A * 60, et: cap(m[3].trim()), clase: 'fuerte', grupo: 'Ronda ' + r + ' de ' + N, texto: 'Algo por encima de conversacional: puedes hablar con frases cortas.' });
+        pasos.push({ k: 'cuenta', b: 'pri', seg: B * 60, et: 'Suave', clase: 'suave', grupo: 'Ronda ' + r + ' de ' + N, texto: cap(limpio(m[5])) + '.' });
+      }
+    } else if ((m = resto.match(/(\d+)\s*×\s*(\d+)\s*min a ritmo (\w+)[^.]*?con\s*(\d+)\s*s\s*rec/i))) {
+      const N = +m[1], A = +m[2], rec = +m[4];
+      bloque('pri', nombre, N + ' × ' + A + ' min a ritmo ' + m[3] + ' · ' + rec + ' s de recuperación', texto, 'fuerte');
+      for (let r = 1; r <= N; r++) {
+        pasos.push({ k: 'cuenta', b: 'pri', seg: A * 60, et: 'Ritmo ' + m[3], clase: 'fuerte', grupo: 'Bloque ' + r + ' de ' + N, texto: 'Incómodo pero controlado: puedes hablar solo con esfuerzo.' });
+        if (r < N) pasos.push({ k: 'cuenta', b: 'pri', seg: rec, et: 'Recupera', clase: 'suave', grupo: 'Bloque ' + r + ' de ' + N, texto: 'Trota muy suave.' });
+      }
+    } else if ((m = resto.match(/(\d+)\s*×\s*(\d+)\s*m\s*con\s*(\d+)\s*min rec/i))) {
+      const N = +m[1], D = +m[2], rec = +m[3];
+      bloque('pri', nombre, N + ' × ' + D + ' m · ' + rec + ' min de recuperación trotando', texto, 'fuerte');
+      for (let r = 1; r <= N; r++) {
+        pasos.push({ k: 'tarea', b: 'pri', et: D + ' m fuerte', clase: 'fuerte', grupo: 'Serie ' + r + ' de ' + N, split: true, texto: 'Pulsa «Hecho» al cruzar los ' + D + ' m: guardamos el tiempo.' });
+        if (r < N) pasos.push({ k: 'cuenta', b: 'pri', seg: rec * 60, et: 'Recupera', clase: 'suave', grupo: 'Serie ' + r + ' de ' + N, texto: 'Trota suave.' });
+      }
+    } else if ((m = resto.match(/(\d+)\s*repeticiones de\s*([\d-]+)\s*m\s*subiendo/i))) {
+      const N = +m[1];
+      bloque('pri', nombre, N + ' cuestas de ' + m[2] + ' m · bajas trotando', texto, 'fuerte');
+      for (let r = 1; r <= N; r++) {
+        pasos.push({ k: 'tarea', b: 'pri', et: 'Sube fuerte', clase: 'fuerte', grupo: 'Cuesta ' + r + ' de ' + N, split: true, texto: m[2] + ' m cuesta arriba, fuerte. Pulsa «Hecho» arriba.' });
+        if (r < N) pasos.push({ k: 'tarea', b: 'pri', et: 'Baja trotando', clase: 'suave', grupo: 'Cuesta ' + r + ' de ' + N, texto: 'Vuelve abajo trotando: es tu recuperación.' });
+      }
+    } else if ((m = resto.match(/Escalera:\s*((?:\d+\s*m\s*-?\s*)+)/i))) {
+      const ds = m[1].match(/\d+/g).map(Number);
+      bloque('pri', nombre, ds.join(' - ') + ' m · recuperas la mitad de lo que tardas', texto, 'fuerte');
+      ds.forEach((D, r) => {
+        pasos.push({ k: 'tarea', b: 'pri', et: D + ' m fuerte', clase: 'fuerte', grupo: 'Tramo ' + (r + 1) + ' de ' + ds.length, split: true, texto: 'Pulsa «Hecho» al acabar el tramo: la recuperación será la mitad de lo que tardes.' });
+        if (r < ds.length - 1) pasos.push({ k: 'cuenta', b: 'pri', seg: 60, mitad: true, et: 'Recupera', clase: 'suave', grupo: 'Tramo ' + (r + 1) + ' de ' + ds.length, texto: 'Trota muy suave.' });
+      });
+    } else {
+      const rg = rango(resto) || [30, 30];
+      const corre = /carrera|corr|run|rodaje|tirada|trote/i.test(day.resumen + ' ' + resto);
+      bloque('pri', nombre, rg[0] === rg[1] ? rg[0] + ' min' : rg[0] + '-' + rg[1] + ' min', texto, 'corre');
+      pasos.push({ k: 'libre', b: 'pri', min: rg[0], max: rg[1], et: corre ? 'Corre' : 'Cardio', clase: 'corre', texto: cap(texto) + '.' });
+    }
+
+    // Strides (al acabar o en el cierre)
+    const st = (alAcabar + ' ' + calma).match(/(\d+)\s*strides de\s*(\d+)\s*m/i);
+    if (st) {
+      bloque('str', 'Strides', st[1] + ' × ' + st[2] + ' m', 'Aceleraciones progresivas hasta casi sprint, sin llegar a esprintar. Vuelves andando.', 'fuerte');
+      pasos.push({ k: 'contador', b: 'str', n: +st[1], et: st[1] + ' strides de ' + st[2] + ' m', clase: 'fuerte', texto: 'Acelera poco a poco hasta un 85-90 % y vuelve andando. Marca cada uno.' });
+      calma = calma.replace(/\s*\+?\s*\d+\s*strides de[^.]*$/i, '');
+    }
+    // Core (híbrido: después del cardio)
+    if (core) {
+      const items = splitRespetandoParentesis(core).map(s => cap(limpio(s))).filter(Boolean);
+      bloque('core', 'Core', items.length + ' ejercicios', items.join(' · '), 'core');
+      pasos.push({ k: 'lista', b: 'core', et: 'Core', clase: 'core', items, texto: 'Después del cardio. Marca cada uno al acabar todas sus series.' });
+    }
+    // Vuelta a la calma
+    const txCalma = calma || ex.vueltaCalma;
+    const segCalma = (minDe(txCalma) || 5) * 60;
+    bloque('calma', 'Vuelta a la calma', Math.round(segCalma / 60) + ' min', txCalma + (post ? '. Después: ' + post : ''), 'calma');
+    pasos.push({ k: 'cuenta', b: 'calma', seg: segCalma, et: 'Vuelta a la calma', clase: 'calma', texto: cap(limpio(txCalma)) + (post ? '. Después: ' + limpio(post) + '.' : '.') });
+    // Opcional
+    const ro = rango(opcional);
+    if (ro) {
+      bloque('opc', 'Opcional', (ro[0] === ro[1] ? ro[0] : ro[0] + '-' + ro[1]) + ' min', opcional, 'suave');
+      pasos.push({ k: 'cuenta', b: 'opc', seg: ro[0] * 60, et: 'Opcional', clase: 'suave', opcional: true, texto: cap(limpio(opcional)) + '. Si no te apetece, sáltalo.' });
+    }
+    return { bloques, pasos };
+  }
+
+  // Detalle del día de carrera (Hoy y Entreno): las fases en tarjetas, en vez del
+  // texto troceado por comas (cortaba frases: «… sirve para recuperar» / «No para sumar forma»).
+  function _crDetalleHTML(day) {
+    const { bloques } = _crBloques(day);
+    return '<div class="cr-det">' + bloques.map(b => '<div class="cr-det-b ' + b.clase + '"><div class="cr-det-cab"><span class="cr-det-tit">' + _esc(b.titulo) + '</span>'
+      + (b.resumen ? '<span class="cr-det-res">' + _esc(b.resumen) + '</span>' : '') + '</div>'
+      + (b.texto && b.texto !== b.resumen ? '<p class="cr-det-tx">' + _esc(b.texto) + (/[.!?]$/.test(b.texto) ? '' : '.') + '</p>' : '') + '</div>').join('') + '</div>';
+  }
+
+  let _cr = null, _crTimer = null, _crWake = null;
+  const _CR_CLAVE = () => 'kone_carrera_' + ((_cr && _cr.fecha) || getFechaHoyISO());
+  const _crFmt = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), mm = Math.floor(s % 3600 / 60), ss = s % 60; return (h ? h + ':' + String(mm).padStart(2, '0') : mm) + ':' + String(ss).padStart(2, '0'); };
+  function crAbrir(day) {
+    if (!day || !_hdEsCarrera(day)) return false;
+    const { pasos } = _crBloques(day);
+    if (!pasos.length) return false;
+    let g = null;
+    try { g = JSON.parse(localStorage.getItem('kone_carrera_' + getFechaHoyISO()) || 'null'); } catch (e) {}
+    if (g && g.sesion !== day.resumen) g = null;
+    const ahora = Date.now();
+    _cr = Object.assign({ fecha: getFechaHoyISO(), sesion: day.resumen, nombre: _nombreSesion(day.resumen || ''), i: 0, inicio: ahora, faseInicio: ahora, pausaDesde: null, splits: [], cont: {}, listas: {}, rec: {}, fin: null }, g || {});
+    _cr.pasos = pasos;
+    Object.keys(_cr.rec || {}).forEach(i => { if (pasos[i]) pasos[i].seg = _cr.rec[i]; });
+    _sesAudioListo();
+    document.getElementById('carreraModo').classList.add('abierta');
+    ['pwaInstallBanner', 'pushInstallBanner'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = 'none'; });
+    document.body.style.overflow = 'hidden';
+    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(w => { _crWake = w; }).catch(() => {}); } catch (e) {}
+    if (!g) kEvento('carrera_iniciada', { fases: pasos.length, sesion: day.etiqueta || '' });
+    _crAvanzarTiempo(false);
+    _crPintar();
+    _crProgramar();
+    clearInterval(_crTimer);
+    _crTimer = setInterval(_crTick, 250);
+    _crGuardar();
+    return true;
+  }
+  function crCerrar() {
+    document.getElementById('carreraModo').classList.remove('abierta');
+    document.body.style.overflow = '';
+    clearInterval(_crTimer);
+    _sesCancelarAviso();
+    try { if (_crWake) _crWake.release(); } catch (e) {}
+    _crWake = null;
+    _crGuardar();
+  }
+  function _crGuardar() {
+    if (!_cr) return;
+    const { pasos, ...resto } = _cr;
+    try { localStorage.setItem(_CR_CLAVE(), JSON.stringify(resto)); } catch (e) {}
+  }
+  // Las fases por tiempo terminan solas; con la app en segundo plano el reloj se
+  // frena, así que al volver se recorren todas las que ya han pasado.
+  function _crAvanzarTiempo(avisar) {
+    if (!_cr || _cr.fin || _cr.pausaDesde) return false;
+    let cambio = false;
+    while (_cr.i < _cr.pasos.length) {
+      const p = _cr.pasos[_cr.i];
+      if (p.k !== 'cuenta') break;
+      const fin = _cr.faseInicio + p.seg * 1000;
+      if (Date.now() < fin) break;
+      _cr.i++; _cr.faseInicio = fin; cambio = true;
+    }
+    if (cambio) {
+      if (_cr.i >= _cr.pasos.length) { _crTerminar(); return true; }
+      if (avisar && document.visibilityState === 'visible') { _sesPitido(); try { navigator.vibrate && navigator.vibrate([250, 120, 250]); } catch (e) {} }
+      _crGuardar(); _crPintar(); _crProgramar();
+    }
+    return cambio;
+  }
+  function _crProgramar() {
+    _sesCancelarAviso();
+    if (!_cr || _cr.fin || _cr.pausaDesde) return;
+    const p = _cr.pasos[_cr.i];
+    if (!p || p.k !== 'cuenta') return;
+    const sig = _cr.pasos[_cr.i + 1];
+    const rest = (_cr.faseInicio + p.seg * 1000 - Date.now()) / 1000;
+    if (rest > 3) _sesProgramarAviso(rest, sig ? 'Ahora: ' + sig.et + (sig.seg ? ' ' + _crFmt(sig.seg) : '') : 'Sesión terminada. ¡Bien hecho!');
+  }
+  function _crTick() {
+    if (!_cr) return;
+    if (_crAvanzarTiempo(true)) return;
+    const ahora = _cr.pausaDesde || _cr.fin || Date.now();
+    const tot = document.getElementById('crCrono');
+    if (tot) tot.textContent = _crFmt((ahora - _cr.inicio) / 1000);
+    const p = _cr.pasos[_cr.i];
+    const reloj = document.getElementById('crReloj');
+    if (!p || !reloj) return;
+    const trans = (ahora - _cr.faseInicio) / 1000;
+    if (p.k === 'cuenta') {
+      reloj.textContent = _crFmt(Math.ceil(p.seg - trans));
+      const arco = document.getElementById('crArco');
+      if (arco) arco.setAttribute('stroke-dashoffset', String(578 * Math.min(1, trans / p.seg)));
+    } else {
+      reloj.textContent = _crFmt(trans);
+      const barra = document.getElementById('crBarra');
+      if (barra && p.k === 'libre') barra.style.width = Math.min(100, trans / (p.max * 60) * 100) + '%';
+      const arco = document.getElementById('crArco');
+      if (arco && p.k === 'libre') arco.setAttribute('stroke-dashoffset', String(578 * (1 - Math.min(1, trans / (p.max * 60)))));
+    }
+  }
+  // Pasar a la fase siguiente a mano (Hecho, Siguiente, Saltar). Las tareas guardan su tiempo.
+  function crSiguiente() {
+    if (!_cr || _cr.fin) return;
+    _sesAudioListo();
+    const ahora = _cr.pausaDesde || Date.now();
+    const p = _cr.pasos[_cr.i];
+    const trans = (ahora - _cr.faseInicio) / 1000;
+    if (p && p.split) {
+      _cr.splits.push({ et: (p.grupo ? p.grupo + ' · ' : '') + p.et, seg: Math.round(trans) });
+      const sig = _cr.pasos[_cr.i + 1];
+      if (sig && sig.mitad) { sig.seg = Math.max(30, Math.round(trans / 2)); _cr.rec[_cr.i + 1] = sig.seg; }
+    }
+    if (p && p.k === 'libre') _cr.splits.push({ et: p.et, seg: Math.round(trans), libre: true });
+    _cr.i++;
+    _cr.faseInicio = ahora;
+    if (_cr.pausaDesde) _cr.pausaDesde = ahora;
+    if (_cr.i >= _cr.pasos.length) { _crTerminar(); return; }
+    _crGuardar(); _crPintar(); _crProgramar();
+  }
+  function crAnterior() {
+    if (!_cr || _cr.i === 0) return;
+    _cr.i--;
+    _cr.faseInicio = _cr.pausaDesde || Date.now();
+    _crGuardar(); _crPintar(); _crProgramar();
+  }
+  function crPausa() {
+    if (!_cr || _cr.fin) return;
+    if (_cr.pausaDesde) {
+      const d = Date.now() - _cr.pausaDesde;
+      _cr.inicio += d; _cr.faseInicio += d; _cr.pausaDesde = null;
+    } else _cr.pausaDesde = Date.now();
+    _crGuardar(); _crPintar(); _crProgramar();
+  }
+  function crContar() {
+    const p = _cr && _cr.pasos[_cr.i];
+    if (!p || p.k !== 'contador') return;
+    const n = (_cr.cont[_cr.i] || 0) + 1;
+    _cr.cont[_cr.i] = n;
+    if (n >= p.n) { crSiguiente(); return; }
+    _crGuardar(); _crPintar();
+  }
+  function crMarcar(j) {
+    const p = _cr && _cr.pasos[_cr.i];
+    if (!p || p.k !== 'lista') return;
+    const l = _cr.listas[_cr.i] || [];
+    l[j] = !l[j];
+    _cr.listas[_cr.i] = l;
+    _crGuardar(); _crPintar();
+  }
+  function _crTerminar() {
+    if (!_cr) return;
+    _cr.fin = _cr.pausaDesde || Date.now();
+    _cr.pausaDesde = null;
+    _cr.i = _cr.pasos.length;
+    _sesCancelarAviso();
+    if (document.visibilityState === 'visible') { _sesPitido(); try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch (e) {} }
+    const min = Math.max(1, Math.round((_cr.fin - _cr.inicio) / 60000));
+    // Registro de la carrera (los splits sirven para «cronometra y anota»).
+    const reg = Array.isArray(userData.carreras) ? userData.carreras : [];
+    if (!reg.some(r => r.fecha === _cr.fecha && r.sesion === _cr.sesion)) {
+      reg.push({ fecha: _cr.fecha, sesion: _cr.sesion, min, splits: _cr.splits.filter(s => !s.libre).map(s => s.seg) });
+      userData.carreras = reg.slice(-40);
+    }
+    if (!(userData.entrenosCompletados || []).includes(getFechaHoyISO())) {
+      try { toggleEntrenoCompletado(); } catch (e) { console.warn('[carrera] completar:', e.message); }
+    } else {
+      const user = getCurrentUser();
+      if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    }
+    try { actualizarRacha(); } catch (e) {}
+    kEvento('carrera_terminada', { minutos: min, splits: _cr.splits.length });
+    _crGuardar(); _crPintar();
+  }
+
+  const _CR_RELOJ = '<span class="cr-reloj" id=' + '"crReloj" role="timer"></span>';
+  const _CR_ICO = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  function _crPintar() {
+    if (!_cr) return;
+    const { pasos, i } = _cr;
+    document.getElementById('crTop').innerHTML = '<button type="button" class="ses-cerrar" onclick="crCerrar()" aria-label="Salir del modo carrera (se guarda lo que llevas)">' + _CR_ICO('<path d="M6 6l12 12M18 6L6 18"/>') + '</button>'
+      + '<div class="cr-prog" aria-hidden="true"><i style="width:' + Math.round(Math.min(i, pasos.length) / pasos.length * 100) + '%"></i></div>'
+      + '<span class="ses-crono" id="crCrono"></span>';
+    const cuerpo = document.getElementById('crCuerpo');
+    const pie = document.getElementById('crPie');
+    if (i >= pasos.length) { _crPintarResumen(cuerpo, pie); _crTick(); return; }
+    const p = pasos[i];
+    const sig = pasos[i + 1];
+    const enPausa = !!_cr.pausaDesde;
+    let h = '<div class="cr-cab"><span class="cr-fase">Fase ' + (i + 1) + ' de ' + pasos.length + (p.grupo ? ' · ' + _esc(p.grupo) : '') + '</span><span class="cr-ses">' + _esc(_cr.nombre) + '</span></div>'
+      + '<div class="cr-et ' + p.clase + '">' + _esc(p.et) + (p.opcional ? ' <small>sin obligación</small>' : '') + '</div>';
+    if (p.k === 'cuenta' || p.k === 'libre') {
+      h += '<div class="cr-anillo ' + p.clase + '"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="fondo"/><circle cx="100" cy="100" r="92" class="val" id="crArco" stroke-dasharray="578" stroke-dashoffset="' + (p.k === 'libre' ? 578 : 0) + '"/></svg>'
+        + '<div class="cr-reloj-caja">' + _CR_RELOJ + '<span class="cr-reloj-k">' + (p.k === 'cuenta' ? 'quedan' : 'llevas') + '</span></div></div>';
+      if (p.k === 'libre') h += '<div class="cr-obj"><span>Objetivo: <b>' + (p.min === p.max ? p.min : p.min + '-' + p.max) + ' min</b></span><div class="cr-obj-barra"><i id="crBarra"></i><em style="left:' + Math.round(p.min / p.max * 100) + '%"></em></div></div>';
+    } else if (p.k === 'tarea') {
+      h += '<div class="cr-anillo ' + p.clase + ' sin-arco"><div class="cr-reloj-caja">' + _CR_RELOJ + '<span class="cr-reloj-k">llevas</span></div></div>';
+    } else if (p.k === 'contador') {
+      const n = _cr.cont[i] || 0;
+      h += '<button type="button" class="cr-contador" onclick="crContar()" aria-label="Marcar uno hecho"><b>' + n + '<small> / ' + p.n + '</small></b><span>Toca al acabar cada uno</span></button>';
+    } else if (p.k === 'lista') {
+      const l = _cr.listas[i] || [];
+      h += '<div class="cr-lista">' + p.items.map((it, j) => '<button type="button" class="cr-item' + (l[j] ? ' ok' : '') + '" onclick="crMarcar(' + j + ')" aria-pressed="' + !!l[j] + '"><span class="cr-check">' + _CR_ICO('<path d="M20 6 9 17l-5-5"/>') + '</span>' + _esc(it) + '</button>').join('') + '</div>';
+    }
+    h += '<p class="cr-tx">' + _esc(p.texto || '') + '</p>';
+    if (sig) h += '<div class="cr-luego"><span>Luego</span><b>' + _esc(sig.et) + '</b>' + (sig.k === 'cuenta' ? '<em>' + _crFmt(sig.seg) + '</em>' : '') + '</div>';
+    if (_cr.splits.some(s => !s.libre)) h += '<div class="cr-splits"><div class="cr-splits-t">Tus tiempos</div>' + _cr.splits.filter(s => !s.libre).map(s => '<div><span>' + _esc(s.et) + '</span><b>' + _crFmt(s.seg) + '</b></div>').join('') + '</div>';
+    if (enPausa) h += '<div class="cr-pausa-aviso">En pausa</div>';
+    cuerpo.innerHTML = h;
+    cuerpo.scrollTop = 0;
+    const accion = p.k === 'tarea' ? 'Hecho' : p.k === 'libre' ? 'He terminado' : p.k === 'lista' ? (p.items.length && (_cr.listas[i] || []).filter(Boolean).length >= p.items.length ? 'Siguiente' : 'Ronda hecha') : p.k === 'contador' ? 'Saltar' : (p.opcional ? 'Saltar' : 'Siguiente');
+    pie.innerHTML = '<button type="button" class="ses-atras" onclick="crAnterior()"' + (i === 0 ? ' disabled' : '') + ' aria-label="Fase anterior">' + _CR_ICO('<path d="M15 18l-6-6 6-6"/>') + '</button>'
+      + '<button type="button" class="cr-pausa" onclick="crPausa()">' + (enPausa ? _CR_ICO('<polygon points="7 4 20 12 7 20 7 4" fill="currentColor"/>') + 'Seguir' : _CR_ICO('<path d="M9 5v14M15 5v14"/>') + 'Pausa') + '</button>'
+      + '<button type="button" class="btn-primary cr-sig" onclick="crSiguiente()">' + accion + ' ' + _CR_ICO('<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>') + '</button>';
+    _crTick();
+  }
+  function _crPintarResumen(cuerpo, pie) {
+    const min = Math.max(1, Math.round(((_cr.fin || Date.now()) - _cr.inicio) / 60000));
+    const racha = typeof calcularRachaDias === 'function' ? calcularRachaDias() : 0;
+    const splits = _cr.splits.filter(s => !s.libre);
+    const llama = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c-4.4 0-8-3.1-8-7.6 0-3.3 2.1-5.6 3.8-7.4.4-.4 1.1-.1 1.1.5 0 1.3.6 2.6 1.7 3.2.2-3.4 2.2-6.4 4.6-8.6.4-.4 1.1-.1 1.1.5 0 2.3 1.3 3.8 2.6 5.3 1.2 1.4 2.1 3 2.1 5.1C21 18.9 16.4 22 12 22z"/></svg>';
+    let mejor = '';
+    if (splits.length > 1) {
+      const s = splits.map(x => x.seg);
+      mejor = '<div class="ses-stat"><div class="v">' + _crFmt(Math.min(...s)) + '</div><div class="k">Mejor tramo</div></div>';
+    }
+    cuerpo.innerHTML = '<div class="ses-fin"><div class="ses-medalla">' + llama + '</div><h2>Sesión completada</h2><p>' + _esc(_cr.nombre) + (racha ? ' · llevas <b style="color:var(--brasa-txt)">' + racha + (racha === 1 ? ' día' : ' días') + ' seguidos</b>' : '') + '</p></div>'
+      + '<div class="ses-stats"><div class="ses-stat dest"><div class="v">' + min + ' min</div><div class="k">Tiempo total</div></div>'
+      + '<div class="ses-stat"><div class="v">' + _cr.pasos.length + '</div><div class="k">Fases</div></div>' + mejor + '</div>'
+      + (splits.length ? '<div class="cr-splits"><div class="cr-splits-t">Tus tiempos</div>' + splits.map(s => '<div><span>' + _esc(s.et) + '</span><b>' + _crFmt(s.seg) + '</b></div>').join('') + '</div>' : '')
+      + '<p class="ses-sug" style="text-align:center">Queda guardado en tu historial. Mañana, a recuperar.</p>';
+    pie.innerHTML = '<button type="button" class="btn-primary" onclick="crCerrar()">Volver a hoy</button>';
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && _cr && document.getElementById('carreraModo')?.classList.contains('abierta')) _crTick(); });
 
   // Temporizador de descanso
   function sesDescansoEmpezar(seg, texto) {
@@ -22284,6 +22651,8 @@ Se coló: ${lista}`;
         try {
           const g = JSON.parse(localStorage.getItem('kone_sesion_' + getFechaHoyISO()) || 'null');
           if (g && !g.fin && document.getElementById('dashboard')?.classList.contains('active')) sesAbrir();
+          const gc = JSON.parse(localStorage.getItem('kone_carrera_' + getFechaHoyISO()) || 'null');
+          if (gc && !gc.fin && document.getElementById('dashboard')?.classList.contains('active')) empezarEntrenamientoHoy();
         } catch (e) {}
       }, 1200);
     }
