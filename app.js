@@ -2094,6 +2094,8 @@
   // para las sugerencias de "Añadir ejercicio" y la búsqueda de reserva.
   const VIDEO_TECNICA = [
     // 28 oct 2026 (aprobado por Rafa, ideas de @elenadomenech_27): ejercicios nuevos del corredor.
+    ['step down', 'X0QRvoKJEkc', 'CERO Murcia - Step down (bajar escalón)'],
+    ['abducci[oó]n de cadera de pie', 'QEDgewYMW0U', 'RaqueSibaja - Abducción de cadera de pie con banda'],
     ['paseo de puntillas', 'D5k9qrRyjDk', 'PERFORMANCE MOVE - Paseo granjero de puntillas'],
     ['saltos (de )?lado a lado', 'sd0yBEhTQAo', 'Mariana Cicutta - Saltos laterales a la línea'],
     // 28 oct 2026 (aprobado por Rafa, idea de @tonigimenex).
@@ -2260,7 +2262,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261029');
+      const r = await fetch('/data/ejercicios-info.json?v=20261030');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3934,7 +3936,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (131 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (142 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4083,7 +4085,13 @@
     // 28 oct 2026 · revisión de @marulekhal, @cienciaychandal y @fitnesshibridoesp, aprobadas por Rafa el 30 oct
     "No hace falta prohibirte nada: sube un escalón. Huevo frito → revuelto → cocido. Pollo frito → al horno → a la plancha. Yogur azucarado → natural → griego natural.",
     "Tus músculos se recuperan antes de lo que crees, pero entrenarlos a diario acaba pasando factura a tendones y articulaciones. Dos o tres veces por semana cada uno es lo que mejor funciona, y tu plan ya lo reparte así.",
-    "Comer sano es el primer paso. Saber cuánto comes, el segundo. Saber cuánto de eso es proteína, hidratos y grasa, el tercero. Tu plan te da los tres hechos."
+    "Comer sano es el primer paso. Saber cuánto comes, el segundo. Saber cuánto de eso es proteína, hidratos y grasa, el tercero. Tu plan te da los tres hechos.",
+    // 30 oct 2026 · revisión de @mente.cuerpo.running, aprobadas por Rafa
+    "Para correr rápido, primero hay que aprender a correr lento.",
+    "Casi todos tus días deberían sentirse fáciles: si puedes hablar mientras corres, vas bien.",
+    "Entrenar no es competir: el máximo se guarda para el día de la carrera.",
+    "Si te ahogas corriendo no es que no sirvas para esto: es que vas demasiado rápido. Baja el ritmo o alterna con caminar.",
+    "El mejor plan es el que encaja en tu vida, no el que te obliga a cambiarla."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -5482,10 +5490,15 @@
       // perfil sin impacto (que incluye tobillo, esguince y Aquiles) y en principiantes.
       const _gemelosRun = (bloqueMeso % 2 === 0 && !rSinMat && !_sinImpacto && !esPrincipiante)
         ? 'paseo de puntillas con mancuerna 3×20m por mano' : 'gemelos en escalón 3×15';
+      // 30 oct 2026 (aprobado por Rafa, idea de @mente.cuerpo.running): prevención de
+      // rodilla. Un bloque sí y otro no, abducción de cadera de pie con goma en lugar de
+      // los lateral band walks, y step down en lugar de la búlgara en silla (al aire libre).
+      const _abdGoma = bloqueMeso % 2 === 1 ? 'abducción de cadera de pie con goma 3×12/lado' : 'lateral band walks 3×12/lado';
+      const _stepDown = bloqueMeso % 2 === 0 ? 'Step down desde un escalón 3×10/pierna' : 'Sentadilla búlgara en silla 3×10/pierna';
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
-          : 'Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, lateral band walks 3×12/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s'
+          : `Fuerza corredor · Sentadilla goblet 3×12, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, ${_abdGoma}, dead bug 3×10/lado, gemelos en escalón 3×15, plancha frontal 3×30s`
         : (esAvanzado && !_sinIntensidad)
           ? rSinMat
             // Los gemelos faltaban SOLO en esta variante (avanzado al aire
@@ -5496,10 +5509,10 @@
             ? `Fuerza + pliometría · ${_plioAvIni}, sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, copenhagen plank 3×15s/lado, A-skips 3×20m, gemelos en escalón a una pierna 4×12/lado`
             : `Fuerza + pliometría · ${_plioAvIni}, peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
-            ? `Fuerza corredor · ${_piesRapidosRun}Sentadilla búlgara en silla 3×10/pierna, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
+            ? `Fuerza corredor · ${_piesRapidosRun}${_stepDown}, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
             // 28 oct 2026 (aprobado por Rafa, idea de @elenadomenech_27): un bloque
             // sí y otro no, halo con disco en lugar del pallof press (core + hombro).
-            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, lateral band walks 3×12/lado, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, ${_gemelosRun}`;
+            : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, ${_abdGoma}, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, ${_gemelosRun}`;
 
       // EL OBJETIVO NO CAMBIABA NADA DEL PLAN DE RUNNING (comprobado 7 sept
       // 2026: los cuatro objetivos daban un plan idéntico, carácter a carácter,
@@ -5779,7 +5792,7 @@
           const falta = diasParaEvento - (i - _hoyIdx);
           if (falta === 0) {
             return { dia: d.dia, tipo: 'Entrenamiento', resumen: `Día de carrera · ${_nombreCarrera}`, etiqueta: 'Intensidad',
-              detalle: `Hoy es ${_nombreCarrera}. Desayuno que ya hayas probado, 2-3 h antes. Calentamiento: 10 min trote suave${_conStrides ? ' + 3-4 progresivos de 60-80 m' : ''} (en maratón, 5 min basta). Sal más despacio de lo que te pide el cuerpo: los primeros kilómetros parecen fáciles y se pagan al final. Nada nuevo hoy: ni geles, ni zapatillas, ni ropa. Y disfrútala: es el premio a todas estas semanas` };
+              detalle: `Hoy es ${_nombreCarrera}. Desayuno que ya hayas probado, 2-3 h antes. Calentamiento: 10 min trote suave${_conStrides ? ' + 3-4 progresivos de 60-80 m' : ''} (en maratón, 5 min basta). Los dos primeros kilómetros, unos 10 segundos por kilómetro más lento que tu ritmo objetivo: parecen fáciles y lo que guardas ahí es lo que tendrás al final. Nada nuevo hoy: ni geles, ni zapatillas, ni ropa. Al cruzar la meta no te sientes de golpe: camina 5-10 minutos, y bebe agua y algo con sales en la primera hora. Y disfrútala: es el premio a todas estas semanas` };
           }
           if (falta === 1) {
             return { dia: d.dia, tipo: 'Descanso', resumen: 'Víspera de carrera', etiqueta: 'Descanso',
@@ -10646,6 +10659,11 @@
       if (diasParaEvento !== null && diasParaEvento <= 7) {
         notasDeporte.push(`Semana de ${tieneEvento ? `"${u.evento.trim()}"` : 'tu carrera'}: nada nuevo el día de la carrera (ni geles, ni desayuno, ni zapatillas, ni ropa: todo probado antes en una tirada larga). Deja todo preparado la noche anterior: ropa, dorsal, geles y el reloj cargado. Duerme bien las 2-3 noches previas, que cuentan más que la víspera (es normal dormir mal por los nervios). Y los 2 días antes, bebe algo más de lo normal, con electrolitos.`);
       }
+      // 30 oct 2026 (aprobado por Rafa, idea de @mente.cuerpo.running).
+      notasDeporte.push('Antes de correr, 5 minutos de movilidad: balanceos de pierna hacia delante y hacia los lados, círculos de cadera, rodillas y tobillos, talones al glúteo y skipping suave. Los estiramientos, mejor después.');
+      const _mesNota = new Date().getMonth();
+      if (_mesNota >= 5 && _mesNota <= 8) notasDeporte.push('Con calor: sal a primera o última hora, busca sombra y fuentes o lleva agua, y guíate por el esfuerzo, no por el ritmo: es normal ir 10-20 segundos por kilómetro más lento.');
+      if (_mesNota === 11 || _mesNota <= 1) notasDeporte.push('Con frío: haz la movilidad dentro de casa antes de salir, tápate cuello y orejas, y si puedes evita las primeras y las últimas horas del día.');
       // Quien empieza a correr (28 oct 2026, aprobado por Rafa; idea de @elenadomenech_27).
       if (esPrincipiante) {
         notasDeporte.push('Empieza más despacio de lo que crees: si puedes hablar mientras corres, vas bien. Las lesiones al empezar casi siempre vienen de subir demasiado rápido, no de las zapatillas. Y caminar también cuenta: los minutos andando son parte del plan, no un fallo.');
