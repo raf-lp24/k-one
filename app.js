@@ -932,7 +932,7 @@
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>', title: 'Marca cada serie: el descanso va solo', text: 'Al terminar una serie, márcala con el ✓ y arranca el temporizador de descanso con el tiempo que toca para ese ejercicio. Cuando acaba, el móvil vibra y vas a por la siguiente. Con «Avisos de entreno» activados, te avisamos aunque tengas el móvil bloqueado.' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>', title: 'Nosotros te decimos cuánto peso poner', text: 'Apunta el peso que usas y, al acabar cada ejercicio, dinos «Me sobró», «Justo» o «No llegué». Con eso te proponemos el peso de la próxima vez. Al terminar la sesión verás los kilos movidos y tus récords.' },
     { section: 'hoy', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>', title: '¿No sabes hacer un ejercicio?', text: 'Pulsa «Cómo se hace»: fotos de la posición inicial y final, qué músculos trabajas, las instrucciones y el vídeo de técnica. Hacerlo bien importa más que el peso.' },
-    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Tus comidas de hoy', text: 'En Hoy ves las comidas que te tocan, con su hora y sus calorías. Márcalas cuando las hagas. Para ver la receta o cambiar un plato, pulsa «Ver recetas y cambiar comidas».' },
+    { section: 'hoy', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8 C12 5 14 3 17 3 C17 6 15 8 12 8 Z"/><path d="M4 11 H20 a8 8 0 0 1 -16 0 Z"/></svg>', title: 'Tu semana, día a día', text: 'Arriba en Hoy tienes los 7 días: toca uno y ves su entreno o, en «Comidas», lo que te toca comer, con su hora y sus calorías. Marca las comidas de hoy cuando las hagas. Para ver la receta o cambiar un plato, pulsa «Cambiar opciones y ver recetas».' },
     { section: 'semana', soloEntreno: true, icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title: 'Entreno: tu semana entera', text: 'Aquí ves todos los días de esta semana y las próximas, que se van ajustando con tu progreso. Si quieres meter un ejercicio que no está, pulsa «+ Añadir ejercicio» al final del día.' },
     { section: 'nutricion', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>', title: 'Comida: elige y cambia lo que quieras', text: 'Cada comida tiene 5 opciones con las cantidades ya ajustadas a ti. Si ninguna te convence, «Reiniciar» te da otras 5. ¿Comes otra cosa? «+ Añadir tu comida» y montas tu plato con sus gramos: calculamos sus calorías. Elige tus 7 días y te sale la lista de la compra.' },
     { section: 'checkin', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', title: 'Check-in cada fin de semana', textSolo: 'Cinco minutos: tu peso y cómo te has encontrado. Con eso ajustamos tus calorías si hace falta. Cuando toque, te lo recordamos en Hoy.', text: 'Cinco minutos: tu peso, cómo te has encontrado y cuántos días entrenaste. Con eso ajustamos tu plan de la semana siguiente. Cuando toque, te lo recordamos en Hoy.' },
@@ -12215,7 +12215,8 @@
       if (typeof _ofrecerPrimerEntrenoHoy === 'function' && _ofrecerPrimerEntrenoHoy()) hacerPrimerEntrenoHoy();
       else empezarEntrenamientoHoy();
     } else if (id === 'comida') {
-      const c = document.getElementById('hoyComidas');
+      try { _hdSel = getIndiceDiaHoy(); hdTab('com'); } catch (e) {}
+      const c = document.getElementById('hoyDia');
       if (c) { const y = c.getBoundingClientRect().top + window.scrollY - 80; window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
     } else if (id === 'semana') showSection('semana');
     else if (id === 'menu') showSection('nutricion');
@@ -12294,6 +12295,8 @@
   }
 
   function _pintarComidasHoy() {
+    // El calendario de la semana enseña lo mismo (y lo que se marque aquí): se repinta a la vez.
+    try { _pintarHoyDia(); } catch (e) { console.warn('[hoy] tu semana:', e.message); }
     const caja = document.getElementById('hoyComidas');
     if (!caja) return;
     const comidas = _comidasDeHoy();
@@ -12350,6 +12353,252 @@
     irANutricionHoy();
     setTimeout(() => {
       const b = document.getElementById('mealBlock' + i);
+      if (!b) return;
+      b.classList.add('expanded');
+      window.scrollTo({ top: Math.max(0, b.getBoundingClientRect().top + window.scrollY - 16), behavior: 'smooth' });
+    }, 250);
+  }
+
+  // ===== TU SEMANA EN HOY (30 oct 2026) =====
+  // Idea de Rafa, con maqueta aprobada: calendario L-D arriba, se toca un día y
+  // debajo sale su entrenamiento o sus comidas en dos pestañas. Así Hoy deja de
+  // ser una lista larguísima. Solo lee el plan: no cambia nada de él. El entreno
+  // detallado de siempre (#todayPlan) sigue debajo, plegado, y el modo serie a
+  // serie lo lee de ahí igual que antes.
+  let _hdSel = null, _hdPestana = 'ent', _hdTodos = false, _hdDetalle = false, _hdFecha = '';
+  const _HD_LETRAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const _HD_DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  function _isoDia(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function _fechasSemana() {
+    const hoy = new Date(); hoy.setHours(12, 0, 0, 0);
+    const lunes = new Date(hoy); lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(lunes); d.setDate(lunes.getDate() + i); return d; });
+  }
+  // La sesión que se ve en cada casilla: la de hoy es la de getIndiceSesionHoy(),
+  // por si adelantó su primer entreno a un día de descanso.
+  function _hdSesion(i) {
+    const sem = (generatedPlan && generatedPlan.semana) || [];
+    return i === getIndiceDiaHoy() ? sem[getIndiceSesionHoy()] : sem[i];
+  }
+  // "remo con barra 4×8 (sin tirón, …)" → { nombre: 'Remo con barra', dosis: '4×8' }.
+  // Las notas entre paréntesis y lo que va tras ":" se quedan para el detalle.
+  function _ejerciciosCortos(dia) {
+    if (!dia || !dia.detalle) return [];
+    const det = _aplicarSustitucionesDia(dia.detalle, dia.dia);
+    const partes = det.split('·');
+    const txt = partes.length >= 2 ? partes.slice(1).join('·') : det;
+    const re = /\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:\s*[-–]\s*\d+)?\s*(?:seg|min|km|s|m)?\b(?:\s*(?:por |\/\s*)(?:pierna|lado|brazo))?|\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+)?\s*(?:min|km|seg|s|m)\b/i;
+    return splitRespetandoParentesis(txt).map(e => {
+      const s = e.replace(/\([^()]*\)/g, ' ').split(':')[0].replace(/\s+/g, ' ').trim();
+      if (!s) return null;
+      const m = s.match(re);
+      let nombre = s, dosis = '';
+      if (m) {
+        dosis = m[0].trim().replace(/(\d)\s*[x×]\s*(\d)/, '$1×$2');
+        nombre = s.slice(0, m.index).trim() || s.slice(m.index + m[0].length).trim() || s;
+      }
+      nombre = nombre.replace(/[,;·\-–+\s]+$/, '');
+      return { nombre: nombre.charAt(0).toUpperCase() + nombre.slice(1), dosis };
+    }).filter(Boolean);
+  }
+  // Las tomas de un día con la opción elegida en Nutrición (como _comidasDeHoy).
+  function _comidasDelDia(dia) {
+    if (!generatedPlan || !generatedPlan.nutricion) return [];
+    const elegidas = (Array.isArray(userData.comidasSemana) && userData.comidasSemana[dia]) || [];
+    return _tomasDia(dia, generatedPlan, elegidas).map((t, i) => {
+      const base = (t.opciones || []).filter(o => !o.custom);
+      const extras = (userData.comidasExtra && userData.comidasExtra[dia] && userData.comidasExtra[dia][i]) || [];
+      const todas = base.concat(extras);
+      const op = todas[elegidas[i]] || todas[0];
+      return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '' } : null;
+    }).filter(Boolean);
+  }
+  const _HD_FLECHA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+
+  function _pintarHoyDia() {
+    const caja = document.getElementById('hoyDia');
+    const sec = document.getElementById('section-hoy');
+    if (!caja || !generatedPlan) return;
+    const soloDieta = !!generatedPlan.soloDieta;
+    const haySemana = !soloDieta && Array.isArray(generatedPlan.semana) && generatedPlan.semana.length === 7;
+    const hayComidas = !!generatedPlan.nutricion;
+    if (!haySemana && !hayComidas) { caja.style.display = 'none'; if (sec) sec.classList.remove('hd-on'); return; }
+    const hoyIdx = getIndiceDiaHoy();
+    const fechaHoy = getFechaHoyISO();
+    // Al cambiar de día (app abierta de un día para otro) se vuelve a hoy.
+    if (_hdFecha !== fechaHoy) { _hdFecha = fechaHoy; _hdSel = hoyIdx; _hdTodos = false; _hdDetalle = false; }
+    // Sin entreno (solo nutrición) o sin menú, solo hay una pestaña posible.
+    const pest = !haySemana ? 'com' : !hayComidas ? 'ent' : _hdPestana;
+    const fechas = _fechasSemana();
+    const hechos = new Set([].concat(userData.historialEntrenos || [], userData.entrenosCompletados || []));
+
+    document.getElementById('hdCal').innerHTML = fechas.map((f, i) => {
+      const d = haySemana ? _hdSesion(i) : null;
+      const entreno = !!(d && d.tipo !== 'Descanso');
+      const hecho = haySemana && hechos.has(_isoDia(f));
+      const punto = haySemana ? '<span class="p' + (hecho ? ' hecho' : entreno ? '' : ' desc') + '" aria-hidden="true"></span>' : '';
+      const estado = haySemana ? (hecho ? ', hecho' : entreno ? ', entreno' : ', descanso') : '';
+      return '<button type="button" class="hd-d' + (i === hoyIdx ? ' hoy' : '') + (i === _hdSel ? ' sel' : '') + '" onclick="hdDia(' + i + ')"'
+        + ' aria-pressed="' + (i === _hdSel) + '" aria-label="' + _HD_DIAS[i] + ' ' + f.getDate() + (i === hoyIdx ? ', hoy' : '') + estado + '">'
+        + '<span class="l" aria-hidden="true">' + _HD_LETRAS[i] + '</span><span class="n" aria-hidden="true">' + f.getDate() + '</span>' + punto + '</button>';
+    }).join('');
+    const ley = document.getElementById('hdLey');
+    if (ley) ley.style.display = haySemana ? '' : 'none';
+    const tabs = document.getElementById('hdTabs');
+    tabs.style.display = haySemana && hayComidas ? '' : 'none';
+    tabs.querySelectorAll('.hd-tab').forEach(t => { const on = t.dataset.t === pest; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
+
+    const iso = _isoDia(fechas[_hdSel]);
+    const etiDia = _HD_DIAS[_hdSel] + ' ' + fechas[_hdSel].getDate() + (_hdSel === hoyIdx ? ' · hoy' : '');
+    document.getElementById('hdPanel').innerHTML = pest === 'ent'
+      ? _hdPanelEntreno(_hdSel, hoyIdx, etiDia, hechos.has(iso))
+      : _hdPanelComidas(_hdSel, hoyIdx, etiDia, iso);
+    // El detalle de siempre solo se ve con hoy elegido, en Entrenamiento y abierto.
+    const det = document.getElementById('todayPlan');
+    if (det) det.classList.toggle('hd-plegado', !(_hdDetalle && _hdSel === hoyIdx && pest === 'ent'));
+    caja.style.display = '';
+    if (sec) sec.classList.add('hd-on');
+  }
+
+  function _hdPanelEntreno(i, hoyIdx, etiDia, hecho) {
+    const esHoy = i === hoyIdx;
+    const d = _hdSesion(i);
+    if (!d) return '';
+    if (d.tipo === 'Descanso') {
+      const oferta = esHoy ? _ofrecerPrimerEntrenoHoy() : null;
+      if (oferta) {
+        return '<div class="hd-card hd-desc"><div class="hd-eti">' + _esc(etiDia) + '</div><div class="hd-tit">¿Empiezas hoy?</div>'
+          + '<p class="hd-nota">Hoy te toca descanso, pero puedes adelantar tu primer entreno: ' + _esc(_nombreSesion(oferta.dia.resumen || oferta.dia.dia || '')) + '.</p>'
+          + '<button type="button" class="hd-btn" onclick="hacerPrimerEntrenoHoy()">Hacer mi primer entreno hoy ' + _HD_FLECHA + '</button></div>';
+      }
+      const checkin = i === 6;
+      const texto = d.detalle
+        ? d.detalle.charAt(0).toUpperCase() + d.detalle.slice(1)
+        : 'Descansar también es parte del plan: duerme bien, bebe agua y, si te apetece, sal a dar un paseo.';
+      return '<div class="hd-card hd-desc"><div class="hd-eti' + (hecho ? ' ok' : '') + '">' + _esc(etiDia) + (hecho ? ' · hecho ✓' : '') + '</div>'
+        + '<div class="hd-tit">' + (checkin ? 'Descanso · check-in' : _esc(_nombreSesion(d.resumen || '') || 'Descanso')) + '</div>'
+        + '<p class="hd-nota">' + _esc(texto) + '</p>'
+        + (checkin ? '<p class="hd-nota">El domingo toca contarnos cómo ha ido la semana: el plan de la siguiente se ajusta con tus respuestas.</p>' : '')
+        + (checkin && esHoy ? '<button type="button" class="hd-btn sec" onclick="showSection(\'checkin\')">Hacer el check-in ' + _HD_FLECHA + '</button>' : '')
+        + '</div>';
+    }
+    const ejs = _ejerciciosCortos(d);
+    // Las sesiones de carrera vienen escritas como un párrafo ("40-50 min a zona 2,
+    // ritmo conversacional…"), no como ejercicios: en vez de lista, el texto corto.
+    const esLista = ejs.filter(e => /×/.test(e.dosis)).length >= 2;
+    let resumen = '';
+    if (!esLista) {
+      const det = _aplicarSustitucionesDia(d.detalle || '', d.dia);
+      const partes = det.split('·');
+      resumen = (partes.length >= 2 && partes[0].length < 40 ? partes.slice(1).join('·') : det).replace(/\s*\([^()]*\)/g, '').replace(/\s+/g, ' ').trim();
+      if (resumen.length > 210) {
+        const corte = resumen.lastIndexOf('. ', 210);
+        resumen = corte > 80 ? resumen.slice(0, corte + 1) : resumen.slice(0, 200).replace(/\s+\S*$/, '') + '…';
+      }
+      resumen = resumen.charAt(0).toUpperCase() + resumen.slice(1);
+    }
+    const st = {};
+    try { _rellenarStatsSesion(d, null, null, st); } catch (e) {}
+    const chips = [];
+    if (st.label && st.label !== 'Ejercicios' && st.label !== 'Enfoque') chips.push(st.label === 'Distancia' ? st.valor : st.valor + ' ' + st.label.toLowerCase());
+    else if (esLista) chips.push(ejs.length + (ejs.length === 1 ? ' ejercicio' : ' ejercicios'));
+    if (st.dur) chips.push('~' + st.dur + ' min');
+    if (st.intensidad) chips.push('Intensidad ' + st.intensidad.toLowerCase());
+    const dp = generatedPlan.diasParaEvento;
+    const cuenta = esHoy && generatedPlan.evento && dp !== null && dp !== undefined
+      ? '<span class="hd-chip cd">' + _esc(dp === 0 ? '¡Hoy! ' + generatedPlan.evento : 'Faltan ' + dp + (dp === 1 ? ' día · ' : ' días · ') + generatedPlan.evento) + '</span>' : '';
+    const verTodos = !esHoy && _hdTodos;
+    const lista = !esLista ? '' : (verTodos ? ejs : ejs.slice(0, 4)).map(e => '<div class="hd-ej"><b>' + _esc(e.nombre) + '</b>' + (e.dosis ? '<span>' + _esc(e.dosis) + '</span>' : '') + '</div>').join('');
+    let mas = '';
+    if (esHoy) mas = '<button type="button" class="hd-mas" onclick="hdVerDetalle()" aria-expanded="' + _hdDetalle + '">'
+      + (_hdDetalle ? 'Ocultar el detalle' : !esLista ? 'Ver el entreno completo' : (ejs.length > 4 ? 'Ver los ' + ejs.length + ' ejercicios' : 'Ver el entreno completo') + ', con pesos y técnica') + '</button>';
+    else if (esLista && ejs.length > 4) mas = '<button type="button" class="hd-mas" onclick="hdVerTodos()" aria-expanded="' + _hdTodos + '">' + (_hdTodos ? 'Ver menos' : 'Ver los ' + ejs.length + ' ejercicios') + '</button>';
+    let accion = '';
+    if (esHoy) {
+      accion = '<button type="button" class="hd-btn" onclick="empezarEntrenamientoHoy()">' + (hecho ? 'Abrir el entreno' : 'Empezar entrenamiento') + ' ' + _HD_FLECHA + '</button>';
+    } else {
+      accion = '<button type="button" class="hd-btn sec" onclick="hdVerEnEntreno(' + i + ')">' + (i < hoyIdx ? 'Ver el día en Entreno' : 'Ver con fotos y técnica') + ' ' + _HD_FLECHA + '</button>';
+    }
+    return '<div class="hd-card"><div class="hd-eti' + (hecho ? ' ok' : '') + '">' + _esc(etiDia) + (hecho ? ' · hecho ✓' : '') + '</div>'
+      + '<div class="hd-tit">' + _esc(_nombreSesion(d.resumen || '') || 'Tu sesión') + '</div>'
+      + '<div class="hd-chips">' + chips.map(c => '<span class="hd-chip">' + _esc(c) + '</span>').join('') + cuenta + '</div>'
+      + accion
+      + (lista ? '<div class="hd-lista">' + lista + '</div>' : '') + (resumen ? '<p class="hd-nota hd-res">' + _esc(resumen) + '</p>' : '') + mas + '</div>';
+  }
+
+  function _hdPanelComidas(i, hoyIdx, etiDia, iso) {
+    const esHoy = i === hoyIdx;
+    const comidas = _comidasDelDia(i);
+    if (!comidas.length) return '<div class="hd-card hd-desc"><p class="hd-nota">Este día todavía no tiene menú.</p></div>';
+    const k = (generatedPlan.kcalObjPorDia && generatedPlan.kcalObjPorDia[i]) || generatedPlan.kcalObj;
+    const p = generatedPlan.protObj;
+    const c = (generatedPlan.carbsObjPorDia && generatedPlan.carbsObjPorDia[i]) || generatedPlan.carbsObj;
+    const g = k && p && c ? Math.round((k - p * 4 - c * 4) / 9) : 0;
+    // La unidad va con la etiqueta: en Bebas Neue la «g» saldría en mayúscula.
+    const caja = (v, u, t) => '<div><b>' + _esc(Number(v).toLocaleString('es-ES')) + '</b><small>' + (u ? u + ' ' : '') + t + '</small></div>';
+    const tot = k ? '<div class="hd-tot-k">Objetivo del ' + _esc(etiDia.replace(' · hoy', '').toLowerCase()) + '</div><div class="hd-tot">' + caja(k, '', 'kcal')
+      + (p ? caja(p, 'g', 'proteína') : '') + (c ? caja(c, 'g', 'hidratos') : '') + (g > 0 ? caja(g, 'g', 'grasa') : '') + '</div>' : '';
+    const hechas = (userData.comidasHechas && userData.comidasHechas[iso]) || [];
+    const n = comidas.filter((_, j) => hechas[j]).length;
+    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const filas = comidas.map((cm, j) => {
+      const h = !!hechas[j];
+      const pm = String(cm.nombre).match(/^(.*\S)\s*\(([^()]+)\)\s*$/);
+      const nom = pm ? { nombre: pm[1], nota: pm[2] } : { nombre: cm.nombre, nota: '' };
+      const kc = String(cm.kcal || '').replace(/\s*kcal\s*$/i, '');
+      // Solo se marcan las de hoy: es el registro de lo que has comido, no un plan.
+      const btn = esHoy
+        ? '<button type="button" class="hc-check" onclick="marcarComidaHoy(' + j + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + cm.momento) + '">' + check + '</button>'
+        : '<button type="button" class="hc-check" disabled aria-hidden="true" tabindex="-1">' + check + '</button>';
+      return '<div class="hc-fila' + (h ? ' hecha' : '') + '">' + btn
+        + '<div class="hc-txt"><div class="hc-mom">' + _esc(cm.momento) + (cm.hora ? ' · <b>' + _esc(cm.hora) + '</b>' : '') + '</div><div class="hc-nom">' + _esc(nom.nombre) + '</div>'
+        + (nom.nota ? '<span class="hc-nota">' + _esc(nom.nota) + '</span>' : '') + '</div>'
+        + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '')
+        + '<button type="button" class="hc-ir" onclick="irAComidaDia(' + i + ',' + j + ')" aria-label="' + _esc('Ver las recetas de ' + cm.momento) + '"><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button></div>';
+    }).join('');
+    const prog = esHoy ? '<div class="hc-prog"><span>' + (n === comidas.length ? 'Todas hechas. Bien.' : n + ' de ' + comidas.length + ' hechas') + '</span>'
+      + '<span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(n / comidas.length * 100) + '%"></i></span></div>' : '';
+    return tot + '<div class="hd-card">' + prog + '<div class="hc-lista">' + filas + '</div>'
+      + '<button type="button" class="hc-ver" onclick="irANutricionDia(' + i + ')"><span>Cambiar opciones y ver recetas</span><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button></div>';
+  }
+
+  function hdDia(i) {
+    if (_hdSel !== i) kEvento('hoy_calendario_dia', { dia: i, hoy: i === getIndiceDiaHoy() });
+    _hdSel = i; _hdTodos = false;
+    _pintarHoyDia();
+  }
+  function hdTab(t) {
+    if (_hdPestana !== t) kEvento('hoy_calendario_pestana', { pestana: t });
+    _hdPestana = t;
+    _pintarHoyDia();
+  }
+  function hdVerTodos() { _hdTodos = !_hdTodos; _pintarHoyDia(); }
+  function hdVerDetalle() {
+    _hdDetalle = !_hdDetalle;
+    _pintarHoyDia();
+    const det = document.getElementById('todayPlan');
+    if (_hdDetalle && det) setTimeout(() => window.scrollTo({ top: Math.max(0, det.getBoundingClientRect().top + window.scrollY - 70), behavior: 'smooth' }), 60);
+  }
+  // Otro día de la semana: se abre en Entreno, ya desplegado.
+  function hdVerEnEntreno(i) {
+    showSection('semana');
+    setTimeout(() => {
+      const fila = document.querySelectorAll('#weekGrid .week-day-row')[i];
+      if (!fila) return;
+      fila.classList.add('expanded');
+      window.scrollTo({ top: Math.max(0, fila.getBoundingClientRect().top + window.scrollY - 70), behavior: 'smooth' });
+    }, 250);
+  }
+  function irANutricionDia(i) {
+    showSection('nutricion');
+    try { seleccionarDiaNutri(i); } catch (e) {}
+  }
+  function irAComidaDia(i, j) {
+    irANutricionDia(i);
+    setTimeout(() => {
+      const b = document.getElementById('mealBlock' + j);
       if (!b) return;
       b.classList.add('expanded');
       window.scrollTo({ top: Math.max(0, b.getBoundingClientRect().top + window.scrollY - 16), behavior: 'smooth' });
@@ -12413,8 +12662,10 @@
 
   // Deriva músculos, intensidad, duración y nº de ejercicios de la sesión de un día.
   // Todo se calcula de los ejercicios reales (nada inventado); la duración es una estimación.
-  function _rellenarStatsSesion(dia, tagsEl, statsEl) {
-    if (!tagsEl || !statsEl) return;
+  // Con `salida` no pinta nada: deja { tags, dur, intensidad, label, valor } en ese objeto
+  // (lo usa el calendario de Hoy para los datos de cualquier día).
+  function _rellenarStatsSesion(dia, tagsEl, statsEl, salida) {
+    if (!salida && (!tagsEl || !statsEl)) return;
     const detalle  = (dia && dia.detalle) || '';
     const etiqueta = (dia && dia.etiqueta) || '';
     const resumen  = (dia && dia.resumen) || '';
@@ -12429,16 +12680,18 @@
     // Helpers para pintar (o esconder) la barra
     const pintarTags = (arr) => {
       const u = []; arr.filter(Boolean).forEach(t => { if (!u.includes(t)) u.push(t); });
+      if (salida) { salida.tags = u.slice(0, 4); return; }
       tagsEl.innerHTML = u.slice(0, 4).map(t => `<span>${t}</span>`).join('');
     };
     const pintarStats = (dur, intensidad, label, valor) => {
+      if (salida) { Object.assign(salida, { dur, intensidad, label, valor }); return; }
       document.getElementById('thDuracion').textContent = dur + ' min';
       document.getElementById('thIntensidad').textContent = intensidad;
       const l = document.getElementById('thStat3Label'); if (l) l.textContent = label;
       document.getElementById('thEjercicios').textContent = valor;
       statsEl.style.display = '';
     };
-    const ocultar = () => { tagsEl.innerHTML = ''; statsEl.style.display = 'none'; };
+    const ocultar = () => { if (salida) return; tagsEl.innerHTML = ''; statsEl.style.display = 'none'; };
 
     // ─── Clasificación de la modalidad del día ───
     // La ETIQUETA del día manda (Empuje, Piernas, WOD, Estaciones, Cardio...). Así un día
@@ -12590,6 +12843,8 @@
     if (generatedPlan && generatedPlan.soloDieta) { showSection('nutricion'); return; }
     _ses = null; // desde el botón siempre es la sesión de HOY (no la de ayer en memoria)
     if (sesAbrir()) return;
+    // Sin modo serie a serie, el detalle de Hoy (plegado bajo el calendario) se abre.
+    if (!_hdDetalle) { _hdSel = getIndiceDiaHoy(); _hdPestana = 'ent'; _hdDetalle = true; try { _pintarHoyDia(); } catch (e) {} }
     const el = document.getElementById('todayPlan');
     if (el && el.style.display !== 'none') {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -13677,6 +13932,7 @@
       btn.classList.remove('completado');
       badge.style.display = 'none';
     }
+    try { _pintarHoyDia(); } catch (e) {}
 
     // Reflejar el estado también en el día "Hoy" del Plan semanal
     const dayBadge = document.getElementById('dayCompletadoBadge');

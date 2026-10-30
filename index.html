@@ -5975,6 +5975,62 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   @media (prefers-reduced-motion: reduce) { .flecha-redonda { transition: none; }}
   @media (prefers-reduced-motion: reduce) { .hc-barra i, .hc-check { transition: none; }}
 
+  /* TU SEMANA en Hoy (30 oct 2026): calendario L-D + pestañas Entrenamiento/Comidas.
+     Con él a la vista, el hero grande y «Tus comidas de hoy» sobran (mismo contenido). */
+  #section-hoy.hd-on #todayHero, #section-hoy.hd-on #hoyComidas { display: none !important; }
+  .hoy-dia { margin: 0 0 20px; }
+  .hd-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .hd-d { background: var(--carbon); border: 1px solid var(--humo); border-radius: 14px; padding: 8px 0 7px; text-align: center; cursor: pointer; color: var(--blanco); font: inherit; min-height: 64px; display: flex; flex-direction: column; align-items: center; gap: 1px; transition: background .15s, border-color .15s; }
+  .hd-d .l { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 1px; color: var(--metal); }
+  .hd-d .n { font-family: 'Bebas Neue', sans-serif; font-size: 23px; line-height: 1.05; }
+  .hd-d .p { width: 6px; height: 6px; border-radius: 50%; background: var(--brasa-txt); margin-top: 2px; }
+  .hd-d .p.desc { background: var(--humo); }
+  .hd-d .p.hecho { background: #3BA55C; }
+  .hd-d.hoy { border-color: var(--brasa-txt); }
+  .hd-d.sel { background: var(--brasa); border-color: var(--brasa); }
+  .hd-d.sel .l { color: rgba(255,255,255,.85); }
+  .hd-d.sel .p { background: #fff; }
+  .hd-d:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 2px; }
+  .hd-ley { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 11px; color: var(--metal); }
+  .hd-ley i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .hd-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--carbon); border: 1px solid var(--humo); border-radius: 999px; padding: 4px; margin: 16px 0 12px; }
+  .hd-tab { background: none; border: 0; border-radius: 999px; padding: 11px 0; min-height: 44px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: var(--metal-claro); cursor: pointer; }
+  .hd-tab.on { background: var(--blanco); color: var(--negro); }
+  .hd-tab:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 2px; }
+  .hd-card { background: var(--carbon); border: 1px solid var(--humo); border-radius: 18px; padding: 16px; }
+  .hd-eti { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .hd-eti.ok { color: #5CC07A; }
+  .hd-tit { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; letter-spacing: .5px; color: var(--blanco); margin-top: 6px; overflow-wrap: anywhere; }
+  .hd-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .hd-chip { background: var(--grafito); border: 1px solid var(--humo); border-radius: 999px; padding: 6px 11px; font-size: 12px; color: var(--blanco); }
+  .hd-chip.cd { border-color: rgba(242,106,54,.5); color: var(--brasa-txt); }
+  .hd-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: var(--brasa); color: #fff; border: 0; border-radius: 14px; padding: 15px; min-height: 50px; font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 14px; text-transform: uppercase; cursor: pointer; transition: background .15s; }
+  .hd-btn:hover { background: var(--brasa-oscura); }
+  .hd-btn.sec { background: var(--grafito); border: 1px solid var(--humo); color: var(--blanco); }
+  .hd-btn.sec:hover { border-color: rgba(242,106,54,.6); }
+  .hd-btn svg { width: 16px; height: 16px; }
+  .hd-lista { margin-top: 12px; }
+  .hd-ej { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 2px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 14px; color: var(--blanco); }
+  .hd-ej b { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .hd-ej span { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--metal-claro); white-space: nowrap; flex-shrink: 0; }
+  .hd-mas { display: block; width: 100%; background: none; border: 0; padding: 12px 0 2px; min-height: 44px; text-align: center; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--brasa-txt); cursor: pointer; }
+  .hd-nota { font-size: 13px; line-height: 1.5; color: var(--metal-claro); margin: 8px 0 0; }
+  .hd-res { margin-top: 14px; font-size: 13.5px; }
+  .hd-desc { text-align: center; padding: 22px 6px 6px; }
+  .hd-desc .hd-tit { margin-bottom: 8px; }
+  .hd-desc .hd-btn { margin-top: 16px; }
+  .hd-tot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+  .hd-tot div { background: var(--carbon); border: 1px solid var(--humo); border-radius: 12px; padding: 8px 0 7px; text-align: center; }
+  .hd-tot b { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 21px; line-height: 1.1; color: var(--blanco); }
+  .hd-tot small { font-size: 10px; color: var(--metal); }
+  .hd-tot-k { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); margin: 0 0 6px; }
+  .hd-card .hc-fila:first-child { border-top: 0; }
+  .hd-card .hc-prog { margin-top: 0; }
+  .hc-check:disabled { cursor: default; opacity: .55; }
+  #todayPlan.hd-plegado { display: none !important; }
+  #todayPlan.hd-plegado ~ #feedbackPanel { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .hd-d, .hd-btn { transition: none; }}
+
   /* RECUADROS PLEGABLES del entreno ("Tu plan, adaptado", "Después de entrenar"):
      cerrados de inicio para que Hoy no sea un muro de texto (2 oct 2026). */
   .plg > summary { list-style: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -11725,6 +11781,84 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
         <!-- Primeros pasos: las 2 primeras semanas, hasta completarlos o cerrarlos. La pinta _pintarPrimerosPasos(). -->
         <div class="pp-card" id="primerosPasos" style="display:none" aria-labelledby="ppTitulo"></div>
 
+        <!-- TU SEMANA (30 oct 2026, idea de Rafa con maqueta aprobada): calendario L-D
+             arriba, se toca un día y debajo sale su entrenamiento o sus comidas, en dos
+             pestañas. Sustituye a la tarjeta grande del hero y a «Tus comidas de hoy» (que
+             se quedan en el HTML, ocultas, por si se quiere volver). Lo pinta _pintarHoyDia().
+             El entreno detallado de siempre (#todayPlan) va justo debajo, plegado: se abre
+             con «Ver los N ejercicios» y el modo serie a serie lo sigue leyendo de ahí. -->
+        <div class="hoy-dia" id="hoyDia" style="display:none">
+          <div class="hd-cal" id="hdCal" role="group" aria-label="Días de esta semana"></div>
+          <div class="hd-ley" id="hdLey" aria-hidden="true"><span><i style="background:var(--brasa-txt)"></i>Entreno</span><span><i style="background:#3BA55C"></i>Hecho</span><span><i style="background:var(--humo)"></i>Descanso</span></div>
+          <div class="hd-tabs" id="hdTabs" role="tablist" aria-label="Qué ver del día">
+            <button type="button" role="tab" class="hd-tab on" data-t="ent" aria-selected="true" onclick="hdTab('ent')">Entrenamiento</button>
+            <button type="button" role="tab" class="hd-tab" data-t="com" aria-selected="false" onclick="hdTab('com')">Comidas</button>
+          </div>
+          <div id="hdPanel" role="tabpanel"></div>
+        </div>
+        <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+            <div class="motivation-label">Entrenamiento de hoy</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
+              <button type="button" class="hoy-feedback" id="btnFeedback" onclick="toggleFeedback()">¿Cómo va el entreno?<span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
+            </div>
+          </div>
+          <div id="todayContent" style="color:var(--metal);font-size:14px;line-height:1.8;margin-top:16px">
+            Generando tu plan personalizado...
+          </div>
+          <div class="entreno-completado-badge" id="entrenoCompletadoBadge" style="display:none">
+            <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span> <span>Entrenamiento de hoy completado. Buen trabajo.</span>
+          </div>
+        </div>
+
+        <!-- PANEL DE FEEDBACK DEL ENTRENO -->
+        <div id="feedbackPanel" style="display:none;background:var(--grafito);border-left:3px solid var(--brasa);padding:40px;margin-bottom:32px">
+          <div class="motivation-label" style="margin-bottom:20px">¿Cómo va el entreno de hoy?</div>
+
+          <!-- PASO 1: sensación general -->
+          <div id="feedbackStep1">
+            <p style="font-size:15px;font-weight:500;margin-bottom:14px;color:var(--blanco)">¿Cómo te sientes hoy?</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px">
+              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>A tope</span></div>
+              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Normal</span></div>
+              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Cansado</span></div>
+              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Molestia</span></div>
+            </div>
+            <p style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--blanco)">¿Quieres cambiar algún ejercicio?</p>
+            <p style="font-size:12px;color:var(--metal);margin-bottom:16px">Marca los que no te convencen y te proponemos alternativas</p>
+            <div id="ejerciciosList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+              <!-- generado por JS -->
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <button onclick="showVariants()" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--brasa);color:#fff;transition:all 0.2s;letter-spacing:0.3px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Cambiar ejercicios
+              </button>
+              <button onclick="skipFeedbackExercises()" style="padding:14px 20px;font-size:13px;font-weight:600;border:1px solid var(--humo);cursor:pointer;background:var(--grafito);color:var(--blanco);transition:all 0.2s;letter-spacing:0.3px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2" style="vertical-align:-3px;margin-right:6px"><path d="M20 6L9 17l-5-5"/></svg>Todo bien, seguir así
+              </button>
+            </div>
+          </div>
+
+          <!-- PASO 2: variantes -->
+          <div id="feedbackStep2" style="display:none">
+            <div id="variantsContent"></div>
+            <div style="display:flex;gap:12px;margin-top:28px">
+              <button class="btn-ghost" onclick="document.getElementById('feedbackStep1').style.display='block';document.getElementById('feedbackStep2').style.display='none'" style="font-size:12px;padding:10px 20px">← Volver</button>
+              <button class="btn-primary" onclick="confirmVariants()" style="font-size:13px;padding:12px 24px">Confirmar cambios y actualizar mi entreno →</button>
+            </div>
+          </div>
+
+          <!-- PASO 3: confirmación -->
+          <div id="feedbackStep3" style="display:none">
+            <div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:24px 28px">
+              <div class="motivation-label" style="margin-bottom:10px">Plan actualizado</div>
+              <p id="feedbackConfirmMsg" style="font-size:15px;color:var(--blanco);line-height:1.7;font-weight:300"></p>
+            </div>
+          </div>
+        </div>
+
+
         <!-- RESUMEN DEL DÍA: hero de la sesión con foto de gimnasio -->
         <div class="today-hero" id="todayHero" style="display:none">
           <picture>
@@ -11891,68 +12025,6 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
                 <button class="btn-primary" id="btnEnviarMotivoBaja" style="padding:9px 20px;font-size:13px" onclick="enviarMotivoBaja()">Enviar →</button>
                 <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:13px 8px;min-height:44px" onclick="descartarMotivoBaja()">Prefiero no decirlo</button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="todayPlan" style="background:var(--carbon);padding:40px;margin-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
-            <div class="motivation-label">Entrenamiento de hoy</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn-completado" id="btnCompletado" onclick="toggleEntrenoCompletado()">✓ Marcar como completado</button>
-              <button type="button" class="hoy-feedback" id="btnFeedback" onclick="toggleFeedback()">¿Cómo va el entreno?<span class="flecha-redonda" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
-            </div>
-          </div>
-          <div id="todayContent" style="color:var(--metal);font-size:14px;line-height:1.8;margin-top:16px">
-            Generando tu plan personalizado...
-          </div>
-          <div class="entreno-completado-badge" id="entrenoCompletadoBadge" style="display:none">
-            <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span> <span>Entrenamiento de hoy completado. Buen trabajo.</span>
-          </div>
-        </div>
-
-        <!-- PANEL DE FEEDBACK DEL ENTRENO -->
-        <div id="feedbackPanel" style="display:none;background:var(--grafito);border-left:3px solid var(--brasa);padding:40px;margin-bottom:32px">
-          <div class="motivation-label" style="margin-bottom:20px">¿Cómo va el entreno de hoy?</div>
-
-          <!-- PASO 1: sensación general -->
-          <div id="feedbackStep1">
-            <p style="font-size:15px;font-weight:500;margin-bottom:14px;color:var(--blanco)">¿Cómo te sientes hoy?</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px">
-              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>A tope</span></div>
-              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Normal</span></div>
-              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Cansado</span></div>
-              <div class="radio-opt" onclick="selectFeedback(this,'sensacion')" style="font-size:13px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px"><span>Molestia</span></div>
-            </div>
-            <p style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--blanco)">¿Quieres cambiar algún ejercicio?</p>
-            <p style="font-size:12px;color:var(--metal);margin-bottom:16px">Marca los que no te convencen y te proponemos alternativas</p>
-            <div id="ejerciciosList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
-              <!-- generado por JS -->
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <button onclick="showVariants()" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--brasa);color:#fff;transition:all 0.2s;letter-spacing:0.3px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Cambiar ejercicios
-              </button>
-              <button onclick="skipFeedbackExercises()" style="padding:14px 20px;font-size:13px;font-weight:600;border:1px solid var(--humo);cursor:pointer;background:var(--grafito);color:var(--blanco);transition:all 0.2s;letter-spacing:0.3px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2" style="vertical-align:-3px;margin-right:6px"><path d="M20 6L9 17l-5-5"/></svg>Todo bien, seguir así
-              </button>
-            </div>
-          </div>
-
-          <!-- PASO 2: variantes -->
-          <div id="feedbackStep2" style="display:none">
-            <div id="variantsContent"></div>
-            <div style="display:flex;gap:12px;margin-top:28px">
-              <button class="btn-ghost" onclick="document.getElementById('feedbackStep1').style.display='block';document.getElementById('feedbackStep2').style.display='none'" style="font-size:12px;padding:10px 20px">← Volver</button>
-              <button class="btn-primary" onclick="confirmVariants()" style="font-size:13px;padding:12px 24px">Confirmar cambios y actualizar mi entreno →</button>
-            </div>
-          </div>
-
-          <!-- PASO 3: confirmación -->
-          <div id="feedbackStep3" style="display:none">
-            <div style="background:rgba(209,66,14,0.08);border-left:3px solid var(--brasa);padding:24px 28px">
-              <div class="motivation-label" style="margin-bottom:10px">Plan actualizado</div>
-              <p id="feedbackConfirmMsg" style="font-size:15px;color:var(--blanco);line-height:1.7;font-weight:300"></p>
             </div>
           </div>
         </div>
