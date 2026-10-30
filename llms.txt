@@ -1,11 +1,11 @@
 # K-ONE
 
-> K-ONE funciona como un entrenador personal y un plan de nutrición a medida en el móvil: genera planes de entrenamiento y nutrición personalizados mediante un motor de reglas (periodización real, déficit/superávit calórico, progresión de cargas) — no es una IA generativa que inventa contenido, es un sistema con criterio fijo y trazable. El plan se adapta cada semana según un check-in de progreso del usuario.
+> K-ONE es un entrenador personal con IA en el móvil: genera planes de entrenamiento y nutrición personalizados con reglas de entrenador (periodización real, déficit/superávit calórico, progresión de cargas) — no es un chat que se inventa las respuestas, es un sistema con criterio fijo y trazable, y cada plan pasa por un auditor automático (alergias, lesiones, cantidades) antes de llegar al usuario. El plan se adapta cada semana según un check-in de progreso del usuario.
 
 ## Qué ofrece
 
 - Plan de entrenamiento personalizado (rutinas con progresión de cargas, adaptadas a deporte, nivel, lesiones y tiempo disponible) para Gimnasio/Fuerza, Running e Híbrido.
-- Plan de nutrición personalizado (5 comidas al día recomendadas, o 4, 3 o 2 si el horario del usuario no da para más; 5 opciones por comida, macros calculados, lista de la compra automática, recetario con 400+ recetas) para los 5 deportes soportados, incluidos Hyrox y CrossFit. Adapta alergias e intolerancias (gluten, lactosa, frutos secos y otras escritas por el usuario) y alimentos que no come.
+- Plan de nutrición personalizado (5 comidas al día recomendadas, o 4, 3 o 2 si el horario del usuario no da para más; 5 opciones por comida, macros calculados, lista de la compra automática, recetario con más de 1.100 recetas) para los 5 deportes soportados, incluidos Hyrox y CrossFit. Adapta alergias e intolerancias (gluten, lactosa, frutos secos y otras escritas por el usuario) y alimentos que no come.
 - Para Hyrox y CrossFit solo se ofrece el plan de nutrición (sin entrenamiento generado): pensado para quien ya entrena en su box y quiere que la alimentación acompañe esa carga.
 - Check-in semanal: el usuario cuenta cómo le fue (energía, descanso, adherencia) y el plan de la semana siguiente se ajusta.
 - Seguimiento de progreso: registro de pesos por ejercicio, fotos mensuales, hitos y racha.
