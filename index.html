@@ -5984,7 +5984,10 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hd-semana { position: relative; overflow: hidden; border: 1px solid var(--humo); border-radius: 22px; padding: 16px 12px 12px;
     background: radial-gradient(130% 120% at 100% 0%, rgba(209,66,14,.22), transparent 55%), linear-gradient(180deg, #1b1b1b, #111); }
   .hd-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px 14px; }
-  .hd-cab .eye { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--brasa-txt); }
+  .hd-cab .eye, .hn-eye { display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--brasa-txt); }
+  .hd-cab .eye .eye-ic, .hn-eye .eye-ic { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(242,106,54,.14); border: 1px solid rgba(242,106,54,.3); }
+  .hd-cab .eye .eye-ic svg, .hn-eye .eye-ic svg { width: 14px; height: 14px; }
+  .hd-cab .tit { margin-top: 8px !important; }
   .hd-cab .tit { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; letter-spacing: .5px; color: var(--blanco); margin-top: 4px; }
   .hd-cab .tit small { font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0; color: var(--metal-claro); margin-left: 8px; }
   .hd-anillo { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
@@ -6058,7 +6061,9 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hn-dia { position: relative; overflow: hidden; border: 1px solid var(--humo); border-radius: 22px; padding: 18px 18px 16px; margin-bottom: 14px;
     background: radial-gradient(120% 130% at 0% 0%, rgba(232,162,58,.16), transparent 55%), linear-gradient(180deg, #1b1b1b, #111); }
   .hn-dia-cab { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-  .hn-eye { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: #E8A23A; }
+  .hn-eye { color: #E8A23A; }
+  .hn-eye .eye-ic { background: rgba(232,162,58,.14) !important; border-color: rgba(232,162,58,.32) !important; }
+  .hn-kcal { margin-top: 10px !important; }
   .hn-kcal { font-family: 'Bebas Neue', sans-serif; font-size: 46px; line-height: .95; letter-spacing: .5px; color: var(--blanco); margin-top: 6px; }
   .hn-kcal small { display: block; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0; color: var(--metal-claro); margin-top: 2px; }
   .hn-anillo { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
@@ -6076,12 +6081,14 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hn-mac.c i { background: linear-gradient(90deg, #B97A1E, #E8A23A); }
   .hn-mac.g i { background: linear-gradient(90deg, #7d7a75, #C9C5BE); }
   .hn-linea { list-style: none; margin: 0; padding: 0; position: relative; }
-  .hn-fila { position: relative; display: grid; grid-template-columns: 40px 26px minmax(0, 1fr); align-items: center; column-gap: 10px; padding: 5px 0; }
-  .hn-fila::before { content: ''; position: absolute; left: 62px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
+  .hn-fila { position: relative; display: grid; grid-template-columns: 58px 26px minmax(0, 1fr); align-items: center; column-gap: 10px; padding: 5px 0; }
+  .hn-fila::before { content: ''; position: absolute; left: 80px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
   .hn-fila:first-child::before { top: 50%; }
   .hn-fila:last-child::before { bottom: 50%; }
   .hn-fila.hecha::before { background: rgba(47,163,90,.55); }
-  .hn-hora { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal-claro); text-align: right; }
+  .hn-hora { justify-self: end; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--blanco); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 999px; padding: 4px 9px; line-height: 1.2; }
+  .hn-hora:empty { display: none; }
+  .hn-fila.hecha .hn-hora { color: #5CC07A; background: rgba(47,163,90,.1); border-color: rgba(47,163,90,.3); }
   .hn-punto { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; padding: 0; color: transparent;
     background: #141414; border: 2px solid var(--humo); cursor: pointer; transition: background .15s, border-color .15s; }
   span.hn-punto { cursor: default; }

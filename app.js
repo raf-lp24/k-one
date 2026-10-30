@@ -12457,7 +12457,7 @@
         + '<circle class="val" cx="27" cy="27" r="23" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + largo.toFixed(1) + '" stroke-dashoffset="' + resto.toFixed(1) + '"/></svg>'
         + '<b aria-hidden="true">' + hechosSemana + '/' + tocan + '</b></div>';
     }
-    document.getElementById('hdCab').innerHTML = '<div><div class="eye">Tu semana</div><div class="tit">Semana ' + semanaPlan + '<small>' + rango + '</small></div></div>' + anillo;
+    document.getElementById('hdCab').innerHTML = '<div><div class="eye"><span class="eye-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>Tu semana</div><div class="tit">Semana ' + semanaPlan + '<small>' + rango + '</small></div></div>' + anillo;
 
     document.getElementById('hdCal').innerHTML = fechas.map((f, i) => {
       const d = haySemana ? _hdSesion(i) : null;
@@ -12614,7 +12614,7 @@
         + '<circle cx="30" cy="30" r="25" fill="none" stroke-width="5" stroke-linecap="round" class="val" stroke-dasharray="' + largo.toFixed(1) + '" stroke-dashoffset="' + (largo * (1 - n / comidas.length)).toFixed(1) + '"/></svg>'
         + '<b aria-hidden="true">' + n + '/' + comidas.length + '</b><small aria-hidden="true">hechas</small></div>';
     }
-    const resumen = k ? '<div class="hn-dia"><div class="hn-dia-cab"><div><div class="hn-eye">' + (esHoy ? 'Tu nutrición de hoy' : 'Nutrición · ' + _esc(etiDia)) + '</div>'
+    const resumen = k ? '<div class="hn-dia"><div class="hn-dia-cab"><div><div class="hn-eye"><span class="eye-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></span>' + (esHoy ? 'Tu nutrición de hoy' : 'Nutrición del ' + _esc(etiDia.toLowerCase())) + '</div>'
       + '<div class="hn-kcal">' + _esc(Number(k).toLocaleString('es-ES')) + '<small>kcal objetivo</small></div></div>' + anillo + '</div>'
       + '<div class="hn-macros">' + (p ? barra('p', 'Proteína', p, 4) : '') + (c ? barra('c', 'Hidratos', c, 4) : '') + (g > 0 ? barra('g', 'Grasa', g, 9) : '') + '</div></div>' : '';
     const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
