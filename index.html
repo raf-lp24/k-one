@@ -6014,6 +6014,9 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hoy-dia .ic.ent { color: var(--brasa-txt); background: rgba(242,106,54,.13); border: 1px solid rgba(242,106,54,.35); }
   .hoy-dia .ic.ok { color: #fff; background: #2FA35A; border: 1px solid #2FA35A; }
   .hoy-dia .ic.desc { color: var(--metal); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+  .hoy-dia .ic.run { color: #F2A93B; background: rgba(242,169,59,.12); border: 1px solid rgba(242,169,59,.35); }
+  .hoy-dia .ic.com { color: #E8A23A; background: rgba(232,162,58,.12); border: 1px solid rgba(232,162,58,.32); }
+  .hoy-dia.sin-pestanas #hdPanel { margin-top: 14px; }
   .hd-d.sel .ic.ent { color: #fff; background: rgba(242,106,54,.35); border-color: rgba(242,106,54,.7); }
   .hd-ley { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.06); }
   .hd-ley span { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: 999px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07);
@@ -6081,14 +6084,11 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hn-mac.c i { background: linear-gradient(90deg, #B97A1E, #E8A23A); }
   .hn-mac.g i { background: linear-gradient(90deg, #7d7a75, #C9C5BE); }
   .hn-linea { list-style: none; margin: 0; padding: 0; position: relative; }
-  .hn-fila { position: relative; display: grid; grid-template-columns: 58px 26px minmax(0, 1fr); align-items: center; column-gap: 10px; padding: 5px 0; }
-  .hn-fila::before { content: ''; position: absolute; left: 80px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
+  .hn-fila { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; column-gap: 12px; padding: 5px 0; }
+  .hn-fila::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
   .hn-fila:first-child::before { top: 50%; }
   .hn-fila:last-child::before { bottom: 50%; }
   .hn-fila.hecha::before { background: rgba(47,163,90,.55); }
-  .hn-hora { justify-self: end; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--blanco); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 999px; padding: 4px 9px; line-height: 1.2; }
-  .hn-hora:empty { display: none; }
-  .hn-fila.hecha .hn-hora { color: #5CC07A; background: rgba(47,163,90,.1); border-color: rgba(47,163,90,.3); }
   .hn-punto { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; padding: 0; color: transparent;
     background: #141414; border: 2px solid var(--humo); cursor: pointer; transition: background .15s, border-color .15s; }
   span.hn-punto { cursor: default; }
@@ -6129,13 +6129,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hn-ver { margin-top: 12px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 16px; padding: 10px 10px 10px 16px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
   .hn-ver:hover { border-color: rgba(242,106,54,0.6); }
   .hn-mac-cab b small { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--metal-claro); margin-left: 2px; }
-  .hn-h2 { display: none; font-style: normal; color: var(--brasa-txt); }
-  /* En el móvil la hora pasa dentro de la tarjeta y la columna de la hora desaparece. */
   @media (max-width: 600px) {
-    .hn-fila { grid-template-columns: 26px minmax(0, 1fr); }
-    .hn-fila::before { left: 12px; }
-    .hn-hora { display: none; }
-    .hn-h2 { display: inline; }
     .hn-ico { width: 34px; height: 34px; border-radius: 10px; }
     .hn-ico svg { width: 17px; height: 17px; }
     .hn-toma { padding: 11px 12px 11px 10px; gap: 10px; }

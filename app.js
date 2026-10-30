@@ -12419,8 +12419,16 @@
   function _hdIcono(t) {
     const d = t === 'ok' ? '<path d="M20 6 9 17l-5-5"/>'
       : t === 'desc' ? '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'
+      : t === 'run' ? '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>'
+      : t === 'com' ? '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>'
       : '<path d="M6.5 6.5v11"/><path d="M17.5 6.5v11"/><path d="M3.5 9v6"/><path d="M20.5 9v6"/><path d="M6.5 12h11"/>';
-    return '<span class="ic ' + t + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (t === 'ok' ? 3.2 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg></span>';
+    return '<span class="ic ' + t + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (t === 'ok' ? 3.2 : t === 'run' || t === 'com' ? 2 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg></span>';
+  }
+  // Sesión de carrera: escrita como párrafo (sin 2 «N×M») y con palabras de correr.
+  function _hdEsCarrera(d) {
+    if (!d || d.tipo === 'Descanso' || !d.detalle) return false;
+    if (_ejerciciosCortos(d).filter(e => /×/.test(e.dosis)).length >= 2) return false;
+    return /carrera|run|rodaje|tirada|zona 2|fartlek|series|trote/i.test((d.resumen || '') + ' ' + d.detalle);
   }
   const _HD_FLECHA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
 
@@ -12459,12 +12467,27 @@
     }
     document.getElementById('hdCab').innerHTML = '<div><div class="eye"><span class="eye-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>Tu semana</div><div class="tit">Semana ' + semanaPlan + '<small>' + rango + '</small></div></div>' + anillo;
 
+    // Marca de cada día: con entreno, pesa (fuerza), zapatilla (carrera), check (hecho) o
+    // luna (descanso); en solo nutrición, cubiertos o check si se comió todo lo del día.
+    const tipos = new Set();
     document.getElementById('hdCal').innerHTML = fechas.map((f, i) => {
+      const iso = _isoDia(f);
       const d = haySemana ? _hdSesion(i) : null;
       const entreno = !!(d && d.tipo !== 'Descanso');
-      const hecho = haySemana && hechos.has(_isoDia(f));
-      const marca = haySemana ? _hdIcono(hecho ? 'ok' : entreno ? 'ent' : 'desc') : '';
-      const estado = haySemana ? (hecho ? ', hecho' : entreno ? ', entreno' : ', descanso') : '';
+      let hecho, tipo, estado;
+      if (haySemana) {
+        hecho = hechos.has(iso);
+        tipo = entreno ? (_hdEsCarrera(d) ? 'run' : 'ent') : 'desc';
+        tipos.add(tipo);
+        estado = hecho ? ', hecho' : entreno ? (tipo === 'run' ? ', carrera' : ', entreno') : ', descanso';
+      } else {
+        const hechas = (userData.comidasHechas && userData.comidasHechas[iso]) || [];
+        const n = _comidasDelDia(i).length;
+        hecho = n > 0 && hechas.filter(Boolean).length >= n;
+        tipo = 'com';
+        estado = hecho ? ', todas las comidas hechas' : '';
+      }
+      const marca = _hdIcono(hecho ? 'ok' : tipo);
       return '<button type="button" class="hd-d' + (i === hoyIdx ? ' hoy' : '') + (i === _hdSel ? ' sel' : '') + (haySemana && !entreno && !hecho ? ' desc' : '') + '" onclick="hdDia(' + i + ')"'
         + ' aria-pressed="' + (i === _hdSel) + '" aria-label="' + _HD_DIAS[i] + ' ' + f.getDate() + (i === hoyIdx ? ', hoy' : '') + estado + '">'
         + '<span class="l" aria-hidden="true">' + (i === hoyIdx ? 'HOY' : _HD_LETRAS[i]) + '</span><span class="n" aria-hidden="true">' + f.getDate() + '</span>'
@@ -12472,11 +12495,14 @@
     }).join('');
     const ley = document.getElementById('hdLey');
     if (ley) {
-      ley.style.display = haySemana ? '' : 'none';
-      ley.innerHTML = [['ent', 'Entreno'], ['ok', 'Hecho'], ['desc', 'Descanso']].map(([t, n]) => '<span>' + _hdIcono(t) + n + '</span>').join('');
+      const items = !haySemana ? [['com', 'Tu menú'], ['ok', 'Todo comido']]
+        : [tipos.has('ent') && ['ent', tipos.has('run') ? 'Fuerza' : 'Entreno'], tipos.has('run') && ['run', 'Carrera'], ['ok', 'Hecho'], ['desc', 'Descanso']].filter(Boolean);
+      ley.innerHTML = items.map(([t, n]) => '<span>' + _hdIcono(t) + n + '</span>').join('');
+      ley.style.display = '';
     }
     const tabs = document.getElementById('hdTabs');
     tabs.style.display = haySemana && hayComidas ? '' : 'none';
+    caja.classList.toggle('sin-pestanas', !(haySemana && hayComidas));
     tabs.dataset.pest = pest;
     tabs.querySelectorAll('.hd-tab').forEach(t => { const on = t.dataset.t === pest; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
 
@@ -12570,7 +12596,7 @@
     const boton = esHoy
       ? '<button type="button" class="today-hero-btn" onclick="empezarEntrenamientoHoy()"><span>' + (hecho ? 'Abrir el entreno' : 'Empezar entrenamiento') + '</span>' + _HD_PLAY + '</button>'
       : '<button type="button" class="today-hero-btn sec" onclick="hdVerEnEntreno(' + i + ')"><span>' + (i < hoyIdx ? 'Ver el día en Entreno' : 'Ver con fotos y técnica') + '</span>' + _HD_FLECHA + '</button>';
-    const carrera = !esLista && /carrera|run|rodaje|tirada|zona 2|fartlek|series|trote/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
+    const carrera = _hdEsCarrera(d);
     const hero = _hdHero({ foto: carrera ? 'running' : 'gym-hero', eyebrow, hecho, cuenta,
       titulo: _nombreSesion(d.resumen || '') || 'Tu sesión',
       sub: [userData.deporte, userData.objetivo ? 'Enfoque ' + userData.objetivo : ''].filter(Boolean).join(' · '),
@@ -12626,10 +12652,10 @@
       const punto = esHoy
         ? '<button type="button" class="hn-punto" onclick="marcarComidaHoy(' + j + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + cm.momento) + '">' + check + '</button>'
         : '<span class="hn-punto" aria-hidden="true">' + check + '</span>';
-      return '<li class="hn-fila' + (h ? ' hecha' : '') + (_hdReceta === j ? ' abierta' : '') + '"><div class="hn-hora">' + _esc(cm.hora || '') + '</div>' + punto
+      return '<li class="hn-fila' + (h ? ' hecha' : '') + (_hdReceta === j ? ' abierta' : '') + '">' + punto
         + '<button type="button" class="hn-toma" onclick="hdReceta(' + j + ')" aria-expanded="' + (_hdReceta === j) + '" aria-label="' + _esc(cm.momento + ': ' + nom.nombre + (_hdReceta === j ? '. Ocultar la receta' : '. Ver la receta')) + '">'
         + '<span class="hn-ico" aria-hidden="true">' + _hdIconoToma(cm.momento) + '</span>'
-        + '<span class="hn-txt"><span class="hn-mom">' + _esc(cm.momento) + (cm.hora ? '<i class="hn-h2"> · ' + _esc(cm.hora) + '</i>' : '') + '</span><span class="hn-nom">' + _esc(nom.nombre) + '</span>'
+        + '<span class="hn-txt"><span class="hn-mom">' + _esc(cm.momento) + '</span><span class="hn-nom">' + _esc(nom.nombre) + '</span>'
         + (nom.nota ? '<span class="hn-nota">' + _esc(nom.nota) + '</span>' : '') + '</span>'
         + (kc ? '<span class="hn-k">' + _esc(kc) + '<small>kcal</small></span>' : '') + '</button>' + (_hdReceta === j ? _hdRecetaHTML(cm.op, i, j) : '') + '</li>';
     }).join('');
