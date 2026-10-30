@@ -12434,20 +12434,40 @@
     const fechas = _fechasSemana();
     const hechos = new Set([].concat(userData.historialEntrenos || [], userData.entrenosCompletados || []));
 
+    // Cabecera: semana del plan y, con entreno, un anillo con los entrenos hechos de los que tocan.
+    const semanaPlan = (userData.progreso && userData.progreso.semana) || 1;
+    const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic'];
+    const rango = fechas[0].getDate() + (fechas[0].getMonth() !== fechas[6].getMonth() ? ' ' + MESES[fechas[0].getMonth()] : '') + ' – ' + fechas[6].getDate() + ' ' + MESES[fechas[6].getMonth()];
+    let anillo = '';
+    if (haySemana) {
+      const tocan = generatedPlan.semana.filter(d => d && d.tipo !== 'Descanso').length || 1;
+      const hechosSemana = fechas.filter(f => hechos.has(_isoDia(f))).length;
+      const largo = 2 * Math.PI * 23;
+      const resto = largo * (1 - Math.min(1, hechosSemana / tocan));
+      anillo = '<div class="hd-anillo" role="img" aria-label="' + hechosSemana + ' de ' + tocan + ' entrenos hechos esta semana">'
+        + '<svg viewBox="0 0 54 54" aria-hidden="true"><defs><linearGradient id="hdGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F26A36"/><stop offset="1" stop-color="#C03A08"/></linearGradient></defs>'
+        + '<circle class="fondo" cx="27" cy="27" r="23" fill="none" stroke-width="5"/>'
+        + '<circle class="val" cx="27" cy="27" r="23" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + largo.toFixed(1) + '" stroke-dashoffset="' + resto.toFixed(1) + '"/></svg>'
+        + '<b aria-hidden="true">' + hechosSemana + '/' + tocan + '</b></div>';
+    }
+    document.getElementById('hdCab').innerHTML = '<div><div class="eye">Tu semana</div><div class="tit">Semana ' + semanaPlan + '<small>' + rango + '</small></div></div>' + anillo;
+
     document.getElementById('hdCal').innerHTML = fechas.map((f, i) => {
       const d = haySemana ? _hdSesion(i) : null;
       const entreno = !!(d && d.tipo !== 'Descanso');
       const hecho = haySemana && hechos.has(_isoDia(f));
-      const punto = haySemana ? '<span class="p' + (hecho ? ' hecho' : entreno ? '' : ' desc') + '" aria-hidden="true"></span>' : '';
+      const marca = haySemana ? '<span class="p' + (hecho ? ' hecho' : entreno ? '' : ' desc') + '"></span>' : '';
       const estado = haySemana ? (hecho ? ', hecho' : entreno ? ', entreno' : ', descanso') : '';
-      return '<button type="button" class="hd-d' + (i === hoyIdx ? ' hoy' : '') + (i === _hdSel ? ' sel' : '') + '" onclick="hdDia(' + i + ')"'
+      return '<button type="button" class="hd-d' + (i === hoyIdx ? ' hoy' : '') + (i === _hdSel ? ' sel' : '') + (haySemana && !entreno && !hecho ? ' desc' : '') + '" onclick="hdDia(' + i + ')"'
         + ' aria-pressed="' + (i === _hdSel) + '" aria-label="' + _HD_DIAS[i] + ' ' + f.getDate() + (i === hoyIdx ? ', hoy' : '') + estado + '">'
-        + '<span class="l" aria-hidden="true">' + _HD_LETRAS[i] + '</span><span class="n" aria-hidden="true">' + f.getDate() + '</span>' + punto + '</button>';
+        + '<span class="l" aria-hidden="true">' + (i === hoyIdx ? 'HOY' : _HD_LETRAS[i]) + '</span><span class="n" aria-hidden="true">' + f.getDate() + '</span>'
+        + '<span class="m" aria-hidden="true">' + marca + '</span></button>';
     }).join('');
     const ley = document.getElementById('hdLey');
     if (ley) ley.style.display = haySemana ? '' : 'none';
     const tabs = document.getElementById('hdTabs');
     tabs.style.display = haySemana && hayComidas ? '' : 'none';
+    tabs.dataset.pest = pest;
     tabs.querySelectorAll('.hd-tab').forEach(t => { const on = t.dataset.t === pest; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
 
     const iso = _isoDia(fechas[_hdSel]);
@@ -12462,27 +12482,48 @@
     if (sec) sec.classList.add('hd-on');
   }
 
+  // La tarjeta con foto de siempre (Rafa, 30 oct: «le da un toque premium»), ahora
+  // para el día elegido en el calendario. Mismas clases que #todayHero.
+  function _hdHero(o) {
+    const foto = o.foto || 'gym-hero';
+    return '<div class="today-hero">'
+      + '<picture><source srcset="/img/landing/' + foto + '.webp" type="image/webp"><img class="today-hero-photo" src="/img/landing/' + foto + '.jpg" alt="" aria-hidden="true"></picture>'
+      + '<div class="today-hero-brand" aria-hidden="true">K-ONE<small>Performance</small></div>'
+      + '<div class="today-hero-content">'
+      + (o.hecho ? '<div><span class="hd-hecho">✓ Hecho</span></div>' : '')
+      + '<div class="today-hero-eyebrow">' + _esc(o.eyebrow) + '</div>'
+      + (o.cuenta || '')
+      + '<h2 class="today-hero-title">' + _esc(o.titulo) + '</h2>'
+      + (o.sub ? '<div class="today-hero-sub">' + _esc(o.sub) + '</div>' : '')
+      + (o.tags && o.tags.length ? '<div class="today-hero-tags">' + o.tags.map(t => '<span>' + _esc(t) + '</span>').join('') + '</div>' : '')
+      + (o.stats && o.stats.length ? '<div class="today-hero-stats">' + o.stats.map(s => '<div><span class="k">' + _esc(s[0]) + '</span><span class="v">' + _esc(String(s[1])) + '</span></div>').join('') + '</div>' : '')
+      + (o.boton || '')
+      + '</div></div>';
+  }
+  const _HD_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+
   function _hdPanelEntreno(i, hoyIdx, etiDia, hecho) {
     const esHoy = i === hoyIdx;
     const d = _hdSesion(i);
     if (!d) return '';
+    const semanaPlan = (userData.progreso && userData.progreso.semana) || 1;
+    const eyebrow = esHoy ? 'Sesión de hoy · Semana ' + semanaPlan : etiDia;
     if (d.tipo === 'Descanso') {
       const oferta = esHoy ? _ofrecerPrimerEntrenoHoy() : null;
       if (oferta) {
-        return '<div class="hd-card hd-desc"><div class="hd-eti">' + _esc(etiDia) + '</div><div class="hd-tit">¿Empiezas hoy?</div>'
-          + '<p class="hd-nota">Hoy te toca descanso, pero puedes adelantar tu primer entreno: ' + _esc(_nombreSesion(oferta.dia.resumen || oferta.dia.dia || '')) + '.</p>'
-          + '<button type="button" class="hd-btn" onclick="hacerPrimerEntrenoHoy()">Hacer mi primer entreno hoy ' + _HD_FLECHA + '</button></div>';
+        return _hdHero({ eyebrow: 'Hoy · descanso', titulo: '¿Empiezas hoy?',
+          sub: 'Puedes adelantar tu primer entreno: ' + _nombreSesion(oferta.dia.resumen || oferta.dia.dia || ''),
+          boton: '<button type="button" class="today-hero-btn" onclick="hacerPrimerEntrenoHoy()"><span>Hacer mi primer entreno hoy</span>' + _HD_PLAY + '</button>' });
       }
       const checkin = i === 6;
       const texto = d.detalle
         ? d.detalle.charAt(0).toUpperCase() + d.detalle.slice(1)
         : 'Descansar también es parte del plan: duerme bien, bebe agua y, si te apetece, sal a dar un paseo.';
-      return '<div class="hd-card hd-desc"><div class="hd-eti' + (hecho ? ' ok' : '') + '">' + _esc(etiDia) + (hecho ? ' · hecho ✓' : '') + '</div>'
-        + '<div class="hd-tit">' + (checkin ? 'Descanso · check-in' : _esc(_nombreSesion(d.resumen || '') || 'Descanso')) + '</div>'
-        + '<p class="hd-nota">' + _esc(texto) + '</p>'
-        + (checkin ? '<p class="hd-nota">El domingo toca contarnos cómo ha ido la semana: el plan de la siguiente se ajusta con tus respuestas.</p>' : '')
-        + (checkin && esHoy ? '<button type="button" class="hd-btn sec" onclick="showSection(\'checkin\')">Hacer el check-in ' + _HD_FLECHA + '</button>' : '')
-        + '</div>';
+      return _hdHero({ eyebrow: esHoy ? 'Hoy · descanso' : etiDia, hecho,
+          titulo: checkin ? 'Descanso · check-in' : (_nombreSesion(d.resumen || '') || 'Día de descanso'),
+          sub: texto,
+          boton: checkin && esHoy ? '<button type="button" class="today-hero-btn" onclick="showSection(\'checkin\')"><span>Hacer el check-in</span>' + _HD_FLECHA + '</button>' : '' })
+        + (checkin ? '<div class="hd-card"><p class="hd-nota" style="margin:0">El domingo toca contarnos cómo ha ido la semana: el plan de la siguiente se ajusta con tus respuestas.</p></div>' : '');
     }
     const ejs = _ejerciciosCortos(d);
     // Las sesiones de carrera vienen escritas como un párrafo ("40-50 min a zona 2,
@@ -12501,31 +12542,31 @@
     }
     const st = {};
     try { _rellenarStatsSesion(d, null, null, st); } catch (e) {}
-    const chips = [];
-    if (st.label && st.label !== 'Ejercicios' && st.label !== 'Enfoque') chips.push(st.label === 'Distancia' ? st.valor : st.valor + ' ' + st.label.toLowerCase());
-    else if (esLista) chips.push(ejs.length + (ejs.length === 1 ? ' ejercicio' : ' ejercicios'));
-    if (st.dur) chips.push('~' + st.dur + ' min');
-    if (st.intensidad) chips.push('Intensidad ' + st.intensidad.toLowerCase());
+    const stats = [];
+    if (st.dur) stats.push(['Duración', st.dur + ' min']);
+    if (st.intensidad) stats.push(['Intensidad', st.intensidad]);
+    if (esLista && (!st.label || st.label === 'Ejercicios')) stats.push(['Ejercicios', ejs.length]);
+    else if (st.label && st.label !== 'Enfoque') stats.push([st.label, st.valor]);
     const dp = generatedPlan.diasParaEvento;
     const cuenta = esHoy && generatedPlan.evento && dp !== null && dp !== undefined
-      ? '<span class="hd-chip cd">' + _esc(dp === 0 ? '¡Hoy! ' + generatedPlan.evento : 'Faltan ' + dp + (dp === 1 ? ' día · ' : ' días · ') + generatedPlan.evento) + '</span>' : '';
+      ? '<div class="today-hero-countdown"><span class="today-hero-countdown-num">' + (dp === 0 ? '¡HOY!' : dp) + '</span><span class="today-hero-countdown-label">'
+        + _esc(dp === 0 ? generatedPlan.evento : (dp === 1 ? 'día · ' : 'días · ') + generatedPlan.evento) + '</span></div>' : '';
     const verTodos = !esHoy && _hdTodos;
     const lista = !esLista ? '' : (verTodos ? ejs : ejs.slice(0, 4)).map(e => '<div class="hd-ej"><b>' + _esc(e.nombre) + '</b>' + (e.dosis ? '<span>' + _esc(e.dosis) + '</span>' : '') + '</div>').join('');
     let mas = '';
     if (esHoy) mas = '<button type="button" class="hd-mas" onclick="hdVerDetalle()" aria-expanded="' + _hdDetalle + '">'
       + (_hdDetalle ? 'Ocultar el detalle' : !esLista ? 'Ver el entreno completo' : (ejs.length > 4 ? 'Ver los ' + ejs.length + ' ejercicios' : 'Ver el entreno completo') + ', con pesos y técnica') + '</button>';
     else if (esLista && ejs.length > 4) mas = '<button type="button" class="hd-mas" onclick="hdVerTodos()" aria-expanded="' + _hdTodos + '">' + (_hdTodos ? 'Ver menos' : 'Ver los ' + ejs.length + ' ejercicios') + '</button>';
-    let accion = '';
-    if (esHoy) {
-      accion = '<button type="button" class="hd-btn" onclick="empezarEntrenamientoHoy()">' + (hecho ? 'Abrir el entreno' : 'Empezar entrenamiento') + ' ' + _HD_FLECHA + '</button>';
-    } else {
-      accion = '<button type="button" class="hd-btn sec" onclick="hdVerEnEntreno(' + i + ')">' + (i < hoyIdx ? 'Ver el día en Entreno' : 'Ver con fotos y técnica') + ' ' + _HD_FLECHA + '</button>';
-    }
-    return '<div class="hd-card"><div class="hd-eti' + (hecho ? ' ok' : '') + '">' + _esc(etiDia) + (hecho ? ' · hecho ✓' : '') + '</div>'
-      + '<div class="hd-tit">' + _esc(_nombreSesion(d.resumen || '') || 'Tu sesión') + '</div>'
-      + '<div class="hd-chips">' + chips.map(c => '<span class="hd-chip">' + _esc(c) + '</span>').join('') + cuenta + '</div>'
-      + accion
-      + (lista ? '<div class="hd-lista">' + lista + '</div>' : '') + (resumen ? '<p class="hd-nota hd-res">' + _esc(resumen) + '</p>' : '') + mas + '</div>';
+    const boton = esHoy
+      ? '<button type="button" class="today-hero-btn" onclick="empezarEntrenamientoHoy()"><span>' + (hecho ? 'Abrir el entreno' : 'Empezar entrenamiento') + '</span>' + _HD_PLAY + '</button>'
+      : '<button type="button" class="today-hero-btn sec" onclick="hdVerEnEntreno(' + i + ')"><span>' + (i < hoyIdx ? 'Ver el día en Entreno' : 'Ver con fotos y técnica') + '</span>' + _HD_FLECHA + '</button>';
+    const carrera = !esLista && /carrera|run|rodaje|tirada|zona 2|fartlek|series|trote/i.test((d.resumen || '') + ' ' + (d.detalle || ''));
+    const hero = _hdHero({ foto: carrera ? 'running' : 'gym-hero', eyebrow, hecho, cuenta,
+      titulo: _nombreSesion(d.resumen || '') || 'Tu sesión',
+      sub: [userData.deporte, userData.objetivo ? 'Enfoque ' + userData.objetivo : ''].filter(Boolean).join(' · '),
+      tags: st.tags, stats, boton });
+    const cuerpo = (lista ? '<div class="hd-lista">' + lista + '</div>' : '') + (resumen ? '<p class="hd-nota hd-res">' + _esc(resumen) + '</p>' : '') + mas;
+    return hero + (cuerpo ? '<div class="hd-card hd-ejs">' + cuerpo + '</div>' : '');
   }
 
   function _hdPanelComidas(i, hoyIdx, etiDia, iso) {
