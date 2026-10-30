@@ -6004,15 +6004,19 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hd-d:hover:not(.sel) .n { background: rgba(255,255,255,.1); }
   .hd-d:focus-visible { outline: none; }
   .hd-d:focus-visible .n { outline: 2px solid var(--brasa-txt); outline-offset: 3px; }
-  .hd-d .m { height: 14px; display: grid; place-items: center; }
-  .hoy-dia .p { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brasa-txt); box-shadow: 0 0 8px rgba(242,106,54,.7); }
-  .hoy-dia .p.desc { background: var(--humo); box-shadow: none; }
-  .hoy-dia .p.hecho { width: 14px; height: 14px; background: #2FA35A; box-shadow: 0 0 10px rgba(47,163,90,.45); position: relative; }
-  .hoy-dia .p.hecho::after { content: ''; position: absolute; left: 4.5px; top: 2.5px; width: 3.5px; height: 6.5px; border: solid #fff; border-width: 0 1.8px 1.8px 0; transform: rotate(45deg); }
-  .hd-ley { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); font-size: 11px; color: var(--metal); }
-  .hd-ley span { display: inline-flex; align-items: center; gap: 6px; }
-  .hd-ley .p.hecho { width: 12px; height: 12px; }
-  .hd-ley .p.hecho::after { left: 3.8px; top: 2px; width: 3px; height: 5.5px; }
+  /* Marcas de cada día (v3, 30 oct, Rafa): iconos en vez de puntos con brillo. */
+  .hd-d .m { height: 22px; display: grid; place-items: center; }
+  .hoy-dia .ic { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; flex-shrink: 0; }
+  .hoy-dia .ic svg { width: 13px; height: 13px; }
+  .hoy-dia .ic.ent { color: var(--brasa-txt); background: rgba(242,106,54,.13); border: 1px solid rgba(242,106,54,.35); }
+  .hoy-dia .ic.ok { color: #fff; background: #2FA35A; border: 1px solid #2FA35A; }
+  .hoy-dia .ic.desc { color: var(--metal); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+  .hd-d.sel .ic.ent { color: #fff; background: rgba(242,106,54,.35); border-color: rgba(242,106,54,.7); }
+  .hd-ley { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.06); }
+  .hd-ley span { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: 999px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07);
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--metal-claro); }
+  .hd-ley .ic { width: 20px; height: 20px; border-radius: 50%; }
+  .hd-ley .ic svg { width: 11px; height: 11px; }
   .hd-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; background: var(--carbon); border: 1px solid var(--humo); border-radius: 999px; padding: 4px; margin: 14px 0 14px; }
   .hd-tabs::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--blanco); transition: transform .28s cubic-bezier(.3,.7,.3,1); }
   .hd-tabs[data-pest="com"]::before { transform: translateX(100%); }
@@ -6050,11 +6054,69 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hd-desc { text-align: center; padding: 22px 6px 6px; }
   .hd-desc .hd-tit { margin-bottom: 8px; }
   .hd-desc .hd-btn { margin-top: 16px; }
-  .hd-tot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
-  .hd-tot div { background: var(--carbon); border: 1px solid var(--humo); border-radius: 12px; padding: 8px 0 7px; text-align: center; }
-  .hd-tot b { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 21px; line-height: 1.1; color: var(--blanco); }
-  .hd-tot small { font-size: 10px; color: var(--metal); }
-  .hd-tot-k { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--metal); margin: 0 0 6px; }
+  /* Pestaña Comidas v2 (30 oct, Rafa): tarjeta del día + línea de tiempo. */
+  .hn-dia { position: relative; overflow: hidden; border: 1px solid var(--humo); border-radius: 22px; padding: 18px 18px 16px; margin-bottom: 14px;
+    background: radial-gradient(120% 130% at 0% 0%, rgba(232,162,58,.16), transparent 55%), linear-gradient(180deg, #1b1b1b, #111); }
+  .hn-dia-cab { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .hn-eye { font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: #E8A23A; }
+  .hn-kcal { font-family: 'Bebas Neue', sans-serif; font-size: 46px; line-height: .95; letter-spacing: .5px; color: var(--blanco); margin-top: 6px; }
+  .hn-kcal small { display: block; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0; color: var(--metal-claro); margin-top: 2px; }
+  .hn-anillo { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+  .hn-anillo svg { width: 64px; height: 64px; transform: rotate(-90deg); }
+  .hn-anillo .fondo { stroke: rgba(255,255,255,.09); }
+  .hn-anillo .val { stroke: #2FA35A; transition: stroke-dashoffset .5s ease; }
+  .hn-anillo b { position: absolute; left: 0; right: 0; top: 15px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 20px; line-height: 1; color: var(--blanco); }
+  .hn-anillo small { position: absolute; left: 0; right: 0; top: 35px; text-align: center; font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--metal); }
+  .hn-macros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+  .hn-mac-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 11.5px; color: var(--metal-claro); }
+  .hn-mac-cab b { font-family: 'Bebas Neue', sans-serif; font-size: 19px; font-weight: 400; color: var(--blanco); letter-spacing: .3px; }
+  .hn-mac-barra { height: 6px; border-radius: 999px; background: rgba(255,255,255,.08); margin-top: 6px; overflow: hidden; }
+  .hn-mac-barra i { display: block; height: 100%; border-radius: 999px; }
+  .hn-mac.p i { background: linear-gradient(90deg, #C03A08, #F26A36); }
+  .hn-mac.c i { background: linear-gradient(90deg, #B97A1E, #E8A23A); }
+  .hn-mac.g i { background: linear-gradient(90deg, #7d7a75, #C9C5BE); }
+  .hn-linea { list-style: none; margin: 0; padding: 0; position: relative; }
+  .hn-fila { position: relative; display: grid; grid-template-columns: 40px 26px minmax(0, 1fr); align-items: center; column-gap: 10px; padding: 5px 0; }
+  .hn-fila::before { content: ''; position: absolute; left: 62px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
+  .hn-fila:first-child::before { top: 50%; }
+  .hn-fila:last-child::before { bottom: 50%; }
+  .hn-fila.hecha::before { background: rgba(47,163,90,.55); }
+  .hn-hora { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--metal-claro); text-align: right; }
+  .hn-punto { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; padding: 0; color: transparent;
+    background: #141414; border: 2px solid var(--humo); cursor: pointer; transition: background .15s, border-color .15s; }
+  span.hn-punto { cursor: default; }
+  .hn-punto svg { width: 13px; height: 13px; }
+  button.hn-punto:hover, button.hn-punto:focus-visible { border-color: #2FA35A; outline: none; }
+  .hn-fila.hecha .hn-punto { background: #2FA35A; border-color: #2FA35A; color: #fff; }
+  .hn-toma { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; text-align: left; cursor: pointer; font: inherit; color: var(--blanco);
+    background: var(--carbon); border: 1px solid var(--humo); border-radius: 16px; padding: 12px 14px 12px 12px; transition: border-color .15s, transform .15s; }
+  .hn-toma:hover, .hn-toma:focus-visible { border-color: rgba(242,106,54,.6); outline: none; transform: translateX(2px); }
+  .hn-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; color: var(--brasa-txt); background: rgba(242,106,54,.1); border: 1px solid rgba(242,106,54,.22); }
+  .hn-ico svg { width: 19px; height: 19px; }
+  .hn-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .hn-mom { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--metal); }
+  .hn-nom { font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--blanco); overflow-wrap: anywhere; }
+  .hn-nota { align-self: flex-start; margin-top: 3px; font-size: 10.5px; font-weight: 600; color: #E8A23A; background: rgba(232,162,58,.1); border: 1px solid rgba(232,162,58,.28); border-radius: 999px; padding: 2px 9px; }
+  .hn-k { flex-shrink: 0; text-align: right; font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; color: var(--blanco); }
+  .hn-k small { display: block; font-family: 'Inter', sans-serif; font-size: 10px; color: var(--metal); margin-top: 2px; }
+  .hn-fila.hecha .hn-toma { background: rgba(47,163,90,.06); border-color: rgba(47,163,90,.3); }
+  .hn-fila.hecha .hn-nom { color: var(--metal-claro); }
+  .hn-fila.hecha .hn-ico { color: #5CC07A; background: rgba(47,163,90,.12); border-color: rgba(47,163,90,.3); }
+  .hn-ver { margin-top: 12px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 16px; padding: 10px 10px 10px 16px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .hn-ver:hover { border-color: rgba(242,106,54,0.6); }
+  .hn-mac-cab b small { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--metal-claro); margin-left: 2px; }
+  .hn-h2 { display: none; font-style: normal; color: var(--brasa-txt); }
+  /* En el móvil la hora pasa dentro de la tarjeta y la columna de la hora desaparece. */
+  @media (max-width: 600px) {
+    .hn-fila { grid-template-columns: 26px minmax(0, 1fr); }
+    .hn-fila::before { left: 12px; }
+    .hn-hora { display: none; }
+    .hn-h2 { display: inline; }
+    .hn-ico { width: 34px; height: 34px; border-radius: 10px; }
+    .hn-ico svg { width: 17px; height: 17px; }
+    .hn-toma { padding: 11px 12px 11px 10px; gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hn-punto, .hn-toma, .hn-anillo .val { transition: none; } }
   .hd-card .hc-fila:first-child { border-top: 0; }
   .hd-card .hc-prog { margin-top: 0; }
   .hc-check:disabled { cursor: default; opacity: .55; }
@@ -11843,7 +11905,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
           <div class="hd-semana">
             <div class="hd-cab" id="hdCab"></div>
             <div class="hd-cal" id="hdCal" role="group" aria-label="Días de esta semana"></div>
-            <div class="hd-ley" id="hdLey" aria-hidden="true"><span><i class="p"></i>Entreno</span><span><i class="p hecho"></i>Hecho</span><span><i class="p desc"></i>Descanso</span></div>
+            <div class="hd-ley" id="hdLey" aria-hidden="true"></div>
           </div>
           <div class="hd-tabs" id="hdTabs" role="tablist" aria-label="Qué ver del día" data-pest="ent">
             <button type="button" role="tab" class="hd-tab on" data-t="ent" aria-selected="true" onclick="hdTab('ent')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.66 21.49a2 2 0 1 1-2.83-2.83l-1.77 1.77a2 2 0 1 1-2.83-2.83l6.37-6.36a2 2 0 1 1 2.83 2.83l-1.77 1.77a2 2 0 1 1 2.83 2.82z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.4 12.77a2 2 0 1 1-2.83-2.83l1.77-1.77a2 2 0 1 1-2.83-2.83l2.83-2.82a2 2 0 1 1 2.83 2.82l1.77-1.77a2 2 0 1 1 2.83 2.83z"/></svg>Entrenamiento</button>

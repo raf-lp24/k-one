@@ -12415,6 +12415,13 @@
       return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '' } : null;
     }).filter(Boolean);
   }
+  // Marca de cada día del calendario: pesa (toca entreno), check (hecho) o luna (descanso).
+  function _hdIcono(t) {
+    const d = t === 'ok' ? '<path d="M20 6 9 17l-5-5"/>'
+      : t === 'desc' ? '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'
+      : '<path d="M6.5 6.5v11"/><path d="M17.5 6.5v11"/><path d="M3.5 9v6"/><path d="M20.5 9v6"/><path d="M6.5 12h11"/>';
+    return '<span class="ic ' + t + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (t === 'ok' ? 3.2 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg></span>';
+  }
   const _HD_FLECHA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
 
   function _pintarHoyDia() {
@@ -12456,7 +12463,7 @@
       const d = haySemana ? _hdSesion(i) : null;
       const entreno = !!(d && d.tipo !== 'Descanso');
       const hecho = haySemana && hechos.has(_isoDia(f));
-      const marca = haySemana ? '<span class="p' + (hecho ? ' hecho' : entreno ? '' : ' desc') + '"></span>' : '';
+      const marca = haySemana ? _hdIcono(hecho ? 'ok' : entreno ? 'ent' : 'desc') : '';
       const estado = haySemana ? (hecho ? ', hecho' : entreno ? ', entreno' : ', descanso') : '';
       return '<button type="button" class="hd-d' + (i === hoyIdx ? ' hoy' : '') + (i === _hdSel ? ' sel' : '') + (haySemana && !entreno && !hecho ? ' desc' : '') + '" onclick="hdDia(' + i + ')"'
         + ' aria-pressed="' + (i === _hdSel) + '" aria-label="' + _HD_DIAS[i] + ' ' + f.getDate() + (i === hoyIdx ? ', hoy' : '') + estado + '">'
@@ -12464,7 +12471,10 @@
         + '<span class="m" aria-hidden="true">' + marca + '</span></button>';
     }).join('');
     const ley = document.getElementById('hdLey');
-    if (ley) ley.style.display = haySemana ? '' : 'none';
+    if (ley) {
+      ley.style.display = haySemana ? '' : 'none';
+      ley.innerHTML = [['ent', 'Entreno'], ['ok', 'Hecho'], ['desc', 'Descanso']].map(([t, n]) => '<span>' + _hdIcono(t) + n + '</span>').join('');
+    }
     const tabs = document.getElementById('hdTabs');
     tabs.style.display = haySemana && hayComidas ? '' : 'none';
     tabs.dataset.pest = pest;
@@ -12569,6 +12579,20 @@
     return hero + (cuerpo ? '<div class="hd-card hd-ejs">' + cuerpo + '</div>' : '');
   }
 
+  // Pestaña Comidas (v2, 30 oct, Rafa): tarjeta del día con las kcal y las barras de
+  // macros, y debajo las comidas en una línea de tiempo. El círculo de la línea es el
+  // check (solo hoy: es el registro de lo que has comido, no un plan).
+  const _HD_ICONO_TOMA = {
+    desayuno: '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M6 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/>',
+    tentempie: '<path d="M12 6.528V3a1 1 0 0 1 1-1h0"/><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"/>',
+    comida: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+    cena: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'
+  };
+  function _hdIconoToma(momento) {
+    const m = String(momento || '').toLowerCase();
+    const k = /desayuno/.test(m) ? 'desayuno' : /media|merienda|tentempi|snack/.test(m) ? 'tentempie' : /cena/.test(m) ? 'cena' : 'comida';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + _HD_ICONO_TOMA[k] + '</svg>';
+  }
   function _hdPanelComidas(i, hoyIdx, etiDia, iso) {
     const esHoy = i === hoyIdx;
     const comidas = _comidasDelDia(i);
@@ -12577,32 +12601,40 @@
     const p = generatedPlan.protObj;
     const c = (generatedPlan.carbsObjPorDia && generatedPlan.carbsObjPorDia[i]) || generatedPlan.carbsObj;
     const g = k && p && c ? Math.round((k - p * 4 - c * 4) / 9) : 0;
-    // La unidad va con la etiqueta: en Bebas Neue la «g» saldría en mayúscula.
-    const caja = (v, u, t) => '<div><b>' + _esc(Number(v).toLocaleString('es-ES')) + '</b><small>' + (u ? u + ' ' : '') + t + '</small></div>';
-    const tot = k ? '<div class="hd-tot-k">Objetivo del ' + _esc(etiDia.replace(' · hoy', '').toLowerCase()) + '</div><div class="hd-tot">' + caja(k, '', 'kcal')
-      + (p ? caja(p, 'g', 'proteína') : '') + (c ? caja(c, 'g', 'hidratos') : '') + (g > 0 ? caja(g, 'g', 'grasa') : '') + '</div>' : '';
     const hechas = (userData.comidasHechas && userData.comidasHechas[iso]) || [];
     const n = comidas.filter((_, j) => hechas[j]).length;
-    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    // Barras: el peso de cada macro en las kcal del día (proteína y hidratos 4 kcal/g, grasa 9).
+    const barra = (cls, nombre, gramos, kcalG) => '<div class="hn-mac ' + cls + '"><div class="hn-mac-cab"><span>' + nombre + '</span><b>' + gramos + '<small>g</small></b></div>'
+      + '<div class="hn-mac-barra"><i style="width:' + Math.min(100, Math.round(gramos * kcalG / k * 100)) + '%"></i></div></div>';
+    let anillo = '';
+    if (esHoy) {
+      const largo = 2 * Math.PI * 25;
+      anillo = '<div class="hn-anillo" role="img" aria-label="' + n + ' de ' + comidas.length + ' comidas hechas hoy"><svg viewBox="0 0 60 60" aria-hidden="true">'
+        + '<circle cx="30" cy="30" r="25" fill="none" stroke-width="5" class="fondo"/>'
+        + '<circle cx="30" cy="30" r="25" fill="none" stroke-width="5" stroke-linecap="round" class="val" stroke-dasharray="' + largo.toFixed(1) + '" stroke-dashoffset="' + (largo * (1 - n / comidas.length)).toFixed(1) + '"/></svg>'
+        + '<b aria-hidden="true">' + n + '/' + comidas.length + '</b><small aria-hidden="true">hechas</small></div>';
+    }
+    const resumen = k ? '<div class="hn-dia"><div class="hn-dia-cab"><div><div class="hn-eye">' + (esHoy ? 'Tu nutrición de hoy' : 'Nutrición · ' + _esc(etiDia)) + '</div>'
+      + '<div class="hn-kcal">' + _esc(Number(k).toLocaleString('es-ES')) + '<small>kcal objetivo</small></div></div>' + anillo + '</div>'
+      + '<div class="hn-macros">' + (p ? barra('p', 'Proteína', p, 4) : '') + (c ? barra('c', 'Hidratos', c, 4) : '') + (g > 0 ? barra('g', 'Grasa', g, 9) : '') + '</div></div>' : '';
+    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
     const filas = comidas.map((cm, j) => {
       const h = !!hechas[j];
       const pm = String(cm.nombre).match(/^(.*\S)\s*\(([^()]+)\)\s*$/);
       const nom = pm ? { nombre: pm[1], nota: pm[2] } : { nombre: cm.nombre, nota: '' };
       const kc = String(cm.kcal || '').replace(/\s*kcal\s*$/i, '');
-      // Solo se marcan las de hoy: es el registro de lo que has comido, no un plan.
-      const btn = esHoy
-        ? '<button type="button" class="hc-check" onclick="marcarComidaHoy(' + j + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + cm.momento) + '">' + check + '</button>'
-        : '<button type="button" class="hc-check" disabled aria-hidden="true" tabindex="-1">' + check + '</button>';
-      return '<div class="hc-fila' + (h ? ' hecha' : '') + '">' + btn
-        + '<div class="hc-txt"><div class="hc-mom">' + _esc(cm.momento) + (cm.hora ? ' · <b>' + _esc(cm.hora) + '</b>' : '') + '</div><div class="hc-nom">' + _esc(nom.nombre) + '</div>'
-        + (nom.nota ? '<span class="hc-nota">' + _esc(nom.nota) + '</span>' : '') + '</div>'
-        + (kc ? '<span class="hc-kcal"><span class="v">' + _esc(kc) + '</span><span class="k">kcal</span></span>' : '')
-        + '<button type="button" class="hc-ir" onclick="irAComidaDia(' + i + ',' + j + ')" aria-label="' + _esc('Ver las recetas de ' + cm.momento) + '"><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button></div>';
+      const punto = esHoy
+        ? '<button type="button" class="hn-punto" onclick="marcarComidaHoy(' + j + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + cm.momento) + '">' + check + '</button>'
+        : '<span class="hn-punto" aria-hidden="true">' + check + '</span>';
+      return '<li class="hn-fila' + (h ? ' hecha' : '') + '"><div class="hn-hora">' + _esc(cm.hora || '') + '</div>' + punto
+        + '<button type="button" class="hn-toma" onclick="irAComidaDia(' + i + ',' + j + ')" aria-label="' + _esc(cm.momento + ': ' + nom.nombre + '. Ver la receta') + '">'
+        + '<span class="hn-ico" aria-hidden="true">' + _hdIconoToma(cm.momento) + '</span>'
+        + '<span class="hn-txt"><span class="hn-mom">' + _esc(cm.momento) + (cm.hora ? '<i class="hn-h2"> · ' + _esc(cm.hora) + '</i>' : '') + '</span><span class="hn-nom">' + _esc(nom.nombre) + '</span>'
+        + (nom.nota ? '<span class="hn-nota">' + _esc(nom.nota) + '</span>' : '') + '</span>'
+        + (kc ? '<span class="hn-k">' + _esc(kc) + '<small>kcal</small></span>' : '') + '</button></li>';
     }).join('');
-    const prog = esHoy ? '<div class="hc-prog"><span>' + (n === comidas.length ? 'Todas hechas. Bien.' : n + ' de ' + comidas.length + ' hechas') + '</span>'
-      + '<span class="hc-barra" aria-hidden="true"><i style="width:' + Math.round(n / comidas.length * 100) + '%"></i></span></div>' : '';
-    return tot + '<div class="hd-card">' + prog + '<div class="hc-lista">' + filas + '</div>'
-      + '<button type="button" class="hc-ver" onclick="irANutricionDia(' + i + ')"><span>Cambiar opciones y ver recetas</span><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button></div>';
+    return resumen + '<ol class="hn-linea">' + filas + '</ol>'
+      + '<button type="button" class="hn-ver" onclick="irANutricionDia(' + i + ')"><span>Cambiar opciones y ver recetas</span><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button>';
   }
 
   function hdDia(i) {
