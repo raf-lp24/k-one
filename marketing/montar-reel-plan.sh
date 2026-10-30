@@ -8,14 +8,15 @@
 set -e
 R="${1:?carpeta de trabajo}"
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="$RAIZ/marketing/publicar/videos/12-le-pido-un-plan-a-kone.mp4"
+REEL="${REEL:-plan}"   # REEL=ia → «Le pido un plan a mi entrenador con IA» (30 oct 2026)
+OUT="${OUT:-$RAIZ/marketing/publicar/videos/12-le-pido-un-plan-a-kone.mp4}"
 mkdir -p "$(dirname "$OUT")"
 
 [ -f "$R/tiempos.json" ] || node "$RAIZ/marketing/grabar-reel-plan.mjs" "$R"
 ( cd "$R" && ffmpeg -y -loglevel error -f concat -safe 0 -i lista.txt -vf "fps=30,scale=780:1688:flags=lanczos,format=yuv420p" -c:v libx264 -crf 16 -preset medium app.mp4 )
 
 mkdir -p "$R/piezas"
-pz(){ node "$RAIZ/marketing/cdp-frames.mjs" "http://localhost:8080/marketing/reel-piezas.html?reel=plan&$1" "$R/piezas/tmp" 0.04 25 1080 1920 2>/dev/null && mv "$R/piezas/tmp/f00000.png" "$R/piezas/$2.png"; }
+pz(){ node "$RAIZ/marketing/cdp-frames.mjs" "http://localhost:8080/marketing/reel-piezas.html?reel=$REEL&$1" "$R/piezas/tmp" 0.04 25 1080 1920 2>/dev/null && mv "$R/piezas/tmp/f00000.png" "$R/piezas/$2.png"; }
 pz "pieza=fondo" fondo; pz "pieza=marco" marco; pz "pieza=mascara" mascara; pz "pieza=final" final
 for i in 0 1 2 3 4 5 6 7; do pz "pieza=texto&i=$i" "t$i"; done
 

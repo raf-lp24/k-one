@@ -1,0 +1,72 @@
+<!doctype html>
+<!--
+  Diapositivas de los vídeos «tu entrenador personal con IA» (30 oct 2026), 1080x1920.
+  ?img=<captura sin .png>&eye=<etiqueta>&tit=<título, <br> permitido>&tag=<ANTES|DESPUÉS|…>
+  ?pieza=final → cierre. Las monta marketing/montar-videos-ia.mjs.
+-->
+<meta charset="utf-8">
+<title>K-ONE · vídeos IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; background: #0A0A0A; overflow: hidden; color: #F0EDE8; font-family: 'Inter', sans-serif; }
+  .fondo { position: absolute; inset: 0; background: #0A0A0A; overflow: hidden; }
+  .fondo::before { content: ''; position: absolute; width: 1100px; height: 1100px; right: -420px; top: -380px; border-radius: 50%; background: radial-gradient(circle, rgba(209,66,14,.38), transparent 62%); }
+  .fondo::after { content: ''; position: absolute; width: 900px; height: 900px; left: -420px; bottom: -300px; border-radius: 50%; background: radial-gradient(circle, rgba(209,66,14,.22), transparent 62%); }
+  .rejilla { position: absolute; inset: 0; opacity: .06; background-image: linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.7) 1px, transparent 1px); background-size: 90px 90px; }
+  .logo { position: absolute; left: 72px; top: 70px; font-family: 'Bebas Neue', sans-serif; font-size: 58px; letter-spacing: 3px; }
+  .logo span, .naranja { color: #F26A36; }
+  .ia { position: absolute; right: 72px; top: 84px; font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 4px; color: rgba(240,237,232,.8); border: 1px solid rgba(242,106,54,.5); border-radius: 999px; padding: 10px 20px 8px; }
+  .pie { position: absolute; left: 0; right: 0; bottom: 52px; text-align: center; font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 3px; text-transform: uppercase; color: rgba(240,237,232,.75); }
+  .pie b { color: #F26A36; font-weight: 500; }
+  .caja { position: absolute; left: 72px; right: 72px; top: 170px; }
+  .eye { display: inline-flex; align-items: center; gap: 12px; font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 4px; text-transform: uppercase; color: #F26A36; background: rgba(209,66,14,.12); border: 1px solid rgba(242,106,54,.35); border-radius: 999px; padding: 10px 22px 8px; }
+  .eye::before { content: ''; width: 11px; height: 11px; border-radius: 50%; background: #F26A36; box-shadow: 0 0 10px #F26A36; }
+  .tit { font-family: 'Bebas Neue', sans-serif; font-size: 88px; line-height: .95; letter-spacing: 1px; margin-top: 18px; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+  /* Móvil: pantalla 610x1320 en (235,480). */
+  .movil { position: absolute; left: 221px; top: 466px; width: 638px; height: 1348px; border-radius: 68px; border: 14px solid #161616; background: #000; overflow: hidden;
+    box-shadow: 0 0 0 2px #2c2c2c, 0 40px 120px rgba(0,0,0,.8), 0 0 80px rgba(209,66,14,.18); }
+  .movil img { width: 610px; height: 1320px; object-fit: cover; object-position: top; display: block; border-radius: 54px; }
+  .tag { position: absolute; left: 50%; top: 1700px; transform: translateX(-50%); font-family: 'Bebas Neue', sans-serif; font-size: 54px; letter-spacing: 4px; padding: 14px 44px 8px; border-radius: 999px;
+    background: #D1420E; color: #fff; box-shadow: 0 10px 40px rgba(209,66,14,.55); white-space: nowrap; }
+  .tag.gris { background: #2A2A2A; color: #F0EDE8; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  .final .centro { position: absolute; left: 0; right: 0; top: 560px; text-align: center; }
+  .final .big { font-family: 'Bebas Neue', sans-serif; font-size: 190px; letter-spacing: 6px; line-height: 1; }
+  .final .lema { font-family: 'Bebas Neue', sans-serif; font-size: 96px; line-height: 1; margin-top: 40px; }
+  .final .oferta { font-family: 'DM Mono', monospace; font-size: 30px; letter-spacing: 3px; color: rgba(240,237,232,.85); margin-top: 60px; text-transform: uppercase; }
+  .final .cta { display: inline-block; margin-top: 60px; background: #D1420E; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 64px; letter-spacing: 3px; padding: 22px 60px 16px; border-radius: 999px; box-shadow: 0 10px 40px rgba(209,66,14,.5); }
+</style>
+<body>
+<div class="fondo"><div class="rejilla"></div></div>
+<div class="logo">K-<span>ONE</span></div>
+<div id="slide">
+  <div class="ia">ENTRENADOR CON IA</div>
+  <div class="caja"><div class="eye" id="eye"></div><div class="tit" id="tit"></div></div>
+  <div class="movil"><img id="img" alt=""></div>
+  <div class="tag" id="tag"></div>
+  <div class="pie">k-one.fit · <b>primer mes gratis, sin tarjeta</b></div>
+</div>
+<div class="final" id="final" style="display:none"><div class="centro">
+  <div class="big">K-<span class="naranja">ONE</span></div>
+  <div class="lema">Tu entrenador personal<br>con <span class="naranja">IA</span></div>
+  <div class="oferta">Primer mes gratis · sin tarjeta</div>
+  <div class="cta">k-one.fit</div>
+</div></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get('pieza') === 'final') {
+    document.getElementById('slide').style.display = 'none';
+    document.getElementById('final').style.display = 'block';
+  } else {
+    document.getElementById('eye').textContent = q.get('eye') || '';
+    document.getElementById('tit').innerHTML = q.get('tit') || '';
+    const tag = q.get('tag');
+    const t = document.getElementById('tag');
+    if (tag) { t.textContent = tag; if (/ANTES/i.test(tag)) t.classList.add('gris'); } else t.style.display = 'none';
+    document.getElementById('img').src = 'videos-ia/capturas/' + q.get('img') + '.png';
+  }
+  window.listo = Promise.all([document.fonts.ready, document.fonts.load("88px 'Bebas Neue'"),
+    new Promise(r => { const i = document.getElementById('img'); if (!i.getAttribute('src') || i.complete) r(); else { i.onload = r; i.onerror = r; } })])
+    .then(() => new Promise(r => setTimeout(r, 300)));
+</script>
+</body>

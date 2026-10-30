@@ -1,0 +1,116 @@
+<!doctype html>
+<!-- Maqueta (30 oct 2026, idea de Rafa): «Hoy» con calendario de la semana y pestañas Entrenamiento / Comidas.
+     Solo es un modelo para enseñarlo: no está conectado a la app. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-ONE · Maqueta del día</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --negro: #0A0A0A; --grafito: #161616; --grafito2: #1E1E1E; --borde: #2A2A2A; --blanco: #F0EDE8; --metal: #8C8984; --brasa: #D1420E; --brasa2: #F26A36; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--negro); color: var(--blanco); font-family: 'Inter', sans-serif; max-width: 430px; margin: 0 auto; padding: 18px 16px 110px; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Bebas Neue'; font-size: 28px; letter-spacing: 2px; } .logo span { color: var(--brasa2); }
+  .sem { font-family: 'DM Mono'; font-size: 11px; letter-spacing: 2px; color: var(--metal); text-transform: uppercase; }
+  h1 { font-family: 'Bebas Neue'; font-size: 34px; letter-spacing: 1px; margin: 16px 0 12px; }
+  /* Calendario */
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .dia { background: var(--grafito); border: 1px solid var(--borde); border-radius: 14px; padding: 9px 0 8px; text-align: center; cursor: pointer; position: relative; }
+  .dia .l { font-family: 'DM Mono'; font-size: 11px; color: var(--metal); }
+  .dia .n { font-family: 'Bebas Neue'; font-size: 24px; line-height: 1.1; }
+  .dia .p { width: 6px; height: 6px; border-radius: 50%; margin: 2px auto 0; background: var(--brasa2); }
+  .dia .p.desc { background: var(--borde); }
+  .dia.hecho .p { background: #3BA55C; }
+  .dia.hoy { border-color: var(--brasa2); }
+  .dia.sel { background: var(--brasa); border-color: var(--brasa); } .dia.sel .l { color: rgba(255,255,255,.85); } .dia.sel .p { background: #fff; }
+  .leyenda { display: flex; gap: 14px; margin-top: 8px; font-size: 11px; color: var(--metal); }
+  .leyenda i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  /* Pestañas */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--grafito); border: 1px solid var(--borde); border-radius: 999px; padding: 4px; margin: 18px 0 14px; }
+  .tab { text-align: center; padding: 11px 0; border-radius: 999px; font-weight: 600; font-size: 14px; color: var(--metal); cursor: pointer; }
+  .tab.on { background: var(--blanco); color: var(--negro); }
+  .tarjeta { background: var(--grafito); border: 1px solid var(--borde); border-radius: 18px; padding: 16px; }
+  .eti { font-family: 'DM Mono'; font-size: 11px; letter-spacing: 2px; color: var(--brasa2); text-transform: uppercase; }
+  .tit { font-family: 'Bebas Neue'; font-size: 28px; letter-spacing: .5px; margin-top: 4px; }
+  .datos { display: flex; gap: 8px; margin: 10px 0 14px; flex-wrap: wrap; }
+  .chip { background: var(--grafito2); border: 1px solid var(--borde); border-radius: 999px; padding: 6px 11px; font-size: 12px; color: var(--blanco); }
+  .btn { display: block; width: 100%; text-align: center; background: var(--brasa); color: #fff; border: 0; border-radius: 14px; padding: 15px; font-family: 'Inter'; font-weight: 700; letter-spacing: 1px; font-size: 14px; text-transform: uppercase; cursor: pointer; }
+  .lista { margin-top: 14px; }
+  .ej { display: flex; justify-content: space-between; align-items: center; padding: 11px 2px; border-top: 1px solid var(--borde); font-size: 14px; }
+  .ej b { font-weight: 600; } .ej span { font-family: 'DM Mono'; font-size: 12px; color: var(--metal); }
+  .mas { text-align: center; font-size: 13px; color: var(--brasa2); margin-top: 10px; cursor: pointer; }
+  .comida { display: flex; gap: 12px; align-items: center; padding: 12px 2px; border-top: 1px solid var(--borde); }
+  .comida:first-of-type { border-top: 0; }
+  .hora { font-family: 'DM Mono'; font-size: 11px; color: var(--metal); width: 42px; flex-shrink: 0; }
+  .comida .q { flex: 1; } .comida .q small { display: block; font-family: 'DM Mono'; font-size: 10px; letter-spacing: 1.5px; color: var(--brasa2); text-transform: uppercase; }
+  .comida .q div { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .comida .k { font-family: 'DM Mono'; font-size: 12px; color: var(--metal); }
+  .check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--borde); flex-shrink: 0; }
+  .check.ok { background: #3BA55C; border-color: #3BA55C; }
+  .totales { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .tot { background: var(--grafito2); border-radius: 12px; padding: 8px 0; text-align: center; } .tot b { font-family: 'Bebas Neue'; font-size: 20px; display: block; } .tot small { font-size: 10px; color: var(--metal); }
+  .descanso { text-align: center; padding: 26px 10px; color: var(--metal); font-size: 14px; line-height: 1.5; }
+  .descanso b { display: block; font-family: 'Bebas Neue'; font-size: 30px; color: var(--blanco); letter-spacing: 1px; margin-bottom: 6px; }
+  .barra { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(10,10,10,.96); border-top: 1px solid var(--borde); display: flex; justify-content: space-around; padding: 10px 0 18px; font-size: 11px; color: var(--metal); }
+  .barra .on { color: var(--brasa2); }
+  .nota { margin: 16px 0 0; font-size: 12px; color: var(--metal); text-align: center; }
+</style>
+<body>
+<div class="top"><div class="logo">K-<span>ONE</span></div><div class="sem">Semana 2 · Perder grasa</div></div>
+<h1 id="titDia">Jueves 30</h1>
+
+<div class="cal" id="cal"></div>
+<div class="leyenda"><span><i style="background:#F26A36"></i>Entreno</span><span><i style="background:#3BA55C"></i>Hecho</span><span><i style="background:#2A2A2A"></i>Descanso</span></div>
+
+<div class="tabs"><div class="tab on" data-t="ent">Entrenamiento</div><div class="tab" data-t="com">Comidas</div></div>
+<div id="panel"></div>
+<p class="nota">Maqueta: así se vería. Tocar un día o una pestaña cambia lo de abajo.</p>
+
+<div class="barra"><span class="on">Hoy</span><span>Progreso</span><span>Check-in</span><span>Más</span></div>
+
+<script>
+  const SEMANA = [
+    { l: 'L', n: 27, tipo: 'Pierna A', hecho: true, dur: '55 min', ej: [['Sentadilla', '4 × 6'], ['Peso muerto rumano', '4 × 8'], ['Prensa', '3 × 10'], ['Curl femoral', '3 × 12'], ['Gemelos en escalón', '3 × 15'], ['Plancha', '3 × 40 s']] },
+    { l: 'M', n: 28, tipo: 'Torso A', hecho: true, dur: '50 min', ej: [['Press banca', '4 × 6'], ['Remo con barra', '4 × 8'], ['Press militar', '3 × 10'], ['Jalón al pecho', '3 × 10'], ['Curl de bíceps', '3 × 12'], ['Extensión de tríceps', '3 × 12']] },
+    { l: 'X', n: 29, tipo: null },
+    { l: 'J', n: 30, tipo: 'Pierna B', hoy: true, dur: '55 min', ej: [['Peso muerto', '5 × 5'], ['Puente de glúteo con mancuerna', '4 × 10'], ['Sentadilla búlgara', '4 × 10'], ['Extensión de cuádriceps', '3 × 12'], ['Abducción en máquina', '3 × 15'], ['Paseo de puntillas con mancuerna', '3 × 20 m'], ['Dead bug', '3 × 10']] },
+    { l: 'V', n: 31, tipo: 'Torso B', dur: '50 min', ej: [['Press inclinado en máquina', '4 × 8'], ['Dominadas asistidas', '4 × 6'], ['Elevaciones laterales', '3 × 15'], ['Remo en polea baja', '3 × 10'], ['Curl martillo', '3 × 12'], ['Face pull', '3 × 15']] },
+    { l: 'S', n: 1, tipo: null },
+    { l: 'D', n: 2, tipo: null, checkin: true },
+  ];
+  const COMIDAS = [
+    ['7:30', 'Desayuno', 'Bol de plátano dorado con avena, cacao y yogur', 669, true],
+    ['10:30', 'Media mañana', 'Tortas de arroz con tortilla de claras', 261, true],
+    ['14:00', 'Comida', 'Arroz con pollo y verduras al wok', 742, false],
+    ['17:30', 'Merienda', 'Bizcocho de manzana y canela en taza', 252, false],
+    ['21:00', 'Cena', 'Canelones de calabacín rellenos de pollo', 622, false],
+  ];
+  const NOMBRES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  let sel = 3, tab = 'ent', todos = false;
+  const cal = document.getElementById('cal'), panel = document.getElementById('panel');
+  function pintar() {
+    cal.innerHTML = SEMANA.map((d, i) => `<div class="dia${d.hoy ? ' hoy' : ''}${d.hecho ? ' hecho' : ''}${i === sel ? ' sel' : ''}" data-i="${i}"><div class="l">${d.l}</div><div class="n">${d.n}</div><div class="p${d.tipo ? '' : ' desc'}"></div></div>`).join('');
+    const d = SEMANA[sel];
+    document.getElementById('titDia').textContent = NOMBRES[sel] + ' ' + d.n + (d.hoy ? ' · hoy' : '');
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.t === tab));
+    if (tab === 'ent') {
+      if (!d.tipo) { panel.innerHTML = `<div class="tarjeta descanso"><b>${d.checkin ? 'Descanso · check-in' : 'Descanso'}</b>${d.checkin ? 'Hoy toca contarnos cómo ha ido la semana: el plan de la que viene se ajusta con tus respuestas.' : 'Paseo suave o movilidad 10 min si te apetece. Descansar también es parte del plan.'}</div>`; return; }
+      const lista = todos ? d.ej : d.ej.slice(0, 4);
+      panel.innerHTML = `<div class="tarjeta"><div class="eti">${d.hecho ? 'Hecho ✓' : 'Sesión del día'}</div><div class="tit">${d.tipo}</div>
+        <div class="datos"><span class="chip">${d.ej.length} ejercicios</span><span class="chip">${d.dur}</span><span class="chip">Gimnasio</span></div>
+        <button class="btn">${d.hecho ? 'Ver lo que hice' : 'Empezar entreno →'}</button>
+        <div class="lista">${lista.map(e => `<div class="ej"><b>${e[0]}</b><span>${e[1]}</span></div>`).join('')}</div>
+        ${d.ej.length > 4 ? `<div class="mas" id="mas">${todos ? 'Ver menos' : 'Ver los ' + d.ej.length + ' ejercicios'}</div>` : ''}</div>`;
+      const m = document.getElementById('mas'); if (m) m.onclick = () => { todos = !todos; pintar(); };
+    } else {
+      const kcal = COMIDAS.reduce((a, c) => a + c[3], 0);
+      panel.innerHTML = `<div class="totales"><div class="tot"><b>${kcal}</b><small>kcal</small></div><div class="tot"><b>170 g</b><small>proteína</small></div><div class="tot"><b>212 g</b><small>hidratos</small></div><div class="tot"><b>62 g</b><small>grasa</small></div></div>
+        <div class="tarjeta">${COMIDAS.map(c => `<div class="comida"><div class="hora">${c[0]}</div><div class="q"><small>${c[1]}</small><div>${c[2]}</div></div><div class="k">${c[3]}</div><div class="check${sel === 3 && c[4] ? ' ok' : ''}"></div></div>`).join('')}</div>
+        <button class="btn" style="margin-top:12px;background:var(--grafito2);border:1px solid var(--borde)">Cambiar opciones y ver recetas</button>`;
+    }
+  }
+  cal.onclick = e => { const d = e.target.closest('.dia'); if (d) { sel = +d.dataset.i; todos = false; pintar(); } };
+  document.querySelector('.tabs').onclick = e => { const t = e.target.closest('.tab'); if (t) { tab = t.dataset.t; pintar(); } };
+  pintar();
+</script>
+</body>

@@ -68,11 +68,19 @@
     ['Un momento', 'Se monta<br>tu plan'],
     ['Sin crear cuenta', 'Tus calorías, tu<br>primera sesión y tu menú']
   ];
+  // ?reel=ia · «Le pido un plan a mi entrenador con IA» (30 oct 2026): misma grabación, textos de la IA.
+  const TEXTOS_IA = TEXTOS_PLAN.map(t => t.slice());
+  TEXTOS_IA[0] = ['Pruébalo tú', 'Le pido un plan a<br>mi entrenador con IA'];
+  TEXTOS_IA[6] = ['Un momento', 'La IA monta<br>tu plan'];
   const q = new URLSearchParams(location.search);
   const pieza = q.get('pieza') || 'fondo';
-  const esPlan = q.get('reel') === 'plan';
-  if (pieza === 'texto') { const t = (esPlan ? TEXTOS_PLAN : TEXTOS)[+q.get('i') || 0]; document.getElementById('eye').textContent = t[0]; document.getElementById('tit').innerHTML = t[1]; }
-  if (pieza === 'final' && esPlan) {
+  const esIA = q.get('reel') === 'ia';
+  const esPlan = q.get('reel') === 'plan' || esIA;
+  if (pieza === 'texto') { const t = (esIA ? TEXTOS_IA : esPlan ? TEXTOS_PLAN : TEXTOS)[+q.get('i') || 0]; document.getElementById('eye').textContent = t[0]; document.getElementById('tit').innerHTML = t[1]; }
+  if (pieza === 'final' && esIA) {
+    document.querySelector('#final .oferta').innerHTML = 'Tu entrenador personal<br>con <span class="naranja">IA</span>: primer mes<br>gratis y sin tarjeta';
+    document.querySelector('#final .cta').textContent = 'k-one.fit';
+  } else if (pieza === 'final' && esPlan) {
     document.querySelector('#final .oferta').innerHTML = 'Hazlo tú:<br>primer mes <span class="naranja">gratis</span><br>y sin tarjeta';
     document.querySelector('#final .cta').textContent = 'Comenta PLAN';
   }
