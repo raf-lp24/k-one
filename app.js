@@ -4075,7 +4075,11 @@
     "Preocúpate por comer mejor, no por comer menos.",
     // 29 oct 2026 · revisión de @mariamffit y @cienciaychandal, aprobadas por Rafa
     "¿No sabes usar las máquinas? Se aprende. ¿No sabes comer bien? Se aprende. La disciplina no se tiene: se construye, un día detrás de otro.",
-    "En redes ves lo mejor de los demás y lo peor de ti. A cada persona le tocan unas cartas; tu trabajo es jugar bien las tuyas."
+    "En redes ves lo mejor de los demás y lo peor de ti. A cada persona le tocan unas cartas; tu trabajo es jugar bien las tuyas.",
+    // 30 oct 2026 · revisión de @vikikateam y @fitnesshibridoesp, aprobadas por Rafa
+    "Mira lo que ya haces distinto: desayunas mejor, te mueves más, ya no empiezas de cero cada lunes. Eso también es avanzar, aunque no salga en ningún número.",
+    "Dedica una hora del domingo a dejar una base hecha: pollo a la plancha, arroz, verduras asadas y huevos cocidos. De ahí salen bowls, wraps y cenas rápidas sin empezar de cero cada día. Y si comes fuera, llévalo en un táper: así lo que comes lo decides tú.",
+    "Un día de pizza no estropea nada. Lo que pesa es que, con las prisas, cuidarte siempre quede para el final."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -8675,6 +8679,7 @@
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            op("Pasta cremosa con pollo y tomate cherry en air fryer", "80g pasta integral cruda, 150g pechuga de pollo, 150g tomate cherry, 30g queso crema light, 5g aceite de oliva, ajo, cúrcuma, pimentón, sal", "614 kcal", "49g prot", "64g carbs", "18g grasa", "Freidora 190º · 25 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
@@ -9047,6 +9052,7 @@
             op("Filetes de soja texturizada con calabaza y ensalada", "200g soja texturizada, 150g calabaza, 80g pimiento, 1 huevo, 20g copos de avena, 150g ensalada, 5g AOVE, pimentón, ajo", "519 kcal", "46g prot", "50g carbs", "15g grasa", "Freidora 190º · 25 min"),
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            op("Pasta cremosa con pollo y tomate cherry en air fryer", "80g pasta integral cruda, 150g pechuga de pollo, 150g tomate cherry, 30g queso crema light, 5g aceite de oliva, ajo, cúrcuma, pimentón, sal", "614 kcal", "49g prot", "64g carbs", "18g grasa", "Freidora 190º · 25 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
@@ -9183,6 +9189,7 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            op("Pasta cremosa con pollo y tomate cherry en air fryer", "80g pasta integral cruda, 150g pechuga de pollo, 150g tomate cherry, 30g queso crema light, 5g aceite de oliva, ajo, cúrcuma, pimentón, sal", "614 kcal", "49g prot", "64g carbs", "18g grasa", "Freidora 190º · 25 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
@@ -9400,6 +9407,7 @@
             op("Boniato con contramuslo, aguacate y cottage", "200g boniato asado, 150g contramuslo de pollo, 100g tomate, 50g aguacate, 80g queso cottage, 5g miel, especias", "634 kcal", "51g prot", "58g carbs", "22g grasa", "Fácil · 25 min"),
             op("Ternera con salsa burger de skyr y patatas", "120g filete de ternera, 250g patata, 100g skyr, 30g pepinillos, 5g mostaza, vinagre, 100g lechuga, especias", "530 kcal", "60g prot", "59g carbs", "6g grasa", "Fácil · 25 min"),
             op("Pimientos rellenos de ternera y arroz integral", "2 pimientos rojos (300g), 150g carne picada de ternera 5%, 50g arroz integral, 100g tomate triturado, 50g zanahoria, 30g mozzarella light, 5g aceite de oliva, comino, orégano", "504 kcal", "44g prot", "37g carbs", "20g grasa", "Horno 200º · 40 min"),
+            op("Pasta cremosa con pollo y tomate cherry en air fryer", "80g pasta integral cruda, 150g pechuga de pollo, 150g tomate cherry, 30g queso crema light, 5g aceite de oliva, ajo, cúrcuma, pimentón, sal", "614 kcal", "49g prot", "64g carbs", "18g grasa", "Freidora 190º · 25 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Ñoquis al air fryer con pavo, aguacate y salsa de yogur", "200g ñoquis de patata, 150g pechuga de pavo, 80g aguacate, 70g yogur griego 0%, 10g miel, 3g aceite de oliva virgen extra, ajo, pimentón", "586 kcal", "48g prot", "58g carbs", "18g grasa", "Air fryer · 15 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
@@ -16199,6 +16207,7 @@
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
     "Muffins de plátano, arándanos y pistacho": "Aplasta el plátano con un tenedor y bátelo con el huevo y el yogur. Añade la harina de avena, la proteína, la miel y la levadura, y mezcla sin grumos. Incorpora casi todos los arándanos. Reparte en 3-4 moldes de magdalena y pon encima el resto de arándanos y los pistachos picados. Freidora a 160º unos 20 min (horno: 180º, 15-18 min).",
     "Pimientos rellenos de ternera y arroz integral": "Cuece el arroz integral. Corta la parte de arriba de los pimientos, vacíalos y ásalos en el horno a 200º unos 15 min. Mientras, rehoga la zanahoria rallada con el aceite, añade la carne picada con el comino y el orégano y, cuando cambie de color, el tomate triturado; deja 5 min y mézclalo con el arroz. Rellena los pimientos, pon la mozzarella por encima y hornea 20-25 min más a 200º, hasta que se dore (en la freidora de aire, a 180º unos 15 min).",
+    "Pasta cremosa con pollo y tomate cherry en air fryer": "Cuece la pasta y escúrrela. Corta el pollo en dados y los tomates cherry por la mitad. Mézclalo todo en un recipiente que vaya a la freidora de aire con el queso crema, el aceite, el ajo, la cúrcuma, el pimentón y la sal, y cocínalo a 190º unos 13 min, removiendo a mitad. Al sacarlo, remueve para que el queso se funda con los jugos y quede cremoso. Aguanta hecha de la noche antes para el táper.",
     // 28 oct 2026: recetas de @tonigimenex (TikTok), aprobadas por Rafa.
     "Ñoquis al air fryer con pavo, aguacate y salsa de yogur": "Pon los ñoquis en un bol con el aceite (mejor en spray) y el pimentón, mézclalos y hazlos en la freidora de aire 10 min a 200º, removiendo a mitad. Mientras, haz la pechuga de pavo a la plancha y córtala en tiras, y corta el aguacate en dados. Para la salsa, mezcla el yogur con la miel y el ajo. Sirve los ñoquis con el pavo, el aguacate y la salsa por encima.",
     "Boniato relleno de carne picada con salsa de yogur y miel": "Pincha el boniato con un tenedor, envuélvelo en papel de cocina húmedo y hazlo en el microondas unos 10 min, hasta que esté blando. Mientras, sofríe la cebolla picada en una sartén antiadherente y añade la carne picada con el pimentón hasta que cambie de color. Mezcla el yogur con la miel. Abre el boniato por la mitad, rellénalo con la carne y pon la salsa por encima.",
