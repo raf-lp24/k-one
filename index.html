@@ -6102,6 +6102,23 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   .hn-fila.hecha .hn-toma { background: rgba(47,163,90,.06); border-color: rgba(47,163,90,.3); }
   .hn-fila.hecha .hn-nom { color: var(--metal-claro); }
   .hn-fila.hecha .hn-ico { color: #5CC07A; background: rgba(47,163,90,.12); border-color: rgba(47,163,90,.3); }
+  /* Receta desplegada al tocar la comida (30 oct, Rafa). */
+  .hn-toma .hn-k { transition: opacity .15s; }
+  .hn-fila.abierta .hn-toma { border-color: rgba(242,106,54,.6); border-bottom-color: transparent; border-radius: 16px 16px 0 0; transform: none; }
+  .hn-receta { grid-column: -2 / -1; margin: -1px 0 6px; padding: 6px 14px 14px; border-radius: 0 0 16px 16px; background: var(--carbon); border: 1px solid rgba(242,106,54,.35); border-top: 0; }
+  .hn-rec-mac { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 14px; }
+  .hn-rec-mac span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; border-radius: 12px; background: rgba(255,255,255,.04); font-size: 10.5px; color: var(--metal); }
+  .hn-rec-mac b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 20px; line-height: 1; color: var(--blanco); }
+  .hn-rec-mac b small { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--metal-claro); margin-left: 1px; }
+  .hn-rec-tit { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--brasa-txt); margin: 0 0 8px; }
+  .hn-rec-tit span { color: var(--metal); text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .hn-rec-ing { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .hn-rec-ing li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.45; color: var(--blanco); }
+  .hn-rec-ing li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--brasa-txt); }
+  .hn-rec-pasos { margin: 0 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--metal-claro); }
+  .hn-rec-cambiar { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--humo); border-radius: 999px; padding: 9px 14px; min-height: 40px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .hn-rec-cambiar svg { width: 15px; height: 15px; color: var(--brasa-txt); }
+  .hn-rec-cambiar:hover { border-color: rgba(242,106,54,.6); }
   .hn-ver { margin-top: 12px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--humo); border-radius: 16px; padding: 10px 10px 10px 16px; color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
   .hn-ver:hover { border-color: rgba(242,106,54,0.6); }
   .hn-mac-cab b small { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--metal-claro); margin-left: 2px; }

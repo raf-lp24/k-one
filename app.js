@@ -12365,7 +12365,7 @@
   // ser una lista larguísima. Solo lee el plan: no cambia nada de él. El entreno
   // detallado de siempre (#todayPlan) sigue debajo, plegado, y el modo serie a
   // serie lo lee de ahí igual que antes.
-  let _hdSel = null, _hdPestana = 'ent', _hdTodos = false, _hdDetalle = false, _hdFecha = '';
+  let _hdSel = null, _hdPestana = 'ent', _hdTodos = false, _hdDetalle = false, _hdFecha = '', _hdReceta = null;
   const _HD_LETRAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   const _HD_DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   function _isoDia(d) {
@@ -12412,7 +12412,7 @@
       const extras = (userData.comidasExtra && userData.comidasExtra[dia] && userData.comidasExtra[dia][i]) || [];
       const todas = base.concat(extras);
       const op = todas[elegidas[i]] || todas[0];
-      return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '' } : null;
+      return op ? { momento: t.momento || '', hora: t.hora || '', nombre: op.nombre || '', kcal: op.kcal || '', op } : null;
     }).filter(Boolean);
   }
   // Marca de cada día del calendario: pesa (toca entreno), check (hecho) o luna (descanso).
@@ -12626,25 +12626,50 @@
       const punto = esHoy
         ? '<button type="button" class="hn-punto" onclick="marcarComidaHoy(' + j + ')" aria-pressed="' + h + '" aria-label="' + _esc((h ? 'Desmarcar ' : 'Marcar como hecha: ') + cm.momento) + '">' + check + '</button>'
         : '<span class="hn-punto" aria-hidden="true">' + check + '</span>';
-      return '<li class="hn-fila' + (h ? ' hecha' : '') + '"><div class="hn-hora">' + _esc(cm.hora || '') + '</div>' + punto
-        + '<button type="button" class="hn-toma" onclick="irAComidaDia(' + i + ',' + j + ')" aria-label="' + _esc(cm.momento + ': ' + nom.nombre + '. Ver la receta') + '">'
+      return '<li class="hn-fila' + (h ? ' hecha' : '') + (_hdReceta === j ? ' abierta' : '') + '"><div class="hn-hora">' + _esc(cm.hora || '') + '</div>' + punto
+        + '<button type="button" class="hn-toma" onclick="hdReceta(' + j + ')" aria-expanded="' + (_hdReceta === j) + '" aria-label="' + _esc(cm.momento + ': ' + nom.nombre + (_hdReceta === j ? '. Ocultar la receta' : '. Ver la receta')) + '">'
         + '<span class="hn-ico" aria-hidden="true">' + _hdIconoToma(cm.momento) + '</span>'
         + '<span class="hn-txt"><span class="hn-mom">' + _esc(cm.momento) + (cm.hora ? '<i class="hn-h2"> · ' + _esc(cm.hora) + '</i>' : '') + '</span><span class="hn-nom">' + _esc(nom.nombre) + '</span>'
         + (nom.nota ? '<span class="hn-nota">' + _esc(nom.nota) + '</span>' : '') + '</span>'
-        + (kc ? '<span class="hn-k">' + _esc(kc) + '<small>kcal</small></span>' : '') + '</button></li>';
+        + (kc ? '<span class="hn-k">' + _esc(kc) + '<small>kcal</small></span>' : '') + '</button>' + (_hdReceta === j ? _hdRecetaHTML(cm.op, i, j) : '') + '</li>';
     }).join('');
     return resumen + '<ol class="hn-linea">' + filas + '</ol>'
       + '<button type="button" class="hn-ver" onclick="irANutricionDia(' + i + ')"><span>Cambiar opciones y ver recetas</span><span class="flecha-redonda" aria-hidden="true">' + _HD_FLECHA + '</span></button>';
   }
 
+  // Receta de una comida, desplegada en Hoy al tocarla (Rafa, 30 oct): ingredientes,
+  // preparación y macros, como en el recetario, sin salir de la pantalla.
+  function _hdRecetaHTML(op, i, j) {
+    if (!op) return '';
+    const ings = String(op.ingredientes || '').split(',').map(s => s.trim()).filter(Boolean);
+    const pasos = op.custom ? '' : (op.pasos || (typeof RECETA_PASOS !== 'undefined' && RECETA_PASOS[op.nombre]) || _pasoGenerico(op.nombre, op.ingredientes, op.prep));
+    const num = v => String(v || '').match(/\d+/) ? String(v).match(/\d+/)[0] : '';
+    const macros = [['kcal', num(op.kcal), ''], ['proteína', num(op.prot), 'g'], ['hidratos', num(op.carbs), 'g'], ['grasa', num(op.grasa), 'g']].filter(m => m[1]);
+    return '<div class="hn-receta">'
+      + (macros.length ? '<div class="hn-rec-mac">' + macros.map(m => '<span><b>' + m[1] + (m[2] ? '<small>' + m[2] + '</small>' : '') + '</b>' + m[0] + '</span>').join('') + '</div>' : '')
+      + (ings.length ? '<div class="hn-rec-tit">Ingredientes</div><ul class="hn-rec-ing">' + ings.map(s => '<li>' + _esc(_ingredienteConPesoCereal(s)) + '</li>').join('') + '</ul>' : '')
+      + (pasos ? '<div class="hn-rec-tit">Preparación' + (op.prep ? ' <span>· ' + _esc(op.prep) + '</span>' : '') + '</div><p class="hn-rec-pasos">' + _esc(pasos) + '</p>' : '')
+      + '<button type="button" class="hn-rec-cambiar" onclick="irAComidaDia(' + i + ',' + j + ')">Cambiar por otra opción ' + _HD_FLECHA + '</button>'
+      + '</div>';
+  }
+  function hdReceta(j) {
+    _hdReceta = _hdReceta === j ? null : j;
+    if (_hdReceta !== null) kEvento('hoy_receta', { toma: j });
+    _pintarHoyDia();
+    const fila = document.querySelectorAll('#hdPanel .hn-fila')[j];
+    if (_hdReceta !== null && fila) {
+      const r = fila.getBoundingClientRect();
+      if (r.top < 70 || r.top > window.innerHeight * 0.6) window.scrollTo({ top: Math.max(0, r.top + window.scrollY - 80), behavior: 'smooth' });
+    }
+  }
   function hdDia(i) {
     if (_hdSel !== i) kEvento('hoy_calendario_dia', { dia: i, hoy: i === getIndiceDiaHoy() });
-    _hdSel = i; _hdTodos = false;
+    _hdSel = i; _hdTodos = false; _hdReceta = null;
     _pintarHoyDia();
   }
   function hdTab(t) {
     if (_hdPestana !== t) kEvento('hoy_calendario_pestana', { pestana: t });
-    _hdPestana = t;
+    _hdPestana = t; _hdReceta = null;
     _pintarHoyDia();
   }
   function hdVerTodos() { _hdTodos = !_hdTodos; _pintarHoyDia(); }
