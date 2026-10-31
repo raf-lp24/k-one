@@ -8,7 +8,7 @@
 set -e
 R="${1:?carpeta de trabajo}"
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
-REEL="${REEL:-plan}"   # REEL=ia → «Le pido un plan a mi entrenador con IA» (30 oct 2026)
+REEL="${REEL:-plan}"   # REEL=ia → «Le pido un plan a mi app» (30 oct 2026)
 OUT="${OUT:-$RAIZ/marketing/publicar/videos/12-le-pido-un-plan-a-kone.mp4}"
 mkdir -p "$(dirname "$OUT")"
 
