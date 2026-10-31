@@ -60,15 +60,17 @@
   const T = JSON.parse(q.get('tp') || '{"hoy":0,"menu":2.3,"cambio":7.9,"gluten":10.6,"despues":13.3,"receta":17.5,"total":20.7}');
   const H = +(q.get('h') || 2.6);           // gancho
   const FIN = +(q.get('fin') || 4.6);       // cierre
-  const A = s => H + s;                      // segundo de la app → segundo del vídeo
-  const finIni = A(T.total) + 0.2;
+  // La app se monta un poco más lenta que la grabación (31 oct, Rafa: «un punto menos» de ritmo).
+  const LENTO = +(q.get('lento') || 1);
+  const A = s => H + s * LENTO;              // segundo de la app → segundo del vídeo
+  const finIni = A(T.total) + 0.3;
   // Rótulos: [desde, hasta, ojo, título (HTML con <span>), clase del ojo]
   const R = [
     [A(T.hoy) + 0.25, A(T.menu), 'Lunes · mi plan', 'Este es mi<br><span>menú</span> <span>de</span> <span class="na">hoy</span>'],
     [A(T.menu), A(T.cambio), 'Antes', 'Pan, pasta, avena…<br><span>todo</span> <span>con</span> <span class="na">gluten</span>'],
     [A(T.cambio), A(T.despues), 'Se lo digo a la IA', 'Sin gluten,<br><span>por</span> <span class="na">favor</span>'],
-    [A(T.despues), A(T.despues) + 4.2, 'Al momento', 'Todo el menú<br><span class="ve">sin</span> <span class="ve">gluten</span>', 'verde'],
-    [A(T.despues) + 4.2, finIni, 'Y sin descuadrar nada', 'Mismo objetivo<br><span>de</span> <span class="na">calorías</span>', 'verde'],
+    [A(T.despues), A(T.despues + 4.2), 'Al momento', 'Todo el menú<br><span class="ve">sin</span> <span class="ve">gluten</span>', 'verde'],
+    [A(T.despues + 4.2), finIni, 'Y sin descuadrar nada', 'Mismo objetivo<br><span>de</span> <span class="na">calorías</span>', 'verde'],
   ];
   const rot = document.getElementById('rotulos');
   rot.innerHTML = R.map((r, i) => '<div class="rot" id="r' + i + '"><div class="eye' + (r[4] ? ' ' + r[4] : '') + '">' + r[2] + '</div><div class="tit">' + r[3].replace(/(^|<br>)([^<]+?)(?=<br>|$)/g, (m, a, b) => a + b.split(' ').map(w => '<span>' + w + '</span>').join(' ')) + '</div></div>').join('');
@@ -77,9 +79,9 @@
     // Gancho: las palabras entran una a una; al final sube y se va.
     const g = document.getElementById('gancho');
     const palabras = [...g.querySelectorAll('.g-l span')];
-    palabras.forEach((w, i) => { const p = ease((t - 0.12 - i * 0.11) / 0.28); w.style.opacity = p; w.style.transform = 'translateY(' + (1 - p) * 60 + 'px) scale(' + (1.25 - 0.25 * p) + ')'; });
-    const sub = g.querySelector('.g-sub'); const ps = ease((t - 1.35) / 0.3); sub.style.opacity = ps; sub.style.transform = 'translateY(' + (1 - ps) * 30 + 'px)';
-    const salida = ease((t - (H - 0.35)) / 0.35);
+    palabras.forEach((w, i) => { const p = ease((t - 0.15 - i * 0.14) / 0.36); w.style.opacity = p; w.style.transform = 'translateY(' + (1 - p) * 60 + 'px) scale(' + (1.25 - 0.25 * p) + ')'; });
+    const sub = g.querySelector('.g-sub'); const ps = ease((t - (H - 1.3)) / 0.4); sub.style.opacity = ps; sub.style.transform = 'translateY(' + (1 - ps) * 30 + 'px)';
+    const salida = ease((t - (H - 0.45)) / 0.45);
     g.style.opacity = t < H ? 1 - salida : 0; g.style.transform = 'translateY(' + (-120 * salida) + 'px)';
     g.style.display = t < H + 0.05 ? 'flex' : 'none';
     // Rótulos
@@ -88,17 +90,17 @@
       const dentro = t >= r[0] && t < r[1];
       el.style.display = dentro ? 'block' : 'none';
       if (!dentro) return;
-      const pe = ease((t - r[0]) / 0.3), sa = ease((t - (r[1] - 0.18)) / 0.18);
+      const pe = ease((t - r[0]) / 0.4), sa = ease((t - (r[1] - 0.25)) / 0.25);
       const eye = el.querySelector('.eye');
       eye.style.opacity = pe * (1 - sa); eye.style.transform = 'translateY(' + (1 - pe) * -20 + 'px)';
-      [...el.querySelectorAll('.tit span')].forEach((w, k) => { const p = ease((t - r[0] - 0.08 - k * 0.07) / 0.26); w.style.opacity = p * (1 - sa); w.style.transform = 'translateY(' + (1 - p) * 50 + 'px)'; });
+      [...el.querySelectorAll('.tit span')].forEach((w, k) => { const p = ease((t - r[0] - 0.1 - k * 0.09) / 0.34); w.style.opacity = p * (1 - sa); w.style.transform = 'translateY(' + (1 - p) * 50 + 'px)'; });
     });
     // Cierre
     const f = document.getElementById('fin');
-    const pf = ease((t - finIni) / 0.45);
+    const pf = ease((t - finIni) / 0.55);
     f.style.display = t >= finIni ? 'flex' : 'none';
     f.style.opacity = pf;
-    [...f.children].forEach((c, k) => { const p = ease((t - finIni - 0.15 - k * 0.14) / 0.4); c.style.opacity = p; c.style.transform = 'translateY(' + (1 - p) * 50 + 'px) scale(' + (k === 0 ? 1.15 - 0.15 * p : 1) + ')'; });
+    [...f.children].forEach((c, k) => { const p = ease((t - finIni - 0.2 - k * 0.18) / 0.5); c.style.opacity = p; c.style.transform = 'translateY(' + (1 - p) * 50 + 'px) scale(' + (k === 0 ? 1.15 - 0.15 * p : 1) + ')'; });
   }
   window.duracion = finIni + FIN;
   window.listo = Promise.all([document.fonts.ready, document.fonts.load("100px 'Bebas Neue'"), document.fonts.load("700 30px 'Inter'")]).then(() => render(0));

@@ -96,9 +96,11 @@ await ev(`(() => { const g = document.getElementById('cp-alergia'); const caja =
 marca('gluten');
 await ev(`__toca([...document.querySelectorAll('#cp-alergia .radio-opt')].find(o => o.textContent.trim() === 'Gluten'), false)`); await esperar(1300);
 await ev(`(() => { const b = [...document.querySelectorAll('#cpStep1 .btn-primary')].pop(); b.scrollIntoView({ block: 'center', behavior: 'smooth' }); return 'ok'; })()`); await esperar(900);
-await ev(`__toca([...document.querySelectorAll('#cpStep1 .btn-primary')].pop(), false)`); await esperar(500);
-// Paso 2 (periodicidad de pago): no sale en el vídeo.
+// Paso 2 (periodicidad de pago): no sale en el vídeo. Se deja de grabar ANTES del clic
+// (el toque se ve, el clic llega a los 200 ms): con 500 ms se colaba medio segundo.
+await ev(`__toca([...document.querySelectorAll('#cpStep1 .btn-primary')].pop(), false)`); await esperar(170);
 grabando = false;
+await esperar(400);
 await ev(`(async () => { await guardarCambioPlan(); return 'ok'; })()`);
 await esperar(1200);
 await ev(`(() => { hdTab('com'); window.scrollTo(0, document.getElementById('hoyDia').getBoundingClientRect().top + scrollY - 12); return 'ok'; })()`);
