@@ -1,0 +1,106 @@
+<!doctype html>
+<!--
+  Capa animada del reel «Le digo a mi entrenador con IA que no puedo comer gluten» (31 oct 2026,
+  1080x1920, fondo transparente): gancho del principio, rótulos sobre el móvil y cierre.
+  La renderiza marketing/cdp-frames.mjs llamando a render(t) fotograma a fotograma.
+  ?tp=<tiempos.json de la grabación, en JSON>&h=<segundos del gancho>&fin=<segundos del cierre>
+  Lo monta marketing/montar-reel-celiaco.sh.
+-->
+<meta charset="utf-8">
+<title>K-ONE · reel celíaco</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; background: transparent; overflow: hidden; color: #F0EDE8; font-family: 'Inter', sans-serif; }
+  .capa { position: absolute; inset: 0; }
+  /* Gancho */
+  #gancho { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    background: radial-gradient(120% 80% at 50% 50%, rgba(10,10,10,.15), rgba(10,10,10,.7)); }
+  .g-l { font-family: 'Bebas Neue', sans-serif; font-size: 150px; line-height: .92; letter-spacing: 2px; text-shadow: 0 10px 50px rgba(0,0,0,.75); }
+  .g-l span { display: inline-block; margin: 0 14px; }
+  .g-l .na { color: #F26A36; }
+  .g-sub { margin-top: 40px; display: inline-flex; align-items: center; gap: 14px; font-size: 34px; font-weight: 700; padding: 14px 28px; border-radius: 999px;
+    background: rgba(10,10,10,.6); border: 2px solid rgba(242,106,54,.55); color: #F26A36; }
+  .g-sub i { width: 16px; height: 16px; border-radius: 50%; background: #F26A36; box-shadow: 0 0 16px #F26A36; }
+  /* Rótulos sobre el móvil */
+  .rot { position: absolute; left: 70px; right: 70px; top: 120px; text-align: center; }
+  .eye { display: inline-flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 700; padding: 10px 24px; border-radius: 999px; background: rgba(10,10,10,.65); border: 2px solid rgba(242,106,54,.5); color: #F26A36; }
+  .eye.verde { color: #6FE09A; border-color: rgba(111,224,154,.5); }
+  .tit { font-family: 'Bebas Neue', sans-serif; font-size: 104px; line-height: .93; letter-spacing: 1px; margin-top: 20px; text-shadow: 0 8px 40px rgba(0,0,0,.8); }
+  .tit span { display: inline-block; margin: 0 10px; }
+  .tit .na { color: #F26A36; }
+  .tit .ve { color: #6FE09A; }
+  /* Cierre */
+  #fin { background: #0A0A0A; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  #fin::before { content: ''; position: absolute; width: 1300px; height: 1300px; left: 50%; top: 42%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(209,66,14,.35), transparent 62%); }
+  .f-logo { position: relative; font-family: 'Bebas Neue', sans-serif; font-size: 230px; letter-spacing: 8px; line-height: 1; }
+  .f-logo span { color: #F26A36; }
+  .f-lema { position: relative; font-family: 'Bebas Neue', sans-serif; font-size: 96px; line-height: 1; margin-top: 30px; }
+  .f-lema span { color: #F26A36; }
+  .f-of { position: relative; margin-top: 70px; font-size: 40px; font-weight: 700; color: #F0EDE8; padding: 18px 34px; border-radius: 999px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.14); }
+  .f-cta { position: relative; margin-top: 46px; font-family: 'Bebas Neue', sans-serif; font-size: 76px; letter-spacing: 3px; color: #fff; padding: 22px 70px 14px; border-radius: 999px; background: linear-gradient(155deg, #F26A36, #C03A08); box-shadow: 0 24px 70px rgba(209,66,14,.55); }
+</style>
+<body>
+<div class="capa" id="gancho">
+  <div class="g-l"><span>Le</span><span>digo</span><span>a</span><span>mi</span></div>
+  <div class="g-l"><span>entrenador</span><span>con</span><span class="na">IA</span></div>
+  <div class="g-l"><span>que</span><span>no</span><span>puedo</span></div>
+  <div class="g-l"><span>comer</span><span class="na">gluten</span></div>
+  <div class="g-sub"><i></i>Grabado en la app, sin trucos</div>
+</div>
+<div class="capa" id="rotulos"></div>
+<div class="capa" id="fin">
+  <div class="f-logo">K-<span>ONE</span></div>
+  <div class="f-lema">Tu entrenador personal<br>con <span>IA</span></div>
+  <div class="f-of">Primer mes gratis · sin tarjeta</div>
+  <div class="f-cta">k-one.fit</div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const T = JSON.parse(q.get('tp') || '{"hoy":0,"menu":2.3,"cambio":7.9,"gluten":10.6,"despues":13.3,"receta":17.5,"total":20.7}');
+  const H = +(q.get('h') || 2.6);           // gancho
+  const FIN = +(q.get('fin') || 4.6);       // cierre
+  const A = s => H + s;                      // segundo de la app → segundo del vídeo
+  const finIni = A(T.total) + 0.2;
+  // Rótulos: [desde, hasta, ojo, título (HTML con <span>), clase del ojo]
+  const R = [
+    [A(T.hoy) + 0.25, A(T.menu), 'Lunes · mi plan', 'Este es mi<br><span>menú</span> <span>de</span> <span class="na">hoy</span>'],
+    [A(T.menu), A(T.cambio), 'Antes', 'Pan, pasta, avena…<br><span>todo</span> <span>con</span> <span class="na">gluten</span>'],
+    [A(T.cambio), A(T.despues), 'Se lo digo a la IA', 'Sin gluten,<br><span>por</span> <span class="na">favor</span>'],
+    [A(T.despues), A(T.despues) + 4.2, 'Al momento', 'Todo el menú<br><span class="ve">sin</span> <span class="ve">gluten</span>', 'verde'],
+    [A(T.despues) + 4.2, finIni, 'Y sin descuadrar nada', 'Mismo objetivo<br><span>de</span> <span class="na">calorías</span>', 'verde'],
+  ];
+  const rot = document.getElementById('rotulos');
+  rot.innerHTML = R.map((r, i) => '<div class="rot" id="r' + i + '"><div class="eye' + (r[4] ? ' ' + r[4] : '') + '">' + r[2] + '</div><div class="tit">' + r[3].replace(/(^|<br>)([^<]+?)(?=<br>|$)/g, (m, a, b) => a + b.split(' ').map(w => '<span>' + w + '</span>').join(' ')) + '</div></div>').join('');
+  const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+  function render(t) {
+    // Gancho: las palabras entran una a una; al final sube y se va.
+    const g = document.getElementById('gancho');
+    const palabras = [...g.querySelectorAll('.g-l span')];
+    palabras.forEach((w, i) => { const p = ease((t - 0.12 - i * 0.11) / 0.28); w.style.opacity = p; w.style.transform = 'translateY(' + (1 - p) * 60 + 'px) scale(' + (1.25 - 0.25 * p) + ')'; });
+    const sub = g.querySelector('.g-sub'); const ps = ease((t - 1.35) / 0.3); sub.style.opacity = ps; sub.style.transform = 'translateY(' + (1 - ps) * 30 + 'px)';
+    const salida = ease((t - (H - 0.35)) / 0.35);
+    g.style.opacity = t < H ? 1 - salida : 0; g.style.transform = 'translateY(' + (-120 * salida) + 'px)';
+    g.style.display = t < H + 0.05 ? 'flex' : 'none';
+    // Rótulos
+    R.forEach((r, i) => {
+      const el = document.getElementById('r' + i);
+      const dentro = t >= r[0] && t < r[1];
+      el.style.display = dentro ? 'block' : 'none';
+      if (!dentro) return;
+      const pe = ease((t - r[0]) / 0.3), sa = ease((t - (r[1] - 0.18)) / 0.18);
+      const eye = el.querySelector('.eye');
+      eye.style.opacity = pe * (1 - sa); eye.style.transform = 'translateY(' + (1 - pe) * -20 + 'px)';
+      [...el.querySelectorAll('.tit span')].forEach((w, k) => { const p = ease((t - r[0] - 0.08 - k * 0.07) / 0.26); w.style.opacity = p * (1 - sa); w.style.transform = 'translateY(' + (1 - p) * 50 + 'px)'; });
+    });
+    // Cierre
+    const f = document.getElementById('fin');
+    const pf = ease((t - finIni) / 0.45);
+    f.style.display = t >= finIni ? 'flex' : 'none';
+    f.style.opacity = pf;
+    [...f.children].forEach((c, k) => { const p = ease((t - finIni - 0.15 - k * 0.14) / 0.4); c.style.opacity = p; c.style.transform = 'translateY(' + (1 - p) * 50 + 'px) scale(' + (k === 0 ? 1.15 - 0.15 * p : 1) + ')'; });
+  }
+  window.duracion = finIni + FIN;
+  window.listo = Promise.all([document.fonts.ready, document.fonts.load("100px 'Bebas Neue'"), document.fonts.load("700 30px 'Inter'")]).then(() => render(0));
+</script>
+</body>
