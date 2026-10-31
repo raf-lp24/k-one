@@ -1,6 +1,6 @@
 # K-ONE
 
-> K-ONE es un entrenador personal con IA en el móvil: genera planes de entrenamiento y nutrición personalizados con reglas de entrenador (periodización real, déficit/superávit calórico, progresión de cargas) — no es un chat que se inventa las respuestas, es un sistema con criterio fijo y trazable, y cada plan pasa por un auditor automático (alergias, lesiones, cantidades) antes de llegar al usuario. El plan se adapta cada semana según un check-in de progreso del usuario.
+> K-ONE es una app que te entrena con IA, en el móvil: genera planes de entrenamiento y nutrición personalizados con reglas de entrenador (periodización real, déficit/superávit calórico, progresión de cargas) — no es un chat que se inventa las respuestas, es un sistema con criterio fijo y trazable, y cada plan pasa por un auditor automático (alergias, lesiones, cantidades) antes de llegar al usuario. El plan se adapta cada semana según un check-in de progreso del usuario.
 
 ## Qué ofrece
 

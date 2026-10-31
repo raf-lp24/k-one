@@ -1,11 +1,12 @@
-// Textos de los reels «la app grabada en movimiento» (31 oct 2026). Género neutro y
+// Textos de los reels «la app grabada en movimiento» (31 oct 2026). Rafa: K-ONE no es
+// «un entrenador con IA» (sonaría a persona) sino «la app que te entrena con IA». Género neutro y
 // nada que la app no haga de verdad: cada rótulo se comprobó contra la grabación.
 //   gancho: líneas del principio (las palabras entre *asteriscos* van en naranja)
 //   rotulos(T): [desde, hasta, ojo, título, 'verde'?] en segundos de la GRABACIÓN (T = tiempos.json)
 //   notas(T):   [desde, hasta, texto] píldora pequeña abajo (p. ej. «tiempo acelerado»)
 window.TEXTOS = {
   reventado: {
-    gancho: ['Le digo a mi', 'entrenador con *IA*', 'que esta semana', '*no puedo más*'],
+    gancho: ['Le digo', 'a mi *app*', 'que esta semana', '*no puedo más*'],
     rotulos: T => [
       [T.hoy + 0.25, T.checkin, 'Lunes · mi entreno', 'Mi entreno<br>de hoy'],
       [T.checkin, T.respuesta, 'El check-in de cada semana', 'Energía:<br>*2* de 5'],
@@ -15,7 +16,7 @@ window.TEXTOS = {
     ]
   },
   nocomo: {
-    gancho: ['Le digo a mi', 'entrenador con *IA*', 'que no como', '*pescado*', 'ni *brócoli*'],
+    gancho: ['Le digo', 'a mi *app*', 'que no como', '*pescado*', 'ni *brócoli*'],
     rotulos: T => [
       [T.menu + 0.25, T.cambio, 'Mi menú del martes', 'Pescado en el<br>desayuno y la *cena*'],
       [T.cambio, T.escribe, 'Y yo no como pescado', 'Se lo<br>*digo*'],
@@ -25,7 +26,7 @@ window.TEXTOS = {
     ]
   },
   recetas: {
-    gancho: ['Mi entrenador', 'con *IA* tiene', 'más de *1.100*', 'recetas'],
+    gancho: ['Mi *app*', 'tiene más de', '*1.100*', 'recetas'],
     rotulos: T => [
       [T.hoy + 0.25, T.opciones, 'Mi menú de hoy', 'Ya viene<br>*hecho*'],
       [T.opciones, T.elige, 'En cada comida', '5 opciones<br>a tu *medida*'],
@@ -35,7 +36,7 @@ window.TEXTOS = {
     ]
   },
   carrera: {
-    gancho: ['Mi entrenador', 'con *IA* me dice', 'cuándo *correr*', 'y cuándo *andar*'],
+    gancho: ['Mi *app*', 'me dice', 'cuándo *correr*', 'y cuándo *andar*'],
     rotulos: T => [
       [T.hoy + 0.25, T.calienta, 'Empiezo a correr', 'Mi entreno<br>de *hoy*'],
       [T.calienta, T.corre, 'Primero', 'Calienta<br>5 *minutos*'],

@@ -9,7 +9,7 @@
 export const GUIONES = {
   // 19 · Check-in con poca energía: el plan de hoy baja una serie.
   reventado: {
-    salida: '19-le-digo-a-mi-entrenador-con-ia-que-esta-semana-no-puedo-mas.mp4',
+    salida: '19-le-digo-a-mi-app-que-esta-semana-no-puedo-mas.mp4',
     fecha: '2026-11-02T08:30:00',
     cambios: {},
     gancho: ['ai-gym-hombro-raw.mp4'],
@@ -125,7 +125,7 @@ export const GUIONES = {
   // 22 · Modo carrera (run/walk de principiante): cuenta atrás, «¡a correr!», «camina» y resumen.
   // El tiempo se adelanta entre fases (se ve el cambio, no los minutos): se avisa en pantalla.
   carrera: {
-    salida: '22-mi-entrenador-con-ia-me-dice-cuando-correr.mp4',
+    salida: '22-mi-app-me-dice-cuando-correr.mp4',
     lento: 1, // la cuenta atrás se ve: a cámara lenta los segundos no serían segundos
     fecha: '2026-11-02T18:30:00',
     cambios: { deporte: 'Running', lugar: 'Al aire libre', objetivo: 'Mejorar resistencia', nivel: 'Principiante', diasEntreno: '3 días', historialEntrenos: [], entrenosCompletados: [] },

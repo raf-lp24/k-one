@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Monta el reel «Le digo a mi entrenador con IA que no puedo comer gluten» (31 oct 2026,
+# Monta el reel «Le digo a mi app que no puedo comer gluten» (31 oct 2026,
 # 1080x1920, ~28 s) con:
 #   1) la grabación de la app:   node marketing/grabar-reel-celiaco.mjs <R>
 #   2) el marco del móvil:       marketing/reel-piezas.html?reel=ia (marco y máscara)
@@ -9,7 +9,7 @@
 set -e
 R="${1:?carpeta de trabajo}"
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="${OUT:-$RAIZ/marketing/publicar/videos/18-le-digo-a-mi-entrenador-con-ia-que-no-puedo-comer-gluten.mp4}"
+OUT="${OUT:-$RAIZ/marketing/publicar/videos/18-le-digo-a-mi-app-que-no-puedo-comer-gluten.mp4}"
 H=3.0      # segundos del gancho
 FIN=3.8    # segundos del cierre
 LENTO=1.12 # la app, un 12 % más lenta que la grabación (31 oct, Rafa: «un punto menos» de ritmo)
