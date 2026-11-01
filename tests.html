@@ -142,6 +142,9 @@ function esExcepcionSegura(palabra, texto) {
   // "salsa de yogur casera sin lactosa": el yogur va con su coletilla aunque
   // haya palabras en medio (la sustitución la añade al final del nombre).
   if (palabra === 'yogur' && /yogur( [a-záéíóúñ]+)* sin lactosa/.test(texto)) return true;
+  // "yogur de soja": vegetal, sin lactosa. Desde el 1 nov 2026 el motor ya no le
+  // pega un "sin lactosa" redundante (salía "yogur sin lactosa de soja").
+  if (palabra === 'yogur' && /yogures? de soja/.test(texto)) return true;
   // Fideos de ARROZ (fideuá, wok): sin gluten. Solo vale si dice arroz justo al lado.
   if (palabra === 'fideos' && /fideos de arroz/.test(texto)) return true;
   if (palabra === 'queso' && /queso[a-záéíóúñ ]* sin lactosa/.test(texto)) return true;

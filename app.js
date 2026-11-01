@@ -12003,14 +12003,15 @@
       return;
     }
     const entreno = !!ciclo.dias[dia];
-    const carbsDia = generatedPlan.carbsObjPorDia?.[dia];
+    // Sin gramos (1 nov 2026): el aviso decía «unos 515 g» (el objetivo) y justo debajo
+    // la fila del total enseña los hidratos reales de lo elegido (397 g). El % basta.
     const nombreDia = DIAS_SEMANA_LARGO[dia];
     const icono = entreno
       ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9.5h4.5M17.5 9.5H22M2 14.5h4.5M17.5 14.5H22"/></svg>'
       : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--metal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     const texto = entreno
-      ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${(ciclo.pctPorDia && ciclo.pctPorDia[dia] != null) ? ciclo.pctPorDia[dia] : ciclo.pctEntreno}% más de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''} para reponer el glucógeno que vas a gastar.`
-      : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''}. La proteína no baja: sigue igual que cualquier otro día.`;
+      ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${(ciclo.pctPorDia && ciclo.pctPorDia[dia] != null) ? ciclo.pctPorDia[dia] : ciclo.pctEntreno}% más de carbohidratos para reponer el glucógeno que vas a gastar.`
+      : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos. La proteína no baja: sigue igual que cualquier otro día.`;
     el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>` + _notaSube;
     el.style.display = '';
   }
@@ -14882,7 +14883,7 @@
     @media print{.back,.no-print{display:none !important}}</style></head><body>
     <a href="https://k-one.fit" class="back">← Volver a K-ONE</a>
     <h1>Plan de nutrición — ${_esc(user?.nombre || 'K-ONE')}</h1>
-    ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal${generatedPlan.cicloCarbs ? ' de media al día' : '/día'} · ${generatedPlan.protObj || ''}g proteína${generatedPlan.cicloCarbs ? `<br>Las cantidades de esta hoja son las de un ${generatedPlan.cicloCarbs.dias[0] ? 'día de entreno' : 'día de descanso'}. Los días de entreno llevan un ${generatedPlan.cicloCarbs.pctEntreno}% más de carbohidratos y los de descanso un ${generatedPlan.cicloCarbs.pctDescanso}% menos; el plan semanal de la app ya lo trae ajustado día a día.` : ''}</p>`}
+    ${ocultarKcal ? '' : `<p style="color:#888;font-size:12px;margin-bottom:16px">${generatedPlan.kcalObj || ''} kcal${generatedPlan.cicloCarbs ? ' de media al día' : '/día'} · ${generatedPlan.protObj || ''}g proteína${generatedPlan.cicloCarbs ? `<br>Las cantidades de esta hoja son las de un ${generatedPlan.cicloCarbs.dias[0] ? 'día de entreno' : 'día de descanso'}. Los días de entreno llevan ${generatedPlan.cicloCarbs.porCarga ? 'de media ' : ''}un ${generatedPlan.cicloCarbs.pctEntreno}% más de carbohidratos y los de descanso un ${generatedPlan.cicloCarbs.pctDescanso}% menos; el plan semanal de la app ya lo trae ajustado día a día.` : ''}</p>`}
     <button onclick="window.print()" class="no-print" style="background:#D1420E;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">Imprimir / Guardar PDF</button>`;
     generatedPlan.nutricion.forEach(meal => {
       html += `<h2>${meal.momento} · ${meal.hora}</h2>`;
@@ -17988,7 +17989,7 @@
     if (notaCiclo) {
       const c = generatedPlan.cicloCarbs;
       if (c) {
-        notaCiclo.textContent = `Las cantidades de cada receta son las del primer día de la semana en que la tienes. Tus días de entreno llevan un ${c.pctEntreno}% más de carbohidratos y los de descanso un ${c.pctDescanso}% menos: en la pestaña de cada día tienes el gramaje exacto que te toca.`;
+        notaCiclo.textContent = `Las cantidades de cada receta son las del primer día de la semana en que la tienes. Tus días de entreno llevan ${c.porCarga ? 'de media ' : ''}un ${c.pctEntreno}% más de carbohidratos y los de descanso un ${c.pctDescanso}% menos: en la pestaña de cada día tienes el gramaje exacto que te toca.`;
         notaCiclo.style.display = '';
       } else {
         notaCiclo.style.display = 'none';
@@ -18891,7 +18892,7 @@
     if (generatedPlan.kcalObj && !ocultarKcal) {
       const _ciclo = generatedPlan.cicloCarbs;
       html += `<p style="font-size:11px;color:#999;margin-bottom:12px">Objetivo: ${generatedPlan.kcalObj} kcal${_ciclo ? ' de media al día' : ''} · ${generatedPlan.protObj}g proteína`
-        + (_ciclo ? ` · Los días de entreno llevan un ${_ciclo.pctEntreno}% más de carbohidratos y los de descanso un ${_ciclo.pctDescanso}% menos (el total de la semana no cambia).` : '')
+        + (_ciclo ? ` · Los días de entreno llevan ${_ciclo.porCarga ? 'de media ' : ''}un ${_ciclo.pctEntreno}% más de carbohidratos y los de descanso un ${_ciclo.pctDescanso}% menos (el total de la semana no cambia).` : '')
         + `</p>`;
     }
     dias.forEach((dia, diaIdx) => {
