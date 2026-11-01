@@ -166,6 +166,12 @@ console.log('auditorias_clientes abiertas:', T.auditorias_clientes.length);
   if (pc.length !== 1 || !hpc.every(e => /7,99/.test(e.html))) malos.push('aviso de primer cobro: ' + pc.length + ' enviados (debía ser 1, con el precio)');
   if (conMotorViejo > 1) malos.push(conMotorViejo + ' planes siguen con el motor anterior (solo se admite el cliente sin datos)');
   if (/(^|[^a-záéíóúüñ])pollos?(?![a-záéíóúüñ])/i.test(JSON.stringify(rev.plan.nutricionPorDia))) malos.push('el plan de no como pollo sigue llevando pollo');
+  // Los 8 días cruzan un lunes: el entreno tiene que estar en la semana nueva (1 nov 2026).
+  const { semanaDelCliente, planDeOtraSemana, lunesMadrid } = require(R + 'lib/motor-servidor');
+  const conDatos = T.profiles.filter(p => p.plan && p.userdata && p.userdata.peso && p.userdata.altura && p.userdata.edad);
+  const semanaVieja = conDatos.filter(p => planDeOtraSemana(p.plan, semanaDelCliente(p, T.subscriptions.find(s => s.user_id === p.id) || null)));
+  console.log(`planes en la semana del plan y el lunes ${lunesMadrid()}: ${conDatos.length - semanaVieja.length} de ${conDatos.length}`, semanaVieja.slice(0, 3).map(p => `${p.email}: ${p.plan.semanaPlan}/${p.plan.lunesPlan}`).join(' '));
+  if (semanaVieja.length) malos.push(semanaVieja.length + ' planes se quedan en la semana anterior');
   if (ult.profiles.some(p => 'plan' in p)) malos.push('la copia de seguridad lleva planes');
   const aInv = enviados.filter(e => [].concat(e.a).includes('invitado@ejemplo.com'));
   const planInv = aInv.find(e => /Tu plan de K-ONE .gratis/.test(e.asunto));

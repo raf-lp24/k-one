@@ -10,7 +10,7 @@
 const { getSupabaseAdmin, getAuthUser, getStripe, tieneMetodoPago } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
 const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
-const { obtenerMotor, actualizarPlanCliente } = require('../lib/motor-servidor');
+const { obtenerMotor, actualizarPlanCliente, semanaDelCliente, planDeOtraSemana } = require('../lib/motor-servidor');
 const { avisoDelDia } = require('../lib/aviso-del-dia');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
@@ -1302,6 +1302,16 @@ ${bloqueOpciones}
       } catch (e) {
         console.warn('[notify-cron] motor del servidor no disponible, solo se audita:', e.message);
       }
+      // Suscripciones, para contar la semana del plan igual que la app (desde el
+      // inicio del período de Stripe). Si falla, se cuenta desde el registro.
+      const subsPorUsuario = new Map();
+      try {
+        const rS = await supa.from('subscriptions').select('user_id, status, current_period_start');
+        if (rS.error) throw new Error(rS.error.message);
+        (rS.data || []).forEach(x => subsPorUsuario.set(x.user_id, x));
+      } catch (e) {
+        console.warn('[notify-cron] subscriptions no disponible para la semana del plan:', e.message);
+      }
       // PostgREST corta en 1000 filas por consulta si no se pide explícito:
       // por debajo de eso una sola consulta ya lo trae todo, pero por encima
       // se perdería a los clientes de más sin avisar de nada -- ni error ni
@@ -1310,7 +1320,7 @@ ${bloqueOpciones}
       const TAM_PAGINA = 1000;
       for (let desde = 0; ; desde += TAM_PAGINA) {
         const rAud = await supa.from('profiles')
-          .select('id, nombre, email, userdata, plan')
+          .select('id, nombre, email, userdata, plan, created_at, is_beta, beta_expires')
           .not('plan', 'is', null)
           .range(desde, desde + TAM_PAGINA - 1);
         if (rAud.error) throw new Error('profiles: ' + rAud.error.message);
@@ -1331,9 +1341,14 @@ ${bloqueOpciones}
           // se puede cargar, se sigue solo auditando, como antes.
           // Tope por pasada para no pasarse del tiempo del cron: los que queden se
           // actualizan en la siguiente (o al abrir la app). Los que tienen hallazgo, siempre.
-          if (motorServidor && (hallazgos.length || (planesActualizados < 200 && Date.now() - inicioAuditoria < 35000 && p.plan && p.plan.motorVersion !== huellaServidor))) {
+          // Y si el plan es de otra semana (1 nov 2026): la descarga, la tirada
+          // larga y la semana de carrera cambian cada semana, y el aviso del día
+          // lee este plan aunque el cliente no abra la app.
+          const semanaPlan = semanaDelCliente(p, subsPorUsuario.get(p.id) || null);
+          if (motorServidor && (hallazgos.length || (planesActualizados < 200 && Date.now() - inicioAuditoria < 35000 && p.plan
+              && (p.plan.motorVersion !== huellaServidor || planDeOtraSemana(p.plan, semanaPlan))))) {
             try {
-              if (await actualizarPlanCliente(supa, p, motorServidor, { forzar: hallazgos.length > 0 })) {
+              if (await actualizarPlanCliente(supa, p, motorServidor, { forzar: hallazgos.length > 0, semana: semanaPlan })) {
                 planesActualizados++;
                 hallazgos = auditarPlan(p.userdata || {}, p.plan);
               }
