@@ -5147,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 9;
+  const MOTOR_REV = 10;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -5288,7 +5288,50 @@
     }).join(',');
   };
 
+  // TEXTOS LIBRES INTERPRETADOS POR LA IA (1 nov 2026): COPIA EXACTA de
+  // lib/textos-libres.js (scripts/auditar-entreno.js las compara). La IA solo
+  // puede AÑADIR restricciones; ver ese archivo.
+  const _IA_VOCAB = {
+    lesion: ['rodilla', 'espalda', 'hombro', 'tobillo', 'cadera'],
+    alergias: ['gluten', 'lactosa', 'leche', 'frutos secos', 'cacahuete', 'marisco', 'crustaceos', 'moluscos', 'pescado', 'huevo', 'soja', 'sesamo', 'mostaza', 'apio', 'sulfitos', 'altramuz'],
+    enfermedades: ['hipertension', 'diabetes', 'cardiaco', 'osteoporosis', 'artrosis'],
+  };
+  function _huellaTextosLibres(u) {
+    const s = JSON.stringify(['lesionDetalle', 'enfermedadOtra', 'alergiaOtra', 'noComida', 'medicacion', 'operacion'].map(k => String((u && u[k]) || '').trim()));
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+  function _conTextosInterpretados(u) {
+    const ia = u && u._ia;
+    if (!ia || ia.v !== 1 || ia.h !== _huellaTextosLibres(u)) return u;
+    const solo = (lista, vocab) => (Array.isArray(lista) ? lista : []).filter(x => vocab.includes(x));
+    const lesion = solo(ia.lesion, _IA_VOCAB.lesion);
+    const alergias = solo(ia.alergias, _IA_VOCAB.alergias);
+    const enf = solo(ia.enfermedades, _IA_VOCAB.enfermedades);
+    if (!lesion.length && !alergias.length && !enf.length) return u;
+    const r = { ...u };
+    if (lesion.length) r.lesionDetalle = [u.lesionDetalle || '', ...lesion].join(' ').trim();
+    if (alergias.length) {
+      // La alergia del desplegable es una sola: pasa a «Otra» con todo junto en el
+      // texto, que el motor ya reconoce (gluten, lactosa y frutos secos incluidos).
+      const marcada = u.alergia && u.alergia !== 'No' && u.alergia !== 'Otra' ? u.alergia : '';
+      r.alergia = 'Otra';
+      r.alergiaOtra = [marcada, u.alergia === 'Otra' ? (u.alergiaOtra || '') : '', ...alergias].filter(Boolean).join(', ');
+    }
+    if (enf.length) {
+      const ETQ = { hipertension: 'Hipertensión', diabetes: 'Diabetes', cardiaco: 'Problemas cardíacos' };
+      const base = u.enfermedad && u.enfermedad !== 'No' ? u.enfermedad : '';
+      const otras = enf.filter(x => !ETQ[x]);
+      r.enfermedad = [base, ...enf.filter(x => ETQ[x] && !base.includes(ETQ[x])).map(x => ETQ[x]), otras.length && !base.includes('Otra') ? 'Otra' : ''].filter(Boolean).join(' · ');
+      if (otras.length) r.enfermedadOtra = [u.enfermedadOtra || '', ...otras].join(' ').trim();
+    }
+    return r;
+  }
+
   function buildPlanFromData(u) {
+    // Lo que la IA leyó en los textos escritos a mano, sumado (nunca resta).
+    u = _conTextosInterpretados(u || {});
     // Hyrox y CrossFit se venden SOLO como nutrición: el entrenamiento lo hace
     // el cliente en su box. El formulario ya oculta esos dos deportes cuando el
     // tipo de plan es completo (updateDeporteOptionsPorPlan), pero eso es una
@@ -19225,6 +19268,46 @@
   // Devuelve la respuesta ya parseada (o null si algo falla) para quien
   // necesite saber cuántos avisos quedan; el disparo normal desde
   // saveUserData() la ignora, como siempre (fire-and-forget).
+  // TEXTOS LIBRES (1 nov 2026): si lo que el cliente escribió a mano ha
+  // cambiado desde la última interpretación, se pide al servidor (que lee los
+  // textos ya guardados) y, si la IA marca algo, el plan se rehace con ello
+  // (_conTextosInterpretados, arriba del motor). Sin clave de Anthropic el
+  // servidor contesta «apagado» y no cambia nada. Una petición por sesión y
+  // textos, como mucho.
+  function _quizaInterpretarTextos(data) {
+    try {
+      const u = data && data.userData;
+      if (!u || !data.plan || u !== userData) return;
+      const h = _huellaTextosLibres(u);
+      if (u._ia && u._ia.h === h) return;
+      const hayTexto = ['lesionDetalle', 'enfermedadOtra', 'alergiaOtra', 'noComida', 'medicacion', 'operacion']
+        .some(k => { const t = String(u[k] || '').trim(); return t && !/^(no|ninguna?|nada|-)$/i.test(t); });
+      if (!hayTexto) return;
+      const clave = 'kone_ia_pedida_' + h;
+      try { if (sessionStorage.getItem(clave)) return; sessionStorage.setItem(clave, '1'); } catch (e) {}
+      supa.auth.getSession().then(({ data: s }) => {
+        const token = s && s.session && s.session.access_token;
+        if (!token) return null;
+        return fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ tipo: 'interpretar_textos' })
+        }).then(r => r.ok ? r.json() : null);
+      }).then(r => {
+        // Los textos pueden haber cambiado mientras tanto: solo vale si es de estos.
+        if (!r || !r.ok || !r.ia || r.ia.h !== _huellaTextosLibres(userData)) return;
+        userData._ia = r.ia;
+        if (r.ia.lesion.length || r.ia.alergias.length || r.ia.enfermedades.length) {
+          _actualizarPlanAlMotor();
+          try { buildDashboard(); } catch (e) {}
+        } else {
+          const usr = getCurrentUser();
+          if (usr) saveUserData(usr.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+        }
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
   function _pedirAuditoriaPlan(origen) {
     return supa.auth.getSession().then(({ data }) => {
       const token = data && data.session && data.session.access_token;
@@ -19343,6 +19426,7 @@
         try { localStorage.setItem(claveHuella, huella); } catch (e) {}
         _pedirAuditoriaPlan();
       }
+      _quizaInterpretarTextos(data);
       return true;
     };
     return supa.from('profiles').update(payload).eq('id', _supaUserId)

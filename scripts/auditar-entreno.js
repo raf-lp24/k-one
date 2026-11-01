@@ -21,6 +21,8 @@
 //     al cambiar de semana).
 //  9. Sin cafeína con tensión alta o corazón; tirada larga según la distancia
 //     (10K < media < maratón); nota de menopausia desde los 45 y ciclo hasta 54.
+// 10. Textos libres de la IA: copia exacta en app.js, el motor y Thor los suman,
+//     una huella vieja no cuenta, solo vocabulario y solo los textos se envían.
 //
 // Uso: node scripts/auditar-entreno.js  (entra en `npm test`; sale con código 1
 // si algo falla). Tarda ~45 s.
@@ -174,6 +176,42 @@ for (const [edad, meno, ciclo] of [[35, false, true], [50, true, true], [62, tru
   if (n.some(x => /^Ciclo menstrual/.test(x)) !== ciclo) falla('menopausia', `mujer de ${edad}: nota del ciclo ${ciclo ? 'falta' : 'sobra'}`);
 }
 
+// ── 10: textos libres interpretados por la IA (lib/textos-libres.js) ──
+{
+  const fs = require('fs'), path = require('path');
+  const lib = fs.readFileSync(path.join(__dirname, '..', 'lib', 'textos-libres.js'), 'utf8');
+  const app = require('../lib/fuente-app').leerFuente();
+  const deLib = lib.slice(lib.indexOf('const _IA_VOCAB'), lib.indexOf('module.exports')).trim();
+  const i = app.indexOf('const _IA_VOCAB');
+  const deApp = i < 0 ? '' : app.slice(i, app.indexOf('function buildPlanFromData', i)).split('\n').map(l => l.replace(/^ {2}/, '')).join('\n').trim();
+  if (deLib !== deApp) falla('textos libres', 'la copia de app.js no es igual que lib/textos-libres.js');
+  const { _huellaTextosLibres } = require('../lib/textos-libres');
+  const { auditarPlan } = require('../lib/normalizador-alimentos');
+  const U = { nivel: 'Avanzado', tiempoSesion: '60-90 min', objetivo: 'Mejorar resistencia', lesionDetalle: 'me duele al bajar escaleras', medicacion: 'pastillas de la tensión', progreso: { semana: 2, diasEntrenados: 0, ajuste: 0 } };
+  const ia = { v: 1, h: _huellaTextosLibres(U), lesion: ['rodilla'], alergias: ['crustaceos', 'inventada'], enfermedades: ['hipertension'] };
+  const sin = gen(U), con = gen({ ...U, _ia: ia }), vieja = gen({ ...U, _ia: { ...ia, h: 'otra' } });
+  nPlanes += 3;
+  const ent = p => (p.semana || []).map(d => d.resumen + ' ' + d.detalle).join(' ');
+  const com = p => JSON.stringify(p.nutricionPorDia);
+  if (/salto|pliometr|pogo|jumps/i.test(ent(con))) falla('textos libres', 'con «rodilla» de la IA siguen los saltos');
+  if (/gamba|langostino|cangrejo/i.test(com(con))) falla('textos libres', 'con «crustaceos» de la IA siguen las gambas');
+  if (notas(con).some(x => /cafe[ií]na \(|cafe[ií]na pre/i.test(x))) falla('textos libres', 'con «hipertension» de la IA sigue la cafeína');
+  if (com(vieja) !== com(sin) || ent(vieja) !== ent(sin)) falla('textos libres', 'una interpretación de otros textos (huella vieja) cambia el plan');
+  if (auditarPlan({ ...BASE, ...U, _ia: ia }, sin).length === 0) falla('textos libres', 'Thor no revisa con las alergias que añadió la IA');
+}
+const _iaPrueba = (async () => {
+  const { interpretarTextos } = require('../lib/interpretar-textos');
+  let enviado = '';
+  const falso = { beta: { messages: { create: async req => { enviado = JSON.stringify(req); return { stop_reason: 'end_turn', content: [{ type: 'text', text: JSON.stringify({ lesion: ['rodilla', 'cancer'], alergias: [], enfermedades: ['gripe'] }) }] }; } } } };
+  const r = await interpretarTextos({ nombre: 'Persona Prueba', email: 'prueba@ejemplo.com', peso: '80', lesionDetalle: 'menisco' }, { cliente: falso });
+  if (!r || r.lesion.join() !== 'rodilla' || r.enfermedades.length) falla('textos libres', 'la respuesta de la IA no se filtra al vocabulario: ' + JSON.stringify(r));
+  if (/Persona Prueba|prueba@ejemplo|"80"/.test(enviado)) falla('textos libres', 'a la IA le llegan datos que no son los textos libres');
+  const clave = process.env.ANTHROPIC_API_KEY; delete process.env.ANTHROPIC_API_KEY;
+  if ((await interpretarTextos({ lesionDetalle: 'menisco' })) !== null) falla('textos libres', 'sin ANTHROPIC_API_KEY la IA no está apagada');
+  if (clave) process.env.ANTHROPIC_API_KEY = clave;
+})();
+
+(async () => { await _iaPrueba;
 const unicos = [...new Set(fallos)];
 if (unicos.length) {
   console.log(`\n✘ auditar-entreno: ${unicos.length} fallos (${nPlanes} planes)`);
@@ -181,3 +219,4 @@ if (unicos.length) {
   process.exit(1);
 }
 console.log(`✔ auditar-entreno: lesiones, impacto, material, nivel, corazón, semana de carrera y textos sin fallos (${nPlanes} planes)`);
+})().catch(e => { console.log("✘ auditar-entreno: el script falló:", e.stack); process.exit(1); });

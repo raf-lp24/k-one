@@ -11,6 +11,7 @@ const { getSupabaseAdmin, getAuthUser, getStripe, tieneMetodoPago } = require('.
 const { capturarError } = require('./_sentry');
 const { auditarPlan, auditarYGuardar } = require('../lib/normalizador-alimentos');
 const { obtenerMotor, actualizarPlanCliente, semanaDelCliente, planDeOtraSemana } = require('../lib/motor-servidor');
+const { interpretarTextos, iaActiva } = require('../lib/interpretar-textos');
 const { avisoDelDia } = require('../lib/aviso-del-dia');
 const webpush = require('web-push');
 const ADMIN_EMAIL = 'k.one.fit26@gmail.com';
@@ -1908,6 +1909,34 @@ async function handlePost(req, res) {
     } catch (e) {
       console.warn('[notify] auditar_plan error:', e.message);
       capturarError(e, { fn: 'notify-auditar-plan' });
+      return res.status(200).json({ ok: false });
+    }
+  }
+
+  // INTERPRETAR MIS TEXTOS LIBRES (1 nov 2026) -- lo pide la app al guardar
+  // un plan cuando cambian los textos escritos a mano (lesión, otra
+  // enfermedad, otra alergia, «no como», medicación, operaciones). Lee los
+  // textos GUARDADOS del cliente autenticado (el body no lleva datos: nadie
+  // puede pedir los de otro ni mandar textos arbitrarios) y devuelve las
+  // categorías para userdata._ia. Lo guarda la app, no el servidor, para no
+  // pisar nada que el cliente esté guardando a la vez. Sin ANTHROPIC_API_KEY
+  // contesta { apagado: true } y no hace nada (ver lib/interpretar-textos.js).
+  if ((req.body || {}).tipo === 'interpretar_textos') {
+    try {
+      if (!iaActiva()) return res.status(200).json({ ok: true, apagado: true });
+      const supa = getSupabaseAdmin();
+      const user = await getAuthUser(req, supa);
+      if (!user) return res.status(401).json({ error: 'No autenticado' });
+      if (await estaLimitadoPorTasa(req, 'interpretar_textos')) {
+        return res.status(429).json({ error: 'Demasiadas peticiones' });
+      }
+      const { data: perfil, error } = await supa.from('profiles').select('userdata').eq('id', user.id).maybeSingle();
+      if (error || !perfil) return res.status(200).json({ ok: false });
+      const ia = await interpretarTextos(perfil.userdata || {});
+      return res.status(200).json({ ok: !!ia, ia });
+    } catch (e) {
+      console.warn('[notify] interpretar_textos error:', e.message);
+      capturarError(e, { fn: 'notify-interpretar-textos' });
       return res.status(200).json({ ok: false });
     }
   }
