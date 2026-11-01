@@ -4135,15 +4135,21 @@
   // <script> de 26.000 líneas. Si tocas familias o sinónimos aquí, tócalos
   // también allí -- están marcadas con la misma nota, cruzada.
   const FAMILIAS_ALIMENTOS = {
-    'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones','rodaballo','lenguado','gallo'],
-    'marisco': ['gambas','langostinos','mejillon','mejillón','mejillones','almejas','calamar','calamares','pulpo','sepia','vieira','vieiras','cangrejo','langosta','cigalas','bogavante','berberechos','surimi'],
-    'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas','chuletón'],
+    'pescado': ['salmón','salmon','merluza','lubina','bacalao','dorada','atún','atun','sardina','sardinas','caballa','trucha','rape','pez espada','anchoa','anchoas','boquerón','boquerones','rodaballo','lenguado','gallo','emperador','bonito','panga','abadejo','mero','melva','ventresca','arenque'],
+    'pescado azul': ['salmón','salmon','atún','atun','sardina','sardinas','caballa','trucha','anchoa','anchoas','boquerón','boquerones','bonito','emperador','pez espada','melva','ventresca','arenque'],
+    'marisco': ['gambas','langostinos','mejillon','mejillón','mejillones','almejas','calamar','calamares','pulpo','sepia','vieira','vieiras','cangrejo','langosta','cigalas','bogavante','berberechos','surimi','chipirones','navajas','carabineros','ostras'],
+    'crustáceos': ['gambas','langostinos','cangrejo','langosta','cigalas','bogavante','carabineros','surimi'],
+    'moluscos': ['mejillon','mejillón','mejillones','almejas','calamar','calamares','chipirones','pulpo','sepia','vieira','vieiras','berberechos','navajas','ostras'],
+    'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas','chuletón','jamón','jamon','lomo','cecina','chorizo','salchichón','salchichon','bacon'],
+    'carne': ['pollo','pavo','ternera','buey','cordero','cerdo','conejo','solomillo','entrecot','costillas','chuletón','contramuslo','jamón','jamon','lomo','cecina','bacon','panceta','chorizo','salchichón','salchichon','morcilla','butifarra','carne picada'],
     'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon','cerdo','morcilla','butifarra'],
-    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone'],
+    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone','whey','proteína de suero'],
     'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones','macadamia'],
     'legumbres': ['garbanzos','lentejas','judías','judias','alubias','habas','guisantes','edamame','soja'],
     'verduras': ['brócoli','brocoli','espinacas','espinaca','lechuga','rúcula','rucula','calabacín','calabacin','berenjena','pimiento','pepino','tomate','cebolla','zanahoria','espárrago','esparrago','alcachofa','champiñón','champiñon','setas','apio','puerro','col','repollo','coliflor','calabaza'],
     'frutas': ['plátano','platano','manzana','pera','naranja','mandarina','fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','kiwi','piña','sandía','sandia','melón','melon','mango','uva','uvas','cereza','cerezas','higo','higos','melocotón','melocoton','ciruela'],
+    'frutos rojos': ['fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','moras','grosellas'],
+    'picante': ['guindilla','cayena','chile','jalapeño','jalapeños','sriracha'],
     'huevos': ['huevo','huevos','tortilla','revuelto','claras'],
     'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','cereales','harina','fideos','cuscús','cuscus','seitán','seitan','granola','muesli','bulgur'],
   };
@@ -4193,7 +4199,7 @@
     // filtro corre DESPUÉS del de alérgenos y no vuelve a pasar por él. Antes
     // un celíaco que no comía avena recibía "copos de espelta" (gluten), y
     // quinoa → cuscús o leche → bebida de avena le metían gluten igual.
-    'avena': 'quinoa', 'pan': 'tortas de arroz', 'cereales': 'tortas de arroz',
+    'avena': 'quinoa', 'pan': 'tortas de arroz', 'bocadillo': 'tortas de arroz', 'panecillo': 'tortas de arroz', 'sándwich': 'tortas de arroz', 'sandwich': 'tortas de arroz', 'tosta integral': 'tortas de arroz', 'tostada integral': 'tortas de arroz', 'tosta de centeno': 'tortas de arroz', 'tosta centeno': 'tortas de arroz', 'tosta pequeña': 'tortas de arroz', 'cereales': 'tortas de arroz',
     'leche': 'bebida de arroz', 'yogur': 'yogur de soja',
     'queso': 'hummus', 'requesón': 'tofu sedoso', 'requeson': 'tofu sedoso',
     'kéfir': 'yogur de soja', 'kefir': 'yogur de soja',
@@ -4225,6 +4231,8 @@
     'pistachos': 'semillas de calabaza', 'anacardos': 'semillas de girasol',
     'piñones': 'semillas de sésamo', 'frutos secos': 'semillas',
     'tofu': 'pechuga de pollo', 'seitán': 'pechuga de pavo',
+    'emperador': 'merluza', 'bonito': 'pechuga de pollo', 'panga': 'merluza', 'abadejo': 'merluza', 'mero': 'merluza',
+    'whey': 'proteína vegetal en polvo', 'proteína de suero': 'proteína vegetal en polvo', 'cebolleta': 'puerro', 'chipirones': 'pechuga de pavo',
     'seitan': 'pechuga de pavo', 'tempeh': 'pechuga de pollo',
     'cuscús': 'arroz integral', 'cuscus': 'arroz integral',
     'harina': 'harina de arroz',
@@ -4242,6 +4250,7 @@
     // (Huevos no: su familia lleva nombres de plato -- "revuelto", "tortilla"
     // -- y el huevo ya tiene sustituto propio.)
     'carne roja': 'pechuga de pollo', 'lácteos': 'postre de soja natural',
+    'carne': 'merluza', 'pescado azul': 'merluza', 'crustáceos': 'pechuga de pollo', 'moluscos': 'pechuga de pavo', 'frutos rojos': 'kiwi',
   };
 
   const RECETAS_SUSTITUCION = [
@@ -4294,7 +4303,14 @@
     // "salsa garbanzos" (salsa de soja), "480g en vinagre" (boquerones).
     [/judías verdes|judias verdes/gi, 'calabacín'],
     [/\s*\(pan(?: sin gluten)? tumaca\)/gi, ''],
+    [/salsa de soja sin gluten \(tamari\)/gi, 'zumo de limón'],
     [/salsa (?:de )?soja/gi, 'zumo de limón'],
+    [/soja texturizada/gi, 'carne picada de pavo'],
+    [/(?:yogur|postre) de soja(?: natural)?/gi, 'yogur de coco'],
+    [/(?:bebida|leche) de soja/gi, 'bebida de arroz'],
+    [/at[uú]n bonito/gi, 'pechuga de pollo desmechada'],
+    [/emperador a la plancha/gi, 'pechuga de pollo a la plancha'],
+    [/(?:proteína )?whey/gi, 'proteína vegetal en polvo'],
     [/boquerones en vinagre/gi, 'pechuga de pavo a la plancha'],
     [/atún al natural/gi, 'pechuga de pollo desmechada'],
     [/atún en conserva/gi, 'pollo desmechado'],
@@ -4350,6 +4366,9 @@
     'cerdo': FAMILIAS_ALIMENTOS['cerdo'],
     'legumbres': FAMILIAS_ALIMENTOS['legumbres'],
     'soja': ['soja', 'edamame'],
+    'crustaceos': FAMILIAS_ALIMENTOS['crustáceos'],
+    'moluscos': FAMILIAS_ALIMENTOS['moluscos'],
+    'sesamo': ['sésamo', 'tahini', 'hummus'],
   };
   function _expandirAlergenoLibre(texto) {
     // Mismo separador que filtrarNoComida: aquí el cliente también escribe
@@ -4545,7 +4564,41 @@
   const _RE_MASA_FRASE = /harina|reb[oó]z|pur[eé]|crema lisa|con la leche|con el yogur|(?:tritura|machaca|m[eé]zcla)\w*[^.]*?\bcon\b[^.]*?\b(?:el huevo|los huevos)\b(?! batidos| troceados?| en rodajas| partidos?| duros?| cocidos?)/i;
   const _RE_MASA_PLATO = /bizcocho|muffin|magdalena|gofre|crepe|torrija|\bmasa\b(?! madre)|forma (?:bolitas|filetes|dos hamburguesas|\d+ c[ií]rculos)/i;
   const _RE_FRASE_HUEVO = /\bhuevos?\b|\bclaras?\b|\byemas?\b/i;
+  // Platos que SON huevo cuajado y no tienen versión sin él (1 nov 2026): la
+  // tortilla dulce sobre tortilla de trigo salía «Tofu salteado dulce de tofu»
+  // con «cuando cuaje» en los pasos. A quien no come huevo no se le ofrecen.
+  // Lo mismo los huevos rellenos y el huevo cuajado dentro del aguacate
+  // («Chafa las tofu», «casca un tofu»).
+  const _RE_SOLO_CON_HUEVO = /^(?:Tortilla dulce de huevo|Huevos rellenos|Aguacate relleno de huevo)/i;
+  // Sin huevo NI soja (alergia a los dos): el tofu que pone _adaptarSinHuevo
+  // también está prohibido. Antes el tofu se quedaba (soja en el plato) y, al
+  // tapar el tofu, el filtro general lo cambiaba por pollo hasta en bizcochos
+  // («pechuga de pollo sedoso»). El que liga una masa pasa a lino molido
+  // (10 g por huevo) y el que es la proteína, a pollo.
+  function _sinTofuTrasHuevo(opt) {
+    const pasos0 = opt.pasos || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : '') || '';
+    if (!/tofu/i.test(opt.nombre + ' ' + opt.ingredientes + ' ' + pasos0)) return opt;
+    const ing = (opt.ingredientes || '')
+      .replace(/(\d+)g tofu sedoso(?: batido)?/gi, (m, g) => `${Math.max(10, Math.round(g / 6))}g semillas de lino molidas`)
+      .replace(/(\d+g )?tofu firme/gi, (m, g) => `${g || ''}pechuga de pollo`);
+    const nombre = opt.nombre
+      .replace(/tofu sedoso(?: batido)?/gi, 'lino molido')
+      .replace(/^Tofu salteado/i, 'Pollo salteado').replace(/^Salteado de tofu/i, 'Salteado de pollo')
+      .replace(/\btofu\b/gi, 'pollo');
+    let lino = false;
+    const pasos = pasos0
+      .replace(/(el |la )?tofu sedoso(?: batido)?/gi, (m, art) => {
+        const s = (art ? 'el ' : '') + 'lino molido' + (lino ? '' : ' (hidratado 5 min en el triple de agua)');
+        lino = true;
+        return s;
+      })
+      .replace(/desmenuza el tofu firme/gi, 'corta el pollo en tiras').replace(/tofu firme desmenuzado/gi, 'pollo en tiras')
+      .replace(/filetes? de tofu firme/gi, m => (/s de/.test(m) ? 'filetes de pollo' : 'filete de pollo'))
+      .replace(/tofu firme/gi, 'pollo').replace(/\btofu\b/gi, 'pollo');
+    return { ...opt, nombre, ingredientes: ing, pasos };
+  }
   function _adaptarSinHuevo(opt) {
+    if (_RE_SOLO_CON_HUEVO.test(opt.nombre)) return null;
     let pasos0 = opt.pasos || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : '') || '';
     const ing0 = opt.ingredientes || '';
     // «Tortilla» es de la familia del huevo, así que el filtro general la borra
@@ -4565,7 +4618,7 @@
       if ((m = p.match(/^(\d+)\s+claras?\s*\+\s*(\d+)\s+huevos?$/i))) gramos += +m[1] * 33 + +m[2] * 60;
       else if ((m = p.match(/^(\d+)\/(\d+)\s+huevos?\b/i))) gramos += 60 * m[1] / m[2];
       else if ((m = p.match(/^(\d+)\s+huevos?\b/i))) gramos += +m[1] * 60;
-      else if ((m = p.match(/^(\d+)\s*ml\s+claras?\b/i))) gramos += +m[1];
+      else if ((m = p.match(/^(\d+)\s*(?:ml|g)\s+claras?\b/i))) gramos += +m[1];
       else if ((m = p.match(/^(\d+)\s+claras?\b/i))) gramos += +m[1] * 33;
       else if ((m = p.match(/^(\d+)\s+yemas?\b/i))) gramos += +m[1] * 17;
       else { resto.push(p); return; }
@@ -4573,7 +4626,9 @@
     });
     if (pos < 0) return pasos0 && tortillaWrap ? { ...opt, pasos: pasos0 } : opt;
     const frasesHuevo = pasos0.split(/(?<=\.)\s+/).filter(f => _RE_FRASE_HUEVO.test(f)).join(' ');
-    const masa = _RE_MASA_FRASE.test(frasesHuevo) || _RE_MASA_PLATO.test(pasos0);
+    // El nombre también cuenta: «Bizcocho de chocolate y plátano en taza» no dice
+    // «bizcocho» en los pasos y le tocaba tofu FIRME (1 nov 2026).
+    const masa = _RE_MASA_FRASE.test(frasesHuevo) || _RE_MASA_PLATO.test(opt.nombre + ' ' + pasos0);
     resto.splice(pos, 0, `${Math.max(30, Math.round(gramos / 10) * 10)}g ${masa ? 'tofu sedoso' : 'tofu firme'}`);
     // Sustituye respetando si lo cambiado empezaba en mayúscula o en minúscula.
     const rep = (s, re, por) => s.replace(re, (...a) => {
@@ -4614,6 +4669,7 @@
       [/,? y cuaja el resto del huevo batido en la misma plancha/gi, ''],
       [/con la lechuga, el tomate y el huevo/gi, 'con la lechuga y el tomate'],
       [/las claras y (?:los huevos|el huevo)/gi, 'el tofu sedoso'],
+      [/(?:los huevos|el huevo),? (?:y )?las claras/gi, 'el tofu sedoso'],
       [/(?:los huevos|el huevo)(?: batidos?)?/gi, 'el tofu sedoso'],
       [/las claras/gi, 'el tofu sedoso'],
       [/\bhuevos?\b/gi, 'tofu sedoso'],
@@ -4633,7 +4689,12 @@
       [/hasta que la clara esté hecha/gi, 'hasta que se dore'],
       [/casca los huevos en una sartén antiadherente y revuélvelos/gi, 'desmenuza el tofu firme en una sartén antiadherente y saltéalo'],
       [/los huevos a la plancha/gi, 'los filetes de tofu firme a la plancha'],
+      // «Haz el huevo a la plancha o revuelto»: el «revuelto» se borraba y quedaba «a la plancha o .» (1 nov 2026).
+      [/el huevo a la plancha o revuelto/gi, 'el filete de tofu firme a la plancha'],
       [/el huevo a la plancha/gi, 'el filete de tofu firme a la plancha'],
+      [/chafa las yemas/gi, 'chafa el tofu firme'],
+      [/\bun huevo\b/gi, 'unos dados de tofu firme'],
+      [/,? pica las claras y mézclalo todo/gi, ' y mézclalo todo'],
       [/fríe los huevos con poco aceite/gi, 'dora los filetes de tofu firme con poco aceite'],
       [/bate (?:los huevos|el huevo|las claras)(?: con (?:las claras|el huevo|la yema))? y (?:cuájalos|cuájalas|revuélvelos)/gi, 'desmenuza el tofu firme y saltéalo'],
       [/bate (?:los huevos|el huevo|las claras)(?: con (?:las claras|el huevo(?: entero)?|la yema))?/gi, 'desmenuza el tofu firme'],
@@ -4674,7 +4735,12 @@
   function filtrarNoComida(nutricion, noComidaRaw) {
     const raw = (noComidaRaw || '').trim();
     if (!raw) return nutricion;
-    const tokensOriginales = raw.split(_SEPARADOR_ALIMENTOS).map(t => t.trim().toLowerCase()).filter(t => t.length >= 2);
+    // El cliente escribe frases («no me gusta el pescado», «nada de pescado ni
+    // marisco», «las legumbres»): sin quitar esas palabras el trozo no casaba
+    // con ninguna familia y no se excluía nada (auditoría del 1 nov 2026).
+    const _RELLENO = /^(?:no|nada|nunca|tampoco|ni|me|gusta|gustan|como|tomo|soporto|aguanto|odio|puedo|comer|alergia|alérgic[oa]|alergic[oa]|intolerancia|intolerante|a|al|de|del|el|la|los|las|un|una|nada de)\s+/i;
+    const _sinRelleno = t => { let x = t, y; do { y = x; x = x.replace(_RELLENO, ''); } while (x !== y); return x; };
+    const tokensOriginales = raw.split(_SEPARADOR_ALIMENTOS).map(t => _sinRelleno(t.trim().toLowerCase())).filter(t => t.length >= 2);
     if (!tokensOriginales.length) return nutricion;
     const todosTokens = new Set(tokensOriginales);
     tokensOriginales.forEach(t => {
@@ -4712,7 +4778,11 @@
       'garbanzo': ['hummus'],
       'ternera': ['solomillo'],
       'aguacate': ['guacamole'],
-      'huevo': ['yema', 'clara']
+      'huevo': ['yema', 'clara'],
+      'soja': ['tofu', 'tempeh', 'edamame', 'tamari'],
+      'cebolla': ['cebolleta'],
+      'salsa soja': ['salsa de soja'],
+      'pan': ['bocadillo', 'panecillo', 'sándwich', 'sandwich', 'tosta integral', 'tostada integral', 'tosta de centeno', 'tosta centeno', 'tosta pequeña']
     };
     [...todosTokens].forEach(t => {
       const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)];
@@ -4720,6 +4790,7 @@
     });
     const tokenArr = [...todosTokens];
     const _sinHuevo = tokenArr.some(t => /^(huevo|clara|yema)$/.test(_normAlimento(t)));
+    const _sinSoja = tokenArr.some(t => /^(soja|tofu)$/.test(_normAlimento(t)));
     // Estas dos búsquedas comparaban cadena contra cadena, así que arrastraban
     // el mismo problema de tildes que la regex: con "esparragos" no encontraban
     // ni la receta de sustitución ni el alimento de recambio, que están
@@ -4791,6 +4862,16 @@
     // "rellena de acelgas con al horno" (quitadas las verduras), "Bocadillo de
     // atún y (recuperación...)" (quitado el tomate).
     const limpiar = s => s.replace(/,\s*,+/g, ',')
+      // Cadena yogur → yogur de soja → postre de soja natural: el segundo cambio
+      // solo toca «yogur» y dejaba «postre de soja natural de soja» (1 nov 2026).
+      .replace(/(postres? de soja natural(?:es)?)(?: de soja| natural(?:es)?)+/gi, '$1')
+      // Quitado lo que se espolvoreaba («y espolvorea .») o la palabra de en
+      // medio («Wrap de de merluza», era el kebab).
+      .replace(/(?:,\s*|\s+y\s+)?\b(?:espolvorea|añade|echa|reparte)(?:\s+por\s+encima)?\s*(?=\.|$)/gi, '')
+      .replace(/(?<![a-záéíóúüñ])(de|con)\s+\1(?![a-záéíóúüñ])/gi, '$1')
+      // Quien no come carne: «pechuga (picada) de pavo» acababa «pechuga de merluza».
+      .replace(/pechugas? picadas? de (merluza|lubina|dorada|bacalao)/gi, '$1 picada')
+      .replace(/pechugas? de (merluza|lubina|dorada|bacalao)/gi, '$1')
       .replace(/\s+(?:con|y|e|de)\s+(?=(?:al|a la|a las)\s|\()/g, ' ')
       // "Pasta con y atún" · "tostada, y jamón" · "pisto de" al final
       .replace(/\s+(con|de)\s+(?:y|e)\s+/g, ' $1 ').replace(/,\s+(y|e)\s+/g, ' $1 ')
@@ -4855,7 +4936,11 @@
     }, txt);
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
-        if (_sinHuevo) opt = _adaptarSinHuevo(opt);
+        if (_sinHuevo) {
+          opt = _adaptarSinHuevo(opt);
+          if (!opt) return null;
+          if (_sinSoja) opt = _sinTofuTrasHuevo(opt);
+        }
         // Los PASOS entran en la comprobación, no solo el nombre y los
         // ingredientes: hay recetas que nombran un alimento SOLO en la
         // preparación. Caso real: "Palitos de zanahoria con guacamole casero"
@@ -5004,7 +5089,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 1;
+  const MOTOR_REV = 2;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -9992,10 +10077,13 @@
           [/harina de avena/gi, 'harina de avena certificada sin gluten'],
           [/\bavena\b(?![^,.;:]*sin gluten)/gi, 'avena certificada sin gluten'],
           [/pasta integral/gi, 'pasta sin gluten'],
-          [/fideos( finos)?/gi, 'fideos de arroz'],
+          [/fideos( finos)?(?! de arroz)/gi, 'fideos de arroz'],
           [/\b(cuscús|couscous|bulgur)\b/gi, 'quinoa'],
           [/\bseitán\b/gi, 'tofu firme'],
-          [/salsa de soja/gi, 'salsa de soja sin gluten (tamari)'],
+          [/salsa (?:de )?soja(?! sin gluten)/gi, 'salsa de soja sin gluten (tamari)'],
+          // «15ml soja» y «, soja,» son la salsa: se colaban sin pasar a tamari (1 nov 2026).
+          [/(\d+\s*ml\s+)soja\b(?! texturizada)/gi, '$1salsa de soja sin gluten (tamari)'],
+          [/(^|,\s*)soja(?=\s*(?:,|$))/gi, '$1salsa de soja sin gluten (tamari)'],
           [/harina de trigo/gi, 'harina de arroz'],
           [/crepes de trigo sarraceno/gi, 'crepes de harina de arroz'],
           [/lasaña de lentejas y berenjena/gi, 'pastel de lentejas y berenjena (sin placas de pasta)'],
@@ -10060,14 +10148,16 @@
           // proteico..." pero sus ingredientes seguían diciendo "2 yogures
           // proteicos" -- lácteo de verdad. Tampoco lo cazaba la red de
           // seguridad de abajo, por el mismo motivo.
-          [/\byogures\b(?![^,.;:]*(?:sin lactosa|de coco))/gi, 'yogures sin lactosa'],
-          [/\byogur(t)?\b(?![^,.;:]*(?:sin lactosa|de coco))/gi, 'yogur sin lactosa'],
+          [/\byogures\b(?![^,.;:]*(?:sin lactosa|de coco|de soja))/gi, 'yogures sin lactosa'],
+          // «yogur de soja» no lleva lactosa: salía «yogur sin lactosa de soja» (1 nov 2026).
+          [/\byogur(t)?\b(?![^,.;:]*(?:sin lactosa|de coco|de soja))/gi, 'yogur sin lactosa'],
           [/\bkéfir\b(?![^,.;:]*sin lactosa)/gi, 'kéfir sin lactosa'],
           [/\brequesón\b/gi, 'queso fresco sin lactosa'],
           [/\bskyr\b/gi, 'skyr sin lactosa'],
           // El pesto lleva parmesano (y piñones): se cambia por la alternativa.
           [/pesto( de albahaca)?( vegano)?/gi, 'albahaca fresca picada con AOVE'],
-          [/\b(parmesano|mozzarella|feta|ricotta|burrata)\b/gi, 'queso $1 sin lactosa'],
+          // «(queso )?» : si el plato ya decía «queso feta» salía «queso queso feta» (1 nov 2026).
+          [/(?:\bqueso )?\b(parmesano|mozzarella|feta|ricotta|burrata)\b/gi, 'queso $1 sin lactosa'],
           // El adjetivo va antes del "sin lactosa": "queso tierno sin lactosa",
           // no "queso sin lactosa tierno".
           // El lookahead NO es opcional aquí, aunque el resto de reglas de esta
@@ -10111,6 +10201,7 @@
         .replace(/[\wáéíóúñ]+(\s+[\wáéíóúñ]+)*?\s+sin gluten/gi, '·')
         .replace(/salsa de soja sin gluten \(tamari\)/gi, '·')
         .replace(/yogur de coco[^,]*/gi, '·')
+        .replace(/(yogur(es)?|postres?) de soja/gi, '·')
         .replace(/nata de coco/gi, '·')
         .replace(/proteína aislada de suero \(sin lactosa\)/gi, '·')
         .replace(/[\wáéíóúñ]+(\s+[\wáéíóúñ]+)*?\s+sin lactosa/gi, '·')
@@ -10119,7 +10210,7 @@
         .replace(/\bpipas\b/gi, '·');
 
       const rastros = [];
-      if (sinGluten) rastros.push(/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|fideos|avena|trigo|cebada|centeno|espelta|cuscús|couscous|bulgur|seitán|galletas?|bocadillo|wrap|granola|muesli|harina|lasaña|croquetas?|rebozad\w*|empanad\w*|pizza|pita|bagel|barritas?|multicereal|wassa|cerveza)\b/i);
+      if (sinGluten) rastros.push(/\b(pan|panes|panecillos?|tostas?|tostadas?|pasta|macarrones|espaguetis?|fideos|avena|trigo|cebada|centeno|espelta|cuscús|couscous|bulgur|seitán|galletas?|bocadillo|wrap|granola|muesli|harina|lasaña|croquetas?|rebozad\w*|empanad\w*|pizza|pita|bagel|barritas?|multicereal|wassa|cerveza|salsa (?:de )?soja)\b/i);
       // Los plurales van explícitos: `yogur(t)?` NO casaba con "yogures" y por
       // ahí se coló un lácteo entero hasta el plato de un cliente intolerante.
       // La red de seguridad es lo último que hay entre un alérgeno y el cliente:
