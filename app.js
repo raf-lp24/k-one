@@ -5147,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 5;
+  const MOTOR_REV = 6;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -8298,7 +8298,21 @@
     // solo añade grasa. Los topes dejan a la gente grande casi donde estaba y
     // arreglan a la pequeña, que era donde estaba el problema.
     const _acotar = (v, min, max) => Math.round(Math.min(max, Math.max(min, v)));
-    const _deficit   = _acotar(tdee * 0.18, 250, 500);
+    // Minutos de entreno a la semana (1 nov 2026, revisión de nutricionista
+    // deportiva). Con mucho volumen, un 18 % menos deja muy poca energía para lo
+    // que se gasta entrenando: es la zona de la falta de regla, las fracturas por
+    // estrés y el bajón de rendimiento (baja disponibilidad energética). El
+    // déficit se suaviza a partir de 5 h a la semana y más a partir de 7 h 30.
+    const _minSesion = tiempoSesion.includes('15-20') ? 18 : tiempoSesion.includes('30-45') ? 38
+      : tiempoSesion.includes('60-90') ? 75 : (tiempoSesion.includes('90') || tiempoSesion.includes('Más')) ? 100 : 52;
+    const _diasSolo = Array.isArray(u.diasEntrenoSolo) ? new Set(u.diasEntrenoSolo).size : 0;
+    const _minSemana = soloDieta
+      ? (_sedentarioSolo ? 0 : (_diasSolo || (/intenso/i.test(u.actividadSolo || '') ? 5 : /moderado/i.test(u.actividadSolo || '') ? 3 : 2)) * 60)
+      : numDias * _minSesion;
+    const _volumenAlto = _minSemana >= 300, _volumenMuyAlto = _minSemana >= 450;
+    const _deficit   = _volumenMuyAlto ? _acotar(tdee * 0.10, 200, 350)
+      : _volumenAlto ? _acotar(tdee * 0.12, 200, 400)
+      : _acotar(tdee * 0.18, 250, 500);
     // Superávit de 13% → 8% (29 sept 2026, auditoría de entrenador). Un
     // intermedio gana como mucho 0,25-0,5% de su peso al mes en músculo; lo que
     // sobra por encima de ~+300 kcal es grasa. Con 13% sobre un gasto ya alto,
@@ -8331,6 +8345,24 @@
     // y no se volvía a tocar aunque el cliente llevara semanas estancado.
     if (u.ajusteCalorico) {
       kcalObj = Math.max(esMujer ? 1200 : 1500, kcalObj + u.ajusteCalorico);
+    }
+
+    // SEGURIDAD DEL DÉFICIT (1 nov 2026). Va DESPUÉS del ajuste del check-in para
+    // que ese ajuste tampoco pueda volver a meter déficit.
+    //  · Bajo peso (IMC < 18,5): nunca se pide perder peso. Antes una chica de
+    //    45 kg y 1,70 m que corría 5 días recibía un 18 % menos.
+    //  · Carrera en 14 días o menos: la fase de afinar va en mantenimiento; llegar
+    //    con el depósito lleno rinde más que medio kilo menos.
+    const _bajoPeso = _imc < 18.5;
+    const _carreraCerca = tieneEvento && diasParaEvento !== null && diasParaEvento <= 14;
+    if (perdidaGrasa && _bajoPeso) {
+      kcalObj = Math.max(kcalObj, tdee);
+      _notaComida(`Tu peso está por debajo de lo saludable para tu altura (IMC ${_imc.toFixed(1).replace('.', ',')}). Por eso tu plan no te pone a perder peso: comes lo que gastas, con proteína suficiente, y el entreno de fuerza te ayuda a ganar músculo. Si quieres cambiar tu cuerpo, háblalo antes con tu médico o con un dietista-nutricionista.`);
+    } else if (perdidaGrasa && _carreraCerca) {
+      kcalObj = Math.max(kcalObj, tdee);
+      _notaComida(`Quedan ${diasParaEvento} ${diasParaEvento === 1 ? 'día' : 'días'} para ${u.evento.trim()}: hasta la carrera comes lo que gastas, sin déficit. Llegar con energía rinde mucho más que medio kilo menos. Después de la carrera tu plan vuelve a perder grasa.`);
+    } else if (perdidaGrasa && _volumenAlto) {
+      _notaComida('Entrenas mucho, así que tu déficit es más suave de lo normal: con tanto volumen, comer de menos se paga en lesiones y en rendimiento. Avisa si se te retira la regla o se vuelve irregular, si te lesionas a menudo (sobre todo fracturas por estrés) o si estás siempre cansado o cansada aunque descanses: son señales de que comes poco para lo que entrenas, y toca comer más y consultarlo con un profesional.');
     }
 
     // Masa magra estimada (Boer) para evitar objetivos proteicos excesivos en personas con sobrepeso.
