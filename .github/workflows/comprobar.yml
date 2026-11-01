@@ -39,6 +39,10 @@ jobs:
       # textos rotos, con listas propias (1 nov 2026).
       - name: Alergias, «no como» y seguridad de la dieta
         run: node scripts/auditar-filtros.js
+      # Lesiones (marcadas y escritas a mano), impacto, material, nivel, corazón,
+      # semana de carrera en cualquier día de la semana y textos (1 nov 2026).
+      - name: Entrenamiento seguro y semana de carrera
+        run: node scripts/auditar-entreno.js
       # Tabla de alimentos, recetario, reparto por objetivo y agente de auditoría.
       - name: Auditoría de nutrición y entrenamiento
         run: node scripts/auditoria-completa.js

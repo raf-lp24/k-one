@@ -5415,8 +5415,13 @@
     // encarga su propio bloque, más completo.
     const _imcEnt = (parseFloat(u.peso) || 70) / Math.pow((parseFloat(u.altura) || 170) / 100, 2);
     const _edadEnt = parseInt(u.edad, 10) || 30;
+    // 1 nov 2026: «periostitis tibial», «espolón», «fractura por estrés» o
+    // «gemelo» no entraban (seguían los sprints del remate), y la osteoporosis
+    // escrita en «Otra enfermedad» tampoco: es donde más pesa un mal aterrizaje.
+    const _enfOtraEnt = (u.enfermedad || '').includes('Otra') ? (u.enfermedadOtra || '').toLowerCase() : '';
     const _sinImpacto = !_lesionZonaRodilla && (_imcEnt >= 35 || (_imcEnt >= 30 && esPrincipiante) || _edadEnt >= 65
-      || _mencionaLesion('tobillo', 'cadera', 'artrosis', 'fascitis', 'impacto', 'saltar', 'saltos', 'esguince', 'aquiles'));
+      || _mencionaLesion('tobillo', 'cadera', 'artrosis', 'fascitis', 'plantar', 'espolón', 'espolon', 'periostitis', 'tibial', 'tibia', 'fractura por estrés', 'fractura por estres', 'metatars', 'gemelo', 'sóleo', 'soleo', 'impacto', 'saltar', 'saltos', 'esguince', 'aquiles', 'aquíles')
+      || /osteopor|osteopen|artrosis|artritis/.test(_enfOtraEnt));
 
     const alergiaSalud = u.alergia || 'No';
     const enfermedad = u.enfermedad || 'No';
@@ -5754,14 +5759,14 @@
         etiqueta: 'Fortalecimiento'
       });
       const _rodajeSuave = () => ({
-        resumen: esAvanzado && _conStrides ? 'Zona 2 · Easy run + strides' : 'Easy run · Zona 2',
+        resumen: esAvanzado && _conStrides ? 'Zona 2 · Rodaje suave + strides' : 'Rodaje suave · Zona 2',
         etiqueta: 'Cardio',
-        detalle: `Easy run · ${durSuave} a zona 2 (65-75% FCmáx, RPE 3-4), ritmo conversacional${esAvanzado ? ', cadencia 170-180 spm' : '. Si no puedes mantener una conversación, baja el ritmo'}${esAvanzado ? _strides(6, 80, 'aceleración al 90%, recuperación caminando') : _strides(4, 60, 'aceleración progresiva al 85%, recuperación andando')}${_extraSuave}`
+        detalle: `Rodaje suave · ${durSuave} a zona 2 (65-75% FCmáx, RPE 3-4), ritmo conversacional${esAvanzado ? ', cadencia 170-180 spm' : '. Si no puedes mantener una conversación, baja el ritmo'}${esAvanzado ? _strides(6, 80, 'aceleración al 90%, recuperación caminando') : _strides(4, 60, 'aceleración progresiva al 85%, recuperación andando')}${_extraSuave}`
       });
       const _recuperacion = () => ({
-        resumen: 'Recovery run · Suave',
+        resumen: 'Rodaje de recuperación · Suave',
         etiqueta: 'Cardio',
-        detalle: `Recovery run · ${durRecup} muy suave en zona 1-2 (RPE 2-3). Más lento de lo que crees: sirve para recuperar, no para sumar forma${_extraSuave}`
+        detalle: `Rodaje de recuperación · ${durRecup} muy suave en zona 1-2 (RPE 2-3). Más lento de lo que crees: sirve para recuperar, no para sumar forma${_extraSuave}`
       });
       const _tiradaLarga = () => {
         if (_tramoDur === 'expres') {
@@ -5951,8 +5956,8 @@
             return falta === -1 || d.tipo !== 'Entrenamiento'
               ? { dia: d.dia, tipo: 'Descanso', resumen: 'Recuperación tras la carrera', etiqueta: 'Descanso',
                   detalle: 'Descanso o paseo suave de 20-30 min. Come bien, sobre todo proteína e hidratos, y duerme: las piernas necesitan unos días' }
-              : { dia: d.dia, tipo: 'Entrenamiento', resumen: 'Recovery run · Tras la carrera', etiqueta: 'Cardio',
-                  detalle: `Recovery run · ${durRecup} muy suave (RPE 2-3), solo si las piernas están bien. Si notas molestias, camina en vez de correr` };
+              : { dia: d.dia, tipo: 'Entrenamiento', resumen: 'Rodaje de recuperación · Tras la carrera', etiqueta: 'Cardio',
+                  detalle: `Rodaje de recuperación ·${durRecup} muy suave (RPE 2-3), solo si las piernas están bien. Si notas molestias, camina en vez de correr` };
           }
           if (d.tipo !== 'Entrenamiento') return d;
           if (falta >= 2 && falta <= 7) {
@@ -7905,12 +7910,15 @@
     // cambiados, pero quien tiene una hernia lumbar seguía leyendo «Pierna B ·
     // Peso muerto», con el hombro lesionado «Torso B · Press militar», y el
     // corredor con la rodilla mal «Fuerza + pliometría» sin un solo salto.
-    if (_lesionZonaEspalda || _lesionZonaHombro || _lesionZonaRodilla) {
+    // Y con el perfil «sin impacto» (tobillo, fascitis, osteoporosis, 65+...),
+    // que cambia los saltos por su versión sin vuelo: no puede seguir llamándose
+    // «Fuerza + pliometría» (1 nov 2026).
+    if (_lesionZonaEspalda || _lesionZonaHombro || _lesionZonaRodilla || _sinImpacto) {
       const _tit = s => {
         let t = s;
         if (_lesionZonaEspalda) t = t.replace(/\bPeso muerto\b/g, 'Glúteo e isquios').replace(/\bpeso muerto\b/g, 'glúteo e isquios');
         if (_lesionZonaHombro) t = t.replace(/\bPress militar\b/g, 'Hombro sin dolor').replace(/\bpress militar\b/g, 'hombro sin dolor');
-        if (_lesionZonaRodilla) t = t.replace(/Fuerza \+ pliometría/g, 'Fuerza sin saltos').replace(/\s*\+\s*pliometría/gi, '');
+        if (_lesionZonaRodilla || _sinImpacto) t = t.replace(/Fuerza \+ pliometría/g, 'Fuerza sin saltos').replace(/\s*\+\s*pliometría/gi, '');
         return t;
       };
       semana = semana.map(d => ({ ...d, resumen: d.resumen ? _tit(d.resumen) : d.resumen, detalle: d.detalle ? d.detalle.replace(/^[^·]*·/, m => _tit(m)) : d.detalle }));
@@ -11923,7 +11931,11 @@
       nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => (m.opciones || []).forEach(_topar)));
       (nutricion || []).forEach(m => (m.opciones || []).forEach(_topar));
     }
-    return { motorVersion: _huellaMotor(), bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
+    // Con qué semana del plan y qué lunes se generó (1 nov 2026): la descarga de
+    // cada 4.ª semana, la progresión y la semana de carrera dependen de los dos,
+    // y el plan guardado no se rehacía al cambiar de semana. Ver buildDashboard.
+    const _lunesPlan = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
+    return { motorVersion: _huellaMotor(), semanaPlan: semanaActual, lunesPlan: _lunesPlan, bienvenida, mensaje_dia, entrenamiento_hoy, semana, nutricion, nutricionPorDia, progreso, soloDieta, notasNutricion: soloDieta ? notasSalud : notasComida, notasDeporte, kcalObj, protObj, carbsObj, kcalObjPorDia, carbsObjPorDia, cicloCarbs, tdee, evento: tieneEvento ? u.evento : '', diasParaEvento };
   }
 
 
@@ -12117,7 +12129,23 @@
     // elecciones de comidas del cliente van por índice y no se pierden.
     // Y en general: cualquier plan generado con un motor anterior (sin huella o
     // con otra) se pone al día aquí (30 sept 2026). Ver _actualizarPlanAlMotor().
-    if ((generatedPlan.cicloCarbs === undefined || generatedPlan.motorVersion !== _huellaMotor())
+    // Semana nueva (1 nov 2026): el entreno se generaba una vez y se quedaba en
+    // esa semana hasta que algo lo rehacía (motor nuevo, menú del mes, peso). Sin
+    // eso, la 4.ª semana nunca descargaba, la tirada larga no crecía y la semana
+    // de carrera (y el «Día de carrera») no llegaban. Ahora, si ha cambiado la
+    // semana del plan o el lunes de esta semana, se rehace con las mismas
+    // elecciones de comida.
+    let _semanaNueva = false;
+    try {
+      const _l = new Date(); _l.setHours(0, 0, 0, 0); _l.setDate(_l.getDate() - ((_l.getDay() + 6) % 7));
+      const _lunes = `${_l.getFullYear()}-${String(_l.getMonth() + 1).padStart(2, '0')}-${String(_l.getDate()).padStart(2, '0')}`;
+      const _sem = getSemanaActual();
+      if (generatedPlan.lunesPlan !== _lunes || generatedPlan.semanaPlan !== _sem) {
+        _semanaNueva = true;
+        userData.progreso = { ...(userData.progreso || { diasEntrenados: 0, ajuste: 0 }), semana: _sem };
+      }
+    } catch (e) {}
+    if ((_semanaNueva || generatedPlan.cicloCarbs === undefined || generatedPlan.motorVersion !== _huellaMotor())
         && userData && userData.peso && userData.altura && userData.edad) {
       // Si el plan lo puso al día el SERVIDOR (lib/motor-servidor.js, con la web
       // publicada) y aquí la huella es otra, lo normal es que esta pestaña lleve
@@ -12125,7 +12153,7 @@
       // la versión nueva en vez de "rebajar" el plan con el motor viejo.
       let _recargado = false;
       try { _recargado = sessionStorage.getItem('kone_recarga_motor') === generatedPlan.motorServidor; } catch (e) {}
-      if (generatedPlan.motorServidor && !_recargado) {
+      if (generatedPlan.motorServidor && !_recargado && generatedPlan.motorVersion !== _huellaMotor()) {
         try { sessionStorage.setItem('kone_recarga_motor', generatedPlan.motorServidor); } catch (e) {}
         location.reload();
         return;
