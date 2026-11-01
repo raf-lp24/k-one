@@ -4284,6 +4284,11 @@
     [/salchichón/gi, 'pavo curado en lonchas'],
     // «pavo ahumado» seguía siendo ahumado (y salado) para quien tiene tensión alta (1 nov 2026).
     [/salmón ahumado/gi, 'pavo en lonchas'],
+    // Borrar solo «mermelada» dejaba «con de frutos rojos» y «Unta sin azúcar» (1 nov 2026, diabetes).
+    // La de arándanos de la mousse es fruta cocida sin azúcar: es una compota.
+    [/mermelada (?:casera )?de arándanos/gi, 'compota de arándanos'],
+    [/como una mermelada/gi, 'como una compota'],
+    [/mermelada(?: casera)?(?: sin azúcar)?(?: de (?:frutos rojos|fresas?|frambuesas?|melocotón))?/gi, 'fresa chafada'],
     [/salmón a la plancha/gi, 'pechuga de pollo a la plancha'],
     [/salmón a la parrilla/gi, 'pechuga de pollo a la parrilla'],
     [/salmón al horno/gi, 'pollo al horno'],
@@ -4871,6 +4876,20 @@
       // medio («Wrap de de merluza», era el kebab).
       .replace(/(?:,\s*|\s+y\s+)?\b(?:espolvorea|añade|echa|reparte)(?:\s+por\s+encima)?\s*(?=\.|$)/gi, '')
       .replace(/(?<![a-záéíóúüñ])(de|con)\s+\1(?![a-záéíóúüñ])/gi, '$1')
+      // Quitada la miel (diabetes, 1 nov 2026): «con la miel y mézclala», «termina con
+      // un hilo de miel», «Riega con la miel y cierra», «Unta la miel y añade».
+      .replace(/\bcon\s+(?:y\s+)?(?=(?:mézcla|remueve|bate|añade))/gi, 'y ')
+      .replace(/,?\s*y termina con un hilo(?:\s+de)?\s*(?=\.|$)/gi, '')
+      .replace(/\s+(?:y|con)\s+un\s+(?:chorrito|hilo)(?:\s+de)?\s*(?=\.|$)/gi, '')
+      .replace(/\b(?:(?:Endulza|Riega|Rocía)\s+con|(?:Añade|Echa|Pon)\s+(?:el|un)\s+(?:hilo|chorrito)(?:\s+de)?)\s+(?:y\s+)?(espolvorea|sirve|mezcla)/g, (m, v) => v.charAt(0).toUpperCase() + v.slice(1))
+      .replace(/\b(?:(?:endulza|riega|rocía)\s+con|(?:añade|echa|pon)\s+(?:el|un)\s+(?:hilo|chorrito)(?:\s+de)?)\s+(?:y\s+)?(espolvorea|sirve|mezcla)/g, '$1')
+      .replace(/,\s*(?:un|el)\s+(?:hilo|chorrito)(?:\s+de)?\s+(?:y\s+)?(espolvorea)/g, ' y $1')
+      // «3 cdtas» sin nada detrás (era la miel).
+      .replace(/,\s*\d+\s*(?:cdtas?|cdas?|cucharadas?|cucharaditas?)\s*(?=,|$)/gi, '')
+      .replace(/\b(?:Riega|Rocía)\s+con\s+(?:y\s+)?(cierra|sirve)/g, (m, v) => v.charAt(0).toUpperCase() + v.slice(1))
+      .replace(/\b(?:riega|rocía)\s+con\s+(?:y\s+)?(cierra|sirve)/g, '$1')
+      .replace(/\bUnta\s+y\s+añade/g, 'Añade').replace(/\bunta\s+y\s+añade/g, 'añade')
+      .replace(/\bUnta\s+sobre\s+(?:las|los|el|la)\s+[^.]*?\s+y\s+(coloca|pon|añade)/g, (m, v) => v.charAt(0).toUpperCase() + v.slice(1))
       // Quien no come carne: «pechuga (picada) de pavo» acababa «pechuga de merluza».
       .replace(/pechugas? picadas? de (merluza|lubina|dorada|bacalao)/gi, '$1 picada')
       .replace(/pechugas? de (merluza|lubina|dorada|bacalao)/gi, '$1')
@@ -4970,7 +4989,8 @@
         nuevoIng = concordarAdjetivos(_concordarSustitucion(limpiar(quitarCantidadesHuerfanas(nuevoIng))));
         nuevoNombre = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(nuevoNombre))))
           .replace(/\s+(con|de|y)\s*,\s*/g, ' $1 ').replace(/\s+de\s+(con|y)\s+/g, ' $1 ').replace(/\s*,\s*,/g, ',')
-          .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+          .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim()
+          .replace(/, ([^,()]+)$/, (m, x) => (/ (?:y|e|con) /.test(x) || !/ y | con /.test(opt.nombre) ? m : ' y ' + x));
         // El nombre puede quedar empezando en minúscula si la palabra sustituida
         // era la primera ("Huevos revueltos con champiñones" -> "tofu revuelto
         // con champiñones").
@@ -5091,7 +5111,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 3;
+  const MOTOR_REV = 4;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -7185,7 +7205,7 @@
       if (!_sedentarioSolo) notasSalud.push('Nos indicaste diabetes. Vigila tu glucosa antes y después de entrenar, y ten a mano hidratos de absorción rápida en las sesiones más largas o intensas.');
       // La diabetes condiciona sobre todo la comida, y hasta ahora no había ni una
       // línea sobre ella (solo consejos de entreno). Va con las notas de comida.
-      _notaComida('Nos indicaste diabetes. Reparte los hidratos entre todas las tomas en vez de concentrarlos en una, prioriza los de absorción lenta (legumbres, avena, arroz integral, pasta al dente, verdura y fruta entera) y deja los zumos, los dulces y las bebidas azucaradas. Este plan no sustituye a tu médico ni a tu pauta de medicación: si usas insulina u otros fármacos, ajústalo con quien te los recetó.');
+      _notaComida('Nos indicaste diabetes. Reparte los hidratos entre todas las tomas en vez de concentrarlos en una, prioriza los de absorción lenta (legumbres, avena, arroz integral, pasta al dente, verdura y fruta entera) y deja los zumos, los dulces y las bebidas azucaradas. Por eso tu plan no lleva miel ni mermelada. Este plan no sustituye a tu médico ni a tu pauta de medicación: si usas insulina u otros fármacos, ajústalo con quien te los recetó.');
     } else if (enfermedad.includes('Otra')) {
       // Se cita lo que escribió, igual que ya hacen las notas de medicación y
       // de operación. El campo "¿Cuál?" se guardaba y se enseñaba en Jarvis,
@@ -10353,7 +10373,11 @@
     const _hipertension = enfermedad.includes('Hipertensión');
     // Todos los curados y salazones que la nota dice quitar (1 nov 2026: se colaban lomo embuchado y cecina).
     const _filtroSal = _hipertension ? 'jamón serrano, jamón ibérico, salmón ahumado, lomo embuchado, cecina, chorizo, salchichón, fuet, sobrasada, anchoas, mojama, bacon, panceta' : '';
-    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroSal].filter(Boolean).join(', ');
+    // Diabetes (1 nov 2026, aprobado por Rafa): fuera la miel y la mermelada. El
+    // sirope y el dátil van con ellas porque son los sustitutos de la miel en
+    // SUSTITUCIONES_NOCOMIDA: sin vetarlos, un azúcar se cambiaba por otro.
+    const _filtroAzucar = enfermedad.includes('Diabetes') ? 'miel, mermelada, sirope, dátil' : '';
+    const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroSal, _filtroAzucar].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
     if (_redAlergenos && textoFiltro) {
       nutricion = nutricion.map(m => {
