@@ -11213,6 +11213,29 @@
       notasDeporte.push('Hidratación: bebe entre 30-35 ml de agua por kg de peso al día (más si hace calor o entrenas por tu cuenta), repartidos a lo largo del día.');
       notasDeporte.push('Movimiento: sin entrenar, lo que más suma es caminar a diario (unos 7.000-10.000 pasos) y levantarte cada hora si trabajas sentado. Si más adelante quieres ganar músculo o tonificar, la fuerza dos días a la semana es lo que más cambia el cuerpo: entonces puedes cambiar tu plan en «Cambiar plan». Y si te cuesta llegar a tu objetivo de proteína solo con comida, un batido de proteína whey es una forma cómoda de completarlo.');
     }
+    // CONSEJOS DE NUTRICIÓN DEPORTIVA (1 nov 2026, revisión de nutricionista,
+    // aprobados por Rafa). Cada uno solo a quien le corresponde. Los ejemplos de
+    // comida no chocan con alergias ni con «no como»: sin pan con miel, sin pollo
+    // concreto, y la toma de la noche cambia si no toma lácteos.
+    {
+      const _compite = /competici/i.test(objetivo);
+      const _sinLacteos = /l[aá]cteo|yogur|queso|reques[oó]n/i.test(textoFiltro || '');
+      if ((esRunner || esCombinacion) && (sesionLarga || _compite)) {
+        notasDeporte.push('Más de 2 horas: si vas a estar más de 2 horas corriendo (maratón, trail largo), puedes subir a 60-90 g de hidratos por hora. Para pasar de 60, usa geles o bebidas que mezclen glucosa y fructosa: se absorben por dos vías y el estómago lo lleva mejor. El estómago también se entrena: pruébalo antes en las tiradas largas, nunca por primera vez el día de la carrera.');
+      }
+      if (esRunner || esCombinacion || esHyrox) {
+        notasDeporte.push('¿Cuánto sudas? Pésate sin ropa antes y después de una sesión de una hora, sin beber en medio: cada kilo que pierdes es más o menos un litro de líquido. Si pierdes más de un kilo, o se te queda la ropa blanca de sal, en las sesiones largas o con calor bebe con sales (sodio), no solo agua.');
+      }
+      if ((ganarMusculo || _volumenAlto) && !_sedentarioSolo) {
+        notasDeporte.push(`Antes de dormir: una toma con proteína de digestión lenta (${_sinLacteos ? (sinLactosa && !/l[aá]cteo|leche/i.test(textoFiltro || '') ? 'queso batido o yogur sin lactosa' : 'yogur de soja o un batido de proteína vegetal') : (sinLactosa ? 'queso batido, yogur o requesón sin lactosa' : 'queso batido, yogur griego o requesón')}) ayuda a recuperar durante la noche. No hace falta comer más: puede ser la merienda o el postre de la cena.`);
+      }
+      if ((esHyrox || esCrossfit) && _compite) {
+        notasDeporte.push('El día de la competición: desayuno que ya conozcas, 2-3 horas antes. Si hay varias pruebas o WODs, entre una y otra toma algo de hidrato rápido y ligero (plátano, tortitas de arroz o una bebida isotónica) y agua con sales. Nada de grasa ni mucha fibra hasta que acabes.');
+      }
+      if ((esCombinacion || esHyrox) && (numDias >= 5 || _diasSolo >= 5)) {
+        notasDeporte.push('Dos sesiones el mismo día: lo que comas entre una y otra es lo que más cuenta. En la hora siguiente a la primera, toma hidratos y algo de proteína (por ejemplo, arroz o pasta con tu proteína de siempre). Así llegas a la segunda con energía y no a medio gas.');
+      }
+    }
     if (!soloDieta) {
       notasDeporte.push('Calentamiento: dedica 5-8 min antes de cada sesión. Movilidad articular (hombros, caderas, tobillos), activación muscular (puente de glúteos, plancha 30s) y series progresivas del primer ejercicio.');
       notasDeporte.push('Vuelta a la calma: 5 min de estiramientos estáticos (30s por grupo muscular) al terminar. Los músculos que más has trabajado hoy son los que más necesitan estirarse.');
