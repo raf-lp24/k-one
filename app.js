@@ -5147,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 6;
+  const MOTOR_REV = 7;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -10952,14 +10952,20 @@
     // completa, y días de los dos tipos; y la amplitud sale del objetivo. Un
     // "u.cicladoCarbs = 'off'" guardado de antes ya no se mira, a propósito:
     // era una decisión técnica que no le tocaba tomar a él.
-    if (!soloDieta && semana.length === 7) {
-      const esDiaEntreno = semana.map(d => d.tipo === 'Entrenamiento');
+    // «Solo nutrición» que entrena por su cuenta también cicla (1 nov 2026), con
+    // la semana de días que marcó (la misma que usa el repostaje).
+    const _semCiclo = !soloDieta ? semana : (_entrenaSolo ? _semanaFuel : []);
+    if (_semCiclo.length === 7) {
+      const esDiaEntreno = _semCiclo.map(d => d.tipo === 'Entrenamiento');
       const nEntreno = esDiaEntreno.filter(Boolean).length;
       const nDescanso = 7 - nEntreno;
       // Sin los dos tipos de día no hay nada que ciclar (ni 7 días de entreno
       // ni 7 de descanso permiten redistribuir sin cambiar la media).
       if (nEntreno > 0 && nDescanso > 0) {
-        const amplitud = ganarMusculo ? 0.20 : perdidaGrasa ? 0.15 : 0.10;
+        let amplitud = ganarMusculo ? 0.20 : perdidaGrasa ? 0.15 : 0.10;
+        // En resistencia (running, híbrido, Hyrox, CrossFit) el glucógeno es el
+        // combustible del entreno: el reparto entre días pesa más.
+        if (esRunner || esCombinacion || esHyrox || esCrossfit) amplitud = Math.max(amplitud, 0.20);
         let factorEntreno = 1 + amplitud;
         let factorDescanso = 1 - (amplitud * nEntreno) / nDescanso;
         // Con muchos días de entreno y pocos de descanso, toda la subida hay
@@ -10971,13 +10977,34 @@
         // justo lo que hace que la gente abandone una dieta. La subida de los
         // días de entreno se recalcula hacia atrás desde ese suelo, para que la
         // media semanal siga cuadrando exactamente.
-        if (factorDescanso < 0.75) {
-          factorDescanso = 0.75;
+        // En resistencia el suelo es un 30 % (1 nov 2026): con 5 días de entreno y
+        // 2 de descanso, el 25 % dejaba la tirada larga con solo un 15 % más. Un
+        // corredor en descanso sigue por encima de 3 g/kg con este suelo.
+        const _suelo = (esRunner || esCombinacion || esHyrox || esCrossfit) ? 0.70 : 0.75;
+        if (factorDescanso < _suelo) {
+          factorDescanso = _suelo;
           factorEntreno = 1 + ((1 - factorDescanso) * nDescanso) / nEntreno;
         }
-        factorPorDia = esDiaEntreno.map(e => (e ? factorEntreno : factorDescanso));
+        // Carga de cada sesión (1 nov 2026, revisión de nutricionista deportiva):
+        // antes un rodaje suave de 30 min y una tirada larga de 2 h llevaban los
+        // mismos hidratos. Ahora las exigentes (tirada larga, fondo, series, umbral,
+        // metcon, sesión larga) suben más y las suaves (rodaje, cardio suave,
+        // accesorios) menos. La media de los días de entreno es la misma de antes,
+        // así que el total de la semana sigue sin moverse.
+        const _cargaDia = d => {
+          if (d.tipo !== 'Entrenamiento') return 0;
+          const e = d.etiqueta || '', r = d.resumen || '';
+          if (/Volumen|Fondo|Intensidad|Umbral|Híbrido|WOD/.test(e) || /sesi[oó]n larga|tirada larga|\+ intervalos/i.test(r)) return 1.8;
+          if (/Cardio|Complemento/.test(e)) return 0.5;
+          return 1;
+        };
+        const _cargas = _semCiclo.map(_cargaDia);
+        const _cargaMedia = _cargas.reduce((a, b) => a + b, 0) / nEntreno;
+        factorPorDia = esDiaEntreno.map((e, i) => (e ? 1 + (factorEntreno - 1) * _cargas[i] / _cargaMedia : factorDescanso));
         cicloCarbs = {
           dias: esDiaEntreno,
+          pctPorDia: factorPorDia.map(x => Math.round((x - 1) * 100)),
+          porCarga: _cargas.some((c, i) => esDiaEntreno[i] && c !== _cargas[esDiaEntreno.indexOf(true)]),
           pctEntreno: Math.round((factorEntreno - 1) * 100),
           pctDescanso: Math.round((1 - factorDescanso) * 100),
           nEntreno,
@@ -11069,7 +11096,7 @@
     // porque es lo que más cambia respecto a lo que el cliente espera ver: si
     // no se le cuenta, un miércoles con más arroz que un domingo parece un fallo.
     if (cicloCarbs) {
-      notasDeporte.push(`Carbohidratos por día: tus ${cicloCarbs.nEntreno} días de entreno llevan un ${cicloCarbs.pctEntreno}% más de carbohidratos y tus ${cicloCarbs.nDescanso} días de descanso un ${cicloCarbs.pctDescanso}% menos. No comes ni más ni menos a la semana — el total es exactamente el mismo —, se reparte hacia los días en que tu cuerpo vacía el glucógeno y lo aprovecha. La proteína no se mueve ningún día: esa sostiene tu masa muscular entrenes o no. Si prefieres los 7 días iguales, puedes desactivarlo arriba en Nutrición.`);
+      notasDeporte.push(`Carbohidratos por día: tus ${cicloCarbs.nEntreno} días de entreno llevan${cicloCarbs.porCarga ? ' de media' : ''} un ${cicloCarbs.pctEntreno}% más de carbohidratos y tus ${cicloCarbs.nDescanso} días de descanso un ${cicloCarbs.pctDescanso}% menos.${cicloCarbs.porCarga ? ' Entre los de entreno, los más exigentes (tirada larga, series, metcon) llevan más y los suaves, menos: el combustible va donde se gasta.' : ''} No comes ni más ni menos a la semana — el total es exactamente el mismo —, se reparte hacia los días en que tu cuerpo vacía el glucógeno y lo aprovecha. La proteína no se mueve ningún día: esa sostiene tu masa muscular entrenes o no.`);
     }
     // BUG REAL (encontrado 7 sept 2026, verificando las notas nuevas de Hyrox):
     // este bloque decidía las notas de hidratación/suplementación mirando
@@ -11850,7 +11877,7 @@
       ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--brasa)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9.5h4.5M17.5 9.5H22M2 14.5h4.5M17.5 14.5H22"/></svg>'
       : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--metal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     const texto = entreno
-      ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${ciclo.pctEntreno}% más de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''} para reponer el glucógeno que vas a gastar.`
+      ? `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de entreno.</strong> Comes un ${(ciclo.pctPorDia && ciclo.pctPorDia[dia] != null) ? ciclo.pctPorDia[dia] : ciclo.pctEntreno}% más de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''} para reponer el glucógeno que vas a gastar.`
       : `<strong>${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}: día de descanso.</strong> Comes un ${ciclo.pctDescanso}% menos de carbohidratos${carbsDia ? ` (unos ${carbsDia} g)` : ''}. La proteína no baja: sigue igual que cualquier otro día.`;
     el.innerHTML = `<div class="ciclo-aviso${entreno ? '' : ' descanso'}">${icono}<div class="ciclo-aviso-txt">${texto}</div></div>` + _notaSube;
     el.style.display = '';
