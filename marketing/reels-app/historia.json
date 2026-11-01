@@ -1,21 +1,193 @@
 {
-  "_nota": "Reel 23 «Me doy de alta en K-ONE» (1 nov 2026, idea de Rafa): una clienta (una chica normal, no de culturista, hecha con Higgsfield; 1 nov: Rafa no la quería «hiperfuerte») y, en su móvil, la app grabada de verdad. Escenas: Videos/historia-alta/c1-4.mp4. Insertos: grabaciones de grabar.mjs. Rótulos: [desde, hasta, ojo, título, 'verde'?] en segundos desde el principio del tramo.",
+  "_nota": "Reel 23 «Me doy de alta en K-ONE» (1 nov 2026, idea de Rafa): una clienta (una chica normal, no de culturista, hecha con Higgsfield; 1 nov: Rafa no la quería «hiperfuerte») y, en su móvil, la app grabada de verdad. Escenas: Videos/historia-alta/c1-4.mp4. Insertos: grabaciones de grabar.mjs. Rótulos: [desde, hasta, ojo, título, 'verde'?] en segundos desde el principio del tramo. 1 nov (Rafa: «va todo super rápido» y «no hace falta enseñar menos, pero más lento»): el cuestionario entero a 2× con un rótulo por bloque, y el resto a velocidad real.",
   "salida": "23-me-doy-de-alta-en-k-one.mp4",
   "tramos": [
-    { "tipo": "ia", "clip": "c1", "ss": 0.3, "d": 3.2,
-      "rotulos": [[0.15, 3.2, "Domingo, 23:40", "Me doy de alta<br>en *K-ONE*"]] },
-    { "tipo": "app", "fondo": "c1", "app": "alta", "partes": [[0, 28.15, 3.6], [28.15, 32.54, 2.2]],
-      "rotulos": [[0, 3.6, "Unas preguntas", "Cómo soy y<br>qué *quiero*"], [3.6, 5.8, "Y en 3 minutos", "Mi plan,<br>*hecho*", "verde"]] },
-    { "tipo": "ia", "clip": "c2", "ss": 0.2, "d": 3.0,
-      "rotulos": [[0.15, 3.0, "Lunes, 7:30", "Primer<br>*entreno*"]] },
-    { "tipo": "app", "fondo": "c2", "app": "fuerza", "partes": [[2.85, 9.55, 4.2], [9.55, 11.6, 1.6]],
-      "rotulos": [[0, 2.2, "La app me guía", "Serie a<br>*serie*"], [2.2, 4.2, "Con mis kilos", "Y el<br>*descanso*"], [4.2, 5.8, "Primer día", "*Hecho*", "verde"]] },
-    { "tipo": "ia", "clip": "c3", "ss": 0.3, "d": 2.8,
-      "rotulos": [[0.15, 2.8, "14:00", "¿Y qué<br>*como*?"]] },
-    { "tipo": "app", "fondo": "c3", "app": "comidas", "partes": [[0, 6.3, 3.8]],
-      "rotulos": [[0, 3.8, "Mi menú de hoy", "Con mis<br>*cantidades*", "verde"]] },
-    { "tipo": "ia", "clip": "c4", "ss": 0.5, "d": 2.8,
-      "rotulos": [[0.15, 2.8, "Mañana, más", "Lo difícil era<br>*empezar*"]] },
-    { "tipo": "fin", "d": 3.4 }
+    {
+      "tipo": "ia",
+      "clip": "c1",
+      "ss": 0.3,
+      "d": 3.2,
+      "rotulos": [
+        [
+          0.15,
+          3.2,
+          "Domingo, 23:40",
+          "Me doy de alta<br>en *K-ONE*"
+        ]
+      ]
+    },
+    {
+      "tipo": "app",
+      "fondo": "c1",
+      "app": "alta",
+      "partes": [
+        [
+          0,
+          28.15,
+          14.07
+        ],
+        [
+          28.15,
+          32.54,
+          4.39
+        ]
+      ],
+      "rotulos": [
+        [
+          0,
+          2.4,
+          "Entro en k-one.fit",
+          "Primer mes<br>*gratis*"
+        ],
+        [
+          2.4,
+          5,
+          "Me pregunta",
+          "Edad, peso<br>y *altura*"
+        ],
+        [
+          5,
+          7.8,
+          "Mi salud",
+          "Lesiones y<br>*alergias*"
+        ],
+        [
+          7.8,
+          9.2,
+          "Cómo como",
+          "Y cuántas<br>*veces*"
+        ],
+        [
+          9.2,
+          10.75,
+          "Qué quiero",
+          "Mi<br>*objetivo*"
+        ],
+        [
+          10.75,
+          14.07,
+          "Y cómo entreno",
+          "Días y<br>*tiempo*"
+        ],
+        [
+          14.07,
+          18.46,
+          "Y al momento",
+          "Mi plan,<br>*hecho*",
+          "verde"
+        ]
+      ]
+    },
+    {
+      "tipo": "ia",
+      "clip": "c2",
+      "ss": 0.2,
+      "d": 3,
+      "rotulos": [
+        [
+          0.15,
+          3,
+          "Lunes, 7:30",
+          "Primer<br>*entreno*"
+        ]
+      ]
+    },
+    {
+      "tipo": "app",
+      "fondo": "c2",
+      "app": "fuerza",
+      "partes": [
+        [
+          2.85,
+          9.55,
+          6.7
+        ],
+        [
+          9.55,
+          11.6,
+          2.05
+        ]
+      ],
+      "rotulos": [
+        [
+          0,
+          2.6,
+          "La app me guía",
+          "Serie a<br>*serie*"
+        ],
+        [
+          2.6,
+          6.7,
+          "Con mis kilos",
+          "Y el<br>*descanso*"
+        ],
+        [
+          6.7,
+          8.75,
+          "Primer día",
+          "*Hecho*",
+          "verde"
+        ]
+      ]
+    },
+    {
+      "tipo": "ia",
+      "clip": "c3",
+      "ss": 0.3,
+      "d": 2.8,
+      "rotulos": [
+        [
+          0.15,
+          2.8,
+          "14:00",
+          "¿Y qué<br>*como*?"
+        ]
+      ]
+    },
+    {
+      "tipo": "app",
+      "fondo": "c3",
+      "app": "comidas",
+      "partes": [
+        [
+          0,
+          6.37,
+          6.37
+        ]
+      ],
+      "rotulos": [
+        [
+          0,
+          3,
+          "Mi menú de hoy",
+          "Ya viene<br>*hecho*"
+        ],
+        [
+          3,
+          6.37,
+          "Toco y veo",
+          "La receta con<br>mis *cantidades*",
+          "verde"
+        ]
+      ]
+    },
+    {
+      "tipo": "ia",
+      "clip": "c4",
+      "ss": 0.5,
+      "d": 2.8,
+      "rotulos": [
+        [
+          0.15,
+          2.8,
+          "Mañana, más",
+          "Lo difícil era<br>*empezar*"
+        ]
+      ]
+    },
+    {
+      "tipo": "fin",
+      "d": 3.4
+    }
   ]
 }
