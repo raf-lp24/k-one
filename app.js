@@ -1220,7 +1220,7 @@
     // en repeticiones y el farmer carry es un transporte medido en metros. Salía
     // "Farmer carry con mancuernas 4×10 por lado" -- un paseo cargado de "10
     // repeticiones por lado".
-    [/remo con mancuerna(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Remo en banco inclinado con mancuernas']],
+    [/remo con mancuernas?(?! apoyado)( a una mano)?/i, ['Remo en polea baja', 'Remo en máquina con apoyo de pecho', 'Remo en banco inclinado con mancuernas']],
     // "( cargadas? con mancuernas?)?" entra en el patrón por lo mismo que el
     // material del hip thrust de abajo: la plantilla de Híbrido en casa escribe
     // "zancadas cargadas con mancuernas" y, si la regla solo se comía
@@ -1324,7 +1324,7 @@
     // colgando delante y detrás del reemplazo -- salía "elevación de Elevación
     // de gemelos sentado de pie" (nombre duplicado y contradictorio a la vez).
     // Bug real reproducido en Gimnasio/Principiante/4 días, semanas 2, 3, 5 y 9.
-    [/(elevaci[oó]n de )?gemelos( de pie| sentados?)?( en escal[oó]n con mancuerna| en escal[oó]n| en prensa o m[aá]quina| en prensa| con carga| con mancuernas?)?/i,
+    [/(elevaci[oó]n de )?gemelos( de pie| sentados?)?( en escal[oó]n con mancuernas?| en escal[oó]n| en prensa o m[aá]quina| en prensa| con carga| con mancuernas?)?/i,
       ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
     // El día de fuerza del corredor avanzado apenas rotaba: midiendo 12 semanas
@@ -4179,6 +4179,7 @@
     'sardina': 'lubina', 'sardinas': 'lubina',
     'caballa': 'lubina', 'trucha': 'lubina',
     'anchoa': 'pechuga de pollo', 'anchoas': 'pechuga de pollo',
+    'lomo embuchado': 'pavo en lonchas', 'cecina': 'pavo en lonchas',
     'gambas': 'pechuga de pollo', 'langostinos': 'pechuga de pollo',
     'mejillones': 'pechuga de pollo', 'calamares': 'pechuga de pavo',
     'pulpo': 'pechuga de pavo', 'sepia': 'pechuga de pavo',
@@ -4281,7 +4282,8 @@
     [/panceta/gi, 'pavo ahumado'],
     [/chorizo/gi, 'pavo curado'],
     [/salchichón/gi, 'pavo curado en lonchas'],
-    [/salmón ahumado/gi, 'pechuga de pavo ahumada'],
+    // «pavo ahumado» seguía siendo ahumado (y salado) para quien tiene tensión alta (1 nov 2026).
+    [/salmón ahumado/gi, 'pavo en lonchas'],
     [/salmón a la plancha/gi, 'pechuga de pollo a la plancha'],
     [/salmón a la parrilla/gi, 'pechuga de pollo a la parrilla'],
     [/salmón al horno/gi, 'pollo al horno'],
@@ -5089,7 +5091,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 2;
+  const MOTOR_REV = 3;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -5519,6 +5521,8 @@
       // cada 4ª semana, no cada 3ª).
       const lugarR  = u.lugar || 'Gimnasio';
       const rSinMat = lugarR.includes('sin material') || lugarR.includes('aire libre');
+      // Cinta de correr solo en el gimnasio: en casa (con mancuernas) no hay (1 nov 2026).
+      const rSinCinta = rSinMat || !/gimnasio/i.test(lugarR);
       // Rotación del ejercicio pliométrico "de firma" del bloque avanzado, por
       // mesociclo (bloqueMeso). Antes era fijo (siempre el mismo salto) y la
       // versión "sin material" pedía "saltos al cajón", que necesita un cajón —
@@ -5680,7 +5684,7 @@
       // "Perder grasa": caminar al acabar los días suaves suma gasto sin sumar
       // impacto. Antes solo lo recibía el día de fuerza, que con 2-3 días no existía.
       const _extraSuave = perdidaGrasa
-        ? (rSinMat
+        ? (rSinCinta
             ? '. Opcional, al terminar: 10-15 min caminando a paso vivo (suma gasto sin cargar más las piernas)'
             : '. Opcional, al terminar: 10-15 min caminando en cinta con inclinación o en bici suave (suma gasto sin impacto)')
         : '';
@@ -5725,7 +5729,7 @@
               media: 'Cuestas: 8 repeticiones de 200-300m subiendo fuerte (RPE 8-9)',
               larga: 'Cuestas: 10 repeticiones de 200-300m subiendo fuerte (RPE 8-9)',
               muyLarga: 'Cuestas: 12 repeticiones de 200-300m subiendo fuerte (RPE 8-9)' }[_tramoDur]
-            + ` — cuesta real de 4-6%${rSinMat ? '' : ' o cinta con inclinación alta'}. Bajas trotando de vuelta como recuperación`
+            + ` — cuesta real de 4-6%${rSinCinta ? '' : ' o cinta con inclinación alta'}. Bajas trotando de vuelta como recuperación`
           : { expres: 'Fartlek: 5×(1 min fuerte / 1 min suave)',
               corta: 'Fartlek: 8×(1 min fuerte / 2 min suave)',
               media: 'Escalera: 200m-400m-800m-1000m-800m-400m-200m con recuperación proporcional al esfuerzo (mitad del tiempo de trabajo)',
@@ -5822,7 +5826,7 @@
         resumen: 'Cardio sin impacto', etiqueta: 'Cardio',
         detalle: rSinMat
           ? `Caminata rápida · ${_tramoDur === 'expres' ? 20 : 30} min a paso vivo: respiras más fuerte, pero puedes hablar. Suma resistencia sin el impacto de correr un día más`
-          : `Bici o elíptica · ${_tramoDur === 'expres' ? 20 : 30} min suave (RPE 3-4). Suma resistencia sin el impacto de correr un día más`
+          : `${rSinCinta ? 'Bici o caminata a paso vivo' : 'Bici o elíptica'} · ${_tramoDur === 'expres' ? 20 : 30} min suave (RPE 3-4). Suma resistencia sin el impacto de correr un día más`
       });
 
       // "Ganar músculo" y "Ganar fuerza" (ganarMusculo cubre las dos): con 3
@@ -7841,6 +7845,20 @@
     // "femoral en máquina" a "peso muerto rumano con mancuernas" justo para quien
     // tiene la espalda lesionada). Por eso los ejercicios de sustitución de las
     // lesiones ya se eligen según el material disponible, más arriba.
+    // El TÍTULO del día también (1 nov 2026): los ejercicios ya estaban
+    // cambiados, pero quien tiene una hernia lumbar seguía leyendo «Pierna B ·
+    // Peso muerto», con el hombro lesionado «Torso B · Press militar», y el
+    // corredor con la rodilla mal «Fuerza + pliometría» sin un solo salto.
+    if (_lesionZonaEspalda || _lesionZonaHombro || _lesionZonaRodilla) {
+      const _tit = s => {
+        let t = s;
+        if (_lesionZonaEspalda) t = t.replace(/\bPeso muerto\b/g, 'Glúteo e isquios').replace(/\bpeso muerto\b/g, 'glúteo e isquios');
+        if (_lesionZonaHombro) t = t.replace(/\bPress militar\b/g, 'Hombro sin dolor').replace(/\bpress militar\b/g, 'hombro sin dolor');
+        if (_lesionZonaRodilla) t = t.replace(/Fuerza \+ pliometría/g, 'Fuerza sin saltos').replace(/\s*\+\s*pliometría/gi, '');
+        return t;
+      };
+      semana = semana.map(d => ({ ...d, resumen: d.resumen ? _tit(d.resumen) : d.resumen, detalle: d.detalle ? d.detalle.replace(/^[^·]*·/, m => _tit(m)) : d.detalle }));
+    }
     if (mapaLesion.length) {
       semana = semana.map(d => d.detalle ? { ...d, detalle: aplicarReemplazos(d.detalle, mapaLesion) } : d);
       semana = semana.map(d => d.detalle ? { ...d, detalle: _dedupSesion(d.detalle) } : d);
@@ -10333,7 +10351,8 @@
     // alta es bajar la sal: fuera los curados y ahumados (los más salados), y
     // lo que tiene versión baja en sal se pide así (más abajo).
     const _hipertension = enfermedad.includes('Hipertensión');
-    const _filtroSal = _hipertension ? 'jamón serrano, jamón ibérico, salmón ahumado' : '';
+    // Todos los curados y salazones que la nota dice quitar (1 nov 2026: se colaban lomo embuchado y cecina).
+    const _filtroSal = _hipertension ? 'jamón serrano, jamón ibérico, salmón ahumado, lomo embuchado, cecina, chorizo, salchichón, fuet, sobrasada, anchoas, mojama, bacon, panceta' : '';
     const textoFiltro = [_quitarAlergiasDedicadas(u.noComida, _activas), alergiaLibre, _filtroSal].filter(Boolean).join(', ');
     nutricion = filtrarNoComida(nutricion, textoFiltro);
     if (_redAlergenos && textoFiltro) {
@@ -10351,9 +10370,13 @@
     // (Se vuelve a pasar al final sobre nutricionPorDia: los platos de antes y
     // después de entrenar entran más tarde y no pasan por aquí.)
     const _bajoEnSal = t => (t || '')
+      .replace(/pavo ahumado(?: en lonchas)?/gi, 'pavo en lonchas')
       .replace(/pavo en lonchas(?! bajo)/gi, m => m + ' bajo en sal')
       .replace(/jamón cocido(?! bajo)/gi, m => m + ' bajo en sal')
-      .replace(/salsa de soja(?! baja)/gi, m => m + ' baja en sal');
+      // También «salsa soja» y «15ml soja» a secas (1 nov 2026), que se quedaban con toda su sal.
+      .replace(/salsa (?:de )?soja(?! (?:baja|sin gluten))/gi, 'salsa de soja baja en sal')
+      .replace(/(\d+\s*ml\s+)soja\b(?! texturizada)/gi, '$1salsa de soja baja en sal')
+      .replace(/(^|,\s*)soja(?=\s*(?:,|$))/gi, '$1salsa de soja baja en sal');
     const _tomasBajasEnSal = tomas => tomas.map(m => ({ ...m, opciones: m.opciones.map(o => ({ ...o, ingredientes: _bajoEnSal(o.ingredientes) })) }));
     if (_hipertension) {
       nutricion = _tomasBajasEnSal(nutricion);
