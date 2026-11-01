@@ -122,6 +122,37 @@ export const GUIONES = {
     }
   },
 
+  // Para el reel de historia (1 nov): el modo serie a serie de fuerza, del botón al resumen.
+  // Solo se usa como inserto en el móvil; no tiene textos propios en textos.js.
+  fuerza: {
+    salida: '_inserto-fuerza.mp4',
+    fecha: '2026-11-02T07:30:00',
+    cambios: {},
+    gancho: [], fondo: [],
+    async pasos(h) {
+      await h.ev(`(() => { localStorage.removeItem('kone_sesion_' + getFechaHoyISO()); hdTab('ent'); window.scrollTo(0, document.getElementById('hdTabs').getBoundingClientRect().top + scrollY - 12); return 'ok'; })()`);
+      await h.espera(400);
+      h.grabar();
+      h.marca('hoy');
+      await h.espera(1200);
+      await h.ev(`__toca(document.querySelector('#hdPanel .today-hero-btn'))`); await h.espera(1600);
+      h.marca('sesion');
+      // El peso se escribe en la casilla (con + iría de 1,5 en 1,5 kg).
+      await h.ev(`__toca(document.querySelector('#sesCuerpo .ses-kg input'), false)`); await h.espera(350);
+      await h.ev(`__escribe(document.querySelector('#sesCuerpo .ses-kg input'), '40', 160)`); await h.espera(700);
+      await h.ev(`__toca(document.querySelectorAll('#sesCuerpo .ses-marcar')[0], false)`); await h.espera(2600);
+      h.marca('descanso');
+      await h.ev(`__toca([...document.querySelectorAll('#sesDescanso .ses-mini')].pop(), false)`); await h.espera(900);
+      await h.ev(`__toca(document.querySelectorAll('#sesCuerpo .ses-marcar')[1], false)`); await h.espera(1800);
+      h.pausa();
+      await h.ev(`(() => { sesDescansoFin(true); for (let k = 0; k < 30 && _ses.idx < _ses.pasos.length; k++) sesIr(1); return _ses.idx; })()`); await h.espera(900);
+      h.sigue();
+      h.marca('resumen');
+      await h.espera(3200);
+      h.marca('fin');
+    }
+  },
+
   // 22 · Modo carrera (run/walk de principiante): cuenta atrás, «¡a correr!», «camina» y resumen.
   // El tiempo se adelanta entre fases (se ve el cambio, no los minutos): se avisa en pantalla.
   carrera: {

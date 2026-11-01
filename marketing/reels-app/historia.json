@@ -1,0 +1,21 @@
+{
+  "_nota": "Reel 23 «Me doy de alta en K-ONE» (1 nov 2026, idea de Rafa): una clienta (una chica normal, no de culturista, hecha con Higgsfield; 1 nov: Rafa no la quería «hiperfuerte») y, en su móvil, la app grabada de verdad. Escenas: Videos/historia-alta/c1-4.mp4. Insertos: grabaciones de grabar.mjs. Rótulos: [desde, hasta, ojo, título, 'verde'?] en segundos desde el principio del tramo.",
+  "salida": "23-me-doy-de-alta-en-k-one.mp4",
+  "tramos": [
+    { "tipo": "ia", "clip": "c1", "ss": 0.3, "d": 3.2,
+      "rotulos": [[0.15, 3.2, "Domingo, 23:40", "Me doy de alta<br>en *K-ONE*"]] },
+    { "tipo": "app", "fondo": "c1", "app": "alta", "partes": [[0, 28.15, 3.6], [28.15, 32.54, 2.2]],
+      "rotulos": [[0, 3.6, "Unas preguntas", "Cómo soy y<br>qué *quiero*"], [3.6, 5.8, "Y en 3 minutos", "Mi plan,<br>*hecho*", "verde"]] },
+    { "tipo": "ia", "clip": "c2", "ss": 0.2, "d": 3.0,
+      "rotulos": [[0.15, 3.0, "Lunes, 7:30", "Primer<br>*entreno*"]] },
+    { "tipo": "app", "fondo": "c2", "app": "fuerza", "partes": [[2.85, 9.55, 4.2], [9.55, 11.6, 1.6]],
+      "rotulos": [[0, 2.2, "La app me guía", "Serie a<br>*serie*"], [2.2, 4.2, "Con mis kilos", "Y el<br>*descanso*"], [4.2, 5.8, "Primer día", "*Hecho*", "verde"]] },
+    { "tipo": "ia", "clip": "c3", "ss": 0.3, "d": 2.8,
+      "rotulos": [[0.15, 2.8, "14:00", "¿Y qué<br>*como*?"]] },
+    { "tipo": "app", "fondo": "c3", "app": "comidas", "partes": [[0, 6.3, 3.8]],
+      "rotulos": [[0, 3.8, "Mi menú de hoy", "Con mis<br>*cantidades*", "verde"]] },
+    { "tipo": "ia", "clip": "c4", "ss": 0.5, "d": 2.8,
+      "rotulos": [[0.15, 2.8, "Mañana, más", "Lo difícil era<br>*empezar*"]] },
+    { "tipo": "fin", "d": 3.4 }
+  ]
+}
