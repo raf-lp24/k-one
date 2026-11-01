@@ -5147,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 7;
+  const MOTOR_REV = 8;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -8463,6 +8463,13 @@
       ? (perdidaGrasa ? 3.0 : ganarMusculo ? 5.5 : 4.5)
       : (perdidaGrasa ? 3.0 : _sedentarioSolo ? 3.5 : ganarMusculo ? 4.5 : sentirseMejor ? 3.5 : 4.5)) * (enfoqueBajoCarbo ? 0.65 : 1);
     let carbsObj = Math.round(pesoRef * carbsMultiplier);
+    // Resistencia preparando una competición (1 nov 2026, aprobado por Rafa): de
+    // 4,5 a 6 g/kg (6,5 con 5 h o más a la semana), lo que piden las guías para
+    // volumen moderado-alto. Las calorías no cambian: sale de la grasa, y el
+    // suelo de grasa de abajo (20 %, 0,7-0,8 g/kg) frena el exceso. Con el
+    // reparto por carga, la tirada larga y las series quedan cerca de 7 g/kg.
+    const _compResistencia = carbsAltos && /competici/i.test(objetivo) && !perdidaGrasa && !enfoqueBajoCarbo;
+    if (_compResistencia) carbsObj = Math.max(carbsObj, Math.round(pesoRef * (_volumenAlto ? 6.0 : 5.5)));
 
     // LA GRASA NECESITA SUELO Y TECHO. En este motor la grasa no se pide: es lo
     // que queda tras la proteína y los carbohidratos, y en los extremos de peso
@@ -11022,6 +11029,39 @@
     // la normalización de más abajo solo podía calcular el factor del lunes y
     // dejar que llegara al resto de rebote, lo que dejaba días reales hasta un
     // 9% fuera de su objetivo. Clonando, cada día es independiente de verdad.
+    // Resistencia preparando competición (1 nov 2026): con las calorías fijas, la
+    // grasa de los platos (aceite, aguacate, frutos secos, queso…) no dejaba sitio
+    // a los hidratos y el plato servía ~1 g/kg menos que el objetivo. Se recorta
+    // un tercio de los ingredientes grasos y esas calorías pasan al hidrato del
+    // plato (arroz, pasta, pan, patata, avena…). Mismas calorías; la etiqueta sale
+    // de la tabla de alimentos, así que «Ver macros» sigue cuadrando. Solo en
+    // platos que tienen un hidrato que escalar.
+    const _ING_GRASO = /aceite|\baove\b|aguacate|guacamole|frutos secos|\bnuez\b|nueces|almendras?|avellanas?|anacardos?|pistachos?|cacahuetes?|crema de (?:cacahuete|almendra|semillas)|mantequilla|queso (?:curado|semicurado|rallado|manchego|crema)|mozzarella|parmesano|chocolate|\bcoco\b|semillas|tahini|pesto|mayonesa|\bnata\b/i;
+    const _menosGrasaMasHidrato = o => {
+      if (o.racionFija || !INGREDIENTE_CARBOHIDRATO.test(o.ingredientes || '')) return o;
+      const c = parseInt(o.carbs) || 0, g = parseInt(o.grasa) || 0;
+      if (c <= 0 || g <= 0) return o;
+      let quitada = 0;
+      const ing = (o.ingredientes || '').split(',').map(x => {
+        const t = x.trim();
+        if (!_ING_GRASO.test(t)) return x;
+        const mm = t.match(/^(\d+(?:[.,]\d+)?)\s*(g|ml)\s+(.+)$/i);
+        if (!mm) return x;
+        const gr = parseFloat(mm[1].replace(',', '.'));
+        const al = _buscarAlimento(mm[3]);
+        if (!al || !al.g || gr < 8) return x;
+        const nuevo = Math.round(gr * 0.67);
+        quitada += (gr - nuevo) * al.g / 100;
+        return (x.match(/^\s*/)[0]) + nuevo + mm[2] + ' ' + mm[3];
+      }).join(',');
+      const dG = Math.min(g, Math.round(quitada));
+      if (dG < 2) return o;
+      const cNuevo = c + Math.round(dG * 9 / 4);
+      const fC = Math.min(1.5, cNuevo / c);
+      const cFinal = Math.round(c * fC);
+      return { ...o, ingredientes: escalarIngredientesPorMacro(ing, 1, fC), grasa: `${g - dG}g grasa`, carbs: `${cFinal}g carbs`,
+        kcal: `${Math.max(0, (parseInt(o.kcal) || 0) + 4 * (cFinal - c) - 9 * dG)} kcal` };
+    };
     nutricionPorDia.forEach((dia, i) => {
       const f = factorPorDia[i];
       carbsObjPorDia[i] = Math.round(carbsObj * f);
@@ -11038,6 +11078,7 @@
             ingredientes: escalarIngredientesPorMacro(o.ingredientes, 1, f),
           };
         });
+        if (_compResistencia) m.opciones = m.opciones.map(_menosGrasaMasHidrato);
       });
     });
 
