@@ -53,6 +53,8 @@
     document.getElementById(screenId).classList.add('active');
     if (!(opciones && opciones.mantenerScroll)) window.scrollTo(0,0);
     if (screenId === 'registro' || screenId === 'login') { try { _pintarPlanPendiente(); } catch (e) {} }
+    if (screenId === 'registro') { try { _rellenarRegistroConDatos(); } catch (e) {} }
+    if (screenId === 'bienvenida') { try { _rellenarBienvenida(); } catch (e) {} }
     const btnVolver = document.getElementById('btnVolverDashboard');
     if (btnVolver) {
       const user = getCurrentUser();
@@ -20874,6 +20876,47 @@ Se coló: ${lista}`;
     // Ya lo hizo en este dispositivo: a guardarlo (con opción de rehacerlo).
     if (_leerPlanPendiente()) { goTo('registro'); return; }
     enterFormulario();
+  }
+
+  // DATOS PRIMERO (1 nov 2026, Rafa): el alta empieza con nombre, apellidos y email,
+  // como antes; luego el cuestionario y al final solo la contraseña, con el nombre y
+  // el email ya puestos. Se guardan en este dispositivo 14 días (como el plan pendiente).
+  const _CLAVE_DATOS_ALTA = 'kone_alta_datos';
+  function _leerDatosAlta() {
+    try { const d = JSON.parse(localStorage.getItem(_CLAVE_DATOS_ALTA) || 'null'); if (d && Date.now() - (d.t || 0) < 14 * 86400000) return d; } catch (e) {}
+    return null;
+  }
+  function validarCampoBienvenida(campo) {
+    const val = ((document.getElementById('bv-' + campo) || {}).value || '').trim();
+    const ok = campo === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val) : val.length >= 2;
+    _setFieldState('bv-' + campo, val ? (ok ? 'valid' : 'error') : 'none');
+    return ok;
+  }
+  function _rellenarBienvenida() {
+    const d = _leerDatosAlta();
+    const u = getCurrentUser();
+    const pon = (id, v) => { const el = document.getElementById(id); if (el && !el.value && v) el.value = v; };
+    if (d) { pon('bv-nombre', d.nombre); pon('bv-apellidos', d.apellidos); pon('bv-email', d.email); }
+    else if (u) { const p = String(u.nombre || '').trim().split(/\s+/); pon('bv-nombre', p[0]); pon('bv-apellidos', p.slice(1).join(' ')); pon('bv-email', u.email); }
+  }
+  function empezarConDatos() {
+    // Con la sesión ya iniciada no hace falta: sus datos ya están en la cuenta.
+    if (getCurrentUser() && _supaUserId) { empezarCuestionario(); return; }
+    const campos = ['nombre', 'apellidos', 'email'];
+    const fallos = campos.filter(c => { const ok = validarCampoBienvenida(c); if (!ok) _setFieldState('bv-' + c, 'error'); return !ok; });
+    if (fallos.length) { const el = document.getElementById('bv-' + fallos[0]); if (el) el.focus(); return; }
+    const v = c => document.getElementById('bv-' + c).value.trim();
+    try { localStorage.setItem(_CLAVE_DATOS_ALTA, JSON.stringify({ nombre: v('nombre'), apellidos: v('apellidos'), email: v('email').toLowerCase(), t: Date.now() })); } catch (e) {}
+    kEvento('alta_datos');
+    empezarCuestionario();
+  }
+  // En «Crea tu cuenta», el nombre y el email de la bienvenida ya puestos.
+  function _rellenarRegistroConDatos() {
+    const d = _leerDatosAlta();
+    if (!d) return;
+    const n = document.getElementById('reg-nombre'), e = document.getElementById('reg-email');
+    if (n && !n.value) { n.value = (d.nombre + ' ' + d.apellidos).trim(); validarCampoReg('nombre'); }
+    if (e && !e.value) { e.value = d.email; validarCampoReg('email'); }
   }
 
   async function enviarPlanPorEmail(ev) {

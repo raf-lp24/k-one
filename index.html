@@ -3372,9 +3372,37 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       Tu plan en<br>
       <em>3 minutos</em>
     </h2>
-    <p class="welcome-sub">Responde unas preguntas sobre ti y te enseñamos tu plan. La cuenta la creas al final, solo si te convence.</p>
+    <p class="welcome-sub">Dinos quién eres, responde unas preguntas y te enseñamos tu plan. La contraseña la pones al final, solo si te convence.</p>
+    <!-- 1 nov 2026 (Rafa): primero nombre, apellidos y email, como antes; luego el
+         cuestionario y, al final, la contraseña con nombre y email ya rellenos. -->
+    <form id="bienvenidaForm" onsubmit="empezarConDatos(); return false;" autocomplete="on" style="text-align:left">
+      <div class="auth-field">
+        <label for="bv-nombre">Nombre</label>
+        <div class="auth-field-wrap">
+          <input type="text" id="bv-nombre" placeholder="Ej: Carlos" autocomplete="given-name" aria-describedby="err-bv-nombre" oninput="validarCampoBienvenida('nombre')">
+          <span class="auth-field-check" id="check-bv-nombre">✓</span>
+        </div>
+      </div>
+      <div class="auth-error" id="err-bv-nombre" role="alert" aria-live="polite">Escribe tu nombre</div>
+      <div class="auth-field">
+        <label for="bv-apellidos">Apellidos</label>
+        <div class="auth-field-wrap">
+          <input type="text" id="bv-apellidos" placeholder="Ej: García López" autocomplete="family-name" aria-describedby="err-bv-apellidos" oninput="validarCampoBienvenida('apellidos')">
+          <span class="auth-field-check" id="check-bv-apellidos">✓</span>
+        </div>
+      </div>
+      <div class="auth-error" id="err-bv-apellidos" role="alert" aria-live="polite">Escribe tus apellidos</div>
+      <div class="auth-field">
+        <label for="bv-email">Email</label>
+        <div class="auth-field-wrap">
+          <input type="email" id="bv-email" placeholder="tu@email.com" autocomplete="email" aria-describedby="err-bv-email" oninput="validarCampoBienvenida('email')">
+          <span class="auth-field-check" id="check-bv-email">✓</span>
+        </div>
+      </div>
+      <div class="auth-error" id="err-bv-email" role="alert" aria-live="polite">Introduce un email válido</div>
+    </form>
     <div class="welcome-btns">
-      <button class="btn-primary" onclick="empezarCuestionario()">Empezar el cuestionario</button>
+      <button class="btn-primary" type="submit" form="bienvenidaForm">Empezar el cuestionario</button>
       <div class="welcome-divider"><span>o</span></div>
       <button class="btn-ghost" onclick="goTo('login')">Ya tengo cuenta · Entrar</button>
     </div>
@@ -3398,7 +3426,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     <div id="registroPasoCuenta" class="reg-paso" style="display:none">
       <span class="reg-paso-n">Último paso</span>
       <b>Crea tu cuenta para guardar tu plan</b>
-      <span>Solo nombre, email y contraseña. Así tu plan queda guardado y empiezas tu mes gratis.</span>
+      <span>Tu nombre y tu email ya están puestos: solo falta elegir una contraseña. Así tu plan queda guardado y empiezas tu mes gratis.</span>
     </div>
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
@@ -3493,7 +3521,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Bienvenido/a</h2>
-    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="empezarCuestionario()">Haz tu plan aquí →</a></p>
+    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('bienvenida')">Haz tu plan aquí →</a></p>
     <p id="loginPlanPendiente" style="display:none;margin:-6px 0 18px;font-size:12px;line-height:1.5;color:var(--metal-claro);background:rgba(209,66,14,0.08);border:1px solid rgba(209,66,14,0.35);border-radius:10px;padding:10px 12px">Tienes un plan recién hecho en este dispositivo. Si tu cuenta todavía no tiene plan, se lo guardamos al entrar.</p>
 
     <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
