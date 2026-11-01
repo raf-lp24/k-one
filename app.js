@@ -4143,12 +4143,14 @@
     'carne roja': ['ternera','buey','cordero','cerdo','solomillo','entrecot','costillas','chuletón','jamón','jamon','lomo','cecina','chorizo','salchichón','salchichon','bacon'],
     'carne': ['pollo','pavo','ternera','buey','cordero','cerdo','conejo','solomillo','entrecot','costillas','chuletón','contramuslo','jamón','jamon','lomo','cecina','bacon','panceta','chorizo','salchichón','salchichon','morcilla','butifarra','carne picada'],
     'cerdo': ['jamón','jamon','lomo','bacon','panceta','chorizo','salchichón','salchichon','cerdo','morcilla','butifarra'],
-    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone','whey','proteína de suero'],
+    'lácteos': ['leche','yogur','queso','requesón','requeson','kéfir','kefir','nata','mantequilla','cottage','queso batido','queso fresco','skyr','mozzarella','parmesano','feta','ricotta','burrata','manchego','mascarpone','whey','proteína de suero','caseína','proteína aislada','proteína isolada'],
     'frutos secos': ['nueces','almendras','avellanas','cacahuete','cacahuetes','pistachos','anacardos','piñones','pinones','macadamia'],
     'legumbres': ['garbanzos','lentejas','judías','judias','alubias','habas','guisantes','edamame','soja'],
     'verduras': ['brócoli','brocoli','espinacas','espinaca','lechuga','rúcula','rucula','calabacín','calabacin','berenjena','pimiento','pepino','tomate','cebolla','zanahoria','espárrago','esparrago','alcachofa','champiñón','champiñon','setas','apio','puerro','col','repollo','coliflor','calabaza'],
     'frutas': ['plátano','platano','manzana','pera','naranja','mandarina','fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','kiwi','piña','sandía','sandia','melón','melon','mango','uva','uvas','cereza','cerezas','higo','higos','melocotón','melocoton','ciruela'],
     'frutos rojos': ['fresa','fresas','frambuesa','frambuesas','arándanos','arandanos','moras','grosellas'],
+    'pescado blanco': ['merluza','lubina','bacalao','dorada','rape','lenguado','gallo','rodaballo','panga','abadejo','mero'],
+    'sulfitos': ['vino','vinagre','vinagreta','pasas','orejones','pepinillos','encurtidos','sidra','cerveza'],
     'picante': ['guindilla','cayena','chile','jalapeño','jalapeños','sriracha'],
     'huevos': ['huevo','huevos','tortilla','revuelto','claras'],
     'gluten': ['pan','pasta','trigo','cebada','centeno','galletas','cereales','harina','fideos','cuscús','cuscus','seitán','seitan','granola','muesli','bulgur'],
@@ -4233,7 +4235,11 @@
     'piñones': 'semillas de sésamo', 'frutos secos': 'semillas',
     'tofu': 'pechuga de pollo', 'seitán': 'pechuga de pavo',
     'emperador': 'merluza', 'bonito': 'pechuga de pollo', 'panga': 'merluza', 'abadejo': 'merluza', 'mero': 'merluza',
-    'whey': 'proteína vegetal en polvo', 'proteína de suero': 'proteína vegetal en polvo', 'cebolleta': 'puerro', 'chipirones': 'pechuga de pavo',
+    'whey': 'proteína vegetal en polvo', 'proteína de suero': 'proteína vegetal en polvo',
+    'caseína': 'proteína vegetal en polvo', 'proteína aislada': 'proteína vegetal en polvo', 'proteína isolada': 'proteína vegetal en polvo',
+    'vinagre': 'limón', 'vinagreta': 'limón', 'pasas': 'arándanos', 'orejones': 'arándanos', 'pepinillos': 'pepino',
+    'nectarina': 'manzana', 'paraguayo': 'manzana',
+    'salmorejo': 'crema de calabacín', 'gazpacho': 'crema de calabacín', 'cebolleta': 'puerro', 'chipirones': 'pechuga de pavo',
     'seitan': 'pechuga de pavo', 'tempeh': 'pechuga de pollo',
     'cuscús': 'arroz integral', 'cuscus': 'arroz integral',
     'harina': 'harina de arroz',
@@ -4318,6 +4324,9 @@
     [/at[uú]n bonito/gi, 'pechuga de pollo desmechada'],
     [/emperador a la plancha/gi, 'pechuga de pollo a la plancha'],
     [/(?:proteína )?whey/gi, 'proteína vegetal en polvo'],
+    // Sin tomate, el salmorejo pasa a crema de calabacín: los pasos cuentan cómo se hace esa crema.
+    [/Tritura [^.]*hasta obtener (?:el|la) (?:salmorejo|gazpacho)[^.]*\./gi, 'Cuece el calabacín troceado en poca agua 10 min y tritúralo con el AOVE y sal hasta obtener una crema fina.'],
+    [/proteína aislada(?: de suero)?(?: \(sin lactosa\))?|proteína isolada|proteína iso\b/gi, 'proteína vegetal en polvo'],
     [/boquerones en vinagre/gi, 'pechuga de pavo a la plancha'],
     [/atún al natural/gi, 'pechuga de pollo desmechada'],
     [/atún en conserva/gi, 'pollo desmechado'],
@@ -4375,7 +4384,8 @@
     'soja': ['soja', 'edamame'],
     'crustaceos': FAMILIAS_ALIMENTOS['crustáceos'],
     'moluscos': FAMILIAS_ALIMENTOS['moluscos'],
-    'sesamo': ['sésamo', 'tahini', 'hummus'],
+    'sesamo': ['sésamo', 'tahini', 'hummus', 'ajonjolí'],
+    'tofu': ['soja'],
   };
   function _expandirAlergenoLibre(texto) {
     // Mismo separador que filtrarNoComida: aquí el cliente también escribe
@@ -4423,9 +4433,9 @@
   // siguen por la exclusión completa de la familia de lácteos.
   // Copia exacta en lib/normalizador-alimentos.js (lo vigila auditoria-completa).
   const ALERGIAS_DEDICADAS = {
-    'gluten': ['gluten', 'celiac', 'celiaqu', 'trigo'],
+    'gluten': ['gluten', 'celiac', 'celiaqu', 'trigo', 'tacc'],
     'lactosa': ['lactosa'],
-    'frutos secos': ['frutos secos', 'fruto seco', 'nuez', 'nueces', 'almendra', 'avellana', 'cacahuete', 'anacardo', 'pistacho'],
+    'frutos secos': ['frutos secos', 'fruto seco', 'frutossecos', 'cascara', 'nuez', 'nueces', 'almendra', 'avellana', 'cacahuete', 'anacardo', 'pistacho'],
   };
   // esAlergia=false para "no como": ahí "leche" es un gusto, no una alergia a
   // la proteína, y no debe impedir tratar "lactosa" con su sistema propio.
@@ -4541,6 +4551,8 @@
     tortilla: { despues: '(?![a-záéíóúüñ]*\\s+(?:de\\s+)?(?:ma[ií]z|trigo|integral))' },
     leche: { despues: '(?!\\s+(?:sin lactosa\\s+)?(?:de\\s+)?coco)' },
     nata: { despues: '(?!\\s+(?:de\\s+)?coco)' },
+    // «pasas» (sulfitos) no puede casar con «pásala» ni «pasado».
+    pasa: { antes: '(?=pasas?(?![a-záéíóúüñ]))' },
   };
   function _reAlimento(token) {
     const palabras = _normTexto(token).split(/\s+/).filter(Boolean).map(_raizSinPlural);
@@ -4747,7 +4759,26 @@
     // con ninguna familia y no se excluía nada (auditoría del 1 nov 2026).
     const _RELLENO = /^(?:no|nada|nunca|tampoco|ni|me|gusta|gustan|como|tomo|soporto|aguanto|odio|puedo|comer|alergia|alérgic[oa]|alergic[oa]|intolerancia|intolerante|a|al|de|del|el|la|los|las|un|una|nada de)\s+/i;
     const _sinRelleno = t => { let x = t, y; do { y = x; x = x.replace(_RELLENO, ''); } while (x !== y); return x; };
-    const tokensOriginales = raw.split(_SEPARADOR_ALIMENTOS).map(t => _sinRelleno(t.trim().toLowerCase())).filter(t => t.length >= 2);
+    // Otros nombres de lo mismo (1 nov 2026, barrido de 253 formas de escribir una
+    // alergia): «soya», «maní», «APLV», «frutos de cáscara», «anisakis»…
+    const _ALIAS_ALIMENTO = {
+      'soya': 'soja', 'mani': 'cacahuete', 'ajonjoli': 'sésamo', 'banana': 'plátano', 'bananas': 'plátano',
+      'leguminosas': 'legumbres', 'leguminosa': 'legumbres', 'anisakis': 'pescado',
+      'ovoproductos': 'huevo', 'ovoproducto': 'huevo', 'clara de huevo': 'huevo', 'claras de huevo': 'huevo',
+      'frutos de cascara': 'frutos secos', 'fruto de cascara': 'frutos secos', 'frutossecos': 'frutos secos',
+      'aplv': 'lácteos', 'caseina': 'lácteos', 'proteina de la leche': 'lácteos', 'proteina de leche': 'lácteos',
+      'proteina de leche de vaca': 'lácteos', 'proteina de la leche de vaca': 'lácteos', 'productos lacteos': 'lácteos', 'derivados lacteos': 'lácteos',
+      'ltp': 'melocotón', 'proteina transportadora de lipidos': 'melocotón', 'sulfito': 'sulfitos',
+    };
+    const _alias = t => {
+      const x = _sinRelleno(t);
+      // «alergia a la leche» no es un gusto: es toda la familia de lácteos.
+      if (/alergi|al[eé]rgic/.test(t) && _normTexto(x) === 'leche') return 'lácteos';
+      return _ALIAS_ALIMENTO[_normTexto(x)] || x;
+    };
+    const rawFrases = raw.replace(/\bleche,?\s+(?:y\s+)?(?:sus\s+)?derivados\b/gi, 'lácteos')
+      .replace(/\bpescado blanco,?\s+(?:y\s+)?azul\b/gi, 'pescado').replace(/(?:,\s*|\s+y\s+)(?:sus\s+)?derivados\b/gi, '');
+    const tokensOriginales = rawFrases.split(_SEPARADOR_ALIMENTOS).map(t => _alias(t.trim().toLowerCase())).filter(t => t.length >= 2);
     if (!tokensOriginales.length) return nutricion;
     const todosTokens = new Set(tokensOriginales);
     tokensOriginales.forEach(t => {
@@ -4789,10 +4820,15 @@
       'soja': ['tofu', 'tempeh', 'edamame', 'tamari'],
       'cebolla': ['cebolleta'],
       'salsa soja': ['salsa de soja'],
+      'melocoton': ['nectarina', 'paraguayo'],
+      'sesamo': ['tahini', 'hummus'],
+      'tahini': ['hummus'],
+      'tomate': ['salmorejo', 'gazpacho'],
       'pan': ['bocadillo', 'panecillo', 'sándwich', 'sandwich', 'tosta integral', 'tostada integral', 'tosta de centeno', 'tosta centeno', 'tosta pequeña']
     };
     [...todosTokens].forEach(t => {
-      const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)];
+      // «tomates» queda «tomat» al quitar el plural: se prueba también quitando solo la «s» (1 nov 2026).
+      const extra = SINONIMOS_MISMO_ALIMENTO[_normAlimento(t)] || SINONIMOS_MISMO_ALIMENTO[_normTexto(t).replace(/s$/, '')];
       if (extra) extra.forEach(e => todosTokens.add(e));
     });
     const tokenArr = [...todosTokens];
@@ -5111,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 4;
+  const MOTOR_REV = 5;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
