@@ -4093,7 +4093,9 @@
     "Casi todos tus días deberían sentirse fáciles: si puedes hablar mientras corres, vas bien.",
     "Entrenar no es competir: el máximo se guarda para el día de la carrera.",
     "Si te ahogas corriendo no es que no sirvas para esto: es que vas demasiado rápido. Baja el ritmo o alterna con caminar.",
-    "El mejor plan es el que encaja en tu vida, no el que te obliga a cambiarla."
+    "El mejor plan es el que encaja en tu vida, no el que te obliga a cambiarla.",
+    // 1 nov 2026 · revisión de @vikikateam, aprobada por Rafa
+    "Cuidarte no va de tener miedo a una cena de pasta, a un día de descanso o a comer fuera. Eso también forma parte del plan."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -8819,6 +8821,7 @@
             op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
+            op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
             op("Pudin de chía proteico con cottage y frambuesas", "15g semillas de chía, 100ml leche desnatada, 15g proteína whey, 50g queso cottage, 50g frambuesas, 5g crema de cacahuete", "261 kcal", "25g prot", "20g carbs", "9g grasa", "Nevera · 5 min + 2 h"),
             op("Mousse de yogur griego con mermelada de arándanos", "200g yogur griego 0%, 100g arándanos, zumo de limón al gusto", "181 kcal", "21g prot", "22g carbs", "1g grasa", "Cazo · 10 min"),
             op("Helado de plátano, fresas y yogur griego", "1 plátano, 80g fresas, 100g yogur griego 0%", "205 kcal", "12g prot", "37g carbs", "1g grasa", "Batidora · 5 min"),
@@ -9272,6 +9275,7 @@
             op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
+            op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
             op("Pudin de chía proteico con cottage y frambuesas", "15g semillas de chía, 100ml leche desnatada, 15g proteína whey, 50g queso cottage, 50g frambuesas, 5g crema de cacahuete", "261 kcal", "25g prot", "20g carbs", "9g grasa", "Nevera · 5 min + 2 h"),
             op("Mousse de yogur griego con mermelada de arándanos", "200g yogur griego 0%, 100g arándanos, zumo de limón al gusto", "181 kcal", "21g prot", "22g carbs", "1g grasa", "Cazo · 10 min"),
             op("Helado de plátano, fresas y yogur griego", "1 plátano, 80g fresas, 100g yogur griego 0%", "205 kcal", "12g prot", "37g carbs", "1g grasa", "Batidora · 5 min"),
@@ -9704,6 +9708,7 @@
             op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
+            op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
             op("Pudin de chía proteico con cottage y frambuesas", "15g semillas de chía, 100ml leche desnatada, 15g proteína whey, 50g queso cottage, 50g frambuesas, 5g crema de cacahuete", "261 kcal", "25g prot", "20g carbs", "9g grasa", "Nevera · 5 min + 2 h"),
             op("Mousse de yogur griego con mermelada de arándanos", "200g yogur griego 0%, 100g arándanos, zumo de limón al gusto", "181 kcal", "21g prot", "22g carbs", "1g grasa", "Cazo · 10 min"),
             op("Helado de plátano, fresas y yogur griego", "1 plátano, 80g fresas, 100g yogur griego 0%", "205 kcal", "12g prot", "37g carbs", "1g grasa", "Batidora · 5 min"),
@@ -17334,6 +17339,7 @@
     "Tarta de queso proteica con fresas al horno": "Para 4 raciones, multiplica por 4. Bate las claras con el queso batido, el queso crema y la proteína hasta que quede liso. Viértelo en un molde, reparte las fresas en láminas por encima y hornéalo 30-35 minutos a 170 °C. Déjalo enfriar en la nevera antes de cortar.",
     "Tortitas de chocolate con yogur y fresas": "Bate el huevo con la mitad del yogur, el cacao y la harina de avena. Haz tortitas pequeñas en una sartén con unas gotas de aceite, 2 minutos por lado. Sírvelas con el resto del yogur y las fresas.",
     "Bizcocho de chocolate y plátano en taza": "Chafa el plátano en una taza grande, añade el huevo y el cacao y mezcla bien. Cuécelo 1 minuto y medio o 2 en el microondas, hasta que al pinchar salga limpio.",
+    "Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete": "Bate el huevo con las claras en un plato y moja la tortilla de trigo por las dos caras. Ponla en una sartén antiadherente caliente y echa el resto del huevo por encima. Cuando cuaje, reparte el plátano en rodajas y el chocolate troceado, dóblala por la mitad y dale la vuelta un minuto. Sírvela con la crema de cacahuete por encima.",
     "Pudin de chía proteico con cottage y frambuesas": "Mezcla la chía con la leche y la proteína y déjala al menos 2 horas en la nevera (mejor de un día para otro). Ponle por encima el cottage, las frambuesas y la crema de cacahuete.",
     "Gofres de vainilla proteicos con yogur y fresas": "Mezcla la harina de avena, la proteína, el huevo, las claras, la bebida de almendras y una pizca de levadura hasta tener una masa sin grumos. Cuécela en la gofrera 3-4 minutos por tanda. Sírvelos con el yogur y las fresas.",
     "Tostada de plátano con crema de almendra y chocolate": "Unta el pan con la crema de almendra y pon encima el plátano en rodajas con canela. Cocínala 8-10 minutos a 170 °C en la air fryer (o tuéstala en la sartén tapada). Termina con el chocolate fundido por encima y acompáñala con el yogur.",
