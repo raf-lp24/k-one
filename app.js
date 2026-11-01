@@ -5430,6 +5430,7 @@
     // zona 2, quitan strides y pliometría y cambian el metcon por un circuito
     // suave. Antes solo el gimnasio lo hacía (el remate en zona 2).
     const _sinIntensidad = enfermedad.includes('Hipertensión') || enfermedad.includes('cardíacos');
+    const _NOTA_CAFEINA_SALUD = 'No te proponemos cafeína ni pre-entrenos con estimulantes: con la tensión alta o un problema de corazón la suben durante unas horas. Si tomas café, que sea el de siempre, y pregunta a tu médico antes de tomar más.';
     const medicacion = (u.medicacion || '').trim();
     const progreso = u.progreso || { semana: 1, diasEntrenados: 0, ajuste: 0 };
     // Semana y bloque del mesociclo. Se declaran aquí arriba porque los planes por
@@ -5738,7 +5739,50 @@
       const _conStrides = !_lesionZonaRodilla && _tramoDur !== 'expres' && !_sinIntensidad;
       const _strides = (n, metros, nota) => _conStrides ? `. Al acabar: ${n} strides de ${metros}m (${nota})` : '';
       const durSuave = _escalarDur(_RUN_DUR.suave[0] + _extraAv, _RUN_DUR.suave[1] + _extraAv, _multVolumenRun, _TOPE_RUN - (_conStrides ? 5 : 0));
-      const durLarga = _escalarDur(_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv, _multVolumenRun);
+      // TIRADA LARGA SEGÚN LA CARRERA (1 nov 2026, aprobado por Rafa). Antes solo
+      // dependía del tiempo por sesión: 10K, media y maratón salían con la misma
+      // tirada (hasta 110-120 min) y cada bloque de 4 semanas volvía al punto de
+      // partida. Ahora, si el evento dice la distancia:
+      //  · el pico (la 3.ª semana del bloque) es el de esa distancia y nivel;
+      //    en 5K y 10K nunca pasa del tiempo por sesión, y en media y maratón
+      //    puede pasarlo (es LA sesión de esas distancias), salvo con 30-45 min
+      //    o menos por sesión;
+      //  · crece hacia la carrera: a 5 semanas o menos está en su pico, y antes
+      //    va un 6 % por debajo por cada semana de más (mínimo el 70 %). Sin
+      //    fecha, sube un 5 % por bloque hasta el pico.
+      // El último tramo (semana de carrera) ya lo recorta su propio bloque.
+      const _distCarrera = (() => {
+        if (!tieneEvento) return null;
+        const e = u.evento.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        if (/trail|ultra|montana|hyrox|triatl|duatl|crossfit/.test(e)) return null;
+        if (/media|medio|half|21 ?k|21[.,]1|21 km/.test(e)) return 'media';
+        if (/maraton|marathon|42 ?k|42[.,]2|42 km/.test(e)) return 'maraton';
+        if (/(^|[^0-9])10 ?(k|km|mil)\b|diez mil|10\.000/.test(e)) return '10k';
+        if (/(^|[^0-9])5 ?(k|km|mil)\b|cinco mil|5\.000/.test(e)) return '5k';
+        return null;
+      })();
+      const _PICO_LARGA = { '5k': esAvanzado ? 70 : 60, '10k': esAvanzado ? 90 : 75, media: esAvanzado ? 130 : 115, maraton: esAvanzado ? 170 : 150 }[_distCarrera];
+      const _capLarga = !_PICO_LARGA ? _TOPE_RUN
+        : (_distCarrera === 'media' || _distCarrera === 'maraton')
+          ? (['media', 'larga', 'muyLarga'].includes(_tramoDur) ? Math.max(_TOPE_RUN, _PICO_LARGA) : _TOPE_RUN)
+          : Math.min(_TOPE_RUN, _PICO_LARGA);
+      const _progLarga = !_PICO_LARGA ? 1
+        : diasParaEvento !== null
+          ? Math.max(0.8, Math.min(1, 1 - 0.06 * (diasParaEvento / 7 - 5)))
+          : Math.min(1, 0.85 + 0.05 * bloqueMeso);
+      // 5K y 10K no necesitan ir creciendo: solo se topa la tirada a la de su
+      // distancia, y nunca por debajo del rodaje suave más 10 minutos.
+      const _hiCorta = _PICO_LARGA && (_distCarrera === '5k' || _distCarrera === '10k')
+        ? Math.max(_RUN_DUR.suave[1] + _extraAv + 10, Math.min(_RUN_DUR.larga[1] + _extraAv, Math.round(_PICO_LARGA / 1.21)))
+        : 0;
+      const _baseLarga = _hiCorta ? [_hiCorta - 10, _hiCorta]
+        : _PICO_LARGA
+          ? [Math.round(_PICO_LARGA / 1.21 * _progLarga) - 15, Math.round(_PICO_LARGA / 1.21 * _progLarga)]
+          : [_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv];
+      const durLarga = _escalarDur(_baseLarga[0], _baseLarga[1], _multVolumenRun, _capLarga);
+      // Pasa del tiempo por sesión que dijo tener: se le explica por qué.
+      const _largaMasQueSesion = _capLarga > _TOPE_RUN && parseInt(durLarga.split('-').pop(), 10) > _TOPE_RUN;
+      const _ritmoFinal = { media: 'ritmo de media maratón', maraton: 'ritmo maratón' }[_distCarrera] || 'ritmo maratón';
       const durRecup = _escalarDur(Math.max(10, _RUN_DUR.suave[0] - 10), Math.max(15, _RUN_DUR.suave[1] - 10), 1);
       const _cal = { expres: 4, corta: 10, media: 10, larga: 15, muyLarga: 15 }[_tramoDur];
       const _vuelta = { expres: 2, corta: 5, media: 8, larga: 10, muyLarga: 10 }[_tramoDur];
@@ -5775,12 +5819,16 @@
         }
         // Final a ritmo maratón solo en avanzado, una semana sí y otra no, y nunca
         // en descarga ni con el objetivo de encontrarse mejor.
-        const conFinal = esAvanzado && !sentirseMejor && Math.max(1, semanaActual) % 2 === 0 && semanaCiclo !== 4;
+        // En 5K y 10K no: el ritmo de esas carreras se trabaja en las series.
+        const conFinal = esAvanzado && !sentirseMejor && Math.max(1, semanaActual) % 2 === 0 && semanaCiclo !== 4 && _distCarrera !== '5k' && _distCarrera !== '10k';
+        const _masTxt = _largaMasQueSesion
+          ? ` Es más de lo que dura tu sesión normal a propósito: para ${_distCarrera === 'maraton' ? 'una maratón' : 'una media maratón'} la tirada larga es la sesión que más cuenta. Si ese día no tienes tanto tiempo, haz lo que puedas a ritmo suave.`
+          : '';
         return conFinal
-          ? { resumen: 'Tirada larga · Final a ritmo maratón', etiqueta: 'Volumen',
-              detalle: `Tirada larga con calidad · ${durLarga}. Todo a zona 2 suave salvo los últimos 15-20 min, a ritmo maratón. Hidratación cada 20 min. ${_descargaTxt}${_extraSuave ? ' ' + _extraSuave.slice(2) : ''}` }
+          ? { resumen: `Tirada larga · Final a ${_ritmoFinal}`, etiqueta: 'Volumen',
+              detalle: `Tirada larga con calidad · ${durLarga}. Todo a zona 2 suave salvo los últimos 15-20 min, a ${_ritmoFinal}. Hidratación cada 20 min. ${_descargaTxt}${_masTxt}${_extraSuave ? ' ' + _extraSuave.slice(2) : ''}` }
           : { resumen: 'Tirada larga', etiqueta: 'Volumen',
-              detalle: `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). ${_descargaTxt} Post: foam rolling + estiramientos${_extraSuave}` };
+              detalle: `Tirada larga · ${durLarga} a ritmo suave zona 1-2 (RPE 3-4). ${_descargaTxt}${_masTxt} Post: foam rolling + estiramientos${_extraSuave}` };
       };
       // Calidad del intermedio: fartlek o escalera un bloque, cuestas el siguiente.
       const _calidadIntermedio = () => {
@@ -5936,7 +5984,7 @@
       if (diasParaEvento !== null && diasParaEvento <= 17) {
         const _hoyIdx = (new Date().getDay() + 6) % 7;
         const _durTaper = _escalarDur(_RUN_DUR.suave[0], _RUN_DUR.suave[1], 0.6);
-        const _durLargaRec = _escalarDur(_RUN_DUR.larga[0] + _extraAv, _RUN_DUR.larga[1] + _extraAv, _multVolumenRun * 0.7);
+        const _durLargaRec = _escalarDur(_baseLarga[0], _baseLarga[1], _multVolumenRun * 0.7, _capLarga);
         const _nombreCarrera = tieneEvento ? u.evento.trim() : 'tu carrera';
         const _rodajeTaper = (extra) => ({
           tipo: 'Entrenamiento', resumen: 'Rodaje suave · Semana de carrera', etiqueta: 'Cardio',
@@ -11226,7 +11274,11 @@
     if (esRunner) {
       notasDeporte.push('Hidratación: bebe 5-7 ml/kg de peso 2-4h antes de correr. Durante sesiones de +60 min, 150-250 ml cada 20 min con electrolitos.');
       notasDeporte.push('Tus carbohidratos están ajustados al alza para mantener el glucógeno muscular. Los días de tirada larga (>10 km), prioriza la comida rica en hidratos 3h antes.');
-      notasDeporte.push('Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
+      // Sin cafeína con tensión alta o problemas cardíacos (1 nov 2026, aprobado
+      // por Rafa): la sube durante unas horas. Mismo criterio en Hyrox e híbrido.
+      notasDeporte.push(_sinIntensidad
+        ? 'Suplementación útil para running: electrolitos en carreras largas y vitamina D si entrenas mucho en interior. ' + _NOTA_CAFEINA_SALUD
+        : 'Suplementación útil para running: cafeína (3-6 mg/kg, 30-60 min pre-carrera), electrolitos en carreras largas, vitamina D si entrenas mucho en interior.');
       // Nutricion DURANTE la carrera: hasta ahora el plan solo cubria antes
       // (fuelingPreCarrera) y despues (fuelingPostCarrera) de la tirada larga,
       // nada de que hacer en los 60+ minutos de en medio -- justo donde mas
@@ -11261,7 +11313,9 @@
     } else if (esHyrox) {
       notasDeporte.push('Hidratación: como Hyrox mezcla carrera y estaciones, bebe 400-600 ml con electrolitos 2h antes. En competición, aprovecha las transiciones para beber.');
       notasDeporte.push('Tu plan tiene carbohidratos altos para mantener el rendimiento en las 8 estaciones + 8 km de carrera. Los días de simulacro, carga hidratos la noche anterior.');
-      notasDeporte.push('Suplementación útil para Hyrox: cafeína pre-competición (3-6 mg/kg), creatina diaria (5g), beta-alanina (3-6g/día) para mejorar tolerancia al ácido láctico.');
+      notasDeporte.push(_sinIntensidad
+        ? 'Suplementación útil para Hyrox: creatina diaria (5g) y beta-alanina (3-6g/día) para mejorar tolerancia al ácido láctico. ' + _NOTA_CAFEINA_SALUD
+        : 'Suplementación útil para Hyrox: cafeína pre-competición (3-6 mg/kg), creatina diaria (5g), beta-alanina (3-6g/día) para mejorar tolerancia al ácido láctico.');
       // Nutricion DURANTE la competicion: igual que le faltaba a running, aqui
       // tampoco habia nada sobre que hacer en la propia carrera (60-90+ min
       // para la mayoria de atletas). Evidencia (guias de nutricion Hyrox):
@@ -11276,7 +11330,9 @@
       notasDeporte.push('Suplementación útil para fuerza: creatina monohidrato (5g/día, el suplemento con más evidencia científica), proteína whey si no llegas a tu objetivo proteico con comida.');
     } else if (esCombinacion) {
       notasDeporte.push('Hidratación: al combinar fuerza y cardio, necesitas más hidratación que solo gimnasio. 500-700 ml pre-entreno, 200 ml cada 15-20 min durante.');
-      notasDeporte.push('Suplementación útil para entrenamiento híbrido: creatina monohidrato (5g/día), cafeína pre-entreno (200-400 mg), proteína post si la sesión es larga.');
+      notasDeporte.push(_sinIntensidad
+        ? 'Suplementación útil para entrenamiento híbrido: creatina monohidrato (5g/día) y proteína post si la sesión es larga. ' + _NOTA_CAFEINA_SALUD
+        : 'Suplementación útil para entrenamiento híbrido: creatina monohidrato (5g/día), cafeína pre-entreno (200-400 mg), proteína post si la sesión es larga.');
     } else {
       // Único caso real que llega aquí: solo-dieta que marcó "No entreno,
       // llevo una vida sedentaria" (deporte='No especificado' desde el
@@ -11316,7 +11372,9 @@
       // usuario (semana, con lesión/material/rotación ya aplicados) y, si se
       // queda corta del mínimo recomendado (2x/semana), se avisa con un extra
       // concreto en vez de dejarlo a lo que trajera la plantilla por azar.
-      const _coreRegex = /plancha|dead bug|rueda abdominal|russian twist|elevaci[oó]n de piernas|abdomin/i;
+      // 1 nov 2026: «Copenhagen plank», pallof, bird dog y hollow también son core
+      // (al corredor le decía «0 días» con su copenhagen del día de fuerza).
+      const _coreRegex = /plancha|plank|dead bug|bird dog|hollow|pallof|rueda abdominal|russian twist|elevaci[oó]n de piernas|abdomin/i;
       const diasConCore = semana.filter(d => d.detalle && _coreRegex.test(d.detalle)).length;
       if (diasConCore < 2) {
         notasDeporte.push(`Core: tu plan de esta semana trae trabajo de core en ${diasConCore} día${diasConCore === 1 ? '' : 's'}. Lo recomendable son al menos 2x/semana — añade 3×30-45s de plancha + 3×12/lado de dead bug al final de dos de tus sesiones.`);
@@ -11485,7 +11543,26 @@
     // Fuentes públicas: fisiologiadelejercicio.com (López Chicharro), g-se.com,
     // crownsportnutrition.com. Nunca se recomienda suplementar hierro sin
     // análisis: en exceso es contraproducente, no inocuo.
-    if (esMujer) {
+    // Menopausia (1 nov 2026, aprobado por Rafa): el 68 % del público tiene más
+    // de 45 años y a una mujer de 60 le llegaban las notas de la regla y nada de
+    // esto. Desde los 55, ciclo y hierro ya no se enseñan (la edad media de la
+    // menopausia en España ronda los 51); entre 45 y 54 van las dos cosas,
+    // porque puede estar en cualquier punto. Fuentes: ISSN, NAMS, Fundación
+    // Española de Reumatología y SEEDO (proteína, calcio, vitamina D, fuerza).
+    const _edadMujer = parseInt(u.edad, 10) || 0;
+    if (esMujer && _edadMujer >= 45) {
+      // Las fuentes de calcio, sin lo que no puede o no quiere comer.
+      const _evitaMeno = `${u.alergia || ''} ${u.alergiaOtra || ''} ${u.noComida || ''}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const _calcioMeno = [
+        // Alergia a la proteína de la leche: ni sin lactosa. Intolerancia: sin lactosa.
+        /aplv|caseina|leche|lacteo/.test(_evitaMeno) ? '' : /lactosa/.test(_evitaMeno) ? 'yogur o leche sin lactosa' : 'lácteos',
+        'bebidas vegetales enriquecidas',
+        /pescado|sardina|anisakis/.test(_evitaMeno) ? '' : 'sardinas en lata con espina',
+        /frutos secos|almendra/.test(_evitaMeno) ? 'legumbres' : 'almendras',
+      ].filter(Boolean).join(', ');
+      notasDeporte.push(`Menopausia: si ya estás en ella o cerca, cambian algunas cosas y tu plan ayuda en casi todas. Proteína: repártela en todas las tomas, unos 25-30 g en cada una, porque con menos estrógenos el músculo responde peor a cantidades pequeñas. Hueso: unos 1.000-1.200 mg de calcio al día (${_calcioMeno}) y vitamina D, que sin ella el calcio no se aprovecha. Entreno: la fuerza con un peso que de verdad cueste${!soloDieta ? ' (la de tu plan)' : ', 2-3 días a la semana,'} es lo que más protege músculo y hueso${_sinImpacto ? '; caminar a buen paso y subir escaleras también suman' : ', y si tu médico no te lo desaconseja, algo de impacto (subir escaleras a buen paso, saltos suaves) también suma hueso'}. Sofocos y sueño: el alcohol, el picante y el café por la tarde los empeoran; una cena no muy tarde ayuda. Si tienes dudas sobre tratamiento o densidad ósea, tu ginecóloga es quien mejor te puede orientar.`);
+    }
+    if (esMujer && _edadMujer < 55) {
       notasDeporte.push('Hierro: si menstrúas, tus necesidades de hierro son bastante más altas, y el déficit es la carencia nutricional más común entre mujeres que entrenan. Engaña porque su síntoma — cansancio y entrenos sin chispa — se parece mucho al de estar sobreentrenada. Buenas fuentes en tu plan: carne roja, legumbres, espinacas y marisco; acompáñalas de vitamina C (cítrico, pimiento o tomate crudo) para absorber más, y separa el café y el té de esas comidas porque lo bloquean. Si el cansancio persiste, un análisis con ferritina lo aclara — pero no te suplementes hierro por tu cuenta sin ese análisis.');
       // La evidencia sobre periodizar el entreno por fases del ciclo es
       // inconsistente (los propios estudios no se ponen de acuerdo ni en

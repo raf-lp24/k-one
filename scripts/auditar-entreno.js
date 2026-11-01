@@ -19,6 +19,8 @@
 //     en inglés y textos rotos.
 //  8. El plan lleva la semana y el lunes con que se generó (la app lo rehace
 //     al cambiar de semana).
+//  9. Sin cafeína con tensión alta o corazón; tirada larga según la distancia
+//     (10K < media < maratón); nota de menopausia desde los 45 y ciclo hasta 54.
 //
 // Uso: node scripts/auditar-entreno.js  (entra en `npm test`; sale con código 1
 // si algo falla). Tarda ~45 s.
@@ -137,6 +139,39 @@ for (let hoyIdx = 0; hoyIdx < 7; hoyIdx++) {
     });
   }
  }
+}
+
+// ── 9: cafeína, distancia de la carrera y menopausia (1 nov 2026) ──
+const notas = p => [...(p.notasDeporte || []), ...(p.notasNutricion || [])].map(String);
+for (const deporte of ['Running', 'Híbrido']) for (const enfermedad of ['Hipertensión', 'Problemas cardíacos']) {
+  const p = gen({ deporte, lugar: deporte === 'Running' ? 'Al aire libre' : 'Gimnasio + exterior', enfermedad });
+  nPlanes++;
+  const c = notas(p).find(x => /cafe[ií]na \(|cafe[ií]na pre|\d+-\d+ mg/i.test(x));
+  if (c) falla('cafeína', `${deporte} con ${enfermedad}: «${c.slice(0, 90)}…»`);
+}
+const picoLarga = (nivel, evento) => {
+  let max = 0;
+  const f = new Date(); f.setDate(f.getDate() + 28);
+  for (const s of [1, 2, 3]) {
+    const p = gen({ nivel, tiempoSesion: '60-90 min', objetivo: 'Preparar una competición', evento, eventoFecha: iso(f), progreso: { semana: s, diasEntrenados: 0, ajuste: 0 } });
+    nPlanes++;
+    const d = (p.semana || []).find(x => /Tirada/.test(x.resumen));
+    const m = d && d.detalle.match(/(\d+) min/g);
+    if (m) max = Math.max(max, ...m.map(x => parseInt(x, 10)));
+  }
+  return max;
+};
+for (const nivel of ['Llevo algo de tiempo', 'Avanzado']) {
+  const [k10, media, mara] = [picoLarga(nivel, '10K de mi barrio'), picoLarga(nivel, 'Media maratón de Valencia'), picoLarga(nivel, 'Maratón de Sevilla')];
+  if (!(k10 <= 90 && k10 < media && media < mara && media >= 100 && mara >= 140))
+    falla('distancia de la carrera', `${nivel.split(',')[0]}: tirada larga pico 10K ${k10} · media ${media} · maratón ${mara} min (10K ≤ 90, media ≥ 100, maratón ≥ 140)`);
+}
+for (const [edad, meno, ciclo] of [[35, false, true], [50, true, true], [62, true, false]]) {
+  const p = gen({ sexo: 'Mujer', edad: String(edad), peso: '66', altura: '164', deporte: 'Gimnasio / Fuerza', lugar: 'Gimnasio' });
+  nPlanes++;
+  const n = notas(p);
+  if (n.some(x => /^Menopausia/.test(x)) !== meno) falla('menopausia', `mujer de ${edad}: nota de menopausia ${meno ? 'falta' : 'sobra'}`);
+  if (n.some(x => /^Ciclo menstrual/.test(x)) !== ciclo) falla('menopausia', `mujer de ${edad}: nota del ciclo ${ciclo ? 'falta' : 'sobra'}`);
 }
 
 const unicos = [...new Set(fallos)];
