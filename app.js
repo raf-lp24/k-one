@@ -5147,7 +5147,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 8;
+  const MOTOR_REV = 9;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -11062,6 +11062,68 @@
       return { ...o, ingredientes: escalarIngredientesPorMacro(ing, 1, fC), grasa: `${g - dG}g grasa`, carbs: `${cFinal}g carbs`,
         kcal: `${Math.max(0, (parseInt(o.kcal) || 0) + 4 * (cFinal - c) - 9 * dG)} kcal` };
     };
+    // GRASA MÍNIMA (1 nov 2026, revisión de nutricionista, aprobada por Rafa).
+    // Unos 200 platos de más de 250 kcal llevaban menos del 12 % de grasa, y quien
+    // los elegía acababa días por debajo del 20 % y del mínimo por kilo (mala
+    // absorción de las vitaminas A, D, E y K; en mujeres, el ciclo). Se lleva el
+    // plato al 20 % con grasa buena (salado: AOVE; dulce: nueces, o lino sin frutos
+    // secos) y se quita el hidrato que mantiene las mismas calorías. Los de antes y
+    // después de entrenar no se tocan (ahí conviene poca grasa). En competición de
+    // resistencia, más suave (15 %) para no deshacer el extra de hidratos.
+    const _REPOSTAJE = /pre-?entreno|post-?entreno|antes de|despu[ée]s de entrenar|recuperaci[óo]n|pre-?wod|post-?wod|pre-?carrera|post-?carrera/i;
+    const _SALADO = /pollo|pavo|ternera|carne|at[uú]n|salm[oó]n|merluza|bacalao|gambas|pescado|jam[oó]n|patata|lentejas|garbanzos|alubias|verdura|tomate|ensalada|pasta|espaguetis|macarrones|arroz(?! con leche)|huevos? (?:cocidos?|a la plancha|revueltos?)|tortilla|quinoa|cuscús|wrap|bocadillo|sándwich/i;
+    const _vetado = re => re.test(textoFiltro || '');
+    const _sinNueces = sinFrutosSecos || _vetado(/nuez|nueces|frutos secos/i);
+    const _sinAceite = _vetado(/aceite|aove|oliva/i);
+    const _conGrasaMinima = o => {
+      if (o.racionFija || _REPOSTAJE.test(`${o.nombre} ${o.prep || ''}`)) return o;
+      // Las bebidas no: unas nueces en un batido o un café no tienen sentido.
+      if (/smoothie|batido|caf[eé]|zumo|gelatina|bebida/i.test(o.nombre)) return o;
+      const K = parseInt(o.kcal) || 0, g = parseInt(o.grasa) || 0, c = parseInt(o.carbs) || 0, p = parseInt(o.prot) || 0;
+      if (K < 180) return o;
+      const umbral = _compResistencia ? 0.12 : 0.15, meta = _compResistencia ? 0.15 : 0.20;
+      if (g * 9 / K >= umbral) return o;
+      const salado = _SALADO.test(o.nombre + ' ' + o.ingredientes);
+      const fuente = salado ? (_sinAceite ? null : 'AOVE') : (!_sinNueces ? 'nueces picadas' : _vetado(/lino|semillas/i) ? null : 'semillas de lino molidas');
+      const al = fuente && _buscarAlimento(fuente);
+      if (!al || !al.g) return o;
+      let gr = Math.round((meta * K / 9 - g) * 100 / al.g);
+      if (gr < 3) return o;
+      // Con hidrato escalable (arroz, pasta, pan, patata, avena…) se quita de ahí;
+      // si no lo hay (fruta, lácteos), se encoge un poco todo el plato. El hidrato
+      // o el plato nunca bajan más de un 40 % / 25 %.
+      const conHidrato = c > 0 && INGREDIENTE_CARBOHIDRATO.test(o.ingredientes || '');
+      let kcalA = gr * al.kcal / 100;
+      const tope = conHidrato ? 0.4 * c * 4 : 0.25 * K;
+      if (kcalA > tope) { gr = Math.round(gr * tope / kcalA); if (gr < 3) return o; kcalA = gr * al.kcal / 100; }
+      const gA = gr * al.g / 100, pA = gr * al.p / 100, cA = gr * al.c / 100;
+      let ing, pN, cN, gN;
+      if (conHidrato) {
+        const cBase = Math.max(1, c - Math.round(kcalA / 4));
+        ing = escalarIngredientesPorMacro(o.ingredientes, 1, cBase / c);
+        pN = p + pA; cN = cBase + cA; gN = g + gA;
+      } else {
+        const sc = (K - kcalA) / K;
+        ing = scaleIngredientes(o.ingredientes, sc);
+        pN = p * sc + pA; cN = c * sc + cA; gN = g * sc + gA;
+      }
+      // Si ya lleva esa grasa, se sube su cantidad; si no, se añade al final.
+      const reYa = salado ? /(\d+(?:[.,]\d+)?)\s*(g|ml)\s+(AOVE|aceite de oliva[^,]*)/i : /(\d+(?:[.,]\d+)?)\s*g\s+(nueces[^,]*|semillas de lino[^,]*)/i;
+      const ya = ing.match(reYa);
+      let pasos = o.pasos;
+      if (ya) ing = ing.replace(ya[0], ya[0].replace(ya[1], String(Math.round(parseFloat(ya[1].replace(',', '.')) + gr))));
+      else {
+        ing = `${ing}, ${gr}g ${fuente}`;
+        const base = o.pasos || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[o.nombre] : '') || '';
+        const extra = salado ? 'Al servir, riega con el AOVE en crudo.' : `Reparte por encima ${fuente === 'nueces picadas' ? 'las nueces picadas' : 'las semillas de lino molidas'}.`;
+        if (base) pasos = `${base.trim()} ${extra}`;
+      }
+      pN = Math.round(pN); cN = Math.round(cN); gN = Math.round(gN);
+      const out = { ...o, ingredientes: ing, grasa: `${gN}g grasa`, carbs: `${cN}g carbs`, prot: `${pN}g prot`,
+        kcal: `${Math.round(pN * 4 + cN * 4 + gN * 9)} kcal` };
+      if (pasos) out.pasos = pasos;
+      return out;
+    };
     nutricionPorDia.forEach((dia, i) => {
       const f = factorPorDia[i];
       carbsObjPorDia[i] = Math.round(carbsObj * f);
@@ -11079,6 +11141,7 @@
           };
         });
         if (_compResistencia) m.opciones = m.opciones.map(_menosGrasaMasHidrato);
+        m.opciones = m.opciones.map(_conGrasaMinima);
       });
     });
 
@@ -11764,6 +11827,11 @@
       nutricion.forEach(_sinEntreno);
       nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(_sinEntreno));
     }
+
+    // Grasa mínima otra vez, al final: el escalado por toma completa con arroz o
+    // patata los platos que topan con la ración máxima de carne o pescado, y eso
+    // devolvía algunos por debajo del 15 % de grasa.
+    nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => { m.opciones = (m.opciones || []).map(_conGrasaMinima); }));
 
     if (_hipertension) {
       for (let i = 0; i < nutricionPorDia.length; i++) {
