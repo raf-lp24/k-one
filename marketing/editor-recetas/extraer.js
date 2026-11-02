@@ -159,6 +159,9 @@ lista.forEach(f => {
   f.ia = f.ia ? { ...f.ia, ingredientes, motivo: f.ia.motivo + ' ' + motivo } : { tipo: 'cantidad', motivo, ingredientes };
 });
 console.log('revisión con IA:', lista.filter(f => f.ia).length);
+// De dónde sale cada receta (origenes.js). Sin archivo, la ficha no enseña nada.
+const ORIGENES = fs.existsSync(path.join(__dirname, 'origenes.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'origenes.json'), 'utf8')) : {};
+lista.forEach(f => { if (ORIGENES[f.nombre]) f.origen = ORIGENES[f.nombre]; });
 fs.mkdirSync(salida, { recursive: true });
 fs.writeFileSync(path.join(salida, 'recetas.json'), JSON.stringify(lista));
 fs.writeFileSync(path.join(salida, 'alimentos.json'), JSON.stringify({ alim: ALIM, cant: require(path.join(RAIZ, 'scripts', 'cant-defecto')) }));

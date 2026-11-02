@@ -85,6 +85,9 @@ button { cursor: pointer; }
 .macro em.sube { color: var(--brasa-txt); } .macro em.baja { color: #8cc5e8; }
 .reparto { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; background: var(--acero); }
 .nota-pie { font-size: 12px; color: var(--metal); margin: 7px 0 0; }
+.origen { font-size: 13px; color: var(--metal); margin: 6px 0 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.origen a { color: var(--brasa-txt); }
+.origen b { color: var(--ok); font-weight: 600; }
 .ing { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 6px; align-items: center; padding-bottom: 8px; }
 .ing input { background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
 .ing-info { grid-column: 1 / -1; font-size: 12px; color: var(--metal); }
@@ -388,6 +391,15 @@ function avisoNoEnTabla(p) {
   const mal = partir(p.ingredientes).filter((x) => { const i = leerIng(x); return i.gramos !== null && !i.al; });
   return mal.length ? `<p class="nota-pie" style="color:var(--aviso)">No está en la tabla de alimentos, así que no cuenta en los macros: ${esc(mal.join(', '))}</p>` : '';
 }
+// De dónde sale. El enlace solo es seguro si lo comprobé a mano; el resto es el post más parecido.
+function htmlOrigen(r) {
+  const o = r.origen;
+  if (r.esNueva) return '';
+  if (!o) return '<p class="origen">De dónde sale: recetario inicial de K-ONE, sin cuenta apuntada.</p>';
+  const fecha = o.fecha ? ' · ' + new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+  const post = o.post ? ` · <a href="${esc(o.post)}" target="_blank" rel="noopener noreferrer">${o.seguro ? 'Ver el post' : 'Ver el post más parecido'}</a>` : '';
+  return `<p class="origen">De dónde sale: ${esc(o.cuenta)}${fecha}${post}${o.fiel ? ' · <b>Ya está como en el post, y en la app</b>' : ''}</p>`;
+}
 function htmlIaGuardada(r) {
   if (!iaPendiente(r)) return '';
   const hay = r.ia.nombre || r.ia.ingredientes || r.ia.prep || r.ia.mover;
@@ -571,7 +583,8 @@ function pintarCabecera() {
   $('avanceTxt').textContent = hechas + ' de ' + total + ' revisadas · ' + cam + ' cambiadas · ' + qui + ' para quitar';
   const pc = (n) => (total ? n * 100 / total : 0) + '%';
   $('barra').innerHTML = `<i style="width:${pc(ok)};background:var(--ok)"></i><i style="width:${pc(cam)};background:var(--brasa-txt)"></i><i style="width:${pc(qui)};background:var(--mal)"></i>`;
-  const n = Object.keys(C).filter((id) => { const c = C[id]; return editada(c) || c.estado === 'quitar' || c.nota || c.fav || c.nueva; }).length;
+  // Los cambios de una receta que ya se aplicó se quedan con su id antiguo: no cuentan.
+  const n = Object.keys(C).filter((id) => { const c = C[id]; return (RI[id] || c.nueva) && (editada(c) || c.estado === 'quitar' || c.nota || c.fav || c.nueva); }).length;
   $('nCambios').textContent = n ? ' ' + n : '';
 }
 
@@ -717,6 +730,7 @@ function pintarFicha() {
   const avisos = r.avisos.length ? `<div class="bloque"><h3>Avisos medidos</h3><ul class="avisos">${r.avisos.map((a) => `<li>${esc(a.x)}${a.t === 'parecida' ? `<div class="parecidas">${vinc(r.parecidas)}</div>` : a.t === 'variantes' ? `<div class="parecidas">${vinc(r.mismoNombre)}</div>` : ''}</li>`).join('')}</ul></div>` : '';
   fi.innerHTML = `<button class="volver" id="volver">← Volver a la lista</button>
     <input class="nombre" id="nombre" value="${esc(e.nombre)}" aria-label="Nombre de la receta">
+    ${htmlOrigen(r)}
     ${htmlIaGuardada(r)}
     <div id="iaViva">${htmlIaViva()}</div>
     ${avisos}
