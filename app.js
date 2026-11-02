@@ -5013,6 +5013,32 @@
       && _RE_PLATO_DULCE.test(opt.nombre + ' ' + opt.ingredientes)
       && !_RE_PLATO_SALADO.test(opt.nombre + ' ' + opt.ingredientes);
     const _esDeQueso = t => /queso|cottage/.test(_normTexto(String(t)));
+    // En un salado, el queso en lonchas o rallado no se cambia por nada: «hummus
+    // en lonchas» no existe (aprobado por Rafa el 2 nov 2026). El resto de quesos
+    // (crema, fresco…) sigue con su sustituto.
+    const _QUESO_SOLIDO = 'queso\\s+(?:rallado|en\\s+lonchas|parmesano)(?:\\s+(?:light|sin lactosa))*';
+    const _RE_ING_QUESO_SOLIDO = new RegExp('^\\s*(?:\\d+\\s*(?:g\\s+)?)?(?:' + _QUESO_SOLIDO + '|lonchas?\\s+(?:de\\s+)?queso(?:\\s+(?:tierno|light|sin lactosa))*)\\s*$', 'i');
+    const _RE_PASO_QUESO_SOLIDO = new RegExp(_ARTICULO_PREVIO + _QUESO_SOLIDO, 'gi');
+    const _quitaQuesoSolido = tokenArr.some((t, i) => _normAlimento(t) === 'queso' && susMap[i] === 'hummus');
+    const _sinQuesoSolido = ing => ing.split(',').filter(x => !_RE_ING_QUESO_SOLIDO.test(x)).join(',');
+    // Todo su queso es de ese tipo: se va también del nombre y de los pasos.
+    const _soloQuesoSolido = ing => {
+      const quesos = ing.split(',').filter(x => /(?<![a-záéíóúüñ])queso(?![a-záéíóúüñ])/i.test(x));
+      return quesos.every(x => _RE_ING_QUESO_SOLIDO.test(x));
+    };
+    const _regexesBorrar = regexes.map(re => new RegExp(_ARTICULO_PREVIO + '(?:' + re.source + ')(?:\\s+' + _DESCRIPCION_BORRADA + ')*', re.flags));
+    // Lo que queda en los pasos al quitarlo: «echa y deja», «un trozo de ,», «pon encima para que se funda».
+    const _pasosSinQueso = ps => ps
+      .replace(/\bPon en cada mitad\s+un trozo de\s*,\s*casca/g, 'Casca en cada mitad')
+      .replace(/\s+y cubre(?:\s+con)?\s*(?=\.)/gi, '')
+      .replace(/\bcon\s*,\s*/gi, 'con ')
+      .replace(/,?\s*y termina\s+(?:con\s+)?en l[aá]minas/gi, '')
+      .replace(/los champiñones laminados, el tomate\s*(?:y\s*)?\./gi, 'los champiñones laminados y el tomate.')
+      .replace(/\s+y espera a que se funda(?: el hummus)?\s*(?=\.)/gi, ' y espera a que cuaje')
+      .replace(/,?\s*hasta que se funda(?: el hummus)?\s*(?=\.)/gi, '')
+      .replace(/;?\s*al final pon\s+encima para que se funda/gi, '')
+      .replace(/,?\s*echa\s+y deja/gi, ' y deja')
+      .replace(/\s*un trozo de\s*,/gi, '');
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
         if (_sinHuevo) {
@@ -5037,13 +5063,18 @@
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
         let nuevoNombre = opt.nombre;
-        let nuevoIng = envasesAGramos(opt.ingredientes);
+        // Antes de pasar a gramos: «2 lonchas queso tierno» sería ya «20g queso tierno».
+        const _quitaSolido = _quitaQuesoSolido && !_dulce;
+        const _quitaTodoQueso = _quitaSolido && _soloQuesoSolido(opt.ingredientes);
+        const _borraQueso = i => _quitaTodoQueso && _normAlimento(tokenArr[i]) === 'queso';
+        let nuevoIng = envasesAGramos(_quitaSolido ? _sinQuesoSolido(opt.ingredientes) : opt.ingredientes);
         recetasActivas.forEach(([re, reemplazo]) => {
           nuevoNombre = nuevoNombre.replace(re, _susReceta(re, reemplazo));
           nuevoIng = nuevoIng.replace(re, _susReceta(re, reemplazo));
         });
-        regexesSust.forEach((re, i) => {
-          const reemplazo = _susToken(i);
+        regexesSust.forEach((re0, i) => {
+          const re = _borraQueso(i) ? _regexesBorrar[i] : re0;
+          const reemplazo = _borraQueso(i) ? '' : _susToken(i);
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
@@ -5055,7 +5086,7 @@
         }
         nuevoNombre = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(nuevoNombre))))
           .replace(/\s+(con|de|y)\s*,\s*/g, ' $1 ').replace(/\s+de\s+(con|y)\s+/g, ' $1 ').replace(/\s*,\s*,/g, ',')
-          .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim()
+          .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s+y\s+con\s+/g, ' con ').replace(/\s{2,}/g, ' ').trim()
           .replace(/, ([^,()]+)$/, (m, x) => (/ (?:y|e|con) /.test(x) || !/ y | con /.test(opt.nombre) ? m : ' y ' + x));
         // El nombre puede quedar empezando en minúscula si la palabra sustituida
         // era la primera ("Huevos revueltos con champiñones" -> "tofu revuelto
@@ -5081,11 +5112,14 @@
           || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : null);
         if (pasosOrig) {
           let ps = pasosOrig;
+          if (_quitaSolido) ps = ps.replace(_RE_PASO_QUESO_SOLIDO, '');
           recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, _susReceta(re, reemplazo)); });
-          regexesSust.forEach((re, i) => {
-            const reemplazo = _susToken(i);
+          regexesSust.forEach((re0, i) => {
+            const re = _borraQueso(i) ? _regexesBorrar[i] : re0;
+            const reemplazo = _borraQueso(i) ? '' : _susToken(i);
             re.lastIndex = 0; ps = ps.replace(re, reemplazo);
           });
+          if (_quitaSolido) ps = _pasosSinQueso(ps);
           if (_dulce) ps = ps.replace(/\bel yogur con el yogur griego\b/gi, 'el yogur griego').replace(/\bel yogur y el yogur griego\b/gi, 'el yogur griego');
           ps = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(ps))));
           if (ps !== pasosOrig) nuevosPasos = ps;
