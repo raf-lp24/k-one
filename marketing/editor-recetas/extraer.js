@@ -162,6 +162,19 @@ console.log('revisión con IA:', lista.filter(f => f.ia).length);
 // De dónde sale cada receta (origenes.js). Sin archivo, la ficha no enseña nada.
 const ORIGENES = fs.existsSync(path.join(__dirname, 'origenes.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'origenes.json'), 'utf8')) : {};
 lista.forEach(f => { if (ORIGENES[f.nombre]) f.origen = ORIGENES[f.nombre]; });
+// Lo comparado a mano con el post de cada receta de Lu y Vikika (posts.json): manda sobre la revisión anterior.
+const POSTS = fs.existsSync(path.join(__dirname, 'posts.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'posts.json'), 'utf8')) : {};
+lista.forEach(f => {
+  const p = POSTS[f.nombre];
+  if (!p) return;
+  f.origen = { ...(f.origen || {}), cuenta: p.cuenta, post: 'https://www.instagram.com/' + p.post + '/', seguro: !p.parecido, ...(p.igual ? { igual: true } : {}), ...(p.parecido ? { parecido: true } : {}) };
+  if (p.motivo) {
+    f.ia = { tipo: 'post', motivo: p.motivo, ...(p.nombre ? { nombre: p.nombre } : {}), ...(p.ingredientes ? { ingredientes: p.ingredientes } : {}) };
+  } else if (f.ia && (p.igual || p.parecido)) delete f.ia;
+});
+// Lo que Rafa ya revisó y está en la app sale del Recetario (aplicadas.json).
+const APLICADAS = new Set((fs.existsSync(path.join(__dirname, 'aplicadas.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'aplicadas.json'), 'utf8')) : []).map(a => a.nombre + '|' + a.ingredientes));
+lista.forEach(f => { if (APLICADAS.has(f.nombre + '|' + f.ingredientes)) { f.hecha = true; delete f.ia; } });
 fs.mkdirSync(salida, { recursive: true });
 fs.writeFileSync(path.join(salida, 'recetas.json'), JSON.stringify(lista));
 fs.writeFileSync(path.join(salida, 'alimentos.json'), JSON.stringify({ alim: ALIM, cant: require(path.join(RAIZ, 'scripts', 'cant-defecto')) }));

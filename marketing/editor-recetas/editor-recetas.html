@@ -349,7 +349,7 @@ function iaAplicada(r) {
   const e = ef(r);
   return (!i.nombre || e.nombre === i.nombre) && (!i.ingredientes || e.ingredientes === i.ingredientes) && (!i.prep || e.prep === i.prep) && (!i.mover || !e.mx.some((x) => x.endsWith('|' + i.mover[0])));
 }
-function iaPendiente(r) { const c = C[r.id] || {}; return !!r.ia && !c.iaVista && c.estado !== 'quitar' && !iaAplicada(r); }
+function iaPendiente(r) { const c = C[r.id] || {}; return !r.hecha && !!r.ia && !c.iaVista && c.estado !== 'quitar' && !iaAplicada(r); }
 function mxPropuesto(r, p) {
   const mx = ef(r).mx;
   if (p.mover) return [...new Set(mx.map((x) => (x.endsWith('|' + p.mover[0]) ? x.slice(0, -p.mover[0].length) + p.mover[1] : x)))];
@@ -398,13 +398,14 @@ function htmlOrigen(r) {
   if (r.esNueva) return '';
   if (!o) return '<p class="origen">De dónde sale: recetario inicial de K-ONE, sin cuenta apuntada.</p>';
   const fecha = o.fecha ? ' · ' + new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
-  const post = o.post ? ` · <a href="${esc(o.post)}" target="_blank" rel="noopener noreferrer">${o.seguro ? 'Ver el post' : 'Ver el post más parecido'}</a>` : '';
-  return `<p class="origen">De dónde sale: ${esc(o.cuenta)}${fecha}${post}${o.fiel ? ' · <b>Ya está como en el post, y en la app</b>' : ''}</p>`;
+  const post = o.post ? ` · <a href="${esc(o.post)}" target="_blank" rel="noopener noreferrer">${o.seguro ? 'Ver el post' : o.parecido ? 'Ver el post parecido' : 'Ver el post más parecido'}</a>` : '';
+  const marca = o.fiel ? ' · <b>Ya está como en el post, y en la app</b>' : o.igual ? ' · <b>Coincide con el post</b>' : o.parecido ? ' · No es una copia exacta: el post no da las cantidades por ración' : '';
+  return `<p class="origen">De dónde sale: ${esc(o.cuenta)}${fecha}${post}${marca}${r.hecha && !o.fiel ? ' · <b>Ya aplicada en la app</b>' : ''}</p>`;
 }
 function htmlIaGuardada(r) {
   if (!iaPendiente(r)) return '';
   const hay = r.ia.nombre || r.ia.ingredientes || r.ia.prep || r.ia.mover;
-  return `<div class="ia"><h3>Revisión con IA: no acaba de tener sentido</h3><p>${esc(r.ia.motivo)}</p>${hay ? htmlDifPropuesta(r, r.ia) : ''}
+  return `<div class="ia"><h3>${r.ia.tipo === 'post' ? 'Para dejarla como en el post' : 'Revisión con IA: no acaba de tener sentido'}</h3><p>${esc(r.ia.motivo)}</p>${hay ? htmlDifPropuesta(r, r.ia) : ''}
     <div class="ia-botones">${hay ? '<button class="b pri" id="iaAplicar">Aplicar la propuesta</button>' : ''}<button class="b" id="iaDejar">Dejarla como está</button></div></div>`;
 }
 function htmlIaViva() {
@@ -577,11 +578,12 @@ function ponerDoc(id, c) {
 
 // ─── Cabecera ───
 function pintarCabecera() {
-  const total = R.length;
+  const vivas = R.filter((r) => !r.hecha);
+  const total = vivas.length;
   let ok = 0, cam = 0, qui = 0;
-  R.forEach((r) => { const e = estadoDe(r); if (e === 'ok') ok++; else if (e === 'cambiada' || e === 'nueva') cam++; else if (e === 'quitar') qui++; });
+  vivas.forEach((r) => { const e = estadoDe(r); if (e === 'ok') ok++; else if (e === 'cambiada' || e === 'nueva') cam++; else if (e === 'quitar') qui++; });
   const hechas = ok + cam + qui;
-  $('avanceTxt').textContent = 'Te quedan ' + (total - hechas) + ' de ' + total + ' · ' + cam + ' cambiadas · ' + qui + ' para quitar';
+  $('avanceTxt').textContent = 'Te quedan ' + (total - hechas) + ' de ' + total + ' · ' + (R.length - total) + ' ya en la app · ' + cam + ' cambiadas · ' + qui + ' para quitar';
   const pc = (n) => (total ? n * 100 / total : 0) + '%';
   $('barra').innerHTML = `<i style="width:${pc(ok)};background:var(--ok)"></i><i style="width:${pc(cam)};background:var(--brasa-txt)"></i><i style="width:${pc(qui)};background:var(--mal)"></i>`;
   // Los cambios de una receta que ya se aplicó se quedan con su id antiguo: no cuentan.
@@ -605,6 +607,9 @@ function pasaFiltro(r) {
     if (['ok', 'cambiada', 'quitar', 'nueva'].includes(F.est) && est !== F.est) return false;
     if (F.est === 'fav' && !e.fav) return false;
     if (F.est === 'nota' && !e.nota) return false;
+    if (F.est === 'hechas') return !!r.hecha;
+    if (r.hecha) return false;
+    if (F.est === 'post' && !(iaPendiente(r) && r.ia.tipo === 'post')) return false;
     if (F.est === 'ia' && !iaPendiente(r)) return false;
     if (F.est === 'aviso' && !r.avisos.length) return false;
     if (['macros', 'parecida', 'variantes', 'criterio', 'alimento'].includes(F.est) && !r.avisos.some((a) => a.t === F.est)) return false;
@@ -656,7 +661,7 @@ function pintarBanco() {
         <input id="fQ" type="search" placeholder="Busca por nombre o ingrediente: atún, avena…" aria-label="Buscar receta" value="${esc(F.q)}">
         <select id="fToma" aria-label="Toma">${o('', 'Todas las tomas', F.toma)}${TOMAS.map((t) => o(t, t, F.toma)).join('')}</select>
         <select id="fObj" aria-label="Objetivo">${o('', 'Todos los objetivos', F.obj)}${RAMAS.map((t) => o(t, t, F.obj)).join('')}${o('Extra', 'Extras por deporte', F.obj)}${o('Repostaje', 'Repostaje', F.obj)}${o('Reserva alérgicos', 'Reserva para alérgicos', F.obj)}</select>
-        <select id="fEst" aria-label="Estado">${o('', 'Cualquier estado', F.est)}${o('ia', 'Revisión con IA: no cuadran', F.est)}${o('pendiente', 'Sin revisar', F.est)}${o('ok', 'Bien', F.est)}${o('cambiada', 'Cambiadas', F.est)}${o('quitar', 'Para quitar', F.est)}${o('nueva', 'Nuevas', F.est)}${o('fav', 'Favoritas', F.est)}${o('nota', 'Con nota', F.est)}${o('aviso', 'Con cualquier aviso', F.est)}${o('macros', 'Aviso: macros que no cuadran', F.est)}${o('parecida', 'Aviso: casi iguales', F.est)}${o('variantes', 'Aviso: nombre repetido', F.est)}${o('criterio', 'Aviso: batido con canela', F.est)}</select>
+        <select id="fEst" aria-label="Estado">${o('', 'Cualquier estado', F.est)}${o('post', 'Para dejar como en el post', F.est)}${o('ia', 'Revisión con IA: no cuadran', F.est)}${o('pendiente', 'Sin revisar', F.est)}${o('hechas', 'Ya en la app', F.est)}${o('ok', 'Bien', F.est)}${o('cambiada', 'Cambiadas', F.est)}${o('quitar', 'Para quitar', F.est)}${o('nueva', 'Nuevas', F.est)}${o('fav', 'Favoritas', F.est)}${o('nota', 'Con nota', F.est)}${o('aviso', 'Con cualquier aviso', F.est)}${o('macros', 'Aviso: macros que no cuadran', F.est)}${o('parecida', 'Aviso: casi iguales', F.est)}${o('variantes', 'Aviso: nombre repetido', F.est)}${o('criterio', 'Aviso: batido con canela', F.est)}</select>
         <select id="fTiempo" aria-label="Tiempo">${o('', 'Cualquier tiempo', F.tiempo)}${o('crudo', 'Sin cocinar', F.tiempo)}${o('5', 'Hasta 5 min', F.tiempo)}${o('10', 'Hasta 10 min', F.tiempo)}${o('20', 'Hasta 20 min', F.tiempo)}</select>
         <select id="fOrden" aria-label="Orden">${o('', 'Orden de la app', F.orden)}${o('az', 'De la A a la Z', F.orden)}${o('prot', 'Más proteína', F.orden)}${o('kcal', 'Menos calorías', F.orden)}${o('kcald', 'Más calorías', F.orden)}</select>
       </div>
@@ -775,7 +780,7 @@ function cuenta(rama, toma) { const k = rama + '|' + toma; return R.filter((r) =
 function cuentaBase(rama, toma) { const k = rama + '|' + toma; return R.filter((r) => !C[r.id]?.nueva && baseMx(r).includes(k)).length; }
 function pintarRecuento() {
   const tipos = [['ia', 'que no acaban de tener sentido (revisión con IA)'], ['pendiente', 'sin revisar'], ['macros', 'con macros que no cuadran'], ['parecida', 'casi iguales a otra'], ['variantes', 'con nombre repetido'], ['criterio', 'batidos con canela'], ['fav', 'favoritas']];
-  const cuantas = (t) => R.filter((r) => { if (t === 'ia') return iaPendiente(r); if (t === 'pendiente') return !estadoDe(r); if (t === 'fav') return ef(r).fav; return r.avisos.some((a) => a.t === t); }).length;
+  const cuantas = (t) => R.filter((r) => { if (r.hecha) return false; if (t === 'ia') return iaPendiente(r); if (t === 'pendiente') return !estadoDe(r); if (t === 'fav') return ef(r).fav; return r.avisos.some((a) => a.t === t); }).length;
   $('vista').innerHTML = `<div class="pagina"><div class="ancho">
     <h2>Cuántas opciones quedan</h2>
     <p>Lo que tendría cada objetivo en cada toma con tus cambios. En rojo si baja de ${MINIMO_TOMA}: por debajo se empiezan a repetir platos y los filtros de alergias o «no como» se quedan cortos. Pulsa una casilla para ver esas recetas.</p>

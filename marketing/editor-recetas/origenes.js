@@ -55,10 +55,14 @@ const cuentaEnInforme = (nombre) => { const n = norm(nombre); for (const t of in
 
 const recetas = JSON.parse(fs.readFileSync(path.join(__dirname, 'recetas.json'), 'utf8'));
 const ingDe = new Map(recetas.map((r) => [r.nombre, r.ingredientes]));
+// Una receta que Rafa renombró sigue saliendo del commit donde entró con su nombre antiguo.
+const aplicadas = fs.existsSync(path.join(__dirname, 'aplicadas.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'aplicadas.json'), 'utf8')) : [];
+const RENOMBRE = Object.fromEntries(aplicadas.filter((a) => a.nombreAntes).map((a) => [a.nombreAntes, a.nombre]));
 const salida = {};
 for (const [c, de] of COMMITS) {
   const fecha = git('show', '-s', '--format=%ad', '--date=short', c).trim();
-  for (const n of nombresDe(c)) {
+  for (const original of nombresDe(c)) {
+    const n = RENOMBRE[original] || original;
     if (salida[n] || !ingDe.has(n)) continue;
     let cuenta = de;
     if (de === 'vikika-o-lu') cuenta = norm(VIKIKA).includes(norm(n)) ? '@vikikateam' : '@lu_fitfoodie';
