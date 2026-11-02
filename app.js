@@ -8957,10 +8957,7 @@
             op("Tortas de arroz con lomo embuchado", "50g tortas de arroz, 60g lomo embuchado", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con jamón serrano", "50g tortas de arroz, 60g jamón serrano", "291 kcal", "14g prot", "43g carbs", "7g grasa", "Sin cocción · 2 min"),
-            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
-            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
-            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 220ml claras, 1 yema", "350 kcal", "31g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
+            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 7 claras, 1 yema", "354 kcal", "32g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
             op("Yogur griego con frutos rojos, nueces y canela", "200g yogur griego 0%, 10g nueces, 150g frutos rojos, canela", "244 kcal", "23g prot", "20g carbs", "8g grasa", "Sin cocción · 2 min"),
             op("Tostada de salmón ahumado con queso fresco y aguacate", "1 tosta de centeno, 50g salmón ahumado, 40g queso fresco, 30g aguacate, eneldo", "286 kcal", "22g prot", "18g carbs", "14g grasa", "Sin cocción · 3 min"),
             op("Queso batido con manzana y canela", "200g queso batido 0%, 1 manzana troceada, 5g pipas de calabaza, canela", "270 kcal", "22g prot", "41g carbs", "2g grasa", "Sin cocción · 2 min"),
@@ -9051,19 +9048,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con tortitas de arroz", "150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "377 kcal", "38g prot", "45g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y tortitas de arroz", "150g legumbres cocidas, 150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "591 kcal", "51g prot", "81g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -9109,6 +9106,9 @@
             // Tomas que marcó Rafa en el Recetario (2 nov 2026).
             opFija("Salmón ahumado con guacamole casero", "60g salmón ahumado, 30g guacamole casero, 150g ensalada", "143 kcal", "13g prot", "7g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
+            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
+            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
+            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
           ]
         },
         {
@@ -9122,7 +9122,7 @@
             op("Queso batido con arándanos y nueces", "200g queso batido 0%, 60g arándanos, 15g nueces troceadas", "256 kcal", "24g prot", "22g carbs", "8g grasa", "Sin cocción · 1 min"),
             op("Tostada de crema de cacahuete con plátano y queso batido", "1 tosta integral, 10g crema de cacahuete, 1/2 plátano, 200g queso batido 0%, canela", "355 kcal", "28g prot", "45g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Edamame con sal marina y limón", "150g edamame cocido, sal marina, limón", "192 kcal", "16g prot", "14g carbs", "8g grasa", "Fácil · 5 min"),
-            op("Mini bocadillo de jamón serrano con queso fresco y tomate", "1 tosta integral, 40g jamón serrano, 70g queso fresco, 100g tomate rallado", "352 kcal", "29g prot", "23g carbs", "16g grasa", "Sin cocción · 3 min"),
+            op("Tosta de jamón serrano con queso fresco y tomate", "1 tosta integral, 40g jamón serrano, 70g queso fresco, 100g tomate rallado", "352 kcal", "29g prot", "23g carbs", "16g grasa", "Sin cocción · 3 min"),
             op("Fruta de temporada con almendras y yogur griego", "1 manzana, 10g almendras tostadas, 200g yogur griego 0%", "282 kcal", "23g prot", "34g carbs", "6g grasa", "Sin cocción · 2 min"),
             op("Yogur de soja con mandarina, proteína y semillas de girasol", "200g yogur de soja, 1 mandarina, 1 scoop proteína whey, 5g semillas de girasol", "342 kcal", "32g prot", "31g carbs", "10g grasa", "Sin cocción · 2 min"),
             op("Yogur griego con pera, canela y nueces", "200g yogur griego 0%, 1 pera, 5g nueces, canela", "264 kcal", "22g prot", "35g carbs", "4g grasa", "Sin cocción · 2 min"),
@@ -9188,7 +9188,7 @@
             op("Smoothie verde de plátano, manzana y espinacas con proteína", "1 plátano, 1 manzana, 50g espinacas, 50g acelgas, 100ml leche desnatada, 30g proteína whey, zumo de limón al gusto", "407 kcal", "32g prot", "63g carbs", "3g grasa", "Batidora · 3 min"),
             op("Flan de queso proteico con frutos rojos", "1 huevo, 60g claras de huevo, 100g queso batido 0%, 30g queso crema light, 60g frutos rojos", "273 kcal", "26g prot", "13g carbs", "13g grasa", "Horno · 40 min"),
             op("Magdalenas de chocolate, plátano y yogur", "60g plátano, 60g yogur natural, 10g cacao puro, 15g proteína whey, 10g nueces", "271 kcal", "18g prot", "25g carbs", "11g grasa", "Air fryer · 15 min"),
-            op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
+            op("Brownie en taza de un minuto", "30g copos de avena, 14g cacao puro, 1 huevo, 1/2 manzana, levadura química, estevia, sal", "301 kcal", "14g prot", "41g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
             op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
@@ -9269,16 +9269,16 @@
             op("Pollo o pavo a la plancha con verdura", "200g pollo, 200g verdura, 10g AOVE", "376 kcal", "49g prot", "9g carbs", "16g grasa", "Fácil · 15 min"),
             op("Pescado blanco con verdura", "200g pescado blanco, 200g verdura, 10g AOVE", "330 kcal", "42g prot", "9g carbs", "14g grasa", "Fácil · 15 min"),
             op("Pescado azul con verdura", "200g pescado azul, 200g verdura", "445 kcal", "46g prot", "9g carbs", "25g grasa", "Fácil · 20 min"),
-            op("Tortilla de claras y una yema con ensalada", "220ml claras, 1 yema, 200g ensalada, 5g AOVE", "251 kcal", "29g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
+            op("Tortilla de claras y una yema con ensalada", "7 claras, 1 yema, 200g ensalada, 5g AOVE", "255 kcal", "30g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Salmón con patata hervida y judías verdes", "150g salmón, 150g patata, 100g judías verdes", "477 kcal", "35g prot", "37g carbs", "21g grasa", "Fácil · 25 min"),
             op("Filetes de pollo con ensalada variada", "150g pollo, 100g ensalada", "188 kcal", "35g prot", "3g carbs", "4g grasa", "Fácil · 12 min"),
             op("Filetes de pollo con pasta y ensalada variada", "150g pollo, 60g pasta cruda, 100g ensalada", "409 kcal", "43g prot", "48g carbs", "5g grasa", "Fácil · 20 min"),
-            op("Carne o pescado con patata cocida y verdura", "150g pescado blanco, 150g patata, 50g verdura", "283 kcal", "32g prot", "32g carbs", "3g grasa", "Fácil · 25 min"),
-            op("Lubina con patata cocida y verdura", "100g verdura, 150g lubina, 50g patata", "198 kcal", "30g prot", "15g carbs", "2g grasa", "Fácil · 25 min"),
-            op("Salmón con verdura", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Pescado blanco con patata cocida y verdura", "150g pescado blanco, 150g patata, 150g verdura", "311 kcal", "34g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Lubina con patata cocida y verdura", "150g verdura, 150g lubina, 150g patata", "307 kcal", "33g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Salmón con verdura y manzana de postre", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 200ml claras, 1 lata atún, 200g ensalada", "380 kcal", "59g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
+            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 6 claras, 1 lata atún, 200g ensalada", "376 kcal", "58g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
             op("Fajitas de pollo con verdura", "2 tortillas de trigo, 220g pollo, 200g verdura", "557 kcal", "61g prot", "49g carbs", "13g grasa", "Fácil · 15 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
@@ -9438,10 +9438,7 @@
             op("Tortas de arroz con lomo embuchado", "50g tortas de arroz, 60g lomo embuchado", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con jamón serrano", "50g tortas de arroz, 60g jamón serrano", "291 kcal", "14g prot", "43g carbs", "7g grasa", "Sin cocción · 2 min"),
-            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
-            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
-            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 220ml claras, 1 yema", "350 kcal", "31g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
+            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 7 claras, 1 yema", "354 kcal", "32g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
             // Movidas aquí desde Desayuno por el usuario (3 oct 2026).
             op("Tortilla de patata ligera con pan", "2 huevos, 200g patata cocida, 2 rebanadas pan integral, 10g AOVE", "611 kcal", "25g prot", "76g carbs", "23g grasa", "Medio · 25 min"),
             op("Yogur griego con granola y frutos rojos", "200g yogur griego, 30g granola, 80g frutos rojos, miel", "412 kcal", "23g prot", "43g carbs", "18g grasa", "Sin cocción · 2 min"),
@@ -9515,10 +9512,10 @@
             op("Pasta con atún y tomate", "150g pasta integral cocida, 2 latas atún, tomate frito casero, aceitunas", "436 kcal", "50g prot", "48g carbs", "6g grasa", "Fácil · 20 min"),
             op("Arroz con pollo al horno y verduras", "150g arroz cocido, 200g pollo al horno, pimiento, cebolla, AOVE", "582 kcal", "46g prot", "68g carbs", "14g grasa", "Fácil · 30 min"),
             op("Lomo de cerdo con patatas panadera", "200g lomo de cerdo, 200g patata panadera, cebolla, AOVE", "503 kcal", "46g prot", "46g carbs", "15g grasa", "Medio · 30 min"),
-            op("Espaguetis con almejas y gambas", "150g espaguetis crudos, 150g almejas, 100g gambas, ajo, perejil, AOVE", "811 kcal", "52g prot", "117g carbs", "15g grasa", "Medio · 20 min"),
+            op("Espaguetis con almejas y gambas", "100g espaguetis crudos, 150g almejas, 100g gambas, ajo, perejil, AOVE", "630 kcal", "46g prot", "80g carbs", "14g grasa", "Medio · 20 min"),
             op("Pechuga rellena de jamón y queso con patatas", "200g pechuga de pollo, 40g jamón cocido, 40g queso tierno, 150g patatas al horno, AOVE, 150g ensalada", "660 kcal", "66g prot", "36g carbs", "28g grasa", "Medio · 30 min"),
             op("Cuscús con pollo y verduras", "150g cuscús cocido, 200g pollo especiado, calabacín, pimiento, pasas", "491 kcal", "53g prot", "55g carbs", "6g grasa", "Fácil · 20 min"),
-            op("Rissotto de champiñones con pollo", "80g arroz crudo (arborio), 180g pollo, champiñones, caldo, parmesano", "610 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
+            op("Risotto de champiñones con pollo", "80g arroz crudo (arborio), 180g pollo, champiñones, caldo, parmesano", "610 kcal", "42g prot", "70g carbs", "18g grasa", "Medio · 30 min"),
             // PLATOS DENSOS EN CARBOHIDRATOS (auditoría 5 sept 2026). El pool de
             // ganancia se movía en 38-70 g de carbohidratos por comida, y a un
             // cliente grande (100 kg en superávit, objetivo ~500 g/día) no se
@@ -9546,19 +9543,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con tortitas de arroz", "150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "377 kcal", "38g prot", "45g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y tortitas de arroz", "150g legumbres cocidas, 150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "591 kcal", "51g prot", "81g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -9603,6 +9600,9 @@
             op("Filetes de pollo empanados con mostaza y limón", "150g pechuga de pollo, 1 huevo, 40g copos de maíz, 15g mostaza, zumo de limón al gusto, ajo", "406 kcal", "44g prot", "35g carbs", "10g grasa", "Air fryer · 25 min"),
             // Tomas que marcó Rafa en el Recetario (2 nov 2026).
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
+            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
+            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
+            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
           ]
         },
         {
@@ -9617,7 +9617,7 @@
             op("Smoothie post-entreno con avena y cacao", "40g proteína whey, 30g avena, 1 plátano, 1 cda cacao, leche", "554 kcal", "47g prot", "69g carbs", "10g grasa", "Sin cocción · 2 min"),
             op("Mini bocadillo de pavo con queso y fruta", "1 panecillo integral, 80g pavo, 1 loncha queso, 1 kiwi", "375 kcal", "30g prot", "39g carbs", "11g grasa", "Sin cocción · 3 min"),
             op("Tosta de queso de cabra con jamón ibérico y miel", "2 tostas de pan blanco, 40g queso de cabra, 30g jamón ibérico, 1 cda miel", "434 kcal", "26g prot", "42g carbs", "18g grasa", "Sin cocción · 3 min"),
-            op("Batido de leche entera con plátano y avena", "300ml leche entera, 1 plátano, 30g avena, canela", "386 kcal", "16g prot", "58g carbs", "10g grasa", "Fácil · 2 min"),
+            op("Batido de leche entera con plátano y avena", "300ml leche entera, 1 plátano, 30g avena", "416 kcal", "15g prot", "62g carbs", "12g grasa", "Fácil · 2 min"),
             op("Bocadillo de queso y jamón serrano", "1 panecillo integral, 30g queso, 30g jamón serrano", "323 kcal", "18g prot", "29g carbs", "15g grasa", "Sin cocción · 3 min"),
             op("Yogur griego con miel y granola", "250g yogur griego, 1 cda miel, 30g granola", "396 kcal", "24g prot", "48g carbs", "12g grasa", "Sin cocción · 2 min"),
             op("Batido de proteína con leche y crema de cacahuete", "1 scoop proteína, 300ml leche entera, 15g crema de cacahuete", "440 kcal", "40g prot", "34g carbs", "16g grasa", "Fácil · 2 min"),
@@ -9626,7 +9626,7 @@
             op("Wrap de pavo, queso y aguacate", "1 tortilla integral, 60g pavo, 20g queso, 1/4 aguacate", "342 kcal", "24g prot", "25g carbs", "17g grasa", "Sin cocción · 5 min"),
             // Merienda densa, mismo motivo que la de media mañana.
             op("Tostadas integrales con plátano, miel y crema de cacahuete", "3 rebanadas pan integral, 1 plátano, 15g miel, 20g crema de cacahuete", "518 kcal", "18g prot", "80g carbs", "14g grasa", "Sin cocción · 3 min"),
-            op("Batido de avena, plátano, dátiles y leche", "60g avena, 1 plátano, 3 dátiles, 300ml leche entera, canela", "524 kcal", "22g prot", "82g carbs", "12g grasa", "Fácil · 3 min"),
+            op("Batido de avena, plátano, dátiles y leche", "60g avena, 1 plátano, 3 dátiles, 300ml leche entera", "602 kcal", "19g prot", "100g carbs", "14g grasa", "Fácil · 3 min"),
             op("Pudding de chía con yogur griego y frutos rojos", "15g semillas de chía, 150g yogur griego 0%, 100ml leche semidesnatada, 80g frutos rojos, canela", "243 kcal", "22g prot", "23g carbs", "7g grasa", "Sin cocción · 5 min + reposo"),
             op("Requesón con pera, nueces y canela", "150g requesón, 1 pera, 15g nueces, canela", "368 kcal", "22g prot", "34g carbs", "16g grasa", "Sin cocción · 3 min"),
             op("Tortitas de arroz con aguacate y huevos", "3 tortitas de arroz, 40g aguacate, 2 huevos cocidos, sal en escamas", "325 kcal", "17g prot", "26g carbs", "17g grasa", "Fácil · 12 min"),
@@ -9684,7 +9684,7 @@
             op("Smoothie verde de plátano, manzana y espinacas con proteína", "1 plátano, 1 manzana, 50g espinacas, 50g acelgas, 100ml leche desnatada, 30g proteína whey, zumo de limón al gusto", "407 kcal", "32g prot", "63g carbs", "3g grasa", "Batidora · 3 min"),
             op("Flan de queso proteico con frutos rojos", "1 huevo, 60g claras de huevo, 100g queso batido 0%, 30g queso crema light, 60g frutos rojos", "273 kcal", "26g prot", "13g carbs", "13g grasa", "Horno · 40 min"),
             op("Magdalenas de chocolate, plátano y yogur", "60g plátano, 60g yogur natural, 10g cacao puro, 15g proteína whey, 10g nueces", "271 kcal", "18g prot", "25g carbs", "11g grasa", "Air fryer · 15 min"),
-            op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
+            op("Brownie en taza de un minuto", "30g copos de avena, 14g cacao puro, 1 huevo, 1/2 manzana, levadura química, estevia, sal", "301 kcal", "14g prot", "41g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
             op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
@@ -9753,7 +9753,7 @@
             op("Wok de ternera con tallarines de arroz y verduras", "180g ternera en tiras, 100g tallarines de arroz, pimiento, brócoli, soja", "588 kcal", "40g prot", "62g carbs", "20g grasa", "Medio · 20 min"),
             // Cenas densas en carbohidratos, mismo motivo que las comidas.
             op("Pollo teriyaki con tallarines de arroz y verduras", "200g tallarines de arroz cocidos, 180g pollo, 120g brócoli, 80g zanahoria, salsa teriyaki casera, 5g sésamo", "598 kcal", "49g prot", "78g carbs", "10g grasa", "Medio · 25 min"),
-            op("Salmón con boniato asado y quinoa", "180g salmón al horno, 250g boniato asado, 100g quinoa cocida, espárragos, 10g AOVE", "833 kcal", "48g prot", "77g carbs", "37g grasa", "Medio · 35 min"),
+            op("Salmón con boniato asado y espárragos", "180g salmón al horno, 250g boniato asado, espárragos, 10g AOVE", "715 kcal", "44g prot", "56g carbs", "35g grasa", "Medio · 35 min"),
             op("Espaguetis integrales con pavo y tomate", "200g espaguetis integrales cocidos, 180g pavo picado, 100g tomate frito casero, albahaca, 10g AOVE", "664 kcal", "52g prot", "78g carbs", "16g grasa", "Fácil · 20 min"),
             op("Hamburguesa de ternera con huevo y boniato asado", "180g carne picada de ternera, 2 huevos, 200g boniato, 10g AOVE, 80g lechuga, 80g tomate", "686 kcal", "57g prot", "47g carbs", "30g grasa", "Medio · 30 min"),
             op("Salmón al horno con quinoa y espárragos", "200g salmón, 150g quinoa cocida, 150g espárragos trigueros, 10g AOVE, limón", "716 kcal", "51g prot", "38g carbs", "40g grasa", "Fácil · 25 min"),
@@ -9769,16 +9769,16 @@
             op("Pollo o pavo a la plancha con verdura", "200g pollo, 200g verdura, 10g AOVE", "376 kcal", "49g prot", "9g carbs", "16g grasa", "Fácil · 15 min"),
             op("Pescado blanco con verdura", "200g pescado blanco, 200g verdura, 10g AOVE", "330 kcal", "42g prot", "9g carbs", "14g grasa", "Fácil · 15 min"),
             op("Pescado azul con verdura", "200g pescado azul, 200g verdura", "445 kcal", "46g prot", "9g carbs", "25g grasa", "Fácil · 20 min"),
-            op("Tortilla de claras y una yema con ensalada", "220ml claras, 1 yema, 200g ensalada, 5g AOVE", "251 kcal", "29g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
+            op("Tortilla de claras y una yema con ensalada", "7 claras, 1 yema, 200g ensalada, 5g AOVE", "255 kcal", "30g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Salmón con patata hervida y judías verdes", "150g salmón, 150g patata, 100g judías verdes", "477 kcal", "35g prot", "37g carbs", "21g grasa", "Fácil · 25 min"),
             op("Filetes de pollo con ensalada variada", "150g pollo, 100g ensalada", "188 kcal", "35g prot", "3g carbs", "4g grasa", "Fácil · 12 min"),
             op("Filetes de pollo con pasta y ensalada variada", "150g pollo, 60g pasta cruda, 100g ensalada", "409 kcal", "43g prot", "48g carbs", "5g grasa", "Fácil · 20 min"),
-            op("Carne o pescado con patata cocida y verdura", "150g pescado blanco, 150g patata, 50g verdura", "283 kcal", "32g prot", "32g carbs", "3g grasa", "Fácil · 25 min"),
-            op("Lubina con patata cocida y verdura", "100g verdura, 150g lubina, 50g patata", "198 kcal", "30g prot", "15g carbs", "2g grasa", "Fácil · 25 min"),
-            op("Salmón con verdura", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Pescado blanco con patata cocida y verdura", "150g pescado blanco, 150g patata, 150g verdura", "311 kcal", "34g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Lubina con patata cocida y verdura", "150g verdura, 150g lubina, 150g patata", "307 kcal", "33g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Salmón con verdura y manzana de postre", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 200ml claras, 1 lata atún, 200g ensalada", "380 kcal", "59g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
+            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 6 claras, 1 lata atún, 200g ensalada", "376 kcal", "58g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
             op("Fajitas de pollo con verdura", "2 tortillas de trigo, 220g pollo, 200g verdura", "557 kcal", "61g prot", "49g carbs", "13g grasa", "Fácil · 15 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
@@ -9846,9 +9846,9 @@
             op("Tostadas con huevo revuelto y tomate", "2 rebanadas centeno, 2 huevos revueltos, tomate, AOVE, orégano", "403 kcal", "18g prot", "31g carbs", "23g grasa", "Fácil · 8 min"),
             op("Tostadas con jamón serrano, tomate y AOVE", "2 tostas de pan centeno, 40g jamón serrano, tomate rallado, AOVE", "324 kcal", "16g prot", "38g carbs", "12g grasa", "Sin cocción · 5 min"),
             op("Muesli con leche, nueces y kiwi", "50g muesli sin azúcar, 200ml leche entera, 15g nueces, 1 kiwi", "447 kcal", "14g prot", "56g carbs", "20g grasa", "Sin cocción · 2 min"),
-            op("Tortilla francesa con pan y fruta", "2 huevos, 1 rebanada centeno con tomate, 1 naranja", "559 kcal", "26g prot", "80g carbs", "15g grasa", "Fácil · 8 min"),
+            op("Tortilla francesa con pan y fruta", "2 huevos, 1 rebanada centeno, tomate rallado, 1 naranja", "340 kcal", "19g prot", "39g carbs", "12g grasa", "Fácil · 8 min"),
             op("Crepes de avena con frutos rojos y yogur", "40g harina de avena, 1 huevo, leche, 100g yogur griego 0%, frutos rojos, miel", "473 kcal", "30g prot", "59g carbs", "13g grasa", "Fácil · 10 min"),
-            op("Tostada de salmón ahumado con tomate y kiwi", "2 panes wassa, 60g salmón ahumado, tomate en rodajas, 1 kiwi", "197 kcal", "14g prot", "27g carbs", "3g grasa", "Sin cocción · 3 min"),
+            op("Tostada de salmón ahumado con tomate y kiwi de postre", "2 panes wassa, 60g salmón ahumado, tomate en rodajas, 1 kiwi", "197 kcal", "14g prot", "27g carbs", "3g grasa", "Sin cocción · 3 min"),
             op("Tostadas con jamón cocido y tomate", "2 rebanadas pan centeno, 40g jamón cocido, tomate, AOVE", "316 kcal", "18g prot", "34g carbs", "12g grasa", "Sin cocción · 5 min"),
             op("Yogur natural con nueces y miel", "150g yogur natural entero, 15g nueces, 1 cda miel", "257 kcal", "9g prot", "26g carbs", "13g grasa", "Sin cocción · 1 min"),
             op("Bocadillo pequeño de tortilla francesa", "1 panecillo integral pequeño, 2 huevos en tortilla", "350 kcal", "20g prot", "36g carbs", "14g grasa", "Fácil · 8 min"),
@@ -9856,7 +9856,7 @@
             op("Batido de leche con plátano y avena", "200ml leche semidesnatada, 1 plátano, 30g avena", "342 kcal", "14g prot", "58g carbs", "6g grasa", "Fácil · 2 min"),
             op("Tostadas con pavo y queso fresco", "2 rebanadas pan centeno, 40g pavo, 30g queso fresco, tomate", "316 kcal", "22g prot", "30g carbs", "12g grasa", "Sin cocción · 3 min"),
             op("Tortitas de avena y plátano con yogur griego", "50g avena, 1 huevo, 1 plátano, 100g yogur griego 0%", "429 kcal", "23g prot", "64g carbs", "9g grasa", "Fácil · 10 min"),
-            op("Bizcocho de avena y plátano al microondas", "40g avena, 1 plátano, 1 huevo, canela (mezclar y microondas 2 min)", "336 kcal", "12g prot", "54g carbs", "8g grasa", "Fácil · 3 min"),
+            op("Bizcocho de avena y plátano al microondas", "40g avena, 1 plátano, 1 huevo, canela", "348 kcal", "14g prot", "55g carbs", "8g grasa", "Fácil · mezclar y 2 min al microondas"),
             op("Bowl de açaí con plátano, granola y frutos rojos", "100g pulpa de açaí congelada, 1 plátano, 30g granola, 80g frutos rojos", "369 kcal", "6g prot", "66g carbs", "9g grasa", "Fácil · 5 min"),
             op("Tostada de tomate con huevos revueltos y jamón serrano", "2 tostas integrales, 2 huevos, 100g tomate, 30g jamón serrano, 5g AOVE", "457 kcal", "30g prot", "37g carbs", "21g grasa", "Fácil · 10 min"),
             op("Porridge de avena con manzana, nueces y canela", "50g avena, 200ml leche semidesnatada, 1 manzana, 15g nueces, canela", "497 kcal", "16g prot", "70g carbs", "17g grasa", "Fácil · 8 min"),
@@ -9942,10 +9942,7 @@
             op("Tortas de arroz con lomo embuchado", "50g tortas de arroz, 60g lomo embuchado", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con cecina", "50g tortas de arroz, 60g cecina", "339 kcal", "28g prot", "41g carbs", "7g grasa", "Sin cocción · 2 min"),
             op("Tortas de arroz con jamón serrano", "50g tortas de arroz, 60g jamón serrano", "291 kcal", "14g prot", "43g carbs", "7g grasa", "Sin cocción · 2 min"),
-            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
-            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
-            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 220ml claras, 1 yema", "350 kcal", "31g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
+            op("Tortas de arroz con tortilla de claras y una yema", "50g tortas de arroz, 7 claras, 1 yema", "354 kcal", "32g prot", "43g carbs", "6g grasa", "Fácil · 5 min"),
             op("Fruta de temporada con almendras y yogur griego", "1 manzana o pera, 15g almendras tostadas, 125g yogur griego 0%", "277 kcal", "16g prot", "33g carbs", "9g grasa", "Sin cocción · 2 min"),
             op("Yogur natural con kiwi, semillas de lino y canela", "150g yogur natural, 2 kiwis, 10g semillas de lino, canela", "254 kcal", "9g prot", "32g carbs", "10g grasa", "Sin cocción · 2 min"),
             op("Mini bocadillo de jamón serrano y tomate", "1 panecillo integral, 30g jamón serrano, tomate rallado, AOVE", "321 kcal", "11g prot", "31g carbs", "17g grasa", "Sin cocción · 3 min"),
@@ -9955,7 +9952,7 @@
             op("Smoothie de plátano y frutos rojos", "1 plátano, 80g frutos rojos, 100ml leche, hielo", "182 kcal", "5g prot", "38g carbs", "3g grasa", "Fácil · 2 min"),
             op("Yogur natural con frutos rojos, miel y canela", "150g yogur natural, 120g frutos rojos, 1 cdta miel, canela", "149 kcal", "6g prot", "20g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Puñado de frutos secos variados", "25g mix de almendras, nueces y avellanas", "170 kcal", "5g prot", "6g carbs", "14g grasa", "Sin cocción · 1 min"),
-            op("Batido de plátano con leche", "1 plátano, 200ml leche semidesnatada, canela", "204 kcal", "8g prot", "34g carbs", "4g grasa", "Fácil · 2 min"),
+            op("Batido de plátano con leche", "1 plátano, 200ml leche semidesnatada", "216 kcal", "8g prot", "37g carbs", "4g grasa", "Fácil · 2 min"),
             op("Pera y arándanos con yogur natural", "1 pera, 80g arándanos, 100g yogur natural", "232 kcal", "5g prot", "44g carbs", "4g grasa", "Sin cocción · 2 min"),
             op("Tosta de pavo y queso con zanahoria", "1 tosta integral, 30g pavo, 15g queso, 150g zanahoria", "242 kcal", "17g prot", "30g carbs", "6g grasa", "Sin cocción · 3 min"),
             // Tercer pool de media mañana (mantenimiento: lo usan "Mejorar
@@ -10032,19 +10029,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con tortitas de arroz", "150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "377 kcal", "38g prot", "45g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y tortitas de arroz", "150g legumbres cocidas, 150g pollo, 2 tortitas de arroz, 1 manzana, 150g ensalada", "591 kcal", "51g prot", "81g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -10092,6 +10089,9 @@
             // Tomas que marcó Rafa en el Recetario (2 nov 2026).
             opFija("Salmón ahumado con guacamole casero", "60g salmón ahumado, 30g guacamole casero, 150g ensalada", "143 kcal", "13g prot", "7g carbs", "7g grasa", "Sin cocción · 3 min"),
             op("Wrap de huevo, pavo, cottage y aguacate", "1 tortilla de trigo, 2 huevos, 50g queso cottage, 40g pavo en lonchas, 50g tomate cherry, 30g aguacate, 20g rúcula", "432 kcal", "33g prot", "30g carbs", "20g grasa", "Sartén · 8 min"),
+            op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
+            op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
+            op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
           ]
         },
         {
@@ -10104,7 +10104,7 @@
             op("Hummus con crudités y huevo duro", "60g hummus casero, 2 zanahorias, 100g pepino, 1 huevo duro, pimentón", "312 kcal", "14g prot", "28g carbs", "16g grasa", "Fácil · 12 min"),
             op("Queso batido con arándanos, almendras y canela", "200g queso batido 0%, 150g arándanos, 10g almendras, canela", "298 kcal", "24g prot", "37g carbs", "6g grasa", "Sin cocción · 2 min"),
             op("Mini bocadillo de pavo con tomate", "1 panecillo integral, 60g pavo, tomate, mostaza", "257 kcal", "21g prot", "32g carbs", "5g grasa", "Sin cocción · 2 min"),
-            op("Smoothie de plátano con avena", "1 plátano, 30g avena, 200ml leche, canela", "330 kcal", "12g prot", "57g carbs", "6g grasa", "Fácil · 2 min"),
+            op("Smoothie de plátano con avena", "1 plátano, 30g avena, 200ml leche", "330 kcal", "12g prot", "57g carbs", "6g grasa", "Fácil · 2 min"),
             op("Queso batido con mandarina y semillas de girasol", "200g queso batido 0%, 1 mandarina, 10g semillas de girasol", "223 kcal", "20g prot", "20g carbs", "7g grasa", "Sin cocción · 1 min"),
             op("Yogur natural con pera y semillas de lino", "150g yogur natural, 1 pera, 10g semillas de lino", "261 kcal", "8g prot", "37g carbs", "9g grasa", "Sin cocción · 2 min"),
             op("Tostada con aceite y tomate", "1 rebanada pan integral, tomate rallado, AOVE", "180 kcal", "5g prot", "22g carbs", "8g grasa", "Sin cocción · 3 min"),
@@ -10172,7 +10172,7 @@
             op("Smoothie verde de plátano, manzana y espinacas con proteína", "1 plátano, 1 manzana, 50g espinacas, 50g acelgas, 100ml leche desnatada, 30g proteína whey, zumo de limón al gusto", "407 kcal", "32g prot", "63g carbs", "3g grasa", "Batidora · 3 min"),
             op("Flan de queso proteico con frutos rojos", "1 huevo, 60g claras de huevo, 100g queso batido 0%, 30g queso crema light, 60g frutos rojos", "273 kcal", "26g prot", "13g carbs", "13g grasa", "Horno · 40 min"),
             op("Magdalenas de chocolate, plátano y yogur", "60g plátano, 60g yogur natural, 10g cacao puro, 15g proteína whey, 10g nueces", "271 kcal", "18g prot", "25g carbs", "11g grasa", "Air fryer · 15 min"),
-            op("Brownie en taza de un minuto", "1 huevo, 10g cacao puro, 30g harina de avena, 40ml leche desnatada, 5g miel", "269 kcal", "14g prot", "33g carbs", "9g grasa", "Microondas · 2 min"),
+            op("Brownie en taza de un minuto", "30g copos de avena, 14g cacao puro, 1 huevo, 1/2 manzana, levadura química, estevia, sal", "301 kcal", "14g prot", "41g carbs", "9g grasa", "Microondas · 2 min"),
             op("Tarta de queso proteica con fresas al horno", "60g claras de huevo, 40g queso batido 0%, 40g queso crema light, 15g proteína whey, 40g fresas", "235 kcal", "25g prot", "9g carbs", "11g grasa", "Horno · 40 min"),
             op("Bizcocho de chocolate y plátano en taza", "1 huevo, 100g plátano, 10g cacao puro", "219 kcal", "10g prot", "29g carbs", "7g grasa", "Microondas · 3 min"),
             op("Tortilla dulce de huevo y claras con plátano, chocolate negro y crema de cacahuete", "1 tortilla de trigo, 1 huevo, 100g claras, 80g plátano, 10g chocolate negro, 10g crema de cacahuete", "445 kcal", "25g prot", "48g carbs", "17g grasa", "Sartén · 6 min"),
@@ -10259,16 +10259,16 @@
             op("Pollo o pavo a la plancha con verdura", "200g pollo, 200g verdura, 10g AOVE", "376 kcal", "49g prot", "9g carbs", "16g grasa", "Fácil · 15 min"),
             op("Pescado blanco con verdura", "200g pescado blanco, 200g verdura, 10g AOVE", "330 kcal", "42g prot", "9g carbs", "14g grasa", "Fácil · 15 min"),
             op("Pescado azul con verdura", "200g pescado azul, 200g verdura", "445 kcal", "46g prot", "9g carbs", "25g grasa", "Fácil · 20 min"),
-            op("Tortilla de claras y una yema con ensalada", "220ml claras, 1 yema, 200g ensalada, 5g AOVE", "251 kcal", "29g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
+            op("Tortilla de claras y una yema con ensalada", "7 claras, 1 yema, 200g ensalada, 5g AOVE", "255 kcal", "30g prot", "9g carbs", "11g grasa", "Fácil · 8 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Salmón con patata hervida y judías verdes", "150g salmón, 150g patata, 100g judías verdes", "477 kcal", "35g prot", "37g carbs", "21g grasa", "Fácil · 25 min"),
             op("Filetes de pollo con ensalada variada", "150g pollo, 100g ensalada", "188 kcal", "35g prot", "3g carbs", "4g grasa", "Fácil · 12 min"),
             op("Filetes de pollo con pasta y ensalada variada", "150g pollo, 60g pasta cruda, 100g ensalada", "409 kcal", "43g prot", "48g carbs", "5g grasa", "Fácil · 20 min"),
-            op("Carne o pescado con patata cocida y verdura", "150g pescado blanco, 150g patata, 50g verdura", "283 kcal", "32g prot", "32g carbs", "3g grasa", "Fácil · 25 min"),
-            op("Lubina con patata cocida y verdura", "100g verdura, 150g lubina, 50g patata", "198 kcal", "30g prot", "15g carbs", "2g grasa", "Fácil · 25 min"),
-            op("Salmón con verdura", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
+            op("Pescado blanco con patata cocida y verdura", "150g pescado blanco, 150g patata, 150g verdura", "311 kcal", "34g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Lubina con patata cocida y verdura", "150g verdura, 150g lubina, 150g patata", "307 kcal", "33g prot", "37g carbs", "3g grasa", "Fácil · 25 min"),
+            op("Salmón con verdura y manzana de postre", "100g salmón, 100g verdura, 1 manzana", "334 kcal", "23g prot", "29g carbs", "14g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 200ml claras, 1 lata atún, 200g ensalada", "380 kcal", "59g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
+            op("Tortilla de huevos y claras con atún y ensalada", "2 huevos, 6 claras, 1 lata atún, 200g ensalada", "376 kcal", "58g prot", "9g carbs", "12g grasa", "Fácil · 10 min"),
             op("Fajitas de pollo con verdura", "2 tortillas de trigo, 220g pollo, 200g verdura", "557 kcal", "61g prot", "49g carbs", "13g grasa", "Fácil · 15 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
@@ -10383,7 +10383,7 @@
       op('Skyr con plátano y canela (recuperación post-entreno)', '200g skyr natural, 1 plátano, canela', '260 kcal', '26g prot', '38g carbs', '1g grasa', 'Sin cocción · 2 min'),
       op('Bocadillo de atún y tomate (recuperación post-entreno)', '1 panecillo integral, 1 lata atún al natural, 60g tomate', '270 kcal', '26g prot', '29g carbs', '5g grasa', 'Sin cocción · 4 min'),
       op('Requesón con miel y arándanos (recuperación post-entreno)', '200g requesón, 15g miel, 80g arándanos', '295 kcal', '25g prot', '31g carbs', '9g grasa', 'Sin cocción · 2 min'),
-      op('Tortilla de claras con pan y mermelada (recuperación post-entreno)', '250ml claras, 2 rebanadas pan integral, 20g mermelada', '330 kcal', '35g prot', '40g carbs', '3g grasa', 'Fácil · 8 min'),
+      op("Tortilla de claras y tostadas con mermelada (recuperación post-entreno)", "8 claras, 2 rebanadas pan integral, 20g mermelada", "331 kcal", "36g prot", "40g carbs", "3g grasa", "Fácil · 8 min"),
       op('Proteína isolada con plátano (recuperación post-entreno)', '30g proteína aislada, 1 plátano, agua', '233 kcal', '28g prot', '28g carbs', '1g grasa', 'Fácil · 1 min'),
     ];
     // OJO: estas 4 listas NO se añaden aquí al pool general de Desayuno/Comida/
@@ -10428,7 +10428,7 @@
       const extrasProte = [
         op("Pollo a la plancha con arroz y brócoli", "220g pollo, 100g arroz integral cocido, 200g brócoli, AOVE", "486 kcal", "52g prot", "38g carbs", "14g grasa", "Fácil · 20 min"),
         op("Steak de ternera con patata asada", "180g ternera magra, 200g patata asada, ensalada verde, AOVE", "626 kcal", "71g prot", "45g carbs", "18g grasa", "Medio · 25 min"),
-        op("Revuelto de claras con avena y pavo", "200ml claras, 2 huevos, 30g avena, 50g pavo, espinacas", "446 kcal", "53g prot", "25g carbs", "14g grasa", "Fácil · 10 min"),
+        op("Revuelto de claras con patata y pavo", "6 claras, 2 huevos, 150g patata cocida, 50g pavo, espinacas", "452 kcal", "52g prot", "34g carbs", "12g grasa", "Fácil · 10 min"),
         op("Bowl de atún con arroz y aguacate", "2 latas atún, 100g arroz cocido, 1/4 aguacate, edamame, soja", "472 kcal", "40g prot", "42g carbs", "16g grasa", "Sin cocción · 8 min"),
         op("Pechuga de pavo al horno con boniato", "200g pavo, 200g boniato, espárragos, AOVE", "452 kcal", "46g prot", "40g carbs", "12g grasa", "Medio · 30 min"),
         op("Tortilla de 4 claras con jamón y queso", "4 claras + 1 huevo, 40g jamón cocido, 30g queso, espinacas", "294 kcal", "38g prot", "4g carbs", "14g grasa", "Fácil · 8 min"),
@@ -17456,7 +17456,7 @@
     "Tostada de tomate con aguacate (pan tumaca)": "Tuesta el pan y frótalo con el ajo. Extiende el tomate rallado, aplasta el aguacate por encima con un tenedor y termina con el AOVE y una pizca de sal.",
     // Renombradas al subir la densidad de proteína de los snacks de déficit
     "Tostada de crema de cacahuete con plátano y queso batido": "Tuesta el pan y unta la crema de cacahuete. Corta el medio plátano en rodajas por encima y espolvorea canela. Sirve el queso batido en un bol al lado: es lo que convierte esto en un snack proteico y no en puro hidrato.",
-    "Mini bocadillo de jamón serrano con queso fresco y tomate": "Tuesta el pan. Ralla el tomate y extiéndelo sobre la tosta. Pon el queso fresco en lonchas o desmigado y remata con el jamón serrano. Sin AOVE: el serrano ya trae su grasa.",
+    "Tosta de jamón serrano con queso fresco y tomate": "Tuesta el pan. Ralla el tomate y extiéndelo sobre la tosta. Pon el queso fresco en lonchas o desmigado y remata con el jamón serrano. Sin AOVE: el serrano ya trae su grasa.",
     "Palitos de zanahoria con guacamole casero, pavo y huevo duro": "Aplasta el aguacate con tenedor, lima, sal y un poco de tomate y cebolla picados: guacamole casero, nada de bote. Corta la zanahoria en bastones. Sirve con el huevo duro partido y el pavo enrollado.",
     "Yogur de soja con mandarina, proteína y semillas de girasol": "Disuelve el scoop de proteína en el yogur de soja removiendo bien hasta que no queden grumos. Añade los gajos de mandarina y las semillas de girasol por encima.",
     "Zanahoria y apio con hummus casero y huevos duros": "Tritura garbanzos cocidos con tahini, limón, ajo y un chorrito de agua hasta que quede cremoso: hummus casero. Corta zanahoria y apio en bastones. Sirve con los huevos duros partidos y pimentón por encima.",
@@ -17654,7 +17654,7 @@
     "Tostadas con mermelada y plátano": "Tuesta el pan. Unta mermelada sin azúcar. Añade el plátano en rodajas por encima. Rápido y cargado de energía.",
     "Pollo a la plancha con arroz y brócoli": "Cuece el arroz integral y el brócoli al vapor (8 min). Plancha el pollo sazonado 4-5 min por lado. Sirve con un chorrito de AOVE.",
     "Steak de ternera con patata asada": "Precalienta el horno a 200°C. Asa la patata en dados con AOVE 25 min. Plancha la ternera a fuego fuerte 2-3 min por lado. Prepara ensalada verde.",
-    "Revuelto de claras con avena y pavo": "Cuece la avena en agua 3 min. Bate las claras con los huevos y sal. Revuelve en sartén con espinacas y pavo troceado 3 min.",
+    "Revuelto de claras con patata y pavo": "Bate las claras con los huevos y sal. Revuelve en sartén con las espinacas, el pavo troceado y la patata cocida en dados 3 min.",
     "Bowl de atún con arroz y aguacate": "Cuece el arroz. Escurre el atún. Monta el bowl: arroz, atún, aguacate en láminas, edamame y un chorrito de soja.",
     "Pechuga de pavo al horno con boniato": "Precalienta horno a 200°C. Sazona el pavo con especias. Hornea con el boniato en dados y espárragos 25 min.",
     "Tortilla de 4 claras con jamón y queso": "Bate las claras con el huevo y sal. Añade espinacas, jamón picado y vierte en sartén. Cuando cuaje, añade el queso, dobla y sirve.",
@@ -17852,7 +17852,7 @@
     "Tostadas sin gluten con miel y plátano (antes de tirada larga o series)": "Tuesta el pan sin gluten. Unta la miel y añade el plátano en rodajas por encima.",
     "Tosta sin gluten de mermelada y queso batido (recarga tras tirada larga)": "Tuesta el pan sin gluten. Unta la mermelada y sirve el queso batido al lado o por encima.",
     "Bowl de avena certificada sin gluten salada con huevo": "Cuece la avena en caldo 5 min. Saltea las espinacas 2 min y cuaja los huevos en la misma sartén. Mezcla con la avena y espolvorea queso rallado.",
-    "Tostada de salmón ahumado con tomate y kiwi": "Coloca el salmón ahumado y el tomate en rodajas sobre los panes wassa. Sirve con el kiwi troceado. Sin cocción.",
+    "Tostada de salmón ahumado con tomate y kiwi de postre": "Coloca el salmón ahumado y el tomate en rodajas sobre los panes wassa. Sirve con el kiwi troceado. Sin cocción.",
     "Tostadas con atún fresco a la plancha y tomate": "Plancha el atún fresco 1-2 min por lado (que quede rosado por dentro). Tuesta el pan y sirve con el atún, el tomate y un chorrito de AOVE.",
     "Tostadas con huevo revuelto y tomate": "Bate los huevos y revuélvelos en sartén antiadherente 2-3 min. Tuesta el pan y sirve con el revuelto, el tomate y un chorrito de AOVE. Espolvorea orégano.",
     "Smoothie de plátano y frutos rojos": "Mete todos los ingredientes en la batidora con hielo. Bate 30 segundos hasta que quede cremoso.",
@@ -17860,7 +17860,7 @@
     "Pollo al horno con patata asada y ensalada": "Precalienta el horno a 200°C. Hornea el pollo y la patata en dados con romero y AOVE 25-30 min. Sirve con la ensalada aliñada.",
     "Arroz con pollo al curry y verduras": "Sofríe la cebolla y el pimiento 5 min, añade el pollo en tacos y dora 5 min. Incorpora la leche de coco y el curry, y cocina a fuego suave 12-15 min. Cuece el arroz basmati aparte.",
     "Queso batido con arándanos y canela": "Vierte el queso batido en un bol. Añade los arándanos, espolvorea canela y un chorrito de miel.",
-    "Smoothie de plátano con avena": "Mete el plátano, la avena, la leche y canela en la batidora. Bate 30 segundos hasta que quede cremoso.",
+    "Smoothie de plátano con avena": "Mete el plátano, la avena y la leche en la batidora. Bate 30 segundos hasta que quede cremoso.",
     "Queso batido con mandarina y semillas de girasol": "Vierte el queso batido en un bol. Añade la mandarina en gajos y espolvorea las semillas de girasol.",
     "Wrap de pollo con verduras y mostaza": "Extiende la mostaza sobre la tortilla. Añade el pollo desmechado, la lechuga y la zanahoria rallada. Enrolla apretado y corta por la mitad.",
     "Crema de calabacín con pollo desmechado": "Sofríe cebolla y calabacín troceado en AOVE 10 min, añade caldo y tritura hasta obtener una crema fina. Sirve con el pollo desmechado por encima y la tosta al lado.",
@@ -17873,7 +17873,7 @@
     "Berenjenas rellenas de carne gratinadas": "Corta las berenjenas por la mitad y vacía la pulpa con una cuchara. Sofríe la carne picada con la cebolla y el tomate 10 min. Rellena las berenjenas, cubre con queso y gratina en el horno a 200°C 15-20 min.",
     "Sopa de pollo con fideos y verduras": "Cuece el pollo en el caldo 15 min y desmecha. Añade la zanahoria y el apio troceados y cocina 8 min más. Incorpora los fideos los últimos 3-4 min. Espolvorea perejil.",
     "Muesli con leche, nueces y kiwi": "Vierte el muesli en un bol con la leche. Añade las nueces troceadas y el kiwi. Sin cocción.",
-    "Tortilla francesa con pan y fruta": "Bate los huevos con una pizca de sal y cuaja en sartén a fuego medio 2-3 min por lado. Sirve con el pan con tomate y la naranja.",
+    "Tortilla francesa con pan y fruta": "Bate los huevos con una pizca de sal y cuaja en sartén a fuego medio 2-3 min por lado. Sirve con el pan con el tomate rallado y la naranja.",
     "Garbanzos con atún, huevo y ensalada": "Cuece el huevo 10 min y pélalo. Escurre el atún. Mezcla los garbanzos con la ensalada, el atún y el huevo troceado, y aliña con AOVE.",
     "Pasta con pollo y pesto casero": "Cuece la pasta según el envase. Plancha el pollo 4-5 min por lado y córtalo en tiras. Mezcla la pasta con el pesto, el pollo y el tomate cherry.",
     "Queso batido con miel y semillas de calabaza": "Vierte el queso batido en un bol. Añade un chorrito de miel, las semillas de calabaza y canela.",
@@ -18008,21 +18008,21 @@
     "Sándwich de pavo con huevos revueltos": "Revuelve los huevos en una sartén antiadherente 2-3 min con una pizca de sal. Monta el sándwich con las dos rebanadas de pan y el pavo en lonchas, y toma los huevos al lado.",
     "Tosta de pan con jamón serrano": "Tuesta el pan y ponle encima el jamón serrano en lonchas. Sin cocción.",
     "Tosta de pan con lomo embuchado": "Tuesta el pan y ponle encima el lomo embuchado en lonchas. Sin cocción.",
-    "Garbanzos con atún y pechuga de pollo": "Escurre y enjuaga los garbanzos y mézclalos con el atún escurrido. Haz la pechuga de pollo a la plancha 4-5 min por lado y sírvela al lado. Termina con la fruta. Acompaña con una ensalada aliñada con vinagre o limón.",
-    "Arroz con huevos a la plancha y queso batido": "Cuece el arroz (pesado en seco) unos 15 min y escúrrelo. Haz los huevos a la plancha en una sartén antiadherente. Sírvelo con el queso batido y toma la fruta al final. Acompaña con una ensalada aliñada con vinagre o limón.",
-    "Merluza con legumbres y huevos cocidos": "Cuece los huevos 10 min y pélalos. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas y sírvelo todo junto. Toma la fruta al final. Cuece las judías verdes 8-10 min en agua con sal y sírvelas al lado.",
-    "Berenjenas rellenas de carne picada": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Vacía un poco la pulpa, saltéala con la carne picada y rellena las berenjenas. Gratina 5 min. Toma la fruta al final.",
-    "Berenjenas rellenas de carne picada con pasta": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.",
+    "Garbanzos con pechuga de pollo y ensalada; manzana de postre": "Escurre y enjuaga los garbanzos. Haz la pechuga de pollo a la plancha 4-5 min por lado y sírvela con los garbanzos. Acompaña con una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
+    "Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana": "Cuece el arroz (pesado en seco) unos 15 min y escúrrelo. Haz los huevos a la plancha en una sartén antiadherente. Sírvelo con una ensalada aliñada con vinagre o limón. De postre, el queso batido con la manzana.",
+    "Merluza con legumbres, huevo cocido y judías verdes; manzana de postre": "Cuece el huevo 10 min y pélalo. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas. Cuece las judías verdes 8-10 min en agua con sal y sírvelo todo junto. Toma la manzana de postre.",
+    "Berenjenas rellenas de carne picada y manzana de postre": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Vacía un poco la pulpa, saltéala con la carne picada y rellena las berenjenas. Gratina 5 min. Toma la fruta al final.",
+    "Berenjenas rellenas de carne picada con pasta y manzana de postre": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.",
     "Arroz con gambas y pan con tomate": "Cuece el arroz (pesado en seco) unos 15 min. Saltea las gambas en una sartén antiadherente 2-3 min y mézclalas con el arroz. Tuesta el pan y úntalo con el tomate rallado.",
-    "Filetes de pollo con tortitas de arroz": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con las tortitas de arroz y toma la fruta al final. Acompaña con una ensalada aliñada con vinagre o limón.",
-    "Legumbres con filetes de pollo y tortitas de arroz": "Calienta las legumbres escurridas. Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con las tortitas de arroz y toma la fruta al final. Acompaña con una ensalada aliñada con vinagre o limón.",
+    "Filetes de pollo con arroz y ensalada; manzana de postre": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con el arroz y una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
+    "Legumbres con filetes de pollo y ensalada; manzana de postre": "Calienta las legumbres escurridas. Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
     "Almendras con fruta": "Toma las almendras al natural con la fruta. Sin cocción.",
     "Salmón con patata hervida y judías verdes": "Cuece la patata en trozos 15-20 min y las judías verdes 8-10 min. Haz el salmón a la plancha o al horno 8-10 min. Sírvelo todo junto.",
     "Filetes de pollo con ensalada variada": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con la ensalada, solo con verduras y sin salsas.",
     "Filetes de pollo con pasta y ensalada variada": "Cuece la pasta (pesada en seco). Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con la ensalada, solo con verduras y sin salsas.",
-    "Carne o pescado con patata cocida y verdura": "Cuece la patata en trozos 15-20 min. Haz el pescado a la plancha o al horno 8-10 min (o la carne a la plancha) y sírvelo con la patata y la verdura.",
+    "Pescado blanco con patata cocida y verdura": "Cuece la patata en trozos 15-20 min. Haz el pescado a la plancha o al horno 8-10 min y sírvelo con la patata y la verdura.",
     "Lubina con patata cocida y verdura": "Cuece la patata en trozos 15-20 min y la verdura al vapor 5-8 min. Haz la lubina a la plancha o al horno 8-10 min y sírvelo todo junto.",
-    "Salmón con verdura": "Haz el salmón a la plancha o al horno 8-10 min. Cuece la verdura al vapor 5-8 min o saltéala. Toma la fruta al final.",
+    "Salmón con verdura y manzana de postre": "Haz el salmón a la plancha o al horno 8-10 min. Cuece la verdura al vapor 5-8 min o saltéala. Toma la fruta al final.",
     // De la dieta AJ7 del usuario (27 ago 2023)
     "Tortitas de avena con claras, huevos y fruta": "Bate la harina de avena con las claras y los huevos hasta tener una masa sin grumos. Cuaja las tortitas en una sartén antiadherente a fuego medio, 1-2 min por lado. Toma la fruta al lado.",
     "Tostadas con aceite, huevos a la plancha y pavo": "Tuesta el pan y riégalo con el aceite de oliva. Haz los huevos a la plancha en una sartén antiadherente y sírvelos con el pavo.",
@@ -18081,7 +18081,7 @@
     "Tostadas de masa madre con huevo, aguacate y mozzarella": "Tuesta el pan. Haz los huevos a la plancha o revueltos. Unta el aguacate machacado en las tostadas y pon encima el tomate en rodajas, la mozzarella y los huevos. Sal y pimienta al gusto.",
     "Gelatina proteica de frutos rojos": "Prepara una infusión con el agua caliente y las bolsitas de té y deja reposar 5 min. Retira las bolsitas y disuelve la gelatina en polvo removiendo bien, sin que llegue a hervir. Pon los frutos rojos en un táper, vierte el líquido por encima y deja cuajar en la nevera unas 4 horas. Córtala en barritas.",
     "Vasito de yogur, chía y frutos rojos": "Prepara la gelatina light como indica el sobre y repártela en vasitos. Cuando empiece a cuajar (1 hora en la nevera), pon encima el yogur mezclado con la chía y termina con los frutos rojos. Deja reposar en la nevera 2 horas más.",
-    "Patatas crujientes con ternera, queso fresco y ensalada": "Corta la patata en dados, sazónala con pimentón y hazla en la freidora de aire a 190º unos 16-18 min, sin aceite y removiendo a mitad. Mientras, saltea la carne picada con el ajo y una pizca de sal. Sirve las patatas con la carne, el queso batido por encima y la ensalada al lado.",
+    "Patatas crujientes con ternera, queso batido y ensalada": "Corta la patata en dados, sazónala con pimentón y hazla en la freidora de aire a 190º unos 16-18 min, sin aceite y removiendo a mitad. Mientras, saltea la carne picada con el ajo y una pizca de sal. Sirve las patatas con la carne, el queso batido por encima y la ensalada al lado.",
     "Ensalada crujiente de pollo y espirales de lentejas": "Cuece las espirales de lentejas como indica el paquete, escúrrelas y hazlas en la freidora de aire a 180º unos 15 min, con sal y especias, hasta que crujan. Haz el pollo a la plancha y córtalo en tiras. Para la salsa, mezcla el yogur con perejil, ajo, sal, pimienta y un chorro de limón. Monta la lechuga y el tomate, añade el pollo y las espirales crujientes y aliña con la salsa.",
     "Muffins de arándanos proteicos": "Bate el huevo con el yogur y la vainilla. Añade la harina de avena y la proteína y mezcla hasta que no queden grumos. Incorpora los arándanos, reparte la masa en 2 moldes de magdalena y hornea a 180º unos 10-12 min. Puedes hacer varias tandas de una vez: aguantan 3 días en la nevera.",
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
@@ -18210,7 +18210,7 @@
     "Pasta cremosa de calabaza con pollo": "Sofríe la cebolla y el ajo con el aceite, añade la calabaza en dados y un poco de agua y cuécela 12 minutos. Tritúrala con la leche hasta tener una crema. Cuece la pasta, haz el pollo a la plancha en dados y mézclalo todo con la salsa y el romero.",
     "Banana Bowl": "Dora el plátano en rodajas en una sartén. Añade la avena, la canela y el cacao y mézclalo bien. En un bol, remueve el yogur con la proteína y un chorrito de café. Pon la mezcla tibia encima y termina con la crema de cacahuete y el chocolate en trocitos.",
     "Magdalenas de chocolate, plátano y yogur": "Chafa el plátano y mézclalo con el yogur, el cacao y la proteína. Repártelo en 2-3 moldes de magdalena, pon las nueces picadas por encima y cocínalas 15 minutos a 180 °C en la air fryer (o 20 en el horno).",
-    "Brownie en taza de un minuto": "Mezcla en una taza el huevo, el cacao, la harina de avena, la leche y la miel hasta que no queden grumos. Cuécelo 1 minuto en el microondas a máxima potencia y déjalo reposar un minuto antes de comer.",
+    "Brownie en taza de un minuto": "Tritura la avena, el cacao, el huevo, la manzana, la levadura, la sal y la estevia con un chorrito de agua. Ponlo en una taza y cuécelo 1 minuto en el microondas; sácalo y dale 1 minuto más.",
     "Tarta de queso proteica con fresas al horno": "Para 4 raciones, multiplica por 4. Bate las claras con el queso batido, el queso crema y la proteína hasta que quede liso. Viértelo en un molde, reparte las fresas en láminas por encima y hornéalo 30-35 minutos a 170 °C. Déjalo enfriar en la nevera antes de cortar.",
     "Tortitas de chocolate con yogur y fresas": "Bate el huevo con la mitad del yogur, el cacao y la harina de avena. Haz tortitas pequeñas en una sartén con unas gotas de aceite, 2 minutos por lado. Sírvelas con el resto del yogur y las fresas.",
     "Bizcocho de chocolate y plátano en taza": "Chafa el plátano en una taza grande, añade el huevo y el cacao y mezcla bien. Cuécelo 1 minuto y medio o 2 en el microondas, hasta que al pinchar salga limpio.",
@@ -18286,13 +18286,13 @@
     "Espaguetis con almejas y gambas": "Cuece los espaguetis en agua con sal según el paquete. Sofríe el ajo picado en el AOVE, añade las almejas y las gambas y cocina 3-4 min hasta que las almejas se abran. Mezcla con la pasta escurrida y espolvorea perejil.",
     "Pechuga rellena de jamón y queso con patatas": "Abre la pechuga en libro, rellena con el jamón y el queso, y ciérrala con un palillo. Marca en la plancha 4-5 min por lado o termina al horno hasta que el queso funda. Sirve con las patatas al horno con AOVE. Acompaña con una ensalada aliñada con vinagre o limón.",
     "Cuscús con pollo y verduras": "Hidrata el cuscús con agua o caldo caliente 5 min y suéltalo con un tenedor. Saltea el pollo especiado en dados con el calabacín y el pimiento 6-8 min. Mezcla con el cuscús y añade las pasas.",
-    "Rissotto de champiñones con pollo": "Sofríe el pollo en dados y los champiñones. Añade el arroz arborio y nácaralo 1 min. Ve incorporando el caldo caliente poco a poco, removiendo, durante 18-20 min hasta que el arroz esté cremoso. Termina con el parmesano rallado.",
+    "Risotto de champiñones con pollo": "Sofríe el pollo en dados y los champiñones. Añade el arroz arborio y nácaralo 1 min. Ve incorporando el caldo caliente poco a poco, removiendo, durante 18-20 min hasta que el arroz esté cremoso. Termina con el parmesano rallado.",
     "Arroz a la cubana con pollo": "Cuece el arroz. Cocina el pollo a la plancha en tiras. Fríe los huevos con poco aceite y el plátano en rodajas. Sirve el arroz con el tomate frito casero, el pollo, el huevo y el plátano encima.",
     "Paella de pollo y verduras": "Dora el pollo en trozos con el AOVE en la paellera. Añade las judías verdes y el pimiento y sofríe 3-4 min. Incorpora el arroz y el azafrán disuelto en un poco de agua caliente, y cocina a fuego medio hasta que el arroz absorba el líquido.",
     "Macarrones integrales con pollo y tomate": "Cocina el pollo en dados en el AOVE hasta que esté hecho. Añade el tomate frito casero y el orégano, y calienta 2-3 min. Mezcla con los macarrones cocidos.",
     "Lentejas con arroz y pollo": "Sofríe la cebolla y la zanahoria picadas 5 min. Añade el pollo en dados y dóralo. Incorpora las lentejas cocidas, el pimentón y un poco de agua, y cocina 10 min a fuego medio. Sirve con el arroz.",
     "Fideuá de pollo y gambas": "Sofríe el ajo y el pimiento en el AOVE. Añade el pollo en dados y dóralo. Incorpora los fideos, el azafrán y las gambas, y cocina 5-6 min a fuego medio hasta que las gambas estén hechas.",
-    "Batido de leche entera con plátano y avena": "Mete la leche, el plátano, la avena y la canela en la batidora. Bate 30 segundos hasta que quede homogéneo.",
+    "Batido de leche entera con plátano y avena": "Mete la leche, el plátano y la avena en la batidora. Bate 30 segundos hasta que quede homogéneo.",
     "Bocadillo de queso y jamón serrano": "Abre el panecillo y rellena con el queso y el jamón serrano. Sin cocción.",
     "Yogur griego con miel y granola": "Vierte el yogur griego en un bol, riega con la miel y añade la granola justo antes de comer para que no se reblandezca.",
     "Batido de proteína con leche y crema de cacahuete": "Mete el scoop de proteína, la leche y la crema de cacahuete en la batidora o coctelera. Bate 30 segundos hasta que quede homogéneo.",
@@ -18300,7 +18300,7 @@
     "Batido de caseína con plátano y cacao": "Mete la caseína, el plátano, el cacao puro y la leche en la batidora. Bate 30-40 segundos hasta que no queden grumos.",
     "Wrap de pavo, queso y aguacate": "Aplasta el aguacate con un tenedor y extiéndelo sobre la tortilla. Añade el pavo y el queso, y enrolla bien apretado.",
     "Tostadas integrales con plátano, miel y crema de cacahuete": "Tuesta el pan y unta la crema de cacahuete. Corta el plátano en rodajas por encima y riega con la miel.",
-    "Batido de avena, plátano, dátiles y leche": "Deshuesa los dátiles y mételos en la batidora con la avena, el plátano, la leche y la canela. Bate 30-40 segundos hasta que quede fino.",
+    "Batido de avena, plátano, dátiles y leche": "Deshuesa los dátiles y mételos en la batidora con la avena, el plátano y la leche. Bate 30-40 segundos hasta que quede fino.",
     "Batido de cacao con crema de almendra": "Mete la leche, el cacao puro, la crema de almendra y el hielo en la batidora. Bate 30 segundos hasta que quede homogéneo.",
     "Pasta con pollo y champiñones al ajillo": "Cuece la pasta en agua con sal. Sofríe el ajo laminado en el AOVE, añade el pollo en tiras y dóralo, e incorpora los champiñones 4-5 min hasta que suelten el agua. Mezcla con la pasta escurrida.",
     "Hamburguesa de ternera con boniato al horno": "Precalienta el horno a 200°C y hornea el boniato en cuñas 25-30 min. Forma la hamburguesa con la carne y márcala en la plancha 3-4 min por lado. Sirve con la ensalada.",
@@ -18309,7 +18309,7 @@
     "Costillas al horno con puré de patata": "Sazona las costillas con las especias. Hornéalas a 180°C tapadas con papel de aluminio 45-50 min, y destapa los últimos 10 min para que se doren. Sirve con el puré de patata.",
     "Wok de ternera con tallarines de arroz y verduras": "Hidrata los tallarines de arroz en agua caliente según el paquete. Saltea la ternera a fuego fuerte 2-3 min. Añade el pimiento y el brócoli y saltea 3-4 min más. Incorpora los tallarines y la salsa de soja, y saltea 2 min más.",
     "Pollo teriyaki con tallarines de arroz y verduras": "Mezcla salsa de soja, miel y un poco de jengibre para la salsa teriyaki casera. Saltea el pollo en tiras a fuego fuerte, añade el brócoli y la zanahoria y saltea 3-4 min. Incorpora los tallarines y la salsa teriyaki, saltea 2 min más y espolvorea sésamo.",
-    "Salmón con boniato asado y quinoa": "Precalienta el horno a 200°C. Hornea el boniato en cuñas y los espárragos con el AOVE 20-25 min, añadiendo el salmón los últimos 12-15 min. Sirve todo sobre la quinoa cocida.",
+    "Salmón con boniato asado y espárragos": "Precalienta el horno a 200°C. Hornea el boniato en cuñas y los espárragos con el AOVE 20-25 min, añadiendo el salmón los últimos 12-15 min. Sírvelo todo junto.",
     "Espaguetis integrales con pavo y tomate": "Cuece los espaguetis. Dora el pavo picado en el AOVE deshaciendo los grumos con una cuchara. Añade el tomate frito casero y cocina 5 min. Mezcla con la pasta escurrida y espolvorea albahaca fresca.",
     "Tostadas con jamón cocido y tomate": "Tuesta el pan de centeno. Extiende el tomate rallado con el AOVE y añade el jamón cocido encima.",
     "Huevos revueltos con champiñones": "Saltea los champiñones laminados 4-5 min hasta que se doren. Añade el huevo batido y cuaja a fuego medio removiendo. Sirve con la tosta.",
@@ -18323,7 +18323,7 @@
     "Bizcocho de avena y plátano al microondas": "Aplasta el plátano con un tenedor y mézclalo con la avena, el huevo y la canela hasta obtener una masa homogénea. Vierte en un bol o taza apto para microondas y cocina 2 min a máxima potencia.",
     "Bowl de açaí con plátano, granola y frutos rojos": "Tritura la pulpa de açaí congelada con medio plátano hasta obtener una crema espesa y fría. Sirve en un bol y decora con el resto del plátano en rodajas, la granola y los frutos rojos.",
     "Puñado de frutos secos variados": "Sin cocción: toma el puñado de frutos secos tal cual. Listo en 0 min.",
-    "Batido de plátano con leche": "Mete el plátano, la leche y la canela en la batidora. Bate 20-30 segundos hasta que quede homogéneo.",
+    "Batido de plátano con leche": "Mete el plátano y la leche en la batidora. Bate 20-30 segundos hasta que quede homogéneo.",
     "Marmitako de atún con patata": "Sofríe la cebolla y el pimiento en el AOVE 5 min. Añade la patata cascada en trozos (rompiéndola en vez de cortarla, para que suelte almidón) y el tomate. Cubre con agua, añade el pimentón y cuece 15 min. Incorpora el atún en dados los últimos 3-4 min.",
     "Potaje de garbanzos con espinacas y bacalao": "Sofríe el ajo en el AOVE. Añade los garbanzos cocidos y un poco de agua, y cocina 8-10 min. Incorpora las espinacas y el bacalao desalado en trozos, y cuece 5 min más hasta que el bacalao esté hecho.",
     "Albóndigas de pavo en salsa con arroz": "Forma las albóndigas con el pavo picado y dóralas en el AOVE. Sofríe la cebolla picada, añade la salsa de tomate casera y las albóndigas, y cuece a fuego suave 15 min. Sirve con el arroz cocido.",
@@ -18357,7 +18357,7 @@
     "Yogur griego con avena y miel (90 min antes de entrenar)": "Vierte el yogur griego en un bol, añade la avena y un chorrito de miel. Sin cocción. Tómalo 90 min antes de entrenar.",
     "Bocadillo de atún y tomate (recuperación post-entreno)": "Escurre el atún y ponlo en el panecillo con el tomate en rodajas. Sin cocción. Tómalo en la primera hora después de entrenar.",
     "Requesón con miel y arándanos (recuperación post-entreno)": "Vierte el requesón en un bol, añade los arándanos y un chorrito de miel. Sin cocción. Tómalo en la primera hora después de entrenar.",
-    "Tortilla de claras con pan y mermelada (recuperación post-entreno)": "Cuaja las claras en una sartén antiadherente 2-3 min. Tuesta el pan y úntalo con la mermelada. Tómalo en la primera hora después de entrenar."
+    "Tortilla de claras y tostadas con mermelada (recuperación post-entreno)": "Cuaja las claras en una sartén antiadherente 2-3 min. Tuesta el pan y úntalo con la mermelada. Tómalo en la primera hora después de entrenar.",
   };
 
   // Genera una preparación razonable para cualquier plato que no tenga una
@@ -20046,7 +20046,8 @@
     }, 450);
   }
 
-  function validarCampoReg(campo) {
+  // escribiendo: el email a medias aun no es un error; el aviso sale al salir del campo.
+  function validarCampoReg(campo, escribiendo) {
     const val = (document.getElementById('reg-' + campo) || {}).value || '';
     switch (campo) {
       case 'apellidos':
@@ -20057,7 +20058,7 @@
         break;
       case 'email': {
         const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
-        _setFieldState('reg-email', val.trim() ? (ok ? 'valid' : 'error') : 'none');
+        _setFieldState('reg-email', val.trim() ? (ok ? 'valid' : (escribiendo ? 'none' : 'error')) : 'none');
         break;
       }
       case 'pass': {
@@ -20094,11 +20095,11 @@
     }
   }
 
-  function validarCampoLogin(campo) {
+  function validarCampoLogin(campo, escribiendo) {
     const val = (document.getElementById('login-' + campo) || {}).value || '';
     if (campo === 'email') {
       const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
-      _setFieldState('login-email', val.trim() ? (ok ? 'valid' : 'error') : 'none');
+      _setFieldState('login-email', val.trim() ? (ok ? 'valid' : (escribiendo ? 'none' : 'error')) : 'none');
       const err = document.getElementById('err-login-email');
       if (err) err.textContent = 'Introduce un email válido';
     }

@@ -3426,7 +3426,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       <label for="reg-email">Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="reg-email" name="username" placeholder="tu@email.com" autocomplete="username"
-          aria-describedby="err-email" oninput="validarCampoReg('email')" onblur="validarCampoReg('email')">
+          aria-describedby="err-email" oninput="validarCampoReg('email', true)" onblur="validarCampoReg('email')">
         <span class="auth-field-check" id="check-email">✓</span>
       </div>
     </div>
@@ -3511,7 +3511,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       <label for="login-email">Email</label>
       <div class="auth-field-wrap">
         <input type="email" id="login-email" name="username" placeholder="tu@email.com" autocomplete="username"
-          oninput="if(typeof validarCampoLogin==='function')validarCampoLogin('email')" onblur="if(typeof validarCampoLogin==='function')validarCampoLogin('email')">
+          oninput="if(typeof validarCampoLogin==='function')validarCampoLogin('email', true)" onblur="if(typeof validarCampoLogin==='function')validarCampoLogin('email')">
         <span class="auth-field-check" id="check-login-email">✓</span>
       </div>
     </div>
