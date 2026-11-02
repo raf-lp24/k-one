@@ -201,7 +201,8 @@ let R = [], RI = {}, ALIM = {}, CLAVES = [], CANT = {}, UNICOS = [];
 let C = {};              // cambios guardados, por id de receta
 let db = null;
 let vista = 'recetas', sel = null, lim = 80, visibles = [];
-let F = { q: '', toma: '', obj: '', est: '', tiempo: '', orden: '' };
+// Se abre con lo que queda por revisar; en Estado se pueden ver todas.
+let F = { q: '', toma: '', obj: '', est: 'pendiente', tiempo: '', orden: '' };
 let ingUI = [], altAbierto = -1, altBusca = '', pelDeshacer = false;
 const sucios = new Set(), timers = {}, cola = {};
 
@@ -580,7 +581,7 @@ function pintarCabecera() {
   let ok = 0, cam = 0, qui = 0;
   R.forEach((r) => { const e = estadoDe(r); if (e === 'ok') ok++; else if (e === 'cambiada' || e === 'nueva') cam++; else if (e === 'quitar') qui++; });
   const hechas = ok + cam + qui;
-  $('avanceTxt').textContent = hechas + ' de ' + total + ' revisadas · ' + cam + ' cambiadas · ' + qui + ' para quitar';
+  $('avanceTxt').textContent = 'Te quedan ' + (total - hechas) + ' de ' + total + ' · ' + cam + ' cambiadas · ' + qui + ' para quitar';
   const pc = (n) => (total ? n * 100 / total : 0) + '%';
   $('barra').innerHTML = `<i style="width:${pc(ok)};background:var(--ok)"></i><i style="width:${pc(cam)};background:var(--brasa-txt)"></i><i style="width:${pc(qui)};background:var(--mal)"></i>`;
   // Los cambios de una receta que ya se aplicó se quedan con su id antiguo: no cuentan.
@@ -731,6 +732,7 @@ function pintarFicha() {
   fi.innerHTML = `<button class="volver" id="volver">← Volver a la lista</button>
     <input class="nombre" id="nombre" value="${esc(e.nombre)}" aria-label="Nombre de la receta">
     ${htmlOrigen(r)}
+    ${r.fija || r.esNueva || /pre-?entreno|post-?entreno|antes de|despu[ée]s de entrenar|recuperaci[óo]n|pre-?wod|post-?wod|pre-?carrera|post-?carrera/i.test(r.nombre + ' ' + r.prep) ? '' : '<p class="nota-pie">Esto es una ración. Cada cliente la ve entera: ¾, 1, 1½ o 2 raciones, con algo aparte si le falta para su comida.</p>'}
     ${htmlIaGuardada(r)}
     <div id="iaViva">${htmlIaViva()}</div>
     ${avisos}
