@@ -60,18 +60,20 @@
   // ?reel=plan · «Le pido un plan a K-ONE» (27 oct 2026, montar-reel-plan.sh)
   const TEXTOS_PLAN = [
     ['Pruébalo tú', 'Le pido un plan<br>a K-ONE'],
+    ['Primero', 'Creo mi<br>cuenta'],
+    ['Confirmo el correo', 'Y entro'],
     ['Paso 1 de 6', 'Lo básico<br>de ti'],
     ['Tu salud', 'Lesiones, alergias<br>y salud'],
     ['Tu comida', 'Cómo y cuánto<br>comes'],
     ['Tu objetivo', 'Qué quieres<br>conseguir'],
     ['Tu entreno', 'Días, tiempo<br>y dónde entrenas'],
     ['Un momento', 'Se monta<br>tu plan'],
-    ['Sin crear cuenta', 'Tus calorías, tu<br>primera sesión y tu menú']
+    ['Ya está', 'Tus calorías, tu<br>primera sesión y tu menú']
   ];
   // ?reel=ia · «Le pido un plan a mi app» (30 oct 2026; 31 oct: «app», no «entrenador», lo pidió Rafa): misma grabación, textos de la IA.
   const TEXTOS_IA = TEXTOS_PLAN.map(t => t.slice());
   TEXTOS_IA[0] = ['Pruébalo tú', 'Le pido un plan<br>a mi app'];
-  TEXTOS_IA[6] = ['Un momento', 'La IA monta<br>tu plan'];
+  TEXTOS_IA[8] = ['Un momento', 'La IA monta<br>tu plan'];
   const q = new URLSearchParams(location.search);
   const pieza = q.get('pieza') || 'fondo';
   const esIA = q.get('reel') === 'ia';

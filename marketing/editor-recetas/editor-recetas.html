@@ -1,0 +1,737 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recetario K-ONE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<style>
+/* Mesa de trabajo de una sola pantalla: lista de recetas a la izquierda, ficha a la derecha (en el móvil, la ficha tapa la lista). Colores de la app K-ONE. */
+:root {
+  color-scheme: dark;
+  --negro: #0A0A0A; --carbon: #141414; --grafito: #1E1E1E; --acero: #2A2A2A; --humo: #3A3A3A;
+  --metal: #8F8D89; --metal-claro: #B5B2AD; --blanco: #F0EDE8; --puro: #FFFFFF;
+  --brasa: #D1420E; --brasa-txt: #F26A36;
+  --ok: #6CC78A; --mal: #EF6A61; --aviso: #E6B24A;
+  --titulo: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --texto: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --dato: 'DM Mono', ui-monospace, Consolas, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--negro); color: var(--blanco); font: 15px/1.45 var(--texto); display: flex; flex-direction: column; overflow: hidden; }
+* { box-sizing: border-box; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brasa-txt); outline-offset: 2px; }
+
+.cab { flex: none; background: var(--carbon); border-bottom: 1px solid var(--acero); padding-block: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cab-fila { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+.marca { font: 400 28px/1 var(--titulo); letter-spacing: .5px; white-space: nowrap; }
+.marca b { font-weight: 400; color: var(--brasa-txt); }
+.avance { flex: 1 1 200px; min-width: 0; display: grid; gap: 5px; }
+.avance-txt { font-size: 13px; color: var(--metal-claro); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.barra { height: 6px; background: var(--acero); border-radius: 3px; overflow: hidden; display: flex; }
+.barra i { display: block; height: 100%; }
+.guardado { font: 12px var(--dato); color: var(--metal); white-space: nowrap; }
+.guardado.mal { color: var(--mal); }
+.pest { display: flex; gap: 4px; margin-top: 8px; overflow-x: auto; }
+.pest button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 10px; font-weight: 500; color: var(--metal-claro); white-space: nowrap; }
+.pest button[aria-selected="true"] { color: var(--puro); border-color: var(--brasa); }
+.pest span { font: 12px var(--dato); color: var(--brasa-txt); margin-left: 4px; }
+.aviso-red { background: #3a2a10; color: var(--aviso); font-size: 13px; padding: 7px 16px; }
+
+.vista { flex: 1; min-height: 0; }
+.banco { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); height: 100%; }
+.izq { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--acero); }
+.filtros { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--acero); background: var(--carbon); }
+.filtros input, .filtros select { background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; padding: 8px 10px; min-width: 0; font-size: 14px; }
+.filtros input { flex: 1 1 100%; }
+.filtros select { flex: 1 1 170px; }
+.res { flex: none; font-size: 13px; color: var(--metal-claro); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+.lista { flex: 1; min-height: 0; overflow-y: auto; }
+.fila { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--grafito); padding: 11px 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+.fila:hover { background: var(--carbon); }
+.fila[aria-current="true"] { background: var(--grafito); }
+.fila.quitar .f-nom { text-decoration: line-through; color: var(--metal); }
+.f-nom { font-weight: 500; min-width: 0; }
+.f-est { justify-self: end; }
+.f-ing { font-size: 13px; color: var(--metal); grid-column: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.f-mac { font: 12px var(--dato); color: var(--metal-claro); justify-self: end; white-space: nowrap; }
+.f-pie { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+.tomas { display: inline-flex; gap: 2px; }
+.tomas i { font: 500 10px/16px var(--dato); width: 22px; text-align: center; border-radius: 3px; background: var(--grafito); color: #5c5b58; font-style: normal; }
+.tomas i.si { background: #4d2415; color: var(--brasa-txt); }
+.pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: #18301f; }
+.pill.cambiada { color: var(--brasa-txt); background: #3a1c10; }
+.pill.quitar { color: var(--mal); background: #3a1a18; }
+.pill.nueva { color: var(--aviso); background: #3a2a10; }
+.marca-aviso { font-size: 12px; color: var(--aviso); }
+.estrella { color: var(--aviso); font-size: 14px; line-height: 1; }
+.mas { display: block; width: calc(100% - 32px); margin: 14px 16px 24px; padding: 11px; background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; }
+
+.ficha { min-height: 0; overflow-y: auto; background: var(--carbon); padding-block: 16px 40px; padding-left: 20px; padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.vacia { color: var(--metal-claro); max-width: 42ch; margin: 12vh auto 0; text-align: center; }
+.vacia h2 { font: 400 30px var(--titulo); color: var(--blanco); margin: 0 0 8px; }
+.volver { display: none; background: none; border: 0; color: var(--brasa-txt); padding: 0 0 10px; font-weight: 500; }
+.nombre { width: 100%; background: none; border: 0; border-bottom: 1px solid var(--humo); padding: 2px 0 6px; font: 400 30px/1.1 var(--titulo); letter-spacing: .3px; }
+.nombre:focus { outline: 0; border-color: var(--brasa-txt); }
+.bloque { margin-top: 20px; }
+.bloque > h3 { font-size: 13px; font-weight: 700; color: var(--metal-claro); margin: 0 0 8px; }
+.macros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.macro { background: var(--grafito); border-radius: 8px; padding: 9px 10px; min-width: 0; }
+.macro b { display: block; font: 400 26px/1 var(--titulo); font-variant-numeric: tabular-nums; }
+.macro span { font-size: 12px; color: var(--metal-claro); }
+.macro em { display: block; font: 11px var(--dato); color: var(--metal); margin-top: 3px; }
+.macro em.sube { color: var(--brasa-txt); } .macro em.baja { color: #8cc5e8; }
+.reparto { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; background: var(--acero); }
+.nota-pie { font-size: 12px; color: var(--metal); margin: 7px 0 0; }
+.ing { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 6px; align-items: center; padding-bottom: 8px; }
+.ing input { background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
+.ing-info { grid-column: 1 / -1; font-size: 12px; color: var(--metal); }
+.ing-info.mal { color: var(--aviso); }
+.b-peq { background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; padding: 7px 10px; font-size: 13px; white-space: nowrap; }
+.b-peq:hover { border-color: var(--metal); }
+.b-peq[aria-expanded="true"] { border-color: var(--brasa-txt); color: var(--brasa-txt); }
+.b-x { width: 36px; padding: 7px 0; text-align: center; color: var(--metal-claro); }
+.alts { grid-column: 1 / -1; background: var(--negro); border: 1px solid var(--acero); border-radius: 8px; padding: 8px; display: grid; gap: 2px; margin-bottom: 4px; }
+.alts input { margin-bottom: 4px; font-size: 14px; }
+.alt { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 10px; text-align: left; background: none; border: 0; border-radius: 6px; padding: 7px 8px; }
+.alt:hover { background: var(--grafito); }
+.alt b { font-weight: 500; min-width: 0; }
+.alt span { font: 13px var(--dato); color: var(--brasa-txt); white-space: nowrap; }
+.alt small { grid-column: 1 / -1; font: 11px var(--dato); color: var(--metal-claro); }
+.alt small u { text-decoration: none; color: var(--aviso); font-family: var(--texto); }
+.matriz-caja { overflow-x: auto; }
+.matriz { border-collapse: separate; border-spacing: 3px; font-size: 12px; width: 100%; min-width: 330px; }
+.matriz th { font-weight: 500; color: var(--metal-claro); text-align: center; padding: 2px; }
+.matriz th:first-child { text-align: left; white-space: nowrap; }
+.celda { width: 100%; min-height: 36px; background: var(--grafito); border: 1px solid var(--humo); border-radius: 6px; color: transparent; }
+.celda[aria-pressed="true"] { background: var(--brasa); border-color: var(--brasa); color: var(--puro); }
+.lleva { font-size: 13px; color: var(--metal-claro); margin: 8px 0 0; }
+.campo { width: 100%; background: var(--grafito); border: 1px solid var(--humo); border-radius: 8px; padding: 9px 10px; }
+textarea.campo { min-height: 70px; resize: vertical; display: block; }
+.avisos { display: grid; gap: 6px; }
+.avisos li { list-style: none; background: #2b2110; color: #efd28f; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+.avisos { margin: 0; padding: 0; }
+.vinculo { background: none; border: 0; padding: 0; color: var(--brasa-txt); text-align: left; font-size: 13px; text-decoration: underline; text-underline-offset: 2px; }
+.parecidas { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; bottom: -40px; padding-block: 12px; background: var(--carbon); margin-top: 18px; border-top: 1px solid var(--acero); }
+.b { border-radius: 8px; padding: 11px 14px; font-weight: 500; border: 1px solid var(--humo); background: var(--grafito); flex: 1 1 auto; }
+.b.pri { background: var(--brasa); border-color: var(--brasa); color: var(--puro); }
+.b.pel { color: var(--mal); border-color: #5a2a27; }
+.b.act { border-color: currentColor; }
+
+.pagina { height: 100%; overflow-y: auto; padding-block: 20px 50px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.ancho { max-width: 880px; margin: 0 auto; }
+.pagina h2 { font: 400 30px var(--titulo); margin: 0 0 6px; }
+.pagina p { color: var(--metal-claro); margin: 0 0 14px; max-width: 65ch; }
+.rec { border-collapse: separate; border-spacing: 4px; width: 100%; min-width: 520px; font-variant-numeric: tabular-nums; }
+.rec th { font-weight: 500; font-size: 13px; color: var(--metal-claro); padding: 4px; }
+.rec th:first-child { text-align: left; }
+.rec button { width: 100%; background: var(--grafito); border: 1px solid var(--acero); border-radius: 8px; padding: 10px 4px; }
+.rec button b { display: block; font: 400 24px/1 var(--titulo); }
+.rec button small { font: 11px var(--dato); color: var(--metal); }
+.rec button.corta { border-color: var(--mal); }
+.rec button.corta b { color: var(--mal); }
+.resumen-n { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.resumen-n button { background: var(--grafito); border: 1px solid var(--acero); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.resumen-n b { font-family: var(--dato); font-weight: 500; color: var(--brasa-txt); margin-right: 5px; }
+.grupo { margin-top: 22px; }
+.grupo h3 { font: 400 22px var(--titulo); margin: 0 0 8px; }
+.cam { border-top: 1px solid var(--acero); padding: 11px 0; }
+.cam-nom { background: none; border: 0; padding: 0; font-weight: 700; text-align: left; }
+.cam-nom:hover { color: var(--brasa-txt); }
+.dif { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 2px 10px; font-size: 13px; margin-top: 5px; }
+.dif dt { color: var(--metal); }
+.dif dd { margin: 0; min-width: 0; }
+.dif s { color: var(--metal); }
+.dif .a { color: var(--brasa-txt); margin: 0 4px; }
+.pie-botones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.brindis { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--puro); color: var(--negro); padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 899px) {
+  .banco { grid-template-columns: minmax(0, 1fr); }
+  .izq { border-right: 0; }
+  .ficha { position: fixed; inset: 0; z-index: 20; padding-top: calc(14px + env(safe-area-inset-top, 0px)); padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .volver { display: block; }
+  .acciones { bottom: calc(-30px - env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: no-preference) { .barra i { transition: width .25s; } }
+</style>
+
+<header class="cab">
+  <div class="cab-fila">
+    <div class="marca">K-<b>ONE</b> recetario</div>
+    <div class="avance">
+      <div class="avance-txt"><span id="avanceTxt">Cargando recetas</span><span class="guardado" id="guardado"></span></div>
+      <div class="barra" id="barra"></div>
+    </div>
+  </div>
+  <div class="pest" role="tablist">
+    <button role="tab" id="p-recetas" data-vista="recetas" aria-selected="true">Recetas</button>
+    <button role="tab" id="p-recuento" data-vista="recuento" aria-selected="false">Recuento</button>
+    <button role="tab" id="p-cambios" data-vista="cambios" aria-selected="false">Tus cambios<span id="nCambios"></span></button>
+  </div>
+</header>
+<div class="aviso-red" id="avisoRed" hidden></div>
+<main class="vista" id="vista"></main>
+<div class="brindis" id="brindis" hidden></div>
+
+<script>
+const RAMAS = ['Perder grasa', 'Ganar músculo', 'Mantenimiento'];
+const TOMAS = ['Desayuno', 'Media mañana', 'Comida', 'Merienda', 'Cena'];
+const CORTO = { 'Desayuno': 'De', 'Media mañana': 'Mm', 'Comida': 'Co', 'Merienda': 'Me', 'Cena': 'Ce' };
+const MINIMO_TOMA = 20; // Ninguna toma baja de 20 opciones desde la ampliación de septiembre.
+const CLAVE_LOCAL = 'kone_recetario_cambios';
+
+let R = [], RI = {}, ALIM = {}, CLAVES = [], CANT = {}, UNICOS = [];
+let C = {};              // cambios guardados, por id de receta
+let db = null;
+let vista = 'recetas', sel = null, lim = 80, visibles = [];
+let F = { q: '', toma: '', obj: '', est: '', tiempo: '', orden: '' };
+let ingUI = [], altAbierto = -1, altBusca = '', pelDeshacer = false;
+const sucios = new Set(), timers = {}, cola = {};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+const clonar = (o) => JSON.parse(JSON.stringify(o));
+
+// ─── Macros: la misma cuenta que «Ver macros» de la app (scripts/validar-recetas.js) ───
+const PESO_UNIDAD = [
+  [/pl[áa]tano/i, 120], [/huevos?\b/i, 55], [/claras?\b/i, 33], [/yemas?\b/i, 17], [/kiwis?\b/i, 75],
+  [/manzana|pera\b/i, 180], [/naranja/i, 180], [/aguacate/i, 200], [/tomate/i, 120],
+  [/tosta|rebanada|reba[ñn]ada/i, 30], [/panecillo/i, 60], [/tortita|torta de arroz|tortas de arroz/i, 9],
+  [/\bbarra\b/i, 100],
+  [/panes? wassa|wassa/i, 10], [/barrita/i, 50],
+  [/scoop/i, 30], [/cda|cucharada sopera|cucharada\b/i, 15], [/cdta|cucharadita/i, 5],
+  [/pu[ñn]ado/i, 25], [/loncha/i, 20], [/yogur/i, 125], [/vaso/i, 200],
+  [/latas?\b/i, 80],
+  [/zanahorias?/i, 80], [/mandarinas?/i, 90], [/berenjenas?/i, 250],
+  [/calabac[íi]n(es)?/i, 200], [/mangos?\b/i, 200], [/boniatos?/i, 150],
+  [/pimientos?/i, 120], [/champi[ñn]on(es)?/i, 20], [/rama de apio|ramas de apio/i, 40],
+  [/tortillas? (integral|de trigo|de ma[íi]z)/i, 40], [/d[áa]tiles?/i, 8],
+  [/higos?\b/i, 50], [/ciruelas?/i, 60], [/melocot[óo]n(es)?/i, 150], [/granadas?/i, 180],
+  [/pieza|unidad/i, 100]
+];
+function buscar(texto) {
+  const t = norm(texto.replace(/\(.*?\)/g, '').replace(/\bsin lactosa\b/gi, '').replace(/\bpequeñ[oa]s?\b/gi, '').replace(/\s+/g, ' '));
+  const k = CLAVES.find((c) => t.includes(norm(c)));
+  return k ? Object.assign({ clave: k }, ALIM[k]) : null;
+}
+function ponerCantidad(t) {
+  if (!t || /^d|^(un|una|medio|media)/i.test(t)) return t;
+  const def = CANT[t.toLowerCase()];
+  return def ? def + ' ' + t : t;
+}
+function gramosDeUnidad(texto) {
+  const m = texto.trim().match(/^(\d+(?:[.,]\d+)?(?:\/\d+)?)\s+(.*)$/);
+  if (!m) return null;
+  let n;
+  if (m[1].includes('/')) { const [a, b] = m[1].split('/').map(Number); n = b ? a / b : null; }
+  else n = parseFloat(m[1].replace(',', '.'));
+  if (!n) return null;
+  const hit = PESO_UNIDAD.find(([re]) => re.test(m[2]));
+  return hit ? { gramos: Math.round(n * hit[1]), resto: m[2] } : null;
+}
+function leerIng(txt) {
+  const t = ponerCantidad(txt.trim());
+  let gramos = null, resto = null, unidad = 'g';
+  const m = t.match(/^(\d+(?:[.,]\d+)?)\s*(g|gr|ml)\b\s*(.+)$/i);
+  if (m) { gramos = parseFloat(m[1].replace(',', '.')); resto = m[3]; unidad = /ml/i.test(m[2]) ? 'ml' : 'g'; }
+  else { const u = gramosDeUnidad(t); if (u) { gramos = u.gramos; resto = u.resto; } }
+  const al = gramos !== null ? buscar(resto) : buscar(t);
+  return { t, gramos, unidad, al };
+}
+function sumar(textos) {
+  const r = { kcal: 0, p: 0, c: 0, g: 0, f: 0 };
+  textos.forEach((x) => {
+    if (!x.trim()) return;
+    const i = leerIng(x);
+    if (i.gramos === null || !i.al) return;
+    const f = i.gramos / 100;
+    r.p += i.al.p * f; r.c += i.al.c * f; r.g += i.al.g * f; r.f += (i.al.f || 0) * f;
+  });
+  const red = (x) => Math.round(Math.round(x * 10) / 10);
+  const p = red(r.p), c = red(r.c), g = red(r.g);
+  return { kcal: p * 4 + c * 4 + g * 9, p, c, g, f: red(r.f) };
+}
+const partir = (s) => String(s || '').split(',').map((x) => x.trim()).filter(Boolean);
+
+// ─── Alimentos parecidos ───
+const FAMILIAS = [
+  ['gluten', /\bpan\b|tosta|pasta|harina|trigo|cusc|bulgur|espelta|centeno|cebada|seit[aá]n|\bwrap|tortilla integral|tortilla de trigo|galleta|granola|cereal|fideo|macarr|espagueti/],
+  ['lactosa', /leche(?! de (coco|almendra|soja|avena|arroz))|yogur|queso|skyr|kefir|requeson|cottage|mantequilla|\bnata\b|whey/],
+  ['huevo', /huevo|\bclaras?\b/],
+  ['pescado', /atun|salmon|merluza|bacalao|sardina|caballa|lubina|dorada|\brape\b|anchoa|trucha|boqueron|pescado|gallo\b/],
+  ['marisco', /gamba|langostino|mejillon|calamar|pulpo|sepia|almeja|marisco/],
+  ['frutos secos', /\bnuez|nueces|almendra|avellana|anacardo|pistacho|cacahuete|pinones/],
+  ['soja', /soja|tofu|edamame|tempeh|tamari/]
+];
+const familiasDe = (t) => { const n = norm(t); return FAMILIAS.filter(([, re]) => re.test(n)).map(([f]) => f); };
+
+// Dentro de los que cuadran en macros, primero los de su misma familia: atún → otro pescado.
+const GRUPOS = [
+  ['ave', /pollo|pavo|\bpato\b/], ['pescado', /atun|salmon|merluza|bacalao|sardina|caballa|lubina|dorada|\brape\b|anchoa|trucha|boqueron|pescado|gallo\b|melva|rodaballo|jurel|emperador|bonito/],
+  ['marisco', /gamba|langostino|mejillon|calamar|pulpo|sepia|almeja/], ['carne', /ternera|cerdo|lomo|buey|cordero|conejo|carne|jamon|lacon/],
+  ['huevo', /huevo|\bclaras?\b/], ['legumbre', /lenteja|garbanzo|alubia|judia blanca|guisante|edamame|tofu|tempeh/],
+  ['queso', /queso|requeson|cottage/], ['yogur', /yogur|skyr|kefir/], ['leche', /leche|bebida de/],
+  ['pan', /\bpan\b|tosta|tortilla|wrap|panecillo/], ['pasta', /pasta|arroz|cuscus|quinoa|fideo|macarr|espagueti|bulgur/], ['avena', /avena|copos|granola|muesli|cereal/], ['tuberculo', /patata|boniato|yuca/],
+  ['fruto seco', /\bnuez|nueces|almendra|avellana|anacardo|pistacho|cacahuete|pinones|semilla/], ['aceite', /aceite|aove|mantequilla/], ['fruta', /manzana|pera\b|platano|naranja|kiwi|fresa|mandarina|melocoton|mango|uva|pina|sandia|melon|frutos rojos|arandano|frambuesa/]
+];
+const grupoDe = (a) => { const n = norm(a.n + ' ' + (a.clave || '')); const g = GRUPOS.find(([, re]) => re.test(n)); return g ? g[0] : ''; };
+
+function prepararAlimentos() {
+  const porNombre = new Map();
+  CLAVES.forEach((k) => { // de la clave más larga a la más corta: «solomillo de cerdo», no «solomillo»
+    const v = ALIM[k];
+    if (porNombre.has(v.n)) return;
+    const b = buscar('x ' + k);
+    if (b && b.n === v.n) porNombre.set(v.n, Object.assign({ clave: k }, v));
+  });
+  UNICOS = [...porNombre.values()].sort((a, b) => a.n.localeCompare(b.n, 'es'));
+}
+function cantidadParecida(i, ali) {
+  if (i.gramos === null) return null;
+  const k1 = i.al ? i.al.kcal : 0, k2 = ali.kcal;
+  // Verdura y fruta ligera: misma cantidad. El resto: las mismas calorías.
+  if (!k1 || !k2 || (k1 < 60 && k2 < 60)) return i.gramos;
+  return Math.max(5, Math.round(i.gramos * k1 / k2 / 5) * 5);
+}
+function candidatos(i, busca) {
+  const b = norm(busca || '').trim();
+  if (b) return UNICOS.filter((a) => norm(a.n + ' ' + a.clave).includes(b)).slice(0, 10);
+  if (!i.al) return [];
+  const k = i.al.kcal || 1;
+  const v = [i.al.p * 4 / k, i.al.c * 4 / k, i.al.g * 9 / k];
+  const grupo = grupoDe(i.al);
+  return UNICOS.filter((a) => a.cat === i.al.cat && a.n !== i.al.n && a.kcal > 0)
+    .map((a) => ({ a, d: Math.abs(a.p * 4 / a.kcal - v[0]) + Math.abs(a.c * 4 / a.kcal - v[1]) + Math.abs(a.g * 9 / a.kcal - v[2]) + Math.abs(a.kcal - k) / Math.max(a.kcal, k) * 0.35 - (grupo && grupoDe(a) === grupo ? 0.3 : 0) }))
+    .sort((x, y) => x.d - y.d).slice(0, 8).map((x) => x.a);
+}
+
+// ─── Estado de cada receta ───
+const baseMx = (r) => r.ap.filter((a) => RAMAS.includes(a.r)).map((a) => a.r + '|' + a.m);
+const mismoMx = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+function ef(r) {
+  const c = C[r.id] || {};
+  return { nombre: c.nombre != null ? c.nombre : r.nombre, ingredientes: c.ingredientes != null ? c.ingredientes : r.ingredientes, prep: c.prep != null ? c.prep : r.prep, mx: c.ap || baseMx(r), fav: !!c.fav, nota: c.nota || '', revisada: c.estado === 'ok', quitar: c.estado === 'quitar', nueva: !!c.nueva };
+}
+const editada = (c) => !!c && (c.nombre != null || c.ingredientes != null || c.prep != null || c.ap != null);
+function estadoDe(r) {
+  const c = C[r.id];
+  if (!c) return '';
+  if (c.estado === 'quitar') return 'quitar';
+  if (c.nueva) return 'nueva';
+  if (editada(c)) return 'cambiada';
+  return c.estado === 'ok' ? 'ok' : '';
+}
+const ETIQ = { ok: 'Bien', cambiada: 'Cambiada', quitar: 'Quitar', nueva: 'Nueva' };
+
+// ─── Guardado: una escritura por documento y solo si cambió ───
+function guardarLocal() { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(C)); } catch (e) {} }
+function indicador(t, mal) { const g = $('guardado'); g.textContent = t; g.classList.toggle('mal', !!mal); }
+async function escribir(id, intento) {
+  guardarLocal();
+  if (!db) { sucios.delete(id); indicador('Guardado en este navegador'); return; }
+  try {
+    if (C[id]) await db.doc('cambios/' + id).set(clonar(C[id]));
+    else await db.doc('cambios/' + id).delete();
+    sucios.delete(id);
+    if (!sucios.size) indicador('Guardado');
+  } catch (e) {
+    if (e && e.code === 'unavailable' && !intento) { await new Promise((r) => setTimeout(r, 800 + Math.random() * 800)); return escribir(id, true); }
+    indicador('No se ha podido guardar. Tus cambios siguen en este navegador', true);
+  }
+}
+function programar(id) {
+  sucios.add(id);
+  indicador('Guardando…');
+  guardarLocal();
+  clearTimeout(timers[id]);
+  timers[id] = setTimeout(() => { cola[id] = (cola[id] || Promise.resolve()).then(() => escribir(id)); }, 600);
+}
+function setCampo(id, campo, valor) {
+  const r = RI[id];
+  const c = Object.assign({}, C[id] || {});
+  const base = campo === 'ap' ? baseMx(r) : r[campo];
+  const igual = campo === 'ap' ? mismoMx(valor, base) : valor === base;
+  if (igual && !c.nueva) delete c[campo]; else c[campo] = valor;
+  ponerDoc(id, c);
+}
+function ponerDoc(id, c) {
+  const llaves = Object.keys(c).filter((k) => k !== 'ts');
+  if (!llaves.length) delete C[id];
+  else { c.ts = Date.now(); C[id] = c; }
+  programar(id);
+  pintarCabecera();
+}
+
+// ─── Cabecera ───
+function pintarCabecera() {
+  const total = R.length;
+  let ok = 0, cam = 0, qui = 0;
+  R.forEach((r) => { const e = estadoDe(r); if (e === 'ok') ok++; else if (e === 'cambiada' || e === 'nueva') cam++; else if (e === 'quitar') qui++; });
+  const hechas = ok + cam + qui;
+  $('avanceTxt').textContent = hechas + ' de ' + total + ' revisadas · ' + cam + ' cambiadas · ' + qui + ' para quitar';
+  const pc = (n) => (total ? n * 100 / total : 0) + '%';
+  $('barra').innerHTML = `<i style="width:${pc(ok)};background:var(--ok)"></i><i style="width:${pc(cam)};background:var(--brasa-txt)"></i><i style="width:${pc(qui)};background:var(--mal)"></i>`;
+  const n = Object.keys(C).filter((id) => { const c = C[id]; return editada(c) || c.estado === 'quitar' || c.nota || c.fav || c.nueva; }).length;
+  $('nCambios').textContent = n ? ' ' + n : '';
+}
+
+// ─── Lista ───
+function pasaFiltro(r) {
+  const e = ef(r), est = estadoDe(r);
+  if (F.q) { const q = norm(F.q); if (!norm(e.nombre + ' ' + e.ingredientes).includes(q)) return false; }
+  const otras = r.ap.filter((a) => !RAMAS.includes(a.r));
+  if (F.toma && !(e.mx.some((x) => x.endsWith('|' + F.toma)) || otras.some((a) => a.m === F.toma))) return false;
+  if (F.obj) {
+    if (RAMAS.includes(F.obj)) { if (!e.mx.some((x) => x.startsWith(F.obj + '|'))) return false; }
+    else if (F.obj === 'Extra') { if (!r.ap.some((a) => a.r.startsWith('Extra'))) return false; }
+    else if (!r.ap.some((a) => a.r === F.obj)) return false;
+  }
+  if (F.est) {
+    if (F.est === 'pendiente' && est) return false;
+    if (['ok', 'cambiada', 'quitar', 'nueva'].includes(F.est) && est !== F.est) return false;
+    if (F.est === 'fav' && !e.fav) return false;
+    if (F.est === 'nota' && !e.nota) return false;
+    if (F.est === 'aviso' && !r.avisos.length) return false;
+    if (['macros', 'parecida', 'variantes', 'criterio', 'alimento'].includes(F.est) && !r.avisos.some((a) => a.t === F.est)) return false;
+  }
+  if (F.tiempo) {
+    const min = +(/(\d+)\s*min/.exec(e.prep) || [])[1] || 999;
+    if (F.tiempo === 'crudo') { if (!/sin cocci/i.test(e.prep)) return false; }
+    else if (min > +F.tiempo) return false;
+  }
+  return true;
+}
+function ordenar(l) {
+  const m = new Map(l.map((r) => [r.id, sumar(partir(ef(r).ingredientes))]));
+  if (F.orden === 'kcal') return l.sort((a, b) => m.get(a.id).kcal - m.get(b.id).kcal);
+  if (F.orden === 'kcald') return l.sort((a, b) => m.get(b.id).kcal - m.get(a.id).kcal);
+  if (F.orden === 'prot') return l.sort((a, b) => m.get(b.id).p - m.get(a.id).p);
+  if (F.orden === 'az') return l.sort((a, b) => ef(a).nombre.localeCompare(ef(b).nombre, 'es'));
+  return l;
+}
+function tirasTomas(mx, r) {
+  const otras = r.ap.filter((a) => !RAMAS.includes(a.r)).map((a) => a.m);
+  return '<span class="tomas" aria-hidden="true">' + TOMAS.map((t) => `<i class="${mx.some((x) => x.endsWith('|' + t)) || otras.includes(t) ? 'si' : ''}">${CORTO[t]}</i>`).join('') + '</span>';
+}
+function htmlFila(r) {
+  const e = ef(r), m = sumar(partir(e.ingredientes)), est = estadoDe(r);
+  const avisos = r.avisos.length ? `<span class="marca-aviso">${r.avisos.length === 1 ? '1 aviso' : r.avisos.length + ' avisos'}</span>` : '';
+  const rep = r.ap.some((a) => a.r === 'Repostaje') ? '<span class="marca-aviso" style="color:var(--metal-claro)">Repostaje</span>' : '';
+  return `<button class="fila ${est}" data-id="${r.id}" ${sel === r.id ? 'aria-current="true"' : ''}>
+    <span class="f-nom">${esc(e.nombre)}</span>
+    <span class="f-est">${est ? `<span class="pill ${est}">${ETIQ[est]}</span>` : ''}</span>
+    <span class="f-ing">${esc(e.ingredientes)}</span>
+    <span class="f-mac">${m.kcal} kcal · ${m.p} P</span>
+    <span class="f-pie">${tirasTomas(e.mx, r)}${rep}${avisos}${e.fav ? '<span class="estrella" title="Favorita">★</span>' : ''}${e.nota ? '<span class="marca-aviso" style="color:var(--metal-claro)">Con nota</span>' : ''}</span>
+  </button>`;
+}
+function pintarLista() {
+  visibles = ordenar(R.filter(pasaFiltro));
+  const caja = $('lista'); if (!caja) return;
+  $('resN').textContent = visibles.length === 1 ? '1 receta' : visibles.length + ' recetas';
+  caja.innerHTML = visibles.slice(0, lim).map(htmlFila).join('') + (visibles.length > lim ? `<button class="mas" id="verMas">Ver ${Math.min(100, visibles.length - lim)} más (quedan ${visibles.length - lim})</button>` : '') + (!visibles.length ? '<p style="padding:20px 16px;color:var(--metal-claro)">Ninguna receta con estos filtros.</p>' : '');
+}
+function pintarBanco() {
+  const o = (v, t, a) => `<option value="${esc(v)}"${a === v ? ' selected' : ''}>${esc(t)}</option>`;
+  $('vista').innerHTML = `<div class="banco">
+    <section class="izq">
+      <div class="filtros">
+        <input id="fQ" type="search" placeholder="Busca por nombre o ingrediente: atún, avena…" aria-label="Buscar receta" value="${esc(F.q)}">
+        <select id="fToma" aria-label="Toma">${o('', 'Todas las tomas', F.toma)}${TOMAS.map((t) => o(t, t, F.toma)).join('')}</select>
+        <select id="fObj" aria-label="Objetivo">${o('', 'Todos los objetivos', F.obj)}${RAMAS.map((t) => o(t, t, F.obj)).join('')}${o('Extra', 'Extras por deporte', F.obj)}${o('Repostaje', 'Repostaje', F.obj)}${o('Reserva alérgicos', 'Reserva para alérgicos', F.obj)}</select>
+        <select id="fEst" aria-label="Estado">${o('', 'Cualquier estado', F.est)}${o('pendiente', 'Sin revisar', F.est)}${o('ok', 'Bien', F.est)}${o('cambiada', 'Cambiadas', F.est)}${o('quitar', 'Para quitar', F.est)}${o('nueva', 'Nuevas', F.est)}${o('fav', 'Favoritas', F.est)}${o('nota', 'Con nota', F.est)}${o('aviso', 'Con cualquier aviso', F.est)}${o('macros', 'Aviso: macros que no cuadran', F.est)}${o('parecida', 'Aviso: casi iguales', F.est)}${o('variantes', 'Aviso: nombre repetido', F.est)}${o('criterio', 'Aviso: batido con canela', F.est)}</select>
+        <select id="fTiempo" aria-label="Tiempo">${o('', 'Cualquier tiempo', F.tiempo)}${o('crudo', 'Sin cocinar', F.tiempo)}${o('5', 'Hasta 5 min', F.tiempo)}${o('10', 'Hasta 10 min', F.tiempo)}${o('20', 'Hasta 20 min', F.tiempo)}</select>
+        <select id="fOrden" aria-label="Orden">${o('', 'Orden de la app', F.orden)}${o('az', 'De la A a la Z', F.orden)}${o('prot', 'Más proteína', F.orden)}${o('kcal', 'Menos calorías', F.orden)}${o('kcald', 'Más calorías', F.orden)}</select>
+      </div>
+      <div class="res"><span id="resN"></span><button class="b-peq" id="nueva">+ Nueva receta</button></div>
+      <div class="lista" id="lista"></div>
+    </section>
+    <section class="ficha" id="ficha"></section>
+  </div>`;
+  pintarLista();
+  pintarFicha();
+}
+
+// ─── Ficha ───
+function abrir(id) { sel = id; altAbierto = -1; altBusca = ''; pelDeshacer = false; ingUI = RI[id] ? partir(ef(RI[id]).ingredientes) : []; pintarFicha(); document.querySelectorAll('.fila').forEach((f) => f.toggleAttribute('aria-current', false)); const f = document.querySelector(`.fila[data-id="${id}"]`); if (f) f.setAttribute('aria-current', 'true'); const fi = $('ficha'); if (fi) fi.scrollTop = 0; }
+function htmlMacros(r) {
+  const ahora = sumar(ingUI), antes = r.calc || { kcal: 0, p: 0, c: 0, g: 0 };
+  const caja = (v, t, a) => { const d = v - a; return `<div class="macro"><b>${v}</b><span>${t}</span><em class="${d > 0 ? 'sube' : d < 0 ? 'baja' : ''}">${d === 0 ? 'igual' : (d > 0 ? '+' : '−') + Math.abs(d) + ' · antes ' + a}</em></div>`; };
+  const tot = Math.max(1, ahora.p * 4 + ahora.c * 4 + ahora.g * 9);
+  return `<div class="macros">${caja(ahora.kcal, 'kcal', antes.kcal)}${caja(ahora.p, 'g proteína', antes.p)}${caja(ahora.c, 'g hidratos', antes.c)}${caja(ahora.g, 'g grasa', antes.g)}</div>
+    <div class="reparto" title="Reparto de calorías"><i style="width:${ahora.p * 400 / tot}%;background:var(--blanco)"></i><i style="width:${ahora.c * 400 / tot}%;background:var(--brasa-txt)"></i><i style="width:${ahora.g * 900 / tot}%;background:var(--metal)"></i></div>
+    <p class="nota-pie">Receta base, sin escalar. ${r.fija ? 'Esta va a ración fija (dieta AJ7).' : 'La app ajusta las cantidades a las calorías de cada cliente.'}</p>`;
+}
+function infoIng(t) {
+  if (!t.trim()) return '<div class="ing-info">Escribe cantidad y alimento: 150g pollo, 2 huevos…</div>';
+  const i = leerIng(t);
+  if (i.gramos !== null && i.al) { const f = i.gramos / 100; return `<div class="ing-info">${esc(i.al.n)} · ${i.gramos} ${i.unidad} · ${Math.round(i.al.kcal * f)} kcal · ${Math.round(i.al.p * f)} P · ${Math.round(i.al.c * f)} C · ${Math.round(i.al.g * f)} G</div>`; }
+  if (i.gramos !== null) return '<div class="ing-info mal">No está en la tabla de alimentos: no cuenta en los macros</div>';
+  return `<div class="ing-info">${i.al ? esc(i.al.n) + ' · ' : ''}Sin cantidad: no cuenta en los macros</div>`;
+}
+function htmlAlts(k) {
+  const i = leerIng(ingUI[k] || '');
+  const lista = candidatos(i, altBusca);
+  const famReceta = new Set(familiasDe(ingUI.join(' ')));
+  const base = sumar(ingUI);
+  const filas = lista.map((a) => {
+    const g = cantidadParecida(i, a);
+    const texto = g !== null ? `${g}${i.unidad === 'ml' && a.cat === 'Lácteos' ? 'ml' : 'g'} ${a.clave}` : a.clave;
+    const prueba = ingUI.slice(); prueba[k] = texto;
+    const s = sumar(prueba);
+    const d = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x);
+    const nuevas = familiasDe(a.clave + ' ' + a.n).filter((f) => !famReceta.has(f));
+    return `<button class="alt" data-alt="${esc(texto)}"><b>${esc(a.n)}</b><span>${g !== null ? g + ' ' + (i.unidad === 'ml' && a.cat === 'Lácteos' ? 'ml' : 'g') : ''}</span><small>Receta: ${d(s.kcal - base.kcal)} kcal · ${d(s.p - base.p)} P · ${d(s.c - base.c)} C · ${d(s.g - base.g)} G${nuevas.length ? ' · <u>añade ' + esc(nuevas.join(', ')) + '</u>' : ''}</small></button>`;
+  }).join('');
+  return `<div class="alts"><input id="altQ" type="search" placeholder="Buscar otro alimento de la tabla" aria-label="Buscar otro alimento" value="${esc(altBusca)}">
+    <div id="altLista">${filas || '<p class="nota-pie" style="padding:4px 8px">' + (i.al ? 'Sin resultados.' : 'No reconozco este ingrediente: busca el alimento arriba.') + '</p>'}</div></div>`;
+}
+function pintarIngredientes() {
+  const caja = $('ings'); if (!caja) return;
+  caja.innerHTML = ingUI.map((t, k) => `<div class="ing" data-k="${k}">
+    <input id="ing-${k}" value="${esc(t)}" aria-label="Ingrediente ${k + 1}">
+    <button class="b-peq" data-alts="${k}" aria-expanded="${altAbierto === k}">Parecidos</button>
+    <button class="b-peq b-x" data-qing="${k}" aria-label="Quitar ingrediente">✕</button>
+    <div id="info-${k}" style="grid-column:1/-1">${infoIng(t)}</div>
+    ${altAbierto === k ? htmlAlts(k) : ''}
+  </div>`).join('') + '<button class="b-peq" id="addIng">+ Añadir ingrediente</button>';
+}
+function pintarFicha() {
+  const fi = $('ficha'); if (!fi) return;
+  const r = RI[sel];
+  fi.hidden = false;
+  if (!r) {
+    if (window.matchMedia('(max-width: 899px)').matches) { fi.hidden = true; return; }
+    fi.innerHTML = `<div class="vacia"><h2>Elige una receta</h2><p>Cambia ingredientes por otros de valor nutritivo parecido, decide en qué tomas sale o quítala. Nada llega a la app hasta que le digas a Claude «aplica los cambios».</p></div>`;
+    return;
+  }
+  const e = ef(r);
+  const fila = (rama) => `<tr><th scope="row">${rama}</th>${TOMAS.map((t) => { const k = rama + '|' + t; const si = e.mx.includes(k); return `<td><button class="celda" data-mx="${esc(k)}" aria-pressed="${si}" aria-label="${esc(rama + ', ' + t)}">✓</button></td>`; }).join('')}</tr>`;
+  const otras = r.ap.filter((a) => !RAMAS.includes(a.r));
+  const grupos = {}; otras.forEach((a) => { (grupos[a.r] = grupos[a.r] || []).push(a.m); });
+  const lleva = Object.entries(grupos).map(([g, m]) => `${g.replace('Extra: ', 'Extra de ')} (${m.join(', ')})`).join(' · ');
+  const vinc = (ids) => (ids || []).map((id) => RI[id] ? `<button class="vinculo" data-id="${id}">${esc(ef(RI[id]).nombre)}</button>` : '').join('');
+  const avisos = r.avisos.length ? `<div class="bloque"><h3>Avisos medidos</h3><ul class="avisos">${r.avisos.map((a) => `<li>${esc(a.x)}${a.t === 'parecida' ? `<div class="parecidas">${vinc(r.parecidas)}</div>` : a.t === 'variantes' ? `<div class="parecidas">${vinc(r.mismoNombre)}</div>` : ''}</li>`).join('')}</ul></div>` : '';
+  fi.innerHTML = `<button class="volver" id="volver">← Volver a la lista</button>
+    <input class="nombre" id="nombre" value="${esc(e.nombre)}" aria-label="Nombre de la receta">
+    ${avisos}
+    <div class="bloque" id="macrosCaja">${htmlMacros(r)}</div>
+    <div class="bloque"><h3>Ingredientes</h3><div id="ings"></div></div>
+    <div class="bloque"><h3>Parte del día, por objetivo</h3>
+      <div class="matriz-caja"><table class="matriz"><thead><tr><th></th>${TOMAS.map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody>${RAMAS.map(fila).join('')}</tbody></table></div>
+      ${lleva ? `<p class="lleva">También sale en: ${esc(lleva)}. Eso se queda igual; si quieres cambiarlo, apúntalo en la nota.</p>` : ''}
+    </div>
+    <div class="bloque"><h3>Dificultad y tiempo</h3><input class="campo" id="prep" value="${esc(e.prep)}" aria-label="Dificultad y tiempo"></div>
+    <div class="bloque"><h3>Nota para Claude</h3><textarea class="campo" id="nota" placeholder="Hazla más ligera, cambia la preparación, súbela a los carruseles…">${esc(e.nota)}</textarea></div>
+    <div class="acciones">
+      <button class="b pri" id="bien">${estadoDe(r) === 'cambiada' || estadoDe(r) === 'nueva' ? 'Guardada, siguiente' : 'Bien así, siguiente'}</button>
+      <button class="b" id="fav" aria-pressed="${e.fav}">${e.fav ? '★ Favorita' : '☆ Favorita'}</button>
+      <button class="b pel ${e.quitar ? 'act' : ''}" id="quitar">${e.quitar ? 'Se quita. Pulsa para dejarla' : 'Quitar de la app'}</button>
+      ${C[r.id] ? `<button class="b" id="deshacer">${pelDeshacer ? '¿Seguro? Pulsa otra vez' : (e.nueva ? 'Descartar receta' : 'Deshacer mis cambios')}</button>` : ''}
+    </div>`;
+  pintarIngredientes();
+}
+function cambioIngredientes() {
+  const r = RI[sel]; if (!r) return;
+  setCampo(sel, 'ingredientes', ingUI.map((x) => x.trim()).filter(Boolean).join(', '));
+  $('macrosCaja').innerHTML = htmlMacros(r);
+  refrescarFila();
+}
+function refrescarFila() {
+  const f = document.querySelector(`.fila[data-id="${sel}"]`);
+  if (f && RI[sel]) { const t = document.createElement('template'); t.innerHTML = htmlFila(RI[sel]).trim(); f.replaceWith(t.content.firstChild); }
+}
+function siguiente() {
+  const i = visibles.findIndex((r) => r.id === sel);
+  const sig = visibles.slice(i + 1).find((r) => !estadoDe(r)) || visibles[i + 1];
+  if (sig) { if (visibles.indexOf(sig) >= lim) { lim = visibles.indexOf(sig) + 40; pintarLista(); } abrir(sig.id); const f = document.querySelector(`.fila[data-id="${sig.id}"]`); if (f) f.scrollIntoView({ block: 'nearest' }); }
+  else { sel = null; pintarFicha(); brindis('Ya no quedan más en esta lista'); }
+}
+function brindis(t) { const b = $('brindis'); b.textContent = t; b.hidden = false; clearTimeout(brindis._t); brindis._t = setTimeout(() => { b.hidden = true; }, 2200); }
+
+// ─── Recuento ───
+function cuenta(rama, toma) { const k = rama + '|' + toma; return R.filter((r) => !ef(r).quitar && ef(r).mx.includes(k)).length; }
+function cuentaBase(rama, toma) { const k = rama + '|' + toma; return R.filter((r) => !C[r.id]?.nueva && baseMx(r).includes(k)).length; }
+function pintarRecuento() {
+  const tipos = [['pendiente', 'sin revisar'], ['macros', 'con macros que no cuadran'], ['parecida', 'casi iguales a otra'], ['variantes', 'con nombre repetido'], ['criterio', 'batidos con canela'], ['fav', 'favoritas']];
+  const cuantas = (t) => R.filter((r) => { if (t === 'pendiente') return !estadoDe(r); if (t === 'fav') return ef(r).fav; return r.avisos.some((a) => a.t === t); }).length;
+  $('vista').innerHTML = `<div class="pagina"><div class="ancho">
+    <h2>Cuántas opciones quedan</h2>
+    <p>Lo que tendría cada objetivo en cada toma con tus cambios. En rojo si baja de ${MINIMO_TOMA}: por debajo se empiezan a repetir platos y los filtros de alergias o «no como» se quedan cortos. Pulsa una casilla para ver esas recetas.</p>
+    <div style="overflow-x:auto"><table class="rec"><thead><tr><th></th>${TOMAS.map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody>
+    ${RAMAS.map((ra) => `<tr><th scope="row" style="white-space:nowrap">${ra}</th>${TOMAS.map((t) => { const n = cuenta(ra, t), b = cuentaBase(ra, t); return `<td><button class="${n < MINIMO_TOMA ? 'corta' : ''}" data-ir-obj="${esc(ra)}" data-ir-toma="${esc(t)}"><b>${n}</b><small>${n === b ? 'igual' : 'antes ' + b}</small></button></td>`; }).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    <h2 style="margin-top:26px">Por dónde empezar</h2>
+    <p>Los avisos salen de medir las ${R.length} recetas con la tabla de alimentos de la app. Pulsa para ir a ellas.</p>
+    <div class="resumen-n">${tipos.map(([t, x]) => `<button data-ir-est="${t}"><b>${cuantas(t)}</b>${x}</button>`).join('')}</div>
+  </div></div>`;
+}
+
+// ─── Tus cambios ───
+function filasCambio(r) {
+  const c = C[r.id] || {}, d = [];
+  const par = (n, a, b) => d.push([n, `<s>${esc(a)}</s><span class="a">→</span>${esc(b)}`]);
+  if (c.nueva) { d.push(['Ingredientes', esc(c.ingredientes || '')]); d.push(['Dónde', esc((c.ap || []).join(', ').replace(/\|/g, ' · ') || 'Sin toma elegida')]); }
+  else {
+    if (c.nombre != null) par('Nombre', r.nombre, c.nombre);
+    if (c.ingredientes != null) { par('Ingredientes', r.ingredientes, c.ingredientes); const a = r.calc, b = sumar(partir(c.ingredientes)); par('Macros', `${a.kcal} kcal, ${a.p} P, ${a.c} C, ${a.g} G`, `${b.kcal} kcal, ${b.p} P, ${b.c} C, ${b.g} G`); }
+    if (c.prep != null) par('Tiempo', r.prep, c.prep);
+    if (c.ap != null) {
+      const bs = baseMx(r), sale = bs.filter((x) => !c.ap.includes(x)), entra = c.ap.filter((x) => !bs.includes(x));
+      if (sale.length) d.push(['Sale de', esc(sale.join(', ').replace(/\|/g, ' · '))]);
+      if (entra.length) d.push(['Entra en', esc(entra.join(', ').replace(/\|/g, ' · '))]);
+    }
+  }
+  if (c.nota) d.push(['Nota', esc(c.nota)]);
+  return d;
+}
+function pintarCambios() {
+  const lista = R.filter((r) => C[r.id]);
+  const grupos = [
+    ['Para quitar', lista.filter((r) => C[r.id].estado === 'quitar')],
+    ['Recetas nuevas', lista.filter((r) => C[r.id].nueva && C[r.id].estado !== 'quitar')],
+    ['Cambiadas', lista.filter((r) => !C[r.id].nueva && C[r.id].estado !== 'quitar' && editada(C[r.id]))],
+    ['Con nota', lista.filter((r) => C[r.id].nota && !editada(C[r.id]) && C[r.id].estado !== 'quitar')],
+    ['Favoritas', lista.filter((r) => C[r.id].fav)]
+  ].filter(([, l]) => l.length);
+  const cuerpo = grupos.map(([t, l]) => `<section class="grupo"><h3>${t} (${l.length})</h3>${l.map((r) => {
+    const d = t === 'Favoritas' ? [] : filasCambio(r);
+    return `<div class="cam"><button class="cam-nom" data-abrir="${r.id}">${esc(ef(r).nombre)}</button>${d.length ? `<dl class="dif">${d.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>` : ''}</div>`;
+  }).join('')}</section>`).join('');
+  $('vista').innerHTML = `<div class="pagina"><div class="ancho">
+    <h2>Antes y después</h2>
+    <p>La app sigue igual hasta que le digas a Claude «aplica los cambios». Entonces recalcula los macros, pasa las auditorías de alimentos y alérgenos y lo sube. Si una receta sale en varios objetivos, el cambio vale para todos.</p>
+    <div class="pie-botones"><button class="b-peq" id="copiar">Copiar el resumen</button></div>
+    ${cuerpo || '<p>Todavía no has cambiado nada. Cuando edites una receta, aparecerá aquí.</p>'}
+  </div></div>`;
+}
+function textoResumen() {
+  return JSON.stringify(R.filter((r) => C[r.id]).map((r) => Object.assign({ id: r.id, original: r.nombre }, C[r.id])), null, 1);
+}
+
+// ─── Vistas y eventos ───
+function irA(v) {
+  vista = v;
+  document.querySelectorAll('.pest button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.vista === v)));
+  if (v === 'recetas') pintarBanco(); else if (v === 'recuento') pintarRecuento(); else pintarCambios();
+}
+document.addEventListener('click', (ev) => {
+  const t = ev.target.closest('button'); if (!t) return;
+  if (t.dataset.vista) return irA(t.dataset.vista);
+  if (t.dataset.irObj || t.dataset.irEst) {
+    F = { q: '', toma: t.dataset.irToma || '', obj: t.dataset.irObj || '', est: t.dataset.irEst || '', tiempo: '', orden: '' }; lim = 80; sel = null;
+    return irA('recetas');
+  }
+  if (t.dataset.abrir) { const id = t.dataset.abrir; F = { q: '', toma: '', obj: '', est: '', tiempo: '', orden: '' }; irA('recetas'); return abrir(id); }
+  if (t.id === 'verMas') { lim += 100; return pintarLista(); }
+  if (t.id === 'copiar') {
+    const txt = textoResumen();
+    navigator.clipboard.writeText(txt).then(() => brindis('Resumen copiado'), () => { const a = document.createElement('textarea'); a.className = 'campo'; a.value = txt; t.parentElement.after(a); a.select(); brindis('Selecciónalo y cópialo a mano'); });
+    return;
+  }
+  if (t.id === 'nueva') {
+    const id = 'n' + Date.now();
+    C[id] = { nueva: true, nombre: 'Receta nueva', ingredientes: '', prep: 'Fácil · 10 min', ap: [], ts: Date.now() };
+    sincronizarNuevas(); programar(id); pintarCabecera(); pintarLista(); ingUI = ['']; sel = id; altAbierto = -1; pintarFicha();
+    return;
+  }
+  if (t.classList.contains('fila') || t.classList.contains('vinculo')) return abrir(t.dataset.id);
+  if (t.id === 'volver') { sel = null; return pintarFicha(); }
+  if (!sel || !RI[sel]) return;
+  if (t.dataset.mx) {
+    const e = ef(RI[sel]); const k = t.dataset.mx;
+    const nueva = e.mx.includes(k) ? e.mx.filter((x) => x !== k) : e.mx.concat(k);
+    setCampo(sel, 'ap', nueva);
+    t.setAttribute('aria-pressed', String(nueva.includes(k)));
+    return refrescarFila();
+  }
+  if (t.dataset.alts != null) { const k = +t.dataset.alts; altAbierto = altAbierto === k ? -1 : k; altBusca = ''; return pintarIngredientes(); }
+  if (t.dataset.qing != null) { ingUI.splice(+t.dataset.qing, 1); altAbierto = -1; pintarIngredientes(); return cambioIngredientes(); }
+  if (t.dataset.alt) { ingUI[altAbierto] = t.dataset.alt; altAbierto = -1; altBusca = ''; pintarIngredientes(); cambioIngredientes(); return brindis('Ingrediente cambiado'); }
+  if (t.id === 'addIng') { ingUI.push(''); altAbierto = -1; pintarIngredientes(); const u = $('ing-' + (ingUI.length - 1)); if (u) u.focus(); return; }
+  const c = Object.assign({}, C[sel] || {});
+  if (t.id === 'bien') { if (c.estado === 'quitar' || !c.estado) c.estado = 'ok'; ponerDoc(sel, c); refrescarFila(); return siguiente(); }
+  if (t.id === 'fav') { if (c.fav) delete c.fav; else c.fav = true; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
+  if (t.id === 'quitar') { if (c.estado === 'quitar') delete c.estado; else c.estado = 'quitar'; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
+  if (t.id === 'deshacer') {
+    if (!pelDeshacer) { pelDeshacer = true; t.textContent = '¿Seguro? Pulsa otra vez'; return; }
+    const id = sel; const eraNueva = !!(C[id] && C[id].nueva);
+    delete C[id]; programar(id); pintarCabecera();
+    if (eraNueva) { sincronizarNuevas(); sel = null; pintarLista(); return pintarFicha(); }
+    refrescarFila(); return abrir(id);
+  }
+});
+let tBusca;
+document.addEventListener('input', (ev) => {
+  const t = ev.target;
+  if (t.id === 'fQ') { F.q = t.value; lim = 80; clearTimeout(tBusca); tBusca = setTimeout(pintarLista, 130); return; }
+  if (t.id === 'altQ') {
+    altBusca = t.value; const v = t.value; pintarIngredientes(); const n = $('altQ'); if (n) { n.focus(); n.setSelectionRange(v.length, v.length); }
+    return;
+  }
+  if (!sel || !RI[sel]) return;
+  if (t.id === 'nombre') { setCampo(sel, 'nombre', t.value); return refrescarFila(); }
+  if (t.id === 'prep') { setCampo(sel, 'prep', t.value); return; }
+  if (t.id === 'nota') { const c = Object.assign({}, C[sel] || {}); if (t.value.trim()) c.nota = t.value; else delete c.nota; ponerDoc(sel, c); return; }
+  if (t.id.startsWith('ing-')) { const k = +t.id.slice(4); ingUI[k] = t.value; const i = $('info-' + k); if (i) i.innerHTML = infoIng(t.value); return cambioIngredientes(); }
+});
+document.addEventListener('change', (ev) => {
+  const m = { fToma: 'toma', fObj: 'obj', fEst: 'est', fTiempo: 'tiempo', fOrden: 'orden' }[ev.target.id];
+  if (m) { F[m] = ev.target.value; lim = 80; pintarLista(); }
+});
+
+// Las recetas nuevas viven solo en los cambios: se añaden a la lista como una fila más.
+function sincronizarNuevas() {
+  R = R.filter((r) => !r.esNueva || C[r.id]);
+  Object.keys(C).forEach((id) => {
+    if (C[id].nueva && !RI[id]) { const f = { id, esNueva: true, nombre: C[id].nombre, ingredientes: '', prep: '', et: {}, calc: { kcal: 0, p: 0, c: 0, g: 0 }, fija: false, ap: [], avisos: [] }; R.unshift(f); RI[id] = f; }
+  });
+}
+
+// ─── Arranque ───
+(async function () {
+  try {
+    const [recetas, alim] = await Promise.all([fetch('recetas.json').then((r) => r.json()), fetch('alimentos.json').then((r) => r.json())]);
+    R = recetas; R.forEach((r) => { RI[r.id] = r; });
+    ALIM = alim.alim; CANT = alim.cant; CLAVES = Object.keys(ALIM).sort((a, b) => b.length - a.length);
+    prepararAlimentos();
+  } catch (e) {
+    $('avanceTxt').textContent = 'No se han podido cargar las recetas. Recarga la página.';
+    return;
+  }
+  try { C = JSON.parse(localStorage.getItem(CLAVE_LOCAL) || '{}') || {}; } catch (e) { C = {}; }
+  sincronizarNuevas();
+  pintarCabecera();
+  irA('recetas');
+
+  db = window.claude && window.claude.use ? await window.claude.use('db').catch(() => null) : null;
+  if (!db) {
+    const a = $('avisoRed'); a.hidden = false;
+    a.textContent = 'Aquí los cambios solo se guardan en este navegador. Abre la página desde tu cuenta de Claude para que queden guardados y yo pueda leerlos.';
+    indicador('Solo en este navegador');
+    return;
+  }
+  let reloj = setTimeout(() => { const a = $('avisoRed'); a.hidden = false; a.textContent = 'Todavía no llego a tus cambios guardados. Lo que edites se guarda en cuanto vuelva la conexión.'; }, 10000);
+  db.collection('cambios').onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(reloj); $('avisoRed').hidden = true; }
+    const nuevo = {};
+    snap.docs.forEach((d) => { nuevo[d.id] = clonar(d.data()); });
+    sucios.forEach((id) => { if (C[id]) nuevo[id] = C[id]; else delete nuevo[id]; });
+    const antes = JSON.stringify(C[sel] || null);
+    C = nuevo;
+    guardarLocal();
+    sincronizarNuevas();
+    pintarCabecera();
+    if (vista === 'recetas') {
+      pintarLista();
+      const dentro = document.activeElement && document.activeElement.closest && document.activeElement.closest('#ficha');
+      if (!dentro && JSON.stringify(C[sel] || null) !== antes) { if (RI[sel]) { ingUI = partir(ef(RI[sel]).ingredientes); } pintarFicha(); }
+    }
+  }, () => { clearTimeout(reloj); const a = $('avisoRed'); a.hidden = false; a.textContent = 'Se ha cortado la conexión con tus cambios guardados. Recarga la página.'; });
+})();
+</script>

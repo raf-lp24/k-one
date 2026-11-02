@@ -18,18 +18,18 @@ mkdir -p "$(dirname "$OUT")"
 mkdir -p "$R/piezas"
 pz(){ node "$RAIZ/marketing/cdp-frames.mjs" "http://localhost:8080/marketing/reel-piezas.html?reel=$REEL&$1" "$R/piezas/tmp" 0.04 25 1080 1920 2>/dev/null && mv "$R/piezas/tmp/f00000.png" "$R/piezas/$2.png"; }
 pz "pieza=fondo" fondo; pz "pieza=marco" marco; pz "pieza=mascara" mascara; pz "pieza=final" final
-for i in 0 1 2 3 4 5 6 7; do pz "pieza=texto&i=$i" "t$i"; done
+for i in 0 1 2 3 4 5 6 7 8 9; do pz "pieza=texto&i=$i" "t$i"; done
 
-# Ventanas: portada, datos, salud, comida, objetivo, entreno, generar, adelanto → fin (+1,6 s quieto)
-read -r -a W <<< "$(node -e "const t=require(process.argv[1]);const fin=t.total+1.6;console.log([t.portada,t.datos,t.salud,t.comida,t.objetivo,t.entreno,t.generar,t.adelanto,fin].map(x=>x.toFixed(2)).join(' '))" "$R/tiempos.json")"
-D=${W[8]}
+# Ventanas: portada, cuenta, correo, datos, salud, comida, objetivo, entreno, generar, adelanto → fin (+1,6 s quieto)
+read -r -a W <<< "$(node -e "const t=require(process.argv[1]);const fin=t.total+1.6;console.log([t.portada,t.cuenta,t.correo,t.datos,t.salud,t.comida,t.objetivo,t.entreno,t.generar,t.adelanto,fin].map(x=>x.toFixed(2)).join(' '))" "$R/tiempos.json")"
+D=${W[10]}
 OFF=$(node -e "console.log((+process.argv[1]-0.6).toFixed(2))" "$D")
 cd "$R/piezas"
 ins="-loop 1 -t $D -i fondo.png -i ../app.mp4 -loop 1 -t $D -i mascara.png -loop 1 -t $D -i marco.png"
-for i in 0 1 2 3 4 5 6 7; do ins="$ins -loop 1 -t $D -i t$i.png"; done
+for i in 0 1 2 3 4 5 6 7 8 9; do ins="$ins -loop 1 -t $D -i t$i.png"; done
 f="[1:v]tpad=stop_mode=clone:stop_duration=2,trim=duration=$D,scale=610:1320:flags=lanczos,format=rgba,pad=1080:1920:235:450:color=black@0[ap];[2:v]format=gray,scale=1080:1920[mk];[ap][mk]alphamerge[apm];[0:v]format=rgba[bg];[bg][apm]overlay=0:0[b1];[b1][3:v]overlay=0:0[c];"
 prev=c
-for i in 0 1 2 3 4 5 6 7; do a=${W[$i]}; b=${W[$((i+1))]}; f="$f[$prev][$((i+4)):v]overlay=0:0:enable='between(t,$a,$b)'[o$i];"; prev=o$i; done
+for i in 0 1 2 3 4 5 6 7 8 9; do a=${W[$i]}; b=${W[$((i+1))]}; f="$f[$prev][$((i+4)):v]overlay=0:0:enable='between(t,$a,$b)'[o$i];"; prev=o$i; done
 f="$f[$prev]fps=30,format=yuv420p,setsar=1[v]"
 # En dos pasadas: con el cierre en la misma (13 entradas a 1080x1920) ffmpeg se queda sin memoria.
 ffmpeg -y -loglevel error $ins -filter_complex "$f" -map "[v]" -t "$D" -c:v libx264 -crf 18 -preset medium main.mp4

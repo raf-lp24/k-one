@@ -1,6 +1,6 @@
 {
-  "_nota": "Reel 23 «Me doy de alta en K-ONE» (1 nov 2026, idea de Rafa): una clienta (una chica normal, no de culturista, hecha con Higgsfield; 1 nov: Rafa no la quería «hiperfuerte») y, en su móvil, la app grabada de verdad. Escenas: Videos/historia-alta/c1-4.mp4. Insertos: grabaciones de grabar.mjs. Rótulos: [desde, hasta, ojo, título, 'verde'?] en segundos desde el principio del tramo. 1 nov (Rafa: «va todo super rápido» y «no hace falta enseñar menos, pero más lento»): el cuestionario entero a 2× con un rótulo por bloque, y el resto a velocidad real.",
-  "salida": "23-me-doy-de-alta-en-k-one.mp4",
+  "_nota": "Reel 23 «Me doy de alta en K-ONE» (1 nov 2026, idea de Rafa): una clienta (una chica normal, no de culturista, hecha con Higgsfield; 1 nov: Rafa no la quería «hiperfuerte») y, en su móvil, la app grabada de verdad. Escenas: Videos/historia-alta/c1-4.mp4. Insertos: grabaciones de grabar.mjs. Rótulos: [desde, hasta, ojo, título, 'verde'?] en segundos desde el principio del tramo. 1 nov (Rafa: «va todo super rápido» y «no hace falta enseñar menos, pero más lento»): el cuestionario entero a 2× con un rótulo por bloque, y el resto a velocidad real. 2 nov: el alta ahora empieza por la cuenta (grabar-reel-plan.mjs): portada y cuenta a 1,6×, «revisa tu correo» a velocidad real, cuestionario a 2× y el adelanto a velocidad real.",
+  "salida": "23-me-doy-de-alta-en-k-one-v2.mp4",
   "tramos": [
     {
       "tipo": "ia",
@@ -23,55 +23,77 @@
       "partes": [
         [
           0,
-          28.15,
-          14.07
+          14.73,
+          9.2
         ],
         [
-          28.15,
-          32.54,
-          4.39
+          14.73,
+          17.6,
+          2.87
+        ],
+        [
+          17.76,
+          42.58,
+          12.41
+        ],
+        [
+          42.58,
+          48,
+          5.42
         ]
       ],
       "rotulos": [
         [
           0,
-          2.4,
+          1.94,
           "Entro en k-one.fit",
           "Primer mes<br>*gratis*"
         ],
         [
-          2.4,
-          5,
+          1.94,
+          9.2,
+          "Primero",
+          "Creo mi<br>*cuenta*"
+        ],
+        [
+          9.2,
+          12.07,
+          "Confirmo el correo",
+          "Y *entro*"
+        ],
+        [
+          12.07,
+          14.7,
           "Me pregunta",
           "Edad, peso<br>y *altura*"
         ],
         [
-          5,
-          7.8,
+          14.7,
+          17.41,
           "Mi salud",
           "Lesiones y<br>*alergias*"
         ],
         [
-          7.8,
-          9.2,
+          17.41,
+          18.87,
           "Cómo como",
           "Y cuántas<br>*veces*"
         ],
         [
-          9.2,
-          10.75,
+          18.87,
+          20.37,
           "Qué quiero",
           "Mi<br>*objetivo*"
         ],
         [
-          10.75,
-          14.07,
+          20.37,
+          24.48,
           "Y cómo entreno",
           "Días y<br>*tiempo*"
         ],
         [
-          14.07,
-          18.46,
+          24.48,
+          29.9,
           "Y al momento",
           "Mi plan,<br>*hecho*",
           "verde"

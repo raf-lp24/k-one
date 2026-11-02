@@ -1,8 +1,9 @@
 // Graba la app DE VERDAD (móvil 390x844) para el reel «Le pido un plan a K-ONE»
-// (27 oct 2026): portada → Empieza gratis → cuestionario de 6 pasos → adelanto
-// del plan. Se rellena como lo haría alguien de verdad (toques visibles), con una
-// persona de ejemplo inventada. NO se crea cuenta: el reel acaba en el adelanto,
-// que se ve antes de registrarse.
+// (27 oct 2026; 2 nov: con el alta nueva): portada → Empieza gratis → crear cuenta →
+// confirmar correo → cuestionario de 6 pasos → adelanto del plan. Se rellena como lo
+// haría alguien de verdad (toques visibles), con una persona de ejemplo inventada.
+// NO se crea cuenta: signUp está simulado y la red hacia Supabase y /api, cortada; la
+// sesión de después es solo local. Acaba antes de pulsar el botón del mes gratis.
 //
 //   node marketing/grabar-reel-plan.mjs <carpetaSalida> [url]
 // Deja en la carpeta los fotogramas (JPG), "lista.txt" (ffconcat con la duración
@@ -45,7 +46,8 @@ ws.addEventListener('message', ev => {
 const cmd = (method, params = {}) => new Promise(res => { const i = ++id; pend.set(i, res); ws.send(JSON.stringify({ id: i, method, params })); });
 const ev = async (e) => { const r = await cmd('Runtime.evaluate', { expression: e, awaitPromise: true, returnByValue: true }); if (r.result?.exceptionDetails) throw new Error(JSON.stringify(r.result.exceptionDetails).slice(0, 300)); return r.result?.result?.value; };
 
-await cmd('Page.enable'); await cmd('Runtime.enable');
+await cmd('Page.enable'); await cmd('Runtime.enable'); await cmd('Network.enable');
+await cmd('Network.setBlockedURLs', { urls: ['*supabase.co*', '*/api/*', '*google-analytics*', '*googletagmanager*', '*facebook*'] });
 await cmd('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
 // Lunes: el adelanto enseña la primera sesión de la semana.
 await cmd('Page.addScriptToEvaluateOnNewDocument', { source: `(() => { const R = Date, fijo = new R('2026-10-26T09:30:00').getTime(), t0 = R.now(); class D extends R { constructor(...a) { if (a.length) super(...a); else super(fijo + (R.now() - t0)); } static now() { return fijo + (R.now() - t0); } } window.Date = D; })();` });
@@ -60,6 +62,15 @@ console.log(await ev(`(() => {
   document.head.appendChild(st);
   // Toque visible y después el clic de verdad.
   window.__toca = (el) => { if (!el) return 'no'; el.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => { const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = '__tap'; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(d); setTimeout(() => d.remove(), 700); setTimeout(() => el.click(), 160); }, 380); return 'ok'; };
+  window.__escribe = (id, texto, ms = 70) => new Promise(res => { const el = document.getElementById(id); el.focus(); el.value = ''; let k = 0; const t = setInterval(() => { el.value = texto.slice(0, ++k); el.dispatchEvent(new Event('input', { bubbles: true })); if (k >= texto.length) { clearInterval(t); el.dispatchEvent(new Event('blur')); res('ok'); } }, ms); });
+  window.__baja = (id, m = 150) => { const el = document.getElementById(id); window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - m, behavior: 'smooth' }); return 'ok'; };
+  // Un punto casi invisible que parpadea: el screencast solo manda fotogramas si algo
+  // cambia, y sin esto una pantalla quieta justo antes de un corte duraría 0,04 s.
+  const lat = document.createElement('div'); lat.style.cssText = 'position:fixed;right:0;bottom:0;width:2px;height:2px;z-index:99999;pointer-events:none;animation:__lat .2s steps(2) infinite'; document.body.appendChild(lat);
+  st.textContent += '@keyframes __lat{from{background:rgba(255,255,255,.01)}to{background:rgba(255,255,255,.03)}}';
+  // Sin cuenta real ni correo de bienvenida.
+  supa.auth.signUp = async () => ({ data: { user: { id: 'demo', identities: [{ id: 'demo' }] }, session: null }, error: null });
+  notificarAdmin = async () => {};
   window.__opc = (idGrupo, texto) => __toca([...document.querySelectorAll('#' + idGrupo + ' .radio-opt')].find(o => o.textContent.trim().startsWith(texto)));
   window.__visible = () => [...document.querySelectorAll('.form-block.active button')].find(b => /Siguiente|Generar/.test(b.textContent));
   return 'listo';
@@ -77,7 +88,28 @@ grabando = true; t0 = Date.now();
 marca('portada');
 await esperar(1600);
 await ev(`__toca([...document.querySelectorAll('button')].find(b => /Empieza gratis/i.test(b.textContent) && b.offsetParent))`); await esperar(1500);
-await ev(`__toca([...document.querySelectorAll('#bienvenida button')].find(b => /Empezar el cuestionario/.test(b.textContent)))`); await esperar(1300);
+
+marca('cuenta');
+await ev(`window.scrollTo(0, 0)`); await esperar(900);
+await ev(`__escribe('reg-nombre', 'Lucía')`); await esperar(350);
+await ev(`__escribe('reg-apellidos', 'Martín Gómez')`); await esperar(350);
+await ev(`__escribe('reg-email', 'lucia.martin@ejemplo.com', 55)`); await esperar(350);
+await ev(`__baja('reg-pass', 200)`); await esperar(450);
+await ev(`__escribe('reg-pass', 'Prueba2026x', 70)`); await esperar(300);
+await ev(`__escribe('reg-pass2', 'Prueba2026x', 70)`); await esperar(500);
+await ev(`__baja('reg-terminos', 260)`); await esperar(650);
+for (const c of ['reg-terminos', 'reg-datosSalud', 'reg-mayorEdad']) { await ev(`__toca(document.getElementById('${c}'))`); await esperar(800); }
+await ev(`__toca(document.querySelector('#registerForm button[type=submit]'))`); await esperar(1200);
+
+marca('correo');
+await ev(`window.scrollTo(0, 0)`); await esperar(2600);
+// Confirmar el correo pasa fuera de la app: corte y entra ya con su sesión (solo local).
+grabando = false;
+await ev(`(() => { setCurrentUser({ nombre: 'Lucía Martín Gómez', email: 'lucia.martin@ejemplo.com', creado: new Date().toISOString() }); enterFormulario(); window.scrollTo(0, 0); return 'ok'; })()`);
+await esperar(700);
+cortes.add(frames.length);
+grabando = true;
+await esperar(400);
 
 marca('datos');
 await ev(`(() => { window.scrollTo(0, 0); return 'ok'; })()`);
@@ -115,19 +147,19 @@ grabando = false;
 let pantalla = '';
 for (let i = 0; i < 80; i++) {
   pantalla = await ev(`(document.querySelector('.screen.active') || {}).id || ''`);
-  if (pantalla && pantalla !== 'formulario' && pantalla !== 'generando' && !/loading|cargando/i.test(pantalla)) break;
+  if (pantalla && pantalla !== 'formulario' && pantalla !== 'generando' && !/loading|cargando/i.test(pantalla) && !(await ev(`document.getElementById('loadingOverlay').classList.contains('visible')`))) break;
   await esperar(250);
 }
 await esperar(900);
 console.log('  pantalla tras generar: ' + pantalla);
-await ev(`window.scrollTo(0, 0)`); await esperar(300);
+await ev(`document.getElementById('modalPaywall').scrollTop = 0`); await esperar(300);
 cortes.add(frames.length);
 grabando = true;
 await esperar(1200);
 
 marca('adelanto');
 await esperar(1800);
-console.log("  scroll adelanto: " + await ev(`(() => { const et = [...document.querySelectorAll('#registro div')].find(e => e.children.length === 0 && /TU PLAN, CON TUS RESPUESTAS/.test(e.textContent)); if (!et) return 'sin adelanto'; const y = et.getBoundingClientRect().top + scrollY - 110; window.scrollTo({ top: y, behavior: 'smooth' }); return "ok " + Math.round(y) + " de " + document.documentElement.scrollHeight; })()`));
+console.log("  scroll adelanto: " + await ev(`(() => { const et = document.getElementById('paywallAdelanto'); if (!et || !et.innerHTML) return 'sin adelanto'; et.scrollIntoView({ block: 'start', behavior: 'smooth' }); return 'ok'; })()`));
 await esperar(1200);
 marca('comidas');
 await esperar(3200);
