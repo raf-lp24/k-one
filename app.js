@@ -53,8 +53,6 @@
     document.getElementById(screenId).classList.add('active');
     if (!(opciones && opciones.mantenerScroll)) window.scrollTo(0,0);
     if (screenId === 'registro' || screenId === 'login') { try { _pintarPlanPendiente(); } catch (e) {} }
-    if (screenId === 'registro') { try { _rellenarRegistroConDatos(); } catch (e) {} }
-    if (screenId === 'bienvenida') { try { _rellenarBienvenida(); } catch (e) {} }
     const btnVolver = document.getElementById('btnVolverDashboard');
     if (btnVolver) {
       const user = getCurrentUser();
@@ -19690,8 +19688,11 @@
   function validarCampoReg(campo) {
     const val = (document.getElementById('reg-' + campo) || {}).value || '';
     switch (campo) {
+      case 'apellidos':
+        _setFieldState('reg-apellidos', val.trim().length >= 2 ? 'valid' : val.trim() ? 'error' : 'none');
+        break;
       case 'nombre':
-        _setFieldState('reg-nombre', val.trim().split(/\s+/).length >= 2 && val.trim().length >= 5 ? 'valid' : val.trim() ? 'error' : 'none');
+        _setFieldState('reg-nombre', val.trim().length >= 2 ? 'valid' : val.trim() ? 'error' : 'none');
         break;
       case 'email': {
         const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
@@ -19799,7 +19800,10 @@
   async function registrar() {
     let ok = true;
 
-    const nombre = document.getElementById('reg-nombre').value.trim();
+    // Nombre y apellidos van en dos casillas (1 nov 2026); en la cuenta se guardan juntos, como siempre.
+    const nombreSolo = document.getElementById('reg-nombre').value.trim();
+    const apellidos = document.getElementById('reg-apellidos').value.trim();
+    const nombre = (nombreSolo + ' ' + apellidos).trim();
     const email = document.getElementById('reg-email').value.trim().toLowerCase();
 
     // Limpieza defensiva: si este navegador tenía una sesión (propia o de
@@ -19822,13 +19826,18 @@
     const mayorEdad = document.getElementById('reg-mayorEdad').checked;
 
     // Limpiar errores
-    ['nombre','email','pass','pass2','terminos','datosSalud','mayorEdad'].forEach(id => {
+    ['nombre','apellidos','email','pass','pass2','terminos','datosSalud','mayorEdad'].forEach(id => {
       document.getElementById(`err-${id}`).classList.remove('visible');
       const input = document.getElementById(`reg-${id}`);
       if (input) input.classList.remove('error');
     });
 
-    if (!nombre || nombre.split(/\s+/).length < 2 || nombre.length < 5) {
+    if (apellidos.length < 2) {
+      document.getElementById('err-apellidos').classList.add('visible');
+      document.getElementById('reg-apellidos').classList.add('error');
+      ok = false;
+    }
+    if (nombreSolo.length < 2) {
       document.getElementById('err-nombre').classList.add('visible');
       document.getElementById('reg-nombre').classList.add('error');
       ok = false;
@@ -19920,7 +19929,7 @@
     }
 
     // Limpiar campos
-    ['reg-nombre','reg-email','reg-pass','reg-pass2','reg-codigoInvitacion'].forEach(id => {
+    ['reg-nombre','reg-apellidos','reg-email','reg-pass','reg-pass2','reg-codigoInvitacion'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -20878,46 +20887,17 @@ Se coló: ${lista}`;
     enterFormulario();
   }
 
-  // DATOS PRIMERO (1 nov 2026, Rafa): el alta empieza con nombre, apellidos y email,
-  // como antes; luego el cuestionario y al final solo la contraseña, con el nombre y
-  // el email ya puestos. Se guardan en este dispositivo 14 días (como el plan pendiente).
-  const _CLAVE_DATOS_ALTA = 'kone_alta_datos';
-  function _leerDatosAlta() {
-    try { const d = JSON.parse(localStorage.getItem(_CLAVE_DATOS_ALTA) || 'null'); if (d && Date.now() - (d.t || 0) < 14 * 86400000) return d; } catch (e) {}
-    return null;
-  }
-  function validarCampoBienvenida(campo) {
-    const val = ((document.getElementById('bv-' + campo) || {}).value || '').trim();
-    const ok = campo === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val) : val.length >= 2;
-    _setFieldState('bv-' + campo, val ? (ok ? 'valid' : 'error') : 'none');
-    return ok;
-  }
-  function _rellenarBienvenida() {
-    const d = _leerDatosAlta();
-    const u = getCurrentUser();
-    const pon = (id, v) => { const el = document.getElementById(id); if (el && !el.value && v) el.value = v; };
-    if (d) { pon('bv-nombre', d.nombre); pon('bv-apellidos', d.apellidos); pon('bv-email', d.email); }
-    else if (u) { const p = String(u.nombre || '').trim().split(/\s+/); pon('bv-nombre', p[0]); pon('bv-apellidos', p.slice(1).join(' ')); pon('bv-email', u.email); }
-  }
-  function empezarConDatos() {
-    // Con la sesión ya iniciada no hace falta: sus datos ya están en la cuenta.
+  // CUENTA PRIMERO (1 nov 2026, Rafa: «como estaba antes»): «Empieza gratis» abre
+  // «Crear cuenta» (nombre, apellidos, email y contraseña) y, al entrar,
+  // _entrarTrasAutenticar() lleva al cuestionario. Con sesión, directo al cuestionario
+  // (o a su plan si ya lo tiene). Quien ya hizo el cuestionario como invitado en este
+  // dispositivo ve su adelanto encima del formulario, como hasta ahora.
+  function empezarAlta() {
     if (getCurrentUser() && _supaUserId) { empezarCuestionario(); return; }
-    const campos = ['nombre', 'apellidos', 'email'];
-    const fallos = campos.filter(c => { const ok = validarCampoBienvenida(c); if (!ok) _setFieldState('bv-' + c, 'error'); return !ok; });
-    if (fallos.length) { const el = document.getElementById('bv-' + fallos[0]); if (el) el.focus(); return; }
-    const v = c => document.getElementById('bv-' + c).value.trim();
-    try { localStorage.setItem(_CLAVE_DATOS_ALTA, JSON.stringify({ nombre: v('nombre'), apellidos: v('apellidos'), email: v('email').toLowerCase(), t: Date.now() })); } catch (e) {}
-    kEvento('alta_datos');
-    empezarCuestionario();
+    kEvento('alta_empezar');
+    goTo('registro');
   }
-  // En «Crea tu cuenta», el nombre y el email de la bienvenida ya puestos.
-  function _rellenarRegistroConDatos() {
-    const d = _leerDatosAlta();
-    if (!d) return;
-    const n = document.getElementById('reg-nombre'), e = document.getElementById('reg-email');
-    if (n && !n.value) { n.value = (d.nombre + ' ' + d.apellidos).trim(); validarCampoReg('nombre'); }
-    if (e && !e.value) { e.value = d.email; validarCampoReg('email'); }
-  }
+
 
   async function enviarPlanPorEmail(ev) {
     if (ev) ev.preventDefault();
@@ -20965,7 +20945,7 @@ Se coló: ${lista}`;
       caja.style.display = 'none'; caja.innerHTML = '';
       ['registroPensarlo', 'registroPasoCuenta'].forEach(id => { const e = document.getElementById(id); if (e) { e.style.display = 'none'; if (id === 'registroPensarlo') e.innerHTML = ''; } });
       if (titulo) titulo.textContent = 'Crear cuenta';
-      if (sub) sub.innerHTML = '¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra aquí →</a>';
+      if (sub) sub.innerHTML = 'Crea tu cuenta y en 3 minutos tienes tu plan. ¿Ya tienes cuenta? <a onclick="goTo(\'login\')">Entra aquí →</a>';
       return;
     }
     if (titulo) titulo.textContent = 'Tu plan está listo';
@@ -23302,8 +23282,8 @@ Se coló: ${lista}`;
       if (goParam === 'registro') {
         window.history.replaceState({}, '', window.location.pathname);
         // Los enlaces de las páginas de deporte y de los emails llevan aquí:
-        // ahora el alta empieza por el cuestionario, no por la cuenta.
-        goTo('bienvenida');
+        // desde el 1 nov 2026 el alta vuelve a empezar por la cuenta (Rafa).
+        empezarAlta();
       } else {
         // La portada ya se veía desde el primer instante: no se sube arriba a quien
         // ya estaba leyendo. Si pulsó algo mientras cargaba la app, se hace ahora.

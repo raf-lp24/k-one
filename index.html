@@ -3372,37 +3372,9 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       Tu plan en<br>
       <em>3 minutos</em>
     </h2>
-    <p class="welcome-sub">Dinos quién eres, responde unas preguntas y te enseñamos tu plan. La contraseña la pones al final, solo si te convence.</p>
-    <!-- 1 nov 2026 (Rafa): primero nombre, apellidos y email, como antes; luego el
-         cuestionario y, al final, la contraseña con nombre y email ya rellenos. -->
-    <form id="bienvenidaForm" onsubmit="empezarConDatos(); return false;" autocomplete="on" style="text-align:left">
-      <div class="auth-field">
-        <label for="bv-nombre">Nombre</label>
-        <div class="auth-field-wrap">
-          <input type="text" id="bv-nombre" placeholder="Ej: Carlos" autocomplete="given-name" aria-describedby="err-bv-nombre" oninput="validarCampoBienvenida('nombre')">
-          <span class="auth-field-check" id="check-bv-nombre">✓</span>
-        </div>
-      </div>
-      <div class="auth-error" id="err-bv-nombre" role="alert" aria-live="polite">Escribe tu nombre</div>
-      <div class="auth-field">
-        <label for="bv-apellidos">Apellidos</label>
-        <div class="auth-field-wrap">
-          <input type="text" id="bv-apellidos" placeholder="Ej: García López" autocomplete="family-name" aria-describedby="err-bv-apellidos" oninput="validarCampoBienvenida('apellidos')">
-          <span class="auth-field-check" id="check-bv-apellidos">✓</span>
-        </div>
-      </div>
-      <div class="auth-error" id="err-bv-apellidos" role="alert" aria-live="polite">Escribe tus apellidos</div>
-      <div class="auth-field">
-        <label for="bv-email">Email</label>
-        <div class="auth-field-wrap">
-          <input type="email" id="bv-email" placeholder="tu@email.com" autocomplete="email" aria-describedby="err-bv-email" oninput="validarCampoBienvenida('email')">
-          <span class="auth-field-check" id="check-bv-email">✓</span>
-        </div>
-      </div>
-      <div class="auth-error" id="err-bv-email" role="alert" aria-live="polite">Introduce un email válido</div>
-    </form>
+    <p class="welcome-sub">Responde unas preguntas sobre ti y te enseñamos tu plan. La cuenta la creas al final, solo si te convence.</p>
     <div class="welcome-btns">
-      <button class="btn-primary" type="submit" form="bienvenidaForm">Empezar el cuestionario</button>
+      <button class="btn-primary" onclick="empezarCuestionario()">Empezar el cuestionario</button>
       <div class="welcome-divider"><span>o</span></div>
       <button class="btn-ghost" onclick="goTo('login')">Ya tengo cuenta · Entrar</button>
     </div>
@@ -3417,7 +3389,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title" id="registroTitulo">Crear cuenta</h2>
-    <p class="auth-subtitle" id="registroSubtitulo">¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
+    <p class="auth-subtitle" id="registroSubtitulo">Crea tu cuenta y en 3 minutos tienes tu plan. ¿Ya tienes cuenta? <a onclick="goTo('login')">Entra aquí →</a></p>
     <!-- Con el cuestionario hecho como invitado: su adelanto y para qué es la cuenta. -->
     <div id="registroPlanListo" style="display:none"></div>
     <!-- 5 oct 2026: el usuario no entendía por qué tras «Tu plan está listo» salían
@@ -3426,19 +3398,29 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     <div id="registroPasoCuenta" class="reg-paso" style="display:none">
       <span class="reg-paso-n">Último paso</span>
       <b>Crea tu cuenta para guardar tu plan</b>
-      <span>Tu nombre y tu email ya están puestos: solo falta elegir una contraseña. Así tu plan queda guardado y empiezas tu mes gratis.</span>
+      <span>Solo nombre, email y contraseña. Así tu plan queda guardado y empiezas tu mes gratis.</span>
     </div>
 
     <form id="registerForm" onsubmit="registrar(); return false;" autocomplete="on">
     <div class="auth-field">
-      <label for="reg-nombre">Nombre y apellidos</label>
+      <label for="reg-nombre">Nombre</label>
       <div class="auth-field-wrap">
-        <input type="text" id="reg-nombre" placeholder="Ej: Carlos García López" autocomplete="name"
+        <input type="text" id="reg-nombre" placeholder="Ej: Carlos" autocomplete="given-name"
           aria-describedby="err-nombre" oninput="validarCampoReg('nombre')" onblur="validarCampoReg('nombre')">
         <span class="auth-field-check" id="check-nombre">✓</span>
       </div>
     </div>
-    <div class="auth-error" id="err-nombre" role="alert" aria-live="polite">Introduce tu nombre y apellidos</div>
+    <div class="auth-error" id="err-nombre" role="alert" aria-live="polite">Escribe tu nombre</div>
+
+    <div class="auth-field">
+      <label for="reg-apellidos">Apellidos</label>
+      <div class="auth-field-wrap">
+        <input type="text" id="reg-apellidos" placeholder="Ej: García López" autocomplete="family-name"
+          aria-describedby="err-apellidos" oninput="validarCampoReg('apellidos')" onblur="validarCampoReg('apellidos')">
+        <span class="auth-field-check" id="check-apellidos">✓</span>
+      </div>
+    </div>
+    <div class="auth-error" id="err-apellidos" role="alert" aria-live="polite">Escribe tus apellidos</div>
 
     <div class="auth-field">
       <label for="reg-email">Email</label>
@@ -3510,7 +3492,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     <button type="submit" class="btn-primary auth-submit">Crear mi cuenta →</button>
     </form>
     <div id="registroPensarlo" style="display:none"></div>
-    <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
+    <p class="auth-back" onclick="goTo('landing')"><span class="auth-back-arrow">←</span> Volver a la web</p>
   </div>
 </div>
 
@@ -3521,7 +3503,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   <div class="auth-card">
     <div class="auth-logo" onclick="goTo('landing')">K-<span>ONE</span></div>
     <h2 class="auth-title">Bienvenido/a</h2>
-    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="goTo('bienvenida')">Haz tu plan aquí →</a></p>
+    <p class="auth-subtitle">¿No tienes cuenta? <a onclick="empezarAlta()">Crea tu cuenta aquí →</a></p>
     <p id="loginPlanPendiente" style="display:none;margin:-6px 0 18px;font-size:12px;line-height:1.5;color:var(--metal-claro);background:rgba(209,66,14,0.08);border:1px solid rgba(209,66,14,0.35);border-radius:10px;padding:10px 12px">Tienes un plan recién hecho en este dispositivo. Si tu cuenta todavía no tiene plan, se lo guardamos al entrar.</p>
 
     <form id="loginForm" onsubmit="login(); return false;" autocomplete="on">
@@ -3544,7 +3526,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     <button type="submit" class="btn-primary auth-submit" style="margin-top:8px">Entrar →</button>
     </form>
     <p class="auth-forgot" onclick="document.getElementById('modalForgot').classList.add('visible')"><span>¿Olvidaste tu contraseña?</span></p>
-    <p class="auth-back" onclick="goTo('bienvenida')"><span class="auth-back-arrow">←</span> Volver</p>
+    <p class="auth-back" onclick="goTo('landing')"><span class="auth-back-arrow">←</span> Volver a la web</p>
   </div>
 </div>
 
@@ -4287,7 +4269,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('pricing')" onkeydown="if(event.key==='Enter')this.click()">Precios</span>
       <span class="nav-link" role="button" tabindex="0" onclick="scrollToSection('faq')" onkeydown="if(event.key==='Enter')this.click()">FAQ</span>
       <span class="nav-link nav-entrar" id="navEntrar" onclick="entrarODashboard()">Entrar</span>
-      <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis</button>
+      <button class="btn-primary" onclick="empezarAlta()">Empieza gratis</button>
     </div>
     <button class="nav-toggle" id="navToggle" onclick="toggleMobileMenu()" aria-label="Abrir menú">
       <span></span><span></span><span></span>
@@ -4301,7 +4283,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('testimonials')">Opiniones</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('pricing')">Precios</span>
     <span class="nav-link" role="button" tabindex="0" onclick="closeMobileMenu(); scrollToSection('faq')">FAQ</span>
-    <button class="btn-primary" onclick="closeMobileMenu(); goTo('bienvenida')">Empieza gratis</button>
+    <button class="btn-primary" onclick="closeMobileMenu(); empezarAlta()">Empieza gratis</button>
   </div>
 
   <section class="hero">
@@ -4324,7 +4306,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       <div class="hero-content">
         <h1 class="hero-title">No hay atajos. <em>Hay pasos.</em></h1>
         <p class="hero-sub"><b>La app que te entrena con IA</b>: plan de entreno y comida a medida en 3 minutos, que se ajusta cada semana a cómo te va.</p>
-        <button class="btn-primary hv-cta" onclick="goTo('bienvenida')">
+        <button class="btn-primary hv-cta" onclick="empezarAlta()">
           Empieza gratis
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
         </button>
@@ -4668,7 +4650,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
           <li>Seguimiento de progreso y cargas</li>
           <li>Gimnasio, running e híbrido</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar gratis</button>
+        <button class="btn-primary" onclick="empezarAlta()">Empezar gratis</button>
       </div>
       <div class="price-card">
         <div class="price-tag">Mensual</div>
@@ -4682,7 +4664,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
           <li>Seguimiento de progreso y cargas</li>
           <li>Gimnasio, running e híbrido</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar gratis</button>
+        <button class="btn-primary" onclick="empezarAlta()">Empezar gratis</button>
       </div>
       <div class="price-card featured">
         <div class="price-badge">Más popular</div>
@@ -4696,7 +4678,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
           <li>Ahorro de 9€ cada trimestre</li>
           <li>Precio bloqueado 3 meses</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar gratis</button>
+        <button class="btn-primary" onclick="empezarAlta()">Empezar gratis</button>
       </div>
       <div class="price-card">
         <div class="price-tag">Solo nutrición</div>
@@ -4710,7 +4692,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
           <li>Macros y calorías calculados</li>
           <li>Sin plan de entrenamiento</li>
         </ul>
-        <button class="btn-primary" onclick="goTo('bienvenida')">Empezar gratis</button>
+        <button class="btn-primary" onclick="empezarAlta()">Empezar gratis</button>
       </div>
     </div>
     <p class="desliza" aria-hidden="true">Desliza para ver los 4 planes <span>→</span></p>
@@ -4829,7 +4811,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
       Lo que se construye <em>despacio</em><br>no se rompe fácil.
     </h2>
     <p class="philosophy-sub">Dentro de un año vas a desear haber empezado hoy. El único momento es ahora.</p>
-    <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis</button>
+    <button class="btn-primary" onclick="empezarAlta()">Empieza gratis</button>
   </section>
 
   <div class="share-bar">
@@ -4849,7 +4831,7 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   </div>
 
   <div class="landing-cta-float" id="landingCtaFloat">
-    <button class="btn-primary" onclick="goTo('bienvenida')">Empieza gratis — primer mes</button>
+    <button class="btn-primary" onclick="empezarAlta()">Empieza gratis — primer mes</button>
   </div>
 
   <footer class="pie">
