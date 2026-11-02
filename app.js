@@ -8825,6 +8825,10 @@
         carbs: `${carbsScaled}g carbs`,
         grasa: `${grasaScaled}g grasa`,
         prep,
+        // La receta tal cual está escrita: de aquí salen las raciones (ver RACIONES).
+        _base: ponerCantidades(ingredientes),
+        _baseKcal: Math.round((parseFloat(prot) || 0) * 4 + (parseFloat(carbs) || 0) * 4 + (parseFloat(grasa) || 0) * 9),
+        _baseProt: parseFloat(prot) || 0,
       };
     };
     // RACIÓN PROPORCIONAL A UNA DIETA DE REFERENCIA (3 oct 2026). Los desayunos de
@@ -10784,6 +10788,30 @@
     // por un primo grande para que dos reinicios seguidos no coincidan nunca
     // con el offset de otra toma o del periodo de rotación.
     const resetComida = u.resetComida || {};
+    // SOLO RECETAS QUE ENCAJEN (2 nov 2026, aprobado por Rafa): como haría un
+    // nutricionista, a cada cliente se le ofrecen las recetas que le caben en esa
+    // comida con ración de 3/4 a 2, en vez de estirar cualquiera hasta su presupuesto.
+    // Si quedan menos de 12 (filtros o perfil muy extremo), las 12 más cercanas.
+    const _pesoTotalTomas = nutricion.reduce((s, m) => s + (PESO_TOMA[m.momento] || 0.2), 0) || 1;
+    const _raciones = nutricion.length <= 3 ? [0.75, 1, 1.5, 2, 2.5, 3] : [0.75, 1, 1.5, 2];
+    nutricion = nutricion.map(m => {
+      const presupuesto = kcalObj * (PESO_TOMA[m.momento] || 0.2) / _pesoTotalTomas;
+      const protToma = protObj * (PESO_TOMA[m.momento] || 0.2) / _pesoTotalTomas;
+      const k = o => o._baseKcal || 0;
+      const aparteMax = Math.max(150, presupuesto * 0.35);
+      const encaja = o => {
+        if (!k(o)) return true;
+        const p = o._baseProt || 0;
+        const r = _raciones.reduce((mejor, x) => (k(o) * x <= presupuesto * 1.1 && p * x <= protToma * 1.4 ? x : mejor), _raciones[0]);
+        return k(o) * 0.75 <= presupuesto * 1.25 && p * 0.75 <= protToma * 1.6 && presupuesto - k(o) * r <= aparteMax;
+      };
+      const opciones = m.opciones || [];
+      const ok = opciones.filter(encaja);
+      if (ok.length >= 12 || opciones.length <= 12) return { ...m, opciones: ok.length >= 12 ? ok : opciones };
+      const cercanas = new Set([...opciones].sort((a, b) => Math.abs(Math.log((k(a) || presupuesto) / presupuesto)) - Math.abs(Math.log((k(b) || presupuesto) / presupuesto))).slice(0, 12));
+      return { ...m, opciones: opciones.filter(o => cercanas.has(o)) };
+    });
+
     const nutricionPorDia = [];
     for (let dia = 0; dia < 7; dia++) {
       nutricionPorDia.push(nutricion.map((m, i) => ({
@@ -12146,6 +12174,124 @@
       nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => (m.opciones || []).forEach(_topar)));
       (nutricion || []).forEach(m => (m.opciones || []).forEach(_topar));
     }
+    // RACIONES (2 nov 2026, aprobado por Rafa). Hasta aquí cada etapa multiplicaba
+    // ingredientes por su cuenta y la receta se desfiguraba: medido en 3 clientes,
+    // de 25 recetas por plan salían idénticas 0 o 1 ("5 tomates y 5 rebanadas",
+    // "70 g de gelatina"). Ahora la receta se reconstruye como está escrita y lo que
+    // cambia es la ración entera (3/4, 1, 1½, 2) y lo que se toma APARTE para llegar
+    // a la comida del cliente. Se parte del texto que dejaron los filtros, así que
+    // nada de lo que una alergia o un "no como" quitó puede volver.
+    if (_alimentos) {
+      const _SIN_MULTIPLICAR = /cacao|gelatina|levadura|canela|nuez moscada|vainilla|estevia|clavo/i;
+      const _nombreDe = t => t.trim().replace(/^\d+(?:[.,]\d+)?(?:\/\d+)?\s*(?:g|gr|ml)?\s+/i, '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/s\b/g, '');
+      const _sumar = txt => {
+        let p = 0, c = 0, g = 0, sinDatos = 0;
+        (txt || '').split(',').forEach(x => {
+          const t = x.trim();
+          if (!t) return;
+          let gr = null, resto = null;
+          const mm = t.match(/^(\d+(?:[.,]\d+)?)\s*(g|gr|ml)\b\s*(.+)$/i);
+          if (mm) { gr = parseFloat(mm[1].replace(',', '.')); resto = mm[3]; }
+          else { const ud = _gramosDeUnidad(t); if (ud) { gr = ud.gramos; resto = ud.resto; } }
+          if (gr === null) return;
+          const al = _buscarAlimento(resto);
+          if (!al) { sinDatos++; return; }
+          p += al.p * gr / 100; c += al.c * gr / 100; g += al.g * gr / 100;
+        });
+        p = Math.round(p); c = Math.round(c); g = Math.round(g);
+        return { p, c, g, k: p * 4 + c * 4 + g * 9, sinDatos };
+      };
+      const _gramosDe = t => {
+        const mm = t.match(/^(\d+(?:[.,]\d+)?)\s*(?:g|gr|ml)\b/i);
+        if (mm) return parseFloat(mm[1].replace(',', '.'));
+        const ud = _gramosDeUnidad(t);
+        return ud ? ud.gramos : null;
+      };
+      // Lo que se toma aparte pasa por los mismos filtros que las recetas.
+      const _aparteValido = txt => {
+        const o = { nombre: txt, ingredientes: txt, kcal: '0 kcal', prot: '0g prot', carbs: '0g carbs', grasa: '0g grasa', prep: '' };
+        const f = filtrarNoComida([{ momento: 'Merienda', opciones: [o] }], textoFiltro)[0].opciones[0];
+        return !!f && f.ingredientes === txt && (!_redAlergenos || _redAlergenos.esSeguro(f));
+      };
+      const _d10 = x => Math.round(x / 10) * 10;
+      const _elegir = lista => lista.find(_aparteValido) || null;
+      const _proteinaAparte = gr => _elegir([`${gr}g yogur griego 0%`, `${gr}g queso batido 0%`, `${Math.min(gr, 100)}g pavo en lonchas`]);
+      const _frutaAparte = (falta, ya) => _elegir((falta >= 90 ? ['1 plátano', '1 manzana', '1 naranja', '1 pera'] : ['1 manzana', '1 naranja', '1 pera', '1 plátano']).filter(x => !ya.includes(x)));
+      const _hidratoAparte = falta => {
+        const gr = Math.min(250, Math.max(80, _d10(falta / 0.9)));
+        return u.enfoqueMacros === 'Bajo en carbohidratos'
+          ? _elegir([`${Math.min(100, _d10(falta / 1.6))}g aguacate`])
+          : _elegir([`${gr}g patata cocida`, `${gr}g arroz blanco cocido`, `${gr}g boniato asado`]);
+      };
+      const _hechasR = new Set();
+      const _racionar = (o, objetivo, objProt, momento, nTomas) => {
+        if (!o || _hechasR.has(o)) return;
+        _hechasR.add(o);
+        if (!o._base || o.racionFija || _REPOSTAJE.test(`${o.nombre} ${o.prep || ''}`)) return;
+        const base = new Map();
+        o._base.split(',').forEach(x => { if (x.trim()) base.set(_nombreDe(x), x.trim()); });
+        const actuales = (o.ingredientes || '').split(',').map(x => x.trim()).filter(Boolean);
+        // Cuánto había escalado ya el plato: lo que no viene en la receta (una
+        // sustitución, la grasa mínima) vuelve a la medida de la receta con esto.
+        const ratios = actuales.map(t => { const b = base.get(_nombreDe(t)); const x = _gramosDe(t), y = b && _gramosDe(b); return x && y ? x / y : null; }).filter(Boolean).sort((a, b) => a - b);
+        const yaEscalado = ratios.length ? ratios[Math.floor(ratios.length / 2)] : 1;
+        const trozos = actuales
+          .filter(t => base.has(_nombreDe(t)) || !/^\d+g (arroz blanco cocido|patata cocida|aguacate)$/i.test(t))
+          .map(t => { const b = base.get(_nombreDe(t)); return b ? { t: b, deReceta: true } : { t: scaleIngredientes(t, 1 / yaEscalado), deReceta: false }; });
+        const texto = r => trozos.map(x => _SIN_MULTIPLICAR.test(x.t) ? x.t : scaleIngredientes(x.t, r).trim()).join(', ');
+        const uno = _sumar(texto(1));
+        if (uno.sinDatos || uno.k < 40) return;
+        const lista = nTomas <= 3 ? [0.75, 1, 1.5, 2, 2.5, 3] : [0.75, 1, 1.5, 2];
+        // La ración más grande que cabe en la comida sin pasarse de proteína: lo que
+        // falte se completa aparte con hidrato, no con más carne o más batido.
+        let r = lista[0];
+        lista.forEach(x => { const m = _sumar(texto(x)); if (m.k <= objetivo * 1.1 && m.p <= objProt * 1.4) r = x; });
+        const cuerpo = texto(r);
+        const m0 = _sumar(cuerpo);
+        let falta = objetivo - m0.k, faltaP = objProt - m0.p;
+        const aparte = [];
+        const poner = t => {
+          if (!t) return false;
+          const a = _sumar(t);
+          if (a.sinDatos || !a.k) return false;
+          aparte.push(t); falta -= a.k; faltaP -= a.p;
+          return true;
+        };
+        const esPlato = momento === 'Comida' || momento === 'Cena';
+        if (faltaP >= 8 && falta >= 60) poner(_proteinaAparte(Math.min(250, Math.max(80, _d10(Math.min(faltaP / 0.102, falta / 0.59))))));
+        if (esPlato && falta >= 70) poner(_hidratoAparte(falta));
+        for (let i = 0; i < 2 && !esPlato && falta >= 70; i++) { if (!poner(_frutaAparte(falta, aparte))) break; }
+        if (!esPlato && falta >= 90) poner(_elegir([`${Math.min(80, Math.max(30, _d10(falta / 3.7)))}g copos de avena`, `${Math.min(80, Math.max(30, _d10(falta / 2.5)))}g pan integral`]));
+        const total = _sumar([cuerpo, ...aparte].join(', '));
+        o.ingredientes = [cuerpo, ...aparte].join(', ');
+        o.prot = `${total.p}g prot`; o.carbs = `${total.c}g carbs`; o.grasa = `${total.g}g grasa`;
+        o.kcal = `${total.k} kcal`;
+        o.racion = r;
+        if (aparte.length) o.aparte = aparte.join(', '); else delete o.aparte;
+        const pasos = (o.pasos || (typeof RECETA_PASOS !== 'undefined' ? RECETA_PASOS[o.nombre] : '') || '').replace(/\s*Acompaña el plato con [^.]*\./g, '');
+        if (pasos) o.pasos = aparte.length ? `${pasos} Aparte: ${aparte.join(', ')}.` : pasos;
+      };
+      nutricionPorDia.forEach((tomasDia, iDia) => {
+        if (!Array.isArray(tomasDia)) return;
+        const objetivoDia = kcalObjPorDia[iDia] || kcalObj;
+        const pesoDia = tomasDia.reduce((s, m) => s + (PESO_TOMA[m.momento] || 0.2), 0) || 1;
+        tomasDia.forEach(m => {
+          const parte = (PESO_TOMA[m.momento] || 0.2) / pesoDia;
+          (m.opciones || []).forEach(o => _racionar(o, objetivoDia * parte, protObj * parte, m.momento, tomasDia.length));
+        });
+      });
+      const _pesoHoy = (nutricion || []).reduce((s, m) => s + (PESO_TOMA[m.momento] || 0.2), 0) || 1;
+      (nutricion || []).forEach(m => {
+        const parte = (PESO_TOMA[m.momento] || 0.2) / _pesoHoy;
+        (m.opciones || []).forEach(o => _racionar(o, kcalObj * parte, protObj * parte, m.momento, nutricion.length));
+      });
+      // Lo que se toma aparte (yogur 0 %, fruta, patata) baja el porcentaje de grasa del conjunto.
+      nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => { m.opciones = (m.opciones || []).map(_conGrasaMinima); }));
+      (nutricion || []).forEach(m => { m.opciones = (m.opciones || []).map(_conGrasaMinima); });
+    }
+    const _sinBase = o => { if (o) { delete o._base; delete o._baseKcal; delete o._baseProt; } };
+    nutricionPorDia.forEach(d => (Array.isArray(d) ? d : []).forEach(m => (m.opciones || []).forEach(_sinBase)));
+    (nutricion || []).forEach(m => (m.opciones || []).forEach(_sinBase));
     // Con qué semana del plan y qué lunes se generó (1 nov 2026): la descarga de
     // cada 4.ª semana, la progresión y la semana de carrera dependen de los dos,
     // y el plan guardado no se rehacía al cambiar de semana. Ver buildDashboard.
@@ -13281,6 +13427,8 @@
 
   // Receta de una comida, desplegada en Hoy al tocarla (Rafa, 30 oct): ingredientes,
   // preparación y macros, como en el recetario, sin salir de la pantalla.
+  // La ración de cada plato (ver RACIONES en buildPlanFromData). Con una ración entera no se dice nada.
+  const _textoRacion = op => ({ 0.75: '¾ de ración', 1.5: '1½ raciones', 2: '2 raciones', 2.5: '2½ raciones', 3: '3 raciones' })[op && op.racion] || '';
   function _hdRecetaHTML(op, i, j) {
     if (!op) return '';
     const ings = String(op.ingredientes || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -13289,7 +13437,7 @@
     const macros = [['kcal', num(op.kcal), ''], ['proteína', num(op.prot), 'g'], ['hidratos', num(op.carbs), 'g'], ['grasa', num(op.grasa), 'g']].filter(m => m[1]);
     return '<div class="hn-receta">'
       + (macros.length ? '<div class="hn-rec-mac">' + macros.map(m => '<span><b>' + m[1] + (m[2] ? '<small>' + m[2] + '</small>' : '') + '</b>' + m[0] + '</span>').join('') + '</div>' : '')
-      + (ings.length ? '<div class="hn-rec-tit">Ingredientes</div><ul class="hn-rec-ing">' + ings.map(s => '<li>' + _esc(_ingredienteConPesoCereal(s)) + '</li>').join('') + '</ul>' : '')
+      + (ings.length ? '<div class="hn-rec-tit">Ingredientes' + (_textoRacion(op) ? ' <span>· ' + _textoRacion(op) + '</span>' : '') + '</div><ul class="hn-rec-ing">' + ings.map(s => '<li>' + _esc(_ingredienteConPesoCereal(s)) + '</li>').join('') + '</ul>' : '')
       + (pasos ? '<div class="hn-rec-tit">Preparación' + (op.prep ? ' <span>· ' + _esc(op.prep) + '</span>' : '') + '</div><p class="hn-rec-pasos">' + _esc(pasos) + '</p>' : '')
       + '<button type="button" class="hn-rec-cambiar" onclick="irAComidaDia(' + i + ',' + j + ')">Cambiar por otra opción ' + _HD_FLECHA + '</button>'
       + '</div>';
@@ -14459,7 +14607,7 @@
         return `
         <div class="meal-option ${optIdx === comidasSeleccionadas[mealIdx] ? 'selected' : ''}" onclick="selectMealOption(this, ${mealIdx}, ${optIdx})">
           ${opt.custom ? `<button type="button" class="ejercicio-extra-quitar" onclick="event.stopPropagation();quitarComidaExtra(${dia},${mealIdx},${opt._extraIdx})" aria-label="Quitar esta comida">✕</button>` : ''}
-          <div class="meal-opt-num">${opt.custom ? '<span class="comida-extra-badge">Tu comida</span>' : `Opción ${optIdx + 1}`}</div>
+          <div class="meal-opt-num">${opt.custom ? '<span class="comida-extra-badge">Tu comida</span>' : `Opción ${optIdx + 1}${_textoRacion(opt) ? ' · ' + _textoRacion(opt) : ''}`}</div>
           <div class="meal-opt-name">${opt.nombre}</div>
           <div class="meal-opt-ingredients" style="margin-bottom:10px;font-size:13px;color:var(--metal-claro);line-height:1.6">${ingredTexto}</div>
           <div class="meal-opt-macros-visual">
@@ -18188,7 +18336,7 @@
             <div class="receta-ingredientes"><ul>${items}</ul></div>
             ${pasos ? `<div class="receta-pasos-label">Preparación</div><div class="receta-pasos">${pasos}</div>` : ''}
             <div class="receta-footer">
-              <div class="receta-prep">⏱ ${opt.prep}</div>
+              <div class="receta-prep">⏱ ${opt.prep}${_textoRacion(opt) ? ' · ' + _textoRacion(opt) : ''}</div>
               <div class="receta-macros">
                 <span class="receta-macro-pill">kcal ${opt.kcal}</span>
                 <span class="receta-macro-pill">prot ${opt.prot}</span>
