@@ -9012,7 +9012,7 @@
           opciones: [
             // Movidas aquí desde Desayuno por el usuario (3 oct 2026).
             op("Revuelto de champiñones y espinacas con pavo", "3 claras, 1 huevo, 100g champiñones, 100g espinacas, 60g pavo, 10g AOVE", "324 kcal", "38g prot", "7g carbs", "16g grasa", "Fácil · 10 min"),
-            op("Poké bowl de salmón con arroz y aguacate", "150g salmón fresco en dados, 80g arroz cocido, 1/4 aguacate, pepino, edamame, salsa soja, sésamo", "615 kcal", "43g prot", "37g carbs", "33g grasa", "Sin cocción · 10 min"),
+            op("Poké bowl de salmón con arroz y aguacate", "150g salmón fresco en dados, 80g arroz cocido, 1/4 aguacate, edamame, salsa soja, sésamo", "605 kcal", "43g prot", "34g carbs", "33g grasa", "Sin cocción · 10 min"),
             op("Pollo al limón con patata asada y ensalada", "180g pollo al horno, 150g patata asada, 120g lechuga, 120g tomate, 60g zanahoria, 10g AOVE, limón", "516 kcal", "47g prot", "46g carbs", "16g grasa", "Fácil · 30 min"),
             op("Tacos de pollo con guacamole casero y pico de gallo", "2 tortillas de maíz, 180g pollo especiado, 40g guacamole casero, tomate, cebolla, cilantro, lima", "492 kcal", "47g prot", "48g carbs", "13g grasa", "Medio · 20 min"),
             op("Merluza al horno con patata y verduras", "200g merluza, 150g patata, judías verdes, zanahoria, AOVE, limón", "448 kcal", "41g prot", "44g carbs", "12g grasa", "Fácil · 25 min"),
@@ -9037,7 +9037,7 @@
             op("Salteado de pavo con brócoli y quinoa", "180g pavo, 150g brócoli, 120g quinoa cocida, 10g AOVE, ajo, 10ml salsa de soja", "500 kcal", "53g prot", "36g carbs", "16g grasa", "Fácil · 20 min"),
             // Añadidas el 3 oct 2026 (aprobadas por el usuario; macros con scripts/componer.js).
             op("Ternera guisada con patata, zanahoria y guisantes", "150g ternera, 200g patata, 100g zanahoria, 50g guisantes, 5g AOVE, cebolla, laurel", "604 kcal", "62g prot", "62g carbs", "12g grasa", "Media · 40 min"),
-            op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
+            op("Lentejas estofadas con zanahoria y pimiento", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 10g AOVE, pimentón, laurel", "467 kcal", "25g prot", "67g carbs", "11g grasa", "Fácil · 25 min"),
             op("Arroz salteado con tofu y verduras", "60g arroz crudo, 150g tofu firme, 100g calabacín, 80g pimiento, 5g AOVE, ajo", "539 kcal", "32g prot", "60g carbs", "19g grasa", "Fácil · 20 min"),
             // De la dieta AJ7 del usuario (6 abril 2025), aprobadas el 3 oct 2026.
             op("Arroz, pasta o quinoa con pollo y verdura", "50g arroz crudo, 200g pollo, 200g verdura, 10g AOVE", "548 kcal", "52g prot", "49g carbs", "16g grasa", "Fácil · 20 min"),
@@ -9048,19 +9048,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -9330,6 +9330,15 @@
             op("Tostadas de boniato con cottage, aguacate y huevo", "200g boniato asado, 100g queso cottage, 30g aguacate, 2 huevos, 5g miel, pimentón", "494 kcal", "29g prot", "54g carbs", "18g grasa", "Horno o freidora · 20 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Tostada de atún con tomate y aguacate", "1 tosta integral, 1 lata atún al natural, tomate, 1/4 aguacate", "318 kcal", "26g prot", "22g carbs", "14g grasa", "Sin cocción · 5 min"),
+            // Tomas que marcó Rafa en el Recetario (2 nov 2026).
+            op("Dorada al horno con espárragos y limón", "220g dorada, 150g espárragos trigueros, 150g patata, 10g AOVE, limón, perejil", "520 kcal", "49g prot", "36g carbs", "20g grasa", "Fácil · 25 min"),
+            op("Tacos de pollo con guacamole casero y pico de gallo", "2 tortillas de maíz, 180g pollo especiado, 40g guacamole casero, tomate, cebolla, cilantro, lima", "492 kcal", "47g prot", "48g carbs", "13g grasa", "Medio · 20 min"),
+            op("Salteado de pavo con brócoli y quinoa", "180g pavo, 150g brócoli, 120g quinoa cocida, 10g AOVE, ajo, 10ml salsa de soja", "500 kcal", "53g prot", "36g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Nuggets de pollo crujientes con ensalada", "250g pechuga de pollo, 1 huevo, 25g copos de maíz, 150g ensalada, pimentón, ajo", "480 kcal", "67g prot", "26g carbs", "12g grasa", "Freidora 200º · 15 min"),
+            op("Pizza proteica con base de pollo", "250g pechuga de pollo picada, 1 huevo, 60g tomate triturado, 40g mozzarella, 50g champiñones, 50g tomate cherry, 20g maíz, 20g rúcula, orégano", "541 kcal", "76g prot", "12g carbs", "21g grasa", "Horno 190º · 30 min"),
+            op("Merluza al horno con patata y verduras", "200g merluza, 150g patata, judías verdes, zanahoria, AOVE, limón", "448 kcal", "41g prot", "44g carbs", "12g grasa", "Fácil · 25 min"),
+            op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
+            op("Bowl de quinoa con pavo, aguacate y rúcula", "150g quinoa cocida, 180g pavo a la plancha en tacos, 1/4 aguacate, rúcula, limón", "472 kcal", "44g prot", "38g carbs", "16g grasa", "Fácil · 15 min"),
           ]
         }
       ];
@@ -9532,7 +9541,7 @@
             op("Cuscús con ternera y verduras salteadas", "150g cuscús cocido, 180g ternera, 100g pimiento, 80g zanahoria, 60g cebolla, 10g AOVE, comino", "670 kcal", "73g prot", "54g carbs", "18g grasa", "Fácil · 25 min"),
             // Añadidas el 3 oct 2026 (aprobadas por el usuario; macros con scripts/componer.js).
             op("Ternera guisada con patata, zanahoria y guisantes", "150g ternera, 200g patata, 100g zanahoria, 50g guisantes, 5g AOVE, cebolla, laurel", "604 kcal", "62g prot", "62g carbs", "12g grasa", "Media · 40 min"),
-            op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
+            op("Lentejas estofadas con zanahoria y pimiento", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 10g AOVE, pimentón, laurel", "467 kcal", "25g prot", "67g carbs", "11g grasa", "Fácil · 25 min"),
             op("Arroz salteado con tofu y verduras", "60g arroz crudo, 150g tofu firme, 100g calabacín, 80g pimiento, 5g AOVE, ajo", "539 kcal", "32g prot", "60g carbs", "19g grasa", "Fácil · 20 min"),
             // De la dieta AJ7 del usuario (6 abril 2025), aprobadas el 3 oct 2026.
             op("Arroz, pasta o quinoa con pollo y verdura", "50g arroz crudo, 200g pollo, 200g verdura, 10g AOVE", "548 kcal", "52g prot", "49g carbs", "16g grasa", "Fácil · 20 min"),
@@ -9543,19 +9552,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -9833,6 +9842,10 @@
             op("Tostadas de boniato con cottage, aguacate y huevo", "200g boniato asado, 100g queso cottage, 30g aguacate, 2 huevos, 5g miel, pimentón", "494 kcal", "29g prot", "54g carbs", "18g grasa", "Horno o freidora · 20 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Burrito de huevo, pavo y queso", "1 tortilla de trigo, 2 huevos, 60g pavo, 30g queso, 60g tomate", "454 kcal", "39g prot", "25g carbs", "22g grasa", "Fácil · 12 min"),
+            // Tomas que marcó Rafa en el Recetario (2 nov 2026).
+            op("Nuggets de pollo crujientes con ensalada", "250g pechuga de pollo, 1 huevo, 25g copos de maíz, 150g ensalada, pimentón, ajo", "480 kcal", "67g prot", "26g carbs", "12g grasa", "Freidora 200º · 15 min"),
+            op("Pizza proteica con base de pollo", "250g pechuga de pollo picada, 1 huevo, 60g tomate triturado, 40g mozzarella, 50g champiñones, 50g tomate cherry, 20g maíz, 20g rúcula, orégano", "541 kcal", "76g prot", "12g carbs", "21g grasa", "Horno 190º · 30 min"),
+            op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
           ]
         }
       ];
@@ -10012,7 +10025,7 @@
             op("Bacalao con tomate y pimientos", "200g bacalao, tomate frito casero, pimientos, ajo", "194 kcal", "37g prot", "7g carbs", "2g grasa", "Fácil · 25 min"),
             op("Pollo al horno con verduras variadas", "180g pollo, calabacín, zanahoria, cebolla, AOVE", "408 kcal", "40g prot", "26g carbs", "16g grasa", "Fácil · 30 min"),
             op("Emperador a la plancha con patata y ensalada", "200g emperador, 150g patata, ensalada verde, AOVE", "414 kcal", "38g prot", "34g carbs", "14g grasa", "Fácil · 20 min"),
-            op("Lentejas estofadas con verduras y huevo duro", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 1 huevo duro, 10g AOVE, pimentón, laurel", "549 kcal", "31g prot", "68g carbs", "17g grasa", "Fácil · 25 min"),
+            op("Lentejas estofadas con zanahoria y pimiento", "250g lentejas cocidas, 80g zanahoria, 60g cebolla, 60g pimiento, 10g AOVE, pimentón, laurel", "467 kcal", "25g prot", "67g carbs", "11g grasa", "Fácil · 25 min"),
             op("Cinta de lomo con boniato y judías verdes", "160g cinta de lomo, 150g boniato, 150g judías verdes, 10g AOVE, romero", "468 kcal", "40g prot", "41g carbs", "16g grasa", "Fácil · 30 min"),
             op("Dorada al horno con patata panadera y cebolla", "200g dorada, 150g patata, 80g cebolla, 10g AOVE, perejil, limón", "491 kcal", "43g prot", "37g carbs", "19g grasa", "Fácil · 30 min"),
             op("Calamares a la plancha con quinoa y ensalada de tomate", "180g calamar, 150g quinoa cocida, 120g tomate, 40g cebolla, 10g AOVE, perejil", "444 kcal", "33g prot", "42g carbs", "16g grasa", "Fácil · 20 min"),
@@ -10029,19 +10042,19 @@
             op("Arroz, pasta o quinoa con carne roja y verdura", "50g arroz crudo, 200g carne roja, 200g verdura, 10g AOVE", "675 kcal", "59g prot", "49g carbs", "27g grasa", "Fácil · 20 min"),
             op("Patata o boniato con carne roja y verdura", "220g patata, 200g carne roja, 200g verdura, 10g AOVE", "695 kcal", "60g prot", "53g carbs", "27g grasa", "Fácil · 30 min"),
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
-            op("Garbanzos con pechuga de pollo y ensalada; manzana de postre", "100g garbanzos cocidos, 180g pechuga de pollo, 1 manzana, 150g ensalada", "508 kcal", "52g prot", "57g carbs", "8g grasa", "Fácil · 15 min"),
-            op("Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres, huevo cocido y judías verdes; manzana de postre", "150g merluza, 200g legumbres cocidas, 1 huevo, 1 manzana, 150g judías verdes", "637 kcal", "55g prot", "84g carbs", "9g grasa", "Fácil · 20 min"),
-            op("Berenjenas rellenas de carne picada y manzana de postre", "200g berenjena, 150g carne picada, 1 manzana", "360 kcal", "35g prot", "37g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta y manzana de postre", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
+            op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
+            op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
+            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
-            op("Filetes de pollo con arroz y ensalada; manzana de postre", "150g pollo, 60g arroz cocido, 1 manzana, 150g ensalada", "385 kcal", "38g prot", "47g carbs", "5g grasa", "Fácil · 12 min"),
-            op("Legumbres con filetes de pollo y ensalada; manzana de postre", "200g legumbres cocidas, 150g pollo, 1 manzana, 150g ensalada", "595 kcal", "55g prot", "78g carbs", "7g grasa", "Fácil · 15 min"),
+            op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
+            op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
             op("Arroz con pollo y aguacate", "60g arroz crudo, 200g pollo, 1/2 aguacate", "608 kcal", "51g prot", "56g carbs", "20g grasa", "Fácil · 20 min"),
             op("Pasta con carne picada", "60g pasta cruda, 200g carne picada, 15g AOVE", "618 kcal", "51g prot", "45g carbs", "26g grasa", "Fácil · 20 min"),
             // Ideas de reels de recetas fit (5 oct 2026), macros calculados con scripts/componer.js
-            op("Patatas crujientes con ternera, queso batido y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
+            op("Patatas crujientes con ternera, queso fresco y ensalada", "250g patata, 150g carne picada de ternera, 60g queso batido 0%, 100g ensalada, pimentón, ajo", "476 kcal", "44g prot", "57g carbs", "8g grasa", "Freidora 190º · 18 min"),
             op("Ensalada crujiente de pollo y espirales de lentejas", "200g pollo a la plancha, 50g espirales de lentejas, 100g lechuga, 50g tomate, 125g yogur griego 0%, perejil, ajo, limón", "487 kcal", "72g prot", "34g carbs", "7g grasa", "Freidora · 20 min"),
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Bowl de boniato, ternera, aguacate y cottage", "150g boniato asado, 150g carne picada de ternera, 40g aguacate, 150g queso cottage, 5g miel", "545 kcal", "52g prot", "46g carbs", "17g grasa", "Fácil · 20 min"),
@@ -10092,6 +10105,19 @@
             op("Arroz o pasta con pollo", "50g arroz crudo, 100g pollo", "291 kcal", "26g prot", "40g carbs", "3g grasa", "Fácil · 15 min"),
             op("Arroz o pasta con atún", "50g arroz crudo, 100g atún bonito", "357 kcal", "29g prot", "40g carbs", "9g grasa", "Fácil · 12 min"),
             op("Arroz o pasta con caballa", "50g arroz crudo, 100g caballa", "356 kcal", "22g prot", "40g carbs", "12g grasa", "Fácil · 12 min"),
+            // Tomas que marcó Rafa en el Recetario (2 nov 2026).
+            op("Pollo al curry ligero con verduras", "180g pollo, 100ml leche de coco light, 120g pimiento, 100g cebolla, 100g brócoli, curry, cilantro", "401 kcal", "46g prot", "25g carbs", "13g grasa", "Fácil · 22 min"),
+            op("Dorada al horno con espárragos y limón", "220g dorada, 150g espárragos trigueros, 150g patata, 10g AOVE, limón, perejil", "520 kcal", "49g prot", "36g carbs", "20g grasa", "Fácil · 25 min"),
+            op("Garbanzos salteados con espinacas, pavo y huevo", "150g garbanzos cocidos, 100g espinacas, 100g pavo, 1 huevo, 10g AOVE", "557 kcal", "47g prot", "45g carbs", "21g grasa", "Fácil · 15 min"),
+            op("Salteado de pavo con brócoli y quinoa", "180g pavo, 150g brócoli, 120g quinoa cocida, 10g AOVE, ajo, 10ml salsa de soja", "500 kcal", "53g prot", "36g carbs", "16g grasa", "Fácil · 20 min"),
+            op("Muslo de pollo al horno con ensalada", "200g muslo de pollo sin piel, ensalada verde, AOVE, limón", "455 kcal", "50g prot", "3g carbs", "27g grasa", "Fácil · 25 min"),
+            op("Ensalada de garbanzos con caballa y pepino", "150g garbanzos cocidos, 100g caballa, 100g pepino, 100g tomate, 40g cebolla, 10g AOVE", "578 kcal", "34g prot", "52g carbs", "26g grasa", "Sin cocción · 10 min"),
+            op("Rape a la plancha con verduras salteadas", "200g rape, 150g calabacín, 120g pimiento, 80g cebolla, 10g AOVE, limón", "328 kcal", "36g prot", "19g carbs", "12g grasa", "Fácil · 20 min"),
+            op("Solomillo de ternera con verduras al wok", "160g solomillo, 120g pimiento, 150g calabacín, 80g cebolla, 60g zanahoria, 10ml salsa de soja, sésamo, 10g AOVE", "421 kcal", "40g prot", "27g carbs", "17g grasa", "Fácil · 18 min"),
+            op("Ensalada de pollo con maíz y aguacate", "180g pollo a la plancha, maíz, 1/4 aguacate, lechuga, tomate, limón", "426 kcal", "40g prot", "26g carbs", "18g grasa", "Sin cocción · 10 min"),
+            op("Pollo al horno con verduras asadas", "180g pechuga de pollo, calabacín, pimiento, berenjena, AOVE, hierbas", "402 kcal", "42g prot", "18g carbs", "18g grasa", "Fácil · 25 min"),
+            op("Sepia a la plancha con pisto de verduras", "200g sepia, 120g calabacín, 100g pimiento, 100g tomate, 60g cebolla, 10g AOVE", "345 kcal", "36g prot", "21g carbs", "13g grasa", "Fácil · 20 min"),
+            op("Ensalada de alubias blancas con atún y tomate", "150g alubias cocidas, 1 lata atún al natural, 150g tomate, 50g cebolla, 10g AOVE", "439 kcal", "37g prot", "48g carbs", "11g grasa", "Sin cocción · 8 min"),
           ]
         },
         {
@@ -10319,6 +10345,12 @@
             op("Tostadas de boniato con cottage, aguacate y huevo", "200g boniato asado, 100g queso cottage, 30g aguacate, 2 huevos, 5g miel, pimentón", "494 kcal", "29g prot", "54g carbs", "18g grasa", "Horno o freidora · 20 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Tostada de atún con tomate y aguacate", "1 tosta integral, 1 lata atún al natural, tomate, 1/4 aguacate", "318 kcal", "26g prot", "22g carbs", "14g grasa", "Sin cocción · 5 min"),
+            // Tomas que marcó Rafa en el Recetario (2 nov 2026).
+            op("Dorada al horno con espárragos y limón", "220g dorada, 150g espárragos trigueros, 150g patata, 10g AOVE, limón, perejil", "520 kcal", "49g prot", "36g carbs", "20g grasa", "Fácil · 25 min"),
+            op("Nuggets de pollo crujientes con ensalada", "250g pechuga de pollo, 1 huevo, 25g copos de maíz, 150g ensalada, pimentón, ajo", "480 kcal", "67g prot", "26g carbs", "12g grasa", "Freidora 200º · 15 min"),
+            op("Ensalada de garbanzos con caballa y pepino", "150g garbanzos cocidos, 100g caballa, 100g pepino, 100g tomate, 40g cebolla, 10g AOVE", "578 kcal", "34g prot", "52g carbs", "26g grasa", "Sin cocción · 10 min"),
+            op("Pizza proteica con base de pollo", "250g pechuga de pollo picada, 1 huevo, 60g tomate triturado, 40g mozzarella, 50g champiñones, 50g tomate cherry, 20g maíz, 20g rúcula, orégano", "541 kcal", "76g prot", "12g carbs", "21g grasa", "Horno 190º · 30 min"),
+            op("Tacos de hamburguesa estilo Big Mac", "2 tortillas de trigo, 150g carne picada de ternera, 30g queso rallado, 40g lechuga, 50g yogur griego 0%, mostaza, 20g pepinillos", "615 kcal", "54g prot", "48g carbs", "23g grasa", "Sartén · 15 min"),
           ]
         }
       ];
@@ -17733,7 +17765,7 @@
     "Ensalada de pollo con salsa de yogur y parmesano": "Plancha el pollo sazonado 4-5 min por lado y córtalo en tiras. Mezcla la lechuga romana con los croutons y el parmesano. Aliña con la salsa de yogur y añade el pollo.",
     "Mini bocadillo de jamón serrano y tomate": "Corta el panecillo por la mitad. Unta con el tomate rallado, añade el jamón serrano y un chorrito de AOVE.",
     "Edamame con sal marina y limón": "Cuece el edamame en agua con sal 5 min. Escurre y sirve caliente con sal marina gruesa y un chorrito de limón.",
-    "Poké bowl de salmón con arroz y aguacate": "Cuece el arroz y deja templar. Corta el salmón fresco en dados. Monta el bowl: arroz, salmón, aguacate, pepino y edamame, y aliña con soja y sésamo.",
+    "Poké bowl de salmón con arroz y aguacate": "Cuece el arroz y deja templar. Corta el salmón fresco en dados. Monta el bowl: arroz, salmón, aguacate y edamame, y aliña con soja y sésamo.",
     "Pollo al limón con patata asada y ensalada": "Precalienta el horno a 200°C. Hornea el pollo y la patata en dados con AOVE 25-30 min. Riega el pollo con limón antes de servir junto a la ensalada.",
     "Tostada de crema de cacahuete con plátano": "Tuesta el pan. Unta la crema de cacahuete, añade el plátano en rodajas y espolvorea canela.",
     "Bowl de quinoa con pavo, aguacate y rúcula": "Cuece la quinoa según el envase y deja templar. Plancha el pavo en tacos 5-6 min. Monta el bowl con la quinoa, el pavo, el aguacate y la rúcula, y riega con limón.",
@@ -17914,7 +17946,7 @@
     "Crepes de avena con frutos rojos y yogur": "Bate la harina de avena, el huevo y la leche hasta obtener una masa fina. Cuece 2-3 crepes finas en sartén antiadherente 1-2 min por lado. Cubre con el yogur griego, los frutos rojos y un chorrito de miel.",
     // 47 recetas añadidas al nivelar los pools de comidas (todas las tomas
     // a 23 opciones). Con pasos propios para que no caigan en _pasoGenerico().
-    "Lentejas estofadas con verduras y huevo duro": "Pocha la cebolla, la zanahoria y el pimiento picados en el AOVE 8 min. Añade el pimentón fuera del fuego para que no amargue, incorpora las lentejas cocidas escurridas y el laurel, y cuece 10 min a fuego suave. Cuece el huevo 10 min, pélalo y sírvelo partido por encima.",
+    "Lentejas estofadas con zanahoria y pimiento": "Pocha la cebolla, la zanahoria y el pimiento picados en el AOVE 8 min. Añade el pimentón fuera del fuego para que no amargue, incorpora las lentejas cocidas escurridas y el laurel, y cuece 10 min a fuego suave.",
     "Cinta de lomo con boniato y judías verdes": "Precalienta el horno a 200°C. Corta el boniato en gajos, riégalo con la mitad del AOVE y hornea 25 min. Sazona la cinta de lomo con sal y romero y añádela a la bandeja los últimos 12 min. Cuece las judías verdes al vapor 8 min y aliña con el AOVE restante.",
     "Dorada al horno con patata panadera y cebolla": "Corta la patata en rodajas finas y la cebolla en juliana, ponlas en la bandeja con AOVE y sal y hornea a 200°C 20 min. Coloca la dorada encima, riega con limón y hornea 12 min más. Espolvorea perejil al servir.",
     "Calamares a la plancha con quinoa y ensalada de tomate": "Cuece la quinoa 15 min en agua con sal y escurre. Plancha los calamares limpios a fuego fuerte 2 min por lado — más tiempo los endurece. Aliña el tomate y la cebolla picada con el AOVE, sal y perejil. Sirve la quinoa de base, los calamares encima y la ensalada al lado.",
@@ -18008,14 +18040,14 @@
     "Sándwich de pavo con huevos revueltos": "Revuelve los huevos en una sartén antiadherente 2-3 min con una pizca de sal. Monta el sándwich con las dos rebanadas de pan y el pavo en lonchas, y toma los huevos al lado.",
     "Tosta de pan con jamón serrano": "Tuesta el pan y ponle encima el jamón serrano en lonchas. Sin cocción.",
     "Tosta de pan con lomo embuchado": "Tuesta el pan y ponle encima el lomo embuchado en lonchas. Sin cocción.",
-    "Garbanzos con pechuga de pollo y ensalada; manzana de postre": "Escurre y enjuaga los garbanzos. Haz la pechuga de pollo a la plancha 4-5 min por lado y sírvela con los garbanzos. Acompaña con una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
-    "Arroz con huevos a la plancha y ensalada; de postre, queso batido con manzana": "Cuece el arroz (pesado en seco) unos 15 min y escúrrelo. Haz los huevos a la plancha en una sartén antiadherente. Sírvelo con una ensalada aliñada con vinagre o limón. De postre, el queso batido con la manzana.",
-    "Merluza con legumbres, huevo cocido y judías verdes; manzana de postre": "Cuece el huevo 10 min y pélalo. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas. Cuece las judías verdes 8-10 min en agua con sal y sírvelo todo junto. Toma la manzana de postre.",
-    "Berenjenas rellenas de carne picada y manzana de postre": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Vacía un poco la pulpa, saltéala con la carne picada y rellena las berenjenas. Gratina 5 min. Toma la fruta al final.",
-    "Berenjenas rellenas de carne picada con pasta y manzana de postre": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.",
+    "Garbanzos con atún y pechuga de pollo": "Escurre y enjuaga los garbanzos y mézclalos con el atún escurrido. Haz la pechuga de pollo a la plancha 4-5 min por lado y sírvela al lado. Termina con la fruta. Acompaña con una ensalada aliñada con vinagre o limón.",
+    "Arroz con huevos a la plancha y queso batido": "Cuece el arroz (pesado en seco) unos 15 min y escúrrelo. Haz los huevos a la plancha en una sartén antiadherente. Sírvelo con el queso batido y toma la fruta al final. Acompaña con una ensalada aliñada con vinagre o limón.",
+    "Merluza con legumbres y huevos cocidos": "Cuece los huevos 10 min y pélalos. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas y sírvelo todo junto. Toma la fruta al final. Cuece las judías verdes 8-10 min en agua con sal y sírvelas al lado.",
+    "Berenjenas rellenas de carne picada": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Vacía un poco la pulpa, saltéala con la carne picada y rellena las berenjenas. Gratina 5 min.",
+    "Berenjenas rellenas de carne picada con pasta": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.",
     "Arroz con gambas y pan con tomate": "Cuece el arroz (pesado en seco) unos 15 min. Saltea las gambas en una sartén antiadherente 2-3 min y mézclalas con el arroz. Tuesta el pan y úntalo con el tomate rallado.",
-    "Filetes de pollo con arroz y ensalada; manzana de postre": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con el arroz y una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
-    "Legumbres con filetes de pollo y ensalada; manzana de postre": "Calienta las legumbres escurridas. Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con una ensalada aliñada con vinagre o limón. Toma la manzana de postre.",
+    "Filetes de pollo con arroz y ensalada": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con el arroz y una ensalada aliñada con vinagre o limón.",
+    "Legumbres con filetes de pollo": "Calienta las legumbres escurridas. Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con una ensalada aliñada con vinagre o limón.",
     "Almendras con fruta": "Toma las almendras al natural con la fruta. Sin cocción.",
     "Salmón con patata hervida y judías verdes": "Cuece la patata en trozos 15-20 min y las judías verdes 8-10 min. Haz el salmón a la plancha o al horno 8-10 min. Sírvelo todo junto.",
     "Filetes de pollo con ensalada variada": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con la ensalada, solo con verduras y sin salsas.",
@@ -18081,7 +18113,7 @@
     "Tostadas de masa madre con huevo, aguacate y mozzarella": "Tuesta el pan. Haz los huevos a la plancha o revueltos. Unta el aguacate machacado en las tostadas y pon encima el tomate en rodajas, la mozzarella y los huevos. Sal y pimienta al gusto.",
     "Gelatina proteica de frutos rojos": "Prepara una infusión con el agua caliente y las bolsitas de té y deja reposar 5 min. Retira las bolsitas y disuelve la gelatina en polvo removiendo bien, sin que llegue a hervir. Pon los frutos rojos en un táper, vierte el líquido por encima y deja cuajar en la nevera unas 4 horas. Córtala en barritas.",
     "Vasito de yogur, chía y frutos rojos": "Prepara la gelatina light como indica el sobre y repártela en vasitos. Cuando empiece a cuajar (1 hora en la nevera), pon encima el yogur mezclado con la chía y termina con los frutos rojos. Deja reposar en la nevera 2 horas más.",
-    "Patatas crujientes con ternera, queso batido y ensalada": "Corta la patata en dados, sazónala con pimentón y hazla en la freidora de aire a 190º unos 16-18 min, sin aceite y removiendo a mitad. Mientras, saltea la carne picada con el ajo y una pizca de sal. Sirve las patatas con la carne, el queso batido por encima y la ensalada al lado.",
+    "Patatas crujientes con ternera, queso fresco y ensalada": "Corta la patata en dados, sazónala con pimentón y hazla en la freidora de aire a 190º unos 16-18 min, sin aceite y removiendo a mitad. Mientras, saltea la carne picada con el ajo y una pizca de sal. Sirve las patatas con la carne, el queso batido por encima y la ensalada al lado.",
     "Ensalada crujiente de pollo y espirales de lentejas": "Cuece las espirales de lentejas como indica el paquete, escúrrelas y hazlas en la freidora de aire a 180º unos 15 min, con sal y especias, hasta que crujan. Haz el pollo a la plancha y córtalo en tiras. Para la salsa, mezcla el yogur con perejil, ajo, sal, pimienta y un chorro de limón. Monta la lechuga y el tomate, añade el pollo y las espirales crujientes y aliña con la salsa.",
     "Muffins de arándanos proteicos": "Bate el huevo con el yogur y la vainilla. Añade la harina de avena y la proteína y mezcla hasta que no queden grumos. Incorpora los arándanos, reparte la masa en 2 moldes de magdalena y hornea a 180º unos 10-12 min. Puedes hacer varias tandas de una vez: aguantan 3 días en la nevera.",
     "Tiramisú proteico en vaso": "Mezcla el yogur con la proteína hasta que quede cremoso. Moja las galletas en el café, sin dejarlas mucho para que no se deshagan. En un vaso, alterna capas de galleta y de crema. Termina con el cacao espolvoreado y el chocolate rallado. Mejor tras 30 min en la nevera.",
