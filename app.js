@@ -17327,7 +17327,7 @@
     "Lomo embuchado con tortas de arroz y zanahoria": "Monta el lomo embuchado sobre las tortas de arroz. Corta la zanahoria en bastones y sírvela al lado para ir mojando.",
     "Queso batido con pera, nueces y canela": "Trocea la pera con piel, que es donde está casi toda la fibra. Mézclala con el queso batido, añade las nueces troceadas y espolvorea canela.",
     "Queso fresco con manzana y miel": "Trocea la manzana con piel y mézclala con el queso fresco. Añade el hilo de miel y espolvorea canela.",
-    "Queso batido con arándanos, almendras y canela": "Mezcla los arándanos con el queso batido. Esparce las almendras troceadas por encima y espolvorea canela: con los arándanos ya dulces ya queda dulce.",
+    "Queso batido con arándanos, almendras y canela": "Mezcla los arándanos con el queso batido. Esparce las almendras troceadas por encima y espolvorea canela: con los arándanos ya queda dulce.",
     "Yogur griego con pera y nueces": "Trocea la pera con piel sobre el yogur griego. Añade las nueces troceadas y termina con el hilo de miel.",
     "Manzana con nueces y pasas": "Corta la manzana en gajos, con piel. Sírvela con las nueces y las pasas al lado. Sin cocción, listo en 2 min.",
     "Batido de fresa con leche y avena": "Mete las fresas, la leche y los copos de avena en la batidora con un par de cubitos. Bate 30 segundos hasta que no queden grumos de avena.",
