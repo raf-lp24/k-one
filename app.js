@@ -5004,6 +5004,15 @@
         return conMayus + ' ' + x;
       });
     }, txt);
+    // Sin queso, en un plato dulce el sustituto es yogur griego y no hummus
+    // («Tarta de hummus», aprobado por Rafa el 2 nov 2026). Si tampoco puede
+    // tomar yogur (lácteos), se queda el sustituto de siempre.
+    const _RE_PLATO_DULCE = /miel|mermelada|chocolate|cacao|vainilla|galletas?|fresas?|frambuesas?|ar[aá]ndanos?|frutos rojos|kiwi|pl[aá]tano|coco rallado|prote[ií]na whey/i;
+    const _RE_PLATO_SALADO = /pollo|pavo|ternera|carne|at[uú]n|salm[oó]n|merluza|bacalao|gambas|jam[oó]n|patata|boniato|aguacate|guacamole|tomate|lechuga|espinacas|pimiento|ajo|mostaza|huevos? (?:cocidos?|a la plancha|revueltos?|pochados?)/i;
+    const _sinQuesoEnDulce = opt => _permitido('yogur griego')
+      && _RE_PLATO_DULCE.test(opt.nombre + ' ' + opt.ingredientes)
+      && !_RE_PLATO_SALADO.test(opt.nombre + ' ' + opt.ingredientes);
+    const _esDeQueso = t => /queso|cottage/.test(_normTexto(String(t)));
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
         if (_sinHuevo) {
@@ -5011,6 +5020,9 @@
           if (!opt) return null;
           if (_sinSoja) opt = _sinTofuTrasHuevo(opt);
         }
+        const _dulce = _sinQuesoEnDulce(opt);
+        const _susReceta = (re, reemplazo) => (_dulce && reemplazo === 'hummus' && _esDeQueso(re.source) ? 'yogur griego' : reemplazo);
+        const _susToken = i => (_dulce && susMap[i] === 'hummus' && _esDeQueso(tokenArr[i]) ? 'yogur griego' : (susMap[i] || ''));
         // Los PASOS entran en la comprobación, no solo el nombre y los
         // ingredientes: hay recetas que nombran un alimento SOLO en la
         // preparación. Caso real: "Palitos de zanahoria con guacamole casero"
@@ -5027,15 +5039,20 @@
         let nuevoNombre = opt.nombre;
         let nuevoIng = envasesAGramos(opt.ingredientes);
         recetasActivas.forEach(([re, reemplazo]) => {
-          nuevoNombre = nuevoNombre.replace(re, reemplazo);
-          nuevoIng = nuevoIng.replace(re, reemplazo);
+          nuevoNombre = nuevoNombre.replace(re, _susReceta(re, reemplazo));
+          nuevoIng = nuevoIng.replace(re, _susReceta(re, reemplazo));
         });
         regexesSust.forEach((re, i) => {
-          const reemplazo = susMap[i] || '';
+          const reemplazo = _susToken(i);
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
         nuevoIng = concordarAdjetivos(_concordarSustitucion(limpiar(quitarCantidadesHuerfanas(nuevoIng))));
+        // El plato ya llevaba yogur griego: una sola línea, no dos.
+        if (_dulce) {
+          nuevoIng = nuevoIng.replace(/(\d+)g yogur griego( 0%)?, (\d+)g yogur griego(?! \d)/i, (m, a, z, b) => `${+a + +b}g yogur griego${z || ''}`);
+          nuevoNombre = nuevoNombre.replace(/yogur y yogur griego/i, 'yogur griego');
+        }
         nuevoNombre = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(nuevoNombre))))
           .replace(/\s+(con|de|y)\s*,\s*/g, ' $1 ').replace(/\s+de\s+(con|y)\s+/g, ' $1 ').replace(/\s*,\s*,/g, ',')
           .replace(/\s+con\s*$/, '').replace(/\s+y\s*$/, '').replace(/\s{2,}/g, ' ').trim()
@@ -5064,11 +5081,12 @@
           || ((typeof RECETA_PASOS !== 'undefined') ? RECETA_PASOS[opt.nombre] : null);
         if (pasosOrig) {
           let ps = pasosOrig;
-          recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, reemplazo); });
+          recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, _susReceta(re, reemplazo)); });
           regexesSust.forEach((re, i) => {
-            const reemplazo = susMap[i] || '';
+            const reemplazo = _susToken(i);
             re.lastIndex = 0; ps = ps.replace(re, reemplazo);
           });
+          if (_dulce) ps = ps.replace(/\bel yogur con el yogur griego\b/gi, 'el yogur griego').replace(/\bel yogur y el yogur griego\b/gi, 'el yogur griego');
           ps = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(ps))));
           if (ps !== pasosOrig) nuevosPasos = ps;
         }
@@ -10411,7 +10429,7 @@
           [/\bleche (entera|semidesnatada|desnatada)/gi, 'leche $1 sin lactosa'],
           // "(?:de )?" : en el recetario hay "leche coco light" sin el "de", y
           // salía "leche sin lactosa coco light" (17 sept 2026).
-          [/\bleche\b(?! (?:de )?(?:avena|coco|arroz|soja|almendra))(?! vegetal)(?![^,.;:]*sin lactosa)/gi, 'leche sin lactosa']
+          [/\bleche\b(?! (?:de )?(?:avena|coco|arroz|soja|almendra))(?! vegetal)(?!(?:\s+(?!con\b|y\b|e\b)[a-záéíóúñ]+){0,2}\s+sin lactosa)/gi, 'leche sin lactosa']
         );
       }
       if (sinFrutosSecos) {
