@@ -149,6 +149,15 @@ lista.forEach(f => {
   if (f.ia || !f.avisos.some(a => a.t === 'criterio')) return;
   f.ia = { tipo: 'mezcla', motivo: 'Es un batido y lleva canela. El criterio de la app es batidos sin canela.', ingredientes: f.ingredientes.split(',').map(x => x.trim()).filter(x => !/^canela$/i.test(x)).join(', ') };
 });
+// 2 nov (Rafa, en una nota): nadie mide las claras en ml al hacer una tortilla. Una clara son 33 g (PESO_UNIDAD).
+const CLARAS_ML = /(\d+)\s*ml claras/gi;
+lista.forEach(f => {
+  const base = (f.ia && f.ia.ingredientes) || f.ingredientes;
+  if (!base.match(CLARAS_ML)) return;
+  const motivo = 'Las claras están en mililitros y al cocinar se cuentan: mejor decir cuántas son. Una clara son unos 33 ml.';
+  const ingredientes = base.replace(CLARAS_ML, (m, n) => Math.round(+n / 33) + ' claras');
+  f.ia = f.ia ? { ...f.ia, ingredientes, motivo: f.ia.motivo + ' ' + motivo } : { tipo: 'cantidad', motivo, ingredientes };
+});
 console.log('revisión con IA:', lista.filter(f => f.ia).length);
 fs.mkdirSync(salida, { recursive: true });
 fs.writeFileSync(path.join(salida, 'recetas.json'), JSON.stringify(lista));
