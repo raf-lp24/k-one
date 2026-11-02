@@ -8943,6 +8943,7 @@
             op("Tortita de arándanos", "40g copos de avena, 1 huevo, 120ml leche desnatada, 40g arándanos, levadura química, estevia, esencia de vainilla", "296 kcal", "17g prot", "39g carbs", "8g grasa", "Sartén · 10 min"),
             op("Avena cremosa tipo arroz con leche", "40g copos de avena, 200ml leche desnatada, 100g yogur griego 0%, canela, ralladura de limón al gusto", "279 kcal", "22g prot", "41g carbs", "3g grasa", "Cazo · 8 min"),
             op("Avena sabor tiramisú", "45g copos de avena, 20g semillas de chía, 100ml leche desnatada, 50ml café, 30g proteína whey, 50g yogur griego 0%, estevia, esencia de vainilla", "459 kcal", "42g prot", "48g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
+            op("Tostada de cottage con fresas, kiwi y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 1 kiwi, 10g miel", "402 kcal", "23g prot", "64g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -9226,7 +9227,6 @@
             op("Bocaditos de plátano estilo pancake", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Avena cremosa tipo arroz con leche", "40g copos de avena, 200ml leche desnatada, 100g yogur griego 0%, canela, ralladura de limón al gusto", "279 kcal", "22g prot", "41g carbs", "3g grasa", "Cazo · 8 min"),
-            op("Tostada de cottage con fresas y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 10g miel", "354 kcal", "22g prot", "53g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -9424,6 +9424,7 @@
             op("Tortita de arándanos", "40g copos de avena, 1 huevo, 120ml leche desnatada, 40g arándanos, levadura química, estevia, esencia de vainilla", "296 kcal", "17g prot", "39g carbs", "8g grasa", "Sartén · 10 min"),
             op("Avena cremosa tipo arroz con leche", "40g copos de avena, 200ml leche desnatada, 100g yogur griego 0%, canela, ralladura de limón al gusto", "279 kcal", "22g prot", "41g carbs", "3g grasa", "Cazo · 8 min"),
             op("Avena sabor tiramisú", "45g copos de avena, 20g semillas de chía, 100ml leche desnatada, 50ml café, 30g proteína whey, 50g yogur griego 0%, estevia, esencia de vainilla", "459 kcal", "42g prot", "48g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
+            op("Tostada de cottage con fresas, kiwi y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 1 kiwi, 10g miel", "402 kcal", "23g prot", "64g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -9729,7 +9730,6 @@
             op("Tostadas integrales con huevo, pavo y plátano", "4 rebanadas pan integral, 2 huevos, 60g pavo en lonchas, 1 plátano, 10g AOVE", "708 kcal", "44g prot", "88g carbs", "20g grasa", "Fácil · 10 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Avena cremosa tipo arroz con leche", "40g copos de avena, 200ml leche desnatada, 100g yogur griego 0%, canela, ralladura de limón al gusto", "279 kcal", "22g prot", "41g carbs", "3g grasa", "Cazo · 8 min"),
-            op("Tostada de cottage con fresas y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 10g miel", "354 kcal", "22g prot", "53g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -9928,6 +9928,7 @@
             op("Bol de yogur griego con manzana, avena y canela", "200g yogur griego 0%, 1 manzana, 30g avena, canela", "335 kcal", "25g prot", "52g carbs", "3g grasa", "Sin cocción · 3 min"),
             op("Tostadas con guacamole casero, huevo y pavo", "2 tostadas integrales, 40g guacamole casero, 2 huevos a la plancha, 40g pavo en lonchas", "438 kcal", "30g prot", "30g carbs", "22g grasa", "Fácil · 10 min"),
             op("Bol de kéfir con avena, pera y semillas de lino", "200ml kéfir, 30g avena, 1 pera, 10g semillas de lino", "373 kcal", "13g prot", "60g carbs", "9g grasa", "Sin cocción · 3 min"),
+            op("Tostada de cottage con fresas, kiwi y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 1 kiwi, 10g miel", "402 kcal", "23g prot", "64g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -10217,7 +10218,6 @@
             op("Tostadas de masa madre con huevo, aguacate y mozzarella", "2 rebanadas pan de masa madre, 2 huevos, 1/4 aguacate, 1 tomate, 30g mozzarella", "506 kcal", "28g prot", "40g carbs", "26g grasa", "Fácil · 10 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Avena cremosa tipo arroz con leche", "40g copos de avena, 200ml leche desnatada, 100g yogur griego 0%, canela, ralladura de limón al gusto", "279 kcal", "22g prot", "41g carbs", "3g grasa", "Cazo · 8 min"),
-            op("Tostada de cottage con fresas y miel", "60g pan de masa madre, 150g queso cottage, 100g fresas, 10g miel", "354 kcal", "22g prot", "53g carbs", "6g grasa", "Sin cocción · 5 min"),
           ]
         },
         {
@@ -18050,7 +18050,7 @@
     "Boniato asado con yogur cremoso, nueces y miel": "Asa el boniato en láminas o mitades en la freidora de aire a 190º unos 15-20 min. Mezcla el yogur con la proteína hasta que quede una crema lisa. Pon la crema encima del boniato templado y termina con las nueces troceadas, canela y la miel.",
     "Tostadas de masa madre con crema de yogur y frutos rojos": "Mezcla el yogur con la proteína hasta tener una crema espesa. Úntala sobre las rebanadas de pan, reparte los frutos rojos por encima y hazlas en la freidora de aire a 190º unos 8-10 min, hasta que la crema cuaje. Termina con la miel.",
     "Tostada de plátano asado con crema proteica": "Tuesta el pan. Corta el plátano por la mitad a lo largo y ásalo en la freidora de aire a 200º unos 10 min, hasta que caramelice. Mezcla el queso batido con la proteína hasta que quede una crema. Unta la crema en la tostada, pon el plátano encima y espolvorea canela.",
-    "Tostada de cottage con fresas y miel": "Tuesta el pan. Unta el queso cottage por encima, reparte las fresas en rodajas y termina con un hilo de miel.",
+    "Tostada de cottage con fresas, kiwi y miel": "Tuesta el pan. Unta el queso cottage por encima, reparte las fresas y el kiwi en rodajas y termina con un hilo de miel.",
     "Tostada de salmón ahumado con cottage y huevo": "Cuece el huevo 10 min y pélalo. Tuesta el pan con unas gotas de aceite. Unta el queso cottage, pon encima el salmón ahumado y el huevo en rodajas, y una pizca de pimienta.",
     "Tostada de pollo con aguacate y cottage": "Tuesta el pan. Unta el queso cottage, pon el aguacate en láminas y el pollo desmenuzado por encima. Sal y pimienta al gusto.",
     "Wrap de huevo, pavo, cottage y aguacate": "Bate los huevos y cuájalos en una sartén antiadherente a fuego medio como una tortilla fina. Calienta la tortilla de trigo 30 segundos por cada lado. Unta el queso cottage, pon encima la tortilla de huevo, el pavo, los tomates cherry partidos, el aguacate y la rúcula. Enrolla y corta por la mitad.",
