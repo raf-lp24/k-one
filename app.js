@@ -2262,7 +2262,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261030');
+      const r = await fetch('/data/ejercicios-info.json?v=20261102');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3938,7 +3938,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (142 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (146 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4095,7 +4095,12 @@
     "Si te ahogas corriendo no es que no sirvas para esto: es que vas demasiado rápido. Baja el ritmo o alterna con caminar.",
     "El mejor plan es el que encaja en tu vida, no el que te obliga a cambiarla.",
     // 1 nov 2026 · revisión de @vikikateam, aprobada por Rafa
-    "Cuidarte no va de tener miedo a una cena de pasta, a un día de descanso o a comer fuera. Eso también forma parte del plan."
+    "Cuidarte no va de tener miedo a una cena de pasta, a un día de descanso o a comer fuera. Eso también forma parte del plan.",
+    // 2 nov 2026 · revisión de Instagram, aprobadas por Rafa
+    "No te hace falta ir más rápido: te hace falta no parar.",
+    "No esperes a enero. Si empiezas hoy, enero te pilla con dos meses hechos.",
+    "Un mes flojo no borra meses de trabajo.",
+    "La decisión no es del lunes que viene: es de hoy."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -4547,6 +4552,9 @@
   const _NO_ES_ESE_ALIMENTO = {
     calabaza: { antes: '(?<!semillas de )(?<!pipas de )' },
     pan: { antes: '(?!panader|pancet)' },
+    // El sándwich helado es de galleta, no de pan (2 nov 2026).
+    sándwich: { despues: '(?!\\s+helado)' },
+    sandwich: { despues: '(?!\\s+helado)' },
     // Tortilla de maíz/trigo/integral es un wrap, no huevo.
     tortilla: { despues: '(?![a-záéíóúüñ]*\\s+(?:de\\s+)?(?:ma[ií]z|trigo|integral))' },
     leche: { despues: '(?!\\s+(?:sin lactosa\\s+)?(?:de\\s+)?coco)' },
@@ -4861,7 +4869,7 @@
     const _APELLIDOS = '(?:romana|iceberg|trigueros|ib[eé]ric[oa]s?|serrano|dur[oa]s?|pochad[oa]s?|pelad[oa]s?|limpi[oa]s?|variad[oa]s?|basmati|arborio|bomba|manchego|curad[oa]s?|semicurad[oa]s?|tiern[oa]s?|parmesano|crema(?!\\s+de)|cherry|roj[oa]s?|verdes?|amarill[oa]s?|pintas?|blanc[oa]s?|semidesnatad[oa]|desnatad[oa]|enter[oa]|wassa|madur[oa]s?|sec[oa]s?|gratinad[oa]s?|proteic[oa]s?|poché|grandes?|pequeñ[oa]s?|integral(?:es)?|centeno|multicereal(?:es)?|fin[oa]s?|panadera|al natural|en conserva|en aceite|griego|light|\\d+\\s*%|certificad[ao]s?|sin (?:gluten|lactosa))';
     // Sin sustituto el alimento se BORRA, y con él la preparación que lo
     // describía: "con verduras salteadas" quedaba "con salteadas".
-    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|picad[oa]s?|laminad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
+    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|picad[oa]s?|laminad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|negr[oa]s?|fundid[oa]s?|mar[ií]a|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
     const susMap = {};
     // Un sustituto sirve si no está vetado él mismo (ni por token ni por regex:
     // "pechuga de pollo" no vale si el cliente no come pollo).
@@ -4884,7 +4892,10 @@
       const raiz = _normAlimento(t);
       for (const [clave, valor] of Object.entries(SUSTITUCIONES_NOCOMIDA)) {
         const claveN = _normTexto(clave);
-        if ((claveN.includes(raiz) || raiz.includes(claveN)) && _permitido(valor)) {
+        // Solo desde el inicio de una palabra: «chocolate» contiene «col» y salía
+        // «10g lechuga negro» (2 nov 2026).
+        const _desdeInicio = (txt, trozo) => new RegExp('(?<![a-zñ0-9])' + trozo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(txt);
+        if ((_desdeInicio(claveN, raiz) || _desdeInicio(raiz, claveN)) && _permitido(valor)) {
           susMap[i] = valor; return;
         }
       }
@@ -4905,6 +4916,8 @@
     // "rellena de acelgas con al horno" (quitadas las verduras), "Bocadillo de
     // atún y (recuperación...)" (quitado el tomate).
     const limpiar = s => s.replace(/,\s*,+/g, ',')
+      // Sándwich helado sin chocolate (2 nov 2026): no queda con qué cubrirlo.
+      .replace(/\s*\bCubre la mitad(?:\s+con)?\s*\./g, '')
       // Cadena yogur → yogur de soja → postre de soja natural: el segundo cambio
       // solo toca «yogur» y dejaba «postre de soja natural de soja» (1 nov 2026).
       .replace(/(postres? de soja natural(?:es)?)(?: de soja| natural(?:es)?)+/gi, '$1')
@@ -9094,6 +9107,8 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @lu_fitfoodie. Macros con componer.js.
+            op("Sándwich helado de coco y yogur", "150g yogur griego 0%, 15g queso crema, 8g coco rallado, 20g galletas maría, 10g chocolate negro", "327 kcal", "19g prot", "29g carbs", "15g grasa", "Congelador · 2 h"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
@@ -9188,6 +9203,8 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @raulencinass. Macros con componer.js.
+            op("Hamburguesa de ternera con guacamole y queso", "80g pan integral, 125g carne picada de ternera, 30g aguacate, 80g tomate, 25g queso en lonchas, 30g lechuga, 5g mostaza", "537 kcal", "45g prot", "42g carbs", "21g grasa", "Sartén · 12 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
             op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
@@ -9548,6 +9565,8 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @lu_fitfoodie. Macros con componer.js.
+            op("Sándwich helado de coco y yogur", "150g yogur griego 0%, 15g queso crema, 8g coco rallado, 20g galletas maría, 10g chocolate negro", "327 kcal", "19g prot", "29g carbs", "15g grasa", "Congelador · 2 h"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
@@ -9642,6 +9661,8 @@
             op("Pasta cremosa con pollo y tomate cherry en air fryer", "80g pasta integral cruda, 150g pechuga de pollo, 150g tomate cherry, 30g queso crema light, 5g aceite de oliva, ajo, cúrcuma, pimentón, sal", "614 kcal", "49g prot", "64g carbs", "18g grasa", "Freidora 190º · 25 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @raulencinass. Macros con componer.js.
+            op("Hamburguesa de ternera con guacamole y queso", "80g pan integral, 125g carne picada de ternera, 30g aguacate, 80g tomate, 25g queso en lonchas, 30g lechuga, 5g mostaza", "537 kcal", "45g prot", "42g carbs", "21g grasa", "Sartén · 12 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
             op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
@@ -9981,6 +10002,8 @@
             op("Crumble de frutos rojos con yogur griego", "150g frutos rojos, 25g copos de avena, 15g proteína whey, 8g aceite de coco, canela, 100g yogur griego 0%", "339 kcal", "27g prot", "33g carbs", "11g grasa", "Horno o freidora 180º · 20 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Bol helado de frutos rojos, plátano y yogur griego", "150g arándanos congelados, 150g frutos rojos congelados, 1 plátano, 100g yogur griego 0%", "330 kcal", "14g prot", "64g carbs", "2g grasa", "Batidora · 5 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @lu_fitfoodie. Macros con componer.js.
+            op("Sándwich helado de coco y yogur", "150g yogur griego 0%, 15g queso crema, 8g coco rallado, 20g galletas maría, 10g chocolate negro", "327 kcal", "19g prot", "29g carbs", "15g grasa", "Congelador · 2 h"),
             op("Crema de cacao proteica con avena", "50g harina de avena, 20g proteína whey, 5g cacao puro, 120ml leche desnatada", "333 kcal", "28g prot", "44g carbs", "5g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Mousse de yogur griego y coco", "250g yogur griego 0%, 10g coco rallado, 4g gelatina neutra en polvo, 10g miel", "272 kcal", "30g prot", "20g carbs", "8g grasa", "Nevera · 5 min + 2 h"),
@@ -10074,6 +10097,8 @@
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
             op("Boniato relleno de carne picada con salsa de yogur y miel", "250g boniato, 150g carne picada de ternera, 60g cebolla, 70g yogur griego 0%, 10g miel, pimentón", "516 kcal", "44g prot", "67g carbs", "8g grasa", "Microondas · 15 min"),
+            // 2 nov 2026 (aprobado por Rafa): idea de @raulencinass. Macros con componer.js.
+            op("Hamburguesa de ternera con guacamole y queso", "80g pan integral, 125g carne picada de ternera, 30g aguacate, 80g tomate, 25g queso en lonchas, 30g lechuga, 5g mostaza", "537 kcal", "45g prot", "42g carbs", "21g grasa", "Sartén · 12 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Croquetas de atún con salsa de yogur y cilantro", "120g atún al natural, 1 huevo, 25g harina de avena, 5g aceite de oliva virgen extra, cebollino, 80g yogur griego 0%, 5g mostaza, cilantro, zumo de limón al gusto, 100g lechuga, 100g tomate", "442 kcal", "51g prot", "28g carbs", "14g grasa", "Sartén · 15 min"),
             op("Pastel de pollo y calabaza", "100g pechuga de pollo, 100g calabaza, 60ml leche desnatada, 1 huevo, 60g brócoli, 30g queso fresco", "341 kcal", "42g prot", "14g carbs", "13g grasa", "Horno · 30 min"),
@@ -17735,6 +17760,9 @@
     "Boniato relleno de carne picada con salsa de yogur y miel": "Pincha el boniato con un tenedor, envuélvelo en papel de cocina húmedo y hazlo en el microondas unos 10 min, hasta que esté blando. Mientras, sofríe la cebolla picada en una sartén antiadherente y añade la carne picada con el pimentón hasta que cambie de color. Mezcla el yogur con la miel. Abre el boniato por la mitad, rellénalo con la carne y pon la salsa por encima.",
     "Crema de cacao proteica con avena": "Mezcla la harina de avena, la proteína y el cacao en un bol. Añade la leche poco a poco, removiendo, hasta que quede una crema espesa y lisa, como una crema de cacao. Si la quieres más fina, un chorrito más de leche. Cómela con cuchara o úntala en una tortita de arroz.",
     "Bol helado de frutos rojos, plátano y yogur griego": "Tritura los arándanos y los frutos rojos congelados con el plátano y el yogur hasta tener una crema espesa, como un helado. Si cuesta triturar, espera 5 min a que la fruta se ablande un poco. Sírvelo en un bol y cómelo enseguida.",
+    // 2 nov 2026: recetas de la revisión de Instagram, aprobadas por Rafa.
+    "Hamburguesa de ternera con guacamole y queso": "Forma la hamburguesa con la carne picada y hazla a la plancha 3-4 min por cada lado; al final pon el queso encima para que se funda. Tuesta el pan. Machaca el aguacate y úntalo en la base. Añade la lechuga, el tomate en rodajas, la carne con el queso y la mostaza, y cierra.",
+    "Sándwich helado de coco y yogur": "Bate el yogur con el queso crema y el coco. Monta las galletas con el relleno en medio, en un molde de magdalenas. Congela 2 h y desmolda. Cubre la mitad con el chocolate fundido. Espolvorea un poco de coco por encima.",
     "Tarta de queso ligera": "Bate el yogur con el queso batido, el huevo y la vainilla hasta tener una crema lisa. Viértela en un molde pequeño forrado con papel de horno y hazla en la freidora de aire a 170º unos 25 min (o al horno a 170º unos 35 min). Déjala enfriar y luego unas horas en la nevera antes de cortarla. Para una tarta entera, multiplica las cantidades por 4.",
     "Arroz, pasta o quinoa con pollo y verdura": "Cuece el arroz, la pasta o la quinoa (pesados en seco). Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Mezcla todo y aliña con el aceite de oliva.",
     "Patata o boniato con pollo y verdura": "Cuece o asa la patata o el boniato. Haz el pollo a la plancha y cuece o saltea la verdura que prefieras. Sírvelo todo junto con el aceite de oliva.",
