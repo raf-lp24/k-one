@@ -99,8 +99,14 @@ for (let i = iniExtras; i < finExtras; i++) {
 // Avisos de verdad, medidos.
 const norm = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
 const lista = [...filas.values()];
-lista.forEach((f, i) => {
-  f.id = 'r' + String(i + 1).padStart(4, '0');
+// El id sale del contenido, no del orden: si entra una receta nueva en app.js, los
+// cambios de Rafa guardados en el editor siguen apuntando a la suya.
+const fnv = (s) => { let h = 0x811c9dc5; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+const vistos = new Set();
+lista.forEach((f) => {
+  f.id = 'r' + fnv(f.nombre + '|' + f.ingredientes);
+  if (vistos.has(f.id)) throw new Error('id repetido: ' + f.nombre);
+  vistos.add(f.id);
   const a = analizar(f.ingredientes);
   // Igual que scripts/componer.js: 4p + 4c + 9g con los gramos ya redondeados.
   f.calc = { kcal: Math.round(a.p) * 4 + Math.round(a.c) * 4 + Math.round(a.g) * 9, p: Math.round(a.p), c: Math.round(a.c), g: Math.round(a.g), f: Math.round(a.f) };
@@ -108,7 +114,8 @@ lista.forEach((f, i) => {
   if (a.sinDatos.length) f.avisos.push({ t: 'alimento', x: 'No encuentro en la tabla: ' + a.sinDatos.join(', ') });
   const dif = f.et.kcal ? Math.abs(f.calc.kcal - f.et.kcal) / f.et.kcal : 0;
   if (dif > 0.15 && !a.sinDatos.length) f.avisos.push({ t: 'macros', x: 'La etiqueta dice ' + f.et.kcal + ' kcal y sus ingredientes suman ' + f.calc.kcal });
-  if (/batido/i.test(f.nombre) && /canela/i.test(f.ingredientes)) f.avisos.push({ t: 'criterio', x: 'Batido con canela (criterio de la app: batidos sin canela)' });
+  // Ojo: «queso batido» no es un batido.
+  if (/(?<!queso )batido|smoothie/i.test(f.nombre) && /canela/i.test(f.ingredientes)) f.avisos.push({ t: 'criterio', x: 'Batido con canela (criterio de la app: batidos sin canela)' });
   f._ing = new Set(f.ingredientes.split(',').map(t => norm(t).replace(/^[\d.,/\s]*(g|gr|ml)?\s*/, '').trim()).filter(Boolean));
 });
 // Casi iguales: dos nombres distintos con al menos el 75 % de los ingredientes en común.
@@ -124,6 +131,25 @@ lista.forEach(f => {
   if (f.parecidas) f.avisos.push({ t: 'parecida', x: 'Casi igual que ' + f.parecidas.length + (f.parecidas.length === 1 ? ' receta más' : ' recetas más') });
   if (f.mismoNombre) f.avisos.push({ t: 'variantes', x: 'Hay ' + (f.mismoNombre.length + 1) + ' versiones con este nombre' });
 });
+// Revisión con IA (revision.json, leída receta a receta el 2 nov 2026) + los batidos con
+// canela, que se resuelven solos. Una receta ya cambiada en app.js tiene otro id y su
+// propuesta deja de aplicarse: se avisa, no se pierde en silencio.
+const REV = JSON.parse(fs.readFileSync(path.join(__dirname, 'revision.json'), 'utf8'));
+const porId = new Map(lista.map(f => [f.id, f]));
+Object.entries(REV).forEach(([id, rev]) => {
+  const f = porId.get(id);
+  if (!f) { console.log('REVISIÓN SIN RECETA: ' + id + ' · ' + rev.motivo); return; }
+  f.ia = rev;
+  if (rev.ingredientes) {
+    const a = analizar(rev.ingredientes);
+    if (a.sinDatos.length) console.log('PROPUESTA NO RESUELVE: ' + f.nombre + ' → ' + a.sinDatos.join(', '));
+  }
+});
+lista.forEach(f => {
+  if (f.ia || !f.avisos.some(a => a.t === 'criterio')) return;
+  f.ia = { tipo: 'mezcla', motivo: 'Es un batido y lleva canela. El criterio de la app es batidos sin canela.', ingredientes: f.ingredientes.split(',').map(x => x.trim()).filter(x => !/^canela$/i.test(x)).join(', ') };
+});
+console.log('revisión con IA:', lista.filter(f => f.ia).length);
 fs.mkdirSync(salida, { recursive: true });
 fs.writeFileSync(path.join(salida, 'recetas.json'), JSON.stringify(lista));
 fs.writeFileSync(path.join(salida, 'alimentos.json'), JSON.stringify({ alim: ALIM, cant: require(path.join(RAIZ, 'scripts', 'cant-defecto')) }));

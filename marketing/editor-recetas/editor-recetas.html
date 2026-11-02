@@ -115,6 +115,16 @@ textarea.campo { min-height: 70px; resize: vertical; display: block; }
 .avisos { margin: 0; padding: 0; }
 .vinculo { background: none; border: 0; padding: 0; color: var(--brasa-txt); text-align: left; font-size: 13px; text-decoration: underline; text-underline-offset: 2px; }
 .parecidas { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+.ia { margin-top: 14px; background: #1f1510; border: 1px solid #5a2c18; border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
+.ia h3 { margin: 0; font-size: 13px; font-weight: 700; color: var(--brasa-txt); }
+.ia p { margin: 0; font-size: 14px; }
+.ia .dif { margin-top: 0; }
+.ia .nota-pie { margin: 0; }
+.ia-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.ia-botones .b { padding: 9px 12px; flex: 0 1 auto; }
+.ia.bien { background: #14221a; border-color: #2c5a3d; }
+.ia.bien h3 { color: var(--ok); }
+.marca-ia { font-size: 12px; font-weight: 500; color: var(--brasa-txt); }
 .acciones { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; bottom: -40px; padding-block: 12px; background: var(--carbon); margin-top: 18px; border-top: 1px solid var(--acero); }
 .b { border-radius: 8px; padding: 11px 14px; font-weight: 500; border: 1px solid var(--humo); background: var(--grafito); flex: 1 1 auto; }
 .b.pri { background: var(--brasa); border-color: var(--brasa); color: var(--puro); }
@@ -328,6 +338,103 @@ function estadoDe(r) {
 }
 const ETIQ = { ok: 'Bien', cambiada: 'Cambiada', quitar: 'Quitar', nueva: 'Nueva' };
 
+// ─── Revisión con IA: la leída de antemano (r.ia, revision.json) y la que se pide al momento ───
+let sampleFn = null, iaVivo = null;
+function iaAplicada(r) {
+  const i = r.ia; if (!i || !(i.nombre || i.ingredientes || i.prep || i.mover)) return false;
+  const e = ef(r);
+  return (!i.nombre || e.nombre === i.nombre) && (!i.ingredientes || e.ingredientes === i.ingredientes) && (!i.prep || e.prep === i.prep) && (!i.mover || !e.mx.some((x) => x.endsWith('|' + i.mover[0])));
+}
+function iaPendiente(r) { const c = C[r.id] || {}; return !!r.ia && !c.iaVista && c.estado !== 'quitar' && !iaAplicada(r); }
+function mxPropuesto(r, p) {
+  const mx = ef(r).mx;
+  if (p.mover) return [...new Set(mx.map((x) => (x.endsWith('|' + p.mover[0]) ? x.slice(0, -p.mover[0].length) + p.mover[1] : x)))];
+  if (p.tomas && p.tomas.length) { const ob = [...new Set(mx.map((x) => x.split('|')[0]))]; return (ob.length ? ob : RAMAS).flatMap((o) => p.tomas.map((t) => o + '|' + t)); }
+  return null;
+}
+function htmlDifPropuesta(r, p) {
+  const e = ef(r), filas = [];
+  const par = (n, a, b) => filas.push(`<dt>${n}</dt><dd><s>${esc(a)}</s><span class="a">→</span>${esc(b)}</dd>`);
+  if (p.nombre && p.nombre !== e.nombre) par('Nombre', e.nombre, p.nombre);
+  if (p.ingredientes && p.ingredientes !== e.ingredientes) {
+    par('Ingredientes', e.ingredientes, p.ingredientes);
+    const a = sumar(partir(e.ingredientes)), b = sumar(partir(p.ingredientes));
+    par('Macros', `${a.kcal} kcal, ${a.p} P, ${a.c} C, ${a.g} G`, `${b.kcal} kcal, ${b.p} P, ${b.c} C, ${b.g} G`);
+  }
+  if (p.prep && p.prep !== e.prep) par('Tiempo', e.prep, p.prep);
+  const mx = mxPropuesto(r, p);
+  if (mx && !mismoMx(mx, e.mx)) { const tomas = (l) => [...new Set(l.map((x) => x.split('|')[1]))].join(', ') || 'ninguna'; par('Toma', tomas(e.mx), tomas(mx)); }
+  return filas.length ? `<dl class="dif">${filas.join('')}</dl>` : '';
+}
+function aplicarPropuesta(p) {
+  const r = RI[sel]; if (!r) return;
+  const mx = mxPropuesto(r, p);
+  if (p.nombre) setCampo(sel, 'nombre', p.nombre);
+  if (p.ingredientes) setCampo(sel, 'ingredientes', p.ingredientes);
+  if (p.prep) setCampo(sel, 'prep', p.prep);
+  if (mx) setCampo(sel, 'ap', mx);
+  ingUI = partir(ef(r).ingredientes); altAbierto = -1; iaVivo = null;
+  refrescarFila(); pintarFicha();
+  brindis('Propuesta aplicada a tu recetario');
+}
+function htmlIaGuardada(r) {
+  if (!iaPendiente(r)) return '';
+  const hay = r.ia.nombre || r.ia.ingredientes || r.ia.prep || r.ia.mover;
+  return `<div class="ia"><h3>Revisión con IA: no acaba de tener sentido</h3><p>${esc(r.ia.motivo)}</p>${hay ? htmlDifPropuesta(r, r.ia) : ''}
+    <div class="ia-botones">${hay ? '<button class="b pri" id="iaAplicar">Aplicar la propuesta</button>' : ''}<button class="b" id="iaDejar">Dejarla como está</button></div></div>`;
+}
+function htmlIaViva() {
+  if (!sampleFn) return '';
+  const v = iaVivo && iaVivo.id === sel ? iaVivo : null;
+  if (!v) return `<div class="ia-botones" style="margin-top:12px"><button class="b" id="iaRevisar">Revisar esta receta con IA</button></div>`;
+  if (v.estado === 'pensando') return `<div class="ia"><h3>Revisando la receta…</h3><p>Puede tardar hasta un minuto.</p><div class="ia-botones"><button class="b" id="iaParar">Parar</button></div></div>`;
+  if (v.estado === 'error') return `<div class="ia"><h3>Revisión con IA</h3><p>${esc(v.texto)}</p><div class="ia-botones"><button class="b" id="iaRevisar">Volver a probar</button></div></div>`;
+  const res = v.res, r = RI[sel];
+  if (res.sentido) return `<div class="ia bien"><h3>Revisión con IA: tiene sentido</h3><p>${esc(res.motivo)}</p></div>`;
+  const dif = htmlDifPropuesta(r, res);
+  return `<div class="ia"><h3>Revisión con IA: esto es lo que no cuadra</h3><p>${esc(res.motivo)}</p>${dif}<div class="ia-botones">${dif ? '<button class="b pri" id="iaAplicarVivo">Aplicar la propuesta</button>' : ''}<button class="b" id="iaRevisar">Pedir otra revisión</button></div></div>`;
+}
+function pintarIaViva() { const c = $('iaViva'); if (c) c.innerHTML = htmlIaViva(); }
+async function revisarConIA(otra) {
+  const r = RI[sel]; if (!r || !sampleFn) return;
+  const e = ef(r), id = sel, m = sumar(partir(e.ingredientes));
+  const ctl = new AbortController();
+  iaVivo = { id, estado: 'pensando', ctl };
+  pintarIaViva();
+  const prompt = `Revisas recetas de K-ONE, una app de entrenamiento y nutrición en español. Di si esta receta tiene sentido como plato real: que el nombre diga lo que lleva, que los ingredientes combinen, que se pueda cocinar (un bizcocho necesita algo que cuaje), que las cantidades sean normales y que la toma encaje (media mañana y merienda son tentempiés, no comidas).
+
+Reglas:
+- No la cambies por gusto. Una receta sencilla de dieta es válida: si tiene sentido, dilo y no propongas nada.
+- Si propones cambios, cambia lo mínimo y mantén las calorías parecidas (más o menos un 15 %), salvo que el error sea justo la cantidad.
+- Ingredientes separados por comas, con la cantidad delante («150g pollo», «2 huevos»), usando solo alimentos de la lista. Sin comas dentro de un ingrediente.
+- Los batidos no llevan canela.
+
+Receta:
+Nombre: ${e.nombre}
+Ingredientes: ${e.ingredientes}
+Preparación: ${e.prep}
+Tomas en las que sale: ${[...new Set(e.mx.map((x) => x.split('|')[1]))].join(', ') || 'solo repostaje o extras'}
+Total: ${m.kcal} kcal, ${m.p} g proteína, ${m.c} g hidratos, ${m.g} g grasa
+
+Alimentos que existen: ${UNICOS.map((a) => a.clave).join('; ')}
+
+Responde solo con JSON:
+{"sentido": true o false, "motivo": "una o dos frases claras, de tú, para alguien que no sabe de nutrición", "nombre": null o "nombre nuevo", "ingredientes": null o "ingredientes nuevos", "tomas": null o lista con algunas de ${JSON.stringify(TOMAS)}}`;
+  try {
+    const x = await sampleFn.json(prompt, { signal: ctl.signal, cache: otra ? false : undefined });
+    if (!iaVivo || iaVivo.ctl !== ctl) return;
+    const texto = (v) => (typeof v === 'string' && v.trim() ? v.trim() : null);
+    iaVivo = { id, estado: 'ok', res: { sentido: !!(x && x.sentido), motivo: texto(x && x.motivo) || 'Sin explicación.', nombre: texto(x && x.nombre), ingredientes: texto(x && x.ingredientes), tomas: Array.isArray(x && x.tomas) ? x.tomas.filter((t) => TOMAS.includes(t)) : null } };
+  } catch (err) {
+    if (!iaVivo || iaVivo.ctl !== ctl) return;
+    const code = err && err.code;
+    if (code === 'cancelled') iaVivo = null;
+    else if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(code)) { sampleFn = null; iaVivo = null; brindis('La revisión con IA no está disponible aquí'); }
+    else iaVivo = { id, estado: 'error', texto: code === 'rate_limited' ? 'Has llegado al límite de uso de tu cuenta de Claude. Prueba más tarde.' : code === 'session_expired' ? 'Tu sesión de Claude ha caducado. Vuelve a entrar.' : 'No ha salido bien esta vez. Vuelve a probar.' };
+  }
+  if (sel === id) pintarIaViva();
+}
+
 // ─── Guardado: una escritura por documento y solo si cambió ───
 function guardarLocal() { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(C)); } catch (e) {} }
 function indicador(t, mal) { const g = $('guardado'); g.textContent = t; g.classList.toggle('mal', !!mal); }
@@ -396,6 +503,7 @@ function pasaFiltro(r) {
     if (['ok', 'cambiada', 'quitar', 'nueva'].includes(F.est) && est !== F.est) return false;
     if (F.est === 'fav' && !e.fav) return false;
     if (F.est === 'nota' && !e.nota) return false;
+    if (F.est === 'ia' && !iaPendiente(r)) return false;
     if (F.est === 'aviso' && !r.avisos.length) return false;
     if (['macros', 'parecida', 'variantes', 'criterio', 'alimento'].includes(F.est) && !r.avisos.some((a) => a.t === F.est)) return false;
   }
@@ -427,13 +535,15 @@ function htmlFila(r) {
     <span class="f-est">${est ? `<span class="pill ${est}">${ETIQ[est]}</span>` : ''}</span>
     <span class="f-ing">${esc(e.ingredientes)}</span>
     <span class="f-mac">${m.kcal} kcal · ${m.p} P</span>
-    <span class="f-pie">${tirasTomas(e.mx, r)}${rep}${avisos}${e.fav ? '<span class="estrella" title="Favorita">★</span>' : ''}${e.nota ? '<span class="marca-aviso" style="color:var(--metal-claro)">Con nota</span>' : ''}</span>
+    <span class="f-pie">${tirasTomas(e.mx, r)}${iaPendiente(r) ? '<span class="marca-ia">No cuadra</span>' : ''}${rep}${avisos}${e.fav ? '<span class="estrella" title="Favorita">★</span>' : ''}${e.nota ? '<span class="marca-aviso" style="color:var(--metal-claro)">Con nota</span>' : ''}</span>
   </button>`;
 }
 function pintarLista() {
   visibles = ordenar(R.filter(pasaFiltro));
   const caja = $('lista'); if (!caja) return;
   $('resN').textContent = visibles.length === 1 ? '1 receta' : visibles.length + ' recetas';
+  const nIa = R.filter(iaPendiente).length, bIa = $('verIA');
+  bIa.textContent = 'No cuadran: ' + nIa; bIa.hidden = !nIa || F.est === 'ia';
   caja.innerHTML = visibles.slice(0, lim).map(htmlFila).join('') + (visibles.length > lim ? `<button class="mas" id="verMas">Ver ${Math.min(100, visibles.length - lim)} más (quedan ${visibles.length - lim})</button>` : '') + (!visibles.length ? '<p style="padding:20px 16px;color:var(--metal-claro)">Ninguna receta con estos filtros.</p>' : '');
 }
 function pintarBanco() {
@@ -444,11 +554,11 @@ function pintarBanco() {
         <input id="fQ" type="search" placeholder="Busca por nombre o ingrediente: atún, avena…" aria-label="Buscar receta" value="${esc(F.q)}">
         <select id="fToma" aria-label="Toma">${o('', 'Todas las tomas', F.toma)}${TOMAS.map((t) => o(t, t, F.toma)).join('')}</select>
         <select id="fObj" aria-label="Objetivo">${o('', 'Todos los objetivos', F.obj)}${RAMAS.map((t) => o(t, t, F.obj)).join('')}${o('Extra', 'Extras por deporte', F.obj)}${o('Repostaje', 'Repostaje', F.obj)}${o('Reserva alérgicos', 'Reserva para alérgicos', F.obj)}</select>
-        <select id="fEst" aria-label="Estado">${o('', 'Cualquier estado', F.est)}${o('pendiente', 'Sin revisar', F.est)}${o('ok', 'Bien', F.est)}${o('cambiada', 'Cambiadas', F.est)}${o('quitar', 'Para quitar', F.est)}${o('nueva', 'Nuevas', F.est)}${o('fav', 'Favoritas', F.est)}${o('nota', 'Con nota', F.est)}${o('aviso', 'Con cualquier aviso', F.est)}${o('macros', 'Aviso: macros que no cuadran', F.est)}${o('parecida', 'Aviso: casi iguales', F.est)}${o('variantes', 'Aviso: nombre repetido', F.est)}${o('criterio', 'Aviso: batido con canela', F.est)}</select>
+        <select id="fEst" aria-label="Estado">${o('', 'Cualquier estado', F.est)}${o('ia', 'Revisión con IA: no cuadran', F.est)}${o('pendiente', 'Sin revisar', F.est)}${o('ok', 'Bien', F.est)}${o('cambiada', 'Cambiadas', F.est)}${o('quitar', 'Para quitar', F.est)}${o('nueva', 'Nuevas', F.est)}${o('fav', 'Favoritas', F.est)}${o('nota', 'Con nota', F.est)}${o('aviso', 'Con cualquier aviso', F.est)}${o('macros', 'Aviso: macros que no cuadran', F.est)}${o('parecida', 'Aviso: casi iguales', F.est)}${o('variantes', 'Aviso: nombre repetido', F.est)}${o('criterio', 'Aviso: batido con canela', F.est)}</select>
         <select id="fTiempo" aria-label="Tiempo">${o('', 'Cualquier tiempo', F.tiempo)}${o('crudo', 'Sin cocinar', F.tiempo)}${o('5', 'Hasta 5 min', F.tiempo)}${o('10', 'Hasta 10 min', F.tiempo)}${o('20', 'Hasta 20 min', F.tiempo)}</select>
         <select id="fOrden" aria-label="Orden">${o('', 'Orden de la app', F.orden)}${o('az', 'De la A a la Z', F.orden)}${o('prot', 'Más proteína', F.orden)}${o('kcal', 'Menos calorías', F.orden)}${o('kcald', 'Más calorías', F.orden)}</select>
       </div>
-      <div class="res"><span id="resN"></span><button class="b-peq" id="nueva">+ Nueva receta</button></div>
+      <div class="res"><span id="resN"></span><span class="ia-botones"><button class="b-peq" id="verIA" data-ir-est="ia" style="color:var(--brasa-txt)"></button><button class="b-peq" id="nueva">+ Nueva receta</button></span></div>
       <div class="lista" id="lista"></div>
     </section>
     <section class="ficha" id="ficha"></section>
@@ -458,7 +568,7 @@ function pintarBanco() {
 }
 
 // ─── Ficha ───
-function abrir(id) { sel = id; altAbierto = -1; altBusca = ''; pelDeshacer = false; ingUI = RI[id] ? partir(ef(RI[id]).ingredientes) : []; pintarFicha(); document.querySelectorAll('.fila').forEach((f) => f.toggleAttribute('aria-current', false)); const f = document.querySelector(`.fila[data-id="${id}"]`); if (f) f.setAttribute('aria-current', 'true'); const fi = $('ficha'); if (fi) fi.scrollTop = 0; }
+function abrir(id) { if (iaVivo && iaVivo.ctl) iaVivo.ctl.abort(); iaVivo = null; sel = id; altAbierto = -1; altBusca = ''; pelDeshacer = false; ingUI = RI[id] ? partir(ef(RI[id]).ingredientes) : []; pintarFicha(); document.querySelectorAll('.fila').forEach((f) => f.toggleAttribute('aria-current', false)); const f = document.querySelector(`.fila[data-id="${id}"]`); if (f) f.setAttribute('aria-current', 'true'); const fi = $('ficha'); if (fi) fi.scrollTop = 0; }
 function htmlMacros(r) {
   const ahora = sumar(ingUI), antes = r.calc || { kcal: 0, p: 0, c: 0, g: 0 };
   const caja = (v, t, a) => { const d = v - a; return `<div class="macro"><b>${v}</b><span>${t}</span><em class="${d > 0 ? 'sube' : d < 0 ? 'baja' : ''}">${d === 0 ? 'igual' : (d > 0 ? '+' : '−') + Math.abs(d) + ' · antes ' + a}</em></div>`; };
@@ -519,6 +629,8 @@ function pintarFicha() {
   const avisos = r.avisos.length ? `<div class="bloque"><h3>Avisos medidos</h3><ul class="avisos">${r.avisos.map((a) => `<li>${esc(a.x)}${a.t === 'parecida' ? `<div class="parecidas">${vinc(r.parecidas)}</div>` : a.t === 'variantes' ? `<div class="parecidas">${vinc(r.mismoNombre)}</div>` : ''}</li>`).join('')}</ul></div>` : '';
   fi.innerHTML = `<button class="volver" id="volver">← Volver a la lista</button>
     <input class="nombre" id="nombre" value="${esc(e.nombre)}" aria-label="Nombre de la receta">
+    ${htmlIaGuardada(r)}
+    <div id="iaViva">${htmlIaViva()}</div>
     ${avisos}
     <div class="bloque" id="macrosCaja">${htmlMacros(r)}</div>
     <div class="bloque"><h3>Ingredientes</h3><div id="ings"></div></div>
@@ -558,8 +670,8 @@ function brindis(t) { const b = $('brindis'); b.textContent = t; b.hidden = fals
 function cuenta(rama, toma) { const k = rama + '|' + toma; return R.filter((r) => !ef(r).quitar && ef(r).mx.includes(k)).length; }
 function cuentaBase(rama, toma) { const k = rama + '|' + toma; return R.filter((r) => !C[r.id]?.nueva && baseMx(r).includes(k)).length; }
 function pintarRecuento() {
-  const tipos = [['pendiente', 'sin revisar'], ['macros', 'con macros que no cuadran'], ['parecida', 'casi iguales a otra'], ['variantes', 'con nombre repetido'], ['criterio', 'batidos con canela'], ['fav', 'favoritas']];
-  const cuantas = (t) => R.filter((r) => { if (t === 'pendiente') return !estadoDe(r); if (t === 'fav') return ef(r).fav; return r.avisos.some((a) => a.t === t); }).length;
+  const tipos = [['ia', 'que no acaban de tener sentido (revisión con IA)'], ['pendiente', 'sin revisar'], ['macros', 'con macros que no cuadran'], ['parecida', 'casi iguales a otra'], ['variantes', 'con nombre repetido'], ['criterio', 'batidos con canela'], ['fav', 'favoritas']];
+  const cuantas = (t) => R.filter((r) => { if (t === 'ia') return iaPendiente(r); if (t === 'pendiente') return !estadoDe(r); if (t === 'fav') return ef(r).fav; return r.avisos.some((a) => a.t === t); }).length;
   $('vista').innerHTML = `<div class="pagina"><div class="ancho">
     <h2>Cuántas opciones quedan</h2>
     <p>Lo que tendría cada objetivo en cada toma con tus cambios. En rojo si baja de ${MINIMO_TOMA}: por debajo se empiezan a repetir platos y los filtros de alergias o «no como» se quedan cortos. Pulsa una casilla para ver esas recetas.</p>
@@ -643,6 +755,11 @@ document.addEventListener('click', (ev) => {
   if (t.classList.contains('fila') || t.classList.contains('vinculo')) return abrir(t.dataset.id);
   if (t.id === 'volver') { sel = null; return pintarFicha(); }
   if (!sel || !RI[sel]) return;
+  if (t.id === 'iaAplicar') return aplicarPropuesta(RI[sel].ia);
+  if (t.id === 'iaAplicarVivo') return aplicarPropuesta(iaVivo.res);
+  if (t.id === 'iaDejar') { const c0 = Object.assign({}, C[sel] || {}); c0.iaVista = true; ponerDoc(sel, c0); refrescarFila(); return pintarFicha(); }
+  if (t.id === 'iaRevisar') return revisarConIA(!!(iaVivo && iaVivo.id === sel));
+  if (t.id === 'iaParar') { if (iaVivo && iaVivo.ctl) iaVivo.ctl.abort(); return; }
   if (t.dataset.mx) {
     const e = ef(RI[sel]); const k = t.dataset.mx;
     const nueva = e.mx.includes(k) ? e.mx.filter((x) => x !== k) : e.mx.concat(k);
@@ -655,7 +772,7 @@ document.addEventListener('click', (ev) => {
   if (t.dataset.alt) { ingUI[altAbierto] = t.dataset.alt; altAbierto = -1; altBusca = ''; pintarIngredientes(); cambioIngredientes(); return brindis('Ingrediente cambiado'); }
   if (t.id === 'addIng') { ingUI.push(''); altAbierto = -1; pintarIngredientes(); const u = $('ing-' + (ingUI.length - 1)); if (u) u.focus(); return; }
   const c = Object.assign({}, C[sel] || {});
-  if (t.id === 'bien') { if (c.estado === 'quitar' || !c.estado) c.estado = 'ok'; ponerDoc(sel, c); refrescarFila(); return siguiente(); }
+  if (t.id === 'bien') { if (c.estado === 'quitar' || !c.estado) c.estado = 'ok'; if (iaPendiente(RI[sel])) c.iaVista = true; ponerDoc(sel, c); refrescarFila(); return siguiente(); }
   if (t.id === 'fav') { if (c.fav) delete c.fav; else c.fav = true; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
   if (t.id === 'quitar') { if (c.estado === 'quitar') delete c.estado; else c.estado = 'quitar'; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
   if (t.id === 'deshacer') {
@@ -709,6 +826,8 @@ function sincronizarNuevas() {
   pintarCabecera();
   irA('recetas');
 
+  // Sin esperar a la base: el botón aparece cuando se sabe que aquí se puede preguntar a Claude.
+  if (window.claude && window.claude.use) window.claude.use('sample').then((s) => { sampleFn = s; pintarIaViva(); }).catch(() => {});
   db = window.claude && window.claude.use ? await window.claude.use('db').catch(() => null) : null;
   if (!db) {
     const a = $('avisoRed'); a.hidden = false;
