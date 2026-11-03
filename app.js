@@ -1097,7 +1097,7 @@
     // entrena sin peso y el ejercicio se quedaba FIJO 12 semanas seguidas. Es lo
     // que pasaba en el día de fuerza del corredor al aire libre, el perfil con
     // menos variedad tras arreglar el avanzado (medido 7 sept 2026).
-    [/sentadilla b[uú]lgara( en silla)?/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás', 'Split squat']],
+    [/sentadilla b[uú]lgara( en silla)?/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás', 'Split squat', 'Sentadilla búlgara con landmine', 'Sentadilla con giro a zancada']],
     // "Sentadilla aérea" queda fuera de la regla genérica de sentadilla (que la
     // excluye en su lookahead) y no tenía ninguna propia: el principiante la
     // veía las 12 semanas. Alternativas todas sin material y con ficha.
@@ -1130,7 +1130,7 @@
     // cadera del día, y la rotación la cambiaba siempre por un curl femoral
     // sentado. El patrón de bisagra desaparecía de la semana entera. Se deja una
     // alternativa que SÍ es bisagra para que el patrón sobreviva a la rotación.
-    [/peso muerto rumano( con mancuernas?)?/i, ['Peso muerto rumano a una pierna', 'Femoral tumbado en máquina', 'Curl femoral sentado en máquina']],
+    [/peso muerto rumano( con mancuernas?)?/i, ['Peso muerto rumano a una pierna', 'Femoral tumbado en máquina', 'Curl femoral sentado en máquina', 'Peso muerto rumano con banda']],
     // "( sumo)?( con mancuernas?)?" consume el material/variante que puede ir
     // detrás en la plantilla ("peso muerto con mancuernas", "peso muerto sumo
     // con mancuernas"): sin esto quedaba colgando ("Hip thrust con barra con
@@ -1232,7 +1232,7 @@
     // 2026): juntos solo se consumía el material si iba precedido de
     // "cargadas", y "zancadas con mancuernas" salía "Step-ups con mancuernas
     // con mancuernas" -- el material repetido dos veces en el mismo nombre.
-    [/zancadas?( inversas)?( cargadas?)?( con mancuernas?)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara con mancuernas', 'Zancada inversa con mancuernas', 'Zancada lateral con mancuernas', 'Zancada cruzada atrás']],
+    [/zancadas?( inversas)?( cargadas?)?( con mancuernas?)?/i, ['Step-ups con mancuernas', 'Sentadilla búlgara con mancuernas', 'Zancada inversa con mancuernas', 'Zancada lateral con mancuernas', 'Zancada cruzada atrás', 'Sentadilla con giro a zancada']],
     // "( en banco| con barra| con mancuernas?)?" consume dónde y con qué se hace
     // el hip thrust en la plantilla. El hip thrust se apoya en un banco, pero ni
     // el peso muerto rumano ni el puente de glúteo: sin consumirlo salían
@@ -1262,6 +1262,9 @@
     // entre el día A y el día B (el guardia anti-duplicados solo mira dentro de
     // la misma sesión, no entre días).
     [/prensa de piernas/i, ['Sentadilla hack', 'Zancadas con mancuernas', 'Extensión de cuádriceps']],
+    // 3 nov 2026 (aprobado por Rafa), idea de @trainologym: la sissy estira el recto
+    // anterior, que la máquina sin respaldo reclinable no llega a estirar.
+    [/extensi[oó]n de cu[aá]driceps(?! \(rango corto\))/i, ['Sissy squat']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
     // ellos quedaba colgando el material que trae esa opción por su cuenta
@@ -1456,13 +1459,13 @@
   // paréntesis del ejercicio original detrás ("saltando a la comba").
   // Al corredor de cinta no le afecta: el lugar "Cinta / Interior" se resuelve
   // como entorno de gimnasio, así que sigue pudiendo recibirlas.
-  const _ALT_SOLO_GIMNASIO = /polea|barra z|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
+  const _ALT_SOLO_GIMNASIO = /landmine|polea|barra z|m[aá]quina|multipower|prensa|banco scott|\bsled\b|\bhack\b|\bcinta\b|bici est[áa]tica|el[íi]ptica|assault bike|air bike|remo suave|remo o bici/i;
   // La BANDA ELÁSTICA cuenta como material: quien elige "en casa sin material"
   // no tiene una. Medido el 6 sept 2026: "pallof press con banda" y "clamshells
   // con banda" llegaban a planes sin material (128 casos), desde las plantillas
   // de running e híbrido. Corregidas esas plantillas y añadida aquí la palabra
   // para que la rotación tampoco pueda colarlas por detrás.
-  const _ALT_PESO_LIBRE = /mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad|\bbandas?\b|goma el[áa]stica|tobillera/i;
+  const _ALT_PESO_LIBRE = /rumano con banda|mancuernas?|\bbarra\b|kettlebell|wall balls?|thrusters con|\bdisco\b|lastrad|\bbandas?\b|goma el[áa]stica|tobillera/i;
   // BUG REAL (5 sept 2026): la rotación se aplica DESPUÉS de las sustituciones
   // por lesión —a propósito, para que la regex de lesión encuentre el nombre
   // original— pero no sabía nada de lesiones, así que podía volver a meter por
@@ -1476,7 +1479,7 @@
   // al dar alternativas al drill del corredor avanzado (A-skips → Comba): la
   // comba empezó a aparecer en planes de rodilla lesionada pese a existir ya
   // una regla en el mapa de lesiones, que para entonces ya había pasado.
-  const _ALT_RIESGO_RODILLA = /sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto|comba/i;
+  const _ALT_RIESGO_RODILLA = /sissy|sentadilla|prensa|zancada|b[uú]lgara|step[- ]?up|hack|pistol|box jump|burpee|salto|comba/i;
   // Perfil «sin impacto» (15 oct 2026): solo se vetan los saltos, no el patrón
   // de rodilla. Mismo motivo de orden: la rotación corre después del mapa.
   const _ALT_IMPACTO = /jump|burpee|salto|comba|hop|jacks|bounding|patinador|double[- ]?under|explosiv/i;
@@ -1500,7 +1503,7 @@
   // "fondos en paralelas" (15 sept 2026): la rotación se los daba a principiantes
   // en el hueco del press banca. Bajar el propio peso colgado de dos barras pide
   // una fuerza de tríceps y un control de hombro que quien empieza no tiene.
-  const _ALT_NIVEL_ALTO = /rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
+  const _ALT_NIVEL_ALTO = /sissy|landmine|giro a zancada|rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones, esPrincipiante) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
@@ -2030,6 +2033,9 @@
     'step up con peso': 'https://www.youtube.com/results?search_query=step+up+con+mancuernas',
     'sentadilla hack': 'https://www.youtube.com/results?search_query=sentadilla+hack+máquina',
     'sissy squat': 'https://www.youtube.com/results?search_query=sissy+squat+técnica',
+    'sentadilla búlgara con landmine': 'https://www.youtube.com/results?search_query=landmine+bulgarian+split+squat',
+    'peso muerto rumano con banda': 'https://www.youtube.com/results?search_query=peso+muerto+rumano+con+banda+y+mancuerna',
+    'sentadilla con giro a zancada': 'https://www.youtube.com/results?search_query=sentadilla+con+giro+a+zancada',
     'calf raise máquina': 'https://www.youtube.com/results?search_query=calf+raise+máquina',
     'ab wheel': 'https://www.youtube.com/results?search_query=ab+wheel+rueda+abdominal',
     'woodchop': 'https://www.youtube.com/results?search_query=woodchop+polea+core',
@@ -2262,7 +2268,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261102');
+      const r = await fetch('/data/ejercicios-info.json?v=20261103');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3938,7 +3944,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (146 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (153 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4100,7 +4106,15 @@
     "No te hace falta ir más rápido: te hace falta no parar.",
     "No esperes a enero. Si empiezas hoy, enero te pilla con dos meses hechos.",
     "Un mes flojo no borra meses de trabajo.",
-    "La decisión no es del lunes que viene: es de hoy."
+    "La decisión no es del lunes que viene: es de hoy.",
+    // 3 nov 2026 · revisión de Instagram y @trainologym, aprobadas por Rafa
+    "Habrá días buenos y días malos. Moverte no depende de cuál te toque.",
+    "Aunque lleves años en esto, todavía te puedes sorprender.",
+    "En las elevaciones laterales no gana quien más levanta: baja el peso, no te impulses con la cadera y haz de 10 a 20 repeticiones limpias.",
+    "Un core fuerte es el que no se deja arquear, ni inclinar, ni girar. Plancha, paseo de granjero a una mano y press Pallof.",
+    "Para la pierna, mejor un día con sentadilla como base y otro con bisagra que separar cuádriceps y femoral.",
+    "Antes de saltar más alto, aprende a aterrizar.",
+    "Ningún ejercicio salva por sí solo el hombro: cuida cuántos empujes haces, cómo subes el peso y trabaja el manguito rotador."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
