@@ -1033,9 +1033,9 @@
   // entre paréntesis: "90/90", "band pull-aparts"...); el resto de etiquetas
   // se ponen al mismo nivel aquí, sin tocar duración ni estructura.
   const SESION_EXTRAS = {
-    'Cardio': { calentamiento: '5-8 min de movilidad de tobillos, cadera y rodillas (círculos de tobillo, balanceos de pierna adelante-atrás y lateral, sentadilla profunda sostenida 20s) + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
+    'Cardio': { calentamiento: '5-8 min de movilidad dinámica (círculos de tobillo, zancada baja con la pierna de delante estirada para el isquio, apertura de cadera en zancada, sentadilla lateral) + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
     'Fuerza': { calentamiento: '8-10 min de movilidad articular (círculos de cadera y hombro, rotaciones de tronco, gato-camello, sentadilla profunda sostenida) + 1-2 series de aproximación con poco peso en el primer ejercicio', vueltaCalma: '5 min de estiramientos de los grupos musculares trabajados hoy' },
-    'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (skipping, talones al glúteo, zancada progresiva)', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
+    'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (A-skips, skipping alto) + 3 progresivos al 50, 75 y 90 %', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
     'Fondo': { calentamiento: '8-10 min trote suave + movilidad de cadera y tobillo (90/90, círculos de tobillo, balanceos de pierna)', vueltaCalma: '5 min caminando + estiramientos de toda la cadena posterior' },
     'Volumen': { calentamiento: '10 min trote muy suave + activación de glúteo y core (puente de glúteo, paseo lateral con banda, dead bug)', vueltaCalma: '5-8 min caminando + estiramientos de piernas y espalda baja' },
     'Combinado': { calentamiento: '5 min de cardio suave + movilidad articular general (círculos de cadera y hombro, rotaciones de tronco, sentadilla profunda sostenida)', vueltaCalma: '5 min de estiramientos de cuerpo completo' },
@@ -1328,7 +1328,7 @@
     // de gemelos sentado de pie" (nombre duplicado y contradictorio a la vez).
     // Bug real reproducido en Gimnasio/Principiante/4 días, semanas 2, 3, 5 y 9.
     [/(elevaci[oó]n de )?gemelos( de pie| sentados?)?( en escal[oó]n con mancuernas?| en escal[oó]n| en prensa o m[aá]quina| en prensa| con carga| con mancuernas?)?/i,
-      ['Elevación de gemelos de pie', 'Elevación de gemelos sentado']],
+      ['Elevación de gemelos de pie', 'Elevación de gemelos sentado', 'Isométrico de sóleo']],
     [/fondos en paralelas/i, ['Press banca con mancuernas', 'Press cerrado']],
     // El día de fuerza del corredor avanzado apenas rotaba: midiendo 12 semanas
     // seguidas, el core (copenhagen plank) y el drill (A-skips) salían SIEMPRE
@@ -1390,7 +1390,7 @@
     [/plancha lateral/i, ['Copenhagen plank']],
     // «Plancha con elevación de pierna» (15 oct 2026, @valicentif): la progresión
     // natural de la plancha sin material, apta para todos los niveles.
-    [/plancha(?! lateral| invertida| con elevaci)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados', 'Plancha con elevación de pierna'], true],
+    [/plancha(?! lateral| invertida| con elevaci)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados', 'Plancha con elevación de pierna', 'Kettlebell drag'], true],
     // "Equilibrio en una pierna" fuera de estos dos huecos: es una postura que se
     // aguanta (segundos) y tanto el dead bug de las plantillas de running como los
     // clamshells se escriben por repeticiones por lado, así que salía un
@@ -1503,7 +1503,7 @@
   // "fondos en paralelas" (15 sept 2026): la rotación se los daba a principiantes
   // en el hueco del press banca. Bajar el propio peso colgado de dos barras pide
   // una fuerza de tríceps y un control de hombro que quien empieza no tiene.
-  const _ALT_NIVEL_ALTO = /sissy|landmine|giro a zancada|rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
+  const _ALT_NIVEL_ALTO = /kettlebell drag|sissy|landmine|giro a zancada|rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones, esPrincipiante) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
@@ -2033,6 +2033,12 @@
     'step up con peso': 'https://www.youtube.com/results?search_query=step+up+con+mancuernas',
     'sentadilla hack': 'https://www.youtube.com/results?search_query=sentadilla+hack+máquina',
     'sissy squat': 'https://www.youtube.com/results?search_query=sissy+squat+técnica',
+    'elevación de talón con rodilla flexionada': 'https://www.youtube.com/results?search_query=bent+knee+calf+raise+soleo+corredores',
+    'isométrico de sóleo': 'https://www.youtube.com/results?search_query=isometrico+soleo+corredores',
+    'elevación de punteras': 'https://www.youtube.com/results?search_query=tibial+raise+elevacion+de+punteras+pared',
+    'peterson step down': 'https://www.youtube.com/results?search_query=peterson+step+down',
+    'kettlebell drag': 'https://www.youtube.com/results?search_query=plank+kettlebell+drag',
+    'inversión y eversión de tobillo con banda': 'https://www.youtube.com/results?search_query=inversion+eversion+tobillo+banda+elastica',
     'sentadilla búlgara con landmine': 'https://www.youtube.com/results?search_query=landmine+bulgarian+split+squat',
     'peso muerto rumano con banda': 'https://www.youtube.com/results?search_query=peso+muerto+rumano+con+banda+y+mancuerna',
     'sentadilla con giro a zancada': 'https://www.youtube.com/results?search_query=sentadilla+con+giro+a+zancada',
@@ -2268,7 +2274,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=20261103');
+      const r = await fetch('/data/ejercicios-info.json?v=202611032');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3944,7 +3950,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (153 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (156 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4114,7 +4120,11 @@
     "Un core fuerte es el que no se deja arquear, ni inclinar, ni girar. Plancha, paseo de granjero a una mano y press Pallof.",
     "Para la pierna, mejor un día con sentadilla como base y otro con bisagra que separar cuádriceps y femoral.",
     "Antes de saltar más alto, aprende a aterrizar.",
-    "Ningún ejercicio salva por sí solo el hombro: cuida cuántos empujes haces, cómo subes el peso y trabaja el manguito rotador."
+    "Ningún ejercicio salva por sí solo el hombro: cuida cuántos empujes haces, cómo subes el peso y trabaja el manguito rotador.",
+    // 3 nov 2026 · @daniigzr.athlete
+    "Si empiezas a correr, no busques 30 minutos seguidos: 1 minuto corriendo y 1 caminando, de 10 a 15 veces, a ritmo cómodo.",
+    "En series cortas no persigas las pulsaciones: tardan en subir. Guíate por el ritmo o por cómo te sientes.",
+    "Prueba tu tobillo: con el pie a un palmo de la pared, intenta tocarla con la rodilla sin levantar el talón. Si no llegas, toca movilidad."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -5765,13 +5775,18 @@
       // paseo de puntillas con mancuerna en lugar de los gemelos en escalón (gemelo,
       // tobillo, agarre y core a la vez). Necesita una mancuerna, y fuera con el
       // perfil sin impacto (que incluye tobillo, esguince y Aquiles) y en principiantes.
+      // 3 nov 2026 (idea de @daniigzr.athlete): el sóleo y la parte delantera de la pierna
+      // también se entrenan, un bloque de cada cuatro cada uno. Los principiantes siguen con gemelos.
+      const _pantorrillaRun = esPrincipiante ? 'gemelos en escalón 3×15'
+        : bloqueMeso % 4 === 1 ? 'elevación de talón con rodilla flexionada 3×15'
+        : bloqueMeso % 4 === 3 ? 'elevación de punteras 3×20' : 'gemelos en escalón 3×15';
       const _gemelosRun = (bloqueMeso % 2 === 0 && !rSinMat && !_sinImpacto && !esPrincipiante)
-        ? 'paseo de puntillas con mancuerna 3×20m por mano' : 'gemelos en escalón 3×15';
+        ? 'paseo de puntillas con mancuerna 3×20m por mano' : _pantorrillaRun;
       // 30 oct 2026 (aprobado por Rafa, idea de @mente.cuerpo.running): prevención de
       // rodilla. Un bloque sí y otro no, abducción de cadera de pie con goma en lugar de
       // los lateral band walks, y step down en lugar de la búlgara en silla (al aire libre).
-      const _abdGoma = bloqueMeso % 2 === 1 ? 'abducción de cadera de pie con goma 3×12/lado' : 'lateral band walks 3×12/lado';
-      const _stepDown = bloqueMeso % 2 === 0 ? 'Step down desde un escalón 3×10/pierna' : 'Sentadilla búlgara en silla 3×10/pierna';
+      const _abdGoma = bloqueMeso % 2 === 1 ? 'abducción de cadera de pie con goma 3×12/lado' : bloqueMeso % 4 === 2 ? 'inversión y eversión de tobillo con banda 3×12/lado' : 'lateral band walks 3×12/lado';
+      const _stepDown = (bloqueMeso % 4 === 2 && !_sinImpacto && !_lesionZonaRodilla) ? 'Peterson step down 3×10/pierna' : bloqueMeso % 2 === 0 ? 'Step down desde un escalón 3×10/pierna' : 'Sentadilla búlgara en silla 3×10/pierna';
       const fuerzaCorredor = esPrincipiante
         ? rSinMat
           ? 'Fuerza corredor · Sentadilla aérea 3×15, zancadas 3×10/pierna, puente glúteo a una pierna 3×12/lado, clamshells 3×15/lado, dead bug 3×10/lado, gemelos en escalón 3×15, plancha 3×30s'
@@ -5786,7 +5801,7 @@
             ? `Fuerza + pliometría · ${_plioAvIni}, sentadilla búlgara 4×8/pierna, peso muerto a una pierna 4×8/pierna, hip thrust a una pierna 4×10/lado, copenhagen plank 3×15s/lado, A-skips 3×20m, gemelos en escalón a una pierna 4×12/lado`
             : `Fuerza + pliometría · ${_plioAvIni}, peso muerto rumano 4×6, sentadilla búlgara 4×8/pierna, hip thrust 4×10, copenhagen plank 3×15s/lado, A-skips + B-skips 3×20m cada, gemelos con carga 4×12`
           : rSinMat
-            ? `Fuerza corredor · ${_piesRapidosRun}${_stepDown}, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, gemelos en escalón 3×15`
+            ? `Fuerza corredor · ${_piesRapidosRun}${_stepDown}, hip thrust en suelo 3×15, peso muerto a una pierna 3×10/pierna, clamshells 3×15/lado, plancha lateral 3×25s/lado, ${_pantorrillaRun}`
             // 28 oct 2026 (aprobado por Rafa, idea de @elenadomenech_27): un bloque
             // sí y otro no, halo con disco en lugar del pallof press (core + hombro).
             : `Fuerza corredor · ${_piesRapidosRun}Peso muerto rumano 3×10, sentadilla goblet 3×12, zancadas con mancuernas 3×10/pierna, hip thrust 3×12, ${_abdGoma}, ${bloqueMeso % 2 === 1 ? 'halo con disco 3×8/lado' : 'pallof press 3×10/lado'}, ${_gemelosRun}`;
@@ -5969,7 +5984,7 @@
         return {
           resumen: cuestas ? 'Cuestas · Calidad' : 'Fartlek o series · Calidad',
           etiqueta: 'Intensidad',
-          detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? ' + drills (A-skips, balanceos de piernas)' : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
+          detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, balanceos de piernas)' : ' + drills (A-skips, skipping alto) y 3 progresivos al 50, 75 y 90 %') : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
         };
       };
       // Sesión mixta (28 oct 2026, aprobado por Rafa; la «semana 8» de
@@ -5988,7 +6003,7 @@
       // Calidad del avanzado: VO2máx una semana, umbral la siguiente.
       const _calidadAvanzado = () => _mixtaToca ? _calidadMixta() : Math.max(1, semanaActual) % 2 === 1
         ? { resumen: 'VO2máx · Intervalos cortos', etiqueta: 'Intensidad',
-            detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? ' + drills (A-skips, high knees, butt kicks)' : ''}. Series: ${{
+            detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, high knees, butt kicks)' : ' + drills (A-skips, skipping alto) y 3 progresivos al 50, 75 y 90 %') : ''}. Series: ${{
               expres: '3×400m con 60s rec trote',
               corta: '5×400m con 90s rec trote',
               media: '5×800m con 2 min rec trote',
