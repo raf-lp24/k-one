@@ -400,7 +400,8 @@ function htmlOrigen(r) {
   const fecha = o.fecha ? ' · ' + new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
   const post = o.post ? ` · <a href="${esc(o.post)}" target="_blank" rel="noopener noreferrer">${o.seguro ? 'Ver el post' : o.parecido ? 'Ver el post parecido' : 'Ver el post más parecido'}</a>` : '';
   const marca = o.fiel ? ' · <b>Ya está como en el post, y en la app</b>' : o.igual ? ' · <b>Coincide con el post</b>' : o.parecido ? ' · No es una copia exacta: el post no da las cantidades por ración' : '';
-  return `<p class="origen">De dónde sale: ${esc(o.cuenta)}${fecha}${post}${marca}${r.hecha && !o.fiel ? ' · <b>Ya aplicada en la app</b>' : ''}</p>`;
+  const nueva = r.propuesta && !r.hecha ? ` · <b>Receta nueva: aún no está en la app. «Bien así» la añade y «Quitar» la descarta.</b>${r.est ? ' Cantidad normal puesta por mí, porque el post no la da: ' + esc(r.est) + '.' : ''}${r.pasos ? '</p><p class="origen">Pasos: ' + esc(r.pasos) : ''}` : '';
+  return `<p class="origen">De dónde sale: ${esc(o.cuenta)}${fecha}${post}${marca}${nueva}${r.hecha && !o.fiel ? ' · <b>Ya aplicada en la app</b>' : ''}</p>`;
 }
 function htmlIaGuardada(r) {
   if (!iaPendiente(r)) return '';
