@@ -531,6 +531,7 @@ function renderAdminMensajes() {
           'Ejercicio': _svgIcoMsg('<path d="M6.5 6.5a2.5 2.5 0 1 1 3.5 3.5l-6 6-3.5-3.5 6-6z"/><path d="M17.5 6.5a2.5 2.5 0 1 0-3.5 3.5l6 6 3.5-3.5-6-6z"/><line x1="8" y1="8" x2="16" y2="16"/>'),
           'Mi plan': _svgIcoMsg('<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3z"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/>'),
           'Pago': _svgIcoMsg('<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>'),
+          'Valoración': _svgIcoMsg('<polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/>'),
           'Otro': _icoChat
         };
         const motivoIcon = motivoIcons[m.asunto] || _icoChat;

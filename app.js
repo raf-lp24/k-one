@@ -1264,7 +1264,7 @@
     [/prensa de piernas/i, ['Sentadilla hack', 'Zancadas con mancuernas', 'Extensión de cuádriceps']],
     // 3 nov 2026 (aprobado por Rafa), idea de @trainologym: la sissy estira el recto
     // anterior, que la máquina sin respaldo reclinable no llega a estirar.
-    [/extensi[oó]n de cu[aá]driceps(?! \(rango corto\))/i, ['Sissy squat']],
+    [/extensi[oó]n de cu[aá]driceps(?! \(rango corto\))/i, ['Sissy squat', 'Prensa de piernas', 'Sentadilla hack']],
     // Los "(?!...)" evitan tocar las opciones de curl/tríceps/laterales que ya
     // haya dejado la rotación de accesorios (poolsEjercicio, más abajo): sin
     // ellos quedaba colgando el material que trae esa opción por su cuenta
@@ -20701,6 +20701,7 @@
     comprobarRenovacionMensual();
     try { _comprobarTarjetaPrueba(); } catch (e) {}
     try { comprobarNovedades(email); } catch (e) {}
+    try { comprobarValoracionSemana(email); } catch (e) {}
     comprobarRecordatorioCheckin();
     // Antes solo se ocultaba dentro del "if (generatedPlan) { if
     // (tieneAccesoActivo) {...} }" -- si saved no existía, o existía sin
@@ -22305,6 +22306,100 @@ Se coló: ${lista}`;
     if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
     if (_onEncuestaCerrada) _onEncuestaCerrada();
     _onEncuestaCerrada = null;
+  }
+
+  // ===== VALORACIÓN A LA SEMANA =====
+  // 3 nov 2026, la pidió Rafa. Al contrario que la encuesta de arriba, que
+  // alimenta los testimonios de la web, esta es privada: llega a Mensajes de
+  // Jarvis, donde se puede contestar al cliente.
+  const VALORACION_DIAS = 7;
+  const VALORACION_REPETIR_DIAS = 3;
+  const VALORACION_VECES_MAX = 3;
+  let _valoracionEstrellas = 0;
+
+  function comprobarValoracionSemana(email) {
+    if (!userData || !userData.onboardingCompletado || !tieneAccesoActivo(email)) return;
+    const v = userData.valoracionSemana || {};
+    if (v.enviada || (v.pospuesta || 0) >= VALORACION_VECES_MAX) return;
+    if (v.proxima && Date.now() < new Date(v.proxima).getTime()) return;
+    const user = getCurrentUser();
+    const dias = user && user.creado ? Math.floor((Date.now() - new Date(user.creado).getTime()) / 86400000) : NaN;
+    if (!(dias >= VALORACION_DIAS)) return;
+    // Después de Novedades (1,5 s), para no pisarlo.
+    setTimeout(() => mostrarValoracionSemana(dias), 2500);
+  }
+
+  function mostrarValoracionSemana(dias) {
+    if (document.getElementById('onboardingModal')?.classList.contains('visible')) return;
+    if (document.querySelector('.modal-overlay.visible')) return;
+    if (document.getElementById('sesionModo')?.classList.contains('abierta')) return;
+    _valoracionEstrellas = 0;
+    document.getElementById('valoracionMejorar').value = '';
+    document.getElementById('valoracionMal').value = '';
+    document.querySelectorAll('#valoracionStars .encuesta-star').forEach(s => s.classList.remove('activa'));
+    // Quien lleva tiempo sin que se lo hayamos preguntado no está en su primera semana.
+    document.getElementById('valoracionTitulo').textContent = dias < 14 ? '¿Qué tal tu primera semana?' : '¿Qué tal te va con K-ONE?';
+    document.getElementById('modalValoracionSemana').classList.add('visible');
+    kEvento('valoracion_vista');
+  }
+
+  function seleccionarEstrellaValoracion(n) {
+    _valoracionEstrellas = n;
+    document.querySelectorAll('#valoracionStars .encuesta-star').forEach((s, i) => {
+      s.classList.toggle('activa', i < n);
+    });
+  }
+
+  function posponerValoracionSemana() {
+    document.getElementById('modalValoracionSemana').classList.remove('visible');
+    const v = userData.valoracionSemana || {};
+    userData.valoracionSemana = Object.assign({}, v, {
+      pospuesta: (v.pospuesta || 0) + 1,
+      proxima: new Date(Date.now() + VALORACION_REPETIR_DIAS * 86400000).toISOString()
+    });
+    const user = getCurrentUser();
+    if (user) saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+  }
+
+  async function enviarValoracionSemana() {
+    const mejorar = (document.getElementById('valoracionMejorar')?.value || '').trim().slice(0, 1200);
+    const mal = (document.getElementById('valoracionMal')?.value || '').trim().slice(0, 1200);
+    if (!_valoracionEstrellas && !mejorar && !mal) {
+      showToast('Marca las estrellas o escribe algo antes de enviar');
+      return;
+    }
+    const user = getCurrentUser();
+    if (!user || !_supaUserId) return;
+    const btn = document.getElementById('valoracionEnviar');
+    btn.disabled = true;
+    const estrellas = _valoracionEstrellas ? `${_valoracionEstrellas} de 5` : 'sin marcar';
+    const cuerpo = [
+      `[VALORACIÓN] Estrellas: ${estrellas}`,
+      mejorar ? `Qué mejorarías:\n${mejorar}` : '',
+      mal ? `Qué has visto mal:\n${mal}` : ''
+    ].filter(Boolean).join('\n\n');
+    const fila = { user_id: _supaUserId, nombre: user.nombre || user.email, email: user.email, asunto: 'Valoración', mensaje: cuerpo };
+    try {
+      // Mismo reintento que el motivo de baja: no consta si "asunto" tiene
+      // restricción de valores, y el "[VALORACIÓN]" lo deja identificable.
+      const { error } = await supa.from('mensajes_cliente').insert(fila);
+      if (error) {
+        const r2 = await supa.from('mensajes_cliente').insert(Object.assign({}, fila, { asunto: 'Otro' }));
+        if (r2.error) throw new Error(r2.error.message);
+      }
+    } catch (e) {
+      // Se queda abierto para no perder lo que ha escrito.
+      btn.disabled = false;
+      showToast('No se ha podido enviar. Inténtalo de nuevo en un momento.');
+      return;
+    }
+    btn.disabled = false;
+    notificarAdmin('mensaje', { nombre: user.nombre, email: user.email, asunto: `Valoración (${estrellas})`, mensaje: cuerpo });
+    userData.valoracionSemana = { enviada: true, fecha: new Date().toISOString(), estrellas: _valoracionEstrellas };
+    saveUserData(user.email, { userData, plan: generatedPlan, savedAt: new Date().toISOString() });
+    document.getElementById('modalValoracionSemana').classList.remove('visible');
+    kEvento('valoracion_enviada');
+    showToast('Recibido. Gracias por contárnoslo.');
   }
 
   // ===== NOTIFICACIÓN AL ADMIN POR EMAIL =====

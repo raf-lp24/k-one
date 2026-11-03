@@ -3977,6 +3977,25 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
   </div>
 </div>
 
+<!-- VALORACIÓN A LA SEMANA (privada: llega a Mensajes de Jarvis, nunca a la web) -->
+<div class="modal-overlay" id="modalValoracionSemana">
+  <div class="modal-box" style="max-width:460px;max-height:calc(100dvh - 24px);overflow-y:auto">
+    <div class="modal-title" id="valoracionTitulo" style="font-size:20px">¿Qué tal tu primera semana?</div>
+    <p class="modal-desc" style="margin-bottom:4px">Solo lo leemos nosotros, no se publica en ningún sitio. Si algo no va bien, queremos arreglarlo.</p>
+    <div class="encuesta-stars" id="valoracionStars" role="group" aria-label="Tu valoración de 1 a 5 estrellas">
+      <button type="button" class="encuesta-star" aria-label="1 estrella" onclick="seleccionarEstrellaValoracion(1)">★</button>
+      <button type="button" class="encuesta-star" aria-label="2 estrellas" onclick="seleccionarEstrellaValoracion(2)">★</button>
+      <button type="button" class="encuesta-star" aria-label="3 estrellas" onclick="seleccionarEstrellaValoracion(3)">★</button>
+      <button type="button" class="encuesta-star" aria-label="4 estrellas" onclick="seleccionarEstrellaValoracion(4)">★</button>
+      <button type="button" class="encuesta-star" aria-label="5 estrellas" onclick="seleccionarEstrellaValoracion(5)">★</button>
+    </div>
+    <textarea class="encuesta-textarea" id="valoracionMejorar" maxlength="1200" style="min-height:68px;margin-bottom:12px" aria-label="Qué mejorarías" placeholder="¿Qué mejorarías? (opcional)"></textarea>
+    <textarea class="encuesta-textarea" id="valoracionMal" maxlength="1200" style="min-height:68px;margin-bottom:12px" aria-label="Qué has visto mal o no te funciona" placeholder="¿Has visto algo mal o que no te funcione? (opcional)"></textarea>
+    <button class="btn-primary" id="valoracionEnviar" style="width:100%" onclick="enviarValoracionSemana()">Enviar →</button>
+    <button class="encuesta-skip" onclick="posponerValoracionSemana()">Ahora no</button>
+  </div>
+</div>
+
 <!-- MODAL OPINIÓN PÚBLICA (landing) -->
 <div class="modal-overlay" id="modalOpinionPublica">
   <div class="modal-box" style="max-width:460px">
@@ -10587,6 +10606,8 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
     user-select: none;
   }
   .encuesta-star.activa { color: var(--brasa-txt); }
+  button.encuesta-star { background: none; border: 0; padding: 0; min-width: 44px; min-height: 44px; }
+  button.encuesta-star:focus-visible { outline: 2px solid var(--metal); outline-offset: 2px; }
   .encuesta-textarea {
     width: 100%;
     background: var(--grafito);
