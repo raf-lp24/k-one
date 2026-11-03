@@ -1161,5 +1161,215 @@
    "op(\"Huevos duros con jamón serrano (snack proteico)\", \"2 huevos duros, 20g jamón serrano, pimienta\", \"214 kcal\", \"20g prot\", \"2g carbs\", \"14g grasa\", \"Fácil · 8 min\"),"
   ],
   "pasos": null
+ },
+ {
+  "nombre": "Tortitas de arroz con aguacate y tomate",
+  "ingredientes": "3 tortitas de arroz, 1/2 aguacate, 100g tomate, sal",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op('Tortitas de arroz con aguacate y tomate', '3 tortitas de arroz, 1/2 aguacate, 100g tomate, sal', '250 kcal', '5g prot', '30g carbs', '13g grasa', 'Sin cocción · 3 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Bol de yogur de coco con fruta y semillas de calabaza",
+  "ingredientes": "200g yogur de coco, 1 plátano, 15g semillas de calabaza",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op('Bol de yogur de coco con fruta y semillas de calabaza', '200g yogur de coco, 1 plátano, 15g semillas de calabaza', '350 kcal', '6g prot', '46g carbs', '17g grasa', 'Sin cocción · 3 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Bol de frutos rojos con semillas de girasol",
+  "ingredientes": "200g frutos rojos, 20g semillas de girasol, canela",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op('Bol de frutos rojos con semillas de girasol', '200g frutos rojos, 20g semillas de girasol, canela', '210 kcal', '6g prot', '24g carbs', '10g grasa', 'Sin cocción · 2 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Tortilla de patata con ensalada verde",
+  "ingredientes": "3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op('Tortilla de patata con ensalada verde', '3 huevos, 200g patata, 100g cebolla, ensalada, 15g AOVE', '595 kcal', '26g prot', '53g carbs', '31g grasa', 'Medio · 25 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Plátano con semillas de calabaza",
+  "ingredientes": "1 plátano, 20g semillas de calabaza",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op('Plátano con semillas de calabaza', '1 plátano, 20g semillas de calabaza', '220 kcal', '7g prot', '28g carbs', '10g grasa', 'Sin cocción · 1 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Pavo en lonchas con tomate y aguacate",
+  "ingredientes": "100g pavo en lonchas, 150g tomate, 1/2 aguacate",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op('Pavo en lonchas con tomate y aguacate', '100g pavo en lonchas, 150g tomate, 1/2 aguacate', '270 kcal', '24g prot', '10g carbs', '16g grasa', 'Sin cocción · 3 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Manzana con semillas de girasol",
+  "ingredientes": "1 manzana, 20g semillas de girasol",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op('Manzana con semillas de girasol', '1 manzana, 20g semillas de girasol', '190 kcal', '5g prot', '26g carbs', '9g grasa', 'Sin cocción · 1 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Huevos cocidos con tomate y AOVE",
+  "ingredientes": "2 huevos cocidos, 150g tomate, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op('Huevos cocidos con tomate y AOVE', '2 huevos cocidos, 150g tomate, 5g AOVE', '200 kcal', '14g prot', '8g carbs', '13g grasa', 'Sin cocción · 5 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Atún con tomate y aguacate",
+  "ingredientes": "1 lata de atún al natural, 150g tomate, 1/2 aguacate",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op('Atún con tomate y aguacate', '1 lata de atún al natural, 150g tomate, 1/2 aguacate', '280 kcal', '24g prot', '10g carbs', '17g grasa', 'Sin cocción · 3 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Pollo al limón con arroz y espinacas",
+  "ingredientes": "180g pechuga de pollo, 60g arroz cocido, 150g espinacas, AOVE, limón",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op('Pollo al limón con arroz y espinacas', '180g pechuga de pollo, 60g arroz cocido, 150g espinacas, AOVE, limón', '450 kcal', '42g prot', '40g carbs', '14g grasa', 'Fácil · 20 min')"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Bol de arroz inflado con fruta y semillas de girasol",
+  "ingredientes": "40g arroz inflado, 1 plátano, 200ml bebida de arroz, 15g semillas de girasol",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op('Bol de arroz inflado con fruta y semillas de girasol', '40g arroz inflado, 1 plátano, 200ml bebida de arroz, 15g semillas de girasol', '310 kcal', '8g prot', '52g carbs', '9g grasa', 'Sin cocción · 3 min')"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Ensalada templada de quinoa, aguacate y huevo",
+  "ingredientes": "80g quinoa cocida, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op('Ensalada templada de quinoa, aguacate y huevo', '80g quinoa cocida, 1/2 aguacate, 2 huevos cocidos, rúcula, tomate, AOVE', '480 kcal', '22g prot', '42g carbs', '26g grasa', 'Fácil · 20 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Tortitas de arroz con plátano y canela",
+  "ingredientes": "3 tortitas de arroz, 1 plátano, canela",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op('Tortitas de arroz con plátano y canela', '3 tortitas de arroz, 1 plátano, canela', '230 kcal', '4g prot', '48g carbs', '2g grasa', 'Sin cocción · 2 min')"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Fruta variada con semillas de calabaza",
+  "ingredientes": "1 pieza de fruta, 1 mandarina, 15g semillas de calabaza",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op('Fruta variada con semillas de calabaza', '1 pieza de fruta, 1 mandarina, 15g semillas de calabaza', '180 kcal', '5g prot', '24g carbs', '8g grasa', 'Sin cocción · 1 min')"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Huevos cocidos con tomate cherry",
+  "ingredientes": "2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op('Huevos cocidos con tomate cherry', '2 huevos cocidos, 150g tomate cherry, sal, 5g AOVE', '210 kcal', '14g prot', '8g carbs', '14g grasa', 'Fácil · 10 min'),"
+  ],
+  "pasos": null
  }
 ]

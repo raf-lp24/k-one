@@ -175,8 +175,10 @@ lista.forEach(f => {
 // Recetas nuevas de Instagram a la espera de Rafa: aún no están en app.js (sin líneas). Las que apruebe
 // se meten en app.js con su toma; las que estén en aplicadas.json o en la app ya no se añaden aquí.
 const { componer: componerProp } = require(path.join(RAIZ, 'scripts', 'componer'));
+// Si una ya aprobada se quita luego de la app, no vuelve como propuesta.
+const yaAprobadas = new Set((fs.existsSync(path.join(__dirname, 'aplicadas.json')) ? JSON.parse(fs.readFileSync(path.join(__dirname, 'aplicadas.json'), 'utf8')) : []).flatMap(a => [a.nombre, a.nombreAntes]));
 (fs.existsSync(path.join(__dirname, 'propuestas-jone.js')) ? require('./propuestas-jone.js') : []).forEach(x => {
-  if (lista.some(f => f.nombre === x.nombre)) return;
+  if (lista.some(f => f.nombre === x.nombre) || yaAprobadas.has(x.nombre)) return;
   const c = componerProp(x.nombre, x.ingredientes, x.prep);
   const et = { kcal: c.kcal, p: c.p, c: c.c, g: c.g };
   lista.push({ nombre: x.nombre, ingredientes: x.ingredientes, prep: x.prep, et, fija: false, ap: x.ap, lineas: [], id: 'r' + fnv(x.nombre + '|' + x.ingredientes), calc: { ...et, f: Math.round(c.fibra || 0) }, avisos: [], pasos: x.pasos, propuesta: true, est: x.est || '', origen: { cuenta: '@jonealcuaz', fecha: '2026-11-03', post: 'https://www.instagram.com/' + x.post + '/', seguro: true, igual: true } });
