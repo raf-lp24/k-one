@@ -8911,13 +8911,10 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Yogur proteico con avena y tortilla francesa", "50g avena, 2 huevos, 125g yogur proteico", "414 kcal", "33g prot", "39g carbs", "14g grasa", "Fácil · 8 min"),
             op("Avena con leche, tortilla francesa y manzana", "50g avena, 150ml leche semidesnatada, 2 huevos, 1 manzana", "525 kcal", "26g prot", "67g carbs", "17g grasa", "Fácil · 10 min"),
-            op("Huevos revueltos con tortitas de arroz y tomates cherry", "3 huevos, 4 tortitas de arroz, 6 tomates cherry", "518 kcal", "30g prot", "59g carbs", "18g grasa", "Fácil · 8 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Tosta con huevo cocido y jamón serrano", "1 tosta de pan, 1 huevo, 30g jamón serrano", "217 kcal", "17g prot", "17g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Tosta con huevos cocidos, jamón serrano y leche", "1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada", "399 kcal", "32g prot", "25g carbs", "19g grasa", "Fácil · 12 min"),
             op("Sándwich de pavo con huevos revueltos", "2 rebanadas pan de molde, 40g pavo en lonchas, 3 huevos", "423 kcal", "36g prot", "27g carbs", "19g grasa", "Fácil · 8 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortitas de avena con claras, huevos y fruta", "60g harina de avena, 250ml claras, 2 huevos, 1 manzana", "607 kcal", "50g prot", "68g carbs", "15g grasa", "Fácil · 12 min"),
             op("Tostadas con aceite, huevos a la plancha y pavo", "80g pan, 10g AOVE, 2 huevos, 150g pavo", "613 kcal", "57g prot", "40g carbs", "25g grasa", "Fácil · 8 min"),
             op("Tostadas con aceite, huevos a la plancha y pollo", "80g pan, 10g AOVE, 2 huevos, 150g pollo", "623 kcal", "55g prot", "40g carbs", "27g grasa", "Fácil · 12 min"),
             op("Tostadas con crema de cacahuete, queso batido y una manzana", "80g pan, 15g crema de cacahuete, 400g queso batido 0%, 1 manzana", "692 kcal", "52g prot", "94g carbs", "12g grasa", "Fácil · 8 min"),
@@ -8931,7 +8928,6 @@
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Bol de yogur proteico con plátano caramelizado", "200g yogur griego 0%, 25g proteína whey, 1 plátano, 20g copos de avena, 5g miel, canela", "428 kcal", "44g prot", "54g carbs", "4g grasa", "Sartén · 5 min"),
-            op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Bol de yogur proteico con kiwi y pepitas de chocolate", "200g yogur griego 0%, 20g proteína whey, 1 kiwi, 20g copos de avena, 5g chocolate negro, 5g miel", "369 kcal", "40g prot", "41g carbs", "5g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
             op("Cheesecake de arándanos con avena", "40g copos de avena, 10g semillas de chía, 200ml leche desnatada, 100g arándanos, 100g yogur griego 0%, 20g queso crema light, 5g miel, zumo de limón al gusto", "459 kcal", "26g prot", "64g carbs", "11g grasa", "Nevera · 5 min + 1 noche"),
@@ -8943,7 +8939,6 @@
             op("Bocaditos de plátano estilo pancake", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
             op("Tostadas francesas sabor cheesecake de fresas", "2 rebanadas pan de molde integral, 1 huevo, 30ml leche desnatada, 30g queso crema light, 50g fresas, 3g aceite de oliva virgen extra, canela, 30g yogur griego 0%, estevia, esencia de vainilla", "374 kcal", "20g prot", "33g carbs", "18g grasa", "Sartén · 10 min"),
             op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
-            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Muffins salados", "2 huevos, 30g queso crema light, 50g espinacas, 75g pimiento rojo, 30g maíz dulce, sal y pimienta", "303 kcal", "19g prot", "14g carbs", "19g grasa", "Horno · 25 min"),
             op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
@@ -8981,7 +8976,6 @@
             op("Skyr con pera y semillas de lino", "150g skyr natural, 1 pera, 10g semillas de lino, canela", "265 kcal", "19g prot", "36g carbs", "5g grasa", "Sin cocción · 2 min"),
             op("Queso batido con cerezas, almendras y canela", "200g queso batido 0%, 150g cerezas, 10g almendras, canela", "310 kcal", "24g prot", "40g carbs", "6g grasa", "Sin cocción · 2 min"),
             op("Tosta pequeña de pavo con tomate", "1 tosta pequeña integral, 40g pavo en lonchas, tomate", "173 kcal", "16g prot", "16g carbs", "5g grasa", "Sin cocción · 2 min"),
-            op("Cecina con tortitas de arroz y zanahoria", "40g cecina, 2 tortitas de arroz, 150g zanahoria", "237 kcal", "19g prot", "29g carbs", "5g grasa", "Sin cocción · 3 min"),
             op("Batido de proteína con plátano y avena", "1 scoop proteína whey, 1 plátano, 20g copos de avena, agua", "311 kcal", "28g prot", "43g carbs", "3g grasa", "Fácil · 3 min"),
             op("Pavo con bastones de zanahoria", "60g pavo en lonchas, 100g zanahoria, mostaza", "113 kcal", "14g prot", "12g carbs", "1g grasa", "Sin cocción · 3 min"),
             // "Media mañana" era la toma más corta (17 opciones, medido sobre 20
@@ -9012,7 +9006,6 @@
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
-            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
             op("Huevos rellenos de aguacate y atún", "3 huevos cocidos, 40g aguacate, 40g atún al natural, 15g queso crema light, sal y pimienta", "386 kcal", "33g prot", "5g carbs", "26g grasa", "Cazo · 12 min"),
             // 30 oct 2026 · revisión completa de @vikikateam y variantes de @lu_fitfoodie (más variedad), aprobadas por Rafa
             op("Rollitos de pepino con atún y yogur", "300g pepino, 100g atún al natural, 100g yogur griego 0%, 15g mostaza, 70g aguacate, zumo de limón al gusto", "352 kcal", "40g prot", "21g carbs", "12g grasa", "Sin cocción · 10 min"),
@@ -9064,9 +9057,7 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
             op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
             op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
             op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
             op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
@@ -9297,7 +9288,6 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
-            op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "1 tortilla de trigo integral, 2 huevos, 60g espinacas, 80g tomate cherry, 30g queso en lonchas", "414 kcal", "27g prot", "27g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
@@ -9395,13 +9385,10 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Yogur proteico con avena y tortilla francesa", "50g avena, 2 huevos, 125g yogur proteico", "414 kcal", "33g prot", "39g carbs", "14g grasa", "Fácil · 8 min"),
             op("Avena con leche, tortilla francesa y manzana", "50g avena, 150ml leche semidesnatada, 2 huevos, 1 manzana", "525 kcal", "26g prot", "67g carbs", "17g grasa", "Fácil · 10 min"),
-            op("Huevos revueltos con tortitas de arroz y tomates cherry", "3 huevos, 4 tortitas de arroz, 6 tomates cherry", "518 kcal", "30g prot", "59g carbs", "18g grasa", "Fácil · 8 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Tosta con huevo cocido y jamón serrano", "1 tosta de pan, 1 huevo, 30g jamón serrano", "217 kcal", "17g prot", "17g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Tosta con huevos cocidos, jamón serrano y leche", "1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada", "399 kcal", "32g prot", "25g carbs", "19g grasa", "Fácil · 12 min"),
             op("Sándwich de pavo con huevos revueltos", "2 rebanadas pan de molde, 40g pavo en lonchas, 3 huevos", "423 kcal", "36g prot", "27g carbs", "19g grasa", "Fácil · 8 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortitas de avena con claras, huevos y fruta", "60g harina de avena, 250ml claras, 2 huevos, 1 manzana", "607 kcal", "50g prot", "68g carbs", "15g grasa", "Fácil · 12 min"),
             op("Tostadas con aceite, huevos a la plancha y pavo", "80g pan, 10g AOVE, 2 huevos, 150g pavo", "613 kcal", "57g prot", "40g carbs", "25g grasa", "Fácil · 8 min"),
             op("Tostadas con aceite, huevos a la plancha y pollo", "80g pan, 10g AOVE, 2 huevos, 150g pollo", "623 kcal", "55g prot", "40g carbs", "27g grasa", "Fácil · 12 min"),
             op("Tostadas con crema de cacahuete, queso batido y una manzana", "80g pan, 15g crema de cacahuete, 400g queso batido 0%, 1 manzana", "692 kcal", "52g prot", "94g carbs", "12g grasa", "Fácil · 8 min"),
@@ -9433,7 +9420,6 @@
             op("Bocaditos de plátano estilo pancake", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
             op("Tostadas francesas sabor cheesecake de fresas", "2 rebanadas pan de molde integral, 1 huevo, 30ml leche desnatada, 30g queso crema light, 50g fresas, 3g aceite de oliva virgen extra, canela, 30g yogur griego 0%, estevia, esencia de vainilla", "374 kcal", "20g prot", "33g carbs", "18g grasa", "Sartén · 10 min"),
             op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
-            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Muffins salados", "2 huevos, 30g queso crema light, 50g espinacas, 75g pimiento rojo, 30g maíz dulce, sal y pimienta", "303 kcal", "19g prot", "14g carbs", "19g grasa", "Horno · 25 min"),
             op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
@@ -9511,7 +9497,6 @@
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
-            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
             op("Huevos rellenos de aguacate y atún", "3 huevos cocidos, 40g aguacate, 40g atún al natural, 15g queso crema light, sal y pimienta", "386 kcal", "33g prot", "5g carbs", "26g grasa", "Cazo · 12 min"),
             // 30 oct 2026 · revisión completa de @vikikateam y variantes de @lu_fitfoodie (más variedad), aprobadas por Rafa
             op("Rollitos de pepino con atún y yogur", "300g pepino, 100g atún al natural, 100g yogur griego 0%, 15g mostaza, 70g aguacate, zumo de limón al gusto", "352 kcal", "40g prot", "21g carbs", "12g grasa", "Sin cocción · 10 min"),
@@ -9568,9 +9553,7 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
             op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
             op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
             op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
             op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
@@ -9806,7 +9789,6 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
-            op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "1 tortilla de trigo integral, 2 huevos, 60g espinacas, 80g tomate cherry, 30g queso en lonchas", "414 kcal", "27g prot", "27g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             op("Hamburguesas de lentejas con pan integral y huevo", "200g lentejas cocidas, 30g copos de avena, 2 huevos, 30g cebolla, 5g aceite de oliva, 60g pan integral, 50g lechuga, 80g tomate, comino", "749 kcal", "45g prot", "95g carbs", "21g grasa", "Fácil · 20 min"),
@@ -9896,13 +9878,10 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Yogur proteico con avena y tortilla francesa", "50g avena, 2 huevos, 125g yogur proteico", "414 kcal", "33g prot", "39g carbs", "14g grasa", "Fácil · 8 min"),
             op("Avena con leche, tortilla francesa y manzana", "50g avena, 150ml leche semidesnatada, 2 huevos, 1 manzana", "525 kcal", "26g prot", "67g carbs", "17g grasa", "Fácil · 10 min"),
-            op("Huevos revueltos con tortitas de arroz y tomates cherry", "3 huevos, 4 tortitas de arroz, 6 tomates cherry", "518 kcal", "30g prot", "59g carbs", "18g grasa", "Fácil · 8 min"),
             op("Sándwich de pavo y yogur proteico con avena", "2 rebanadas pan de molde, 40g pavo en lonchas, 125g yogur proteico, 20g avena", "345 kcal", "31g prot", "44g carbs", "5g grasa", "Sin cocción · 4 min"),
             op("Tosta con huevo cocido y jamón serrano", "1 tosta de pan, 1 huevo, 30g jamón serrano", "217 kcal", "17g prot", "17g carbs", "9g grasa", "Fácil · 12 min"),
-            op("Tosta con huevos cocidos, jamón serrano y leche", "1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada", "399 kcal", "32g prot", "25g carbs", "19g grasa", "Fácil · 12 min"),
             op("Sándwich de pavo con huevos revueltos", "2 rebanadas pan de molde, 40g pavo en lonchas, 3 huevos", "423 kcal", "36g prot", "27g carbs", "19g grasa", "Fácil · 8 min"),
             // De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.
-            op("Tortitas de avena con claras, huevos y fruta", "60g harina de avena, 250ml claras, 2 huevos, 1 manzana", "607 kcal", "50g prot", "68g carbs", "15g grasa", "Fácil · 12 min"),
             op("Tostadas con aceite, huevos a la plancha y pavo", "80g pan, 10g AOVE, 2 huevos, 150g pavo", "613 kcal", "57g prot", "40g carbs", "25g grasa", "Fácil · 8 min"),
             op("Tostadas con aceite, huevos a la plancha y pollo", "80g pan, 10g AOVE, 2 huevos, 150g pollo", "623 kcal", "55g prot", "40g carbs", "27g grasa", "Fácil · 12 min"),
             op("Tostadas con crema de cacahuete, queso batido y una manzana", "80g pan, 15g crema de cacahuete, 400g queso batido 0%, 1 manzana", "692 kcal", "52g prot", "94g carbs", "12g grasa", "Fácil · 8 min"),
@@ -9923,7 +9902,6 @@
             op("Tiras de crepe proteico con frambuesas", "2 huevos, 100g queso batido 0%, 30g harina de avena, 80g frambuesas", "365 kcal", "29g prot", "33g carbs", "13g grasa", "Sartén · 10 min"),
             op("Crepes proteicas con chocolate negro y frambuesas", "30g harina de avena, 1 scoop proteína whey, 1 huevo, 60ml leche desnatada, 100g frambuesas, 10g chocolate negro 85%", "424 kcal", "39g prot", "40g carbs", "12g grasa", "Sartén · 10 min"),
             op("Avena nocturna de chocolate, kiwi y arándanos", "50g copos de avena, 1 scoop proteína whey, 10g chía, 150ml leche desnatada, 1 kiwi, 50g arándanos, 10g chocolate negro", "556 kcal", "39g prot", "73g carbs", "12g grasa", "Nevera · toda la noche"),
-            op("Huevos cocidos con plátano y crema de cacahuete", "3 huevos, 1 plátano, 15g crema de cacahuete", "444 kcal", "25g prot", "32g carbs", "24g grasa", "Fácil · 12 min"),
             op("Huevos en cesta crujiente con tomate y queso", "1 tortilla de trigo, 3 huevos, 100g tomate, 20g queso rallado light, orégano, pimienta", "461 kcal", "31g prot", "28g carbs", "25g grasa", "Fácil · 20 min"),
             op("Tortitas de arroz con cottage, salmón ahumado y tomate", "2 tortitas de arroz, 100g queso cottage, 60g salmón ahumado, 80g tomate, 1 manzana, especias", "338 kcal", "24g prot", "47g carbs", "6g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
@@ -9936,7 +9914,6 @@
             op("Bocaditos de plátano estilo pancake", "100g plátano, 1 huevo, 30g copos de avena, 60ml leche desnatada, 50g fresas, levadura química", "328 kcal", "14g prot", "50g carbs", "8g grasa", "Sartén · 10 min"),
             op("Tostadas francesas sabor cheesecake de fresas", "2 rebanadas pan de molde integral, 1 huevo, 30ml leche desnatada, 30g queso crema light, 50g fresas, 3g aceite de oliva virgen extra, canela, 30g yogur griego 0%, estevia, esencia de vainilla", "374 kcal", "20g prot", "33g carbs", "18g grasa", "Sartén · 10 min"),
             op("Carrot cake de una porción con yogur", "1 huevo, 40g harina de avena, 60g yogur griego 0%, 50g zanahoria rallada, levadura química, canela, 60g yogur griego 0%, 10g nueces", "391 kcal", "26g prot", "38g carbs", "15g grasa", "Microondas · 8 min"),
-            op("Pan de avena y espinacas relleno de pavo y queso fresco", "30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo", "374 kcal", "36g prot", "26g carbs", "14g grasa", "Microondas · 8 min"),
             op("Sándwich de huevo cremoso", "2 rebanadas pan integral, 3 huevos cocidos, 15g queso crema light, 5g mostaza, 20g pepinillos", "426 kcal", "29g prot", "28g carbs", "22g grasa", "Cazo · 12 min"),
             op("Muffins salados", "2 huevos, 30g queso crema light, 50g espinacas, 75g pimiento rojo, 30g maíz dulce, sal y pimienta", "303 kcal", "19g prot", "14g carbs", "19g grasa", "Horno · 25 min"),
             op("Tortilla esponjosa de queso crema con pavo, champiñones y tomate", "2 huevos, 30g queso crema light, 20g queso rallado, 40g pechuga de pavo, 40g champiñones, 50g tomate", "380 kcal", "33g prot", "8g carbs", "24g grasa", "Sartén · 10 min"),
@@ -10010,7 +9987,6 @@
             // 29 oct 2026 · revisión de @raulencinass, aprobada por Rafa
             op("Tortitas de arroz con queso cottage, miel y sésamo", "4 tortitas de arroz, 150g queso cottage, 10g miel, 5g sésamo, pimienta", "327 kcal", "20g prot", "46g carbs", "7g grasa", "Sin cocción · 3 min"),
             // 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa
-            op("Tortitas de arroz con atún cremoso", "3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto", "253 kcal", "26g prot", "26g carbs", "5g grasa", "Sin cocción · 5 min"),
             op("Huevos rellenos de aguacate y atún", "3 huevos cocidos, 40g aguacate, 40g atún al natural, 15g queso crema light, sal y pimienta", "386 kcal", "33g prot", "5g carbs", "26g grasa", "Cazo · 12 min"),
             // 30 oct 2026 · revisión completa de @vikikateam y variantes de @lu_fitfoodie (más variedad), aprobadas por Rafa
             op("Rollitos de pepino con atún y yogur", "300g pepino, 100g atún al natural, 100g yogur griego 0%, 15g mostaza, 70g aguacate, zumo de limón al gusto", "352 kcal", "40g prot", "21g carbs", "12g grasa", "Sin cocción · 10 min"),
@@ -10058,9 +10034,7 @@
             // Del plan "Plan alimentación Rafael López (MF)" del usuario, aprobadas el 3 oct 2026.
             op("Garbanzos con atún y pechuga de pollo", "100g garbanzos cocidos, 1 lata atún, 100g pechuga de pollo, 1 manzana, 150g ensalada", "507 kcal", "54g prot", "57g carbs", "7g grasa", "Fácil · 15 min"),
             op("Arroz con huevos a la plancha y queso batido", "100g arroz crudo, 2 huevos, 100g queso batido 0%, 1 manzana, 150g ensalada", "708 kcal", "33g prot", "117g carbs", "12g grasa", "Fácil · 20 min"),
-            op("Merluza con legumbres y huevos cocidos", "150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes", "796 kcal", "69g prot", "85g carbs", "20g grasa", "Fácil · 20 min"),
             op("Berenjenas rellenas de carne picada", "200g berenjena, 150g carne picada", "256 kcal", "34g prot", "12g carbs", "8g grasa", "Medio · 35 min"),
-            op("Berenjenas rellenas de carne picada con pasta", "200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana", "541 kcal", "41g prot", "74g carbs", "9g grasa", "Medio · 35 min"),
             op("Arroz con gambas y pan con tomate", "100g arroz crudo, 100g gambas, 2 rebanadas pan, 30g tomate", "584 kcal", "26g prot", "111g carbs", "4g grasa", "Fácil · 20 min"),
             op("Filetes de pollo con arroz y ensalada", "150g pollo, 60g arroz cocido, 150g ensalada", "281 kcal", "37g prot", "22g carbs", "5g grasa", "Fácil · 12 min"),
             op("Legumbres con filetes de pollo", "150g legumbres cocidas, 150g pollo, 150g ensalada", "414 kcal", "49g prot", "41g carbs", "6g grasa", "Fácil · 15 min"),
@@ -10313,7 +10287,6 @@
             // Recetas de vídeos de cocina fit (6 oct 2026): voz + fotogramas; macros con scripts/componer.js
             op("Boniato con pollo, pepino, tomate y cottage", "200g boniato asado, 150g pechuga de pollo, 100g pepino, 100g tomate, 80g queso cottage, 10g pipas de calabaza, 5g miel", "516 kcal", "49g prot", "62g carbs", "8g grasa", "Fácil · 20 min"),
             op("Bowl de pavo, huevos, cottage, pepino y tomate", "180g pavo, 2 huevos, 150g queso cottage, 100g pepino, 100g tomate, pimentón", "513 kcal", "74g prot", "16g carbs", "17g grasa", "Fácil · 15 min"),
-            op("Tacos de zanahoria con pollo y cottage", "200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos", "499 kcal", "53g prot", "29g carbs", "19g grasa", "Horno 180º · 20 min"),
             op("Tortilla de espinacas, cherry y queso en freidora", "1 tortilla de trigo integral, 2 huevos, 60g espinacas, 80g tomate cherry, 30g queso en lonchas", "414 kcal", "27g prot", "27g carbs", "22g grasa", "Freidora 180º · 12 min"),
             op("Pizza con base de brócoli y pollo", "250g brócoli, 2 huevos, 45g harina de avena, 60g tomate triturado, 40g mozzarella light, 100g pechuga de pollo, 30g cebolla morada, ajo, orégano", "677 kcal", "59g prot", "54g carbs", "25g grasa", "Media · 30 min"),
             // 28 oct 2026 (aprobado por Rafa): receta de @tonigimenex (TikTok). Macros con componer.js.
@@ -17482,7 +17455,6 @@
     // 14 oct 2026 · ideas de @valicentif, con nuestras cantidades y pasos
     "Pizza con base de brócoli y pollo": "Tritura el brócoli crudo hasta que quede como arroz. Mézclalo con los huevos, la harina de avena, el ajo y el orégano, extiende la masa fina sobre papel de horno y hornéala 12 min a 200 °C. Mientras, haz el pollo a la plancha en tiras y corta la cebolla en juliana. Saca la base, cubre con el tomate, la mozzarella, el pollo y la cebolla, y vuelve al horno 8-10 min, hasta que se funda el queso.",
     "Hamburguesas de lentejas con pan integral y huevo": "Escurre las lentejas y aplástalas con un tenedor hasta hacer un puré grueso. Bate los huevos y echa la mitad en el puré con los copos de avena, la cebolla muy picada y el comino; mezcla y forma dos hamburguesas. Hazlas a la plancha con el aceite, 3-4 min por cada lado, y cuaja el resto del huevo batido en la misma plancha. Tuesta el pan y monta las hamburguesas con la lechuga, el tomate y el huevo.",
-    "Huevos cocidos con plátano y crema de cacahuete": "Cuece los huevos 10 min en agua hirviendo, pásalos a agua fría y pélalos; puedes dejarlos hechos la noche antes y llevártelos. Sírvelos con una pizca de sal y acompáñalos del plátano con la crema de cacahuete untada por encima.",
     // Mantenimiento — renombradas al subir la fibra del día tipo a 25,5 g
     "Yogur natural con frutos rojos, miel y canela": "Vierte el yogur en un bol. Añade los frutos rojos enteros por encima, un hilo de miel y espolvorea canela. Sin cocción.",
     "Lomo embuchado con tortas de arroz y zanahoria": "Monta el lomo embuchado sobre las tortas de arroz. Corta la zanahoria en bastones y sírvela al lado para ir mojando.",
@@ -17515,7 +17487,6 @@
     // MEDIA MAÑANA — reescritas al subir la fibra del plan de pérdida de grasa
     "Batido de proteína con plátano y avena": "Mete el plátano troceado, los copos de avena, el scoop de proteína y un vaso de agua en la batidora. Bate 30 segundos hasta que no queden grumos de avena y bébelo recién hecho.",
     "Tzatziki casero con bastones de zanahoria": "Ralla el pepino y apriétalo con las manos para quitarle el agua: si no, el tzatziki queda aguado. Mézclalo con el yogur, el ajo muy picado, la menta y el AOVE. Corta la zanahoria en bastones y úsala para mojar.",
-    "Cecina con tortitas de arroz y zanahoria": "Monta la cecina sobre las tortitas de arroz. Corta la zanahoria en bastones y sírvela al lado para mojar o comer a bocados. Listo en 3 min.",
     "Sardinillas en lata con tomate y pimiento": "Escurre las sardinillas. Corta el tomate en rodajas y el pimiento rojo en tiras finas. Colócalo todo en el plato, riega con el AOVE y añade una pizca de sal.",
     "Tortitas de arroz con queso fresco, pavo y zanahoria": "Unta el queso fresco sobre las tortitas de arroz. Reparte el pavo por encima. Corta la zanahoria en bastones y sírvela al lado.",
     "Huevos duros con tomate cherry y zanahoria": "Cuece los huevos 10 min desde que el agua hierve y pásalos por agua fría para pelarlos sin pelea. Pártelos por la mitad. Añade el tomate cherry partido y la zanahoria en bastones, riega con el AOVE y sal.",
@@ -18046,19 +18017,15 @@
     // Del plan "Plan alimentación Rafael López (MF)" del usuario (3 oct 2026)
     "Yogur proteico con avena y tortilla francesa": "Cuece la avena con agua 2-3 min, removiendo. Bate los huevos con una pizca de sal y cuaja la tortilla en una sartén antiadherente 1-2 min por lado. Sírvelo con el yogur proteico.",
     "Avena con leche, tortilla francesa y manzana": "Calienta la avena con la leche 2-3 min, removiendo. Bate los huevos con una pizca de sal y cuaja la tortilla en una sartén antiadherente 1-2 min por lado. Toma la manzana al lado.",
-    "Huevos revueltos con tortitas de arroz y tomates cherry": "Casca los huevos en una sartén antiadherente y revuélvelos a fuego medio 2-3 min con una pizca de sal. Sírvelos con las tortitas de arroz y los tomates cherry cortados por la mitad.",
     "Sándwich de pavo y yogur proteico con avena": "Monta el sándwich con las dos rebanadas de pan y el pavo en lonchas. Mezcla la avena con el yogur proteico y tómalo al lado.",
     "Tosta con huevo cocido y jamón serrano": "Cuece el huevo 10 min, enfríalo y pélalo. Tuesta el pan y ponle encima el jamón serrano y el huevo cocido en rodajas.",
-    "Tosta con huevos cocidos, jamón serrano y leche": "Cuece los huevos 10 min, enfríalos y pélalos. Tuesta el pan y ponle encima el jamón serrano y los huevos en rodajas. Acompáñalo con la leche.",
     "Tortitas de arroz con pavo y yogur proteico con avena": "Mezcla la avena con el yogur proteico. Sírvelo con las tortitas de arroz y el pavo en lonchas.",
     "Sándwich de pavo con huevos revueltos": "Revuelve los huevos en una sartén antiadherente 2-3 min con una pizca de sal. Monta el sándwich con las dos rebanadas de pan y el pavo en lonchas, y toma los huevos al lado.",
     "Tosta de pan con jamón serrano": "Tuesta el pan y ponle encima el jamón serrano en lonchas. Sin cocción.",
     "Tosta de pan con lomo embuchado": "Tuesta el pan y ponle encima el lomo embuchado en lonchas. Sin cocción.",
     "Garbanzos con atún y pechuga de pollo": "Escurre y enjuaga los garbanzos y mézclalos con el atún escurrido. Haz la pechuga de pollo a la plancha 4-5 min por lado y sírvela al lado. Termina con la fruta. Acompaña con una ensalada aliñada con vinagre o limón.",
     "Arroz con huevos a la plancha y queso batido": "Cuece el arroz (pesado en seco) unos 15 min y escúrrelo. Haz los huevos a la plancha en una sartén antiadherente. Sírvelo con el queso batido y toma la fruta al final. Acompaña con una ensalada aliñada con vinagre o limón.",
-    "Merluza con legumbres y huevos cocidos": "Cuece los huevos 10 min y pélalos. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas y sírvelo todo junto. Toma la fruta al final. Cuece las judías verdes 8-10 min en agua con sal y sírvelas al lado.",
     "Berenjenas rellenas de carne picada": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Vacía un poco la pulpa, saltéala con la carne picada y rellena las berenjenas. Gratina 5 min.",
-    "Berenjenas rellenas de carne picada con pasta": "Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.",
     "Arroz con gambas y pan con tomate": "Cuece el arroz (pesado en seco) unos 15 min. Saltea las gambas en una sartén antiadherente 2-3 min y mézclalas con el arroz. Tuesta el pan y úntalo con el tomate rallado.",
     "Filetes de pollo con arroz y ensalada": "Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelos con el arroz y una ensalada aliñada con vinagre o limón.",
     "Legumbres con filetes de pollo": "Calienta las legumbres escurridas. Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con una ensalada aliñada con vinagre o limón.",
@@ -18070,7 +18037,6 @@
     "Lubina con patata cocida y verdura": "Cuece la patata en trozos 15-20 min y la verdura al vapor 5-8 min. Haz la lubina a la plancha o al horno 8-10 min y sírvelo todo junto.",
     "Salmón con verdura y manzana de postre": "Haz el salmón a la plancha o al horno 8-10 min. Cuece la verdura al vapor 5-8 min o saltéala. Toma la fruta al final.",
     // De la dieta AJ7 del usuario (27 ago 2023)
-    "Tortitas de avena con claras, huevos y fruta": "Bate la harina de avena con las claras y los huevos hasta tener una masa sin grumos. Cuaja las tortitas en una sartén antiadherente a fuego medio, 1-2 min por lado. Toma la fruta al lado.",
     "Tostadas con aceite, huevos a la plancha y pavo": "Tuesta el pan y riégalo con el aceite de oliva. Haz los huevos a la plancha en una sartén antiadherente y sírvelos con el pavo.",
     "Tostadas con aceite, huevos a la plancha y pollo": "Haz el pollo a la plancha 4-5 min por lado (o usa pollo ya cocinado). Tuesta el pan, riégalo con el aceite y sírvelo con los huevos a la plancha y el pollo.",
     "Tostadas con crema de cacahuete, queso batido y una manzana": "Tuesta el pan y úntalo con la crema de cacahuete. Sirve el queso batido en un bol y toma la manzana al lado.",
@@ -18115,7 +18081,6 @@
     "Nuggets de pollo crujientes con ensalada": "Tritura la pechuga con el huevo, sal, ajo y pimentón hasta tener una masa. Machaca los copos de maíz. Forma bolitas aplastadas con la masa y rebózalas en los copos. Hazlas en la freidora de aire a 200º unos 12-15 min, dándoles la vuelta a mitad. Sírvelos con la ensalada.",
     "Tacos de hamburguesa estilo Big Mac": "Mezcla el yogur con mostaza y los pepinillos picados para la salsa. Reparte la carne picada sobre las tortillas, aplastándola en una capa fina, y sálala. Ponlas en la sartén con la carne hacia abajo 3-4 min, dales la vuelta, echa el queso y deja 1 min más. Termina con la salsa y la lechuga, y dóblalas como un taco.",
     "Gofre de boniato con hamburguesa, cottage y guacamole": "Cuece el boniato pelado en trozos unos 15 min y tritúralo con el huevo, sal y especias. Hazlo en la gofrera caliente unos 6-8 min, hasta que esté dorado. Mientras, haz la carne a la plancha en forma de hamburguesa. Monta el gofre con el queso cottage, el guacamole casero (aguacate machacado con tomate, cebolla, limón y sal), el tomate en rodajas, los canónigos y la hamburguesa encima.",
-    "Tacos de zanahoria con pollo y cottage": "Ralla la zanahoria y mézclala con el queso rallado, el huevo, sal y especias. Forma 4 círculos finos sobre papel de horno y hornea a 180º unos 20 min, hasta que los bordes se doren. Mientras, haz el pollo a la plancha y desmenúzalo. Rellena los círculos con el queso cottage, el pollo y los canónigos, y dóblalos como tacos.",
     "Bowl de boniato con salmón, guacamole y cottage": "Asa el boniato en dados en la freidora de aire a 190º unos 15-18 min. Haz el salmón a la plancha o al horno 10 min y desmígalo. Monta el bol con la rúcula, el boniato, el salmón, el tomate en dados, el queso cottage y el guacamole casero (aguacate machacado con limón y sal), y un hilo de miel por encima del boniato.",
     "Tortilla de espinacas, cherry y queso en freidora": "Pon la tortilla de trigo en un molde apto para la freidora de aire, de forma que haga de base. Reparte dentro las espinacas y los tomates cherry partidos. Bate los huevos con sal y pimienta y échalos por encima, con el queso en lascas. Hazla a 180º unos 10-12 min, hasta que cuaje.",
     // Recetas de reels de cocina fit (5 oct 2026)
@@ -18294,12 +18259,10 @@
     "Bocaditos de plátano estilo pancake": "Tritura la avena con el huevo, la leche y una pizca de levadura. Corta el plátano en rodajas gruesas, báñalas en la masa y cocínalas en una sartén antiadherente a fuego medio, 1-2 minutos por lado. Sírvelas con las fresas.",
     "Tostadas francesas sabor cheesecake de fresas": "Mezcla el queso crema con estevia, vainilla y casi todas las fresas picadas. Úntalo en una rebanada, tapa con la otra, aplasta con un rodillo y corta en trozos. Bate el huevo con la leche, la canela y estevia, y empapa los trozos. Dóralos por los dos lados en una sartén engrasada con el aceite. Sírvelos con el yogur y el resto de las fresas.",
     "Carrot cake de una porción con yogur": "Mezcla el huevo, la harina de avena, los primeros 60 g de yogur, la zanahoria rallada, la canela y una pizca de levadura. Ponlo en un recipiente apto para microondas y cuécelo 3-4 minutos a potencia media, hasta que al pinchar salga limpio. Deja que se temple, cúbrelo con el resto del yogur y las nueces picadas.",
-    "Pan de avena y espinacas relleno de pavo y queso fresco": "Tritura la avena, las espinacas, el huevo, las claras, la leche, una pizca de levadura y sal. Ponlo en un recipiente apto para microondas y cuécelo 3-4 minutos, vigilando que no se salga. Desmóldalo, ábrelo por la mitad y rellénalo con el queso fresco batido y el pavo.",
     "Sándwich de huevo cremoso": "Cuece los huevos 10 minutos y pélalos. Chafa las yemas con el queso crema y la mostaza, pica las claras y mézclalo todo con sal y pimienta. Tuesta el pan, reparte el relleno y pon encima los pepinillos en rodajas.",
     "Muffins salados": "Bate los huevos con el queso crema, sal y pimienta hasta que no queden grumos. Añade las espinacas picadas, el pimiento en dados y el maíz. Reparte la mezcla en moldes de magdalena engrasados y hornea 20 minutos a 180 °C.",
     "Tortilla esponjosa de queso crema con pavo, champiñones y tomate": "Bate muy bien los huevos con el queso crema, sin grumos. Viértelo en una sartén antiadherente a fuego medio-bajo. Cuando empiecen a salir burbujas, reparte encima el pavo, los champiñones laminados, el tomate y el queso rallado. Tapa la sartén y espera a que se funda el queso.",
     "Huevos rancheros con alubias": "Sofríe la cebolla picada con el aceite, añade el tomate troceado y el orégano y deja que se haga 10 minutos. Mientras, haz los huevos a la plancha y calienta la tortilla y las alubias. Pon sobre la tortilla las alubias, los huevos y la salsa de tomate, y un poco de picante si te gusta.",
-    "Tortitas de arroz con atún cremoso": "Escurre el atún y mézclalo con el queso crema, el yogur, unas gotas de limón, el apio picado, sal y pimienta. Repártelo sobre las tortitas de arroz y pon encima el tomate en dados.",
     "Huevos rellenos de aguacate y atún": "Cuece los huevos 10 minutos, pélalos y pártelos por la mitad. Chafa las yemas con el aguacate, el atún escurrido, el queso crema, sal y pimienta hasta tener una crema. Rellena las claras.",
     "Mousse de yogur griego y coco": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Mezcla el yogur con el coco, la estevia y la vainilla, añade la gelatina y remueve bien. Repártelo en vasitos y déjalo 2 horas en la nevera.",
     "Mousse de yogur griego y frambuesas": "Hidrata la gelatina en 2 cucharadas de agua fría y disuélvela calentándola unos segundos. Tritura el yogur con las frambuesas y la estevia, añade la gelatina y bate otra vez. Repártelo en vasitos y déjalo 2 horas en la nevera.",

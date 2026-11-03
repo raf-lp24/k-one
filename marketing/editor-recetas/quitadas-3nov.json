@@ -1,0 +1,180 @@
+[
+ {
+  "nombre": "Huevos revueltos con tortitas de arroz y tomates cherry",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Huevos revueltos con tortitas de arroz y tomates cherry\": \"Casca los huevos en una sartén antiadherente y revuélvelos a fuego medio 2-3 min con una pizca de sal. Sírvelos con las tortitas de arroz y los tomates cherry cortados por la mitad.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Avena con leche, tortilla francesa y manzana\", \"50g avena, 150ml leche semid",
+    "texto": "op(\"Huevos revueltos con tortitas de arroz y tomates cherry\", \"3 huevos, 4 tortitas de arroz, 6 tomates cherry\", \"518 kcal\", \"30g prot\", \"59g carbs\", \"18g grasa\", \"Fácil · 8 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Avena con leche, tortilla francesa y manzana\", \"50g avena, 150ml leche semid",
+    "texto": "op(\"Huevos revueltos con tortitas de arroz y tomates cherry\", \"3 huevos, 4 tortitas de arroz, 6 tomates cherry\", \"518 kcal\", \"30g prot\", \"59g carbs\", \"18g grasa\", \"Fácil · 8 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Avena con leche, tortilla francesa y manzana\", \"50g avena, 150ml leche semid",
+    "texto": "op(\"Huevos revueltos con tortitas de arroz y tomates cherry\", \"3 huevos, 4 tortitas de arroz, 6 tomates cherry\", \"518 kcal\", \"30g prot\", \"59g carbs\", \"18g grasa\", \"Fácil · 8 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Tortitas de avena con claras, huevos y fruta",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Tortitas de avena con claras, huevos y fruta\": \"Bate la harina de avena con las claras y los huevos hasta tener una masa sin grumos. Cuaja las tortitas en una sartén antiadherente a fuego medio, 1-2 min por lado. Toma la fruta al lado.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "// De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.",
+    "texto": "op(\"Tortitas de avena con claras, huevos y fruta\", \"60g harina de avena, 250ml claras, 2 huevos, 1 manzana\", \"607 kcal\", \"50g prot\", \"68g carbs\", \"15g grasa\", \"Fácil · 12 min\"),"
+   },
+   {
+    "antesDeLaLinea": "// De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.",
+    "texto": "op(\"Tortitas de avena con claras, huevos y fruta\", \"60g harina de avena, 250ml claras, 2 huevos, 1 manzana\", \"607 kcal\", \"50g prot\", \"68g carbs\", \"15g grasa\", \"Fácil · 12 min\"),"
+   },
+   {
+    "antesDeLaLinea": "// De la dieta AJ7 del usuario (27 ago 2023), aprobadas el 3 oct 2026.",
+    "texto": "op(\"Tortitas de avena con claras, huevos y fruta\", \"60g harina de avena, 250ml claras, 2 huevos, 1 manzana\", \"607 kcal\", \"50g prot\", \"68g carbs\", \"15g grasa\", \"Fácil · 12 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Tosta con huevos cocidos, jamón serrano y leche",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Tosta con huevos cocidos, jamón serrano y leche\": \"Cuece los huevos 10 min, enfríalos y pélalos. Tuesta el pan y ponle encima el jamón serrano y los huevos en rodajas. Acompáñalo con la leche.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Tosta con huevo cocido y jamón serrano\", \"1 tosta de pan, 1 huevo, 30g jamón",
+    "texto": "op(\"Tosta con huevos cocidos, jamón serrano y leche\", \"1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada\", \"399 kcal\", \"32g prot\", \"25g carbs\", \"19g grasa\", \"Fácil · 12 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Tosta con huevo cocido y jamón serrano\", \"1 tosta de pan, 1 huevo, 30g jamón",
+    "texto": "op(\"Tosta con huevos cocidos, jamón serrano y leche\", \"1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada\", \"399 kcal\", \"32g prot\", \"25g carbs\", \"19g grasa\", \"Fácil · 12 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Tosta con huevo cocido y jamón serrano\", \"1 tosta de pan, 1 huevo, 30g jamón",
+    "texto": "op(\"Tosta con huevos cocidos, jamón serrano y leche\", \"1 tosta de pan, 2 huevos, 50g jamón serrano, 150ml leche semidesnatada\", \"399 kcal\", \"32g prot\", \"25g carbs\", \"19g grasa\", \"Fácil · 12 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Pan de avena y espinacas relleno de pavo y queso fresco",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Pan de avena y espinacas relleno de pavo y queso fresco\": \"Tritura la avena, las espinacas, el huevo, las claras, la leche, una pizca de levadura y sal. Ponlo en un recipiente apto para microondas y cuécelo 3-4 minutos, vigilando que no se salga. Desmóldalo, ábrelo por la mitad y rellénalo con el queso fresco batido y el pavo.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Carrot cake de una porción con yogur\", \"1 huevo, 40g harina de avena, 60g yo",
+    "texto": "op(\"Pan de avena y espinacas relleno de pavo y queso fresco\", \"30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo\", \"374 kcal\", \"36g prot\", \"26g carbs\", \"14g grasa\", \"Microondas · 8 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Carrot cake de una porción con yogur\", \"1 huevo, 40g harina de avena, 60g yo",
+    "texto": "op(\"Pan de avena y espinacas relleno de pavo y queso fresco\", \"30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo\", \"374 kcal\", \"36g prot\", \"26g carbs\", \"14g grasa\", \"Microondas · 8 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Carrot cake de una porción con yogur\", \"1 huevo, 40g harina de avena, 60g yo",
+    "texto": "op(\"Pan de avena y espinacas relleno de pavo y queso fresco\", \"30g copos de avena, 30g espinacas, 1 huevo, 30g claras de huevo, 60ml leche desnatada, levadura química, 40g queso fresco batido, 40g pechuga de pavo\", \"374 kcal\", \"36g prot\", \"26g carbs\", \"14g grasa\", \"Microondas · 8 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Huevos cocidos con plátano y crema de cacahuete",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Huevos cocidos con plátano y crema de cacahuete\": \"Cuece los huevos 10 min en agua hirviendo, pásalos a agua fría y pélalos; puedes dejarlos hechos la noche antes y llevártelos. Sírvelos con una pizca de sal y acompáñalos del plátano con la crema de cacahuete untada por encima.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Bol de yogur proteico con plátano caramelizado\", \"200g yogur griego 0%, 25g ",
+    "texto": "op(\"Huevos cocidos con plátano y crema de cacahuete\", \"3 huevos, 1 plátano, 15g crema de cacahuete\", \"444 kcal\", \"25g prot\", \"32g carbs\", \"24g grasa\", \"Fácil · 12 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Avena nocturna de chocolate, kiwi y arándanos\", \"50g copos de avena, 1 scoop",
+    "texto": "op(\"Huevos cocidos con plátano y crema de cacahuete\", \"3 huevos, 1 plátano, 15g crema de cacahuete\", \"444 kcal\", \"25g prot\", \"32g carbs\", \"24g grasa\", \"Fácil · 12 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Merluza con legumbres y huevos cocidos",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Merluza con legumbres y huevos cocidos\": \"Cuece los huevos 10 min y pélalos. Haz la merluza a la plancha o al horno 8-10 min. Calienta las legumbres escurridas y sírvelo todo junto. Toma la fruta al final. Cuece las judías verdes 8-10 min en agua con sal y sírvelas al lado.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Arroz con huevos a la plancha y queso batido\", \"100g arroz crudo, 2 huevos, ",
+    "texto": "op(\"Merluza con legumbres y huevos cocidos\", \"150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes\", \"796 kcal\", \"69g prot\", \"85g carbs\", \"20g grasa\", \"Fácil · 20 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Arroz con huevos a la plancha y queso batido\", \"100g arroz crudo, 2 huevos, ",
+    "texto": "op(\"Merluza con legumbres y huevos cocidos\", \"150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes\", \"796 kcal\", \"69g prot\", \"85g carbs\", \"20g grasa\", \"Fácil · 20 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Arroz con huevos a la plancha y queso batido\", \"100g arroz crudo, 2 huevos, ",
+    "texto": "op(\"Merluza con legumbres y huevos cocidos\", \"150g merluza, 200g legumbres cocidas, 3 huevos, 1 manzana, 150g judías verdes\", \"796 kcal\", \"69g prot\", \"85g carbs\", \"20g grasa\", \"Fácil · 20 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Berenjenas rellenas de carne picada con pasta",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Berenjenas rellenas de carne picada con pasta\": \"Corta las berenjenas por la mitad y hornéalas 20 min a 200 °C. Saltea la pulpa con la carne picada y rellena las berenjenas. Cuece la pasta (pesada en seco) y sírvela al lado. Toma la fruta al final.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Berenjenas rellenas de carne picada\", \"200g berenjena, 150g carne picada\", \"",
+    "texto": "op(\"Berenjenas rellenas de carne picada con pasta\", \"200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana\", \"541 kcal\", \"41g prot\", \"74g carbs\", \"9g grasa\", \"Medio · 35 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Berenjenas rellenas de carne picada\", \"200g berenjena, 150g carne picada\", \"",
+    "texto": "op(\"Berenjenas rellenas de carne picada con pasta\", \"200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana\", \"541 kcal\", \"41g prot\", \"74g carbs\", \"9g grasa\", \"Medio · 35 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Berenjenas rellenas de carne picada\", \"200g berenjena, 150g carne picada\", \"",
+    "texto": "op(\"Berenjenas rellenas de carne picada con pasta\", \"200g berenjena, 150g carne picada, 50g pasta cruda, 1 manzana\", \"541 kcal\", \"41g prot\", \"74g carbs\", \"9g grasa\", \"Medio · 35 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Cecina con tortitas de arroz y zanahoria",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Cecina con tortitas de arroz y zanahoria\": \"Monta la cecina sobre las tortitas de arroz. Corta la zanahoria en bastones y sírvela al lado para mojar o comer a bocados. Listo en 3 min.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Tosta pequeña de pavo con tomate\", \"1 tosta pequeña integral, 40g pavo en lo",
+    "texto": "op(\"Cecina con tortitas de arroz y zanahoria\", \"40g cecina, 2 tortitas de arroz, 150g zanahoria\", \"237 kcal\", \"19g prot\", \"29g carbs\", \"5g grasa\", \"Sin cocción · 3 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Tortitas de arroz con atún cremoso",
+  "motivo": "Rastro de «Quitar» cancelado por «Bien así»: su marca se guardó dos veces y sin más cambios",
+  "pasos": "\"Tortitas de arroz con atún cremoso\": \"Escurre el atún y mézclalo con el queso crema, el yogur, unas gotas de limón, el apio picado, sal y pimienta. Repártelo sobre las tortitas de arroz y pon encima el tomate en dados.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "// 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa",
+    "texto": "op(\"Tortitas de arroz con atún cremoso\", \"3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto\", \"253 kcal\", \"26g prot\", \"26g carbs\", \"5g grasa\", \"Sin cocción · 5 min\"),"
+   },
+   {
+    "antesDeLaLinea": "// 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa",
+    "texto": "op(\"Tortitas de arroz con atún cremoso\", \"3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto\", \"253 kcal\", \"26g prot\", \"26g carbs\", \"5g grasa\", \"Sin cocción · 5 min\"),"
+   },
+   {
+    "antesDeLaLinea": "// 29 oct 2026 · revisión completa de @lu_fitfoodie, aprobadas por Rafa",
+    "texto": "op(\"Tortitas de arroz con atún cremoso\", \"3 tortitas de arroz, 80g atún al natural, 15g queso crema light, 20g yogur griego 0%, 50g tomate, 20g apio, zumo de limón al gusto\", \"253 kcal\", \"26g prot\", \"26g carbs\", \"5g grasa\", \"Sin cocción · 5 min\"),"
+   }
+  ]
+ },
+ {
+  "nombre": "Tacos de zanahoria con pollo y cottage",
+  "motivo": "Rafa lo pidió el 3 nov",
+  "pasos": "\"Tacos de zanahoria con pollo y cottage\": \"Ralla la zanahoria y mézclala con el queso rallado, el huevo, sal y especias. Forma 4 círculos finos sobre papel de horno y hornea a 180º unos 20 min, hasta que los bordes se doren. Mientras, haz el pollo a la plancha y desmenúzalo. Rellena los círculos con el queso cottage, el pollo y los canónigos, y dóblalos como tacos.\",",
+  "lineas": [
+   {
+    "antesDeLaLinea": "op(\"Bowl de pavo, huevos, cottage, pepino y tomate\", \"180g pavo, 2 huevos, 150g ",
+    "texto": "op(\"Tacos de zanahoria con pollo y cottage\", \"200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos\", \"499 kcal\", \"53g prot\", \"29g carbs\", \"19g grasa\", \"Horno 180º · 20 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Bowl de pavo, huevos, cottage, pepino y tomate\", \"180g pavo, 2 huevos, 150g ",
+    "texto": "op(\"Tacos de zanahoria con pollo y cottage\", \"200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos\", \"499 kcal\", \"53g prot\", \"29g carbs\", \"19g grasa\", \"Horno 180º · 20 min\"),"
+   },
+   {
+    "antesDeLaLinea": "op(\"Bowl de pavo, huevos, cottage, pepino y tomate\", \"180g pavo, 2 huevos, 150g ",
+    "texto": "op(\"Tacos de zanahoria con pollo y cottage\", \"200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos\", \"499 kcal\", \"53g prot\", \"29g carbs\", \"19g grasa\", \"Horno 180º · 20 min\"),"
+   }
+  ]
+ }
+]
