@@ -587,7 +587,7 @@ function pintarCabecera() {
   const pc = (n) => (total ? n * 100 / total : 0) + '%';
   $('barra').innerHTML = `<i style="width:${pc(ok)};background:var(--ok)"></i><i style="width:${pc(cam)};background:var(--brasa-txt)"></i><i style="width:${pc(qui)};background:var(--mal)"></i>`;
   // Los cambios de una receta que ya se aplicó se quedan con su id antiguo: no cuentan.
-  const n = Object.keys(C).filter((id) => { const c = C[id]; return (RI[id] || c.nueva) && (editada(c) || c.estado === 'quitar' || c.nota || c.fav || c.nueva); }).length;
+  const n = Object.keys(C).filter((id) => { const c = C[id]; return ((RI[id] && !RI[id].hecha) || c.nueva) && (editada(c) || c.estado === 'quitar' || c.nota || c.fav || c.nueva); }).length;
   $('nCambios').textContent = n ? ' ' + n : '';
 }
 
@@ -813,7 +813,7 @@ function filasCambio(r) {
   return d;
 }
 function pintarCambios() {
-  const lista = R.filter((r) => C[r.id]);
+  const lista = R.filter((r) => C[r.id] && !r.hecha);
   const grupos = [
     ['Para quitar', lista.filter((r) => C[r.id].estado === 'quitar')],
     ['Recetas nuevas', lista.filter((r) => C[r.id].nueva && C[r.id].estado !== 'quitar')],

@@ -176,5 +176,990 @@
     "texto": "op(\"Tacos de zanahoria con pollo y cottage\", \"200g zanahoria, 30g queso rallado, 1 huevo, 120g pechuga de pollo, 80g queso cottage, 30g canónigos\", \"499 kcal\", \"53g prot\", \"29g carbs\", \"19g grasa\", \"Horno 180º · 20 min\"),"
    }
   ]
+ },
+ {
+  "nombre": "Skyr con manzana y semillas de chía",
+  "ingredientes": "200g skyr, 1 manzana, 10g semillas de chía, canela",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Skyr con manzana y semillas de chía\", \"200g skyr, 1 manzana, 10g semillas de chía, canela\", \"280 kcal\", \"24g prot\", \"37g carbs\", \"4g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Skyr con manzana y semillas de chía\": \"Vierte el skyr en un bol. Corta la manzana en dados con piel — ahí está la fibra —, añade las semillas de chía y espolvorea canela. Mejor si reposa 10 min para que la chía se hidrate.\","
+ },
+ {
+  "nombre": "Batido de caseína con plátano y cacao",
+  "ingredientes": "30g caseína, 1 plátano, 1 cda cacao puro, leche",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Batido de caseína con plátano y cacao\", \"30g caseína, 1 plátano, 1 cda cacao puro, leche\", \"384 kcal\", \"32g prot\", \"46g carbs\", \"8g grasa\", \"Fácil · 2 min\"),"
+  ],
+  "pasos": "\"Batido de caseína con plátano y cacao\": \"Mete la caseína, el plátano, el cacao puro y la leche en la batidora. Bate 30-40 segundos hasta que no queden grumos.\","
+ },
+ {
+  "nombre": "Tostada de centeno con tomate, jamón y queso",
+  "ingredientes": "1 rebanada centeno, 120g tomate rallado, 30g jamón serrano, 30g queso fresco",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostada de centeno con tomate, jamón y queso\", \"1 rebanada centeno, 120g tomate rallado, 30g jamón serrano, 30g queso fresco\", \"229 kcal\", \"16g prot\", \"21g carbs\", \"9g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tostada de centeno con tomate, jamón y queso\": \"Tuesta el pan de centeno. Extiende el tomate rallado, coloca el queso fresco y remata con el jamón serrano.\","
+ },
+ {
+  "nombre": "Queso batido con mandarina y semillas de girasol",
+  "ingredientes": "200g queso batido 0%, 1 mandarina, 10g semillas de girasol",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Queso batido con mandarina y semillas de girasol\", \"200g queso batido 0%, 1 mandarina, 10g semillas de girasol\", \"223 kcal\", \"20g prot\", \"20g carbs\", \"7g grasa\", \"Sin cocción · 1 min\"),"
+  ],
+  "pasos": "\"Queso batido con mandarina y semillas de girasol\": \"Vierte el queso batido en un bol. Añade la mandarina en gajos y espolvorea las semillas de girasol.\","
+ },
+ {
+  "nombre": "Calamares a la plancha con quinoa y ensalada de tomate",
+  "ingredientes": "180g calamar, 150g quinoa cocida, 120g tomate, 40g cebolla, 10g AOVE, perejil",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Calamares a la plancha con quinoa y ensalada de tomate\", \"180g calamar, 150g quinoa cocida, 120g tomate, 40g cebolla, 10g AOVE, perejil\", \"444 kcal\", \"33g prot\", \"42g carbs\", \"16g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Calamares a la plancha con quinoa y ensalada de tomate\": \"Cuece la quinoa 15 min en agua con sal y escurre. Plancha los calamares limpios a fuego fuerte 2 min por lado — más tiempo los endurece. Aliña el tomate y la cebolla picada con el AOVE, sal y perejil. Sirve la quinoa de base, los calamares encima y la ensalada al lado.\","
+ },
+ {
+  "nombre": "Manzana con nueces y pasas",
+  "ingredientes": "1 manzana, 20g nueces, 15g pasas",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Manzana con nueces y pasas\", \"1 manzana, 20g nueces, 15g pasas\", \"302 kcal\", \"4g prot\", \"40g carbs\", \"14g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Manzana con nueces y pasas\": \"Corta la manzana en gajos, con piel. Sírvela con las nueces y las pasas al lado. Sin cocción, listo en 2 min.\","
+ },
+ {
+  "nombre": "Tosta de aguacate con huevo duro",
+  "ingredientes": "1 tosta integral, 50g aguacate, 1 huevo duro, tomate, sal",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Tosta de aguacate con huevo duro\", \"1 tosta integral, 50g aguacate, 1 huevo duro, tomate, sal\", \"278 kcal\", \"14g prot\", \"24g carbs\", \"14g grasa\", \"Sin cocción · 5 min\"),"
+  ],
+  "pasos": "\"Tosta de aguacate con huevo duro\": \"Cuece el huevo 10 min y pélalo. Tuesta el pan, aplasta el aguacate con sal y unas gotas de limón, extiéndelo y coloca el huevo en rodajas con el tomate encima.\","
+ },
+ {
+  "nombre": "Rodaballo al horno con coles de Bruselas y patata",
+  "ingredientes": "200g rodaballo, 100g coles de Bruselas, 100g patata, AOVE, limón",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Rodaballo al horno con coles de Bruselas y patata\", \"200g rodaballo, 100g coles de Bruselas, 100g patata, AOVE, limón\", \"340 kcal\", \"32g prot\", \"26g carbs\", \"12g grasa\", \"Fácil · 25 min\"),"
+  ],
+  "pasos": "\"Rodaballo al horno con coles de Bruselas y patata\": \"Precalienta el horno a 200°C. Hornea el rodaballo junto a las coles de Bruselas y la patata en dados con AOVE 20-25 min. Riega con limón antes de servir.\","
+ },
+ {
+  "nombre": "Edamame con sal marina y limón",
+  "ingredientes": "150g edamame cocido, sal marina, limón",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Edamame con sal marina y limón\", \"150g edamame cocido, sal marina, limón\", \"192 kcal\", \"16g prot\", \"14g carbs\", \"8g grasa\", \"Fácil · 5 min\"),"
+  ],
+  "pasos": "\"Edamame con sal marina y limón\": \"Cuece el edamame en agua con sal 5 min. Escurre y sirve caliente con sal marina gruesa y un chorrito de limón.\","
+ },
+ {
+  "nombre": "Tostada de tomate con huevos revueltos y jamón serrano",
+  "ingredientes": "2 tostas integrales, 2 huevos, 100g tomate, 30g jamón serrano, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostada de tomate con huevos revueltos y jamón serrano\", \"2 tostas integrales, 2 huevos, 100g tomate, 30g jamón serrano, 5g AOVE\", \"457 kcal\", \"30g prot\", \"37g carbs\", \"21g grasa\", \"Fácil · 10 min\"),"
+  ],
+  "pasos": "\"Tostada de tomate con huevos revueltos y jamón serrano\": \"Tuesta el pan y extiende el tomate con el AOVE y sal. Revuelve los huevos a fuego suave 2 min, retirándolos aún cremosos. Monta sobre las tostas con el jamón serrano encima.\","
+ },
+ {
+  "nombre": "Hamburguesa de ternera con huevo y boniato asado",
+  "ingredientes": "180g carne picada de ternera, 2 huevos, 200g boniato, 10g AOVE, 80g lechuga, 80g tomate",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Hamburguesa de ternera con huevo y boniato asado\", \"180g carne picada de ternera, 2 huevos, 200g boniato, 10g AOVE, 80g lechuga, 80g tomate\", \"686 kcal\", \"57g prot\", \"47g carbs\", \"30g grasa\", \"Medio · 30 min\"),"
+  ],
+  "pasos": "\"Hamburguesa de ternera con huevo y boniato asado\": \"Asa el boniato en gajos a 200°C 25 min. Sazona la carne picada con sal y pimienta, forma la hamburguesa sin apretarla y plánchala 3 min por lado. Fríe los huevos a la plancha y ponlos encima. Sirve con la lechuga y el tomate.\","
+ },
+ {
+  "nombre": "Pasta con verduras y atún",
+  "ingredientes": "70g pasta integral cruda, 1 lata atún, calabacín, tomate, AOVE",
+  "tomas": [
+   {
+    "r": "Extra: Running e Hyrox",
+    "m": "Comida"
+   },
+   {
+    "r": "Extra: Running e Hyrox",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Pasta con verduras y atún\", \"70g pasta integral cruda, 1 lata atún, calabacín, tomate, AOVE\", \"468 kcal\", \"32g prot\", \"58g carbs\", \"12g grasa\", \"Fácil · 15 min\"),"
+  ],
+  "pasos": "\"Pasta con verduras y atún\": \"Cuece la pasta integral al dente. Saltea calabacín en rodajas con AOVE 3 min. Escurre el atún y mezcla todo con tomate troceado. Un chorrito de AOVE al servir.\","
+ },
+ {
+  "nombre": "Cuscús con pollo y verduras",
+  "ingredientes": "150g cuscús cocido, 200g pollo especiado, calabacín, pimiento, pasas",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Cuscús con pollo y verduras\", \"150g cuscús cocido, 200g pollo especiado, calabacín, pimiento, pasas\", \"491 kcal\", \"53g prot\", \"55g carbs\", \"6g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Cuscús con pollo y verduras\": \"Hidrata el cuscús con agua o caldo caliente 5 min y suéltalo con un tenedor. Saltea el pollo especiado en dados con el calabacín y el pimiento 6-8 min. Mezcla con el cuscús y añade las pasas.\","
+ },
+ {
+  "nombre": "Bocadillo de atún con queso y tomate",
+  "ingredientes": "1 panecillo integral, 1 lata atún, 20g queso, tomate",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Bocadillo de atún con queso y tomate\", \"1 panecillo integral, 1 lata atún, 20g queso, tomate\", \"398 kcal\", \"30g prot\", \"38g carbs\", \"14g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Bocadillo de atún con queso y tomate\": \"Escurre bien el atún. Abre el panecillo, coloca el tomate en rodajas, el queso y el atún desmigado encima.\","
+ },
+ {
+  "nombre": "Edamame con pipas de calabaza",
+  "ingredientes": "120g edamame, 10g pipas de calabaza, sal",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Edamame con pipas de calabaza\", \"120g edamame, 10g pipas de calabaza, sal\", \"200 kcal\", \"16g prot\", \"16g carbs\", \"8g grasa\", \"Fácil · 6 min\"),"
+  ],
+  "pasos": "\"Edamame con pipas de calabaza\": \"Cuece el edamame en agua con sal 5 min y escurre. Sírvelo caliente con una pizca de sal gruesa y las pipas por encima. Se come apretando la vaina con los dientes: la piel no se come.\","
+ },
+ {
+  "nombre": "Tostas con atún, aguacate y tomate cherry",
+  "ingredientes": "2 rebanadas centeno, 1 lata atún, 1/4 aguacate, tomate cherry, limón",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostas con atún, aguacate y tomate cherry\", \"2 rebanadas centeno, 1 lata atún, 1/4 aguacate, tomate cherry, limón\", \"392 kcal\", \"30g prot\", \"32g carbs\", \"16g grasa\", \"Sin cocción · 5 min\"),"
+  ],
+  "pasos": "\"Tostas con atún, aguacate y tomate cherry\": \"Escurre el atún. Tuesta el pan de centeno, unta el aguacate aplastado y añade el atún y el tomate cherry partido. Riega con limón.\","
+ },
+ {
+  "nombre": "Tortitas de arroz con aguacate, huevo y pavo",
+  "ingredientes": "2 tortitas de arroz, 20g aguacate, 2 huevos cocidos, 50g pavo en lonchas, sal en escamas",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortitas de arroz con aguacate, huevo y pavo\", \"2 tortitas de arroz, 20g aguacate, 2 huevos cocidos, 50g pavo en lonchas, sal en escamas\", \"310 kcal\", \"27g prot\", \"19g carbs\", \"14g grasa\", \"Fácil · 12 min\"),"
+  ],
+  "pasos": "\"Tortitas de arroz con aguacate, huevo y pavo\": \"Aplasta el aguacate y úntalo sobre las tortitas. Reparte el pavo y corona con los huevos cocidos en rodajas. Termina con sal en escamas.\","
+ },
+ {
+  "nombre": "Batido de leche con avena, cacao y plátano",
+  "ingredientes": "250ml leche semidesnatada, 30g avena, 5g cacao puro, 1 plátano",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Batido de leche con avena, cacao y plátano\", \"250ml leche semidesnatada, 30g avena, 5g cacao puro, 1 plátano\", \"384 kcal\", \"15g prot\", \"63g carbs\", \"8g grasa\", \"Fácil · 3 min\"),"
+  ],
+  "pasos": "\"Batido de leche con avena, cacao y plátano\": \"Tritura la leche con la avena, el cacao y el plátano 30 segundos hasta que quede homogéneo. Si lo quieres más espeso, usa el plátano congelado en rodajas.\","
+ },
+ {
+  "nombre": "Tostadas integrales con plátano, miel y crema de cacahuete",
+  "ingredientes": "3 rebanadas pan integral, 1 plátano, 15g miel, 20g crema de cacahuete",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostadas integrales con plátano, miel y crema de cacahuete\", \"3 rebanadas pan integral, 1 plátano, 15g miel, 20g crema de cacahuete\", \"518 kcal\", \"18g prot\", \"80g carbs\", \"14g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tostadas integrales con plátano, miel y crema de cacahuete\": \"Tuesta el pan y unta la crema de cacahuete. Corta el plátano en rodajas por encima y riega con la miel.\","
+ },
+ {
+  "nombre": "Bocadillo de atún con huevo duro y tomate",
+  "ingredientes": "1 panecillo integral, 2 latas atún al natural, 1 huevo duro, 80g tomate, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Bocadillo de atún con huevo duro y tomate\", \"1 panecillo integral, 2 latas atún al natural, 1 huevo duro, 80g tomate, 5g AOVE\", \"475 kcal\", \"54g prot\", \"31g carbs\", \"15g grasa\", \"Sin cocción · 8 min\"),"
+  ],
+  "pasos": "\"Bocadillo de atún con huevo duro y tomate\": \"Cuece el huevo 10 min, pélalo y córtalo en rodajas. Abre el panecillo, extiende el tomate rallado con el AOVE y rellena con el atún escurrido y el huevo.\","
+ },
+ {
+  "nombre": "Tortilla de claras con jamón, espárragos y ensalada",
+  "ingredientes": "5 claras, 1 huevo, 30g jamón cocido, 150g espárragos trigueros, 100g lechuga, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortilla de claras con jamón, espárragos y ensalada\", \"5 claras, 1 huevo, 30g jamón cocido, 150g espárragos trigueros, 100g lechuga, 5g AOVE\", \"292 kcal\", \"35g prot\", \"11g carbs\", \"12g grasa\", \"Fácil · 15 min\"),"
+  ],
+  "pasos": "\"Tortilla de claras con jamón, espárragos y ensalada\": \"Saltea los espárragos trigueros 3-4 min. Bate las claras con el huevo y el jamón en dados, añade los espárragos y cuaja en sartén como tortilla, dándole la vuelta a mitad. Sirve con la ensalada de lechuga aliñada con AOVE.\","
+ },
+ {
+  "nombre": "Costillas al horno con puré de patata",
+  "ingredientes": "220g costillas de cerdo, 200g puré de patata, especias",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Costillas al horno con puré de patata\", \"220g costillas de cerdo, 200g puré de patata, especias\", \"781 kcal\", \"61g prot\", \"40g carbs\", \"42g grasa\", \"Medio · 35 min\"),"
+  ],
+  "pasos": "\"Costillas al horno con puré de patata\": \"Sazona las costillas con las especias. Hornéalas a 180°C tapadas con papel de aluminio 45-50 min, y destapa los últimos 10 min para que se doren. Sirve con el puré de patata.\","
+ },
+ {
+  "nombre": "Pollo a la plancha con arroz y brócoli",
+  "ingredientes": "220g pollo, 100g arroz integral cocido, 200g brócoli, AOVE",
+  "tomas": [
+   {
+    "r": "Extra: Gimnasio y CrossFit",
+    "m": "Comida"
+   },
+   {
+    "r": "Extra: Gimnasio y CrossFit",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Pollo a la plancha con arroz y brócoli\", \"220g pollo, 100g arroz integral cocido, 200g brócoli, AOVE\", \"486 kcal\", \"52g prot\", \"38g carbs\", \"14g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Pollo a la plancha con arroz y brócoli\": \"Cuece el arroz integral y el brócoli al vapor (8 min). Plancha el pollo sazonado 4-5 min por lado. Sirve con un chorrito de AOVE.\","
+ },
+ {
+  "nombre": "Tortilla de patata ligera con pan",
+  "ingredientes": "2 huevos, 200g patata cocida, 2 rebanadas pan integral, 10g AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortilla de patata ligera con pan\", \"2 huevos, 200g patata cocida, 2 rebanadas pan integral, 10g AOVE\", \"611 kcal\", \"25g prot\", \"76g carbs\", \"23g grasa\", \"Medio · 25 min\"),"
+  ],
+  "pasos": "\"Tortilla de patata ligera con pan\": \"Cuece la patata en dados 12-15 min hasta que esté tierna. Bate los huevos, mezcla con la patata escurrida y cuaja la tortilla en la sartén con el AOVE, 3-4 min por lado. Acompaña con el pan tostado.\","
+ },
+ {
+  "nombre": "Cottage con frutos rojos y nueces",
+  "ingredientes": "200g queso cottage, 80g frutos rojos, 15g nueces",
+  "tomas": [
+   {
+    "r": "Extra: Gimnasio y CrossFit",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Cottage con frutos rojos y nueces\", \"200g queso cottage, 80g frutos rojos, 15g nueces\", \"286 kcal\", \"24g prot\", \"18g carbs\", \"15g grasa\", \"Sin cocción · 2 min\")"
+  ],
+  "pasos": "\"Cottage con frutos rojos y nueces\": \"Vierte el cottage en un bol. Añade los frutos rojos y las nueces troceadas. Listo en 1 min.\","
+ },
+ {
+  "nombre": "Huevos revueltos con espinacas y tostada integral",
+  "ingredientes": "3 huevos, 100g espinacas, 1 tostada integral, 5g AOVE",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Huevos revueltos con espinacas y tostada integral\", \"3 huevos, 100g espinacas, 1 tostada integral, 5g AOVE\", \"349 kcal\", \"24g prot\", \"16g carbs\", \"21g grasa\", \"Fácil · 10 min\"),"
+  ],
+  "pasos": "\"Huevos revueltos con espinacas y tostada integral\": \"Saltea las espinacas en el AOVE hasta que se ablanden. Añade el huevo batido y cuaja a fuego medio removiendo. Sirve con la tostada.\","
+ },
+ {
+  "nombre": "Tortilla de tres huevos con espinacas y tomate",
+  "ingredientes": "3 huevos, 100g espinacas, 150g tomate, 10g AOVE",
+  "tomas": [
+   {
+    "r": "Reserva alérgicos",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op('Tortilla de tres huevos con espinacas y tomate', '3 huevos, 100g espinacas, 150g tomate, 10g AOVE', '378 kcal', '25g prot', '11g carbs', '26g grasa', 'Fácil · 8 min'),"
+  ],
+  "pasos": null
+ },
+ {
+  "nombre": "Yogur griego con higos y nueces",
+  "ingredientes": "150g yogur griego, 2 higos, 15g nueces, 1 cdta miel",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Yogur griego con higos y nueces\", \"150g yogur griego, 2 higos, 15g nueces, 1 cdta miel\", \"333 kcal\", \"17g prot\", \"28g carbs\", \"17g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Yogur griego con higos y nueces\": \"Vierte el yogur en un bol. Corta los higos en cuartos y colócalos encima con las nueces troceadas. Riega con la miel.\","
+ },
+ {
+  "nombre": "Batido de proteína con avena y plátano",
+  "ingredientes": "1 scoop whey, 30g avena, 1 plátano, 250ml leche",
+  "tomas": [
+   {
+    "r": "Extra: Gimnasio y CrossFit",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Batido de proteína con avena y plátano\", \"1 scoop whey, 30g avena, 1 plátano, 250ml leche\", \"416 kcal\", \"34g prot\", \"52g carbs\", \"8g grasa\", \"Fácil · 3 min\"),"
+  ],
+  "pasos": "\"Batido de proteína con avena y plátano\": \"Pon el scoop, la avena, el plátano y la leche en batidora. Bate 30 seg. Sirve frío.\","
+ },
+ {
+  "nombre": "Queso fresco con manzana y miel",
+  "ingredientes": "100g queso fresco 0%, 1 manzana, 1 cdta miel, canela",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Queso fresco con manzana y miel\", \"100g queso fresco 0%, 1 manzana, 1 cdta miel, canela\", \"193 kcal\", \"13g prot\", \"33g carbs\", \"1g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Queso fresco con manzana y miel\": \"Trocea la manzana con piel y mézclala con el queso fresco. Añade el hilo de miel y espolvorea canela.\","
+ },
+ {
+  "nombre": "Tostadas con huevo revuelto y tomate",
+  "ingredientes": "2 rebanadas centeno, 2 huevos revueltos, tomate, AOVE, orégano",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostadas con huevo revuelto y tomate\", \"2 rebanadas centeno, 2 huevos revueltos, tomate, AOVE, orégano\", \"403 kcal\", \"18g prot\", \"31g carbs\", \"23g grasa\", \"Fácil · 8 min\"),"
+  ],
+  "pasos": "\"Tostadas con huevo revuelto y tomate\": \"Bate los huevos y revuélvelos en sartén antiadherente 2-3 min. Tuesta el pan y sirve con el revuelto, el tomate y un chorrito de AOVE. Espolvorea orégano.\","
+ },
+ {
+  "nombre": "Manzana asada con canela",
+  "ingredientes": "1 manzana, canela, unas gotas de miel",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Manzana asada con canela\", \"1 manzana, canela, unas gotas de miel\", \"94 kcal\", \"1g prot\", \"25g carbs\", \"0g grasa\", \"Fácil · 15 min\"),"
+  ],
+  "pasos": "\"Manzana asada con canela\": \"Hornea la manzana entera a 200°C 25-30 min hasta que esté blanda (o al microondas 4-5 min). Espolvorea canela y riega con unas gotas de miel.\","
+ },
+ {
+  "nombre": "Tortilla de calabacín con ensalada verde",
+  "ingredientes": "3 huevos, 200g calabacín, 60g cebolla, 10g AOVE, 80g lechuga, 80g tomate",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortilla de calabacín con ensalada verde\", \"3 huevos, 200g calabacín, 60g cebolla, 10g AOVE, 80g lechuga, 80g tomate\", \"423 kcal\", \"26g prot\", \"19g carbs\", \"27g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Tortilla de calabacín con ensalada verde\": \"Sofríe el calabacín en rodajas finas y la cebolla en el AOVE 10 min a fuego medio hasta que estén tiernos. Bate los huevos con sal, mezcla con la verdura y cuaja la tortilla 3 min por lado. Sirve con la lechuga y el tomate aliñados.\","
+ },
+ {
+  "nombre": "Cuscús con ternera y verduras salteadas",
+  "ingredientes": "150g cuscús cocido, 180g ternera, 100g pimiento, 80g zanahoria, 60g cebolla, 10g AOVE, comino",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Cuscús con ternera y verduras salteadas\", \"150g cuscús cocido, 180g ternera, 100g pimiento, 80g zanahoria, 60g cebolla, 10g AOVE, comino\", \"670 kcal\", \"73g prot\", \"54g carbs\", \"18g grasa\", \"Fácil · 25 min\"),"
+  ],
+  "pasos": "\"Cuscús con ternera y verduras salteadas\": \"Hidrata el cuscús con el mismo volumen de agua hirviendo con sal, tápalo 5 min y sepáralo con un tenedor. Saltea la ternera en tiras a fuego fuerte 4 min y retira. Saltea el pimiento, la zanahoria y la cebolla 5 min con el comino, devuelve la carne y mezcla con el cuscús.\","
+ },
+ {
+  "nombre": "Queso batido con arándanos, almendras y canela",
+  "ingredientes": "200g queso batido 0%, 150g arándanos, 10g almendras, canela",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Queso batido con arándanos, almendras y canela\", \"200g queso batido 0%, 150g arándanos, 10g almendras, canela\", \"298 kcal\", \"24g prot\", \"37g carbs\", \"6g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Queso batido con arándanos, almendras y canela\": \"Mezcla los arándanos con el queso batido. Esparce las almendras troceadas por encima y espolvorea canela: con los arándanos ya queda dulce.\","
+ },
+ {
+  "nombre": "Bol de yogur natural con muesli y kiwi",
+  "ingredientes": "200g yogur natural, 40g muesli sin azúcar, 2 kiwis",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op(\"Bol de yogur natural con muesli y kiwi\", \"200g yogur natural, 40g muesli sin azúcar, 2 kiwis\", \"374 kcal\", \"13g prot\", \"58g carbs\", \"10g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Bol de yogur natural con muesli y kiwi\": \"Vierte el yogur en un bol, añade el muesli y los kiwis pelados en rodajas. Echa el muesli justo antes de comer para que no se reblandezca.\","
+ },
+ {
+  "nombre": "Entrecot a la plancha con patata asada y guisantes",
+  "ingredientes": "200g entrecot de ternera, 200g patata asada, 100g guisantes, AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Entrecot a la plancha con patata asada y guisantes\", \"200g entrecot de ternera, 200g patata asada, 100g guisantes, AOVE\", \"900 kcal\", \"60g prot\", \"57g carbs\", \"48g grasa\", \"Medio · 25 min\"),"
+  ],
+  "pasos": "\"Entrecot a la plancha con patata asada y guisantes\": \"Precalienta el horno a 200°C y asa la patata en dados con AOVE 25 min. Cuece los guisantes. Plancha el entrecot a fuego fuerte 2-3 min por lado y deja reposar antes de servir.\","
+ },
+ {
+  "nombre": "Paella de pollo y verduras",
+  "ingredientes": "220g arroz cocido, 200g pollo, 120g judías verdes, 100g pimiento, azafrán, 15g AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Paella de pollo y verduras\", \"220g arroz cocido, 200g pollo, 120g judías verdes, 100g pimiento, azafrán, 15g AOVE\", \"706 kcal\", \"54g prot\", \"82g carbs\", \"18g grasa\", \"Medio · 35 min\"),"
+  ],
+  "pasos": "\"Paella de pollo y verduras\": \"Dora el pollo en trozos con el AOVE en la paellera. Añade las judías verdes y el pimiento y sofríe 3-4 min. Incorpora el arroz y el azafrán disuelto en un poco de agua caliente, y cocina a fuego medio hasta que el arroz absorba el líquido.\","
+ },
+ {
+  "nombre": "Tosta de queso de cabra con jamón ibérico y miel",
+  "ingredientes": "2 tostas de pan blanco, 40g queso de cabra, 30g jamón ibérico, 1 cda miel",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tosta de queso de cabra con jamón ibérico y miel\", \"2 tostas de pan blanco, 40g queso de cabra, 30g jamón ibérico, 1 cda miel\", \"434 kcal\", \"26g prot\", \"42g carbs\", \"18g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tosta de queso de cabra con jamón ibérico y miel\": \"Tuesta el pan. Unta el queso de cabra, añade el jamón ibérico y un chorrito de miel por encima.\","
+ },
+ {
+  "nombre": "Kiwi con yogur griego y canela",
+  "ingredientes": "2 kiwis, 150g yogur griego 0%, canela",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Kiwi con yogur griego y canela\", \"2 kiwis, 150g yogur griego 0%, canela\", \"185 kcal\", \"17g prot\", \"27g carbs\", \"1g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Kiwi con yogur griego y canela\": \"Vierte el yogur en un bol. Pela los kiwis, córtalos en rodajas y ponlos por encima. Espolvorea canela.\","
+ },
+ {
+  "nombre": "Wok de cerdo con arroz, verduras y anacardos",
+  "ingredientes": "180g cinta de lomo, 150g arroz cocido, 100g pimiento, 80g zanahoria, 20g anacardos, 10g AOVE, 10ml salsa de soja",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Wok de cerdo con arroz, verduras y anacardos\", \"180g cinta de lomo, 150g arroz cocido, 100g pimiento, 80g zanahoria, 20g anacardos, 10g AOVE, 10ml salsa de soja\", \"686 kcal\", \"50g prot\", \"63g carbs\", \"26g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Wok de cerdo con arroz, verduras y anacardos\": \"Corta la cinta de lomo en tiras y saltéala a fuego muy fuerte 3 min en el AOVE. Retira y saltea el pimiento y la zanahoria en juliana 3 min. Devuelve la carne, añade el arroz cocido, la salsa de soja y los anacardos y saltea 2 min removiendo.\","
+ },
+ {
+  "nombre": "Tostadas con miel y queso fresco",
+  "ingredientes": "2 rebanadas pan integral, 60g queso fresco, miel",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tostadas con miel y queso fresco\", \"2 rebanadas pan integral, 60g queso fresco, miel\", \"354 kcal\", \"18g prot\", \"48g carbs\", \"10g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tostadas con miel y queso fresco\": \"Tuesta el pan. Extiende el queso fresco y riega con un hilo de miel.\","
+ },
+ {
+  "nombre": "Pera y arándanos con yogur natural",
+  "ingredientes": "1 pera, 80g arándanos, 100g yogur natural",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Pera y arándanos con yogur natural\", \"1 pera, 80g arándanos, 100g yogur natural\", \"232 kcal\", \"5g prot\", \"44g carbs\", \"4g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Pera y arándanos con yogur natural\": \"Trocea la pera con piel, mézclala con los arándanos y sírvelo todo sobre el yogur natural.\","
+ },
+ {
+  "nombre": "Yogur natural con pera y semillas de lino",
+  "ingredientes": "150g yogur natural, 1 pera, 10g semillas de lino",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Yogur natural con pera y semillas de lino\", \"150g yogur natural, 1 pera, 10g semillas de lino\", \"261 kcal\", \"8g prot\", \"37g carbs\", \"9g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Yogur natural con pera y semillas de lino\": \"Trocea la pera con piel y mézclala con el yogur. Esparce las semillas de lino por encima.\","
+ },
+ {
+  "nombre": "Fideuá de pollo y gambas",
+  "ingredientes": "200g fideos cocidos, 150g pollo, 100g gambas, 100g pimiento, ajo, azafrán, 10g AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Fideuá de pollo y gambas\", \"200g fideos cocidos, 150g pollo, 100g gambas, 100g pimiento, ajo, azafrán, 10g AOVE\", \"662 kcal\", \"64g prot\", \"70g carbs\", \"14g grasa\", \"Medio · 30 min\"),"
+  ],
+  "pasos": "\"Fideuá de pollo y gambas\": \"Sofríe el ajo y el pimiento en el AOVE. Añade el pollo en dados y dóralo. Incorpora los fideos, el azafrán y las gambas, y cocina 5-6 min a fuego medio hasta que las gambas estén hechas.\","
+ },
+ {
+  "nombre": "Puñado de frutos secos variados",
+  "ingredientes": "25g mix de almendras, nueces y avellanas",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Puñado de frutos secos variados\", \"25g mix de almendras, nueces y avellanas\", \"170 kcal\", \"5g prot\", \"6g carbs\", \"14g grasa\", \"Sin cocción · 1 min\"),"
+  ],
+  "pasos": "\"Puñado de frutos secos variados\": \"Sin cocción: toma el puñado de frutos secos tal cual. Listo en 0 min.\","
+ },
+ {
+  "nombre": "Requesón con manzana, canela y almendras",
+  "ingredientes": "200g requesón, 1 manzana, 10g almendras, canela",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Requesón con manzana, canela y almendras\", \"200g requesón, 1 manzana, 10g almendras, canela\", \"370 kcal\", \"27g prot\", \"34g carbs\", \"14g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Requesón con manzana, canela y almendras\": \"Pon el requesón en un bol. Trocea la manzana con piel, que es donde está la fibra. Añade las almendras trituradas y espolvorea canela generosamente: con la manzana ya queda dulce.\","
+ },
+ {
+  "nombre": "Tortitas de arroz con aguacate y huevos",
+  "ingredientes": "3 tortitas de arroz, 40g aguacate, 2 huevos cocidos, sal en escamas",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   },
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortitas de arroz con aguacate y huevos\", \"3 tortitas de arroz, 40g aguacate, 2 huevos cocidos, sal en escamas\", \"325 kcal\", \"17g prot\", \"26g carbs\", \"17g grasa\", \"Fácil · 12 min\"),",
+   "op(\"Tortitas de arroz con aguacate y huevos\", \"3 tortitas de arroz, 40g aguacate, 2 huevos cocidos, sal en escamas\", \"325 kcal\", \"17g prot\", \"26g carbs\", \"17g grasa\", \"Fácil · 12 min\"),"
+  ],
+  "pasos": "\"Tortitas de arroz con aguacate y huevos\": \"Cuece los huevos 10 min y pélalos. Aplasta el aguacate con sal y unas gotas de limón, extiéndelo sobre las tortitas y coloca el huevo en rodajas encima. Monta justo antes de comer o las tortitas se ablandan.\","
+ },
+ {
+  "nombre": "Arroz con conejo y verduras",
+  "ingredientes": "100g arroz cocido, 180g conejo, pimiento, tomate, romero",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Comida"
+   }
+  ],
+  "lineas": [
+   "op(\"Arroz con conejo y verduras\", \"100g arroz cocido, 180g conejo, pimiento, tomate, romero\", \"470 kcal\", \"36g prot\", \"50g carbs\", \"14g grasa\", \"Medio · 35 min\"),"
+  ],
+  "pasos": "\"Arroz con conejo y verduras\": \"Dora el conejo en trozos. Añade el pimiento y el tomate y sofríe 5 min. Incorpora el arroz y agua o caldo, y cuece a fuego medio 18-20 min con el romero hasta que el arroz esté hecho.\","
+ },
+ {
+  "nombre": "Requesón con pera, nueces y canela",
+  "ingredientes": "200g requesón, 1 pera, 8g nueces, canela",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Requesón con pera, nueces y canela\", \"200g requesón, 1 pera, 8g nueces, canela\", \"374 kcal\", \"27g prot\", \"35g carbs\", \"14g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Requesón con pera, nueces y canela\": \"Trocea la pera con piel sobre el requesón. Añade las nueces troceadas y espolvorea canela. Sin cocción, listo en 2 min.\","
+ },
+ {
+  "nombre": "Batido de cacao y proteína con crema de almendra",
+  "ingredientes": "200ml leche semidesnatada, 10g cacao puro, 5g crema de almendra, 1 scoop proteína whey, hielo",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Batido de cacao y proteína con crema de almendra\", \"200ml leche semidesnatada, 10g cacao puro, 5g crema de almendra, 1 scoop proteína whey, hielo\", \"302 kcal\", \"34g prot\", \"19g carbs\", \"10g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Batido de cacao y proteína con crema de almendra\": \"Mete la leche, el cacao puro, la crema de almendra y el scoop de proteína en la batidora con hielo. Bate 30 segundos. Si queda espeso, añade un poco más de leche.\","
+ },
+ {
+  "nombre": "Avena con queso batido",
+  "ingredientes": "50g avena, 250g queso batido 0%",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   },
+   {
+    "r": "Ganar músculo",
+    "m": "Merienda"
+   },
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Avena con queso batido\", \"50g avena, 250g queso batido 0%\", \"368 kcal\", \"32g prot\", \"51g carbs\", \"4g grasa\", \"Sin cocción · 2 min\"),",
+   "op(\"Avena con queso batido\", \"50g avena, 250g queso batido 0%\", \"368 kcal\", \"32g prot\", \"51g carbs\", \"4g grasa\", \"Sin cocción · 2 min\"),",
+   "op(\"Avena con queso batido\", \"50g avena, 250g queso batido 0%\", \"368 kcal\", \"32g prot\", \"51g carbs\", \"4g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Avena con queso batido\": \"Mezcla la avena con el queso batido hasta que quede cremoso. Sin cocción.\","
+ },
+ {
+  "nombre": "Tortitas de arroz con pavo y tomate",
+  "ingredientes": "2 tortitas de arroz, 40g pavo en lonchas, 120g tomate",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortitas de arroz con pavo y tomate\", \"2 tortitas de arroz, 40g pavo en lonchas, 120g tomate\", \"137 kcal\", \"11g prot\", \"21g carbs\", \"1g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tortitas de arroz con pavo y tomate\": \"Reparte el tomate en rodajas sobre las tortitas de arroz. Añade el pavo en lonchas encima. Móntalas justo antes de comer para que no se ablanden.\","
+ },
+ {
+  "nombre": "Mejillones a la marinera",
+  "ingredientes": "200g mejillones limpios, 150g tomate triturado, 40g cebolla, 10g AOVE, perejil, limón",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Mejillones a la marinera\", \"200g mejillones limpios, 150g tomate triturado, 40g cebolla, 10g AOVE, perejil, limón\", \"364 kcal\", \"39g prot\", \"16g carbs\", \"16g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Mejillones a la marinera\": \"Limpia los mejillones raspando las barbas. Sofríe la cebolla picada en el AOVE 5 min, añade el tomate triturado y cocina 8 min a fuego medio hasta que espese. Incorpora los mejillones, tapa y cuece 5 min a fuego fuerte hasta que se abran — descarta los que no se abran. Espolvorea con perejil y sirve con un chorro de limón.\","
+ },
+ {
+  "nombre": "Requesón con tomate cherry y orégano",
+  "ingredientes": "200g requesón, 150g tomate cherry, orégano, pimienta",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Requesón con tomate cherry y orégano\", \"200g requesón, 150g tomate cherry, orégano, pimienta\", \"229 kcal\", \"25g prot\", \"12g carbs\", \"9g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Requesón con tomate cherry y orégano\": \"Pon el requesón en un bol. Añade los tomates cherry partidos por la mitad, orégano y pimienta. Sin cocción.\","
+ },
+ {
+  "nombre": "Hummus con crudités y huevos duros",
+  "ingredientes": "30g hummus casero, 150g zanahoria, 100g pepino, 2 huevos duros, pimentón",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Hummus con crudités y huevos duros\", \"30g hummus casero, 150g zanahoria, 100g pepino, 2 huevos duros, pimentón\", \"308 kcal\", \"18g prot\", \"23g carbs\", \"16g grasa\", \"Fácil · 12 min\"),"
+  ],
+  "pasos": "\"Hummus con crudités y huevos duros\": \"Haz el hummus triturando garbanzos cocidos con tahini, limón y ajo. Corta la zanahoria y el pepino en bastones. Sirve con los huevos duros partidos y una pizca de pimentón.\","
+ },
+ {
+  "nombre": "Solomillo de ternera con patata y ensalada",
+  "ingredientes": "180g solomillo a la plancha, 150g patata cocida, ensalada verde, AOVE",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Solomillo de ternera con patata y ensalada\", \"180g solomillo a la plancha, 150g patata cocida, ensalada verde, AOVE\", \"422 kcal\", \"41g prot\", \"33g carbs\", \"14g grasa\", \"Medio · 25 min\"),"
+  ],
+  "pasos": "\"Solomillo de ternera con patata y ensalada\": \"Plancha el solomillo a fuego muy fuerte 2-3 min por lado (al punto). Deja reposar 3 min antes de cortar. Cuece la patata en dados 15 min. Prepara la ensalada y aliña con AOVE.\","
+ },
+ {
+  "nombre": "Ensalada templada de salmón con patata y huevo",
+  "ingredientes": "180g salmón a la plancha, 100g patata, 1 huevo duro, rúcula, AOVE, mostaza",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Ensalada templada de salmón con patata y huevo\", \"180g salmón a la plancha, 100g patata, 1 huevo duro, rúcula, AOVE, mostaza\", \"632 kcal\", \"46g prot\", \"22g carbs\", \"40g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Ensalada templada de salmón con patata y huevo\": \"Cuece la patata y el huevo 10-12 min. Plancha el salmón sazonado 3-4 min por lado. Monta sobre la rúcula con la patata y el huevo troceados, y aliña con AOVE y mostaza.\","
+ },
+ {
+  "nombre": "Boquerones en vinagre con ensalada",
+  "ingredientes": "150g boquerones en vinagre, tomate, pimiento, AOVE",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Boquerones en vinagre con ensalada\", \"150g boquerones en vinagre, tomate, pimiento, AOVE\", \"324 kcal\", \"32g prot\", \"9g carbs\", \"18g grasa\", \"Sin cocción · 5 min\"),"
+  ],
+  "pasos": "\"Boquerones en vinagre con ensalada\": \"Sirve los boquerones en vinagre ya preparados junto a una ensalada de tomate y pimiento aliñada con AOVE. Sin cocción.\","
+ },
+ {
+  "nombre": "Tortitas de arroz con queso fresco, pavo y zanahoria",
+  "ingredientes": "3 tortitas de arroz, 40g queso fresco, 40g pavo en lonchas, 150g zanahoria",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Tortitas de arroz con queso fresco, pavo y zanahoria\", \"3 tortitas de arroz, 40g queso fresco, 40g pavo en lonchas, 150g zanahoria\", \"316 kcal\", \"22g prot\", \"39g carbs\", \"8g grasa\", \"Sin cocción · 3 min\"),"
+  ],
+  "pasos": "\"Tortitas de arroz con queso fresco, pavo y zanahoria\": \"Unta el queso fresco sobre las tortitas de arroz. Reparte el pavo por encima. Corta la zanahoria en bastones y sírvela al lado.\","
+ },
+ {
+  "nombre": "Porridge de avena con manzana, nueces y canela",
+  "ingredientes": "50g avena, 200ml leche semidesnatada, 1 manzana, 15g nueces, canela",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Desayuno"
+   }
+  ],
+  "lineas": [
+   "op(\"Porridge de avena con manzana, nueces y canela\", \"50g avena, 200ml leche semidesnatada, 1 manzana, 15g nueces, canela\", \"497 kcal\", \"16g prot\", \"70g carbs\", \"17g grasa\", \"Fácil · 8 min\"),"
+  ],
+  "pasos": "\"Porridge de avena con manzana, nueces y canela\": \"Cuece la avena con la leche a fuego suave 5 min removiendo hasta que espese. Añade la manzana en dados los últimos 2 min para que se ablande. Sirve con las nueces troceadas y canela.\","
+ },
+ {
+  "nombre": "Pollo teriyaki con tallarines de arroz y verduras",
+  "ingredientes": "200g tallarines de arroz cocidos, 180g pollo, 120g brócoli, 80g zanahoria, salsa teriyaki casera, 5g sésamo",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Pollo teriyaki con tallarines de arroz y verduras\", \"200g tallarines de arroz cocidos, 180g pollo, 120g brócoli, 80g zanahoria, salsa teriyaki casera, 5g sésamo\", \"598 kcal\", \"49g prot\", \"78g carbs\", \"10g grasa\", \"Medio · 25 min\"),"
+  ],
+  "pasos": "\"Pollo teriyaki con tallarines de arroz y verduras\": \"Mezcla salsa de soja, miel y un poco de jengibre para la salsa teriyaki casera. Saltea el pollo en tiras a fuego fuerte, añade el brócoli y la zanahoria y saltea 3-4 min. Incorpora los tallarines y la salsa teriyaki, saltea 2 min más y espolvorea sésamo.\","
+ },
+ {
+  "nombre": "Lubina al papillote con verduras juliana",
+  "ingredientes": "200g lubina, 100g zanahoria, 100g calabacín, 60g puerro, 10g AOVE, eneldo, limón",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Lubina al papillote con verduras juliana\", \"200g lubina, 100g zanahoria, 100g calabacín, 60g puerro, 10g AOVE, eneldo, limón\", \"333 kcal\", \"39g prot\", \"15g carbs\", \"13g grasa\", \"Fácil · 25 min\"),"
+  ],
+  "pasos": "\"Lubina al papillote con verduras juliana\": \"Precalienta el horno a 190°C. Corta la zanahoria, el calabacín y el puerro en juliana fina y ponlos sobre papel de horno. Coloca la lubina encima, riega con el AOVE y el limón, añade el eneldo y cierra el papillote bien sellado. Hornea 18 min y ábrelo en la mesa.\","
+ },
+ {
+  "nombre": "Filetes de pollo con pasta y ensalada variada",
+  "ingredientes": "150g pollo, 60g pasta cruda, 100g ensalada",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Cena"
+   },
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   },
+   {
+    "r": "Mantenimiento",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Filetes de pollo con pasta y ensalada variada\", \"150g pollo, 60g pasta cruda, 100g ensalada\", \"409 kcal\", \"43g prot\", \"48g carbs\", \"5g grasa\", \"Fácil · 20 min\"),",
+   "op(\"Filetes de pollo con pasta y ensalada variada\", \"150g pollo, 60g pasta cruda, 100g ensalada\", \"409 kcal\", \"43g prot\", \"48g carbs\", \"5g grasa\", \"Fácil · 20 min\"),",
+   "op(\"Filetes de pollo con pasta y ensalada variada\", \"150g pollo, 60g pasta cruda, 100g ensalada\", \"409 kcal\", \"43g prot\", \"48g carbs\", \"5g grasa\", \"Fácil · 20 min\"),"
+  ],
+  "pasos": "\"Filetes de pollo con pasta y ensalada variada\": \"Cuece la pasta (pesada en seco). Haz los filetes de pollo a la plancha 3-4 min por lado, sin rebozar. Sírvelo con la ensalada, solo con verduras y sin salsas.\","
+ },
+ {
+  "nombre": "Yogur de soja con mandarina, proteína y semillas de girasol",
+  "ingredientes": "200g yogur de soja, 1 mandarina, 1 scoop proteína whey, 5g semillas de girasol",
+  "tomas": [
+   {
+    "r": "Perder grasa",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Yogur de soja con mandarina, proteína y semillas de girasol\", \"200g yogur de soja, 1 mandarina, 1 scoop proteína whey, 5g semillas de girasol\", \"342 kcal\", \"32g prot\", \"31g carbs\", \"10g grasa\", \"Sin cocción · 2 min\"),"
+  ],
+  "pasos": "\"Yogur de soja con mandarina, proteína y semillas de girasol\": \"Disuelve el scoop de proteína en el yogur de soja removiendo bien hasta que no queden grumos. Añade los gajos de mandarina y las semillas de girasol por encima.\","
+ },
+ {
+  "nombre": "Hummus con crudités y huevo duro",
+  "ingredientes": "60g hummus casero, 2 zanahorias, 100g pepino, 1 huevo duro, pimentón",
+  "tomas": [
+   {
+    "r": "Mantenimiento",
+    "m": "Merienda"
+   }
+  ],
+  "lineas": [
+   "op(\"Hummus con crudités y huevo duro\", \"60g hummus casero, 2 zanahorias, 100g pepino, 1 huevo duro, pimentón\", \"312 kcal\", \"14g prot\", \"28g carbs\", \"16g grasa\", \"Fácil · 12 min\"),"
+  ],
+  "pasos": "\"Hummus con crudités y huevo duro\": \"Cuece el huevo 10 min y pélalo. Corta la zanahoria y el pepino en bastones. Sirve el hummus en un cuenco con pimentón para mojar.\","
+ },
+ {
+  "nombre": "Pechuga rellena de espinacas y queso con arroz",
+  "ingredientes": "200g pechuga de pollo, 50g queso tierno, 100g espinacas, 100g arroz cocido",
+  "tomas": [
+   {
+    "r": "Ganar músculo",
+    "m": "Cena"
+   }
+  ],
+  "lineas": [
+   "op(\"Pechuga rellena de espinacas y queso con arroz\", \"200g pechuga de pollo, 50g queso tierno, 100g espinacas, 100g arroz cocido\", \"564 kcal\", \"46g prot\", \"50g carbs\", \"20g grasa\", \"Medio · 30 min\"),"
+  ],
+  "pasos": "\"Pechuga rellena de espinacas y queso con arroz\": \"Saltea las espinacas hasta que se ablanden. Abre la pechuga en libro, rellena con las espinacas y el queso, y ciérrala con un palillo. Cocina en la plancha o al horno hasta que esté hecha y el queso funda. Sirve con el arroz cocido.\","
+ },
+ {
+  "nombre": "Huevos duros con jamón serrano (snack proteico)",
+  "ingredientes": "2 huevos duros, 20g jamón serrano, pimienta",
+  "tomas": [
+   {
+    "r": "Extra: Gimnasio y CrossFit",
+    "m": "Media mañana"
+   }
+  ],
+  "lineas": [
+   "op(\"Huevos duros con jamón serrano (snack proteico)\", \"2 huevos duros, 20g jamón serrano, pimienta\", \"214 kcal\", \"20g prot\", \"2g carbs\", \"14g grasa\", \"Fácil · 8 min\"),"
+  ],
+  "pasos": null
  }
 ]
