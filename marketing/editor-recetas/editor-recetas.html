@@ -750,7 +750,7 @@ function pintarFicha() {
     <div class="bloque"><h3>Dificultad y tiempo</h3><input class="campo" id="prep" value="${esc(e.prep)}" aria-label="Dificultad y tiempo"></div>
     <div class="bloque"><h3>Tu nota</h3><textarea class="campo" id="nota" placeholder="Escribe lo que quieres cambiar: pon cuántas claras lleva, hazla más ligera, sin lactosa…">${esc(e.nota)}</textarea><div id="notaViva">${htmlNotaViva()}</div></div>
     <div class="acciones">
-      <button class="b pri" id="bien">${estadoDe(r) === 'cambiada' || estadoDe(r) === 'nueva' ? 'Guardada, siguiente' : 'Bien así, siguiente'}</button>
+      <button class="b pri" id="bien">${estadoDe(r) === 'quitar' ? 'Se quita, siguiente' : estadoDe(r) === 'cambiada' || estadoDe(r) === 'nueva' ? 'Guardada, siguiente' : 'Bien así, siguiente'}</button>
       <button class="b" id="fav" aria-pressed="${e.fav}">${e.fav ? '★ Favorita' : '☆ Favorita'}</button>
       <button class="b pel ${e.quitar ? 'act' : ''}" id="quitar">${e.quitar ? 'Se quita. Pulsa para dejarla' : 'Quitar de la app'}</button>
       ${C[r.id] ? `<button class="b" id="deshacer">${pelDeshacer ? '¿Seguro? Pulsa otra vez' : (e.nueva ? 'Descartar receta' : 'Deshacer mis cambios')}</button>` : ''}
@@ -884,7 +884,7 @@ document.addEventListener('click', (ev) => {
   if (t.dataset.alt) { ingUI[altAbierto] = t.dataset.alt; altAbierto = -1; altBusca = ''; pintarIngredientes(); cambioIngredientes(); return brindis('Ingrediente cambiado'); }
   if (t.id === 'addIng') { ingUI.push(''); altAbierto = -1; pintarIngredientes(); const u = $('ing-' + (ingUI.length - 1)); if (u) u.focus(); return; }
   const c = Object.assign({}, C[sel] || {});
-  if (t.id === 'bien') { if (c.estado === 'quitar' || !c.estado) c.estado = 'ok'; if (iaPendiente(RI[sel])) c.iaVista = true; ponerDoc(sel, c); refrescarFila(); return siguiente(); }
+  if (t.id === 'bien') { if (!c.estado) c.estado = 'ok'; if (iaPendiente(RI[sel])) c.iaVista = true; ponerDoc(sel, c); refrescarFila(); return siguiente(); }
   if (t.id === 'fav') { if (c.fav) delete c.fav; else c.fav = true; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
   if (t.id === 'quitar') { if (c.estado === 'quitar') delete c.estado; else c.estado = 'quitar'; ponerDoc(sel, c); refrescarFila(); return pintarFicha(); }
   if (t.id === 'deshacer') {
