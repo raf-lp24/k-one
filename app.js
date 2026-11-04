@@ -1042,10 +1042,10 @@
     'Hyrox': { calentamiento: '10 min carrera suave + movilidad dinámica de cadera y hombros (balanceos de pierna, 90/90, rotaciones de hombro con palo o banda)', vueltaCalma: '5 min caminando + estiramientos completos' },
     'Simulacro': { calentamiento: '10 min carrera suave + movilidad dinámica completa (balanceos de pierna, 90/90, círculos de tobillo, rotaciones de hombro)', vueltaCalma: '5-8 min caminando + estiramientos completos, hidrátate bien' },
     'WOD': { calentamiento: '3 rondas suaves: 10 sentadillas aéreas + 10 flexiones + 10 jumping jacks, más movilidad de cadera y hombro (círculos, balanceos) según el WOD de hoy', vueltaCalma: '5 min de respiración + estiramientos de los grupos más exigidos' },
-    'Empuje': { calentamiento: '8 min de activación de hombro y pecho (band pull-aparts, rotaciones de hombro con banda, flexiones con rodillas apoyadas) + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
+    'Empuje': { calentamiento: '8 min de activación de hombro y pecho (band pull-aparts, rotaciones de hombro con banda, pase de goma por encima de la cabeza si tu hombro lo permite, flexiones con rodillas apoyadas) + series de aproximación con poco peso', vueltaCalma: '5 min de estiramientos de pecho, hombros y tríceps' },
     'Tracción': { calentamiento: '8 min de movilidad de hombros y activación de espalda (band pull-aparts, remo con banda elástica, rotaciones de hombro) + series de aproximación', vueltaCalma: '5 min de estiramientos de espalda y bíceps' },
-    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo (balanceos de pierna adelante-atrás, 90/90, círculos de tobillo, sentadilla profunda sostenida) + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
-    'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador (rotaciones externas con banda, band pull-aparts, círculos de brazo) + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
+    'Piernas': { calentamiento: '8-10 min de movilidad de cadera, rodilla y tobillo (balanceos de pierna adelante-atrás, 90/90, apertura de cadera en zancada, círculos de tobillo, sentadilla profunda sostenida) + series de aproximación con poco peso', vueltaCalma: '5-8 min de estiramientos de cuádriceps, isquiotibiales, glúteo y gemelo' },
+    'Hombros': { calentamiento: '8 min de movilidad de hombro y manguito rotador (rotaciones externas con banda, band pull-aparts, pase de goma por encima de la cabeza si tu hombro lo permite, círculos de brazo) + series ligeras de activación', vueltaCalma: '5 min de estiramientos de hombros, trapecios y core' },
     'Complemento': { calentamiento: '5-8 min de movilidad general y activación (círculos de cadera y hombro, sentadilla profunda sostenida, gato-camello)', vueltaCalma: '5 min de estiramientos generales + respiración' },
     // Estas cuatro etiquetas se usan de verdad en los planes (Híbrido 312 veces,
     // Fortalecimiento 144, Empuje+Tracción 96, Umbral 72, medido sobre 2.592
@@ -1097,7 +1097,7 @@
     // entrena sin peso y el ejercicio se quedaba FIJO 12 semanas seguidas. Es lo
     // que pasaba en el día de fuerza del corredor al aire libre, el perfil con
     // menos variedad tras arreglar el avanzado (medido 7 sept 2026).
-    [/sentadilla b[uú]lgara( en silla)?/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás', 'Split squat', 'Sentadilla búlgara con landmine', 'Sentadilla con giro a zancada']],
+    [/sentadilla b[uú]lgara( en silla)?/i, ['Zancadas con mancuernas', 'Step-ups con mancuernas', 'Zancada lateral', 'Zancada cruzada atrás', 'Split squat', 'Sentadilla búlgara con landmine', 'Sentadilla con giro a zancada', 'Búlgara con el pie sobre un step', 'Sentadilla cosaca']],
     // "Sentadilla aérea" queda fuera de la regla genérica de sentadilla (que la
     // excluye en su lookahead) y no tenía ninguna propia: el principiante la
     // veía las 12 semanas. Alternativas todas sin material y con ficha.
@@ -1261,7 +1261,7 @@
     // una sentadilla unas comas más allá y la rotación duplicaba el ejercicio
     // entre el día A y el día B (el guardia anti-duplicados solo mira dentro de
     // la misma sesión, no entre días).
-    [/prensa de piernas/i, ['Sentadilla hack', 'Zancadas con mancuernas', 'Extensión de cuádriceps']],
+    [/prensa de piernas/i, ['Sentadilla hack', 'Zancadas con mancuernas', 'Extensión de cuádriceps', 'Prensa unilateral']],
     // 3 nov 2026 (aprobado por Rafa), idea de @trainologym: la sissy estira el recto
     // anterior, que la máquina sin respaldo reclinable no llega a estirar.
     [/extensi[oó]n de cu[aá]driceps(?! \(rango corto\))/i, ['Sissy squat', 'Prensa de piernas', 'Sentadilla hack']],
@@ -1314,7 +1314,7 @@
     [/combo lateral-frontal/i, ['Six way con mancuernas']],
     // ── Accesorios y técnicos que antes no tenían ninguna alternativa.
     [/face pull/i, ['Retracción escapular con banda', 'Remo en polea con agarre ancho']],
-    [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull']],
+    [/pájaros/i, ['Elevaciones laterales con mancuernas', 'Face pull', 'Hombro posterior con poleas cruzadas', 'WYT en banco inclinado']],
     [/cruces en polea/i, ['Aperturas con mancuernas', 'Press inclinado con mancuernas', 'Contractor de pecho en máquina']],
     // El grupo de material del final es obligatorio: sin él la regex se comía solo
     // "curl femoral" de "Curl femoral sentado en máquina" y el reemplazo heredaba el
@@ -1390,12 +1390,12 @@
     [/plancha lateral/i, ['Copenhagen plank']],
     // «Plancha con elevación de pierna» (15 oct 2026, @valicentif): la progresión
     // natural de la plancha sin material, apta para todos los niveles.
-    [/plancha(?! lateral| invertida| con elevaci)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados', 'Plancha con elevación de pierna', 'Kettlebell drag'], true],
+    [/plancha(?! lateral| invertida| con elevaci)( frontal)?\b/i, ['Plancha invertida', 'Hollow body hold', 'Plancha con pies elevados', 'Plancha con elevación de pierna', 'Kettlebell drag', 'Plancha de codos a palmas'], true],
     // "Equilibrio en una pierna" fuera de estos dos huecos: es una postura que se
     // aguanta (segundos) y tanto el dead bug de las plantillas de running como los
     // clamshells se escriben por repeticiones por lado, así que salía un
     // "Equilibrio en una pierna 3×10/lado".
-    [/dead bug(?! lateral)/i, ['Bird dog', 'Superman']],
+    [/dead bug(?! lateral)/i, ['Bird dog', 'Superman', 'Marcha invertida en puente de glúteo']],
     [/clamshells(?! con banda)/i, ['Abducción tumbado de lado', 'Lateral band walks']],
     [/mountain climbers?/i, ['Burpees', 'Cinta con inclinación a paso rápido', 'Escaladores', 'Salto del patinador'], true],
     [/\bsnatch(es)?\b/i, ['Press de hombro con mancuernas', 'Kettlebell swing'], true],
@@ -1503,7 +1503,7 @@
   // "fondos en paralelas" (15 sept 2026): la rotación se los daba a principiantes
   // en el hueco del press banca. Bajar el propio peso colgado de dos barras pide
   // una fuerza de tríceps y un control de hombro que quien empieza no tiene.
-  const _ALT_NIVEL_ALTO = /kettlebell drag|sissy|landmine|giro a zancada|rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
+  const _ALT_NIVEL_ALTO = /sentadilla cosaca|búlgara con el pie|wyt|kettlebell drag|sissy|landmine|giro a zancada|rueda abdominal|copenhagen|pistol|muscle[- ]?up|dominadas explosivas|hollow|snatch|\bclean\b|fondos en paralelas/i;
   const _tablaRotacionAutomatica = (semilla, semanaActual, bloqueMeso, entorno, lesiones, esPrincipiante) => {
     return ALTERNATIVAS_EJERCICIO.map(([regex, alternativas, cardio, esPrincipal]) => {
       // La rotación semanal no miraba DÓNDE entrena el cliente, así que colaba
@@ -2038,6 +2038,14 @@
     'elevación de punteras': 'https://www.youtube.com/results?search_query=tibial+raise+elevacion+de+punteras+pared',
     'peterson step down': 'https://www.youtube.com/results?search_query=peterson+step+down',
     'kettlebell drag': 'https://www.youtube.com/results?search_query=plank+kettlebell+drag',
+    'plancha de codos a palmas': 'https://www.youtube.com/results?search_query=plancha+de+codos+a+palmas+up+down+plank',
+    'marcha invertida en puente de glúteo': 'https://www.youtube.com/results?search_query=glute+bridge+reverse+march+core',
+    'wyt en banco inclinado': 'https://www.youtube.com/results?search_query=ejercicio+YWT+banco+inclinado+hombro',
+    'hombro posterior con poleas cruzadas': 'https://www.youtube.com/results?search_query=cable+rear+delt+fly+poleas+cruzadas',
+    'pase de goma por encima de la cabeza': 'https://www.youtube.com/results?search_query=band+pass+through+hombro+movilidad',
+    'sentadilla cosaca': 'https://www.youtube.com/results?search_query=sentadilla+cosaca+tecnica',
+    'prensa unilateral': 'https://www.youtube.com/results?search_query=prensa+unilateral+tecnica',
+    'búlgara con el pie sobre un step': 'https://www.youtube.com/results?search_query=deficit+bulgarian+split+squat+step+gluteo',
     'inversión y eversión de tobillo con banda': 'https://www.youtube.com/results?search_query=inversion+eversion+tobillo+banda+elastica',
     'sentadilla búlgara con landmine': 'https://www.youtube.com/results?search_query=landmine+bulgarian+split+squat',
     'peso muerto rumano con banda': 'https://www.youtube.com/results?search_query=peso+muerto+rumano+con+banda+y+mancuerna',
@@ -2274,7 +2282,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=202611032');
+      const r = await fetch('/data/ejercicios-info.json?v=202611041');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -3950,7 +3958,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (156 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (160 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4124,7 +4132,12 @@
     // 3 nov 2026 · @daniigzr.athlete
     "Si empiezas a correr, no busques 30 minutos seguidos: 1 minuto corriendo y 1 caminando, de 10 a 15 veces, a ritmo cómodo.",
     "En series cortas no persigas las pulsaciones: tardan en subir. Guíate por el ritmo o por cómo te sientes.",
-    "Prueba tu tobillo: con el pie a un palmo de la pared, intenta tocarla con la rodilla sin levantar el talón. Si no llegas, toca movilidad."
+    "Prueba tu tobillo: con el pie a un palmo de la pared, intenta tocarla con la rodilla sin levantar el talón. Si no llegas, toca movilidad.",
+    // 4 nov 2026 · ideas de @mariaamdr.fit, con nuestras palabras
+    "Primera semana con una rutina nueva: es normal ir más lento y no saber qué peso poner. Prueba, anota y la siguiente semana ya lo sabrás.",
+    "Si hoy tienes pesas y cardio, primero las pesas. Llegarás con más fuerza a lo que más cuesta.",
+    "¿Flato corriendo? Baja un poco el ritmo, presiona la zona con los dedos, inclínate un poco hacia delante y respira hondo.",
+    "No hace falta cocinar para cenar bien: pan, una proteína ya hecha y algo de verdura. En tu recetario puedes ver solo las recetas sin cocinar."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -8985,6 +8998,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -9215,7 +9231,7 @@
             op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min'),
             op("Ñoquis cremosos con salmón y espinacas", "125g salmón, 95g ñoquis, 40g cebolla, 1 cucharada de queso cottage, 25ml leche evaporada, 40g espinacas, 5g AOVE", "521 kcal", "33g prot", "41g carbs", "25g grasa", "Sartén · 15 min"),
             op("Lasaña de calabacín, atún y huevo", "1 calabacín, 2 huevos cocidos, 2 latas atún, 30g queso cottage, 30g tomate frito casero, 30g mozzarella", "479 kcal", "67g prot", "10g carbs", "19g grasa", "Microondas y freidora · 15 min"),
-            op("Ensaladilla de gambas con mayonesa de huevo", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
+            op("Ensaladilla de gambas con salsa de huevo y yogur", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
             op("Guiso de garbanzos con calamares y gambas", "150g garbanzos cocidos, 100g calamares, 100g gambas, 200g tomate triturado, 60g cebolla, 5g AOVE", "508 kcal", "43g prot", "57g carbs", "12g grasa", "Cazuela · 25 min"),
             op("Fideos de arroz con pollo y pimiento", "200g pechuga de pollo, 40g pimiento verde, 40g cebolla, 5ml soja, 60g fideos de arroz, 10g AOVE", "416 kcal", "47g prot", "21g carbs", "16g grasa", "Sartén · 15 min"),
             op("Poké de arroz crujiente con atún y mango", "150g arroz cocido, 80g pepino, 60g mango, 50g edamame, 30g cebolla morada, 1 lata atún, 20g queso crema, 15ml soja, 5g AOVE", "510 kcal", "34g prot", "62g carbs", "14g grasa", "Freidora 200º · 20 min"),
@@ -9236,6 +9252,12 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Ñoquis con pollo, champiñones y espinacas", "150g pechuga de pollo, 85g ñoquis, 100g champiñones, 40g cebolla, 1 cucharada de queso cottage, 20ml leche evaporada, 40g espinacas, 5g AOVE", "448 kcal", "44g prot", "41g carbs", "12g grasa", "Sartén · 10 min"),
             op("Ensalada de lentejas con fresas y feta", "100g lentejas cocidas, 40g pimiento verde, 60g tomate cherry, 20g cebolla morada, 50g fresas, 30g queso feta, 30g maíz, 5g AOVE", "333 kcal", "16g prot", "38g carbs", "13g grasa", "Sin cocción · 10 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Sopa de lasaña", "70g pasta, 120g carne picada de ternera, 40g cebolla, 60g tomate triturado, 30g queso rallado, 50ml leche evaporada, 300ml caldo de verduras, 5g AOVE", "621 kcal", "49g prot", "50g carbs", "25g grasa", "Olla · 25 min"),
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -9368,6 +9390,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -9515,6 +9540,17 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Nuggets de atún con salsa de miel y mostaza", "2 latas atún, 1 huevo, 1 cucharada de queso crema, 50g yogur natural, 30g mostaza, 20g miel", "413 kcal", "52g prot", "22g carbs", "13g grasa", "Freidora 180º · 12 min"),
             op("Hamburguesa de pollo con pan de zanahoria", "2 zanahorias, 1 huevo, 20g mozzarella, 120g carne picada de pollo", "360 kcal", "38g prot", "16g carbs", "16g grasa", "Sartén · 20 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Frittata en fajita a la freidora", "1 tortilla integral, 3 huevos, 50g pavo, 60g tomate cherry, 30g mozzarella", "502 kcal", "43g prot", "24g carbs", "26g grasa", "Freidora · 20 min"),
+            op("Tomates rellenos de huevo y atún en sartén", "2 tomates, 2 huevos, 1 lata atún, 30g mozzarella, 5g AOVE", "423 kcal", "43g prot", "11g carbs", "23g grasa", "Sartén · 15 min"),
+            op("Bolitas de arroz con atún y queso crema", "1 lata atún, 125g arroz cocido, 30g queso crema, 30g aguacate, 10ml soja", "385 kcal", "27g prot", "40g carbs", "13g grasa", "Microondas · 10 min"),
+            op("Tartar de atún con aguacate y mango", "150g atún rojo, 60g aguacate, 80g mango, 10ml soja, 5g sésamo", "357 kcal", "42g prot", "18g carbs", "13g grasa", "Sin cocción · 20 min"),
+            op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
+            op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
+            op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
           ]
         }
       ];
@@ -9631,6 +9667,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -9872,7 +9911,7 @@
             op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min'),
             op("Ñoquis cremosos con salmón y espinacas", "125g salmón, 95g ñoquis, 40g cebolla, 1 cucharada de queso cottage, 25ml leche evaporada, 40g espinacas, 5g AOVE", "521 kcal", "33g prot", "41g carbs", "25g grasa", "Sartén · 15 min"),
             op("Lasaña de calabacín, atún y huevo", "1 calabacín, 2 huevos cocidos, 2 latas atún, 30g queso cottage, 30g tomate frito casero, 30g mozzarella", "479 kcal", "67g prot", "10g carbs", "19g grasa", "Microondas y freidora · 15 min"),
-            op("Ensaladilla de gambas con mayonesa de huevo", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
+            op("Ensaladilla de gambas con salsa de huevo y yogur", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
             op("Guiso de garbanzos con calamares y gambas", "150g garbanzos cocidos, 100g calamares, 100g gambas, 200g tomate triturado, 60g cebolla, 5g AOVE", "508 kcal", "43g prot", "57g carbs", "12g grasa", "Cazuela · 25 min"),
             op("Fideos de arroz con pollo y pimiento", "200g pechuga de pollo, 40g pimiento verde, 40g cebolla, 5ml soja, 60g fideos de arroz, 10g AOVE", "416 kcal", "47g prot", "21g carbs", "16g grasa", "Sartén · 15 min"),
             op("Poké de arroz crujiente con atún y mango", "150g arroz cocido, 80g pepino, 60g mango, 50g edamame, 30g cebolla morada, 1 lata atún, 20g queso crema, 15ml soja, 5g AOVE", "510 kcal", "34g prot", "62g carbs", "14g grasa", "Freidora 200º · 20 min"),
@@ -9893,6 +9932,12 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Ñoquis con pollo, champiñones y espinacas", "150g pechuga de pollo, 85g ñoquis, 100g champiñones, 40g cebolla, 1 cucharada de queso cottage, 20ml leche evaporada, 40g espinacas, 5g AOVE", "448 kcal", "44g prot", "41g carbs", "12g grasa", "Sartén · 10 min"),
             op("Ensalada de lentejas con fresas y feta", "100g lentejas cocidas, 40g pimiento verde, 60g tomate cherry, 20g cebolla morada, 50g fresas, 30g queso feta, 30g maíz, 5g AOVE", "333 kcal", "16g prot", "38g carbs", "13g grasa", "Sin cocción · 10 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Sopa de lasaña", "70g pasta, 120g carne picada de ternera, 40g cebolla, 60g tomate triturado, 30g queso rallado, 50ml leche evaporada, 300ml caldo de verduras, 5g AOVE", "621 kcal", "49g prot", "50g carbs", "25g grasa", "Olla · 25 min"),
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -10046,6 +10091,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -10184,6 +10232,17 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Nuggets de atún con salsa de miel y mostaza", "2 latas atún, 1 huevo, 1 cucharada de queso crema, 50g yogur natural, 30g mostaza, 20g miel", "413 kcal", "52g prot", "22g carbs", "13g grasa", "Freidora 180º · 12 min"),
             op("Hamburguesa de pollo con pan de zanahoria", "2 zanahorias, 1 huevo, 20g mozzarella, 120g carne picada de pollo", "360 kcal", "38g prot", "16g carbs", "16g grasa", "Sartén · 20 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Frittata en fajita a la freidora", "1 tortilla integral, 3 huevos, 50g pavo, 60g tomate cherry, 30g mozzarella", "502 kcal", "43g prot", "24g carbs", "26g grasa", "Freidora · 20 min"),
+            op("Tomates rellenos de huevo y atún en sartén", "2 tomates, 2 huevos, 1 lata atún, 30g mozzarella, 5g AOVE", "423 kcal", "43g prot", "11g carbs", "23g grasa", "Sartén · 15 min"),
+            op("Bolitas de arroz con atún y queso crema", "1 lata atún, 125g arroz cocido, 30g queso crema, 30g aguacate, 10ml soja", "385 kcal", "27g prot", "40g carbs", "13g grasa", "Microondas · 10 min"),
+            op("Tartar de atún con aguacate y mango", "150g atún rojo, 60g aguacate, 80g mango, 10ml soja, 5g sésamo", "357 kcal", "42g prot", "18g carbs", "13g grasa", "Sin cocción · 20 min"),
+            op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
+            op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
+            op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
           ]
         }
       ];
@@ -10287,6 +10346,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -10541,7 +10603,7 @@
             op('Bacalao con patata y espinacas', '200g bacalao, 200g patata, 150g espinacas, AOVE', '440 kcal', '40g prot', '36g carbs', '14g grasa', 'Fácil · 25 min'),
             op("Ñoquis cremosos con salmón y espinacas", "125g salmón, 95g ñoquis, 40g cebolla, 1 cucharada de queso cottage, 25ml leche evaporada, 40g espinacas, 5g AOVE", "521 kcal", "33g prot", "41g carbs", "25g grasa", "Sartén · 15 min"),
             op("Lasaña de calabacín, atún y huevo", "1 calabacín, 2 huevos cocidos, 2 latas atún, 30g queso cottage, 30g tomate frito casero, 30g mozzarella", "479 kcal", "67g prot", "10g carbs", "19g grasa", "Microondas y freidora · 15 min"),
-            op("Ensaladilla de gambas con mayonesa de huevo", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
+            op("Ensaladilla de gambas con salsa de huevo y yogur", "150g patata, 2 zanahorias, 60g lechuga, 50g cebolla, 1/2 aguacate, 200g gambas, 1 huevo cocido, 1 cucharada de yogur natural, 1 cucharada de mostaza", "644 kcal", "43g prot", "64g carbs", "24g grasa", "Fácil · 25 min"),
             op("Guiso de garbanzos con calamares y gambas", "150g garbanzos cocidos, 100g calamares, 100g gambas, 200g tomate triturado, 60g cebolla, 5g AOVE", "508 kcal", "43g prot", "57g carbs", "12g grasa", "Cazuela · 25 min"),
             op("Fideos de arroz con pollo y pimiento", "200g pechuga de pollo, 40g pimiento verde, 40g cebolla, 5ml soja, 60g fideos de arroz, 10g AOVE", "416 kcal", "47g prot", "21g carbs", "16g grasa", "Sartén · 15 min"),
             op("Poké de arroz crujiente con atún y mango", "150g arroz cocido, 80g pepino, 60g mango, 50g edamame, 30g cebolla morada, 1 lata atún, 20g queso crema, 15ml soja, 5g AOVE", "510 kcal", "34g prot", "62g carbs", "14g grasa", "Freidora 200º · 20 min"),
@@ -10561,6 +10623,12 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Ñoquis con pollo, champiñones y espinacas", "150g pechuga de pollo, 85g ñoquis, 100g champiñones, 40g cebolla, 1 cucharada de queso cottage, 20ml leche evaporada, 40g espinacas, 5g AOVE", "448 kcal", "44g prot", "41g carbs", "12g grasa", "Sartén · 10 min"),
             op("Ensalada de lentejas con fresas y feta", "100g lentejas cocidas, 40g pimiento verde, 60g tomate cherry, 20g cebolla morada, 50g fresas, 30g queso feta, 30g maíz, 5g AOVE", "333 kcal", "16g prot", "38g carbs", "13g grasa", "Sin cocción · 10 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Sopa de lasaña", "70g pasta, 120g carne picada de ternera, 40g cebolla, 60g tomate triturado, 30g queso rallado, 50ml leche evaporada, 300ml caldo de verduras, 5g AOVE", "621 kcal", "49g prot", "50g carbs", "25g grasa", "Olla · 25 min"),
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
           ]
         },
         {
@@ -10723,6 +10791,9 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Avena horneada con arándanos y limón", "60g copos de avena, 22g proteína whey, 1/2 plátano, 50ml leche desnatada, 40g arándanos, 25g yogur natural", "434 kcal", "29g prot", "66g carbs", "6g grasa", "Horno 180º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Bol de tortita al microondas", "1 huevo, 120g kéfir, 30g harina de avena, 30g proteína whey, levadura", "362 kcal", "39g prot", "29g carbs", "10g grasa", "Microondas · 5 min"),
+            op("Tortitas de queso fresco y avena al microondas", "100g queso fresco 0%, 1 huevo, 30g harina de avena, levadura", "268 kcal", "24g prot", "25g carbs", "8g grasa", "Microondas · 5 min"),
           ]
         },
         {
@@ -10887,6 +10958,17 @@
             op('Salmón al horno con boniato y brócoli', '180g salmón, 200g boniato, 200g brócoli, AOVE', '711 kcal', '46g prot', '53g carbs', '35g grasa', 'Medio · 25 min'),
             op("Nuggets de atún con salsa de miel y mostaza", "2 latas atún, 1 huevo, 1 cucharada de queso crema, 50g yogur natural, 30g mostaza, 20g miel", "413 kcal", "52g prot", "22g carbs", "13g grasa", "Freidora 180º · 12 min"),
             op("Hamburguesa de pollo con pan de zanahoria", "2 zanahorias, 1 huevo, 20g mozzarella, 120g carne picada de pollo", "360 kcal", "38g prot", "16g carbs", "16g grasa", "Sartén · 20 min"),
+            // Recetas de @mariaamdr.fit (4 nov 2026), macros con scripts/componer.js
+            op("Huevos marinados con arroz", "2 huevos cocidos, 150g arroz cocido, 20g cebolla, 10ml soja, 5g miel, 5g sésamo", "401 kcal", "20g prot", "51g carbs", "13g grasa", "Fácil · 15 min + 2 h"),
+            op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
+            op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
+            op("Frittata en fajita a la freidora", "1 tortilla integral, 3 huevos, 50g pavo, 60g tomate cherry, 30g mozzarella", "502 kcal", "43g prot", "24g carbs", "26g grasa", "Freidora · 20 min"),
+            op("Tomates rellenos de huevo y atún en sartén", "2 tomates, 2 huevos, 1 lata atún, 30g mozzarella, 5g AOVE", "423 kcal", "43g prot", "11g carbs", "23g grasa", "Sartén · 15 min"),
+            op("Bolitas de arroz con atún y queso crema", "1 lata atún, 125g arroz cocido, 30g queso crema, 30g aguacate, 10ml soja", "385 kcal", "27g prot", "40g carbs", "13g grasa", "Microondas · 10 min"),
+            op("Tartar de atún con aguacate y mango", "150g atún rojo, 60g aguacate, 80g mango, 10ml soja, 5g sésamo", "357 kcal", "42g prot", "18g carbs", "13g grasa", "Sin cocción · 20 min"),
+            op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
+            op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
+            op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
           ]
         }
       ];
@@ -11107,6 +11189,7 @@
           // Los ñoquis de patata llevan harina de trigo (28 oct 2026, receta de @tonigimenex).
           // Sin \b: en JS la «ñ» no es letra para \b y no casaría nunca.
           [/(?<![a-záéíóúüñ])ñoquis( de patata)?(?![^,.;:]*sin gluten)/gi, 'ñoquis sin gluten'],
+          [/(?<![a-záéíóúüñ])sopa de lasaña(?![^,.;:]*sin gluten)/gi, 'sopa de lasaña sin gluten'],
           // OJO -- NO añadir una regla para "pan tumaca" (probado y deshecho el
           // 11 sept 2026): el título se lee "(pan sin gluten tumaca)", pero si
           // se convierte en "(pan tumaca sin gluten)", el lookahead de la red
@@ -14349,11 +14432,11 @@
       // un día de espalda con pullover sumaba volumen de PECHO y no de espalda.
       [/pullover/i, ['Espalda','Pecho']],
       [/press banca|press inclinado|press declinado|declinado|aperturas|contractor|fondos|flexion|cruce|dips/i, ['Pecho','Tríceps']],
-      [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales|push press|face pull/i, ['Hombros']],
+      [/press militar|elevaciones laterales|press arnold|p[áa]jaros|encogimiento|elevaciones frontales|push press|face pull|hombro posterior|wyt/i, ['Hombros']],
       [/dominadas|jal[óo]n|remo|pull[- ]?up|muscle[- ]?up/i, ['Espalda','Bíceps']],
       [/curl|b[íi]ceps|martillo|banco scott|barra z/i, ['Bíceps']],
       [/tr[íi]ceps|patada|copa|franc[ée]s/i, ['Tríceps']],
-      [/plancha|abdomin|russian|elevaci[óo]n de piernas|rueda|dead bug|pallof|core|hollow|toes[- ]?to[- ]?bar/i, ['Core']],
+      [/plancha|abdomin|russian|elevaci[óo]n de piernas|rueda|dead bug|marcha invertida|pallof|core|hollow|toes[- ]?to[- ]?bar/i, ['Core']],
       [/lumbar|hiperextensi[óo]n/i, ['Lumbar']],
     ];
     const musculos = [];
@@ -17972,6 +18055,20 @@
   }
 
   const RECETA_PASOS = {
+    "Sopa de lasaña": "Sofríe la cebolla picada con el aceite en una olla y dora la carne. Añade el tomate, remueve y cubre con el caldo. Cuando hierva, echa la pasta y cuécela el tiempo que diga el paquete. Baja el fuego, añade la leche evaporada y la mitad del queso, y remueve. Sirve con el resto del queso y orégano.",
+    "Huevos marinados con arroz": "Cuece los huevos y pélalos. En un recipiente con tapa mezcla la cebolla picada, la soja, la miel, un chorrito de vinagre y el sésamo. Mete los huevos y déjalos unas horas en la nevera (aguantan varios días). Sírvelos sobre el arroz con un poco de la salsa.",
+    "Bowl de pollo, cottage y parmesano": "Haz el pollo en tiras en la sartén con pimentón, comino y unas gotas de aceite. Pon los canónigos en un bol con el cottage, el resto del aceite, un chorrito de vinagre y sal, y mezcla: hace de salsa. Añade el parmesano, los cherry, los pistachos, el maíz, el huevo en trozos y el pollo.",
+    "Hamburguesa de pollo crujiente con patatas": "Corta la patata en gajos y hazla 15 min a 190 °C en la freidora de aire. Da forma a la hamburguesa con la carne y un poco de sal. Pásala por el huevo batido y por los copos de maíz triturados, y hazla 8-10 min en la freidora, dándole la vuelta a mitad. Móntala en el pan con la mayonesa.",
+    "Espaguetis con jamón, champiñones y leche evaporada": "Cuece los espaguetis. Mientras, saltea la cebolla, los champiñones y el jamón en taquitos en una sartén. Escurre la pasta y échala a la sartén con la leche evaporada y la loncha de queso. Remueve hasta que quede cremosa y termina con pimienta.",
+    "Frittata en fajita a la freidora": "Pon la tortilla en un molde rígido que quepa en la freidora de aire, formando una base. Bate dentro los huevos y añade el pavo, los cherry y la mozzarella. Tapa con papel de aluminio y hazla 18 min a 200 °C. Quita el papel y déjala 2 min más para que se gratine.",
+    "Tomates rellenos de huevo y atún en sartén": "Corta los tomates en rodajas gruesas y quítales el centro, dejando un aro. Pica esa pulpa y mézclala con los huevos batidos y el atún. Pon los aros en la sartén con el aceite y rellénalos con la mezcla. Tapa unos minutos, añade la mozzarella y orégano, y deja que se funda.",
+    "Bolitas de arroz con atún y queso crema": "Calienta el arroz 1 min en el microondas y mézclalo con el atún escurrido, cebollino picado y el queso crema. Forma bolitas con las manos y déjalas un rato en la nevera. Ponles encima un trocito de aguacate y sírvelas con la soja.",
+    "Tartar de atún con aguacate y mango": "Usa atún que haya estado congelado y descongélalo en la nevera. Córtalo en dados y márinalo 10-15 min con la soja y unas gotas de limón. Corta el aguacate y el mango en dados. Monta en un plato el aguacate, el mango y el atún encima, y termina con el sésamo.",
+    "Tartar de salmón ahumado con aguacate y mango": "Corta el salmón en trocitos y mézclalo con la soja y el sésamo. Corta el aguacate y el mango en dados. Monta en un plato el mango, el aguacate y el salmón encima, y sírvelo con el pan tostado.",
+    "Pita de pollo, aguacate y queso crema": "Usa pollo ya cocinado y desmenúzalo. Chafa en un bol el aguacate con el queso crema y mézclalo con el pollo. Tuesta la pita, ábrela por la mitad y rellénala. Acompáñala con el huevo cocido.",
+    "Ensalada de caballa, tomate y mozzarella": "Corta el tomate y la mozzarella en rodajas. Coloca encima la caballa escurrida y aliña con el aceite y un chorrito de vinagre de Módena.",
+    "Bol de tortita al microondas": "Mezcla en un bol grande el huevo, el kéfir, la harina de avena, la proteína y un poco de levadura. Llévalo 2 min al microondas: sube bastante, así que mejor un bol amplio. Acompáñalo con fruta si quieres.",
+    "Tortitas de queso fresco y avena al microondas": "Mezcla en un bol el queso fresco, el huevo, la harina de avena y un poco de levadura. Llévalo 3 min al microondas. Con la misma mezcla también puedes hacer tortitas en la sartén.",
     "Bacalao con patata y espinacas": "Cuece la patata en rodajas 15 minutos. Haz el bacalao en la sartén con el aceite 4-5 minutos por lado. Saltea las espinacas 2 minutos en la misma sartén y sírvelo todo junto.",
     "Merluza al horno con patata y judías verdes": "Hornea la patata en rodajas con la mitad del aceite 15 minutos a 200 °C. Pon encima la merluza con sal y el resto del aceite, y hornea 10-12 minutos más. Cuece las judías verdes 8 minutos y sírvelas al lado.",
     "Pollo a la plancha con arroz y verduras": "Cuece el arroz. Haz el pollo a la plancha con sal, 5-6 minutos por lado. Cuece el brócoli al vapor 5 minutos y sírvelo todo con el aceite por encima.",
@@ -17999,7 +18096,7 @@
     "Brownie de plátano y cacao sin harina": "Bate todos los ingredientes. Si el plátano no está maduro, caliéntalo antes 3 min en el microondas a media potencia. Cocínalo 20 min a 160 °C en la freidora de aire.",
     "Ñoquis cremosos con salmón y espinacas": "Pocha la cebolla con el aceite. Añade el salmón en dados y hazlo. Incorpora el cottage y la leche para formar una salsa. Echa los ñoquis y cocínalos 5 min, con un chorrito de agua si espesa. Termina con las espinacas.",
     "Lasaña de calabacín, atún y huevo": "Corta el calabacín en láminas finas, sálalo y cocínalo 3 min y medio en el microondas. Mezcla el atún, los huevos picados, el cottage y el tomate. Alterna capas de calabacín y relleno, pon la mozzarella encima y gratínalo.",
-    "Ensaladilla de gambas con mayonesa de huevo": "Cuece la patata, las zanahorias y las gambas, y deja que se enfríen. Tritura el huevo cocido con el yogur, la mostaza y el zumo de medio limón para hacer la mayonesa. Corta todo en dados, mézclalo con la lechuga, la cebolla y el aguacate, y guárdalo un rato en la nevera.",
+    "Ensaladilla de gambas con salsa de huevo y yogur": "Cuece la patata, las zanahorias y las gambas, y deja que se enfríen. Tritura el huevo cocido con el yogur, la mostaza y el zumo de medio limón para hacer la salsa. Corta todo en dados, mézclalo con la lechuga, la cebolla y el aguacate, y guárdalo un rato en la nevera.",
     "Guiso de garbanzos con calamares y gambas": "Sofríe la cebolla y el tomate con el aceite. Añade caldo de pescado y los garbanzos. Cuando hierva, incorpora los calamares y cocina 10 min. Agrega las gambas, perejil, ajo en polvo y sal, y deja 5 min más.",
     "Fideos de arroz con pollo y pimiento": "Pocha el pimiento y la cebolla con el aceite. Añade el pollo en tiras y dóralo. Incorpora la soja y mezcla. Cuece los fideos según el paquete, escúrrelos y mézclalos con todo.",
     "Pizza con base de pollo": "Tritura el pollo con el huevo y una pizca de sal. Extiende la mezcla sobre papel de horno con forma de pizza y hornéala 15 min a 180 °C. Añade el tomate, la mozzarella y orégano, y gratina 5 min más.",
@@ -18927,6 +19024,16 @@
   // Recorre los 7 días y agrupa por toma, sin repetir la receta que sale varios
   // días: cada una lleva la lista de días en que la tiene.
   let _recetarioModo = 'semana';
+  let _recetarioCocina = '';
+  // Sale de la preparación que ya lleva cada plato; una receta puede estar en más de un grupo.
+  function _cocinaDeReceta(opt, pasos) {
+    const prep = (opt.prep || '').toLowerCase(), t = prep + ' ' + (pasos || '').toLowerCase();
+    return [
+      /sin cocción|nevera/.test(prep) ? 'sincocinar' : '',
+      /microondas/.test(t) ? 'microondas' : '',
+      /freidora|air ?fryer/.test(t) ? 'freidora' : '',
+    ].filter(Boolean).join(' ');
+  }
   const _DIAS_CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   function _recetarioRecopilar() {
     if (!comidasSemana.length) inicializarComidasSemana();
@@ -18980,7 +19087,7 @@
             ? `<span class="receta-dias-label">En tu menú</span>${p.elegidos.map(d => `<span class="receta-dia-chip elegida">${d}</span>`).join('')}`
             : `<span class="receta-dias-label">Sale el</span>${p.dias.map(d => `<span class="receta-dia-chip">${d}</span>`).join('')}`);
         return `
-          <div class="receta-card${modo === 'todas' && !p.elegidos.length ? ' no-elegida' : ''}">
+          <div class="receta-card${modo === 'todas' && !p.elegidos.length ? ' no-elegida' : ''}" data-cocina="${_cocinaDeReceta(opt, pasos)}">
             <div class="receta-dias">${chips}</div>
             <div class="receta-nombre">${opt.nombre}</div>
             <div class="receta-ingredientes"><ul>${items}</ul></div>
@@ -19014,7 +19121,8 @@
       ? 'Las recetas de las comidas que tienes elegidas esta semana, con ingredientes, preparación y macros. Si cambias una comida en Nutrición, aquí se actualiza.'
       : 'Todas las opciones que te salen esta semana. Las que tienes elegidas van primero y marcadas con el día.';
     const buscador = document.getElementById('recetarioBuscador');
-    if (buscador && buscador.value) filtrarRecetario(buscador.value);
+    document.querySelectorAll('[data-cocina-rec]').forEach(b => b.classList.toggle('active', b.dataset.cocinaRec === _recetarioCocina));
+    filtrarRecetario(buscador ? buscador.value : '');
     return totalRecetas;
   }
 
@@ -19040,6 +19148,7 @@
       }
     }
     _recetarioModo = 'semana';
+    _recetarioCocina = '';
     _pintarRecetario();
     document.getElementById('modalRecetario').classList.add('visible');
     document.body.style.overflow = 'hidden';
@@ -19056,12 +19165,20 @@
       sec.querySelectorAll('.receta-card').forEach(card => {
         // Sin los chips de día: buscar "mar" no debe traer el martes.
         const texto = [...card.querySelectorAll('.receta-nombre, .receta-ingredientes, .receta-pasos')].map(e => e.textContent).join(' ').toLowerCase();
-        const match = !query || texto.includes(query);
+        const deCocina = !_recetarioCocina || (card.dataset.cocina || '').split(' ').includes(_recetarioCocina);
+        const match = (!query || texto.includes(query)) && deCocina;
         card.style.display = match ? '' : 'none';
         if (match) visibles++;
       });
-      sec.style.display = !query || visibles > 0 ? '' : 'none';
+      sec.style.display = (!query && !_recetarioCocina) || visibles > 0 ? '' : 'none';
     });
+  }
+
+  function cambiarCocinaRecetario(cocina) {
+    _recetarioCocina = _recetarioCocina === cocina ? '' : cocina;
+    // En «Mi semana» solo salen las elegidas: para encontrar una cena sin cocinar hay que ver todas.
+    if (_recetarioCocina) _recetarioModo = 'todas';
+    if (generatedPlan && generatedPlan.nutricion) _pintarRecetario();
   }
 
   function cerrarRecetario() {

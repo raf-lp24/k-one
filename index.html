@@ -3579,6 +3579,11 @@ html.portada-esperando .hv-cta.k1-pulsado > svg, html.portada-esperando .hv-ejem
         <button type="button" class="rotacion-opt" data-modo-rec="semana" onclick="cambiarModoRecetario('semana')">Mi semana</button>
         <button type="button" class="rotacion-opt" data-modo-rec="todas" onclick="cambiarModoRecetario('todas')">Todas las opciones</button>
       </div>
+      <div role="group" aria-label="Cómo cocinar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <button type="button" class="rotacion-opt" data-cocina-rec="sincocinar" onclick="cambiarCocinaRecetario('sincocinar')">Sin cocinar</button>
+        <button type="button" class="rotacion-opt" data-cocina-rec="microondas" onclick="cambiarCocinaRecetario('microondas')">Microondas</button>
+        <button type="button" class="rotacion-opt" data-cocina-rec="freidora" onclick="cambiarCocinaRecetario('freidora')">Freidora de aire</button>
+      </div>
       <div id="recetarioNotaCiclo" style="display:none;font-size:13px;color:var(--metal-claro);background:rgba(209,66,14,.07);border:1px solid rgba(242,106,54,0.3);border-radius:14px;padding:11px 14px;margin-bottom:14px;line-height:1.5"></div>
       <input type="text" id="recetarioBuscador" aria-label="Buscar receta" placeholder="Buscar receta... (ej: pollo, salmón, avena)" oninput="filtrarRecetario(this.value)" style="width:100%;background:var(--grafito);border:1px solid var(--humo);border-radius:8px;color:var(--blanco);padding:10px 14px;font-size:13px;font-family:inherit;box-sizing:border-box;outline:none">
     </div>
