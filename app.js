@@ -1035,7 +1035,7 @@
   const SESION_EXTRAS = {
     'Cardio': { calentamiento: '5-8 min de movilidad dinámica (círculos de tobillo, zancada baja con la pierna de delante estirada para el isquio, apertura de cadera en zancada, sentadilla lateral) + 3-4 min trote muy suave', vueltaCalma: '5 min caminando + estiramientos de cuádriceps, isquiotibiales y gemelos' },
     'Fuerza': { calentamiento: '8-10 min de movilidad articular (círculos de cadera y hombro, rotaciones de tronco, gato-camello, sentadilla profunda sostenida) + 1-2 series de aproximación con poco peso en el primer ejercicio', vueltaCalma: '5 min de estiramientos de los grupos musculares trabajados hoy' },
-    'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (A-skips, skipping alto) + 3 progresivos al 50, 75 y 90 %', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
+    'Intensidad': { calentamiento: '10 min trote suave + drills de carrera (A-skips, talones al glúteo, carrera con piernas extendidas, desplazamientos laterales) + 3 progresivos al 50, 75 y 90 %', vueltaCalma: '8-10 min trote muy suave + estiramientos completos de tren inferior' },
     'Fondo': { calentamiento: '8-10 min trote suave + movilidad de cadera y tobillo (90/90, círculos de tobillo, balanceos de pierna)', vueltaCalma: '5 min caminando + estiramientos de toda la cadena posterior' },
     'Volumen': { calentamiento: '10 min trote muy suave + activación de glúteo y core (puente de glúteo, paseo lateral con banda, dead bug)', vueltaCalma: '5-8 min caminando + estiramientos de piernas y espalda baja' },
     'Combinado': { calentamiento: '5 min de cardio suave + movilidad articular general (círculos de cadera y hombro, rotaciones de tronco, sentadilla profunda sostenida)', vueltaCalma: '5 min de estiramientos de cuerpo completo' },
@@ -2282,7 +2282,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=202611041');
+      const r = await fetch('/data/ejercicios-info.json?v=202611042');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -5999,7 +5999,7 @@
         return {
           resumen: cuestas ? 'Cuestas · Calidad' : 'Fartlek o series · Calidad',
           etiqueta: 'Intensidad',
-          detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, balanceos de piernas)' : ' + drills (A-skips, skipping alto) y 3 progresivos al 50, 75 y 90 %') : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
+          detalle: `Calentamiento: ${_cal} min trote${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, balanceos de piernas)' : ' + drills (A-skips, talones al glúteo, carrera con piernas extendidas, desplazamientos laterales) y 3 progresivos al 50, 75 y 90 %') : ' suave'}. ${bloque}. Ritmo fuerte = incómodo pero controlado (RPE 7-8). ${_tramoDur === 'expres' ? '' : 'Cronometra y anota. '}Enfriamiento: ${_vuelta} min trote`
         };
       };
       // Sesión mixta (28 oct 2026, aprobado por Rafa; la «semana 8» de
@@ -6018,7 +6018,7 @@
       // Calidad del avanzado: VO2máx una semana, umbral la siguiente.
       const _calidadAvanzado = () => _mixtaToca ? _calidadMixta() : Math.max(1, semanaActual) % 2 === 1
         ? { resumen: 'VO2máx · Intervalos cortos', etiqueta: 'Intensidad',
-            detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, high knees, butt kicks)' : ' + drills (A-skips, skipping alto) y 3 progresivos al 50, 75 y 90 %') : ''}. Series: ${{
+            detalle: `Calentamiento: ${_cal} min progresivo${_cal >= 10 ? (_lesionZonaRodilla || _sinImpacto ? ' + drills (A-skips, high knees, butt kicks)' : ' + drills (A-skips, talones al glúteo, carrera con piernas extendidas, desplazamientos laterales) y 3 progresivos al 50, 75 y 90 %') : ''}. Series: ${{
               expres: '3×400m con 60s rec trote',
               corta: '5×400m con 90s rec trote',
               media: '5×800m con 2 min rec trote',
@@ -9258,6 +9258,7 @@
             op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
             op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
             op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
           ]
         },
         {
@@ -9551,6 +9552,8 @@
             op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
             op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
             op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
+            op("Quesadilla de atún, pimientos y huevo", "1 tortilla integral, 80g atún, 40g pimientos asados, 1 huevo cocido, 20g queso en lonchas, 20g mozzarella", "431 kcal", "41g prot", "24g carbs", "19g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -9938,6 +9941,7 @@
             op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
             op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
             op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
           ]
         },
         {
@@ -10243,6 +10247,8 @@
             op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
             op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
             op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
+            op("Quesadilla de atún, pimientos y huevo", "1 tortilla integral, 80g atún, 40g pimientos asados, 1 huevo cocido, 20g queso en lonchas, 20g mozzarella", "431 kcal", "41g prot", "24g carbs", "19g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -10629,6 +10635,7 @@
             op("Bowl de pollo, cottage y parmesano", "150g pechuga de pollo, 100g canónigos, 50g queso cottage, 30g parmesano, 80g tomate cherry, 20g pistachos, 30g maíz, 1 huevo cocido, 5g AOVE", "638 kcal", "64g prot", "19g carbs", "34g grasa", "Sartén · 15 min"),
             op("Hamburguesa de pollo crujiente con patatas", "120g carne picada de pollo, 1 huevo, 20g copos de maíz, 60g pan integral, 10g mayonesa 0%, 150g patata", "657 kcal", "44g prot", "73g carbs", "21g grasa", "Freidora · 20 min"),
             op("Espaguetis con jamón, champiñones y leche evaporada", "80g pasta, 50g jamón cocido, 40g cebolla, 80g champiñones, 100ml leche evaporada, 1 loncha queso", "424 kcal", "28g prot", "42g carbs", "16g grasa", "Sartén · 15 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
           ]
         },
         {
@@ -10969,6 +10976,8 @@
             op("Tartar de salmón ahumado con aguacate y mango", "100g salmón ahumado, 60g aguacate, 80g mango, 10ml soja, 5g sésamo, 40g pan integral", "401 kcal", "27g prot", "35g carbs", "17g grasa", "Sin cocción · 10 min"),
             op("Pita de pollo, aguacate y queso crema", "60g pan de pita, 100g pechuga de pollo, 1/2 aguacate, 15g queso crema, 1 huevo cocido", "560 kcal", "38g prot", "39g carbs", "28g grasa", "Sin cocción · 5 min"),
             op("Ensalada de caballa, tomate y mozzarella", "2 latas caballa, 200g tomate, 60g mozzarella, 5g AOVE", "540 kcal", "45g prot", "9g carbs", "36g grasa", "Sin cocción · 5 min"),
+            op("Sándwich crujiente de ternera con salsa burger", "2 tortillas de trigo, 125g carne picada de ternera, 25g queso en lonchas, 100g yogur griego 0%, 30g mostaza, 40g kétchup 0%", "617 kcal", "52g prot", "55g carbs", "21g grasa", "Freidora 180º · 15 min"),
+            op("Quesadilla de atún, pimientos y huevo", "1 tortilla integral, 80g atún, 40g pimientos asados, 1 huevo cocido, 20g queso en lonchas, 20g mozzarella", "431 kcal", "41g prot", "24g carbs", "19g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -18055,6 +18064,8 @@
   }
 
   const RECETA_PASOS = {
+    "Sándwich crujiente de ternera con salsa burger": "Extiende la carne cruda sobre una tortilla, pon el queso y tapa con la otra. Corta en triángulos y hazlo 12 min a 180 °C en la freidora de aire. Mezcla el yogur, la mostaza, el kétchup, sal, ajo y cebolla en polvo, y úsalo para mojar.",
+    "Quesadilla de atún, pimientos y huevo": "Mezcla el atún, los pimientos y el huevo picado. Pon la tortilla en una sartén sin aceite, a fuego medio, con el queso en una mitad. Añade el relleno y la mozzarella, dobla y presiona. Dórala 2-3 min por lado y córtala en triángulos.",
     "Sopa de lasaña": "Sofríe la cebolla picada con el aceite en una olla y dora la carne. Añade el tomate, remueve y cubre con el caldo. Cuando hierva, echa la pasta y cuécela el tiempo que diga el paquete. Baja el fuego, añade la leche evaporada y la mitad del queso, y remueve. Sirve con el resto del queso y orégano.",
     "Huevos marinados con arroz": "Cuece los huevos y pélalos. En un recipiente con tapa mezcla la cebolla picada, la soja, la miel, un chorrito de vinagre y el sésamo. Mete los huevos y déjalos unas horas en la nevera (aguantan varios días). Sírvelos sobre el arroz con un poco de la salsa.",
     "Bowl de pollo, cottage y parmesano": "Haz el pollo en tiras en la sartén con pimentón, comino y unas gotas de aceite. Pon los canónigos en un bol con el cottage, el resto del aceite, un chorrito de vinagre y sal, y mezcla: hace de salsa. Añade el parmesano, los cherry, los pistachos, el maíz, el huevo en trozos y el pollo.",
