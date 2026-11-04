@@ -5305,7 +5305,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 12;
+  const MOTOR_REV = 13;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -11413,6 +11413,9 @@
           // Antes que la regla generica de yogur: si no, "salsa de yogur casera"
           // acababa como "salsa de yogur sin lactosa casera", que se lee fatal.
           [/salsa de yogur casera/gi, 'salsa de yogur casera sin lactosa'],
+          // El tzatziki de bote y la salsa de trufa llevan lácteos (5 nov 2026).
+          [/salsa tzatziki/gi, 'salsa de yogur sin lactosa y pepino'],
+          [/salsa de trufa(?![^,.;:]*sin lactosa)/gi, 'salsa de trufa sin lactosa'],
           [/yogur griego/gi, 'yogur de coco (sin lactosa)'],
           // El PLURAL va antes que el singular y con su propia regla. `\byogur\b`
           // no casa con "yogures" (la palabra sigue con "es", así que no hay
