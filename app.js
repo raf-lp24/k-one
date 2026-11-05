@@ -2294,7 +2294,7 @@
   async function _cargarInfoEjercicios() {
     if (_infoEjercicios) return;
     try {
-      const r = await fetch('/data/ejercicios-info.json?v=202611051');
+      const r = await fetch('/data/ejercicios-info.json?v=202611052');
       _infoEjercicios = r.ok ? await r.json() : {};
     } catch (e) { _infoEjercicios = {}; }
     // claves más largas primero para que "curl martillo" gane a "curl"
@@ -5305,7 +5305,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 13;
+  const MOTOR_REV = 14;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
@@ -9059,8 +9059,8 @@
             op("Copos de maíz con proteína y crema de cacahuete", "200ml leche semidesnatada, 15g proteína whey, 40g copos de maíz, 15g crema de cacahuete", "409 kcal", "25g prot", "48g carbs", "13g grasa", "Sin cocción · 3 min"),
             op("Crepes salados de avena, pavo y queso", "1 huevo, 200ml leche semidesnatada, 50g harina de avena, 60g pechuga de pavo, 30g queso en lonchas", "542 kcal", "42g prot", "44g carbs", "22g grasa", "Sartén · 10 min"),
             op("Tostadas con huevo en freidora", "2 rebanadas de pan integral, 2 huevos, 40g pechuga de pavo, 20g queso rallado", "435 kcal", "37g prot", "29g carbs", "19g grasa", "Freidora 180º · 6 min"),
-            op("Crema de arroz con proteína de chocolate", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey", "276 kcal", "20g prot", "40g carbs", "4g grasa", "Microondas · 3 min"),
-            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
+            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
           ]
         },
@@ -9146,7 +9146,7 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
             // Recetas de @mariaamdr.fit (5 nov 2026), macros con scripts/componer.js
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
           ]
         },
         {
@@ -9332,12 +9332,12 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Ensalada de garbanzos, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 40g queso feta, 10g crema de vinagre balsámico", "458 kcal", "19g prot", "46g carbs", "22g grasa", "Sin cocción · 5 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate, 50g pepino, 25g queso rallado, 10g salsa de soja", "381 kcal", "38g prot", "28g carbs", "13g grasa", "Cazo · 20 min"),
+            op("Ensalada de garbanzos, pollo, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 150g pollo asado en tiras, 40g queso feta, 10g crema de vinagre balsámico", "630 kcal", "53g prot", "46g carbs", "26g grasa", "Sin cocción · 5 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate cherry, 50g pepino, 25g queso feta, 10g salsa de soja", "348 kcal", "34g prot", "26g carbs", "12g grasa", "Cazo · 20 min"),
             op("Berenjena rellena de pollo al microondas", "1 berenjena, 120g pechuga de pollo, 50g cebolla, 60g tomate triturado, 30g queso rallado", "368 kcal", "39g prot", "26g carbs", "12g grasa", "Microondas · 20 min"),
-            op("Fideos de arroz con gambas, tahín y limón", "70g fideos de arroz, 150g gambas, 15g tahini, 20g zumo de limón", "282 kcal", "24g prot", "24g carbs", "10g grasa", "Sartén · 12 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Fideos de arroz con gambas, pimiento y limón", "70g fideos de arroz, 150g gambas, 60g pimiento, 20g zumo de limón, 5g aceite de oliva, chile en polvo", "251 kcal", "23g prot", "24g carbs", "7g grasa", "Sartén · 12 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Salteado de garbanzos, brócoli y pollo", "150g garbanzos cocidos, 60g pimiento, 50g cebolla, 100g brócoli, 120g pechuga de pollo, 5g aceite de oliva", "517 kcal", "44g prot", "56g carbs", "13g grasa", "Sartén · 15 min"),
           ]
         },
@@ -9478,7 +9478,7 @@
             op("Coulant de avena y proteína", "30g harina de avena, 30g proteína whey, 60ml leche semidesnatada, 10g cacao puro, 10g chocolate negro, levadura química", "361 kcal", "32g prot", "38g carbs", "9g grasa", "Microondas · 3 min"),
             op("Helado de yogur, proteína y pistachos", "200g yogur griego 0%, 30g proteína whey, 10g pistachos", "291 kcal", "46g prot", "11g carbs", "7g grasa", "Batidora · 2 h de congelador"),
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
           ]
         },
@@ -9653,8 +9653,8 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
           ]
         }
@@ -9779,8 +9779,8 @@
             op("Copos de maíz con proteína y crema de cacahuete", "200ml leche semidesnatada, 15g proteína whey, 40g copos de maíz, 15g crema de cacahuete", "409 kcal", "25g prot", "48g carbs", "13g grasa", "Sin cocción · 3 min"),
             op("Crepes salados de avena, pavo y queso", "1 huevo, 200ml leche semidesnatada, 50g harina de avena, 60g pechuga de pavo, 30g queso en lonchas", "542 kcal", "42g prot", "44g carbs", "22g grasa", "Sartén · 10 min"),
             op("Tostadas con huevo en freidora", "2 rebanadas de pan integral, 2 huevos, 40g pechuga de pavo, 20g queso rallado", "435 kcal", "37g prot", "29g carbs", "19g grasa", "Freidora 180º · 6 min"),
-            op("Crema de arroz con proteína de chocolate", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey", "276 kcal", "20g prot", "40g carbs", "4g grasa", "Microondas · 3 min"),
-            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
+            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
           ]
         },
@@ -9880,7 +9880,7 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
             // Recetas de @mariaamdr.fit (5 nov 2026), macros con scripts/componer.js
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
           ]
         },
         {
@@ -10063,12 +10063,12 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Ensalada de garbanzos, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 40g queso feta, 10g crema de vinagre balsámico", "458 kcal", "19g prot", "46g carbs", "22g grasa", "Sin cocción · 5 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate, 50g pepino, 25g queso rallado, 10g salsa de soja", "381 kcal", "38g prot", "28g carbs", "13g grasa", "Cazo · 20 min"),
+            op("Ensalada de garbanzos, pollo, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 150g pollo asado en tiras, 40g queso feta, 10g crema de vinagre balsámico", "630 kcal", "53g prot", "46g carbs", "26g grasa", "Sin cocción · 5 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate cherry, 50g pepino, 25g queso feta, 10g salsa de soja", "348 kcal", "34g prot", "26g carbs", "12g grasa", "Cazo · 20 min"),
             op("Berenjena rellena de pollo al microondas", "1 berenjena, 120g pechuga de pollo, 50g cebolla, 60g tomate triturado, 30g queso rallado", "368 kcal", "39g prot", "26g carbs", "12g grasa", "Microondas · 20 min"),
-            op("Fideos de arroz con gambas, tahín y limón", "70g fideos de arroz, 150g gambas, 15g tahini, 20g zumo de limón", "282 kcal", "24g prot", "24g carbs", "10g grasa", "Sartén · 12 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Fideos de arroz con gambas, pimiento y limón", "70g fideos de arroz, 150g gambas, 60g pimiento, 20g zumo de limón, 5g aceite de oliva, chile en polvo", "251 kcal", "23g prot", "24g carbs", "7g grasa", "Sartén · 12 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Salteado de garbanzos, brócoli y pollo", "150g garbanzos cocidos, 60g pimiento, 50g cebolla, 100g brócoli, 120g pechuga de pollo, 5g aceite de oliva", "517 kcal", "44g prot", "56g carbs", "13g grasa", "Sartén · 15 min"),
           ]
         },
@@ -10230,7 +10230,7 @@
             op("Coulant de avena y proteína", "30g harina de avena, 30g proteína whey, 60ml leche semidesnatada, 10g cacao puro, 10g chocolate negro, levadura química", "361 kcal", "32g prot", "38g carbs", "9g grasa", "Microondas · 3 min"),
             op("Helado de yogur, proteína y pistachos", "200g yogur griego 0%, 30g proteína whey, 10g pistachos", "291 kcal", "46g prot", "11g carbs", "7g grasa", "Batidora · 2 h de congelador"),
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
           ]
         },
@@ -10396,8 +10396,8 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
           ]
         }
@@ -10509,8 +10509,8 @@
             op("Copos de maíz con proteína y crema de cacahuete", "200ml leche semidesnatada, 15g proteína whey, 40g copos de maíz, 15g crema de cacahuete", "409 kcal", "25g prot", "48g carbs", "13g grasa", "Sin cocción · 3 min"),
             op("Crepes salados de avena, pavo y queso", "1 huevo, 200ml leche semidesnatada, 50g harina de avena, 60g pechuga de pavo, 30g queso en lonchas", "542 kcal", "42g prot", "44g carbs", "22g grasa", "Sartén · 10 min"),
             op("Tostadas con huevo en freidora", "2 rebanadas de pan integral, 2 huevos, 40g pechuga de pavo, 20g queso rallado", "435 kcal", "37g prot", "29g carbs", "19g grasa", "Freidora 180º · 6 min"),
-            op("Crema de arroz con proteína de chocolate", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey", "276 kcal", "20g prot", "40g carbs", "4g grasa", "Microondas · 3 min"),
-            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Microondas · 5 min"),
+            op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
+            op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
           ]
         },
@@ -10607,7 +10607,7 @@
             op("Bagels de cottage y avena", "90g queso cottage, 55g harina de avena, 5g semillas de sésamo", "316 kcal", "18g prot", "43g carbs", "8g grasa", "Horno 190º · 25 min"),
             op("Bizcocho de cacao y avena sin azúcar", "1 huevo, 100g yogur natural, 15g cacao puro, 50g harina de avena", "398 kcal", "20g prot", "48g carbs", "14g grasa", "Microondas · 5 min"),
             // Recetas de @mariaamdr.fit (5 nov 2026), macros con scripts/componer.js
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
           ]
         },
         {
@@ -10805,12 +10805,12 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Ensalada de garbanzos, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 40g queso feta, 10g crema de vinagre balsámico", "458 kcal", "19g prot", "46g carbs", "22g grasa", "Sin cocción · 5 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate, 50g pepino, 25g queso rallado, 10g salsa de soja", "381 kcal", "38g prot", "28g carbs", "13g grasa", "Cazo · 20 min"),
+            op("Ensalada de garbanzos, pollo, aguacate y feta", "30g canónigos, 80g pepino, 100g tomate, 70g aguacate, 110g garbanzos cocidos, 150g pollo asado en tiras, 40g queso feta, 10g crema de vinagre balsámico", "630 kcal", "53g prot", "46g carbs", "26g grasa", "Sin cocción · 5 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Bowl de arroz, atún y huevo", "70g arroz, 1 lata de atún al natural, 1 huevo, 60g tomate cherry, 50g pepino, 25g queso feta, 10g salsa de soja", "348 kcal", "34g prot", "26g carbs", "12g grasa", "Cazo · 20 min"),
             op("Berenjena rellena de pollo al microondas", "1 berenjena, 120g pechuga de pollo, 50g cebolla, 60g tomate triturado, 30g queso rallado", "368 kcal", "39g prot", "26g carbs", "12g grasa", "Microondas · 20 min"),
-            op("Fideos de arroz con gambas, tahín y limón", "70g fideos de arroz, 150g gambas, 15g tahini, 20g zumo de limón", "282 kcal", "24g prot", "24g carbs", "10g grasa", "Sartén · 12 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Fideos de arroz con gambas, pimiento y limón", "70g fideos de arroz, 150g gambas, 60g pimiento, 20g zumo de limón, 5g aceite de oliva, chile en polvo", "251 kcal", "23g prot", "24g carbs", "7g grasa", "Sartén · 12 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Salteado de garbanzos, brócoli y pollo", "150g garbanzos cocidos, 60g pimiento, 50g cebolla, 100g brócoli, 120g pechuga de pollo, 5g aceite de oliva", "517 kcal", "44g prot", "56g carbs", "13g grasa", "Sartén · 15 min"),
           ]
         },
@@ -10981,7 +10981,7 @@
             op("Coulant de avena y proteína", "30g harina de avena, 30g proteína whey, 60ml leche semidesnatada, 10g cacao puro, 10g chocolate negro, levadura química", "361 kcal", "32g prot", "38g carbs", "9g grasa", "Microondas · 3 min"),
             op("Helado de yogur, proteína y pistachos", "200g yogur griego 0%, 30g proteína whey, 10g pistachos", "291 kcal", "46g prot", "11g carbs", "7g grasa", "Batidora · 2 h de congelador"),
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
-            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 2 h de nevera"),
+            op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
           ]
         },
@@ -11173,8 +11173,8 @@
             op("Tiras de pollo al yogur con copos de maíz", "150g pechuga de pollo, 30g yogur griego 0%, 15g salsa barbacoa 0%, 30g copos de maíz, 5g aceite de oliva, pimentón, comino", "349 kcal", "39g prot", "28g carbs", "9g grasa", "Freidora 200º · 25 min"),
             op("Plato de kebab sin cocinar", "100g ensalada variada, 80g tomate, 150g pollo asado en tiras, 20g mozzarella, 50g salsa tzatziki, 40g maíz dulce", "366 kcal", "43g prot", "17g carbs", "14g grasa", "Sin cocción · 10 min"),
             op("Kebab de pollo al yogur en freidora", "150g contramuslo de pollo, 50g yogur griego 0%, 1 tortilla de trigo, 20g queso rallado, 50g tomate cherry, 20g rúcula, comino, orégano, pimienta", "514 kcal", "52g prot", "27g carbs", "22g grasa", "Freidora 200º · 25 min"),
-            op("Arroz salteado con jamón cocido y huevo", "70g arroz, 50g zanahoria, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "301 kcal", "20g prot", "26g carbs", "13g grasa", "Sartén · 20 min"),
-            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Freidora 180º · 15 min"),
+            op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
+            op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
           ]
         }
@@ -18278,23 +18278,23 @@
     "Tiras de pollo al yogur con copos de maíz": "Corta el pollo en tiras y mézclalo con el yogur, la salsa barbacoa, sal, pimentón y comino. Machaca los copos de maíz y reboza las tiras. Ponlas en la freidora de aire con un chorrito de aceite y hazlas 20 min a 200 °C.",
     "Plato de kebab sin cocinar": "Pon la ensalada en un plato hondo con el tomate troceado y el maíz. Echa la mozzarella sobre el pollo y caliéntalo 1 min y medio en el microondas para que se funda. Colócalo encima y termina con la salsa tzatziki y, si te gusta, salsa picante.",
     "Kebab de pollo al yogur en freidora": "Corta el pollo en tiras y mézclalo con la mitad del yogur, un chorrito de limón, sal y las especias. Hazlo 20 min a 200 °C en la freidora de aire. Rellena la tortilla con el pollo, el queso, el tomate, la rúcula y el resto del yogur. Envuélvela en papel de aluminio y dale 2 min más en la freidora.",
-    "Ensalada de garbanzos, aguacate y feta": "Pon los canónigos en un bol con el pepino y el tomate troceados. Añade el aguacate, los garbanzos escurridos y el feta en dados. Aliña con la crema de vinagre.",
-    "Arroz salteado con jamón cocido y huevo": "Cuece el arroz y escúrrelo. Saltea la zanahoria en dados con el aceite y añade el jamón cocido troceado. Echa el huevo batido, remueve hasta que cuaje y mezcla con el arroz y la soja.",
-    "Bowl de arroz, atún y huevo": "Cuece el arroz y el huevo. Pon el arroz en un bol y reparte por encima el atún escurrido, el huevo en cuartos, el tomate, el pepino y el queso. Aliña con la soja y, si te gusta, un poco de salsa picante.",
+    "Ensalada de garbanzos, pollo, aguacate y feta": "Pon los canónigos en un bol con el pepino y el tomate troceados. Añade el aguacate, los garbanzos escurridos, el pollo ya asado y el feta en dados. Aliña con la crema de vinagre.",
+    "Arroz tres delicias con jamón cocido": "Cuece el arroz y escúrrelo. Saltea la zanahoria rallada y los guisantes con el aceite y añade el jamón cocido troceado. Echa el huevo batido, remueve hasta que cuaje y mezcla con el arroz y la soja.",
+    "Bowl de arroz, atún y huevo": "Cuece el arroz y el huevo. Pon el arroz en un bol y reparte por encima el atún escurrido, el huevo en cuartos, los tomates, el pepino en tiras y el queso en dados. Aliña con la soja y un poco de salsa picante.",
     "Berenjena rellena de pollo al microondas": "Parte la berenjena por la mitad, hazle cortes y ponla 8 min en el microondas. Sofríe el pollo troceado con la cebolla. Saca la pulpa de la berenjena y añádela a la sartén con el tomate. Rellena la berenjena, pon el queso y gratina unos minutos.",
-    "Fideos de arroz con gambas, tahín y limón": "Hidrata los fideos en agua caliente el tiempo que indique el paquete y escúrrelos. Saltea las gambas 2-3 min, añade los fideos, el tahini y el limón, y remueve hasta que se mezcle todo.",
-    "Pizza de yogur y avena con atún": "Mezcla el yogur con la avena y una pizca de sal hasta tener una masa que no se pegue. Estírala sobre papel de horno y pon el tomate, el atún, la mozzarella y la cebolla en tiras. Hazla 10 min a 180 °C en la freidora de aire.",
+    "Fideos de arroz con gambas, pimiento y limón": "Hidrata los fideos en agua caliente el tiempo que indique el paquete y escúrrelos. Saltea el pimiento troceado con las gambas 3-4 min con el aceite y un poco de chile en polvo. Añade los fideos y el limón y remueve hasta que se mezcle todo.",
+    "Pizza de yogur y avena con atún": "Mezcla el yogur con la avena y una pizca de sal hasta tener una masa que no se pegue. Estírala sobre papel de horno y hornéala 5 min a 200 °C. Sácala, pon el tomate, el atún, la mozzarella y la cebolla y vuelve a hornearla hasta que se dore.",
     "Salteado de garbanzos, brócoli y pollo": "Dora el pollo troceado con el aceite y resérvalo. En la misma sartén saltea la cebolla, el pimiento y el brócoli en trozos pequeños. Añade los garbanzos escurridos y el pollo y deja 2-3 min más.",
     "Pan de atún relleno de pollo y tomate": "Tritura el atún escurrido con el huevo y una cucharadita de levadura hasta que quede líquido. Échalo en un recipiente apto y dale 2 min en el microondas. Córtalo en dos y rellénalo con el queso crema, el pollo ya hecho, el tomate y los canónigos.",
     "Copos de maíz con proteína y crema de cacahuete": "Mezcla la leche con la proteína hasta que no queden grumos. Añade los copos de maíz y la crema de cacahuete.",
-    "Crepes salados de avena, pavo y queso": "Agita en una coctelera el huevo, la leche y la avena. Echa una capa fina en una sartén engrasada y, cuando cuaje, dale la vuelta. Pon el pavo y el queso y dóblala. Salen unas 3 crepes.",
+    "Crepes salados de avena, pavo y queso": "Agita en una coctelera el huevo, la leche y la avena. Echa una capa fina en una sartén engrasada. Cuando esté hecha, sin darle la vuelta, pon el pavo y el queso, dóblala y sácala. Salen unas 3 crepes.",
     "Tostadas con huevo en freidora": "Aplasta el centro de cada rebanada con una cuchara para hacer un hueco. Ponlas en la freidora de aire sobre papel y casca un huevo en cada una. Añade el pavo y el queso y hazlas 5-6 min a 180 °C.",
     "Coulant de avena y proteína": "Mezcla en una taza la avena, la proteína, el cacao y una cucharadita de levadura. Añade la leche hasta cubrir y remueve bien. Hunde la onza de chocolate en el centro y dale 1 min en el microondas.",
     "Helado de yogur, proteína y pistachos": "Bate el yogur con la proteína y los pistachos. Pásalo a un tarro y déjalo un par de horas en el congelador.",
     "Helado de frutos rojos y claras": "Usa claras pasteurizadas de brik. Tritura los frutos rojos congelados, añade las claras y la proteína y bate hasta que quede cremoso. Tómalo al momento o déjalo un rato en el congelador.",
-    "Yogur griego con mermelada casera de arándanos y chía": "Hidrata la chía con un poco de agua un par de horas. Calienta los arándanos en una sartén y cháfalos hasta que hiervan. Mézclalos con la chía, déjalos enfriar en la nevera y sírvelos con el yogur.",
-    "Crema de arroz con proteína de chocolate": "Mezcla la leche con la crema de arroz y caliéntala 1 min en el microondas. Espera un minuto y añade la proteína, siempre después de calentar. Remueve hasta que quede cremosa.",
-    "Avena horneada con plátano y yogur": "Chafa el plátano en un molde apto para microondas. Añade la avena, la proteína, la leche y un poco de levadura y mezcla. Dale 3-4 min en el microondas. Termina con el yogur y los arándanos por encima.",
+    "Yogur griego con mermelada casera de arándanos y chía": "Hidrata la chía con un poco de agua unas 6 horas. Calienta los arándanos congelados en una sartén a fuego medio y cháfalos hasta que hiervan. Mézclalos con la chía, deja enfriar y sírvelos con el yogur.",
+    "Crema de arroz con proteína de chocolate y cacahuete": "Mezcla la leche con la crema de arroz y caliéntala 1 min en el microondas. Añade la proteína, siempre después de calentar, y remueve hasta que quede cremosa. Termina con la crema de cacahuete por encima: con el calor se derrite.",
+    "Avena horneada con plátano y yogur": "Chafa el plátano en una fuente apta para horno. Añade la avena, la proteína, la leche y un poco de levadura y mezcla hasta que quede cremoso. Extiende el yogur por encima y reparte los arándanos, calentados 30 s en el microondas. Hornea 35 min a 200 °C, o en la freidora de aire.",
     "Pudin de chía y avena con proteína": "Mezcla en un tarro la chía, la avena, la proteína y la leche. Déjalo una noche en la nevera y sírvelo con los arándanos.",
     "Batido de plátano, avena y frutos rojos": "Pon todo en la batidora con el plátano troceado y bate hasta que quede sin grumos.",
     "Sándwich crujiente de ternera con salsa burger": "Extiende la carne cruda sobre una tortilla, pon el queso y tapa con la otra. Corta en triángulos y hazlo 12 min a 180 °C en la freidora de aire. Mezcla el yogur, la mostaza, el kétchup, sal, ajo y cebolla en polvo, y úsalo para mojar.",
