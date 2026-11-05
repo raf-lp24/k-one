@@ -4000,7 +4000,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (173 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (175 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4194,7 +4194,10 @@
     // 5 nov 2026 · informe de Jarvis
     "No importa cuántas veces hayas fallado: importa lo que hagas a partir de hoy.",
     "Los tiempos que ves en redes no son la media. Corre al tuyo.",
-    "Empezar a lo bestia es la forma más rápida de tener que parar."
+    "Empezar a lo bestia es la forma más rápida de tener que parar.",
+    // 6 nov 2026 · informe de Jarvis
+    "Cuando cueste, acuérdate de quién quieres llegar a ser.",
+    "Un buen entreno no es el que más te cansa, es el que te hace mejorar."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -9662,6 +9665,7 @@
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
             op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
+            op("Boniato aplastado con pollo, verduras, cottage y guacamole", "200g boniato, 3g AOVE, 150g carne picada de pollo, 40g pimiento, 30g cebolla, 30g calabacín, 50g queso cottage, 130g aguacate, 30g cebolla, 100g tomate, 1/2 lima, sal, pimienta", "727 kcal", "45g prot", "67g carbs", "31g grasa", "Freidora 180º · 15 min"),
           ]
         }
       ];
@@ -10408,6 +10412,7 @@
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
             op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
+            op("Boniato aplastado con pollo, verduras, cottage y guacamole", "200g boniato, 3g AOVE, 150g carne picada de pollo, 40g pimiento, 30g cebolla, 30g calabacín, 50g queso cottage, 130g aguacate, 30g cebolla, 100g tomate, 1/2 lima, sal, pimienta", "727 kcal", "45g prot", "67g carbs", "31g grasa", "Freidora 180º · 15 min"),
           ]
         }
       ];
@@ -11188,6 +11193,7 @@
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
             op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
+            op("Boniato aplastado con pollo, verduras, cottage y guacamole", "200g boniato, 3g AOVE, 150g carne picada de pollo, 40g pimiento, 30g cebolla, 30g calabacín, 50g queso cottage, 130g aguacate, 30g cebolla, 100g tomate, 1/2 lima, sal, pimienta", "727 kcal", "45g prot", "67g carbs", "31g grasa", "Freidora 180º · 15 min"),
           ]
         }
       ];
@@ -18277,6 +18283,7 @@
   }
 
   const RECETA_PASOS = {
+    "Boniato aplastado con pollo, verduras, cottage y guacamole": "Corta el boniato en rodajas, sálalo, ponle unas gotas de aceite y hazlo 12 min a 180 °C en la freidora de aire. Mientras, saltea el pollo picado con el pimiento, la cebolla y el calabacín hasta que esté bien hecho. Para el guacamole, machaca el aguacate y mézclalo con la cebolla y el tomate picados, el zumo de lima, sal y pimienta. Aplasta el boniato en el plato y pon encima el cottage, el pollo con verduras y el guacamole.",
     "Bizcocho de zanahoria con proteína": "Ralla la zanahoria y mézclala con los huevos, el yogur, la leche, la harina, la proteína, la levadura y la canela. Pásalo a un molde engrasado y reparte las nueces por encima. Hazlo 15-17 min a 180 °C en la freidora de aire.",
     "Wok de langostinos y verduras con anacardos": "Cocina las verduras al vapor. Mientras, saltea los langostinos con unas gotas de aceite hasta que cambien de color. Mezcla la soja, el zumo de lima, la salsa barbacoa y las especias. Junta las verduras con los langostinos, añade la salsa y dale 1 minuto. Termina con los anacardos.",
     "Crunchywrap de ternera": "Dora la carne con sal, comino y pimentón picante hasta que suelte el jugo. Ponla en el centro de la tortilla grande con la mozzarella, la lechuga y el tomate troceado. Unta la tortilla pequeña con el queso crema, colócala encima y dobla los bordes de la grande hacia el centro. Dóralo en la sartén vuelta y vuelta, empezando por el lado de los pliegues.",
