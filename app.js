@@ -4000,7 +4000,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (171 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (174 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4191,7 +4191,11 @@
     "Si tienes la regla y esos días te falta fuerza, es normal. Baja un poco el peso y sigue: no pierdes nada.",
     "Comiendo fuera: una proteína a la plancha o al horno, algo de verdura y el hidrato que te apetezca. Sin agobios.",
     "¿Día de playa? Llévate algo hecho: pan con atún o pollo, fruta y agua. Comerás mejor que a base de picoteo.",
-    "En un restaurante puedes pedir la salsa aparte. Le das el sabor que quieres y disfrutas igual del plato."
+    "En un restaurante puedes pedir la salsa aparte. Le das el sabor que quieres y disfrutas igual del plato.",
+    // 5 nov 2026 · informe de Thor
+    "No importa cuántas veces hayas fallado: importa lo que hagas a partir de hoy.",
+    "Los tiempos que ves en redes no son la media. Corre al tuyo.",
+    "Empezar a lo bestia es la forma más rápida de tener que parar."
   ];
 
   // Solo nutrición: se quitan las frases de gimnasio (13 de 60: "Entrena como si
@@ -9062,6 +9066,7 @@
             op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
             op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -9480,6 +9485,7 @@
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
             op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -9656,6 +9662,7 @@
             op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
+            op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -9782,6 +9789,7 @@
             op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
             op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -10232,6 +10240,7 @@
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
             op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -10399,6 +10408,7 @@
             op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
+            op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -10512,6 +10522,7 @@
             op("Crema de arroz con proteína de chocolate y cacahuete", "150ml leche semidesnatada, 40g crema de arroz, 15g proteína whey, 15g crema de cacahuete", "376 kcal", "23g prot", "44g carbs", "12g grasa", "Microondas · 3 min"),
             op("Avena horneada con plátano y yogur", "1 plátano, 60g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 80g yogur griego 0%, 50g arándanos, levadura química", "592 kcal", "45g prot", "85g carbs", "8g grasa", "Horno 200º · 40 min"),
             op("Pudin de chía y avena con proteína", "30g semillas de chía, 30g copos de avena, 30g proteína whey, 100ml leche semidesnatada, 50g arándanos", "471 kcal", "37g prot", "47g carbs", "15g grasa", "Sin cocción · 5 min + 1 noche de nevera"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -10983,6 +10994,7 @@
             op("Helado de frutos rojos y claras", "150g frutos rojos, 150g claras de huevo, 15g proteína whey", "190 kcal", "29g prot", "14g carbs", "2g grasa", "Batidora · 5 min"),
             op("Yogur griego con mermelada casera de arándanos y chía", "150g yogur griego 0%, 100g arándanos, 15g semillas de chía", "234 kcal", "19g prot", "26g carbs", "6g grasa", "Sartén · 10 min + 6 h de reposo"),
             op("Batido de plátano, avena y frutos rojos", "200ml leche semidesnatada, 1 plátano, 30g proteína whey, 30g copos de avena, 50g frutos rojos", "472 kcal", "36g prot", "64g carbs", "8g grasa", "Batidora · 3 min"),
+            op("Bizcocho de zanahoria con proteína", "80g zanahoria, 2 huevos, 30g harina de avena, 30g proteína whey, 125g yogur griego 0%, 100ml leche desnatada, 20g nueces, levadura química, canela", "672 kcal", "62g prot", "43g carbs", "28g grasa", "Freidora 180º · 20 min"),
           ]
         },
         {
@@ -11176,6 +11188,7 @@
             op("Arroz tres delicias con jamón cocido", "70g arroz, 50g zanahoria, 30g guisantes, 60g jamón cocido, 1 huevo, 10g salsa de soja, 5g aceite de oliva", "325 kcal", "22g prot", "30g carbs", "13g grasa", "Sartén · 20 min"),
             op("Pizza de yogur y avena con atún", "125g yogur griego 0%, 90g harina de avena, 60g tomate triturado, 1 lata de atún al natural, 30g mozzarella, 30g cebolla", "613 kcal", "53g prot", "71g carbs", "13g grasa", "Horno 200º · 20 min"),
             op("Pan de atún relleno de pollo y tomate", "1 lata de atún al natural, 1 huevo, 15g queso crema light, 60g pechuga de pollo, 40g tomate, 15g canónigos, levadura química", "279 kcal", "42g prot", "3g carbs", "11g grasa", "Microondas · 5 min"),
+            op("Wok de langostinos y verduras con anacardos", "200g langostinos, 300g verduras al vapor, 15ml salsa de soja baja en sal, 15g salsa barbacoa 0%, 1/2 lima, ajo en polvo, jengibre, 10g anacardos, 3g AOVE", "410 kcal", "58g prot", "22g carbs", "10g grasa", "Sartén · 10 min"),
           ]
         }
       ];
@@ -18265,6 +18278,8 @@
   }
 
   const RECETA_PASOS = {
+    "Bizcocho de zanahoria con proteína": "Ralla la zanahoria y mézclala con los huevos, el yogur, la leche, la harina, la proteína, la levadura y la canela. Pásalo a un molde engrasado y reparte las nueces por encima. Hazlo 15-17 min a 180 °C en la freidora de aire.",
+    "Wok de langostinos y verduras con anacardos": "Cocina las verduras al vapor. Mientras, saltea los langostinos con unas gotas de aceite hasta que cambien de color. Mezcla la soja, el zumo de lima, la salsa barbacoa y las especias. Junta las verduras con los langostinos, añade la salsa y dale 1 minuto. Termina con los anacardos.",
     "Crunchywrap de ternera": "Dora la carne con sal, comino y pimentón picante hasta que suelte el jugo. Ponla en el centro de la tortilla grande con la mozzarella, la lechuga y el tomate troceado. Unta la tortilla pequeña con el queso crema, colócala encima y dobla los bordes de la grande hacia el centro. Dóralo en la sartén vuelta y vuelta, empezando por el lado de los pliegues.",
     "Ensalada de melón y pollo": "Aliña el pollo con limón, pimentón picante y comino y hazlo unos 20 min en la freidora de aire. Mientras, pon en un bol los canónigos, la rúcula, el pepino, los tomates, la quinoa, el aguacate y el melón en trozos. Corta el pollo y añádelo con el feta en dados. Termina con la crema de vinagre y el pesto.",
     "Patatas en freidora con huevos, jamón y trufa": "Corta la patata, mézclala con el aceite y sal y hazla 20 min a 200 °C en la freidora de aire, moviéndola a mitad. Haz los huevos a la plancha. Sirve las patatas con los huevos encima, el jamón y un toque de salsa de trufa.",
