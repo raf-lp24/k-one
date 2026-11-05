@@ -4000,7 +4000,7 @@
     return `<button type="button" onclick="event.stopPropagation();abrirInfoEjercicio('${js}')" style="background:none;border:none;padding:0;margin:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Ver técnica de esta sesión">${safe}</button>`;
   }
 
-  // ===== MENSAJES DEL DÍA (174 frases, rotación diaria determinista) =====
+  // ===== MENSAJES DEL DÍA (173 frases, rotación diaria determinista) =====
   const MENSAJES_DIA = [
     "El primer día no requiere ganas. Requiere decisión. Ya la tomaste.",
     "Lo que haces hoy es lo que te diferencia de quien eras ayer.",
@@ -4147,7 +4147,6 @@
     "Dedica una hora del domingo a dejar una base hecha: pollo a la plancha, arroz, verduras asadas y huevos cocidos. De ahí salen bowls, wraps y cenas rápidas sin empezar de cero cada día. Y si comes fuera, llévalo en un táper: así lo que comes lo decides tú.",
     "Un día de pizza no estropea nada. Lo que pesa es que, con las prisas, cuidarte siempre quede para el final.",
     // 28 oct 2026 · revisión de @marulekhal, @cienciaychandal y @fitnesshibridoesp, aprobadas por Rafa el 30 oct
-    "No hace falta prohibirte nada: sube un escalón. Huevo frito → revuelto → cocido. Pollo frito → al horno → a la plancha. Yogur azucarado → natural → griego natural.",
     "Tus músculos se recuperan antes de lo que crees, pero entrenarlos a diario acaba pasando factura a tendones y articulaciones. Dos o tres veces por semana cada uno es lo que mejor funciona, y tu plan ya lo reparte así.",
     "Comer sano es el primer paso. Saber cuánto comes, el segundo. Saber cuánto de eso es proteína, hidratos y grasa, el tercero. Tu plan te da los tres hechos.",
     // 30 oct 2026 · revisión de @mente.cuerpo.running, aprobadas por Rafa
