@@ -21,7 +21,7 @@
 //     al cambiar de semana).
 //  9. Sin cafeína con tensión alta o corazón; tirada larga según la distancia
 //     (10K < media < maratón); nota de menopausia desde los 45 y ciclo hasta 54.
-// 10. Textos libres de la IA: copia exacta en app.js, el motor y Thor los suman,
+// 10. Textos libres de la IA: copia exacta en app.js, el motor y Jarvis los suman,
 //     una huella vieja no cuenta, solo vocabulario y solo los textos se envían.
 //
 // Uso: node scripts/auditar-entreno.js  (entra en `npm test`; sale con código 1
@@ -197,7 +197,7 @@ for (const [edad, meno, ciclo] of [[35, false, true], [50, true, true], [62, tru
   if (/gamba|langostino|cangrejo/i.test(com(con))) falla('textos libres', 'con «crustaceos» de la IA siguen las gambas');
   if (notas(con).some(x => /cafe[ií]na \(|cafe[ií]na pre/i.test(x))) falla('textos libres', 'con «hipertension» de la IA sigue la cafeína');
   if (com(vieja) !== com(sin) || ent(vieja) !== ent(sin)) falla('textos libres', 'una interpretación de otros textos (huella vieja) cambia el plan');
-  if (auditarPlan({ ...BASE, ...U, _ia: ia }, sin).length === 0) falla('textos libres', 'Thor no revisa con las alergias que añadió la IA');
+  if (auditarPlan({ ...BASE, ...U, _ia: ia }, sin).length === 0) falla('textos libres', 'Jarvis no revisa con las alergias que añadió la IA');
 }
 const _iaPrueba = (async () => {
   const { interpretarTextos } = require('../lib/interpretar-textos');

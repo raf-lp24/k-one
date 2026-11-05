@@ -31,8 +31,8 @@ jobs:
       - name: Cron diario
         run: node scripts/probar-cron.js
       # ~600 planes con combinaciones de alergias, enfermedades, lesiones,
-      # deportes y objetivos: ninguno puede llevar un alimento prohibido (Thor).
-      - name: Planes de muestra (motor + Thor)
+      # deportes y objetivos: ninguno puede llevar un alimento prohibido (Jarvis).
+      - name: Planes de muestra (motor + Jarvis)
         run: node scripts/comprobar-motor.js 600
       # Alergias escritas de muchas formas, cada alimento como «no como», tensión
       # alta, diabetes, seguridad del déficit, hidratos por día, grasa mínima y

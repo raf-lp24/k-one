@@ -7,7 +7,7 @@
 //     datos con un cobro vivo detrás sería peor que no borrar.
 //  2. Fotos de progreso y de perfil (Storage), mensajes, historial de emails y lead.
 //  3. Por último el usuario de Auth: la base de datos borra en cascada su perfil, plan,
-//     suscripción, hitos, avisos push, referidos, canjes y avisos de Thor.
+//     suscripción, hitos, avisos push, referidos, canjes y avisos de Jarvis.
 // Si algo falla después del paso 1 se puede reintentar sin problema (todo es idempotente).
 //
 // Tampoco se borra la huella del email en `pruebas_usadas` (SHA-256, no el email): es lo que

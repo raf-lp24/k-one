@@ -24,10 +24,11 @@ marketing/Videos/*.mp4
 # Copias de seguridad bajadas con scripts/copia-seguridad.js (datos de clientes: nunca a git)
 copias/
 
-# Informes de Thor (revisión de Instagram: estadísticas y gasto en anuncios). Solo en local.
+# Informes de Jarvis (revisión de Instagram: estadísticas y gasto en anuncios). Solo en local.
 informes/
 
-# Carpeta de Thor (agente de K-ONE): conocimiento y revisión de Instagram. Solo en local.
+# Carpeta de Jarvis (agente de K-ONE, antes Thor): conocimiento y revisión de Instagram. Solo en local.
+Jarvis/
 Thor/
 
 # Documentos de referencia (planes reales de entreno y dieta) y archivo de versiones viejas: solo en local.

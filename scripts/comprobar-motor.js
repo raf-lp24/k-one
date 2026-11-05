@@ -4,7 +4,7 @@
 // index.html que ejecuta el servidor (lib/motor-servidor.js), y falla si:
 //   - el motor lanza una excepción,
 //   - el plan sale incompleto (días, tomas, platos sin nombre o sin kcal),
-//   - Thor (auditarPlan) encuentra un alimento que ese cliente no puede comer.
+//   - Jarvis (auditarPlan) encuentra un alimento que ese cliente no puede comer.
 //
 // Uso:   node scripts/comprobar-motor.js [n]      (n = planes al azar, 600 por defecto)
 // Lo ejecuta GitHub Actions en cada subida (.github/workflows/comprobar.yml).
@@ -139,7 +139,7 @@ function revisar(u) {
   if (!(plan.kcalObj > 1000 && plan.kcalObj < 6000)) fallos.push('kcal objetivo fuera de rango: ' + plan.kcalObj);
   try {
     const hallazgos = auditarPlan(u, plan);
-    hallazgos.slice(0, 3).forEach(h => fallos.push(`Thor: ${h.coincidencia} en «${h.plato}» (${h.motivo})`));
+    hallazgos.slice(0, 3).forEach(h => fallos.push(`Jarvis: ${h.coincidencia} en «${h.plato}» (${h.motivo})`));
   } catch (e) { fallos.push('auditarPlan lanzó: ' + e.message); }
   return fallos;
 }

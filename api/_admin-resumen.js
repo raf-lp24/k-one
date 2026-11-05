@@ -1,6 +1,6 @@
-// RESUMEN DE SOLO LECTURA PARA THOR (12 oct 2026).
+// RESUMEN DE SOLO LECTURA PARA JARVIS (12 oct 2026).
 //
-// Thor (el agente de K-ONE que hace la ronda semanal) no puede mirar Stripe ni
+// Jarvis (el agente de K-ONE que hace la ronda semanal) no puede mirar Stripe ni
 // Supabase: las claves solo viven en Vercel. Este endpoint le da lo mínimo para
 // los puntos 8-10 de su ronda (pagos fallidos y bajas, altas nuevas, lo que dicen
 // los clientes) SIN datos personales: solo contadores. Ni nombres, ni emails, ni
@@ -8,11 +8,11 @@
 //
 // Se llama como /api/admin?fn=resumen (cuenta dentro de api/admin.js: no suma
 // funciones, el tope de Vercel Hobby es 12). No usa la sesión de admin: lleva una
-// clave propia (THOR_API_KEY en Vercel) que solo permite LEER este resumen, así
+// clave propia (JARVIS_API_KEY en Vercel) que solo permite LEER este resumen, así
 // que si se filtrara no da acceso a Jarvis ni a ningún dato de cliente.
-//   curl -s -X POST -H "x-thor-key: $THOR_API_KEY" "https://k-one.fit/api/admin?fn=resumen"
+//   curl -s -X POST -H "x-jarvis-key: $JARVIS_API_KEY" "https://k-one.fit/api/admin?fn=resumen"
 //
-// Sin THOR_API_KEY en Vercel el endpoint responde 503 y no hace nada.
+// Sin JARVIS_API_KEY en Vercel el endpoint responde 503 y no hace nada.
 const crypto = require('crypto');
 const { getSupabaseAdmin } = require('./_stripeHelpers');
 const { capturarError } = require('./_sentry');
@@ -22,8 +22,8 @@ const DIA = 86400000;
 const h = s => crypto.createHash('sha256').update(String(s)).digest();
 
 function claveValida(req) {
-  const esperada = process.env.THOR_API_KEY || '';
-  const recibida = String(req.headers['x-thor-key'] || '');
+  const esperada = process.env.JARVIS_API_KEY || '';
+  const recibida = String(req.headers['x-jarvis-key'] || '');
   // Hashes de la misma longitud: timingSafeEqual nunca lanza.
   return !!esperada && !!recibida && crypto.timingSafeEqual(h(recibida), h(esperada));
 }
@@ -36,7 +36,7 @@ function contar(lista, f) {
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
-  if (!process.env.THOR_API_KEY) return res.status(503).json({ error: 'Resumen no disponible: falta THOR_API_KEY' });
+  if (!process.env.JARVIS_API_KEY) return res.status(503).json({ error: 'Resumen no disponible: falta JARVIS_API_KEY' });
   if (!claveValida(req)) return res.status(401).json({ error: 'No autorizado' });
 
   try {

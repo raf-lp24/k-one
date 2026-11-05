@@ -12,24 +12,24 @@ Web de entrenamiento y nutrición personalizados en **https://k-one.fit**. Prime
 | `running.html`, `gimnasio.html`, `hibrido.html`, `solo-nutricion.html` | Páginas públicas para buscadores, **generadas** con `node scripts/generar-paginas.js` (no editar a mano). |
 | `api/*.js` (sin guion bajo) | **12 funciones de Vercel — es el tope del plan Hobby.** La 13ª rompe TODOS los despliegues. Si hace falta lógica nueva, va como `accion` dentro de una existente (ver `update-subscription.js`) y su código en un archivo `api/_xxx.js`. |
 | `api/_*.js` | Módulos compartidos (no cuentan como función): hitos, premium, Stripe, Sentry, borrado de cuenta. |
-| `lib/` | Código que usa el servidor: `motor-servidor.js` (ejecuta el MISMO script de `index.html` en Node), `normalizador-alimentos.js` (**Thor**, el agente que revisa planes), `aviso-del-dia.js`. `/lib/*` está tapado al público en `vercel.json`. |
+| `lib/` | Código que usa el servidor: `motor-servidor.js` (ejecuta el MISMO script de `index.html` en Node), `normalizador-alimentos.js` (**Jarvis**, el agente que revisa planes), `aviso-del-dia.js`. `/lib/*` está tapado al público en `vercel.json`. |
 | `data/` | `alimentos.json` (tabla de macros; **va copiada dentro de `index.html`**: `node scripts/incrustar-alimentos.js` tras tocarla) y fichas de ejercicios. |
 | `supabase/*.sql` | Esquema y migraciones (se aplican a mano en el SQL Editor). |
 | Servicios | Vercel (hosting + funciones + cron 09:00 UTC), Supabase (Auth, Postgres con RLS, Storage), Stripe (cobros), Resend (emails), Web Push, Sentry, Google Analytics (solo con consentimiento). |
 
 ## Lo que hace el cron de las 09:00 (`GET /api/notify`)
-Avisos push de entreno · emails de retención (día 1, día 8, reenganche 7/14/21 días, resumen semanal) · **puesta al día de los planes** con el motor actual (y revisión de Thor) · resumen para el admin · **copia de seguridad** en Storage (bucket `backups`, privado). Incluye el **aviso antes del primer cobro** (a quien sigue en prueba, sin cancelar, a 3 días o menos). Se prueba entero con una base de datos simulada; ver «Pruebas».
+Avisos push de entreno · emails de retención (día 1, día 8, reenganche 7/14/21 días, resumen semanal) · **puesta al día de los planes** con el motor actual (y revisión de Jarvis) · resumen para el admin · **copia de seguridad** en Storage (bucket `backups`, privado). Incluye el **aviso antes del primer cobro** (a quien sigue en prueba, sin cancelar, a 3 días o menos). Se prueba entero con una base de datos simulada; ver «Pruebas».
 
 ## Pruebas — pasar siempre antes de subir
 ```
 npm test
 ```
-Encadena: estructura del proyecto (`comprobar-proyecto.js`: ≤12 funciones, sintaxis, JSON, FAQ = JSON-LD, precios, tabla de alimentos incrustada, páginas SEO) → borrado de cuenta (`probar-eliminar-cuenta.js`) → el cron de las 09:00 entero con 8 días simulados (`probar-cron.js`) → ~600 planes con el motor real y Thor (`comprobar-motor.js`, incluye que «Ver macros» cuadre ≥90 %) → auditoría de alimentos y recetario (`auditoria-completa.js`).
+Encadena: estructura del proyecto (`comprobar-proyecto.js`: ≤12 funciones, sintaxis, JSON, FAQ = JSON-LD, precios, tabla de alimentos incrustada, páginas SEO) → borrado de cuenta (`probar-eliminar-cuenta.js`) → el cron de las 09:00 entero con 8 días simulados (`probar-cron.js`) → ~600 planes con el motor real y Jarvis (`comprobar-motor.js`, incluye que «Ver macros» cuadre ≥90 %) → auditoría de alimentos y recetario (`auditoria-completa.js`).
 Además `tests.html` (20 pruebas en el navegador; abrir con el servidor local). GitHub Actions lo pasa en cada subida y avisa si falla, **pero no bloquea el despliegue**.
 
 ## Reglas que hay que respetar
 - **Subir `CACHE_NAME` en `sw.js`** (`kone-vN`) con cada cambio de la web, o los móviles siguen con la copia vieja.
-- **Motor y Thor van en espejo**: los patrones de `neutralizar` están en `index.html` Y en `lib/normalizador-alimentos.js` y deben ser idénticos (`auditoria-completa.js` lo comprueba).
+- **Motor y Jarvis van en espejo**: los patrones de `neutralizar` están en `index.html` Y en `lib/normalizador-alimentos.js` y deben ser idénticos (`auditoria-completa.js` lo comprueba).
 - Los macros de una receta **nunca a mano**: `scripts/componer.js`.
 - Cambiar un precio = Price nuevo en Stripe + variable de entorno + redeploy; y actualizar `index.html`, `llms.txt`, términos y las páginas generadas.
 - El vídeo de la portada se llama `demo-septiembre.mp4`: `vercel.json` cachea `/demo-*` 30 días como inmutable, así que **al cambiarlo hay que cambiar el nombre**.

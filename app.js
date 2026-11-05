@@ -4191,7 +4191,7 @@
     "Comiendo fuera: una proteína a la plancha o al horno, algo de verdura y el hidrato que te apetezca. Sin agobios.",
     "¿Día de playa? Llévate algo hecho: pan con atún o pollo, fruta y agua. Comerás mejor que a base de picoteo.",
     "En un restaurante puedes pedir la salsa aparte. Le das el sabor que quieres y disfrutas igual del plato.",
-    // 5 nov 2026 · informe de Thor
+    // 5 nov 2026 · informe de Jarvis
     "No importa cuántas veces hayas fallado: importa lo que hagas a partir de hoy.",
     "Los tiempos que ves en redes no son la media. Corre al tuyo.",
     "Empezar a lo bestia es la forma más rápida de tener que parar."
@@ -20539,7 +20539,7 @@
   }
 
   // Pide al servidor que revise el plan recién guardado (api/notify.js, tipo
-  // 'auditar_plan'): Thor (el agente de auditoría) mira si se ha colado algo
+  // 'auditar_plan'): Jarvis (el agente de auditoría) mira si se ha colado algo
   // que el cliente no puede o no quiere comer y, si es así, avisa al admin en
   // el momento (push + email + Jarvis) en vez de esperar al cron del día
   // siguiente. El servidor solo revisa el plan del cliente AUTENTICADO -- el
@@ -21928,7 +21928,7 @@
       hallazgos = j.hallazgos || null;
     } catch (e) { return; }
     if (!hallazgos || !hallazgos.length) return;
-    // Thor revisa el plan guardado en el servidor, que puede ir un paso por detrás
+    // Jarvis revisa el plan guardado en el servidor, que puede ir un paso por detrás
     // del que se acaba de poner al día en este dispositivo (_actualizarPlanAlMotor):
     // solo cuentan los platos que SIGUEN en el plan actual.
     try {
@@ -21995,7 +21995,7 @@
   // (buildPlanFromData), sin esperar a que nadie en Jarvis lo haga a mano.
   // _huellaPedida se fija ANTES de guardar para que saveUserData() no
   // dispare su propio aviso automático (vería el mismo plan como "nuevo" y
-  // pediría una segunda auditoría por su cuenta) -- el único aviso de Thor
+  // pediría una segunda auditoría por su cuenta) -- el único aviso de Jarvis
   // para esta regeneración es el explícito de más abajo, con origen
   // 'cliente_confirmo', que además deja constancia en Jarvis del hallazgo
   // aunque ya esté arreglado.

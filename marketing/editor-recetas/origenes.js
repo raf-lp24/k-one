@@ -1,12 +1,12 @@
 // De dónde sale cada receta: `node marketing/editor-recetas/origenes.js` deja origenes.json,
 // que extraer.js mete en cada ficha del Recetario. Sale del historial de git (el commit que
-// añadió el nombre) y de los informes de Thor. El enlace al post se busca por parecido de
+// añadió el nombre) y de los informes de Jarvis. El enlace al post se busca por parecido de
 // ingredientes y por eso la ficha dice «post más parecido»; lo comprobado a mano va en MANUAL.
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const RAIZ = path.join(__dirname, '..', '..');
 const git = (...a) => execFileSync('git', a, { cwd: RAIZ, encoding: 'utf8', maxBuffer: 1 << 29 });
-const THOR = path.join(RAIZ, 'Thor');
-const TRABAJO = path.join(THOR, 'thor', 'instagram', 'trabajo');
+const JARVIS = path.join(RAIZ, 'Jarvis');
+const TRABAJO = path.join(JARVIS, 'jarvis', 'instagram', 'trabajo');
 
 // Commits que añadieron recetas, del más antiguo al más nuevo: [commit, de dónde].
 const COMMITS = [
@@ -49,7 +49,7 @@ function mejorPost(cuenta, nombre, ingredientes) {
   }
   return mejor && mejor.nota >= 0.62 ? (mejor.tipo === 'reel' ? IG(mejor.k) : `https://www.instagram.com/p/${mejor.k}/`) : null;
 }
-const informes = fs.existsSync(path.join(THOR, 'informes')) ? fs.readdirSync(path.join(THOR, 'informes')).filter((f) => f.endsWith('.md')).map((f) => fs.readFileSync(path.join(THOR, 'informes', f), 'utf8')) : [];
+const informes = fs.existsSync(path.join(JARVIS, 'informes')) ? fs.readdirSync(path.join(JARVIS, 'informes')).filter((f) => f.endsWith('.md')).map((f) => fs.readFileSync(path.join(JARVIS, 'informes', f), 'utf8')) : [];
 const VIKIKA = informes.find((t) => /^# .*vikikateam/im.test(t)) || '';
 const cuentaEnInforme = (nombre) => { const n = norm(nombre); for (const t of informes) for (const l of t.split('\n')) if (norm(l).includes(n)) { const m = l.match(/@[a-z0-9_.]+/i); if (m) return m[0]; } return null; };
 
