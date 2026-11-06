@@ -111,7 +111,7 @@ for (const [g, c] of CASOS) {
   const ali = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'alimentos.json'), 'utf8'));
   const sing = x => x.length > 4 && /es$/.test(x) && !/(ques|ces)$/.test(x) ? x.slice(0, -2) : (x.length > 3 && /s$/.test(x) ? x.slice(0, -1) : x);
   const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const NO_ES = [/leche de coco|nata de coco|bebida de \w+|yogur de (soja|coco)|postre de soja/, /(semillas|pipas) de calabaza/, /tortillas? de (trigo|maiz)|tortilla integral/, /panadera|panceta|panecillo/, /nuez moscada/, /sin gluten|sin lactosa/, /harina de (arroz|maiz|garbanzo)/, /agua de coco/];
+  const NO_ES = [/leche de coco|nata de coco|bebida de \w+|yogur de (soja|coco)|postre de soja/, /(semillas|pipas) de calabaza|pan de calabaza|seran el pan/,/tortillas? de (trigo|maiz)|tortilla integral/, /panadera|panceta|panecillo/, /nuez moscada/, /sin gluten|sin lactosa/, /harina de (arroz|maiz|garbanzo)/, /agua de coco/];
   for (const k of Object.keys(ali.alimentos || ali)) {
     const re = new RegExp('(?<![a-zñ])' + N(k).split(/\s+/).map(p => esc(sing(p)) + '(?:s|es)?').join('\\s+(?:de\\s+)?') + '(?![a-zñ])', 'g');
     const plan = gen({ ...PERFILES[0], noComida: k }); nPlanes++;

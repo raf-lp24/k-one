@@ -4648,7 +4648,9 @@
   // de calabaza no son calabaza, ni la leche de coco es leche.
   const _NO_ES_ESE_ALIMENTO = {
     calabaza: { antes: '(?<!semillas de )(?<!pipas de )' },
-    pan: { antes: '(?!panader|pancet)' },
+    // El «pan de calabaza» de la hamburguesa es calabaza: «no como pan» no lo
+    // toca, tampoco en sus pasos («serán el pan») (aprobado por Rafa el 6 nov 2026).
+    pan: { antes: '(?!panader|pancet)(?<!ser[aá]n el )', despues: '(?!\\s+de\\s+calabaza)' },
     // El sándwich helado es de galleta, no de pan (2 nov 2026).
     sándwich: { despues: '(?!\\s+helado)' },
     sandwich: { despues: '(?!\\s+helado)' },
@@ -4966,7 +4968,7 @@
     const _APELLIDOS = '(?:romana|iceberg|trigueros|ib[eé]ric[oa]s?|serrano|dur[oa]s?|pochad[oa]s?|pelad[oa]s?|limpi[oa]s?|variad[oa]s?|basmati|arborio|bomba|manchego|curad[oa]s?|semicurad[oa]s?|tiern[oa]s?|parmesano|crema(?!\\s+de)|cherry|roj[oa]s?|verdes?|amarill[oa]s?|pintas?|blanc[oa]s?|semidesnatad[oa]|desnatad[oa]|enter[oa]|wassa|madur[oa]s?|sec[oa]s?|gratinad[oa]s?|proteic[oa]s?|poché|grandes?|pequeñ[oa]s?|integral(?:es)?|centeno|multicereal(?:es)?|fin[oa]s?|panadera|al natural|en conserva|en aceite|griego|light|\\d+\\s*%|certificad[ao]s?|sin (?:gluten|lactosa))';
     // Sin sustituto el alimento se BORRA, y con él la preparación que lo
     // describía: "con verduras salteadas" quedaba "con salteadas".
-    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|picad[oa]s?|laminad[oa]s?|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|negr[oa]s?|fundid[oa]s?|mar[ií]a|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
+    const _DESCRIPCION_BORRADA = '(?:' + _APELLIDOS + '|salteadas?|frescas?|mediterráne[oa]s?|asad[oa]s?|en rodajas|rallad[oa]s?|picad[oa]s?|laminad[oa]s?|desmigad[oa]s?|en (?:dados|lascas|trozos)|a la plancha|al wok|al vapor|al horno|caser[oa]s?|poché|negr[oa]s?|fundid[oa]s?|mar[ií]a|de (?:avena|trigo|ma[ií]z|arroz|espelta|centeno))';
     const susMap = {};
     // Un sustituto sirve si no está vetado él mismo (ni por token ni por regex:
     // "pechuga de pollo" no vale si el cliente no come pollo).
@@ -5042,7 +5044,8 @@
       .replace(/\s+(?:con|y|e|de)\s+(?=(?:al|a la|a las)\s|\()/g, ' ')
       // "Pasta con y atún" · "tostada, y jamón" · "pisto de" al final
       .replace(/\s+(con|de)\s+(?:y|e)\s+/g, ' $1 ').replace(/,\s+(y|e)\s+/g, ' $1 ')
-      .replace(/\s+(?:con|y|e|de)\s*(?=$|\.)/g, '').replace(/\s+(de|del|con|y|e|para)\s*(?=[,.;])/g, '')
+      // Sin tocar el «y, si te gusta,» o «y, aparte,» de la receta.
+      .replace(/\s+(?:con|y|e|de)\s*(?=$|\.)/g, '').replace(/\s+(de|del|con|y|e|para)\s*(?=[,.;])(?!,\s*(?:si|aparte|cuando|mientras)\b)/g, '')
       .replace(/\s+de\s+(?=(con|y|e)\b)/g, ' ')
       // Quien no toma queso: «Funde encima la mozzarella.» se quedaba en «Funde encima .».
       .replace(/\s+y\s+funde\s+encima\s*\./gi, '.').replace(/\bFunde\s+encima\s*\.\s*/g, '')
@@ -5108,24 +5111,31 @@
     // tomar yogur (lácteos), se queda el sustituto de siempre.
     const _RE_PLATO_DULCE = /miel|mermelada|chocolate|cacao|vainilla|galletas?|fresas?|frambuesas?|ar[aá]ndanos?|frutos rojos|kiwi|pl[aá]tano|coco rallado|prote[ií]na whey/i;
     const _RE_PLATO_SALADO = /pollo|pavo|ternera|carne|at[uú]n|salm[oó]n|merluza|bacalao|gambas|jam[oó]n|patata|boniato|aguacate|guacamole|tomate|lechuga|espinacas|pimiento|ajo|mostaza|huevos? (?:cocidos?|a la plancha|revueltos?|pochados?)/i;
-    const _sinQuesoEnDulce = opt => _permitido('yogur griego')
-      && _RE_PLATO_DULCE.test(opt.nombre + ' ' + opt.ingredientes)
+    const _esPlatoDulce = opt => _RE_PLATO_DULCE.test(opt.nombre + ' ' + opt.ingredientes)
       && !_RE_PLATO_SALADO.test(opt.nombre + ' ' + opt.ingredientes);
+    const _sinQuesoEnDulce = opt => _permitido('yogur griego') && _esPlatoDulce(opt);
     const _esDeQueso = t => /queso|cottage/.test(_normTexto(String(t)));
+    const _QUESOS = new Set(['queso', ...SINONIMOS_MISMO_ALIMENTO.queso].map(_normAlimento));
+    const _esTokenQueso = t => _esDeQueso(t) || _QUESOS.has(_normAlimento(t));
+    // Gramos de la lista de ingredientes, con las unidades («2 rebanadas pan»,
+    // «1 huevo») pasadas a gramos: para saber cuánto plato era el queso.
+    const _gramosIng = ing => ing.split(',').reduce((s, x) => {
+      const m = x.match(/^\s*(\d+(?:[.,]\d+)?)\s*(?:g|gr|ml)\b/i);
+      if (m) return s + parseFloat(m[1].replace(',', '.'));
+      const u = _gramosDeUnidad(x);
+      return s + (u ? u.gramos : 0);
+    }, 0);
     // En un salado, el queso en lonchas o rallado no se cambia por nada: «hummus
-    // en lonchas» no existe (aprobado por Rafa el 2 nov 2026). El resto de quesos
-    // (crema, fresco…) sigue con su sustituto.
+    // en lonchas» no existe (aprobado por Rafa el 2 nov 2026). Desde el 6 nov
+    // tampoco ningún otro queso de un salado pasa a hummus (ver _borraHummus).
     const _QUESO_SOLIDO = 'queso\\s+(?:rallado|en\\s+lonchas|parmesano)(?:\\s+(?:light|sin lactosa))*';
     const _RE_ING_QUESO_SOLIDO = new RegExp('^\\s*(?:\\d+\\s*(?:g\\s+)?)?(?:' + _QUESO_SOLIDO + '|lonchas?\\s+(?:de\\s+)?queso(?:\\s+(?:tierno|light|sin lactosa))*)\\s*$', 'i');
     const _RE_PASO_QUESO_SOLIDO = new RegExp(_ARTICULO_PREVIO + _QUESO_SOLIDO, 'gi');
     const _quitaQuesoSolido = tokenArr.some((t, i) => _normAlimento(t) === 'queso' && susMap[i] === 'hummus');
     const _sinQuesoSolido = ing => ing.split(',').filter(x => !_RE_ING_QUESO_SOLIDO.test(x)).join(',');
-    // Todo su queso es de ese tipo: se va también del nombre y de los pasos.
-    const _soloQuesoSolido = ing => {
-      const quesos = ing.split(',').filter(x => /(?<![a-záéíóúüñ])queso(?![a-záéíóúüñ])/i.test(x));
-      return quesos.every(x => _RE_ING_QUESO_SOLIDO.test(x));
-    };
-    const _regexesBorrar = regexes.map(re => new RegExp(_ARTICULO_PREVIO + '(?:' + re.source + ')(?:\\s+' + _DESCRIPCION_BORRADA + ')*', re.flags));
+    // Al quitar el queso se va también cómo venía («el feta desmigado», «el queso en dados»).
+    const _DESCRIPCION_QUESO = '(?:' + _DESCRIPCION_BORRADA + '|desmigad[oa]s?|en (?:dados|lascas|trozos|l[aá]minas|rodajas)|de cabra|crema|light|0\\s*%)';
+    const _regexesBorrar = regexes.map(re => new RegExp(_ARTICULO_PREVIO + '(?:' + re.source + ')(?:\\s+' + _DESCRIPCION_QUESO + ')*', re.flags));
     // Lo que queda en los pasos al quitarlo: «echa y deja», «un trozo de ,», «pon encima para que se funda».
     const _pasosSinQueso = ps => ps
       .replace(/\bPon en cada mitad\s+un trozo de\s*,\s*casca/g, 'Casca en cada mitad')
@@ -5137,7 +5147,58 @@
       .replace(/,?\s*hasta que se funda(?: el hummus)?\s*(?=\.)/gi, '')
       .replace(/;?\s*al final pon\s+encima para que se funda/gi, '')
       .replace(/,?\s*echa\s+y deja/gi, ' y deja')
-      .replace(/\s*un trozo de\s*,/gi, '');
+      .replace(/\s*un trozo de\s*,/gi, '')
+      // Lo que queda al quitar los demás quesos de un salado (6 nov 2026).
+      .replace(/\s+y\s*,(?!\s*(?:si|aparte|cuando|mientras)\b)\s*/g, ', ')
+      .replace(/\s+,\s*/g, ' ')
+      .replace(/,\s*gratínalo/g, ' y gratínalo')
+      .replace(/los tomates, el pepino en tiras\./g, 'los tomates y el pepino en tiras.')
+      .replace(/el atún escurrido, cebollino picado\./g, 'el atún escurrido y el cebollino picado.')
+      .replace(/mezcla con el resto de la soja, agua, pimentón y lima/g, 'mezcla el resto de la soja con agua, pimentón y lima')
+      .replace(/los garbanzos escurridos, el pollo ya asado\./g, 'los garbanzos escurridos y el pollo ya asado.')
+      .replace(/en láminas, ciérrala/g, 'en láminas y ciérrala')
+      .replace(/Tuesta el pan de centeno, añade/g, 'Tuesta el pan de centeno y añade')
+      .replace(/hornea en el horno/g, 'hornea')
+      .replace(/,?\s+(?:hasta|para)\s+que\s+(?:el\s+)?(?:se\s+)?funda\s*(?=\.)/gi, '')
+      .replace(/,?\s+y\s+deja\s+que\s+se\s+funda\s*(?=\.)/gi, '')
+      .replace(/\bpara\s+que\s+se\s+funda\s+con\b/gi, 'para que se mezcle con')
+      .replace(/(?:^|\s)Echa\s+sobre el pollo y caliéntalo[^.]*\./g, '')
+      .replace(/\s+y\s+(?=entre\b)/gi, ' ')
+      .replace(/\b(Unta|unta)\s+(pon|coloca|añade)\b/g, (m, u, v) => (u === 'Unta' ? v.charAt(0).toUpperCase() + v.slice(1) : v))
+      .replace(/(?:^|(?<=\.\s))Unta\s+(?:(?!\bcon\b)[^.,])*\.\s*/g, '')
+      .replace(/\s+y la otra con\s+(?=monta\b)/gi, ' y ')
+      .replace(/Unta la tortilla pequeña con colócala encima/g, 'Coloca la tortilla pequeña encima')
+      .replace(/,\s*añade\s+(mézcla)/gi, ' y $1')
+      .replace(/\s+con,?\s+sin\b/gi, ', sin')
+      .replace(/\s+y un trozo\s*(?=\.)/gi, '')
+      .replace(/,\s*cúbrelos con gratínalos/gi, ' y hornéalos')
+      .replace(/,\s*cubre con gratina/gi, ' y hornea')
+      .replace(/,\s*pon\s+y\s+gratina/gi, ' y hornea')
+      .replace(/\bPon\s+y\s+gratina/g, 'Hornea')
+      .replace(/Mezcla con las nueces picadas y la ralladura de limón/g, 'Mezcla las nueces picadas con la ralladura de limón')
+      .replace(/Pon dos lonchas de pavo, dos de otra de pavo encima/g, 'Pon dos lonchas de pavo una sobre otra')
+      .replace(/\b(Incorpora|incorpora)\s+y\s+/g, '$1 ')
+      .replace(/,\s+((?:el|la|los|las)\s+[^,.]+?)\s+y\s+(?=hasta\b)/g, ' y $1 ')
+      .replace(/\s+y\s+(?=hasta\b)/g, ' ')
+      .replace(/,?\s*y termina con\s+fuera del fuego/gi, '')
+      .replace(/\s+y la mitad del(?=\s+y\b)/gi, '')
+      .replace(/\s+con el resto del\s+y\s+/gi, ' con ')
+      .replace(/\s+y la loncha\s*(?=\.)/gi, '')
+      .replace(/,\s*pon\s+y\s+tapa/gi, ' y tapa')
+      .replace(/(?:^|\s)Termina(?:\s+con)?(?:\s+por encima)?\s*\./g, '')
+      .replace(/,\s*con\s+los últimos 5 minutos/gi, '')
+      .replace(/el tomate en rodajas, el pavo\./g, 'el tomate en rodajas y el pavo.')
+      .replace(/el pavo, los cherry\./g, 'el pavo y los cherry.')
+      .replace(/,\s*en una mitad\./g, '.')
+      .replace(/\s+junto al\s+y\s+/gi, ' y ')
+      .replace(/\s+y por encima(?=[\s,])/gi, '')
+      .replace(/el jamón y troceados/g, 'el jamón troceado')
+      .replace(/\s+y encima\./g, ' encima.')
+      .replace(/,\s*añade\s+dobla/gi, ', dobla')
+      .replace(/\s+y mezclado con el aguacate/gi, ' y el aguacate')
+      .replace(/\b(Reparte|reparte)\s*,?\s*tapa\b/g, (m, r) => (r === 'Reparte' ? 'Tapa' : 'tapa'))
+      .replace(/,\s*con\s*(?=\.)/g, '')
+      .replace(/^\s+/, '');
     return nutricion.map(meal => {
       const procesadas = meal.opciones.map(opt => {
         if (_sinHuevo) {
@@ -5146,7 +5207,18 @@
           if (_sinSoja) opt = _sinTofuTrasHuevo(opt);
         }
         const _dulce = _sinQuesoEnDulce(opt);
-        const _susReceta = (re, reemplazo) => (_dulce && reemplazo === 'hummus' && _esDeQueso(re.source) ? 'yogur griego' : reemplazo);
+        // Sin queso (aprobado por Rafa el 6 nov 2026):
+        //  · en un salado, el queso que iba a pasar a hummus se quita sin nada
+        //    («Tosta de hummus de cabra», «Espaguetis carbonara con hummus»).
+        //    Los quesos con un sustituto que sí pega (queso batido → yogur de
+        //    soja, queso fresco → tofu sedoso) siguen igual.
+        //  · un dulce con queso que tampoco puede llevar yogur griego (lácteos)
+        //    no se sirve: la toma se queda con sus otros platos.
+        const _esDulceOpt = _esPlatoDulce(opt);
+        const _borraHummus = _quitaQuesoSolido && !_esDulceOpt;
+        const _aHummusQueso = (src, reemplazo) => reemplazo === 'hummus' && _esTokenQueso(src);
+        const _susReceta = (re, reemplazo) => (_dulce && reemplazo === 'hummus' && _esDeQueso(re.source) ? 'yogur griego'
+          : _borraHummus && _aHummusQueso(re.source, reemplazo) ? '' : reemplazo);
         const _susToken = i => (_dulce && susMap[i] === 'hummus' && _esDeQueso(tokenArr[i]) ? 'yogur griego' : (susMap[i] || ''));
         // Los PASOS entran en la comprobación, no solo el nombre y los
         // ingredientes: hay recetas que nombran un alimento SOLO en la
@@ -5161,15 +5233,19 @@
         const textoCompleto = (opt.nombre + ' ' + opt.ingredientes + ' ' + _pasosOpt).toLowerCase();
         const coincide = regexes.some(re => { re.lastIndex = 0; return re.test(textoCompleto); });
         if (!coincide) return opt;
+        if (_quitaQuesoSolido && _esDulceOpt && !_dulce
+          && tokenArr.some((t, i) => { if (!_esTokenQueso(t)) return false; regexes[i].lastIndex = 0; return regexes[i].test(textoCompleto); })) return null;
         let nuevoNombre = opt.nombre;
         // Antes de pasar a gramos: «2 lonchas queso tierno» sería ya «20g queso tierno».
-        const _quitaSolido = _quitaQuesoSolido && !_dulce;
-        const _quitaTodoQueso = _quitaSolido && _soloQuesoSolido(opt.ingredientes);
-        const _borraQueso = i => _quitaTodoQueso && _normAlimento(tokenArr[i]) === 'queso';
+        const _quitaSolido = _borraHummus;
+        const _borraQueso = i => _borraHummus && susMap[i] === 'hummus' && _esTokenQueso(tokenArr[i]);
+        // Borrado sin sustituto: el artículo y la descripción se van con el queso.
+        const _reReceta = (re, reemplazo) => (_susReceta(re, reemplazo) === '' && reemplazo !== ''
+          ? new RegExp(_ARTICULO_PREVIO + '(?:' + re.source + ')(?:\\s+' + _DESCRIPCION_QUESO + ')*', re.flags) : re);
         let nuevoIng = envasesAGramos(_quitaSolido ? _sinQuesoSolido(opt.ingredientes) : opt.ingredientes);
         recetasActivas.forEach(([re, reemplazo]) => {
-          nuevoNombre = nuevoNombre.replace(re, _susReceta(re, reemplazo));
-          nuevoIng = nuevoIng.replace(re, _susReceta(re, reemplazo));
+          nuevoNombre = nuevoNombre.replace(_reReceta(re, reemplazo), _susReceta(re, reemplazo));
+          nuevoIng = nuevoIng.replace(_reReceta(re, reemplazo), _susReceta(re, reemplazo));
         });
         regexesSust.forEach((re0, i) => {
           const re = _borraQueso(i) ? _regexesBorrar[i] : re0;
@@ -5177,7 +5253,15 @@
           re.lastIndex = 0; nuevoIng = nuevoIng.replace(re, reemplazo);
           re.lastIndex = 0; nuevoNombre = nuevoNombre.replace(re, reemplazo);
         });
+        // «Tortitas de arroz con , salmón» · «Albóndigas de pollo y en salsa de tomate».
+        if (_borraHummus) nuevoNombre = nuevoNombre.replace(/\s+con\s*,\s*/g, ' con ').replace(/\s+(?:y|e)\s+(?=en\s)/g, ' ');
         nuevoIng = concordarAdjetivos(_concordarSustitucion(limpiar(quitarCantidadesHuerfanas(nuevoIng))));
+        // Si el queso quitado era la base del plato (bagels o tortitas de queso),
+        // sin él no queda receta: ese plato no se sirve.
+        if (_borraHummus) {
+          const g0 = _gramosIng(envasesAGramos(opt.ingredientes)), g1 = _gramosIng(nuevoIng);
+          if (g0 > 0 && (g0 - g1) / g0 >= 0.3) return null;
+        }
         // El plato ya llevaba yogur griego: una sola línea, no dos.
         if (_dulce) {
           nuevoIng = nuevoIng.replace(/(\d+)g yogur griego( 0%)?, (\d+)g yogur griego(?! \d)/i, (m, a, z, b) => `${+a + +b}g yogur griego${z || ''}`);
@@ -5212,7 +5296,7 @@
         if (pasosOrig) {
           let ps = pasosOrig;
           if (_quitaSolido) ps = ps.replace(_RE_PASO_QUESO_SOLIDO, '');
-          recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(re, _susReceta(re, reemplazo)); });
+          recetasActivas.forEach(([re, reemplazo]) => { ps = ps.replace(_reReceta(re, reemplazo), _susReceta(re, reemplazo)); });
           regexesSust.forEach((re0, i) => {
             const re = _borraQueso(i) ? _regexesBorrar[i] : re0;
             const reemplazo = _borraQueso(i) ? '' : _susToken(i);
@@ -5221,6 +5305,8 @@
           if (_quitaSolido) ps = _pasosSinQueso(ps);
           if (_dulce) ps = ps.replace(/\bel yogur con el yogur griego\b/gi, 'el yogur griego').replace(/\bel yogur y el yogur griego\b/gi, 'el yogur griego');
           ps = concordarAdjetivos(concordarArticulos(_concordarSustitucion(limpiar(ps))));
+          // Segunda vuelta: algunos restos solo se ven después de limpiar («la otra con monta»).
+          if (_quitaSolido) ps = limpiar(_pasosSinQueso(ps));
           if (ps !== pasosOrig) nuevosPasos = ps;
         }
         const adaptada = { ...opt, nombre: nuevoNombre, ingredientes: nuevoIng };
@@ -5311,7 +5397,7 @@
   // plan" en Jarvis. La huella sale del propio código de buildPlanFromData, así
   // que cambia sola con cualquier arreglo; MOTOR_REV es para forzarlo a mano si
   // el cambio está fuera de esta función.
-  const MOTOR_REV = 14;
+  const MOTOR_REV = 15;
   let _huellaMotorCache = null;
   function _huellaMotor() {
     if (_huellaMotorCache) return _huellaMotorCache;
