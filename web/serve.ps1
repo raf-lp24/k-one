@@ -33,6 +33,11 @@ while ($listener.IsListening) {
   if ($path -eq "/") { $path = "/index.html" }
 
   $filePath = Join-Path $Root ($path.TrimStart("/"))
+  # Desde el 6 nov 2026 la web vive en Fragua\web y marketing sigue en Fragua\marketing: los
+  # programas de los reels piden /marketing/... al mismo servidor, así que se buscan un nivel arriba.
+  if ($Root -eq $PSScriptRoot -and $path.StartsWith("/marketing/")) {
+    $filePath = Join-Path (Split-Path $PSScriptRoot -Parent) ($path.TrimStart("/"))
+  }
 
   # Un cliente que cancela la descarga (recargar con imágenes a medias) tumbaba el
   # servidor entero; se ignora el error de esa conexión y se sigue escuchando.

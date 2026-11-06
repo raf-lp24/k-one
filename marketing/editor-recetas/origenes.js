@@ -27,7 +27,7 @@ const MANUAL = {
   'Avena sabor tiramisú': { cuenta: '@lu_fitfoodie', fecha: '2026-10-30', post: IG('Db3L79pACWT'), seguro: true, fiel: true },
 };
 
-const nombresDe = (c) => [...new Set((git('show', c, '--', 'app.js', 'index.html').match(/^\+\s*op(?:Fija)?\("[^"]+"/gm) || []).map((l) => l.replace(/^\+\s*op(?:Fija)?\("/, '').slice(0, -1)))];
+const nombresDe = (c) => [...new Set((git('show', c, '--', 'app.js', 'index.html', 'web/app.js', 'web/index.html').match(/^\+\s*op(?:Fija)?\("[^"]+"/gm) || []).map((l) => l.replace(/^\+\s*op(?:Fija)?\("/, '').slice(0, -1)))];
 const norm = (t) => String(t).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 const SIN = [[/frutillas?/g, 'fresas'], [/bananas?/g, 'platano'], [/batatas?|camote/g, 'boniato'], [/choclos?|choclitos?/g, 'maiz'], [/pimenton/g, 'pimiento'], [/yogurt|yogourt/g, 'yogur'], [/zapallo/g, 'calabaza'], [/jugo/g, 'zumo']];
 const limpiar = (t) => { let s = norm(t); for (const [a, b] of SIN) s = s.replace(a, b); return s; };
@@ -49,7 +49,8 @@ function mejorPost(cuenta, nombre, ingredientes) {
   }
   return mejor && mejor.nota >= 0.62 ? (mejor.tipo === 'reel' ? IG(mejor.k) : `https://www.instagram.com/p/${mejor.k}/`) : null;
 }
-const informes = fs.existsSync(path.join(JARVIS, 'informes')) ? fs.readdirSync(path.join(JARVIS, 'informes')).filter((f) => f.endsWith('.md')).map((f) => fs.readFileSync(path.join(JARVIS, 'informes', f), 'utf8')) : [];
+// Desde el 6 nov 2026 los informes van en una carpeta por mes («2026-11 Noviembre/06-11-2026 viernes.md»).
+const informes = fs.existsSync(path.join(JARVIS, 'informes')) ? fs.readdirSync(path.join(JARVIS, 'informes'), { recursive: true }).filter((f) => f.endsWith('.md')).map((f) => fs.readFileSync(path.join(JARVIS, 'informes', f), 'utf8')) : [];
 const VIKIKA = informes.find((t) => /^# .*vikikateam/im.test(t)) || '';
 const cuentaEnInforme = (nombre) => { const n = norm(nombre); for (const t of informes) for (const l of t.split('\n')) if (norm(l).includes(n)) { const m = l.match(/@[a-z0-9_.]+/i); if (m) return m[0]; } return null; };
 

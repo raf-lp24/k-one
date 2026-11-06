@@ -5,7 +5,7 @@
 // Deja recetas.json (una fila por receta distinta, con dónde aparece) y alimentos.json.
 const fs = require('fs');
 const path = require('path');
-const RAIZ = path.join(__dirname, '..', '..');
+const RAIZ = path.join(__dirname, '..', '..', 'web'); // la web vive en Fragua/web desde el 6 nov 2026
 const { analizar, ALIM } = require(path.join(RAIZ, 'scripts', 'validar-recetas'));
 const salida = process.argv[2];
 if (!salida) { console.error('uso: node extraer.js <carpetaSalida>'); process.exit(1); }

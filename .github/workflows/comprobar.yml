@@ -13,6 +13,10 @@ jobs:
   comprobar:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # La web vive en la carpeta web/ desde el 6 nov 2026.
+    defaults:
+      run:
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

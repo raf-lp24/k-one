@@ -10,7 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
-const salida = process.argv[2] === 'prueba' ? path.join(process.env.TEMP, 'kone-iconos') : path.join(AQUI, '..');
+const salida = process.argv[2] === 'prueba' ? path.join(process.env.TEMP, 'kone-iconos') : path.join(AQUI, '..', 'web');
 fs.mkdirSync(salida, { recursive: true });
 const ICONOS = [['icon-512.png', 512], ['icon-192.png', 192], ['apple-touch-icon.png', 180], ['favicon.png', 64]];
 
